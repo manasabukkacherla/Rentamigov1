@@ -558,7 +558,7 @@ export default function PropertyListingForm() {
         });
       }
 
-      const response = await fetch("http://localhost:8000/api/properties", {
+      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties", {
         method: "POST",
         body: formDataToSend,
       });

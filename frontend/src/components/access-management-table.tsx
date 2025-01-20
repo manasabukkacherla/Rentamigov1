@@ -52,7 +52,7 @@
 
 //   const fetchEmployees = async () => {
 //     try {
-//       const response = await axios.get("http://localhost:8000/api/employees");
+//       const response = await axios.get("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees");
 //       const employeeData = response.data.data;
 
 //       // Transform the API data to match our User interface
@@ -96,7 +96,7 @@
 //   };
 //   const handleUpdateEmployee = async (id: string, data: EmployeeUpdatePayload) => {
 //     try {
-//       await axios.put(`http://localhost:8000/api/employees/${id}`, data);
+//       await axios.put(`https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees/${id}`, data);
 //       await fetchEmployees();
 //     } catch (error) {
 //       console.error("Error updating employee:", error);
@@ -300,7 +300,7 @@ export default function AccessManagementTable() {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get("http://localhost:8000/api/employees");
+      const response = await axios.get("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees");
       const employeeData = response.data.data;
 
       const transformedUsers: User[] = employeeData.map((emp: Employee) => ({
@@ -344,7 +344,7 @@ export default function AccessManagementTable() {
     data: EmployeeUpdatePayload
   ) => {
     try {
-      await axios.put(`http://localhost:8000/api/employees/${id}`, data);
+      await axios.put(`https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees/${id}`, data);
       await fetchEmployees();
       setSelectedUserForUpdate(null);
     } catch (error) {

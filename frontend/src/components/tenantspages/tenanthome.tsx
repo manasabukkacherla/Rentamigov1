@@ -22,7 +22,7 @@ const Tenanthome: React.FC = () => {
     const fetchProperties = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/properties"
+          "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties"
         );
         const formattedProperties = response.data.map((property: any) => ({
           image:

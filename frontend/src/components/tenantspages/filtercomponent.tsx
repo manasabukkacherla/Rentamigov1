@@ -81,20 +81,18 @@ const FilterComponent: React.FC = () => {
   return (
     <div className="font-sans">
       {isMinimized && (
-        <div>
-          <div className="fixed flex flex-row items-center top-6">
-            <ResponsiveSearchBar />
-          </div>
-          <div className="fixed flex flex-row items-center justify-center top-[94px] ml-[355px] ">
-            <Button
-              onClick={toggleFilter}
-              className=" text-white hover:bg-gray-800 p-3 "
-            >
-              <Filter />
-            </Button>
-          </div>
-        </div>
-      )}
+ <div className="fixed top-12 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-4">
+ <ResponsiveSearchBar />
+ <Button
+   onClick={toggleFilter}
+     className="text-white hover:bg-gray-800 p-3 mt-11"
+ >
+   <Filter />
+ </Button>
+</div>
+
+)}
+
 
       {isFilterVisible && (
         <Card className="fixed top-1/5 left-5 w-[91%] md:w-1/4 h-[70vh] bg-white text-black shadow-lg rounded-lg flex flex-col">

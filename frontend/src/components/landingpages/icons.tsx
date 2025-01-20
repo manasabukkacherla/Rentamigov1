@@ -3,35 +3,30 @@ import React from "react";
 const Icons: React.FC = () => {
   const features = [
     {
-      icon: "./images/dollaricon.jpg",
-      alt: "Deposit Icon",
-      title: "Just 1 Month Deposit",
-      description: "Peace of mind for both landlords and tenants.",
+      icon: "./images/Home_page_pointers/good-quality.png",
+      alt: "Hassle Free Experience",
+      title: "Hassle Free Experience",
+      description: "We provide end-to-end support for any of the services with the minimum involvement from the property owner to make sure our client get a hassle free experience throughout the process.",
     },
     {
-      icon: "./images/lockicon.png",
-      alt: "Lock Icon",
-      title: "Minimum Lock-in Period",
-      description: "Don't worry about uncertainties anymore.",
+      icon: "./images/Home_page_pointers/return-on-investment.png",
+      alt: "Best Returns",
+      title: "Best Returns",
+      description: "We ensure to get the best returns for your investment as per the market, thus making sure that our clients are fully satisfied with the transaction which we help them execute.",
     },
     {
-      icon: "./images/walleticon.jpeg",
-      alt: "Wallet Icon",
-      title: "No Brokerage or Hidden Fees",
-      description: "It's all transparent, and no middlemen involved.",
+      icon: "./images/Home_page_pointers/timeline.png",
+      alt: "Adherence to timelines",
+      title: "Adherence to timelines",
+      description: "We ensure that the timelines as mentioned in our agreement documents are always adhered to and never missed",
     },
     {
-      icon: "./images/truckicon.png",
-      alt: "Truck Icon",
-      title: "Quick and Instant Move-in",
-      description: "It's all transparent, and no middlemen involved.",
+      icon: "./images/Home_page_pointers/transparency.png",
+      alt: "Transparency",
+      title: "Transparency",
+      description: "We take pride in the transparency that we maintain in all the services that we provide. There are no hidden charges, no hidden clauses, and no hidden terms in our policies",
     },
-    {
-      icon: "./images/truckicon.png",
-      alt: "Truck Icon",
-      title: "Quick and Instant Move-in",
-      description: "It's all transparent, and no middlemen involved.",
-    },
+    
   ];
 
   return (
@@ -63,7 +58,7 @@ const styles: Record<string, React.CSSProperties> = {
     backgroundColor: "white",
   },
   container: {
-    maxWidth: "1200px",
+    maxWidth: "1700px",
     margin: "0 auto",
   },
   featuresFlex: {

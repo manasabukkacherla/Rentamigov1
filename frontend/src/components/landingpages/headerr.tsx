@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const HeaderWithSearchBar: React.FC = () => {
+const Headerr: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -9,39 +9,64 @@ const HeaderWithSearchBar: React.FC = () => {
     setIsDropdownOpen(!isDropdownOpen);
   };
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    setIsDropdownOpen(false); // Close the dropdown after navigation
+  const handleLinkClick = (link: string) => {
+    switch (link) {
+      case "Home":
+        navigate("/Homepage");
+        break;
+      case "About":
+        navigate("/Aboutus");
+        break;
+      case "Properties":
+        navigate("/Tenanthome");
+        break;
+      case "For home owners":
+        navigate("/owner-page");
+        break;
+      case "Privacy Policy":
+        navigate("/Privacypolicy");
+        break;
+      case "Tenancy Policy":
+        navigate("/Tenancypolicy");
+        break;
+      case "Contact Us":
+        navigate("/Contactus");
+        break;
+      case "Terms and Conditions":
+        navigate("/Termsandconditions");
+        break;
+      default:
+        console.error(`Unknown link: ${link}`);
+    }
+    toggleDropdown();
   };
 
   return (
     <div>
       <header style={styles.header}>
-        <div style={styles.logoContainer}>
+        <div
+          style={styles.logoContainer}
+          onClick={() => navigate("/Homepage")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && navigate("/Homepage")}
+        >
           <img
-            src="/images/rentamigologo.png"
+            src="./images/rentamigologou.png"
             alt="Logo"
             style={styles.logoImg}
           />
           <span style={styles.logoText}>entamigo</span>
         </div>
-        <div style={styles.rightSection}>
-          <input
-            type="text"
-            placeholder="Search Location"
-            className="search-bar-input"
-            style={styles.searchInput}
-          />
-          <button
-            style={styles.menuBtn}
-            onClick={toggleDropdown}
-          >
-            <i className="fas fa-bars" style={styles.icon}></i>
-          </button>
-        </div>
+
+        <button
+          style={styles.menuBtn}
+          onClick={toggleDropdown}
+        >
+          <i className="fas fa-bars" style={styles.icon}></i>
+        </button>
       </header>
 
-      {/* Dropdown Menu */}
       <div
         style={{
           ...styles.dropdown,
@@ -51,52 +76,52 @@ const HeaderWithSearchBar: React.FC = () => {
         <button style={styles.closeBtn} onClick={toggleDropdown}>
           ×
         </button>
-        <div style={styles.links}>
+        <div
+          style={{
+            ...styles.links,
+            gridTemplateColumns:
+              window.innerWidth <= 768 ? "1fr" : "1fr 1fr", // Dynamically adjust columns based on screen width
+          }}
+        >
           {[
-            { name: "Home", path: "/" },
-            { name: "About", path: "/Aboutus" },
-            { name: "For Home Owners", path: "/homeowners" },
-            { name: "Properties", path: "/Tenanthome" },
-            { name: "Privacy Policy", path: "/privacy-policy" },
-            { name: "Tenancy Policy", path: "/tenancy-policy" },
-            { name: "Contact Us", path: "/contact" },
+            "Home",
+            "About",
+            "Properties",
+            "For home owners",
+            "Privacy Policy",
+            "Tenancy Policy",
+            "Contact Us",
+            "Terms and Conditions",
           ].map((link, index) => (
-            <button
+            <a
               key={index}
-              onClick={() => handleNavigation(link.path)}
+              href="#"
               style={styles.link}
+              onClick={(e) => {
+                e.preventDefault();
+                handleLinkClick(link);
+              }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.color = "white";
+                (e.target as HTMLElement).style.backgroundColor = "black";
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.color = "black";
+                (e.target as HTMLElement).style.backgroundColor = "transparent";
+              }}
             >
-              {link.name}
-            </button>
+              {link}
+            </a>
           ))}
         </div>
       </div>
-      <style>
-        {`
-          /* Responsive Styles */
-          @media (max-width: 768px) {
-            .search-bar-input {
-              width: 100px;
-              font-size: 12px;
-            }
-          }
-          @media (max-width: 480px) {
-            .search-bar-input {
-              display: none;
-            }
-            .menuBtn {
-              font-size: 16px;
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };
 
-const styles = {
+const styles: any = {
   header: {
-    position: "fixed" as "fixed",
+    position: "fixed",
     top: 0,
     left: 0,
     width: "100%",
@@ -105,9 +130,8 @@ const styles = {
     alignItems: "center",
     padding: "10px 20px",
     backgroundColor: "white",
-    color: "white",
     zIndex: 1000,
-    boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
   },
   logoContainer: {
     display: "flex",
@@ -116,34 +140,18 @@ const styles = {
   logoImg: {
     width: "50px",
     height: "50px",
-    objectFit: "contain" as "contain",
+    objectFit: "contain",
   },
   logoText: {
-    fontSize: "24px",
-    fontWeight: "bold" as "bold",
-    marginLeft: "10px",
+    fontSize: "25px",
+    fontWeight: "bold",
+    marginLeft: "-8px",
     color: "#000",
     fontFamily: "'Neuropol X', sans-serif",
-    textTransform: "none",
-  },
-  rightSection: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-  },
-  searchInput: {
-    width: "200px",
-    padding: "10px 15px",
-    fontSize: "14px",
-    border: "2px solid #ddd",
-    borderRadius: "20px",
-    outline: "none",
-    transition: "all 0.3s ease",
-    backgroundColor: "#ffffff",
-    color: "#333",
+    marginTop: "11px",
   },
   menuBtn: {
-    backgroundColor: "white",
+    backgroundColor: "transparent",
     color: "black",
     border: "none",
     padding: "10px",
@@ -156,48 +164,60 @@ const styles = {
     transition: "color 0.3s ease",
   },
   icon: {
-    marginRight: "10px",
+    fontSize: "20px",
   },
   dropdown: {
-    position: "fixed" as "fixed",
+    position: "fixed",
     top: "10%",
     left: "10%",
     width: "80%",
     height: "80%",
-    backgroundColor: "black",
+    backgroundColor: "white", // White background remains
     zIndex: 999,
-    boxSizing: "border-box" as "border-box",
+    boxSizing: "border-box",
     borderRadius: "15px",
     overflow: "hidden",
-    flexDirection: "column" as "column",
-    alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
+    alignItems: "center",
+    backgroundImage: `
+    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+    url('./images/rentamigologou.png')
+  `, // Layer a semi-transparent white overlay with the image
+    //backgroundImage: "url('./images/rentamigologou.png')", // Path to your logo
+    backgroundSize: "40%", // Adjust size to make it large and centered
+    backgroundPosition: "left bottom", // Center the logo
+    backgroundRepeat: "no-repeat", // Prevent repeating the image
+   
+    opacity: 1.9, // Adjust opacity for a lighter look (matches the gray effect)
   },
   closeBtn: {
-    position: "absolute" as "absolute",
+    position: "absolute",
     top: "20px",
     right: "20px",
     backgroundColor: "transparent",
     border: "none",
     fontSize: "30px",
     cursor: "pointer",
-    color: "white",
+    color: "black",
   },
   links: {
-    display: "flex",
-    flexDirection: "column" as "column",
-    alignItems: "center",
+    display: "grid",
     gap: "20px",
+    justifyContent: "center",
+    width: "auto",
   },
   link: {
-    color: "white",
-    fontSize: "18px",
-    fontWeight: "bold" as "bold",
+    color: "black", // Default link color
+    fontSize: "20px",
+    fontWeight: "bold",
     textDecoration: "none",
-    textTransform: "uppercase" as "uppercase",
+    textTransform: "uppercase",
     transition: "all 0.3s ease",
-    padding: "10px 20px",
+    textAlign: "center",
+    backgroundColor: "transparent", // Default background
   },
 };
 
-export default HeaderWithSearchBar;
+export default Headerr;

@@ -30,7 +30,7 @@ const ImageGallery: React.FC = ({ propertyId }) => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/api/properties/${propertyId}/com`
+          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}/com`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch rent details");
@@ -57,7 +57,7 @@ const ImageGallery: React.FC = ({ propertyId }) => {
       try {
         const response = await fetch(
 
-          `http://localhost:8000/api/properties/${propertyId}`
+          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}`
 
          
         );
@@ -95,7 +95,7 @@ const ImageGallery: React.FC = ({ propertyId }) => {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/properties/${propertyId}/photos`
+          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}/photos`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch images");

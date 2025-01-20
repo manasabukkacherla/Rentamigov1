@@ -51,7 +51,7 @@ export default function OTPVerificationForm() {
     try {
       const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
 
-      const response = await fetch("http://localhost:8000/api/verify/start", {
+      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/verify/start", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export default function OTPVerificationForm() {
     try {
       const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
 
-      const response = await fetch("http://localhost:8000/api/verify/check", {
+      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/verify/check", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +133,7 @@ export default function OTPVerificationForm() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/owner-intrst-form",
+        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/owner-intrst-form",
         {
           method: "POST",
           headers: {
@@ -165,7 +165,7 @@ export default function OTPVerificationForm() {
       };
 
       await Promise.all([
-        fetch("http://localhost:8000/api/email/send-email", {
+        fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/email/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -173,7 +173,7 @@ export default function OTPVerificationForm() {
             toEmailAddress: formData.email,
           }),
         }),
-        fetch("http://localhost:8000/api/email/send-email", {
+        fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/email/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

@@ -14,7 +14,7 @@ const Description: React.FC<DescriptionProps> = ({ propertyId }) => {
     const fetchDescription = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/properties/${propertyId}`
+          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}`
         );
         setDescription(response.data.propertyDescription); // Assuming `propertyDescription` is the field name
       } catch (err: any) {

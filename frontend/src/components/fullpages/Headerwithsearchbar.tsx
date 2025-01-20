@@ -3,10 +3,15 @@ import { useNavigate } from "react-router-dom";
 
 const HeaderWithSearchBar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSearchBarVisible, setIsSearchBarVisible] = useState(false);
   const navigate = useNavigate();
 
   const toggleDropdown = () => {
     setIsDropdownOpen(!isDropdownOpen);
+  };
+
+  const toggleSearchBar = () => {
+    setIsSearchBarVisible(!isSearchBarVisible);
   };
 
   const handleNavigation = (path: string) => {
@@ -17,7 +22,13 @@ const HeaderWithSearchBar: React.FC = () => {
   return (
     <div>
       <header style={styles.header}>
-        <div style={styles.logoContainer}>
+        <div
+          style={styles.logoContainer}
+          onClick={() => navigate("/Homepage")}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === "Enter" && navigate("/Homepage")}
+        >
           <img
             src="/images/rentamigologo.png"
             alt="Logo"
@@ -25,27 +36,19 @@ const HeaderWithSearchBar: React.FC = () => {
           />
           <span style={styles.logoText}>entamigo</span>
         </div>
+
         <div style={styles.rightSection}>
-          <input
-            type="text"
-            placeholder="Search Location"
-            className="search-bar-input"
-            style={styles.searchInput}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = "black";
-              e.currentTarget.style.backgroundColor = "#f9f9f9";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "#ddd";
-              e.currentTarget.style.backgroundColor = "#ffffff";
-            }}
-          />
-          <button
-            style={styles.menuBtn}
-            onClick={toggleDropdown}
-            onMouseEnter={() => (styles.menuBtn.color = "#ff6347")}
-            onMouseLeave={() => (styles.menuBtn.color = "white")}
-          >
+          {isSearchBarVisible && (
+            <input
+              type="text"
+              placeholder="Search Location"
+              style={styles.searchInput}
+            />
+          )}
+          <button style={styles.menuBtn} onClick={toggleSearchBar}>
+            <i className="fas fa-search" style={styles.icon}></i>
+          </button>
+          <button style={styles.menuBtn} onClick={toggleDropdown}>
             <i className="fas fa-bars" style={styles.icon}></i>
           </button>
         </div>
@@ -60,63 +63,51 @@ const HeaderWithSearchBar: React.FC = () => {
         <button style={styles.closeBtn} onClick={toggleDropdown}>
           ×
         </button>
-        <div style={styles.links}>
+        <div
+          style={{
+            ...styles.links,
+            gridTemplateColumns:
+              window.innerWidth <= 768 ? "1fr" : "1fr 1fr", // Adjust columns based on screen size
+          }}
+        >
           {[
-            { name: "Home", path: "/" },
-            { name: "About", path: "/Aboutus" },
-            { name: "For home owners", path: "/homeowners" },
-            { name: "Properties", path: "/Tenanthome" }, // Updated path
-            { name: "Privacy Policy", path: "/privacy-policy" },
-            { name: "Tenancy Policy", path: "/tenancy-policy" },
-            { name: "Contact Us", path: "/contact" },
-          ].map((link, index) => (
-            <button
-              key={index}
-              onClick={() => handleNavigation(link.path)}
-              style={styles.link}
-              onMouseEnter={(e) => {
-                (e.target as HTMLElement).style.color = "black";
-                (e.target as HTMLElement).style.backgroundColor = "white";
-                (e.target as HTMLElement).style.padding = "10px 20px";
-              }}
-              onMouseLeave={(e) => {
-                (e.target as HTMLElement).style.color = "white";
-                (e.target as HTMLElement).style.backgroundColor = "transparent";
-                (e.target as HTMLElement).style.padding = "0";
-              }}
-            >
-              {link.name}
-            </button>
-          ))}
+  { name: "Home", path: "/" },
+  { name: "About", path: "/Aboutus" },
+  { name: "For home owners", path: "/owner-page" },
+  { name: "Properties", path: "/Tenanthome" },
+  { name: "Privacy Policy", path: "/privacy-policy" },
+  { name: "Tenancy Policy", path: "/tenancy-policy" },
+  { name: "Contact Us", path: "/contact" },
+  { name: "Terms and Conditions", path: "/terms-and-conditions" },
+].map((link, index) => (
+  <button
+    key={index}
+    onClick={() => handleNavigation(link.path)}
+    style={styles.link}
+    onMouseEnter={(e) => {
+      const target = e.target as HTMLElement;
+      target.style.color = styles.linkHover.color;
+      target.style.backgroundColor = styles.linkHover.backgroundColor;
+    }}
+    onMouseLeave={(e) => {
+      const target = e.target as HTMLElement;
+      target.style.color = styles.link.color;
+      target.style.backgroundColor = styles.link.backgroundColor;
+    }}
+  >
+    {link.name}
+  </button>
+))}
+
         </div>
       </div>
-      <style>
-        {`
-          .search-bar-input {
-            width: 200px;
-            padding: 10px 15px;
-            font-size: 14px;
-            border: 2px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-            transition: all 0.3s ease;
-            background-color: #ffffff;
-            color: #333;
-          }
-
-          .search-bar-input:hover {
-            border-color: black;
-            background-color: #f9f9f9;
-          }
-        `}
-      </style>
     </div>
   );
 };
 
-const styles = {
+const styles: any = {
   header: {
-    position: "fixed" as "fixed",
+    position: "fixed",
     top: 0,
     left: 0,
     width: "100%",
@@ -125,25 +116,25 @@ const styles = {
     alignItems: "center",
     padding: "10px 20px",
     backgroundColor: "white",
-    color: "white",
     zIndex: 1000,
+    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
   },
   logoContainer: {
     display: "flex",
     alignItems: "center",
   },
   logoImg: {
-    width: "70px",
-    height: "70px",
-    objectFit: "contain" as "contain",
+    width: "50px",
+    height: "50px",
+    objectFit: "contain",
   },
   logoText: {
-    fontSize: "40px",
-    fontWeight: "bold" as "bold",
-    marginLeft: "3px",
-    color: "#000", // Black text
-    fontFamily: "'Neuropol X', sans-serif", // Font changed to Neuropol X
-    textTransform: "none", // Ensures small letters
+    fontSize: "25px",
+    fontWeight: "bold",
+    marginLeft: "-8px",
+    color: "#000",
+    fontFamily: "'Neuropol X', sans-serif",
+    marginTop: "11px",
   },
   rightSection: {
     display: "flex",
@@ -172,50 +163,72 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    transition: "color 0.3s ease", // Add transition for smooth hover effect
+    transition: "color 0.3s ease",
   },
   icon: {
-    marginRight: "10px",
+    fontSize: "20px",
   },
   dropdown: {
-    position: "fixed" as "fixed",
+    position: "fixed",
     top: "10%",
     left: "10%",
     width: "80%",
     height: "80%",
-    backgroundColor: "black",
+    backgroundColor: "white",
     zIndex: 999,
-    boxSizing: "border-box" as "border-box",
+    boxSizing: "border-box",
     borderRadius: "15px",
     overflow: "hidden",
-    flexDirection: "column" as "column",
-    alignItems: "center",
+    display: "flex",
+    flexDirection: "column",
     justifyContent: "center",
+    alignItems: "center",
   },
   closeBtn: {
-    position: "absolute" as "absolute",
+    position: "absolute",
     top: "20px",
     right: "20px",
     backgroundColor: "transparent",
     border: "none",
     fontSize: "30px",
     cursor: "pointer",
-    color: "white",
+    color: "black",
   },
   links: {
-    display: "flex",
-    flexDirection: "column" as "column",
-    alignItems: "center",
+    display: "grid",
     gap: "20px",
+    justifyContent: "center",
+    width: "100%",
+    textAlign: "center",
+    gridTemplateColumns: "1fr 1fr", // Default: 2 columns
   },
   link: {
-    color: "white",
-    fontSize: "30px",
-    fontWeight: "bold" as "bold",
+    color: "black", // Default link color
+    fontSize: "20px",
+    fontWeight: "bold",
     textDecoration: "none",
-    textTransform: "uppercase" as "uppercase",
+    textTransform: "uppercase",
+    backgroundColor: "white", // Default background
+    padding: "10px 20px",
+    borderRadius: "5px",
     transition: "all 0.3s ease", // Smooth hover effect
+    cursor: "pointer",
+  },
+  linkHover: {
+    color: "white", // Hover link color
+    backgroundColor: "black", // Hover background
+  },
+  "@media (max-width: 768px)": {
+    links: {
+      gridTemplateColumns: "1fr", // Single column on small screens
+      gap: "15px", // Adjust gap for smaller screens
+    },
+    link: {
+      padding: "12px 18px", // Adjust padding for smaller screens
+    },
   },
 };
+
+
 
 export default HeaderWithSearchBar;

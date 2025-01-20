@@ -25,7 +25,7 @@ export function LoginForm() {
 
       // First get user data from Google
       const response = await axios.post(
-        "http://localhost:8000/api/auth/google",
+        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/auth/google",
         {
           credential: credentialResponse.credential,
         }
@@ -36,7 +36,7 @@ export function LoginForm() {
 
       // Verify if the user is an employee
       const verificationResponse = await axios.post(
-        "http://localhost:8000/api/employees/verify",
+        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees/verify",
         {
           email: userData.user.email,
         }
