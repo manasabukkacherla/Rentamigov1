@@ -1,7 +1,8 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+import rentamigologo from '/images/rentamigologo.png';
+//
 const Footer: React.FC = () => {
   const styles = {
     footer: {
@@ -114,7 +115,7 @@ const Footer: React.FC = () => {
           {/* Section 1: Company Logo and Address */}
           <div className="col-md-4 mb-4 mb-md-0">
             <img
-              src="./images/rentamigologo.png"
+              src={rentamigologo}
               alt="Company Logo"
               className="mb-3"
               style={{ width: "100px" }}

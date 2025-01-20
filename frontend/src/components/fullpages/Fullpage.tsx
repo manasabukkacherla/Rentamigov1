@@ -6,6 +6,7 @@ import BuildingAmenities from "./Buildingaminities";
 import Description from "./Description";
 import MapComponent from "../MapComponent";
 import TransportNearby from "./TransportNearby";
+//import Footer from "../landingpages/Footer";
 import Footer from "../landingpages/Footer";
 import PropertyRegistrationForm from "./Owner_registrationForm";
 import { useParams } from "react-router-dom";
@@ -146,7 +147,7 @@ const Fullpage: React.FC<FullpageProps> = () => {
         <TransportNearby />
       </div>
       <div>
-        <Footer />
+       <Footer />
       </div>
       <style>
         {`
