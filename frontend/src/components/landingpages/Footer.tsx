@@ -18,8 +18,7 @@ const Footer: React.FC = () => {
       left: "-100%",
       width: "200%",
       height: "100%",
-      background:
-        "linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 100%)",
+      background: "linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0.1) 100%)",
       animation: "shimmer 5s infinite",
       pointerEvents: "none" as "none",
     },
@@ -64,7 +63,7 @@ const Footer: React.FC = () => {
       color: "white",
       border: "1px solid #555",
       padding: "10px",
-      margin: "10px 0",
+      margin: "10px 0", // Added margin for padding effect
       borderRadius: "5px",
       width: "95%",
       marginLeft: "auto",
@@ -90,7 +89,7 @@ const Footer: React.FC = () => {
       fontWeight: "bold" as "bold",
       transition: "background-color 0.3s, color 0.3s, border-color 0.3s",
       alignSelf: "center",
-      marginTop: "auto",
+      marginTop: "auto", // Pushes the button to the bottom
     },
     formButtonHover: {
       backgroundColor: "black",
@@ -121,13 +120,12 @@ const Footer: React.FC = () => {
               style={{ width: "100px" }}
             />
             <p>
-              Bentley's Guha, #170, 1st Floor,<br />
-              3rd Cross Rd, 27th Main,<br />
-              BTM 1st Stage, Banglore.
+            170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
+            Karnataka, 560068
             </p>
             <div>
               <a
-                href="https://www.facebook.com"
+                href="https://www.facebook.com/Rentamigo2024"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -142,7 +140,7 @@ const Footer: React.FC = () => {
                 <i className="fab fa-facebook-f"></i>
               </a>
               <a
-                href="https://www.twitter.com"
+                href="https://x.com/rentamigo"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Twitter"
@@ -157,7 +155,7 @@ const Footer: React.FC = () => {
                 <i className="fab fa-twitter"></i>
               </a>
               <a
-                href="https://www.instagram.com"
+                href="https://www.instagram.com/rentamigo/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -180,7 +178,7 @@ const Footer: React.FC = () => {
             <ul className="list-unstyled">
               <li>
                 <a
-                  href="/Contactus"
+                  href="#"
                   style={styles.link}
                   onMouseOver={(e) => {
                     Object.assign(e.currentTarget.style, styles.linkHover);
@@ -194,7 +192,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="/Aboutus"
+                  href="#"
                   style={styles.link}
                   onMouseOver={(e) => {
                     Object.assign(e.currentTarget.style, styles.linkHover);
@@ -208,7 +206,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="/service-page"
+                  href="#"
                   style={styles.link}
                   onMouseOver={(e) => {
                     Object.assign(e.currentTarget.style, styles.linkHover);
@@ -222,7 +220,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="/Privacypolicy"
+                  href="#"
                   style={styles.link}
                   onMouseOver={(e) => {
                     Object.assign(e.currentTarget.style, styles.linkHover);
@@ -236,7 +234,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="/Tenancypolicy"
+                  href="#"
                   style={styles.link}
                   onMouseOver={(e) => {
                     Object.assign(e.currentTarget.style, styles.linkHover);
@@ -245,7 +243,7 @@ const Footer: React.FC = () => {
                     Object.assign(e.currentTarget.style, styles.link);
                   }}
                 >
-                  Tenancypolicy
+                  Terms of Service
                 </a>
               </li>
             </ul>
@@ -255,13 +253,7 @@ const Footer: React.FC = () => {
           <div className="col-md-4">
             <div style={styles.formSection}>
               <h2>Subscribe With Us</h2>
-              <form
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  height: "100%",
-                }}
-              >
+              <form style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 <input
                   type="text"
                   style={styles.formInput}
@@ -308,7 +300,7 @@ const Footer: React.FC = () => {
                     Object.assign(e.currentTarget.style, styles.formButton);
                   }}
                 >
-                  Submit
+                  Subscribe
                 </button>
               </form>
             </div>

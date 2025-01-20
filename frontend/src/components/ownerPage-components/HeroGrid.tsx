@@ -62,7 +62,7 @@ const HeroGrid: React.FC<HeroGridProps> = ({ images }) => {
           />
         </div>
 
-        {/* Middle bottom center image */}
+        {/* Middle bottom centers image */}
         <div className="col-span-3 row-span-1 relative">
           <img
             src={images[4]?.url || "/placeholder.svg?height=400&width=300"}

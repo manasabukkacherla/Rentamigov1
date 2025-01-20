@@ -78,7 +78,7 @@ const styles: Record<string, React.CSSProperties> = {
     color: "white",
     fontSize: "2rem", // Base font size for large screens
     fontWeight: "bold",
-    fontFamily: "Britannic Bold",
+    //fontFamily: "Britannic Bold",
     padding: "10px 0",
     textAlign: "center",
   },
@@ -104,12 +104,12 @@ const styles: Record<string, React.CSSProperties> = {
 
 const sectionStyles: Record<string, React.CSSProperties> = {
   "section-1": {
-    animation: "section1Background 10s infinite",
+    animation: "section1Background 17s infinite",
     backgroundImage: "url(./images/aaron-huber-G7sE2S4Lab4-unsplash.jpg)",
     opacity: 0.8, // Added max opacity for black effect
   },
   "section-2": {
-    animation: "section2Background 10s infinite",
+    animation: "section2Background 17s infinite",
     backgroundImage: "url(https://source.unsplash.com/random/1920x1080?ocean)",
     opacity: 0.8, // Added max opacity for black effect
   },

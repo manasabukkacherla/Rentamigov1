@@ -1,14 +1,14 @@
 import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Testimonials: React.FC = () => {
+const Owner_testimonials: React.FC = () => {
   const styles = {
     testimonialCard: {
       textAlign: "center" as const,
       padding: "20px",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
       borderRadius: "10px",
-      height: "300px",
+      height: "400px",
       display: "flex",
       flexDirection: "column" as const,
       justifyContent: "center",
@@ -44,26 +44,26 @@ const Testimonials: React.FC = () => {
             <div className="row">
               <div className="col-12 col-md-4">
                 <div style={styles.testimonialCard}>
-                  
-                  <h5>Amarnath Reddy</h5>
-                  <p>bangalore</p>
-                  <p>"	The property is clean, safe, and well-maintained. I’ve been living here for two years, and I couldn’t be happier. The management team genuinely cares about the tenants.									"</p>
-                </div>
-              </div>
-              <div className="col-12 col-md-4 d-none d-md-block">
-                <div style={styles.testimonialCard}>
-                  
-                  <h5>Jayanthi</h5>
-                  <p>Sivajinagar</p>
-                  <p>"	Moving in was a breeze! The team provided clear instructions, had everything ready on time, and even followed up to ensure I was comfortable in my new home. Exceptional service!										"</p>
-                </div>
-              </div>
-              <div className="col-12 col-md-4 d-none d-md-block">
-                <div style={styles.testimonialCard}>
                  
-                  <h5>Arjun</h5>
-                  <p>Yelhanka</p>
-                  <p>"As a pet owner, I was so happy to find a property management company that welcomes pets and even has amenities like a dog park. My furry friend and I love living here!									"</p>
+                  <h5>Mohan Krishna</h5>
+                  <p>Bangalore</p>
+                  <p>Partnering with this property management company has been the best decision I’ve made. They handle everything – tenant screening, rent collection, and maintenance – so I can enjoy the benefits of owning property without the stress.													</p>
+                </div>
+              </div>
+              <div className="col-12 col-md-4 d-none d-md-block">
+                <div style={styles.testimonialCard}>
+                  
+                  <h5>Madhusudhana Chowdary</h5>
+                  <p>Marathalle</p>
+                  <p>The onboarding process was smooth and professional. They took the time to understand my property and goals and provided a customized management plan that has worked perfectly.I appreciate how transparent and communicative they are. They keep me updated on everything, from tenant issues to maintenance costs, and ensure I’m never caught off guard.																					</p>
+                </div>
+              </div>
+              <div className="col-12 col-md-4 d-none d-md-block">
+                <div style={styles.testimonialCard}>
+                  
+                  <h5>Priyanka Reddy</h5>
+                  <p>Electronic City</p>
+                  <p>"	Living overseas, I was worried about managing my property back home, but this company has taken care of everything. I have complete peace of mind knowing my investment is in good hands.They’ve done an excellent job retaining tenants. By addressing tenant needs promptly and maintaining the property well, I’ve had no vacancies for over two years!																				"</p>
                 </div>
               </div>
             </div>
@@ -74,23 +74,23 @@ const Testimonials: React.FC = () => {
               <div className="col-12 col-md-4">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Divya</h5>
-                  <p>Marathalle</p>
-                  <p>"Living here has been such a smooth experience! The property management team is always prompt in addressing any issues,and it shows in their dedication to maintaining the property										"</p>
+                  <h5>Sujith</h5>
+                  <p>Jigini</p>
+                  <p>"Amazing experience, would visit again."</p>
                 </div>
               </div>
               <div className="col-12 col-md-4 d-none d-md-block">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Pradeep Kumar</h5>
-                  <p>Electronic City</p>
-                  <p>"The property managers genuinely care about their tenants. They listen to concerns, address them promptly, and always prioritize tenant satisfaction. It feels great to be valued as a tenant.										"</p>
+                  <h5>Yamini</h5>
+                  <p>Yelahanka</p>
+                  <p>"Top-notch facilities and services."</p>
                 </div>
               </div>
               <div className="col-12 col-md-4 d-none d-md-block">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Rohith Naik</h5>
+                  <h5>Sujan Yadhav</h5>
                   <p>WhiteField</p>
                   <p>"Exceptional value for money."</p>
                 </div>
@@ -131,4 +131,4 @@ const Testimonials: React.FC = () => {
   );
 };
 
-export default Testimonials;
+export default Owner_testimonials;

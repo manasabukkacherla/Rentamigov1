@@ -185,7 +185,7 @@ const BuildingAmenities: React.FC<BuildingAmenitiesProps> = ({ propertyId }) => 
     const fetchAmenities = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/properties/details/${propertyId}`
+          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/details/${propertyId}`
         );
         const { flatAmenities, societyAmenities } = response.data;
 

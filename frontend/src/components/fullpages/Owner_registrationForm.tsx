@@ -40,7 +40,7 @@ export default function PropertyRegistrationForm() {
     try {
       const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
 
-      const response = await fetch("http://localhost:8000/api/verify/start", {
+      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/verify/start", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,7 +80,7 @@ export default function PropertyRegistrationForm() {
     try {
       const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
 
-      const response = await fetch("http://localhost:8000/api/verify/check", {
+      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/verify/check", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -122,7 +122,7 @@ export default function PropertyRegistrationForm() {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/owner-intrst-form",
+        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/owner-intrst-form",
         {
           method: "POST",
           headers: {

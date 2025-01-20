@@ -13,13 +13,18 @@ const Homepage: React.FC = () => {
   };
 
   return (
-    <div style={homepageStyle}>
+    <div>
+      <div style={homepageStyle}>
       <Header />
       <Button />
       <Icons />
       <Linkbutton />
       <Testimonials />
-      <Footer />
+      
+    </div>
+    <div>
+    <Footer />
+    </div>
     </div>
   );
 };
