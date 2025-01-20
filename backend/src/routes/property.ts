@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
-import Property, { IProperty } from "../models/property";
+import { Property } from "../models/property";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
+import { IProperty } from "../models/property";
 import dotenv from "dotenv";
 import multer from "multer";
 import mongoose from "mongoose";
@@ -76,57 +77,7 @@ const handleMulterUpload = upload.fields([
 ]);
 
 // Helper Function: Get Amenities
-const getAmenities = (property: IProperty) => {
-  const flatAmenityKeys: (keyof IProperty)[] = [
-    "airConditioner",
-    "bed",
-    "wardrobe",
-    "tv",
-    "refrigerator",
-    "washingMachine",
-    "microwave",
-    "sofa",
-    "diningTable",
-    "gasConnection",
-    "playStation",
-  ];
-
-  const societyAmenityKeys: (keyof IProperty)[] = [
-    "lift",
-    "powerBackup",
-    "security",
-    "cctv",
-    "gym",
-    "swimmingPool",
-    "kidsPool",
-    "jacuzzi",
-    "clubHouse",
-    "joggingTrack",
-    "childrenPlayArea",
-    "badmintonCourt",
-    "lawnTennisCourt",
-    "tableTennis",
-    "squashCourt",
-    "foosball",
-    "steamRoom",
-    "carrom",
-    "chessBoard",
-    "multipurposeHall",
-    "yogaMeditationCenter",
-    "flowerPark",
-    "dayToUtilityStores",
-    "thaiMassageParlor",
-    "salon",
-  ];
-
-  // Filter amenities that are true
-  const flatAmenities = flatAmenityKeys.filter((key) => property[key] === true);
-  const societyAmenities = societyAmenityKeys.filter(
-    (key) => property[key] === true
-  );
-
-  return { flatAmenities, societyAmenities };
-};
+//
 
 // Routes
 propertyRouter.post(
@@ -310,3 +261,7 @@ propertyRouter.get("/:id/description", async (req: Request, res: Response) => {
 });
 
 export default propertyRouter;
+function getAmenities(property: any): { flatAmenities: any; societyAmenities: any; } {
+  throw new Error("Function not implemented.");
+}
+
