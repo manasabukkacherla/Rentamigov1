@@ -6,9 +6,9 @@ import BuildingAmenities from "./Buildingaminities";
 import Description from "./Description";
 import MapComponent from "../MapComponent";
 import TransportNearby from "./TransportNearby";
-//import Footer from "../landingpages/Footer";
 import Footer from "../landingpages/Footer";
 import PropertyRegistrationForm from "./Owner_registrationForm";
+import RentDetails from "./Rent_monthly";
 import { useParams } from "react-router-dom";
 
 interface FullpageProps {
@@ -129,12 +129,19 @@ const Fullpage: React.FC<FullpageProps> = () => {
     marginTop: "50px",
   };
 
+  const rentDetailsStyle: React.CSSProperties = {
+    marginTop: "-20px", // Added margin bottom
+  };
+
   return (
     <div style={homepageStyle}>
       <HeaderWithSearchBar />
       <ImageGallery propertyId={id} />
       <div style={layoutStyle} className="layout">
         <div style={leftColumnStyle} className="left-column">
+          <div style={rentDetailsStyle}>
+            <RentDetails monthlyRent={null} maintenanceAmount={null} securityDeposit={null} />
+          </div>
           <App propertyId={id} />
           <BuildingAmenities propertyId={id} />
           <NearbyComponent propertyId={id} />
@@ -147,7 +154,7 @@ const Fullpage: React.FC<FullpageProps> = () => {
         <TransportNearby />
       </div>
       <div>
-       <Footer />
+        <Footer />
       </div>
       <style>
         {`

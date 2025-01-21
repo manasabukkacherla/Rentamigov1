@@ -8,21 +8,14 @@ const ImageGallery: React.FC = ({ propertyId }) => {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
-  // New: Property details
   const [propertyDetails, setPropertyDetails] = useState<{
     propertyName: string;
     locality: string;
     city: string;
-    monthlyRent: number | null;
-    maintenanceAmount: number | null; // Handle null
-    securityDeposit: number | null;
   }>({
     propertyName: "",
     locality: "",
     city: "",
-    monthlyRent: null,
-    maintenanceAmount: null,
-    securityDeposit: null,
   });
 
   // Fetch property details
@@ -30,61 +23,27 @@ const ImageGallery: React.FC = ({ propertyId }) => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await fetch(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}/com`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch rent details");
-        }
-        const data = await response.json();
-        setPropertyDetails((prevDetails) => ({
-          ...prevDetails,
-          monthlyRent: data.monthlyRent || 0,
-          maintenanceAmount: data.maintenanceAmount || null, // Set to null if not provided
-          securityDeposit: data.securityDeposit || 0,
-        }));
-      } catch (error) {
-        console.error("Error fetching rent details:", error);
-      }
-    };
-
-    fetchPropertyDetails();
-  }, [propertyId]);
-
-
-  //fetching details of the property
-  useEffect(() => {
-    const fetchPropertyDetails = async () => {
-      try {
-        const response = await fetch(
-
           `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}`
-
-         
         );
         if (!response.ok) {
           throw new Error("Failed to fetch property details");
         }
         const data = await response.json();
-  
-        // Ensure all properties are set in the state update
-        setPropertyDetails((prevDetails) => ({
-          ...prevDetails, // Retain the previous state
+
+        setPropertyDetails({
           propertyName: data.propertyName || "Unknown Property",
           locality: data.locality || "Unknown Locality",
           city: data.area || "Unknown City",
-          monthlyRent: data.monthlyRent || 0,
-          maintenanceAmount: data.maintenanceAmount || 0,
-          securityDeposit: data.securityDeposit || 0,
-        }));
+        });
       } catch (error) {
         console.error("Error fetching property details:", error);
       }
     };
-  
+
     fetchPropertyDetails();
   }, [propertyId]);
-  
-  //fetching photos
+
+  // Fetching photos
   useEffect(() => {
     const fetchImages = async () => {
       const dummyImages = Array.from(
@@ -206,21 +165,6 @@ const ImageGallery: React.FC = ({ propertyId }) => {
         )}
       </div>
 
-      {/* Rent Price and Security Deposit */}
-      <div style={styles.infoContainerSideBySide}>
-        <div style={styles.infoItemWithStyle}>
-          Monthly Rent: ₹{propertyDetails.monthlyRent}
-        </div>
-        <div style={styles.infoItemWithStyle}>
-          Maintenance:{" "}
-          {propertyDetails.maintenanceAmount !== null
-            ? `₹${propertyDetails.maintenanceAmount}`
-            : "No Maintenance"}
-        </div>
-        <div style={styles.infoItemWithStyle}>
-          Security Deposit: ₹{propertyDetails.securityDeposit}
-        </div>
-      </div>
       {/* View All Button for Mobile */}
       {isMobileView && (
         <button style={styles.viewAllButtonMobile} onClick={() => openModal(0)}>
@@ -326,62 +270,6 @@ const styles = {
   nextButton: {
     right: "10px",
   },
-  infoContainerSideBySide: {
-    display: "flex",
-    justifyContent: "space-between",
-    backgroundColor: "#f1f1f1",
-    borderRadius: "8px",
-    padding: "10px 20px",
-    marginTop: "20px",
-    gap: "10px",
-    border: "1px solid #ccc",
-    width: "40%",
-    marginLeft: "20px",
-  },
-  infoItemWithStyle: {
-    flex: 1,
-    textAlign: "center" as const,
-    padding: "10px",
-    backgroundColor: "white",
-    borderRadius: "5px",
-    border: "1px solid #ddd",
-    fontSize: "14px",
-    fontWeight: "bold" as const,
-  },
-  expandButton: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    marginLeft: "5px",
-  },
-  expandIcon: {
-    fontSize: "16px",
-    color: "#007bff",
-  },
-  expandedInfo: {
-    marginTop: "10px",
-    padding: "10px",
-    backgroundColor: "#f9f9f9",
-    borderRadius: "8px",
-    border: "1px solid #e0e0e0",
-  },
-  expandedInfoCard: {
-    padding: "15px",
-    backgroundColor: "#ffffff",
-    borderRadius: "10px",
-    boxShadow: "0 2px 5px rgba(0, 0, 0, 0.1)",
-  },
-  expandedInfoTitle: {
-    margin: "0 0 10px",
-    fontSize: "18px",
-    fontWeight: "bold" as const,
-    color: "#333",
-  },
-  expandedInfoText: {
-    margin: "5px 0",
-    fontSize: "14px",
-    color: "#555",
-  },
   rightContainer: {
     display: "flex",
     flexDirection: "column" as const,
@@ -468,21 +356,6 @@ const styles = {
     border: "none",
     fontSize: "24px",
     cursor: "pointer",
-  },
-  carouselTextOverlay: {
-    position: "absolute",
-    bottom: "20px", // Position at the bottom of the container
-    left: "50%",
-    transform: "translateX(-50%)",
-    color: "white",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
-    padding: "10px 20px",
-    borderRadius: "8px",
-    fontSize: "18px",
-    fontWeight: "bold",
-    textAlign: "center",
-    zIndex: 2, // Ensure it appears above the image
-    pointerEvents: "none", // Prevent interference with navigation buttons
   },
 };
 
