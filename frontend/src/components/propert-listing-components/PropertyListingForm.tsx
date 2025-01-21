@@ -476,51 +476,6 @@ export default function PropertyListingForm() {
         // Remove photos as they'll be handled separately
         photos: undefined,
       };
-      // const requiredFields = [
-      //   // "name",
-      //   // "whatsappNumber",
-      //   // "email",
-      //   "city",
-      //   "projectName",
-      //   "locality",
-      //   "area",
-      //   "address.line1",
-      //   "studyRoom",
-      //   "servantRoom",
-      //   "pujaRoom",
-      //   "theaterRoom",
-      //   "gymRoom",
-      //   "propertyVideo",
-      //   "exteriorView",
-      //   "livingRoom",
-      //   "kitchen",
-      //   "diningRoom",
-      //   "bedroom1",
-      //   "bedroom2",
-      //   "bedroom3",
-      //   "bedroom4",
-      //   "bathroom1",
-      //   "bathroom2",
-      //   "bathroom3",
-      //   "bathroom4",
-      //   "balcony1",
-      //   "balcony2",
-      //   "balcony3",
-      //   "balcony4",
-      //   "utilityArea",
-      // ];
-
-      // const missingFields = requiredFields.filter((field) => {
-      //   if (field.includes(".")) {
-      //     const [parent, child] = field.split(".");
-      //     return !propertyData[parent]?.[child];
-      //   }
-      //   return !propertyData[field];
-      // });
-
-      // if (missingFields.length > 0) {
-      //   throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
-      // }
 
       // Add property data as JSON string
       formDataToSend.append("propertyData", JSON.stringify(propertyData));
@@ -626,243 +581,81 @@ export default function PropertyListingForm() {
               Log Out
             </button>
           </div>
-
-          {/* Progress Bar */}
-          {/* <div className="mt-4">
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-black h-2 rounded-full"
-                style={{ width: "25%" }}
-              />
-            </div>
-            <div className="mt-1 text-right text-sm text-gray-500">25%</div>
-          </div> */}
         </div>
       </div>
 
       {/* Main Form */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <form className="space-y-8" onSubmit={handleSubmit}>
-          {/* Basic Information */}
-          {/* <div>
-            <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Name*
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  WhatsApp Number*
-                </label>
-                <input
-                  type="text"
-                  name="whatsappNumber"
-                  value={formData.whatsappNumber}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Email*
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  City*
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Project Name*
-                </label>
-                <input
-                  type="text"
-                  name="projectName"
-                  value={formData.projectName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Locality*
-                </label>
-                <input
-                  type="text"
-                  name="locality"
-                  value={formData.locality}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Area*
-                </label>
-                <input
-                  type="text"
-                  name="area"
-                  value={formData.area}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                  required
-                />
-              </div>
-            </div>
-          </div> */}
-          {/* Extra Rooms Information */}
-          {/* //Add these input fields in your form JSX: */}
-          {/* Basic Information */}
-          {/* Extra Rooms */}
-          <div>
-            <h2 className="text-lg font-semibold mb-4">Basic Information</h2>
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  City
-                </label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Project Name
-                </label>
-                <input
-                  type="text"
-                  name="projectName"
-                  value={formData.projectName}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Locality
-                </label>
-                <input
-                  type="text"
-                  name="locality"
-                  value={formData.locality}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Area
-                </label>
-                <input
-                  type="text"
-                  name="area"
-                  value={formData.area}
-                  onChange={handleChange}
-                  className="mt-1 block w-full rounded-md border-gray-300"
-                />
-              </div>
-            </div>
-          </div>
-          {/* <div>
-            <h2 className="text-lg font-semibold mb-4">Extra Rooms</h2>
-            <div className="grid grid-cols-2 gap-6">
-              {[
-                "Study Room",
-                "Servant Room",
-                "Puja Room",
-                "Theater Room",
-                "Gym Room",
-              ].map((room) => (
-                <div key={room}>
-                  <label className="block text-sm font-medium text-gray-700">
-                    {room}
-                  </label>
-                  <div className="relative mt-1">
-                    <select
-                      name={room.toLowerCase().replace(" ", "")}
-                      value={formData[room.toLowerCase().replace(" ", "")]}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 pr-10"
-                    >
-                      <option value="">Select</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                      <option value="4">4</option>
-                      <option value="4+">4+</option>
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div> */}
+        <div className="p-6 bg-white rounded-lg shadow-md">
+  <h2 className="text-2xl font-bold text-gray-800 mb-6">Basic Information</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {/* City Field */}
+    <div>
+      <label htmlFor="city" className="block text-sm font-medium text-gray-600 mb-2">
+        City
+      </label>
+      <input
+        type="text"
+        id="city"
+        name="city"
+        value={formData.city}
+        onChange={handleChange}
+        placeholder="Enter your city"
+        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
 
-          {/* Room Details */}
-          {/* <div>
-            <h2 className="text-lg font-semibold mb-4">Room Details</h2>
-            <div className="grid grid-cols-2 gap-6">
-              {["Living Room", "Kitchen", "Dining Room", "Utility Area"].map(
-                (room) => (
-                  <div key={room}>
-                    <label className="block text-sm font-medium text-gray-700">
-                      {room}
-                    </label>
-                    <div className="relative mt-1">
-                      <select
-                        name={room.toLowerCase().replace(" ", "")}
-                        value={formData[room.toLowerCase().replace(" ", "")]}
-                        onChange={handleChange}
-                        className="block w-full rounded-md border-gray-300 pr-10"
-                      >
-                        <option value="">Select</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="4+">4+</option>
-                      </select>
-                      <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-          </div> */}
+    {/* Project Name Field */}
+    <div>
+      <label htmlFor="projectName" className="block text-sm font-medium text-gray-600 mb-2">
+        Project Name
+      </label>
+      <input
+        type="text"
+        id="projectName"
+        name="projectName"
+        value={formData.projectName}
+        onChange={handleChange}
+        placeholder="Enter the project name"
+        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+
+    {/* Locality Field */}
+    <div>
+      <label htmlFor="locality" className="block text-sm font-medium text-gray-600 mb-2">
+        Locality
+      </label>
+      <input
+        type="text"
+        id="locality"
+        name="locality"
+        value={formData.locality}
+        onChange={handleChange}
+        placeholder="Enter the locality"
+        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+
+    {/* Area Field */}
+    <div>
+      <label htmlFor="area" className="block text-sm font-medium text-gray-600 mb-2">
+        Area
+      </label>
+      <input
+        type="text"
+        id="area"
+        name="area"
+        value={formData.area}
+        onChange={handleChange}
+        placeholder="Enter the area"
+        className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+    </div>
+  </div>
+</div>
+
 
           {/* Bedrooms */}
           <div>
@@ -953,19 +746,6 @@ export default function PropertyListingForm() {
               ))}
             </div>
           </div>
-          {/* Exterior View */}
-          {/* <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Exterior View
-            </label>
-            <input
-              type="text"
-              name="exteriorView"
-              value={formData.exteriorView}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300"
-            />
-          </div> */}
           {/* Property Video */}
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -1135,46 +915,6 @@ export default function PropertyListingForm() {
             <h2 className="text-lg font-semibold mb-4">Property Features</h2>
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Configurations
-                  </label>
-                  <div className="relative mt-1">
-                    <select
-                      name="bedrooms"
-                      value={formData.bedrooms}
-                      onChange={handleChange}
-                    >
-                      <option value="Studio Room">1 RK</option>
-                      <option value="1 BHK">1 BHK</option>
-                      <option value="2 BHK">2 BHK</option>
-                      <option value="3 BHK">3 BHK</option>
-                      <option value="3+ BHK">3+ BHK</option>
-                      <option value="4 BHK">4 BHK</option>
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                </div> */}
-
-                {/* <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Bathrooms
-                  </label>
-                  <div className="relative mt-1">
-                    <select
-                      name="bathrooms"
-                      value={formData.bathrooms}
-                      onChange={handleChange}
-                      className="block w-full rounded-md border-gray-300 pr-10"
-                    >
-                      <option value="">Select</option>
-                      <option value="1">1</option>
-                      <option value="2">2</option>
-                      <option value="3">3</option>
-                    </select>
-                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                </div> */}
               </div>
 
               <div>

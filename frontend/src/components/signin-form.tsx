@@ -15,15 +15,15 @@ export function LoginForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
     console.log("Login submitted", { email, password, rememberMe });
+    // Additional login logic for email/password can be added here.
   };
 
   const handleSuccess = async (credentialResponse: any) => {
     try {
       console.log(credentialResponse, "credentialResponse");
 
-      // First get user data from Google
+      // Step 1: Get user data from Google
       const response = await axios.post(
         "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/auth/google",
         {
@@ -34,7 +34,7 @@ export function LoginForm() {
       const userData = response.data;
       console.log("Google login successful", userData);
 
-      // Verify if the user is an employee
+      // Step 2: Verify if the user is an employee
       const verificationResponse = await axios.post(
         "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees/verify",
         {
@@ -43,24 +43,25 @@ export function LoginForm() {
       );
 
       if (verificationResponse.data.success) {
-        // Employee exists in the system
-        console.log(
-          "Employee verified:",
-          verificationResponse.data.data.employeeId
-        );
+        const role = verificationResponse.data.data.role; // Assuming role is returned
+        console.log("Employee verified:", verificationResponse.data.data.employeeId);
 
-        // Store user data
+        // Store user data in localStorage
         localStorage.setItem(
           "user",
           JSON.stringify({
             ...userData.user,
             employeeId: verificationResponse.data.data.employeeId,
+            role,
           })
         );
-        navigate("/property-listing-form");
 
-        // You can add navigation here
-        // navigate("/dashboard");
+        // Redirect to appropriate dashboard based on role
+        if (role === "manager") {
+          navigate("/ManagerDashboard");
+        } else {
+          navigate("/Empdashboard");
+        }
       } else {
         console.error("Employee verification failed");
         alert(
@@ -81,7 +82,6 @@ export function LoginForm() {
   };
 
   const handleError = () => {
-    // Handle login errors here
     console.log("Google login failed");
   };
 
@@ -98,6 +98,7 @@ export function LoginForm() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {/* Email/Password Fields (optional, uncomment if needed) */}
           {/* <div className="space-y-2 text-center">
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">
               Welcome back
@@ -178,16 +179,8 @@ export function LoginForm() {
             <GoogleLogin
               onSuccess={handleSuccess}
               onError={handleError}
-              // Optionally, you can customize the button appearance and behavior
+              // Optionally, customize the button appearance here
             />
-            {/* <Button
-              type="button"
-              variant="outline"
-              className="w-full"
-              size="lg"
-            >
-              Continue with Apple
-            </Button> */}
           </div>
         </form>
       </div>
