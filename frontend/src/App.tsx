@@ -38,7 +38,6 @@ const App = () => {
           <Route path="/Contactus" element={<ContactUs />} />
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
-
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
           <Route path="/Tenanthome" element={<Tenanthome />} />
