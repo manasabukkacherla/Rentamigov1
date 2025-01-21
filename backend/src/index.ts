@@ -9,7 +9,7 @@ import dotenv from "dotenv";
 import connectToDatabase from "./utils/connectToDb";
 import cors from "cors";
 import verifyRouter from "./routes/verify";
-import propertyRouter from "./routes/property";
+
 import userRouter from "./routes/user";
 import googleAuthRouter from "./routes/googleAuth";
 import emailRouter from "./routes/email";
@@ -39,8 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/verify", verifyRouter);
-app.use("/api/properties", propertyRouter); // Property routes
-app.use("/api/details", propertyRouter); // Property route
+
 app.use("/api/users", userRouter); // User routes
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
