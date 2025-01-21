@@ -1,7 +1,15 @@
 import { Search } from "lucide-react";
 import React from "react";
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+  onSearch: (query: string) => void; // Prop for handling search input
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSearch(e.target.value); // Pass the input value to the parent
+  };
+
   return (
     <div style={styles.container}>
       <style>
@@ -9,7 +17,8 @@ const SearchBar: React.FC = () => {
           .search-bar-container {
             position: relative;
             width: 100%;
-            max-width: 500px;
+            max-width: 500px; /* Default width for large screens */
+            margin: 0 auto;
           }
 
           .search-bar-input {
@@ -36,9 +45,48 @@ const SearchBar: React.FC = () => {
             color: #666;
           }
 
+          /* Medium Screen Adjustments */
+          @media screen and (max-width: 1024px) {
+            .search-bar-container {
+              max-width: 400px; /* Adjust width for medium screens */
+            }
+
+            .search-bar-input {
+              font-size: 15px; /* Slightly smaller font */
+              padding: 10px 40px 10px 15px; /* Adjust padding */
+            }
+          }
+
+          /* Small Screen Adjustments */
           @media screen and (max-width: 768px) {
             .search-bar-container {
-              display: none;
+              max-width: 300px; /* Fixed width for small screens */
+            }
+
+            .search-bar-input {
+              width: 100%; /* Ensure it fills the container */
+              font-size: 14px; /* Smaller font size */
+              padding: 10px 35px 10px 15px; /* Adjust padding */
+            }
+
+            .search-icon {
+              right: 20px; /* Position the search icon closer */
+            }
+          }
+
+          /* Very Small Screen Adjustments */
+          @media screen and (max-width: 480px) {
+            .search-bar-container {
+              max-width: 250px; /* Narrow width for very small screens */
+            }
+
+            .search-bar-input {
+              font-size: 12px; /* Smallest font size */
+              padding: 8px 30px 8px 10px; /* Compact padding */
+            }
+
+            .search-icon {
+              right: 15px; /* Adjust search icon position */
             }
           }
         `}
@@ -46,8 +94,9 @@ const SearchBar: React.FC = () => {
       <div className="search-bar-container">
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search properties..."
           className="search-bar-input"
+          onChange={handleInputChange} // Trigger search on input change
         />
         <Search className="search-icon" size={20} />
       </div>
@@ -60,7 +109,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: "85px",
+    margin: "20px 0",
   },
 };
 
