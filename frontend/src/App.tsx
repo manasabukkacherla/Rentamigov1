@@ -3,7 +3,6 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import SignUpForm from "./components/signup-form";
 import { LoginForm } from "./components/signin-form";
 import AccessManagementTable from "./components/access-management-table";
-
 import Services from "./components/Service-page-components/Services";
 import Homepage from "./components/landingpages/home";
 import Tenanthome from "./components/tenantspages/tenanthome";
