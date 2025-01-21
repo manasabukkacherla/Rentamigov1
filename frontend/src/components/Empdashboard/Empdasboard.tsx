@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Navbar } from "./Navbar";
-import { PropertyCard } from './PropertyCard'; // Reused for properties
-import { PropertyForm } from './PropertyForm'; // Reused for properties
+import { PropertyCard } from './PropertyCard'; // Reused for properties// Reused for properties
 import { SearchFilters } from './SearchFilters'; // Reused for properties
 import { useApp } from './AppContext';
 import { Property } from './types'; // Keep the type as-is
