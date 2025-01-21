@@ -17,23 +17,31 @@ interface Property {
 
 const Tenanthome: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
+  // Fetch properties from the API
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         const response = await axios.get(
           "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties"
         );
+
         const formattedProperties = response.data.map((property: any) => ({
           image:
-            property.photos.cardPhoto[0] || "https://via.placeholder.com/none",
-          title: property.propertyName,
-          address: `${property.locality}, ${property.area}`, // Modified this line
-          rent: `₹${property.monthlyRent.toLocaleString()}`,
+            property.photos?.cardPhoto?.[0] || "https://via.placeholder.com/none",
+          title: property.propertyName || "Unknown Title",
+          address: `${property.locality || "Unknown Locality"}, ${
+            property.area || "Unknown Area"
+          }`,
+          rent: `₹${property.monthlyRent?.toLocaleString() || "0"}`,
           link: `/Fullpage/${property._id}`,
-          propertyId: property._id, // Add this line
+          propertyId: property._id,
         }));
+
         setProperties(formattedProperties);
+        setFilteredProperties(formattedProperties); // Initialize filtered properties
       } catch (error) {
         console.error("Error fetching properties:", error);
       }
@@ -42,6 +50,22 @@ const Tenanthome: React.FC = () => {
     fetchProperties();
   }, []);
 
+  // Handle search input
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+
+    if (!query) {
+      setFilteredProperties(properties); // Reset to all properties if the query is empty
+    } else {
+      const filtered = properties.filter((property) =>
+        property.title.toLowerCase().includes(query.toLowerCase()) ||
+        property.address.toLowerCase().includes(query.toLowerCase())
+      );
+      setFilteredProperties(filtered);
+    }
+  };
+
+  // Styled components
   const PropertySection = styled.div`
     width: 75%;
     margin-left: 25%;
@@ -62,6 +86,8 @@ const Tenanthome: React.FC = () => {
       display: "flex",
       flexDirection: "column",
       position: "relative",
+      marginTop: "40px",
+
     },
     header: {
       width: "100%",
@@ -73,8 +99,8 @@ const Tenanthome: React.FC = () => {
       position: "relative",
     },
     filterSection: {
-      width: "25%",
-      position: "fixed",
+      width: "5%",
+      right:"500px",
       left: 0,
       top: "200px",
       bottom: 0,
@@ -89,30 +115,42 @@ const Tenanthome: React.FC = () => {
 
   return (
     <div style={styles.container}>
+      {/* Header */}
       <div style={styles.header}>
         <Headerr />
       </div>
+
+      {/* Search Bar */}
       <div style={styles.searchBar}>
-        <SearchBar />
+        <SearchBar onSearch={handleSearch} />
       </div>
+
+      {/* Main Content */}
       <div style={styles.mainContent}>
+        {/* Filter Section */}
         <div style={styles.filterSection}>
           <FilterComponent />
         </div>
+
+        {/* Properties Section */}
         <PropertySection>
-          <div style={styles.propertyGrid}>
-            {properties.map((property, index) => (
-              <PropertyCard
-                key={index}
-                image={property.image}
-                title={property.title}
-                address={property.address}
-                rent={property.rent}
-                link={property.link}
-                propertyId={property.propertyId}
-              />
-            ))}
-          </div>
+          {filteredProperties.length > 0 ? (
+            <div style={styles.propertyGrid}>
+              {filteredProperties.map((property, index) => (
+                <PropertyCard
+                  key={property.propertyId || index}
+                  image={property.image}
+                  title={property.title}
+                  address={property.address}
+                  rent={property.rent}
+                  link={property.link}
+                  propertyId={property.propertyId}
+                />
+              ))}
+            </div>
+          ) : (
+            <p style={{ textAlign: "center" }}>No properties found.</p>
+          )}
         </PropertySection>
       </div>
     </div>

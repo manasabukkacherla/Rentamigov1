@@ -81,15 +81,15 @@ const FilterComponent: React.FC = () => {
   return (
     <div className="font-sans">
       {isMinimized && (
- <div className="fixed top-12 left-1/2 transform -translate-x-1/2 flex items-center justify-center space-x-4">
- <ResponsiveSearchBar />
- <Button
-   onClick={toggleFilter}
-     className="text-white hover:bg-gray-800 p-3 mt-11"
- >
-   <Filter />
- </Button>
+        <div className="fixed top-10 md:top-12 right-4 md:right-8 lg:right-12 flex items-center justify-center space-x-4">
+  <Button
+    onClick={toggleFilter}
+    className="text-white hover:bg-gray-800 p-3 mt-11"
+  >
+    <Filter />
+  </Button>
 </div>
+
 
 )}
 
