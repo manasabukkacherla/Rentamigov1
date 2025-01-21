@@ -6,9 +6,11 @@ import { PropertyForm } from './PropertyForm'; // Reused for properties
 import { SearchFilters } from './SearchFilters'; // Reused for properties
 import { useApp } from './AppContext';
 import { Property } from './types'; // Keep the type as-is
+import { useNavigate } from 'react-router-dom'; // Import for navigation
 
 function PropertyDashboard() {
   const { state, dispatch } = useApp();
+  const navigate = useNavigate(); // React Router navigation hook
   const [showForm, setShowForm] = useState(false);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null); // Property state
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,32 +27,14 @@ function PropertyDashboard() {
     return matchesSearch && matchesRent && matchesStatus;
   });
 
-  const handleAddProperty = (propertyData: Omit<Property, 'id' | 'createdAt'>) => {
-    const newProperty: Property = {
-      ...propertyData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    };
-    dispatch({ type: 'ADD_PROPERTY', payload: newProperty });
-    setShowForm(false);
+  const handleAddPropertyClick = () => {
+    // Navigate to /property-listing-form when "Add Property" is clicked
+    navigate('/property-listing-form');
   };
 
   const handleEditProperty = (property: Property) => {
     setEditingProperty(property);
     setShowForm(true);
-  };
-
-  const handleUpdateProperty = (propertyData: Omit<Property, 'id' | 'createdAt'>) => {
-    if (editingProperty) {
-      const updatedProperty: Property = {
-        ...propertyData,
-        id: editingProperty.id,
-        createdAt: editingProperty.createdAt
-      };
-      dispatch({ type: 'UPDATE_PROPERTY', payload: updatedProperty });
-      setShowForm(false);
-      setEditingProperty(null);
-    }
   };
 
   const handleDeleteProperty = (id: string) => {
@@ -69,10 +53,7 @@ function PropertyDashboard() {
             Property Dashboard
           </h2>
           <button
-            onClick={() => {
-              setEditingProperty(null);
-              setShowForm(true);
-            }}
+            onClick={handleAddPropertyClick} // Redirect to /property-listing-form
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
           >
             <Plus className="w-5 h-5" />
@@ -110,11 +91,8 @@ function PropertyDashboard() {
 
         {showForm && (
           <PropertyForm
-            onSubmit={editingProperty ? handleUpdateProperty : handleAddProperty}
-            onClose={() => {
-              setShowForm(false);
-              setEditingProperty(null);
-            }}
+            onSubmit={() => {}} // Not used since we redirect for form submission
+            onClose={() => setShowForm(false)}
             initialData={editingProperty || undefined}
           />
         )}
