@@ -8,6 +8,8 @@ interface InputFieldProps {
   onChange: (value: string) => void;
   type?: 'text' | 'number';
   placeholder?: string;
+  min?: string;
+  max?: string;
 }
 
 export function InputField({ 
@@ -16,7 +18,9 @@ export function InputField({
   value, 
   onChange, 
   type = 'text',
-  placeholder 
+  placeholder,
+  min,
+  max
 }: InputFieldProps) {
   return (
     <div>
@@ -29,7 +33,9 @@ export function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+        min={min}
+        max={max}
+        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
       />
     </div>
   );

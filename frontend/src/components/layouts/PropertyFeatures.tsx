@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bed, Bath, Home, Building2, Warehouse, Clock } from 'lucide-react';
-import { SelectField } from './SelectField';
 import { InputField } from './InputField';
 
 export interface FeaturesData {
@@ -20,18 +19,6 @@ interface PropertyFeaturesProps {
   featuresData: FeaturesData;
   setFeaturesData: React.Dispatch<React.SetStateAction<FeaturesData>>;
 }
-
-const ROOM_NUMBERS = [
-  { value: '1', label: '1' },
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-];
-
-const FLOOR_NUMBERS = Array.from({ length: 50 }, (_, i) => ({
-  value: (i + 1).toString(),
-  label: (i + 1).toString(),
-}));
 
 const EXTRA_ROOMS = [
   'Study Room',
@@ -60,28 +47,37 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <SelectField
-          label="Bedrooms"
+        <InputField
+          label="Number of Bedrooms"
           icon={Bed}
           value={featuresData.bedrooms}
           onChange={(value) => setFeaturesData(prev => ({ ...prev, bedrooms: value }))}
-          options={ROOM_NUMBERS}
+          type="number"
+          placeholder="Enter number of bedrooms"
+          min="1"
+          max="10"
         />
 
-        <SelectField
-          label="Bathrooms"
+        <InputField
+          label="Number of Bathrooms"
           icon={Bath}
           value={featuresData.bathrooms}
           onChange={(value) => setFeaturesData(prev => ({ ...prev, bathrooms: value }))}
-          options={ROOM_NUMBERS}
+          type="number"
+          placeholder="Enter number of bathrooms"
+          min="1"
+          max="10"
         />
 
-        <SelectField
-          label="Balconies"
+        <InputField
+          label="Number of Balconies"
           icon={Home}
           value={featuresData.balconies}
           onChange={(value) => setFeaturesData(prev => ({ ...prev, balconies: value }))}
-          options={ROOM_NUMBERS}
+          type="number"
+          placeholder="Enter number of balconies"
+          min="0"
+          max="10"
         />
 
         <div>
@@ -93,7 +89,7 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
                   type="checkbox"
                   checked={featuresData.extraRooms.includes(room)}
                   onChange={() => handleExtraRoomChange(room)}
-                  className="rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+                  className="rounded border-gray-300 text-red-500 focus:ring-red-500"
                 />
                 <span className="text-sm text-gray-700">{room}</span>
               </label>
@@ -101,20 +97,24 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
           </div>
         </div>
 
-        <SelectField
+        <InputField
           label="Floor of the property"
           icon={Building2}
           value={featuresData.floorNumber}
           onChange={(value) => setFeaturesData(prev => ({ ...prev, floorNumber: value }))}
-          options={FLOOR_NUMBERS}
+          type="number"
+          placeholder="Enter floor number"
+          min="0"
         />
 
-        <SelectField
+        <InputField
           label="Total No of floors"
           icon={Building2}
           value={featuresData.totalFloors}
           onChange={(value) => setFeaturesData(prev => ({ ...prev, totalFloors: value }))}
-          options={FLOOR_NUMBERS}
+          type="number"
+          placeholder="Enter total floors"
+          min="1"
         />
 
         <InputField
@@ -158,7 +158,7 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
                   value={option.value}
                   checked={featuresData.propertyAge === option.value}
                   onChange={(e) => setFeaturesData(prev => ({ ...prev, propertyAge: e.target.value }))}
-                  className="border-gray-300 text-blue-500 focus:ring-blue-500"
+                  className="border-gray-300 text-red-500 focus:ring-red-500"
                 />
                 <span className="text-sm text-gray-700">{option.label}</span>
               </label>
