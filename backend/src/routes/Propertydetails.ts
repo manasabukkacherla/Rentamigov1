@@ -3,6 +3,10 @@ import Property from "../models/Propertydetails"; // Adjust the path to your Pro
 import PropertyLocation from "../models/PropertyLocation"; // Adjust the path to your PropertyLocation model file
 import PropertyFeatures from "../models/Propertyfeatures"; // Adjust the path to your PropertyFeatures model file
 import SocietyAmenities from "../models/Societyamenities";
+import FlatAmenities from "../models/Flatamenities";
+import PropertyRestrictions from "../models/Propertyrestrictions";
+import PropertyCommercials from "../models/Propertycommercials";
+import PropertyAvailability from "../models/PropertyAvailability";
 const propertyRouter = express.Router();
 
 // Route to create a new property
@@ -129,6 +133,7 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
     }
   }
 });
+// route to post society-amenities
 propertyRouter.post("/society-amenities", async (req: Request, res: Response) => {
     try {
       const { property, selectedAmenities, powerBackupType } = req.body;
@@ -160,4 +165,154 @@ propertyRouter.post("/society-amenities", async (req: Request, res: Response) =>
       }
     }
   });
+
+  // Route to create new flat amenities
+propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
+    try {
+      const { property, selectedAmenities } = req.body;
+  
+      // Validate property reference
+      const propertyDoc = await Property.findById(property);
+      if (!propertyDoc) {
+        return res.status(404).send({ error: "Property not found" });
+      }
+  
+      // Create a new FlatAmenities document
+      const flatAmenities = new FlatAmenities({
+        property,
+        propertyName: propertyDoc.propertyName, // Dynamically set propertyName
+        selectedAmenities,
+      });
+  
+      // Save to the database
+      await flatAmenities.save();
+  
+      res.status(201).send(flatAmenities);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred." });
+      }
+    }
+  });
+
+  //property restrictions post api
+  propertyRouter.post("/property-restrictions", async (req: Request, res: Response) => {
+    try {
+      const {
+        property,
+        bachelorTenants,
+        nonVegTenants,
+        tenantWithPets,
+        propertyOverlooking,
+        carParking,
+        carParkingCount,
+        twoWheelerParking,
+        twoWheelerParkingCount,
+        flooringType,
+      } = req.body;
+  
+      // Validate property reference
+      const propertyDoc = await Property.findById(property);
+      if (!propertyDoc) {
+        return res.status(404).send({ error: "Property not found" });
+      }
+  
+      // Create a new PropertyRestrictions document
+      const propertyRestrictions = new PropertyRestrictions({
+        property,
+        propertyName: propertyDoc.propertyName, // Dynamically set propertyName
+        bachelorTenants,
+        nonVegTenants,
+        tenantWithPets,
+        propertyOverlooking,
+        carParking,
+        carParkingCount,
+        twoWheelerParking,
+        twoWheelerParkingCount,
+        flooringType,
+      });
+  
+      // Save to the database
+      await propertyRestrictions.save();
+  
+      res.status(201).send(propertyRestrictions);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred." });
+      }
+    }
+  });
+  //Property commercials post api 
+  propertyRouter.post("/property-commercials", async (req: Request, res: Response) => {
+    try {
+      const { property, monthlyRent, maintenance, maintenanceAmount, securityDeposit } = req.body;
+  
+      // Validate property reference
+      const propertyDoc = await Property.findById(property);
+      if (!propertyDoc) {
+        return res.status(404).send({ error: "Property not found" });
+      }
+  
+      // Create a new PropertyCommercials document
+      const propertyCommercials = new PropertyCommercials({
+        property,
+        propertyName: propertyDoc.propertyName, // Dynamically set propertyName
+        monthlyRent,
+        maintenance,
+        maintenanceAmount,
+        securityDeposit,
+      });
+  
+      // Save to the database
+      await propertyCommercials.save();
+  
+      res.status(201).send(propertyCommercials);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred." });
+      }
+    }
+  });
+
+  // Route to create new property availability
+propertyRouter.post("/property-availability", async (req: Request, res: Response) => {
+  try {
+    const { property, availableFrom } = req.body;
+
+    // Validate property reference
+    const propertyDoc = await Property.findById(property);
+    if (!propertyDoc) {
+      return res.status(404).send({ error: "Property not found" });
+    }
+
+    // Create a new PropertyAvailability document
+    const propertyAvailability = new PropertyAvailability({
+      property,
+      propertyName: propertyDoc.propertyName, // Dynamically set propertyName
+      availableFrom,
+    });
+
+    // Save to the database
+    await propertyAvailability.save();
+
+    res.status(201).send(propertyAvailability);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 export default propertyRouter;
