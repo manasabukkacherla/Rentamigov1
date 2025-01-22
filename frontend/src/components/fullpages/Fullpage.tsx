@@ -10,6 +10,7 @@ import Footer from "../landingpages/Footer";
 import PropertyRegistrationForm from "./Owner_registrationForm";
 import RentDetails from "./Rent_monthly";
 import { useParams } from "react-router-dom";
+import PropertyDetails from "./PropertyDetails";
 
 interface FullpageProps {
   propertyId: string;
@@ -130,13 +131,16 @@ const Fullpage: React.FC<FullpageProps> = () => {
   };
 
   const rentDetailsStyle: React.CSSProperties = {
-    marginTop: "-20px", // Added margin bottom
+    marginTop: "-70px", // Added margin bottom
+    //marginLeft: "20px",
   };
 
   return (
     <div style={homepageStyle}>
       <HeaderWithSearchBar />
       <ImageGallery propertyId={id} />
+      <PropertyDetails style={{ marginLeft: '70px' }} />
+
       <div style={layoutStyle} className="layout">
         <div style={leftColumnStyle} className="left-column">
           <div style={rentDetailsStyle}>
