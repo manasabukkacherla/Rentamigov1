@@ -1,5 +1,31 @@
 import React, { useState } from 'react';
-import { Check, Building2, Dumbbell, School as Pool, Users, Sparkle as Park, Store, Zap } from 'lucide-react';
+import {
+  Check,
+  Building2,
+  Dumbbell,
+  Waves,
+  Users,
+  TreeDeciduous,
+  Store,
+  Zap,
+
+  Shield,
+  Camera,
+  Table,
+  AirVent,
+  User,
+  Sun,
+  ShoppingCart,
+  Scissors,
+  Crown,
+  Gamepad2,
+  Smile,
+  MapPin,
+  ArrowUp,
+  ToyBrick,
+  Circle,
+  Award,
+} from 'lucide-react';
 
 export interface AmenitiesData {
   selectedAmenities: string[];
@@ -12,31 +38,30 @@ interface SocietyAmenitiesProps {
 }
 
 const AMENITIES = [
-  { name: 'Lift', icon: Building2 },
+  { name: 'Lift', icon: ArrowUp },
   { name: 'Power Backup', icon: Zap, hasOptions: true },
-  { name: 'Security', icon: Building2 },
-  { name: 'CCTV', icon: Building2 },
+  { name: 'Security', icon: Shield },
+  { name: 'CCTV', icon: Camera },
   { name: 'Gym', icon: Dumbbell },
-  { name: 'Swimming Pool', icon: Pool },
-  { name: 'Kids Pool', icon: Pool },
-  { name: 'Jacuzzi', icon: Pool },
+  { name: 'Swimming Pool', icon: Waves },
+  { name: 'Kids Pool', icon: Waves },
+  { name: 'Jacuzzi', icon: Sun },
   { name: 'Club House', icon: Building2 },
-  { name: 'Jogging Track', icon: Users },
-  { name: 'Children Play Area', icon: Users },
-  { name: 'Badminton Court', icon: Users },
-  { name: 'Lawn Tennis Court', icon: Users },
-  { name: 'Table Tennis', icon: Users },
-  { name: 'Squash Court', icon: Users },
-  { name: 'Foosball', icon: Users },
-  { name: 'Steam Room', icon: Building2 },
-  { name: 'Carrom', icon: Users },
-  { name: 'Chess Board', icon: Users },
+  { name: 'Jogging Track', icon: User },
+  { name: 'Children Play Area', icon: ToyBrick },
+  { name: 'Badminton Court', icon: Award },
+  { name: 'Lawn Tennis Court', icon: Award },
+  { name: 'Table Tennis', icon: Table },
+  { name: 'Squash Court', icon: Award },
+  { name: 'Football', icon: Circle },
+  { name: 'Steam Room', icon: AirVent },
+  { name: 'Carrom', icon: Table },
+  { name: 'Chess Board', icon: Crown },
   { name: 'Multipurpose Hall', icon: Building2 },
-  { name: 'Yoga / Meditation Center', icon: Users },
-  { name: 'Flower Park', icon: Park },
-  { name: 'Day-to-Day Utility Stores', icon: Store },
-  { name: 'Thai Massage Parlor', icon: Building2 },
-  { name: 'Salon', icon: Building2 },
+  { name: 'Yoga / Meditation Center', icon: User },
+  { name: 'Flower Park', icon: TreeDeciduous },
+  { name: 'Day-to-Day Utility Stores', icon: ShoppingCart },
+  { name: 'Salon', icon: Scissors },
 ];
 
 export function SocietyAmenities({ amenitiesData, setAmenitiesData }: SocietyAmenitiesProps) {
@@ -46,18 +71,17 @@ export function SocietyAmenities({ amenitiesData, setAmenitiesData }: SocietyAme
         ? prev.selectedAmenities.filter(a => a !== amenity)
         : [...prev.selectedAmenities, amenity];
 
-      // If Power Backup is unchecked, remove the type
       if (amenity === 'Power Backup' && !newSelectedAmenities.includes('Power Backup')) {
         return {
           ...prev,
           selectedAmenities: newSelectedAmenities,
-          powerBackupType: undefined
+          powerBackupType: undefined,
         };
       }
 
       return {
         ...prev,
-        selectedAmenities: newSelectedAmenities
+        selectedAmenities: newSelectedAmenities,
       };
     });
   };
@@ -65,7 +89,7 @@ export function SocietyAmenities({ amenitiesData, setAmenitiesData }: SocietyAme
   const handlePowerBackupTypeChange = (type: 'Partially' | 'Fully') => {
     setAmenitiesData(prev => ({
       ...prev,
-      powerBackupType: type
+      powerBackupType: type,
     }));
   };
 
@@ -86,7 +110,7 @@ export function SocietyAmenities({ amenitiesData, setAmenitiesData }: SocietyAme
                 <span className="text-sm text-gray-700">{name}</span>
               </div>
             </label>
-            
+
             {hasOptions && amenitiesData.selectedAmenities.includes(name) && (
               <div className="ml-8 space-y-2">
                 <label className="flex items-center space-x-2">
