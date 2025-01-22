@@ -9,13 +9,13 @@ import dotenv from "dotenv";
 import connectToDatabase from "./utils/connectToDb";
 import cors from "cors";
 import verifyRouter from "./routes/verify";
-
 import userRouter from "./routes/user";
 import googleAuthRouter from "./routes/googleAuth";
 import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
+import propertyRouter from "./routes/Propertydetails";
 
 dotenv.config();
 
@@ -39,13 +39,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use("/api/verify", verifyRouter);
-
 app.use("/api/users", userRouter); // User routes
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", employeeRouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
+app.use("/api/properties", propertyRouter); // Property routes
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
@@ -59,7 +59,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   res.status(500).json({
     success: false,
     message:
-      process.env.NODE_ENV === "production"
+      process.env.NODE_ENV === "development"
         ? "Something went wrong!"
         : err.message,
   });

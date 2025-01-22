@@ -3,9 +3,8 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/property-db';
-// console.log('MONGODB_URI:', MONGODB_URI);
-
+// Replace 'your-database-name' with your actual database name
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mnithinreddy0403:Nithin_1234@cluster0.azwih.mongodb.net/test?retryWrites=true&w=majority';
 
 export const connectToDatabase = async (): Promise<void> => {
   try {

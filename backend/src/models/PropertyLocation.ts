@@ -1,9 +1,9 @@
-// models/PropertyLocation.ts
-import { Schema, model, models, Document } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
+// Define the interface for PropertyLocation
 interface IPropertyLocation extends Document {
-  property: string; // Reference to the Property collection
-  propertyName: string;
+  property: Types.ObjectId; // Reference to the Property collection
+  propertyName: string; // Name of the property from the Property collection
   flatNo: string;
   addressLine1: string;
   addressLine2?: string;
@@ -16,6 +16,7 @@ interface IPropertyLocation extends Document {
   createdAt: Date;
 }
 
+// Define the PropertyLocation schema
 const PropertyLocationSchema = new Schema<IPropertyLocation>(
   {
     property: {
@@ -25,7 +26,6 @@ const PropertyLocationSchema = new Schema<IPropertyLocation>(
     },
     propertyName: {
       type: String,
-      required: [true, "Property name is required"],
       trim: true,
     },
     flatNo: {
@@ -86,6 +86,21 @@ const PropertyLocationSchema = new Schema<IPropertyLocation>(
   }
 );
 
+// Middleware to populate `propertyName` before saving
+PropertyLocationSchema.pre("save", async function (next) {
+  const propertyLocation = this as IPropertyLocation;
+
+  if (propertyLocation.property) {
+    // Fetch the associated property document
+    const property = await model("Property").findById(propertyLocation.property);
+    if (property) {
+      propertyLocation.propertyName = property.propertyName; // Assign propertyName dynamically
+    }
+  }
+  next();
+});
+
+// Define and export the PropertyLocation model
 const PropertyLocation =
   models.PropertyLocation ||
   model<IPropertyLocation>("PropertyLocation", PropertyLocationSchema);
