@@ -47,7 +47,7 @@ const RentDetails: React.FC<RentDetailsProps> = ({
   );
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between bg-gray-50 rounded-lg p-4 mt-5 gap-4 border border-gray-200 w-full max-w-4xl mx-auto">
+    <div className="flex flex-col sm:flex-row justify-between bg-gray-50 rounded-lg p-4 mt-5 gap-4 border border-gray-200 w-full max-w-4xl">
       <div className="flex-1 bg-white rounded p-3 shadow-sm border border-gray-100 text-center">
         <p className="text-gray-600 text-sm">Monthly Rent</p>
         <p className="font-semibold text-base sm:text-lg md:text-xl">
