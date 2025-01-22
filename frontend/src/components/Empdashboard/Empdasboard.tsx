@@ -28,7 +28,7 @@ function PropertyDashboard() {
 
   const handleAddPropertyClick = () => {
     // Navigate to /property-listing-form when "Add Property" is clicked
-    navigate('/property-listing-form');
+    navigate('/base');
   };
 
   const handleEditProperty = (property: Property) => {

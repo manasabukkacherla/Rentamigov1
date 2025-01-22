@@ -3,7 +3,7 @@ import { Home, Building, MapPin, Map, Navigation, MapPinned, Map as MapIcon, Has
 import { InputField } from './InputField';
 
 export interface LocationData {
-  propertyName: string;
+
   flatNo: string;
   addressLine1: string;
   addressLine2: string;
@@ -27,13 +27,7 @@ export function PropertyLocation({ locationData, setLocationData }: PropertyLoca
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <InputField
-        label="Property Name"
-        icon={Home}
-        value={locationData.propertyName}
-        onChange={updateField('propertyName')}
-        placeholder="Name of the property"
-      />
+      
 
       <InputField
         label="Flat No"
