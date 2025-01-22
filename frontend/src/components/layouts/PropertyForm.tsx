@@ -1,5 +1,28 @@
 import React from 'react';
-import { Home, User, Phone, LayoutGrid, Sofa, Compass } from 'lucide-react';
+import {
+  Home,
+  User,
+  Phone,
+  LayoutGrid,
+  Sofa,
+  Compass,
+  Tv,
+  Refrigerator,
+  WashingMachine,
+  Bed,
+  UtensilsCrossed,
+  Wind,
+  Coffee,
+  BatteryCharging,
+  Droplets,
+  Microwave,
+  Flame,
+  PenLine,
+  Lightbulb,
+  Fan,
+  Droplet,
+  DoorClosed,
+} from 'lucide-react';
 import { InputField } from './InputField';
 import { SelectField } from './SelectField';
 
@@ -11,12 +34,44 @@ export interface FormData {
   propertyConfiguration: string;
   furnishingStatus: string;
   facing: string;
+  amenities: string[];
 }
 
 interface PropertyFormProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
 }
+
+interface Amenity {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+}
+
+const BASIC_AMENITIES: Amenity[] = [
+  { id: 'light', label: 'Light', icon: Lightbulb },
+  { id: 'fan', label: 'Fan', icon: Fan },
+  { id: 'geyser', label: 'Geyser', icon: Droplet },
+  { id: 'wardrobe', label: 'Wardrobe', icon: DoorClosed },
+  { id: 'kitchenCabinets', label: 'Kitchen Cabinets', icon: UtensilsCrossed },
+];
+
+const FULL_AMENITIES: Amenity[] = [
+  { id: 'tv', label: 'TV', icon: Tv },
+  { id: 'fridge', label: 'Fridge', icon: Refrigerator },
+  { id: 'washingMachine', label: 'Washing Machine', icon: WashingMachine },
+  { id: 'cotMattress', label: 'Cot mattress', icon: Bed },
+  { id: 'sofa', label: 'Sofa', icon: Sofa },
+  { id: 'diningTable', label: 'Dining Table with Chairs', icon: UtensilsCrossed },
+  { id: 'ac', label: 'AC', icon: Wind },
+  { id: 'coffeeTable', label: 'Coffee Table', icon: Coffee },
+  { id: 'inverter', label: 'Inverter', icon: BatteryCharging },
+  { id: 'waterPurifier', label: 'Water purifier', icon: Droplets },
+  { id: 'microwave', label: 'Microwave oven', icon: Microwave },
+  { id: 'gasStove', label: 'Gas stove/Induction', icon: Flame },
+  { id: 'pipedGas', label: 'Piped Gas', icon: PenLine },
+  ...BASIC_AMENITIES,
+];
 
 const PROPERTY_CONFIGURATIONS = [
   { value: 'Studio Room (1 RK)', label: 'Studio Room (1 RK)' },
@@ -50,62 +105,102 @@ export function PropertyForm({ formData, setFormData }: PropertyFormProps) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleAmenitiesChange = (amenityId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      amenities: prev.amenities.includes(amenityId)
+        ? prev.amenities.filter((id) => id !== amenityId)
+        : [...prev.amenities, amenityId],
+    }));
+  };
+
+  const getAmenitiesTitle = () => {
+    switch (formData.furnishingStatus) {
+      case 'Fully Furnished':
+        return 'Fully Furnished Amenities';
+      case 'Partially Furnished':
+        return 'Partially Furnished Amenities';
+      case 'Semi Furnished':
+        return 'Semi Furnished Amenities';
+      default:
+        return '';
+    }
+  };
+
+  const amenities =
+    formData.furnishingStatus === 'Semi Furnished'
+      ? BASIC_AMENITIES
+      : FULL_AMENITIES;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {/* Property Name Field */}
-      <InputField
-        label="Property Name"
-        icon={Home}
-        value={formData.propertyName}
-        onChange={updateField('propertyName')}
-        placeholder="Enter property name"
-      />
-
-      {/* Owner Name Field */}
-      <InputField
-        label="Owner Name"
-        icon={User}
-        value={formData.ownerName}
-        onChange={updateField('ownerName')}
-        placeholder="Enter the owner's name"
-      />
-
-      {/* Owner Number Field */}
-      <InputField
-        label="Owner Number"
-        icon={Phone}
-        value={formData.ownerNumber}
-        onChange={updateField('ownerNumber')}
-        type="tel"
-        placeholder="Enter the contact number"
-      />
-
-      {/* Property Configuration Dropdown */}
-      <SelectField
-        label="Property Configuration"
-        icon={LayoutGrid}
-        value={formData.propertyConfiguration}
-        onChange={updateField('propertyConfiguration')}
-        options={PROPERTY_CONFIGURATIONS}
-      />
-
-      {/* Furnishing Status Dropdown */}
-      <SelectField
-        label="Furnishing Status"
-        icon={Sofa}
-        value={formData.furnishingStatus}
-        onChange={updateField('furnishingStatus')}
-        options={FURNISHING_STATUS}
-      />
-
-      {/* Facing Dropdown */}
-      <SelectField
-        label="Facing"
-        icon={Compass}
-        value={formData.facing}
-        onChange={updateField('facing')}
-        options={FACING_OPTIONS}
-      />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <InputField
+          label="Property Name"
+          icon={Home}
+          value={formData.propertyName}
+          onChange={updateField('propertyName')}
+          placeholder="Enter property name"
+        />
+        <InputField
+          label="Owner Name"
+          icon={User}
+          value={formData.ownerName}
+          onChange={updateField('ownerName')}
+          placeholder="Enter the owner's name"
+        />
+        <InputField
+          label="Owner Number"
+          icon={Phone}
+          value={formData.ownerNumber}
+          onChange={updateField('ownerNumber')}
+          placeholder="Enter the contact number"
+        />
+        <SelectField
+          label="Property Configuration"
+          icon={LayoutGrid}
+          value={formData.propertyConfiguration}
+          onChange={updateField('propertyConfiguration')}
+          options={PROPERTY_CONFIGURATIONS}
+        />
+        <SelectField
+          label="Furnishing Status"
+          icon={Sofa}
+          value={formData.furnishingStatus}
+          onChange={updateField('furnishingStatus')}
+          options={FURNISHING_STATUS}
+        />
+        <SelectField
+          label="Facing"
+          icon={Compass}
+          value={formData.facing}
+          onChange={updateField('facing')}
+          options={FACING_OPTIONS}
+        />
+      </div>
+      {['Semi Furnished', 'Fully Furnished', 'Partially Furnished'].includes(
+        formData.furnishingStatus
+      ) && (
+        <div className="mt-4">
+          <p className="text-lg font-medium">{getAmenitiesTitle()}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {amenities.map(({ id, label, icon: Icon }) => (
+              <label
+                key={id}
+                className="flex items-center space-x-3 p-2 border rounded hover:bg-gray-100"
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.amenities.includes(id)}
+                  onChange={() => handleAmenitiesChange(id)}
+                />
+                <Icon className="w-5 h-5" />
+                <span>{label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

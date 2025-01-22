@@ -29,11 +29,15 @@ function Base() {
   const [activeStep, setActiveStep] = useState<StepType>('form');
   const [showPreview, setShowPreview] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = React.useState<FormData>({
+    propertyName: '',
+    ownerName: '',
+    ownerNumber: '',
     propertyType: '',
     propertyConfiguration: '',
     furnishingStatus: '',
-    facing: ''
+    facing: '',
+    amenities: [],
   });
 
   const [locationData, setLocationData] = useState<LocationData>({
