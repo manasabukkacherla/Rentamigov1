@@ -29,7 +29,23 @@ propertyRouter.post("/property", async (req: Request, res: Response) => {
     }
   }
 });
+//Routes get all property details
+propertyRouter.get("/property", async (req: Request, res: Response) => {
+  try {
+    // Retrieve all properties from the database
+    const properties = await Property.find();
 
+    // Respond with the list of properties
+    res.status(200).send(properties);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
 // Route to create a new property location
 propertyRouter.post("/property-location", async (req: Request, res: Response) => {
   try {
@@ -77,6 +93,23 @@ propertyRouter.post("/property-location", async (req: Request, res: Response) =>
       res.status(400).send({ error: error.message });
     } else {
       res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+//Routes get all property locations
+propertyRouter.get("/property-location", async (req: Request, res: Response) => {
+  try {
+    // Retrieve all property locations from the database
+    const propertyLocations = await PropertyLocation.find().populate("property", "propertyName");
+
+    // Respond with the list of property locations
+    res.status(200).send(propertyLocations);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
     }
   }
 });
@@ -133,6 +166,36 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
     }
   }
 });
+//Routes get all property features
+propertyRouter.get("/property-features", async (req: Request, res: Response) => {
+  try {
+    const { property, _id } = req.query;
+
+    // Build query based on optional filters
+    const query: any = {};
+    if (property) query.property = property;
+    if (_id) query._id = _id;
+
+    // Fetch property features from the database
+    const propertyFeatures = await PropertyFeatures.find(query)
+      .populate("property", "propertyName") // Populates propertyName from the Property model
+      .exec();
+
+    if (!propertyFeatures.length) {
+      return res.status(404).send({ error: "No property features found" });
+    }
+
+    res.status(200).send(propertyFeatures);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 // route to post society-amenities
 propertyRouter.post("/society-amenities", async (req: Request, res: Response) => {
     try {
@@ -165,6 +228,35 @@ propertyRouter.post("/society-amenities", async (req: Request, res: Response) =>
       }
     }
   });
+  //Routes get all property features
+  propertyRouter.get("/society-amenities", async (req: Request, res: Response) => {
+    try {
+      const { property, _id } = req.query;
+  
+      // Build the query based on optional filters
+      const query: any = {};
+      if (property) query.property = property;
+      if (_id) query._id = _id;
+  
+      // Fetch society amenities from the database
+      const societyAmenities = await SocietyAmenities.find(query)
+        .populate("property", "propertyName") // Populates propertyName from the Property model
+        .exec();
+  
+      if (!societyAmenities.length) {
+        return res.status(404).send({ error: "No society amenities found" });
+      }
+  
+      res.status(200).send(societyAmenities);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred." });
+      }
+    }
+  });
 
   // Route to create new flat amenities
 propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
@@ -194,6 +286,35 @@ propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
         res.status(400).send({ error: error.message });
       } else {
         res.status(400).send({ error: "An unknown error occurred." });
+      }
+    }
+  });
+   //Routes get all flat amenities
+   propertyRouter.get("/flat-amenities", async (req: Request, res: Response) => {
+    try {
+      const { property, _id } = req.query;
+  
+      // Build query based on optional filters
+      const query: any = {};
+      if (property) query.property = property;
+      if (_id) query._id = _id;
+  
+      // Fetch flat amenities from the database
+      const flatAmenities = await FlatAmenities.find(query)
+        .populate("property", "propertyName") // Populates propertyName from the Property model
+        .exec();
+  
+      if (!flatAmenities.length) {
+        return res.status(404).send({ error: "No flat amenities found" });
+      }
+  
+      res.status(200).send(flatAmenities);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred." });
       }
     }
   });
@@ -248,6 +369,35 @@ propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
       }
     }
   });
+  //routes for  get property restrictions
+  propertyRouter.get("/property-restrictions", async (req: Request, res: Response) => {
+    try {
+      const { property, _id } = req.query;
+  
+      // Build query based on optional filters
+      const query: any = {};
+      if (property) query.property = property;
+      if (_id) query._id = _id;
+  
+      // Fetch property restrictions from the database
+      const propertyRestrictions = await PropertyRestrictions.find(query)
+        .populate("property", "propertyName") // Populates propertyName from the Property model
+        .exec();
+  
+      if (!propertyRestrictions.length) {
+        return res.status(404).send({ error: "No property restrictions found" });
+      }
+  
+      res.status(200).send(propertyRestrictions);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred." });
+      }
+    }
+  });
   //Property commercials post api 
   propertyRouter.post("/property-commercials", async (req: Request, res: Response) => {
     try {
@@ -282,7 +432,35 @@ propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
       }
     }
   });
+//route to get the propertycommercials
+propertyRouter.get("/property-commercials", async (req: Request, res: Response) => {
+  try {
+    const { property, _id } = req.query;
 
+    // Build query based on optional filters
+    const query: any = {};
+    if (property) query.property = property;
+    if (_id) query._id = _id;
+
+    // Fetch property commercials from the database
+    const propertyCommercials = await PropertyCommercials.find(query)
+      .populate("property", "propertyName") // Populate propertyName from the Property model
+      .exec();
+
+    if (!propertyCommercials.length) {
+      return res.status(404).send({ error: "No property commercials found" });
+    }
+
+    res.status(200).send(propertyCommercials);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
   // Route to create new property availability
 propertyRouter.post("/property-availability", async (req: Request, res: Response) => {
   try {
@@ -314,5 +492,35 @@ propertyRouter.post("/property-availability", async (req: Request, res: Response
     }
   }
 });
-
+//route to get the propertyavailability
 export default propertyRouter;
+propertyRouter.get("/property-availability", async (req: Request, res: Response) => {
+  try {
+    const { property, _id } = req.query;
+
+    // Build query filters dynamically
+    const query: any = {};
+    if (property) query.property = property; // Filter by property ID
+    if (_id) query._id = _id; // Filter by specific availability document ID
+
+    // Fetch property availability data
+    const propertyAvailability = await PropertyAvailability.find(query)
+      .populate("property", "propertyName") // Populates propertyName from the Property model
+      .exec();
+
+    // If no records found
+    if (!propertyAvailability.length) {
+      return res.status(404).send({ error: "No property availability records found" });
+    }
+
+    // Respond with the data
+    res.status(200).send(propertyAvailability);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});

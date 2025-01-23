@@ -55,3 +55,4 @@ const PropertyAvailability =
   model<IPropertyAvailability>("PropertyAvailability", PropertyAvailabilitySchema);
 
 export default PropertyAvailability;
+
