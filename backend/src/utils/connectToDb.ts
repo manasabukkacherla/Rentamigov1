@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Replace 'your-database-name' with your actual database name
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mnithinreddy0403:Nithin_1234@cluster0.azwih.mongodb.net/test?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://mnithinreddy0403:Nithin_1234@cluster0.azwih.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0';
 
 export const connectToDatabase = async (): Promise<void> => {
   try {
