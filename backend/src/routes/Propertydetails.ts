@@ -175,7 +175,7 @@ propertyRouter.get("/property-location/:locationId", async (req: Request, res: R
 
     // Validate locationId
     if (!locationId) {
-      return res.status(400).send({ error: "Location ID is required" });
+      return res.status(400).json({ error: "Location ID is required" });
     }
 
     // Fetch the location document by its ID
@@ -183,12 +183,21 @@ propertyRouter.get("/property-location/:locationId", async (req: Request, res: R
 
     // If no location is found
     if (!location) {
-      return res.status(404).send({ error: "Property location not found" });
+      return res.status(404).json({ error: "Property location not found" });
     }
 
     // Respond with the location document
-    res.status(200).send(location);
+    res.status(200).json(location);
+  } catch (error) {
+    // Handle unexpected errors
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unknown error occurred." });
+  }
+});
 
+//ge
 //Routes get all property locations
 propertyRouter.get("/property-location", async (req: Request, res: Response) => {
   try {
@@ -296,7 +305,7 @@ propertyRouter.get("/property-features/:featuresId", async (req: Request, res: R
 
     // Validate featuresId
     if (!featuresId) {
-      return res.status(400).send({ error: "Features ID is required" });
+      return res.status(400).json({ error: "Features ID is required" });
     }
 
     // Find the features document by ID
@@ -304,11 +313,19 @@ propertyRouter.get("/property-features/:featuresId", async (req: Request, res: R
 
     // If the features document is not found
     if (!features) {
-      return res.status(404).send({ error: "Features not found" });
+      return res.status(404).json({ error: "Features not found" });
     }
 
     // Return the features document
-    res.status(200).send(features);
+    res.status(200).json(features);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      return res.status(500).json({ error: error.message });
+    }
+    res.status(500).json({ error: "An unknown error occurred." });
+  }
+});
 
 //Routes get all property features
 propertyRouter.get("/property-features", async (req: Request, res: Response) => {
@@ -645,7 +662,7 @@ propertyRouter.get("/flat-amenities/:amenitiesId", async (req: Request, res: Res
   
       // Validate propertyId
       if (!propertyId) {
-        return res.status(400).send({ error: "Property ID is required" });
+        return res.status(400).json({ error: "Property ID is required" });
       }
   
       // Find property restrictions associated with the given property ID
@@ -653,12 +670,20 @@ propertyRouter.get("/flat-amenities/:amenitiesId", async (req: Request, res: Res
   
       // If no restrictions are found
       if (!restrictions || restrictions.length === 0) {
-        return res.status(404).send({ error: "No restrictions found for this property" });
+        return res.status(404).json({ error: "No restrictions found for this property" });
       }
   
       // Return the restrictions
-      res.status(200).send(restrictions);
-
+      res.status(200).json(restrictions);
+    } catch (error) {
+      // Handle unexpected errors
+      if (error instanceof Error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  });
+  
   //routes for  get property restrictions
   propertyRouter.get("/property-restrictions", async (req: Request, res: Response) => {
     try {
@@ -979,7 +1004,7 @@ propertyRouter.get("/property-details/:propertyId", async (req: Request, res: Re
 
 //route to get the propertyavailability
 
-export default propertyRouter;
+
 propertyRouter.get("/property-availability", async (req: Request, res: Response) => {
   try {
     const { property, _id } = req.query;
@@ -1010,3 +1035,4 @@ propertyRouter.get("/property-availability", async (req: Request, res: Response)
     }
   }
 });
+export default propertyRouter;
