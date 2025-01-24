@@ -26,10 +26,11 @@ const steps: { id: StepType; label: string; icon: React.ElementType }[] = [
 ];
 
 function Base() {
+  const [propertyId, setPropertyId] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState<StepType>('form');
   const [showPreview, setShowPreview] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [formData, setFormData] = React.useState<FormData>({
+  const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     ownerName: '',
     ownerNumber: '',
@@ -41,7 +42,6 @@ function Base() {
   });
 
   const [locationData, setLocationData] = useState<LocationData>({
-    propertyName: '',
     flatNo: '',
     addressLine1: '',
     addressLine2: '',
@@ -125,30 +125,129 @@ function Base() {
     propertyVideo: null
   });
 
-  // Effect to scroll to top when step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeStep]);
 
-  const handleNext = () => {
-    const currentIndex = steps.findIndex(step => step.id === activeStep);
-    if (currentIndex < steps.length - 1) {
-      setActiveStep(steps[currentIndex + 1].id);
-      setShowMobileMenu(false);
+  const handleNext = async () => {
+    const currentIndex = steps.findIndex((step) => step.id === activeStep);
+
+    try {
+      switch (activeStep) {
+        case 'form':
+          const formResponse = await fetch('http://localhost:8000/api/properties/property', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+
+          if (!formResponse.ok) {
+            throw new Error('Failed to save property form data');
+          }
+
+          const createdProperty = await formResponse.json();
+          setPropertyId(createdProperty._id);
+          break;
+
+        case 'location':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-location', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...locationData, property: propertyId }),
+          });
+          break;
+
+        case 'features':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-features', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...featuresData, property: propertyId }),
+          });
+          break;
+
+        case 'amenities':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/society-amenities', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...amenitiesData, property: propertyId }),
+          });
+          break;
+
+        case 'flatAmenities':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/flat-amenities', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...flatAmenitiesData, property: propertyId }),
+          });
+          break;
+
+        case 'restrictions':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-restrictions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...restrictionsData, property: propertyId }),
+          });
+          break;
+
+        case 'commercials':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-commercials', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...commercialsData, property: propertyId }),
+          });
+          break;
+
+        case 'availability':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-availability', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ...availabilityData, property: propertyId }),
+          });
+          break;
+
+        default:
+          break;
+      }
+
+      if (currentIndex < steps.length - 1) {
+        setActiveStep(steps[currentIndex + 1].id);
+        setShowMobileMenu(false);
+      }
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Failed to save data. Please try again.');
     }
   };
 
   const handlePrevious = () => {
-    const currentIndex = steps.findIndex(step => step.id === activeStep);
+    const currentIndex = steps.findIndex((step) => step.id === activeStep);
     if (currentIndex > 0) {
       setActiveStep(steps[currentIndex - 1].id);
       setShowMobileMenu(false);
     }
-  };
-
-  const handleStepClick = (stepId: StepType) => {
-    setActiveStep(stepId);
-    setShowMobileMenu(false);
   };
 
   const renderStepContent = () => {
@@ -170,20 +269,26 @@ function Base() {
       case 'availability':
         return <PropertyAvailability availabilityData={availabilityData} setAvailabilityData={setAvailabilityData} />;
       case 'photos':
-        return <PropertyPhotos photoData={photoData} setPhotoData={setPhotoData} featuresData={featuresData} />;
+        return (
+          <PropertyPhotos
+            photoData={photoData}
+            setPhotoData={setPhotoData}
+            featuresData={featuresData}
+            propertyId={propertyId || ''}
+          />
+        );
       default:
         return null;
     }
   };
 
-  const currentStep = steps.find(step => step.id === activeStep);
-  const currentStepIndex = steps.findIndex(step => step.id === activeStep);
+  const currentStep = steps.find((step) => step.id === activeStep);
+  const currentStepIndex = steps.findIndex((step) => step.id === activeStep);
   const progress = ((currentStepIndex + 1) / steps.length) * 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        {/* Mobile Header */}
         <div className="md:hidden fixed top-0 left-0 right-0 bg-white z-20 shadow-sm">
           <div className="flex items-center justify-between px-4 py-3">
             <button
@@ -208,18 +313,17 @@ function Base() {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {showMobileMenu && (
           <div className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden">
             <div className="bg-white h-full w-3/4 max-w-xs p-4 transform transition-transform">
               <div className="space-y-2">
-                {steps.map((step, index) => {
+                {steps.map((step) => {
                   const StepIcon = step.icon;
                   const isCurrent = step.id === activeStep;
                   return (
                     <button
                       key={step.id}
-                      onClick={() => handleStepClick(step.id)}
+                      onClick={() => setActiveStep(step.id)}
                       className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                         isCurrent
                           ? 'bg-red-50 text-red-500'
@@ -239,7 +343,6 @@ function Base() {
           </div>
         )}
 
-        {/* Desktop Header */}
         <div className="hidden md:flex items-center justify-between px-8 py-4 bg-white shadow-sm">
           <h1 className="text-xl font-semibold text-gray-800">Property Details</h1>
           <button
@@ -251,15 +354,14 @@ function Base() {
           </button>
         </div>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex border-b bg-white">
-          {steps.map((step, index) => {
+          {steps.map((step) => {
             const StepIcon = step.icon;
             const isCurrent = step.id === activeStep;
             return (
               <button
                 key={step.id}
-                onClick={() => handleStepClick(step.id)}
+                onClick={() => setActiveStep(step.id)}
                 className={`flex items-center space-x-2 py-4 px-6 border-b-2 transition-colors ${
                   isCurrent
                     ? 'border-red-500 text-red-500'
@@ -273,12 +375,9 @@ function Base() {
           })}
         </div>
 
-        {/* Main Content */}
         <div className="max-w-4xl mx-auto px-4 py-8 mt-14 md:mt-0">
           <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6">
-              {renderStepContent()}
-            </div>
+            <div className="p-6">{renderStepContent()}</div>
 
             <div className="px-6 py-4 border-t border-gray-100 flex justify-between">
               {activeStep !== 'form' && (
@@ -304,7 +403,6 @@ function Base() {
         </div>
       </div>
 
-      {/* Preview Modal */}
       {showPreview && (
         <PreviewModal
           onClose={() => setShowPreview(false)}

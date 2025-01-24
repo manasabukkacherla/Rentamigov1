@@ -1,26 +1,43 @@
-import AWS from "aws-sdk";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
-// Configure AWS S3
-const s3 = new AWS.S3({
-  accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
-  region: process.env.REACT_APP_AWS_REGION,
+// Configure S3 Client
+const s3 = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
 });
 
-export const uploadToS3 = async (fileName: string, base64Data: string, fileType: string) => {
+/**
+ * Uploads a file to AWS S3.
+ * @param fileKey - The key (path) to store the file in the S3 bucket (e.g., "uploads/example.jpg").
+ * @param fileBuffer - The file content as a Buffer.
+ * @param fileType - The MIME type of the file (e.g., "image/jpeg").
+ * @returns The public URL of the uploaded file.
+ */
+export const uploadToS3 = async (
+  fileKey: string,
+  fileBuffer: Buffer,
+  fileType: string
+): Promise<string> => {
+  const bucketName = process.env.AWS_S3_BUCKET_NAME!;
+
   const params = {
-    Bucket: process.env.REACT_APP_S3_BUCKET_NAME!,
-    Key: `uploads/${fileName}`,
-    Body: Buffer.from(base64Data.split(",")[1], "base64"),
+    Bucket: bucketName,
+    Key: fileKey,
+    Body: fileBuffer,
     ContentType: fileType,
-    ACL: "public-read",
   };
 
   try {
-    const uploadResult = await s3.upload(params).promise();
-    return uploadResult.Location; // Return the file URL
+    const command = new PutObjectCommand(params);
+    const response = await s3.send(command);
+
+    console.log("File uploaded successfully:", fileKey);
+    return `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
   } catch (error) {
-    console.error("Error uploading to S3:", error);
-    throw new Error("Error uploading to S3");
+    console.error("Error uploading file to S3:", error);
+    throw new Error("Failed to upload file to S3.");
   }
 };

@@ -1,4 +1,3 @@
-// models/Property.ts
 import { Schema, model, models, Document } from "mongoose";
 
 // Define the interface for the Property document
@@ -6,7 +5,7 @@ interface IProperty extends Document {
   propertyName: string; // Name of the property
   ownerName: string; // Owner's name
   ownerNumber: string; // Owner's contact number
-  propertyType?: string; // Type of property (optional, as not provided in the form directly)
+  propertyType: string; // Type of property
   propertyConfiguration: string; // E.g., 1 BHK, 2 BHK, etc.
   furnishingStatus: "Unfurnished" | "Semi Furnished" | "Fully Furnished" | "Partially Furnished"; // Furnishing status
   facing: string; // Facing direction (e.g., North, East, etc.)
@@ -36,7 +35,8 @@ const PropertySchema = new Schema<IProperty>(
     },
     propertyType: {
       type: String,
-      enum: ["Residential", "Commercial", "Industrial", "Agricultural"], // You can add more property types
+      enum: ["Apartment", "Standalone Building", "Villa", "Row House"], // Matches frontend options
+      required: [true, "Property type is required"],
     },
     propertyConfiguration: {
       type: String,

@@ -1,35 +1,37 @@
-import React, { useState } from 'react';
-import { Image, Video, Eye } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Image, Video } from 'lucide-react';
 
 export interface PhotoData {
-  [key: string]: File | null;
-  coverImage: File | null;
-  exteriorView: File | null;
-  livingRoom: File | null;
-  kitchen: File | null;
-  diningRoom: File | null;
-  bedroom1: File | null;
-  bedroom2: File | null;
-  bedroom3: File | null;
-  bedroom4: File | null;
-  bathroom1: File | null;
-  bathroom2: File | null;
-  bathroom3: File | null;
-  bathroom4: File | null;
-  balcony1: File | null;
-  balcony2: File | null;
-  balcony3: File | null;
-  balcony4: File | null;
-  studyRoom: File | null;
-  pujaRoom: File | null;
-  theaterRoom: File | null;
-  gymRoom: File | null;
-  utilityArea: File | null;
-  others: File | null;
-  propertyVideo: File | null;
+  [key: string]: string | File | null;
+  coverImage: string | File | null;
+  exteriorView: string | File | null;
+  livingRoom: string | File | null;
+  kitchen: string | File | null;
+  diningRoom: string | File | null;
+  bedroom1: string | File | null;
+  bedroom2: string | File | null;
+  bedroom3: string | File | null;
+  bedroom4: string | File | null;
+  bathroom1: string | File | null;
+  bathroom2: string | File | null;
+  bathroom3: string | File | null;
+  bathroom4: string | File | null;
+  balcony1: string | File | null;
+  balcony2: string | File | null;
+  balcony3: string | File | null;
+  balcony4: string | File | null;
+  studyRoom: string | File | null;
+  pujaRoom: string | File | null;
+  theaterRoom: string | File | null;
+  gymRoom: string | File | null;
+  utilityArea: string | File | null;
+  others: string | File | null;
+  propertyVideo: string | File | null;
 }
 
 interface PropertyPhotosProps {
+  propertyId: string;
   photoData: PhotoData;
   setPhotoData: React.Dispatch<React.SetStateAction<PhotoData>>;
   featuresData?: {
@@ -89,126 +91,170 @@ const PreviewModal = ({ url, title, onClose }: PreviewModalProps) => (
   </div>
 );
 
-const BASE_UPLOAD_FIELDS: UploadField[] = [
-  { id: 'coverImage', label: 'Cover Image', description: 'Main image for property listing', accept: 'image/jpeg,image/png', maxSize: 2, required: true },
-  { id: 'exteriorView', label: 'Exterior View', description: 'Outside view of house / society', accept: 'image/jpeg,image/png', maxSize: 2 },
-  { id: 'livingRoom', label: 'Living Room', description: 'Living area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
-  { id: 'kitchen', label: 'Kitchen', description: 'Kitchen area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
-  { id: 'diningRoom', label: 'Dining Room', description: 'Dining area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
-  { id: 'utilityArea', label: 'Utility Area', description: 'Utility area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
-  { id: 'others', label: 'Others', description: 'Any other house related photos', accept: 'image/jpeg,image/png', maxSize: 2 },
-  { id: 'propertyVideo', label: 'Property Video', description: 'Video of the entire property', accept: 'video/mp4', maxSize: 10 },
-];
-
-export function PropertyPhotos({ photoData, setPhotoData, featuresData }: PropertyPhotosProps) {
+export function PropertyPhotos({ photoData, setPhotoData, featuresData, propertyId }: PropertyPhotosProps) {
   const [previewData, setPreviewData] = useState<{ url: string; title: string } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const navigate = useNavigate();
 
-  const handleFileChange = (field: keyof PhotoData) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0] || null;
-    if (file) {
-      const maxSize = BASE_UPLOAD_FIELDS.find(f => f.id === field)?.maxSize || 2;
-      if (file.size > maxSize * 1024 * 1024) {
-        alert(`File size should not exceed ${maxSize}MB`);
-        return;
+  const uploadToS3 = async (fileName: string, base64Data: string, fileType: string, fieldName: string): Promise<string | null> => {
+    try {
+      setLoading(true);
+
+      const response = await fetch('http://localhost:8000/api/photos/upload-photos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          propertyId,
+          fileName,
+          base64Data,
+          fileType,
+          fieldName,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload photos');
       }
+
+      const data = await response.json();
+      return data.fileUrl; // Ensure the backend returns the S3 URL
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    } finally {
+      setLoading(false);
     }
-    setPhotoData(prev => ({ ...prev, [field]: file }));
   };
+
+  const handleFileChange =
+    (field: keyof PhotoData) =>
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0] || null;
+      if (file) {
+        const maxSize = 2; // Default max size is 2MB
+        if (file.size > maxSize * 1024 * 1024) {
+          alert(`File size should not exceed ${maxSize}MB`);
+          return;
+        }
+
+        try {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = async () => {
+            const base64Data = reader.result as string;
+            const url = await uploadToS3(file.name, base64Data, file.type, field as string);
+
+            if (url) {
+              setPhotoData((prev) => ({
+                ...prev,
+                [field]: url,
+              }));
+            } else {
+              alert('Failed to upload file. Please try again.');
+            }
+          };
+
+          reader.onerror = (error) => {
+            console.error('Error reading file as Base64:', error);
+          };
+        } catch (error) {
+          console.error('Error processing file:', error);
+        }
+      }
+    };
 
   const handlePreview = (field: keyof PhotoData, label: string) => {
-    const file = photoData[field];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setPreviewData({ url, title: label });
+    const fileUrl = photoData[field];
+    if (fileUrl) {
+      setPreviewData({ url: fileUrl as string, title: label });
     } else {
-      alert('Please upload an image first');
+      alert('Please upload an image first.');
     }
   };
 
-  const closePreview = () => {
-    if (previewData) {
-      URL.revokeObjectURL(previewData.url);
-      setPreviewData(null);
-    }
+  const closePreview = () => setPreviewData(null);
+
+  const handleSaveProperty = () => {
+    setShowSuccessModal(true);
   };
 
-  // Generate dynamic upload fields based on features
-  const getDynamicUploadFields = () => {
-    const dynamicFields: UploadField[] = [...BASE_UPLOAD_FIELDS];
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+    navigate('/empdashboard');
+  };
 
-    // Add bedroom fields
-    const bedroomCount = parseInt(featuresData?.bedrooms || '0');
-    for (let i = 1; i <= bedroomCount && i <= 10; i++) {
-      dynamicFields.push({
+  const dynamicFields = React.useMemo(() => {
+    const fields: UploadField[] = [
+      { id: 'coverImage', label: 'Cover Image', description: 'Main image for property listing', accept: 'image/jpeg,image/png', maxSize: 2, required: true },
+      { id: 'exteriorView', label: 'Exterior View', description: 'Outside view of house / society', accept: 'image/jpeg,image/png', maxSize: 2 },
+      { id: 'livingRoom', label: 'Living Room', description: 'Living area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
+      { id: 'kitchen', label: 'Kitchen', description: 'Kitchen area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
+      { id: 'diningRoom', label: 'Dining Room', description: 'Dining area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
+      { id: 'utilityArea', label: 'Utility Area', description: 'Utility area of the house', accept: 'image/jpeg,image/png', maxSize: 2 },
+      { id: 'others', label: 'Others', description: 'Any other house-related photos', accept: 'image/jpeg,image/png', maxSize: 2 },
+      { id: 'propertyVideo', label: 'Property Video', description: 'Video of the entire property', accept: 'video/mp4', maxSize: 10 },
+    ];
+
+    for (let i = 1; i <= parseInt(featuresData?.bedrooms || '0', 10); i++) {
+      fields.push({
         id: `bedroom${i}` as keyof PhotoData,
         label: `Bedroom ${i}`,
-        description: i === 1 ? 'Master bedroom' : `Bedroom ${i}`,
+        description: `Photo of Bedroom ${i}`,
         accept: 'image/jpeg,image/png',
         maxSize: 2,
-        category: 'bedroom'
       });
     }
 
-    // Add bathroom fields
-    const bathroomCount = parseInt(featuresData?.bathrooms || '0');
-    for (let i = 1; i <= bathroomCount && i <= 10; i++) {
-      dynamicFields.push({
+    for (let i = 1; i <= parseInt(featuresData?.bathrooms || '0', 10); i++) {
+      fields.push({
         id: `bathroom${i}` as keyof PhotoData,
         label: `Bathroom ${i}`,
-        description: `Bathroom ${i}`,
+        description: `Photo of Bathroom ${i}`,
         accept: 'image/jpeg,image/png',
         maxSize: 2,
-        category: 'bathroom'
       });
     }
 
-    // Add balcony fields
-    const balconyCount = parseInt(featuresData?.balconies || '0');
-    for (let i = 1; i <= balconyCount && i <= 10; i++) {
-      dynamicFields.push({
+    for (let i = 1; i <= parseInt(featuresData?.balconies || '0', 10); i++) {
+      fields.push({
         id: `balcony${i}` as keyof PhotoData,
         label: `Balcony ${i}`,
-        description: `Balcony ${i}`,
+        description: `Photo of Balcony ${i}`,
         accept: 'image/jpeg,image/png',
         maxSize: 2,
-        category: 'balcony'
       });
     }
 
-    // Add extra room fields
-    featuresData?.extraRooms?.forEach(room => {
-      const fieldId = room.toLowerCase().replace(/\s+/g, '') as keyof PhotoData;
-      dynamicFields.push({
-        id: fieldId,
+    featuresData?.extraRooms?.forEach((room, index) => {
+      fields.push({
+        id: `extraRoom${index + 1}` as keyof PhotoData,
         label: room,
-        description: `${room} photos`,
+        description: `Photo of ${room}`,
         accept: 'image/jpeg,image/png',
         maxSize: 2,
-        category: 'extraRoom'
       });
     });
 
-    return dynamicFields;
-  };
+    return fields;
+  }, [featuresData]);
 
-  const uploadFields = getDynamicUploadFields();
-
-  // Group fields by category for better organization
-  const groupedFields = uploadFields.reduce((acc, field) => {
-    const category = field.category || 'main';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(field);
-    return acc;
-  }, {} as Record<string, UploadField[]>);
+  const uploadedPhotosCount = Object.values(photoData).filter((photo) => photo !== null).length;
 
   return (
     <div className="space-y-8">
-      {/* Main Fields */}
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
+
       <div className="space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groupedFields.main?.map(field => (
+          {dynamicFields.map((field) => (
             <div key={field.id} className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                 {field.accept.includes('image') ? <Image className="w-4 h-4" /> : <Video className="w-4 h-4" />}
@@ -225,7 +271,7 @@ export function PropertyPhotos({ photoData, setPhotoData, featuresData }: Proper
                 />
                 {photoData[field.id] && (
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-sm text-green-600">✓ {photoData[field.id]?.name}</span>
+                    <span className="text-sm text-green-600">✓ Uploaded</span>
                     <button
                       onClick={() => handlePreview(field.id, field.label)}
                       className="text-sm text-blue-600 hover:text-blue-700"
@@ -233,7 +279,7 @@ export function PropertyPhotos({ photoData, setPhotoData, featuresData }: Proper
                       Preview
                     </button>
                     <button
-                      onClick={() => setPhotoData(prev => ({ ...prev, [field.id]: null }))}
+                      onClick={() => setPhotoData((prev) => ({ ...prev, [field.id]: null }))}
                       className="text-sm text-red-600 hover:text-red-700"
                     >
                       Remove
@@ -242,189 +288,38 @@ export function PropertyPhotos({ photoData, setPhotoData, featuresData }: Proper
                 )}
               </div>
               <p className="text-xs text-gray-500">
-                Max size: {field.maxSize}MB
-                Format: {field.accept.split('/')[1].split(',').map(f => f.toUpperCase()).join(', ')}
+                Max size: {field.maxSize}MB | Formats: {field.accept.split('/')[1].split(',').map((f) => f.toUpperCase()).join(', ')}
               </p>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Bedrooms Section */}
-      {groupedFields.bedroom && groupedFields.bedroom.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Bedrooms</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groupedFields.bedroom.map(field => (
-              <div key={field.id} className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Image className="w-4 h-4" />
-                  {field.label}
-                </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept={field.accept}
-                    onChange={handleFileChange(field.id)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                  />
-                  {photoData[field.id] && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-green-600">✓ {photoData[field.id]?.name}</span>
-                      <button
-                        onClick={() => handlePreview(field.id, field.label)}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        Preview
-                      </button>
-                      <button
-                        onClick={() => setPhotoData(prev => ({ ...prev, [field.id]: null }))}
-                        className="text-sm text-red-600 hover:text-red-700"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+      <button
+        onClick={handleSaveProperty}
+        disabled={uploadedPhotosCount < 6}
+        className={`px-6 py-3 rounded-lg transition-all ${uploadedPhotosCount >= 6 ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+      >
+        Save Property
+      </button>
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h3 className="text-lg font-semibold">Success</h3>
+            <p className="text-gray-700">Property submitted successfully!</p>
+            <button
+              onClick={closeSuccessModal}
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+            >
+              Close
+            </button>
           </div>
         </div>
       )}
 
-      {/* Bathrooms Section */}
-      {groupedFields.bathroom && groupedFields.bathroom.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Bathrooms</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groupedFields.bathroom.map(field => (
-              <div key={field.id} className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Image className="w-4 h-4" />
-                  {field.label}
-                </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept={field.accept}
-                    onChange={handleFileChange(field.id)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                  />
-                  {photoData[field.id] && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-green-600">✓ {photoData[field.id]?.name}</span>
-                      <button
-                        onClick={() => handlePreview(field.id, field.label)}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        Preview
-                      </button>
-                      <button
-                        onClick={() => setPhotoData(prev => ({ ...prev, [field.id]: null }))}
-                        className="text-sm text-red-600 hover:text-red-700"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Balconies Section */}
-      {groupedFields.balcony && groupedFields.balcony.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Balconies</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groupedFields.balcony.map(field => (
-              <div key={field.id} className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Image className="w-4 h-4" />
-                  {field.label}
-                </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept={field.accept}
-                    onChange={handleFileChange(field.id)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                  />
-                  {photoData[field.id] && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-green-600">✓ {photoData[field.id]?.name}</span>
-                      <button
-                        onClick={() => handlePreview(field.id, field.label)}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        Preview
-                      </button>
-                      <button
-                        onClick={() => setPhotoData(prev => ({ ...prev, [field.id]: null }))}
-                        className="text-sm text-red-600 hover:text-red-700"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Extra Rooms Section */}
-      {groupedFields.extraRoom && groupedFields.extraRoom.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Extra Rooms</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {groupedFields.extraRoom.map(field => (
-              <div key={field.id} className="space-y-2">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <Image className="w-4 h-4" />
-                  {field.label}
-                </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    accept={field.accept}
-                    onChange={handleFileChange(field.id)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all"
-                  />
-                  {photoData[field.id] && (
-                    <div className="mt-2 flex items-center gap-2">
-                      <span className="text-sm text-green-600">✓ {photoData[field.id]?.name}</span>
-                      <button
-                        onClick={() => handlePreview(field.id, field.label)}
-                        className="text-sm text-blue-600 hover:text-blue-700"
-                      >
-                        Preview
-                      </button>
-                      <button
-                        onClick={() => setPhotoData(prev => ({ ...prev, [field.id]: null }))}
-                        className="text-sm text-red-600 hover:text-red-700"
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Preview Modal */}
       {previewData && (
-        <PreviewModal
-          url={previewData.url}
-          title={previewData.title}
-          onClose={closePreview}
-        />
+        <PreviewModal url={previewData.url} title={previewData.title} onClose={closePreview} />
       )}
     </div>
   );
