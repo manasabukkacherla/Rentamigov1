@@ -7,8 +7,9 @@ import FlatAmenities from "../models/Flatamenities";
 import PropertyRestrictions from "../models/Propertyrestrictions";
 import PropertyCommercials from "../models/Propertycommercials";
 import PropertyAvailability from "../models/PropertyAvailability";
-const propertyRouter = express.Router();
+import PhotoUpload from "../models/PropertyPhotos";
 
+const propertyRouter = express.Router();
 // Route to create a new property
 propertyRouter.post("/property", async (req: Request, res: Response) => {
   try {
@@ -962,45 +963,48 @@ propertyRouter.get("/property-availability/:availabilityId", async (req: Request
 
 //get api for the all property details 
 propertyRouter.get("/property-details/:propertyId", async (req: Request, res: Response) => {
-    const { propertyId } = req.params;
-  
-    try {
-      // Validate if the property exists
-      const property = await Property.findById(propertyId);
-      if (!property) {
-        return res.status(404).send({ error: "Property not found" });
-      }
-  
-      // Fetch related details from all collections
-      const propertyLocation = await PropertyLocation.findOne({ property: propertyId });
-      const propertyFeatures = await PropertyFeatures.findOne({ property: propertyId });
-      const societyAmenities = await SocietyAmenities.findOne({ property: propertyId });
-      const flatAmenities = await FlatAmenities.findOne({ property: propertyId });
-      const propertyRestrictions = await PropertyRestrictions.findOne({ property: propertyId });
-      const propertyCommercials = await PropertyCommercials.findOne({ property: propertyId });
-      const propertyAvailability = await PropertyAvailability.findOne({ property: propertyId });
-  
-      // Combine all details into a single object
-      const propertyDetails = {
-        property,
-        propertyLocation,
-        propertyFeatures,
-        societyAmenities,
-        flatAmenities,
-        propertyRestrictions,
-        propertyCommercials,
-        propertyAvailability,
-      };
-  
-      res.status(200).send(propertyDetails);
-    } catch (error) {
-      if (error instanceof Error) {
-        res.status(500).send({ error: error.message });
-      } else {
-        res.status(500).send({ error: "An unknown error occurred." });
-      }
+  const { propertyId } = req.params;
+
+  try {
+    // Validate if the property exists
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      return res.status(404).send({ error: "Property not found" });
     }
-  });
+
+    // Fetch related details from all collections
+    const propertyLocation = await PropertyLocation.findOne({ property: propertyId });
+    const propertyFeatures = await PropertyFeatures.findOne({ property: propertyId });
+    const societyAmenities = await SocietyAmenities.findOne({ property: propertyId });
+    const flatAmenities = await FlatAmenities.findOne({ property: propertyId });
+    const propertyRestrictions = await PropertyRestrictions.findOne({ property: propertyId });
+    const propertyCommercials = await PropertyCommercials.findOne({ property: propertyId });
+    const propertyAvailability = await PropertyAvailability.findOne({ property: propertyId });
+    const propertyPhotos = await PhotoUpload.findOne({ property: propertyId }); // Fetch property photos
+
+    // Combine all details into a single object
+    const propertyDetails = {
+      property,
+      propertyLocation,
+      propertyFeatures,
+      societyAmenities,
+      flatAmenities,
+      propertyRestrictions,
+      propertyCommercials,
+      propertyAvailability,
+      propertyPhotos, // Include photos in the response
+    };
+
+    res.status(200).send(propertyDetails);
+  } catch (error) {
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 
 //route to get the propertyavailability
 
