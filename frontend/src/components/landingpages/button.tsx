@@ -50,9 +50,11 @@ const styles: Record<string, React.CSSProperties> = {
     flexWrap: "wrap",
     gap: "20px",
     padding: "20px",
-    width: "100%",
+    width: "100vw", // Full width of the viewport
     justifyContent: "center",
+    marginLeft: "-60px", 
   },
+  
   section: {
     flex: "1 1 calc(50% - 20px)",
     display: "flex",

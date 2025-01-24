@@ -155,7 +155,7 @@ const styles: any = {
     color: "black",
     border: "none",
     padding: "10px",
-    fontSize: "20px",
+    fontSize: "40px",
     cursor: "pointer",
     borderRadius: "5px",
     display: "flex",
@@ -168,12 +168,12 @@ const styles: any = {
   },
   dropdown: {
     position: "fixed",
-    top: "10%",
-    left: "10%",
-    width: "80%",
-    height: "80%",
+    top: "3%",
+    left: "3%",
+    width: "96%",
+    height: "97%",
     backgroundColor: "white", // White background remains
-    zIndex: 999,
+    zIndex: 1001, 
     boxSizing: "border-box",
     borderRadius: "15px",
     overflow: "hidden",
@@ -182,7 +182,7 @@ const styles: any = {
     justifyContent: "center",
     alignItems: "center",
     backgroundImage: `
-    linear-gradient(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.8)),
+    linear-gradient(rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0.8)),
     url('./images/rentamigologou.png')
   `, // Layer a semi-transparent white overlay with the image
     //backgroundImage: "url('./images/rentamigologou.png')", // Path to your logo
@@ -198,7 +198,7 @@ const styles: any = {
     right: "20px",
     backgroundColor: "transparent",
     border: "none",
-    fontSize: "30px",
+    fontSize: "50px",
     cursor: "pointer",
     color: "black",
   },
@@ -210,7 +210,7 @@ const styles: any = {
   },
   link: {
     color: "black", // Default link color
-    fontSize: "20px",
+    fontSize: "30px",
     fontWeight: "bold",
     textDecoration: "none",
     textTransform: "uppercase",

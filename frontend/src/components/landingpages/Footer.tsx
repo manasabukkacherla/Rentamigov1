@@ -43,6 +43,31 @@ const Footer: React.FC = () => {
       transform: "scale(1.2)",
       color: "#f1f1f1",
     },
+    phoneNumberContainer: {
+      display: "flex",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      marginTop: "-5px",
+      fontSize: "14px",
+      gap: "15px", // Adjus
+      marginRight: "138px",
+
+    },
+    phoneLink: {
+      color: "white",
+      textDecoration: "none",
+      fontWeight: "bold" as "bold",
+
+
+    },
+    phoneLinkHover: {
+      color: "#f1f1f1",
+      textDecoration: "underline",
+    },
+    phoneIcon: {
+      marginRight: "8px",
+      fontSize: "16px",
+    },
     formSection: {
       backgroundColor: "#222",
       padding: "15px",
@@ -120,56 +145,74 @@ const Footer: React.FC = () => {
               className="mb-3"
               style={{ width: "100px" }}
             />
-            <p>
-            170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
-            Karnataka, 560068
+            <p style={{ marginLeft: "15px" }}>
+              170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
+              Karnataka, 560068
             </p>
+            <div style={styles.phoneNumberContainer}>
+              <a
+                href="tel:+918041554935"
+                style={styles.phoneLink}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.phoneLinkHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.phoneLink)}
+              >
+                <i className="fas fa-phone-alt" style={styles.phoneIcon}></i> 080-41554935
+              </a>
+              <a
+                href="tel:+919886090088"
+                style={styles.phoneLink}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.phoneLinkHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.phoneLink)}
+              >
+                <i className="fas fa-mobile-alt" style={styles.phoneIcon}></i> 9886090088
+              </a>
+            </div>
             <div>
               <a
-                href="https://www.facebook.com/Rentamigo2024"
+                href="https://www.facebook.com/profile.php?id=61572274988795"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                style={{ ...styles.socialIcons }}
-                onMouseOver={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIconsHover);
-                }}
-                onMouseOut={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIcons);
-                }}
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
               >
                 <i className="fab fa-facebook-f"></i>
               </a>
               <a
-                href="https://x.com/rentamigo"
+                href="https://x.com/Rentamigo2020"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Twitter"
-                style={{ ...styles.socialIcons }}
-                onMouseOver={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIconsHover);
-                }}
-                onMouseOut={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIcons);
-                }}
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
               >
                 <i className="fab fa-twitter"></i>
               </a>
               <a
-                href="https://www.instagram.com/rentamigo/"
+                href="https://www.instagram.com/rentamigo/?igsh=MWlvcDdhZjZzejAwbQ%3D%3D#"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                style={{ ...styles.socialIcons }}
-                onMouseOver={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIconsHover);
-                }}
-                onMouseOut={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIcons);
-                }}
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
               >
                 <i className="fab fa-instagram"></i>
               </a>
+              <a
+                href="https://www.linkedin.com/in/rentamigo-property-management-services-83a106349/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
+              >
+                <i className="fab fa-linkedin"></i>
+              </a>
+
             </div>
           </div>
 
