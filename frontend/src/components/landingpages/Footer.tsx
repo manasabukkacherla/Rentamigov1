@@ -2,13 +2,13 @@ import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import rentamigologo from '/images/rentamigologo.png';
-//
+
 const Footer: React.FC = () => {
   const styles = {
     footer: {
       backgroundColor: "black",
       color: "white",
-      padding: "40px 20px",
+      padding: "10px 5px",
       position: "relative" as "relative",
       overflow: "hidden",
     },
@@ -43,6 +43,30 @@ const Footer: React.FC = () => {
       transform: "scale(1.2)",
       color: "#f1f1f1",
     },
+    phoneNumberContainer: {
+      display: "flex",
+      justifyContent: "space-evenly",
+      alignItems: "center",
+      marginTop: "90px",
+      fontSize: "14px",
+      gap: "15px", // Adjus
+      marginRight:"78px"
+    },
+    phoneLink: {
+      color: "white",
+      textDecoration: "none",
+      fontWeight: "bold" as "bold",
+      
+      
+    },
+    phoneLinkHover: {
+      color: "#f1f1f1",
+      textDecoration: "underline",
+    },
+    phoneIcon: {
+      marginRight: "8px",
+      fontSize: "16px",
+    },
     formSection: {
       backgroundColor: "#222",
       padding: "15px",
@@ -50,35 +74,24 @@ const Footer: React.FC = () => {
       display: "flex",
       flexDirection: "column" as "column",
       alignItems: "center",
-      justifyContent: "space-between",
+      justifyContent: "center",
       position: "relative" as "relative",
       width: "100%",
       maxWidth: "600px",
-      height: "250px",
       margin: "0 auto",
       boxShadow: "0 4px 10px rgba(0, 0, 0, 0.3)",
-      transition: "box-shadow 0.3s",
     },
     formInput: {
       backgroundColor: "#333",
       color: "white",
       border: "1px solid #555",
       padding: "10px",
-      margin: "10px 0", // Added margin for padding effect
+      margin: "10px 0",
       borderRadius: "5px",
       width: "95%",
       marginLeft: "auto",
       marginRight: "auto",
       transition: "background-color 0.3s, border-color 0.3s",
-    },
-    formInputHover: {
-      backgroundColor: "#444",
-      borderColor: "#888",
-    },
-    formInputFocus: {
-      backgroundColor: "#444",
-      borderColor: "white",
-      outline: "none",
     },
     formButton: {
       backgroundColor: "white",
@@ -88,22 +101,6 @@ const Footer: React.FC = () => {
       borderRadius: "5px",
       cursor: "pointer",
       fontWeight: "bold" as "bold",
-      transition: "background-color 0.3s, color 0.3s, border-color 0.3s",
-      alignSelf: "center",
-      marginTop: "auto", // Pushes the button to the bottom
-    },
-    formButtonHover: {
-      backgroundColor: "black",
-      color: "white",
-      border: "1px solid #f1f1f1",
-    },
-    link: {
-      color: "white",
-      textDecoration: "none",
-    },
-    linkHover: {
-      color: "#f1f1f1",
-      textDecoration: "underline",
     },
   };
 
@@ -121,22 +118,36 @@ const Footer: React.FC = () => {
               style={{ width: "100px" }}
             />
             <p>
-            170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
-            Karnataka, 560068
+              170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
+              Karnataka, 560068
             </p>
+            <div style={styles.phoneNumberContainer}>
+              <a
+                href="tel:+918041554935"
+                style={styles.phoneLink}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.phoneLinkHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.phoneLink)}
+              >
+                <i className="fas fa-phone-alt" style={styles.phoneIcon}></i> 080-41554935
+              </a>
+              <a
+                href="tel:+919886090088"
+                style={styles.phoneLink}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.phoneLinkHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.phoneLink)}
+              >
+                <i className="fas fa-mobile-alt" style={styles.phoneIcon}></i> 9886090088
+              </a>
+            </div>
             <div>
               <a
                 href="https://www.facebook.com/Rentamigo2024"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
-                style={{ ...styles.socialIcons }}
-                onMouseOver={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIconsHover);
-                }}
-                onMouseOut={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIcons);
-                }}
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
               >
                 <i className="fab fa-facebook-f"></i>
               </a>
@@ -145,13 +156,9 @@ const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Twitter"
-                style={{ ...styles.socialIcons }}
-                onMouseOver={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIconsHover);
-                }}
-                onMouseOut={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIcons);
-                }}
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
               >
                 <i className="fab fa-twitter"></i>
               </a>
@@ -160,13 +167,9 @@ const Footer: React.FC = () => {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                style={{ ...styles.socialIcons }}
-                onMouseOver={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIconsHover);
-                }}
-                onMouseOut={(e) => {
-                  Object.assign(e.currentTarget.style, styles.socialIcons);
-                }}
+                style={styles.socialIcons}
+                onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.socialIconsHover)}
+                onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.socialIcons)}
               >
                 <i className="fab fa-instagram"></i>
               </a>
@@ -180,12 +183,12 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  style={styles.link}
+                  style={styles.phoneLink}
                   onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
+                    Object.assign(e.currentTarget.style, styles.phoneLinkHover);
                   }}
                   onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
+                    Object.assign(e.currentTarget.style, styles.phoneLink);
                   }}
                 >
                   Contact Us
@@ -194,12 +197,12 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  style={styles.link}
+                  style={styles.phoneLink}
                   onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
+                    Object.assign(e.currentTarget.style, styles.phoneLinkHover);
                   }}
                   onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
+                    Object.assign(e.currentTarget.style, styles.phoneLink);
                   }}
                 >
                   About
@@ -208,12 +211,12 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  style={styles.link}
+                  style={styles.phoneLink}
                   onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
+                    Object.assign(e.currentTarget.style, styles.phoneLinkHover);
                   }}
                   onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
+                    Object.assign(e.currentTarget.style, styles.phoneLink);
                   }}
                 >
                   Services
@@ -222,12 +225,12 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  style={styles.link}
+                  style={styles.phoneLink}
                   onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
+                    Object.assign(e.currentTarget.style, styles.phoneLinkHover);
                   }}
                   onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
+                    Object.assign(e.currentTarget.style, styles.phoneLink);
                   }}
                 >
                   Privacy Policy
@@ -236,12 +239,12 @@ const Footer: React.FC = () => {
               <li>
                 <a
                   href="#"
-                  style={styles.link}
+                  style={styles.phoneLink}
                   onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
+                    Object.assign(e.currentTarget.style, styles.phoneLinkHover);
                   }}
                   onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
+                    Object.assign(e.currentTarget.style, styles.phoneLink);
                   }}
                 >
                   Terms of Service

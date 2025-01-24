@@ -47,23 +47,24 @@ const Buttons: React.FC = () => {
 const styles: Record<string, React.CSSProperties> = {
   container: {
     display: "flex",
-    flexWrap: "wrap",
-    gap: "20px",
-    padding: "20px",
-    width: "100%",
-    justifyContent: "center",
+    flexWrap: "wrap", // Allows wrapping for mobile screens
+    width: "calc(100% - 20px)", // Full width minus the gap on both sides
+    height: "100vh", // Full height of the viewport
+    margin: "0 auto", // Center the container horizontally
+    padding: "0 10px", // Equal padding on left and right
+    boxSizing: "border-box", // Include padding and borders in dimensions
+    gap: "10px", // Space between the two images
   },
   section: {
-    flex: "1 1 calc(50% - 20px)",
+    flex: "1 1 calc(50% - 10px)", // Each image takes up 50% width minus the gap
     display: "flex",
     justifyContent: "center",
     alignItems: "flex-end",
     position: "relative",
-    height: "calc(85vh - 40px)",
-    backgroundSize: "cover",
+    backgroundSize: "cover", // Ensure images cover the entire section
     backgroundPosition: "center",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    height: "100%", // Full height of the section
+    borderRadius: "0", // No rounded corners
   },
   overlay: {
     position: "absolute",
@@ -72,13 +73,12 @@ const styles: Record<string, React.CSSProperties> = {
     transform: "translateX(-50%)",
     zIndex: 2,
     textAlign: "center",
-    width: "80%", // Adjusted width for better text fit
+    width: "80%",
   },
   text: {
     color: "white",
-    fontSize: "2rem", // Base font size for large screens
+    fontSize: "2rem",
     fontWeight: "bold",
-    //fontFamily: "Britannic Bold",
     padding: "10px 0",
     textAlign: "center",
   },
@@ -90,9 +90,9 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: "1.2rem",
     fontWeight: "bold",
     fontFamily: "Britannic Bold",
-    color: "white", // White text
+    color: "white",
     cursor: "pointer",
-    backgroundColor: "black", // Black background
+    backgroundColor: "black",
     borderRadius: "5px",
     transition: "transform 0.3s ease, background-color 0.3s ease",
     zIndex: 2,
@@ -105,68 +105,34 @@ const styles: Record<string, React.CSSProperties> = {
 const sectionStyles: Record<string, React.CSSProperties> = {
   "section-1": {
     animation: "section1Background 17s infinite",
-    backgroundImage: "url(./images/aaron-huber-G7sE2S4Lab4-unsplash.jpg)",
-    opacity: 0.8, // Added max opacity for black effect
+    backgroundImage: "url('./images/aaron-huber-G7sE2S4Lab4-unsplash.jpg')",
   },
   "section-2": {
     animation: "section2Background 17s infinite",
-    backgroundImage: "url(https://source.unsplash.com/random/1920x1080?ocean)",
-    opacity: 0.8, // Added max opacity for black effect
+    backgroundImage: "url('https://source.unsplash.com/random/1920x1080?ocean')",
   },
 };
 
 // CSS Keyframes and Media Queries
 const keyframesCSS = `
 @keyframes section1Background {
-  0%, 25% { 
-    background-image: url('./images/Ownerone.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay; 
-  }
-  26%, 50% { 
-    background-image: url('./images/Ownertwo.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
-  51%, 75% { 
-    background-image: url('./images/Ownerthree.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
-  76%, 100% { 
-    background-image: url('./images/Ownerfour.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
+  0%, 25% { background-image: url('./images/Ownerone.jpg'); }
+  26%, 50% { background-image: url('./images/Ownertwo.jpg'); }
+  51%, 75% { background-image: url('./images/Ownerthree.jpg'); }
+  76%, 100% { background-image: url('./images/Ownerfour.jpg'); }
 }
 
 @keyframes section2Background {
-  0%, 25% { 
-    background-image: url('./images/Tenantone.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
-  26%, 50% { 
-    background-image: url('./images/Tenanttwo.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
-  51%, 75% { 
-    background-image: url('./images/Tenantthree.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
-  76%, 100% { 
-    background-image: url('./images/Tenantfour.jpg'); 
-    background-color: rgba(0, 0, 0, 0.6); /* Black opacity overlay */
-    background-blend-mode: overlay;
-  }
+  0%, 25% { background-image: url('./images/Tenantone.jpg'); }
+  26%, 50% { background-image: url('./images/Tenanttwo.jpg'); }
+  51%, 75% { background-image: url('./images/Tenantthree.jpg'); }
+  76%, 100% { background-image: url('./images/Tenantfour.jpg'); }
 }
 
 /* Add hover styles for buttons */
 .hover-button:hover {
-  transform: scale(1.1); /* Slightly enlarge the button */
-  background-color: rgba(0, 0, 0, 0.8); /* Slightly lighter black */
+  transform: scale(1.1);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 /* Responsive Styles */
@@ -177,25 +143,24 @@ const keyframesCSS = `
     height: 45px;
   }
   .overlay p {
-    font-size: 1.5rem; /* Smaller description text on mobile */
+    font-size: 1.5rem;
   }
   .overlay {
-    top: 30%; /* Adjust positioning for smaller screens */
+    top: 30%;
     width: 90%;
   }
 }
 
-@media (max-width: 480px) {
-  .hover-button {
-    font-size: 0.9rem;
-    width: 120px;
-    height: 40px;
+/* Mobile View: Stack images vertically */
+@media (max-width: 768px) {
+  .section-1,
+  .section-2 {
+    flex: 1 1 100%; /* Each image takes full width */
+    height: 50vh; /* Adjust height for stacked images */
   }
-  .overlay p {
-    font-size: 1.2rem; /* Further reduced text size for very small screens */
-  }
-  .overlay {
-    top: 25%; /* Adjust positioning for very small screens */
+  .container {
+    flexDirection: column; /* Stack sections vertically */
+    padding: 0 10px; /* Maintain consistent padding on smaller screens */
   }
 }
 `;
