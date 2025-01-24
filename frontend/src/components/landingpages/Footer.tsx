@@ -49,16 +49,14 @@ const Footer: React.FC = () => {
       alignItems: "center",
       marginTop: "-5px",
       fontSize: "14px",
-      gap: "15px", // Adjus
+      gap: "15px", // Adjust spacing between numbers
       marginRight: "138px",
-
+      flexWrap: "wrap", // Enable wrapping for smaller screens
     },
     phoneLink: {
       color: "white",
       textDecoration: "none",
       fontWeight: "bold" as "bold",
-
-
     },
     phoneLinkHover: {
       color: "#f1f1f1",
@@ -67,6 +65,11 @@ const Footer: React.FC = () => {
     phoneIcon: {
       marginRight: "8px",
       fontSize: "16px",
+    },
+    phoneNumberContainerMobile: {
+      flexDirection: "column" as "column", // Stack numbers vertically
+      alignItems: "flex-start", // Align items to the left for a better mobile layout
+      gap: "10px",
     },
     formSection: {
       backgroundColor: "#222",
@@ -149,7 +152,7 @@ const Footer: React.FC = () => {
               170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
               Karnataka, 560068
             </p>
-            <div style={styles.phoneNumberContainer}>
+            <div className="phone-number-container" style={styles.phoneNumberContainer}>
               <a
                 href="tel:+918041554935"
                 style={styles.phoneLink}
@@ -167,6 +170,7 @@ const Footer: React.FC = () => {
                 <i className="fas fa-mobile-alt" style={styles.phoneIcon}></i> 9886090088
               </a>
             </div>
+
             <div>
               <a
                 href="https://www.facebook.com/profile.php?id=61572274988795"
