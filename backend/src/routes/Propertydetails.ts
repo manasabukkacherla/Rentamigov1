@@ -493,7 +493,7 @@ propertyRouter.post("/property-availability", async (req: Request, res: Response
   }
 });
 //route to get the propertyavailability
-export default propertyRouter;
+
 propertyRouter.get("/property-availability", async (req: Request, res: Response) => {
   try {
     const { property, _id } = req.query;
@@ -524,3 +524,4 @@ propertyRouter.get("/property-availability", async (req: Request, res: Response)
     }
   }
 });
+export default propertyRouter;
