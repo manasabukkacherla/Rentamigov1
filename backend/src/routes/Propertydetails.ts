@@ -89,6 +89,40 @@ propertyRouter.get("/property", async (req: Request, res: Response) => {
     }
   }
 });
+//Route to put the property details
+propertyRouter.put("/property/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the property ID
+    if (!id) {
+      return res.status(400).send({ error: "Property ID is required" });
+    }
+
+    // Find the property by ID and update it with the request body
+    const updatedProperty = await Property.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate inputs
+    );
+
+    // If no property found, return 404
+    if (!updatedProperty) {
+      return res.status(404).send({ error: "Property not found" });
+    }
+
+    // Respond with the updated property
+    res.status(200).send(updatedProperty);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 // Route to create a new property location
 propertyRouter.post("/property-location", async (req: Request, res: Response) => {
   try {
@@ -214,6 +248,39 @@ propertyRouter.get("/property-location", async (req: Request, res: Response) => 
       res.status(500).send({ error: error.message });
     } else {
       res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+//route to put the property location
+propertyRouter.put("/property-location/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the property location ID
+    if (!id) {
+      return res.status(400).send({ error: "Property location ID is required" });
+    }
+
+    // Find and update the property location by ID
+    const updatedPropertyLocation = await PropertyLocation.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no property location is found, return 404
+    if (!updatedPropertyLocation) {
+      return res.status(404).send({ error: "Property location not found" });
+    }
+
+    // Respond with the updated property location
+    res.status(200).send(updatedPropertyLocation);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
     }
   }
 });
@@ -358,6 +425,40 @@ propertyRouter.get("/property-features", async (req: Request, res: Response) => 
     }
   }
 });
+//route to put the propert features
+propertyRouter.put("/property-features/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the property features ID
+    if (!id) {
+      return res.status(400).send({ error: "Property features ID is required" });
+    }
+
+    // Find and update the property features by ID
+    const updatedPropertyFeatures = await PropertyFeatures.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no property features are found, return 404
+    if (!updatedPropertyFeatures) {
+      return res.status(404).send({ error: "Property features not found" });
+    }
+
+    // Respond with the updated property features
+    res.status(200).send(updatedPropertyFeatures);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 
 // route to post society-amenities
 propertyRouter.post("/society-amenities", async (req: Request, res: Response) => {
@@ -481,6 +582,39 @@ propertyRouter.get("/society-amenities/:amenitiesId", async (req: Request, res: 
       }
     }
   });
+//route to put the society amenities
+propertyRouter.put("/society-amenities/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the society amenities ID
+    if (!id) {
+      return res.status(400).send({ error: "Society amenities ID is required" });
+    }
+
+    // Find and update the society amenities by ID
+    const updatedSocietyAmenities = await SocietyAmenities.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no society amenities are found, return 404
+    if (!updatedSocietyAmenities) {
+      return res.status(404).send({ error: "Society amenities not found" });
+    }
+
+    // Respond with the updated society amenities
+    res.status(200).send(updatedSocietyAmenities);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
 
 
   // Route to create new flat amenities
@@ -604,6 +738,39 @@ propertyRouter.get("/flat-amenities/:amenitiesId", async (req: Request, res: Res
     }
   });
 
+//route to put the flatamenities
+propertyRouter.put("/flat-amenities/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the flat amenities ID
+    if (!id) {
+      return res.status(400).send({ error: "Flat amenities ID is required" });
+    }
+
+    // Find and update the flat amenities by ID
+    const updatedFlatAmenities = await FlatAmenities.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no flat amenities are found, return 404
+    if (!updatedFlatAmenities) {
+      return res.status(404).send({ error: "Flat amenities not found" });
+    }
+
+    // Respond with the updated flat amenities
+    res.status(200).send(updatedFlatAmenities);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
 
   //property restrictions post api
   propertyRouter.post("/property-restrictions", async (req: Request, res: Response) => {
@@ -745,7 +912,39 @@ propertyRouter.get("/property-restrictions/:restrictionsId", async (req: Request
     }
   }
 });
+//route to put the property restrictions
+propertyRouter.put("/property-restrictions/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
 
+    // Validate the property restrictions ID
+    if (!id) {
+      return res.status(400).send({ error: "Property restrictions ID is required" });
+    }
+
+    // Find and update the property restrictions by ID
+    const updatedPropertyRestrictions = await PropertyRestrictions.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no property restrictions are found, return 404
+    if (!updatedPropertyRestrictions) {
+      return res.status(404).send({ error: "Property restrictions not found" });
+    }
+
+    // Respond with the updated property restrictions
+    res.status(200).send(updatedPropertyRestrictions);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
 
   //Property commercials post api 
   propertyRouter.post("/property-commercials", async (req: Request, res: Response) => {
@@ -870,6 +1069,39 @@ propertyRouter.get("/property-commercials", async (req: Request, res: Response) 
     }
   }
 });
+//route to put the propertycommercials
+propertyRouter.put("/property-commercials/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the property commercials ID
+    if (!id) {
+      return res.status(400).send({ error: "Property commercials ID is required" });
+    }
+
+    // Find and update the property commercials by ID
+    const updatedPropertyCommercials = await PropertyCommercials.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no property commercials are found, return 404
+    if (!updatedPropertyCommercials) {
+      return res.status(404).send({ error: "Property commercials not found" });
+    }
+
+    // Respond with the updated property commercials
+    res.status(200).send(updatedPropertyCommercials);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
 
   // Route to create new property availability
 propertyRouter.post("/property-availability", async (req: Request, res: Response) => {
@@ -902,6 +1134,7 @@ propertyRouter.post("/property-availability", async (req: Request, res: Response
     }
   }
 });
+
 //Get function with property id for availlability 
 propertyRouter.get("/:propertyId/availability", async (req: Request, res: Response) => {
   try {
@@ -1039,4 +1272,38 @@ propertyRouter.get("/property-availability", async (req: Request, res: Response)
     }
   }
 });
+//route to put the propertyavailability
+propertyRouter.put("/property-availability/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    // Validate the property availability ID
+    if (!id) {
+      return res.status(400).send({ error: "Property availability ID is required" });
+    }
+
+    // Find and update the property availability by ID
+    const updatedPropertyAvailability = await PropertyAvailability.findByIdAndUpdate(
+      id,
+      req.body, // Updates from the request body
+      { new: true, runValidators: true } // Return the updated document and validate fields
+    ).populate("property", "propertyName"); // Populate propertyName from the Property model
+
+    // If no property availability is found, return 404
+    if (!updatedPropertyAvailability) {
+      return res.status(404).send({ error: "Property availability not found" });
+    }
+
+    // Respond with the updated property availability
+    res.status(200).send(updatedPropertyAvailability);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 export default propertyRouter;
