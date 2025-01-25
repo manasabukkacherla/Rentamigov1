@@ -32,7 +32,7 @@ export function SearchFilters({
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+       {/* <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Min Rent
@@ -61,7 +61,7 @@ export function SearchFilters({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Status
           </label>
-          <select
+          {/*<select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
@@ -70,7 +70,7 @@ export function SearchFilters({
             <option value="available">Available</option>
             <option value="rented">Rented</option>
           </select>
-        </div>
+        </div>*/} 
       </div>
     </div>
   );

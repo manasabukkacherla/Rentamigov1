@@ -6,7 +6,7 @@ import nodemailer from "nodemailer";
 const router = express.Router();
 
 // Configure Nodemailer
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({ 
   service: "Gmail", // Replace with your preferred service
   auth: {
     user: process.env.SMTP_USER, // Add this to your .env file

@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar } from 'lucide-react';
 
 export interface AvailabilityData {
+  _id: any;
   availableFrom: string;
 }
 
