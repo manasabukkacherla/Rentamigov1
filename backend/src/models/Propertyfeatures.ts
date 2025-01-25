@@ -14,6 +14,7 @@ interface IPropertyFeatures extends Document {
   builtupArea: number; // in sq ft
   carpetArea: number; // in sq ft
   propertyAge: string; // Age of the property
+  propertyDescription: string; // Detailed description of the property
   createdAt: Date;
 }
 
@@ -27,7 +28,6 @@ const PropertyFeaturesSchema = new Schema<IPropertyFeatures>(
     },
     propertyName: {
       type: String,
-      required: false, // This will be populated dynamically
       trim: true,
     },
     bedrooms: {
@@ -87,6 +87,13 @@ const PropertyFeaturesSchema = new Schema<IPropertyFeatures>(
       type: String,
       required: [true, "Property age is required"],
       enum: ["<5 Years", "5-10 Years", ">10 Years"],
+    },
+    propertyDescription: {
+      type: String,
+      required: [true, "Property description is required"],
+      trim: true,
+      minlength: [10, "Description must be at least 10 characters long"],
+      maxlength: [1000, "Description cannot exceed 1000 characters"],
     },
     createdAt: {
       type: Date,

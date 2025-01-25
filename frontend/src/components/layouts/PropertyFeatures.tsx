@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bed, Bath, Home, Building2, Warehouse, Clock } from 'lucide-react';
+import { Bed, Bath, Home, Building2, Warehouse, Clock, FileText } from 'lucide-react';
 import { InputField } from './InputField';
 
 export interface FeaturesData {
@@ -13,6 +13,7 @@ export interface FeaturesData {
   builtupArea: string;
   carpetArea: string;
   propertyAge: string;
+  propertyDescription: string; // New field for property description
 }
 
 interface PropertyFeaturesProps {
@@ -40,7 +41,7 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
       ...prev,
       extraRooms: prev.extraRooms.includes(room)
         ? prev.extraRooms.filter(r => r !== room)
-        : [...prev.extraRooms, room]
+        : [...prev.extraRooms, room],
     }));
   };
 
@@ -165,6 +166,21 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Property Description */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          <FileText className="inline-block w-4 h-4 mr-2" />
+          Property Description
+        </label>
+        <textarea
+          value={featuresData.propertyDescription}
+          onChange={(e) => setFeaturesData(prev => ({ ...prev, propertyDescription: e.target.value }))}
+          rows={4}
+          placeholder="Enter a detailed description of the property"
+          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+        ></textarea>
       </div>
     </div>
   );

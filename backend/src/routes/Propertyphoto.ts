@@ -53,6 +53,7 @@ photosRouter.post("/upload-photos", async (req, res) => {
   try {
     const { propertyId, fileName, base64Data, fieldName } = req.body;
 
+    // Validate required fields
     if (!propertyId || !fileName || !base64Data || !fieldName) {
       return res.status(400).json({ error: "Missing required fields" });
     }
@@ -63,20 +64,31 @@ photosRouter.post("/upload-photos", async (req, res) => {
       return res.status(404).json({ error: "Property not found" });
     }
 
-    // Convert Base64 to Buffer
-    const fileBuffer = Buffer.from(base64Data.replace(/^data:image\/\w+;base64,/, ""), "base64");
-    const fileTypeMatch = base64Data.match(/^data:(image|video)\/(\w+);base64,/);
+    // Validate Base64 data
+    const base64Pattern = /^data:(image|video)\/(\w+);base64,/;
+    const fileTypeMatch = base64Data.match(base64Pattern);
     if (!fileTypeMatch) {
       return res.status(400).json({ error: "Invalid file format" });
     }
-    const fileType = fileTypeMatch[0].split("/")[1];
+    const fileType = fileTypeMatch[2]; // Extract file type (e.g., jpeg, png, mp4)
 
-    // Upload to S3
-    const fileKey = `${propertyId}/${Date.now()}-${fileName}`; // Include property ID in the path
-    const fileUrl = await uploadToS3(fileKey, fileBuffer, `image/${fileType}`);
+    // Convert Base64 to Buffer
+    const fileBuffer = Buffer.from(base64Data.replace(base64Pattern, ""), "base64");
 
-    // Update the database
+    // Define S3 file key
+    const fileKey = `${propertyId}/${Date.now()}-${fileName}`;
+    const fileUrl = await uploadToS3(fileKey, fileBuffer, `${fileTypeMatch[1]}/${fileType}`);
+
+    if (!fileUrl) {
+      return res.status(500).json({ error: "Failed to upload file to S3" });
+    }
+
+    // Prepare nested update field for MongoDB
     const updateField = { [`photos.${fieldName}`]: fileUrl };
+
+    console.log("Update Field:", updateField); // Debugging log
+
+    // Update or create PhotoUpload document in the database
     const updatedPhotoUpload = await PhotoUpload.findOneAndUpdate(
       { property: propertyId },
       {
@@ -89,6 +101,8 @@ photosRouter.post("/upload-photos", async (req, res) => {
       { new: true, upsert: true }
     );
 
+    console.log("Updated PhotoUpload:", updatedPhotoUpload); // Debugging log
+
     return res.status(200).json({
       message: "File uploaded successfully",
       fileUrl,
@@ -100,4 +114,31 @@ photosRouter.post("/upload-photos", async (req, res) => {
   }
 });
 
+//GET api for photos 
+photosRouter.get("/:propertyId/photos", async (req, res) => {
+    try {
+      const { propertyId } = req.params;
+  
+      if (!propertyId) {
+        return res.status(400).json({ error: "Property ID is required" });
+      }
+  
+      // Fetch photos for the property from the database
+      const photoData = await PhotoUpload.findOne({ property: propertyId });
+  
+      if (!photoData) {
+        return res.status(404).json({ error: "No photos found for this property" });
+      }
+  
+      // Return the photos data
+      return res.status(200).json({
+        message: "Photos fetched successfully",
+        photos: photoData.photos,
+      });
+    } catch (error) {
+      console.error("Error fetching photos:", error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+  
 export default photosRouter;
