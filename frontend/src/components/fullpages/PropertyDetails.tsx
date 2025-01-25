@@ -44,7 +44,6 @@ const Details: React.FC = () => {
       try {
         setLoading(true);
 
-        // Fetch basic property details (furnishing status, configuration, facing)
         const propertyResponse = await fetch(
           `http://localhost:8000/api/properties/propertyds/${propertyId}`
         );
@@ -53,7 +52,6 @@ const Details: React.FC = () => {
         }
         const propertyData = await propertyResponse.json();
 
-        // Fetch features (floor and area details)
         const featuresResponse = await fetch(
           `http://localhost:8000/api/properties/${propertyId}/features`
         );
@@ -62,7 +60,6 @@ const Details: React.FC = () => {
         }
         const featuresData = await featuresResponse.json();
 
-        // Fetch availability date
         const availabilityResponse = await fetch(
           `http://localhost:8000/api/properties/${propertyId}/availability`
         );
@@ -71,7 +68,6 @@ const Details: React.FC = () => {
         }
         const availabilityData = await availabilityResponse.json();
 
-        // Fetch parking and tenant preferences
         const restrictionsResponse = await fetch(
           `http://localhost:8000/api/properties/${propertyId}/restrictions`
         );
@@ -80,7 +76,6 @@ const Details: React.FC = () => {
         }
         const restrictionsData = await restrictionsResponse.json();
 
-        // Combine data into a single object
         setPropertyDetails({
           configuration: propertyData.propertyConfiguration,
           furnishingStatus: propertyData.furnishingStatus,

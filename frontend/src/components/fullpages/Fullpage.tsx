@@ -10,7 +10,7 @@ import Footer from "../landingpages/Footer";
 import PropertyRegistrationForm from "./Owner_registrationForm";
 import RentDetails from "./Rent_monthly";
 import { useParams } from "react-router-dom";
-import PropertyDetails from "./PropertyDetails";
+import Details from "./PropertyDetails";
 
 const NearbyComponent: React.FC<{ propertyId: string }> = ({ propertyId }) => {
   const descriptionRef = useRef<HTMLDivElement>(null);
@@ -133,7 +133,7 @@ const Fullpage: React.FC = () => {
             maintenanceAmount={null}
             securityDeposit={null}
           />
-          <PropertyDetails propertyId={propertyId} />
+          <Details  />
           <App propertyId={propertyId} />
           <BuildingAmenities propertyId={propertyId} />
           <NearbyComponent propertyId={propertyId} />
