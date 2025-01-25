@@ -114,7 +114,7 @@ const Fullpage: React.FC<FullpageProps> = () => {
     minWidth: "300px",
     position: "sticky",
     top: "20px",
-    marginTop: "-400px"
+    marginTop: "-100px"
   };
 
   const transportNearbyStyle: React.CSSProperties = {
@@ -140,13 +140,14 @@ const Fullpage: React.FC<FullpageProps> = () => {
     <div style={homepageStyle}>
       <HeaderWithSearchBar />
       <ImageGallery propertyId={id} />
-      <PropertyDetails style={{ marginLeft: '70px' }} />
+      
 
       <div style={layoutStyle} className="layout">
         <div style={leftColumnStyle} className="left-column">
           <div style={rentDetailsStyle}>
             <RentDetails monthlyRent={null} maintenanceAmount={null} securityDeposit={null} />
           </div>
+          <PropertyDetails style={{ marginLeft: '70px' }} />
           <App propertyId={id} />
           <BuildingAmenities propertyId={id} />
           <NearbyComponent propertyId={id} />
