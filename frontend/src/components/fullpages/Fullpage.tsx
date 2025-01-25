@@ -108,6 +108,7 @@ const Fullpage: React.FC = () => {
     minWidth: "300px",
     position: "sticky",
     top: "20px",
+    marginTop: "-400px"
   };
 
   const transportNearbyStyle: React.CSSProperties = {
@@ -138,6 +139,11 @@ const Fullpage: React.FC = () => {
       </div>
       <div style={transportNearbyStyle} className="transport-nearby">
         <TransportNearby propertyId={propertyId} />
+
+        {/*<TransportNearby />*/} 
+      </div>
+      <div>
+        <Footer />
       </div>
       <Footer />
     </div>
