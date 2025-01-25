@@ -1,51 +1,64 @@
 import { Schema, model, models, Document } from "mongoose";
 
-// Define the interface for OwnerInterestForm document
+// Define the interface for the Owner Interest Form document
 interface IOwnerInterestForm extends Document {
   name: string;
   email: string;
-  mobileNo: string;
+  contactNumber: string; // Matches `contactNumber` from the form
   propertyName: string;
   locality: string;
   city: string;
+  isVerified: boolean; // To track OTP verification status
 }
 
-// Define the OwnerInterestForm schema
+// Define the Owner Interest Form schema
 const OwnerInterestFormSchema = new Schema<IOwnerInterestForm>(
   {
     name: {
       type: String,
       required: [true, "Name is required"],
+      trim: true,
     },
     email: {
       type: String,
       required: [true, "Email is required"],
-      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
+      unique: true, // To ensure no duplicate email submissions
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // Email validation
+      trim: true,
     },
-    mobileNo: {
+    contactNumber: {
       type: String,
-      required: [true, "Mobile number is required"],
-      match: [/^\+?\d{10,}$/, "Invalid phone number format"],
+      required: [true, "Contact number is required"],
+      match: [/^\+?\d{10,}$/, "Invalid phone number format"], // Ensures valid international phone format
+      trim: true,
     },
     propertyName: {
       type: String,
       required: [true, "Property name is required"],
+      trim: true,
     },
     locality: {
       type: String,
       required: [true, "Locality is required"],
+      trim: true,
     },
     city: {
       type: String,
       required: [true, "City is required"],
+      trim: true,
+    },
+    isVerified: {
+      type: Boolean,
+      required: true,
+      default: false, // Initially not verified
     },
   },
   {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
+    timestamps: true, // Automatically add `createdAt` and `updatedAt` fields
   }
 );
 
-// Check if the model exists, if not create a new one
+// Export the model, ensuring it is not recreated if already defined
 const OwnerInterestForm =
   models.OwnerInterestForm ||
   model<IOwnerInterestForm>("OwnerInterestForm", OwnerInterestFormSchema);

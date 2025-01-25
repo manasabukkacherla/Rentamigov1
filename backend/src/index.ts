@@ -16,6 +16,11 @@ import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
 import propertyRouter from "./routes/Propertydetails";
+import subscriptionRouter from "./routes/subscriberform";
+import ownerInterestRouter from "./routes/ownerInterest";
+import ownerInterestRoutes from "./routes/ownerInterest";
+
+
 
 dotenv.config();
 
@@ -46,7 +51,9 @@ app.use("/api/employees", employeeRouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
 app.use("/api/properties", propertyRouter); // Property routes
-
+app.use("/api/forms",subscriptionRouter);
+app.use("/api/owner-interest", ownerInterestRouter)
+app.use("/api/owner-interest", ownerInterestRoutes);
 // Basic route
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Welcome to the API" });
