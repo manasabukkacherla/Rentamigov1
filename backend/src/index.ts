@@ -20,7 +20,8 @@ import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
 import ownerInterestRoutes from "./routes/ownerInterest";
 import photosRouter from "./routes/Propertyphoto";
-
+import propertyEnquiryRoutes from "./routes/propertyEnquiryRoutes";
+import enquiryRoutes from "./routes/enquiryRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -59,8 +60,8 @@ app.use("/api/forms",subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter)
 app.use("/api/owner-interest", ownerInterestRoutes);
 app.use("/api/Photos",photosRouter);
-
-
+app.use("/api/property",propertyEnquiryRoutes)
+app.use("/api/service", enquiryRoutes);
 // Basic route
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Welcome to the API" });

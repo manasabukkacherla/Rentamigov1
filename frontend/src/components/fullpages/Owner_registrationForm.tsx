@@ -24,9 +24,6 @@ export default function PropertyRegistrationForm() {
   const [otpSent, setOtpSent] = useState(false);
   const [otp, setOtp] = useState("");
   const [isVerified, setIsVerified] = useState(false);
-  const [verificationStatus, setVerificationStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,20 +32,18 @@ export default function PropertyRegistrationForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleVerify = async () => {
+  const handleSendOtp = async () => {
     setIsLoading(true);
     try {
-      const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
-
-      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/verify/start", {
+      const response = await fetch("http://localhost:8000/api/property/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: formattedNumber,
-          channel: "sms",
-          locale: "en",
+          name: formData.name,
+          email: formData.email,
+          contactNumber: formData.contactNumber,
         }),
       });
 
@@ -75,19 +70,17 @@ export default function PropertyRegistrationForm() {
     }
   };
 
-  const verifyOTP = async () => {
+  const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
-
-      const response = await fetch("https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/verify/check", {
+      const response = await fetch("http://localhost:8000/api/property/verify-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          to: formattedNumber,
-          code: otp,
+          contactNumber: formData.contactNumber,
+          otp,
         }),
       });
 
@@ -95,7 +88,6 @@ export default function PropertyRegistrationForm() {
         throw new Error("Invalid OTP");
       }
 
-      setVerificationStatus("success");
       setIsVerified(true);
       toast({
         title: "Success",
@@ -104,7 +96,6 @@ export default function PropertyRegistrationForm() {
       });
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      setVerificationStatus("error");
       toast({
         variant: "destructive",
         title: "Error",
@@ -118,23 +109,29 @@ export default function PropertyRegistrationForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formattedNumber = `+91${formData.contactNumber.replace(/\D/g, "")}`;
+
+    if (!isVerified) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please verify your phone number before submission.",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      const response = await fetch(
-        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/owner-intrst-form",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: formData.name,
-            email: formData.email,
-            mobileNo: formattedNumber,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:8000/api/property/submit-form", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          isVerified: true,
+        }),
+      });
 
       if (!response.ok) throw new Error("Failed to submit form");
 
@@ -143,6 +140,9 @@ export default function PropertyRegistrationForm() {
         description: "Your details have been successfully submitted.",
         action: <ToastAction altText="Close">Close</ToastAction>,
       });
+      setFormData({ name: "", email: "", contactNumber: "" });
+      setOtpSent(false);
+      setIsVerified(false);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
@@ -151,16 +151,16 @@ export default function PropertyRegistrationForm() {
         description: "Failed to submit form. Please try again.",
         action: <ToastAction altText="Try again">Try again</ToastAction>,
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(true);
   };
 
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-4 mt-16">
       <Card className="w-full max-w-[600px]">
         <CardHeader>
-          <CardTitle>Property Owner Registration</CardTitle>
+          <CardTitle>Property Enquiry Form</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -185,7 +185,7 @@ export default function PropertyRegistrationForm() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="hover:bg-blue-100 focus:ring-2 focus:ring-blue-500"
+                  className="hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="space-y-2">
@@ -194,25 +194,20 @@ export default function PropertyRegistrationForm() {
                   <Input
                     id="contactNumber"
                     name="contactNumber"
-                    type="tel"
                     value={formData.contactNumber}
                     onChange={handleInputChange}
-                    required
                     disabled={otpSent && isVerified}
+                    required
                     className="flex-1 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
                   />
                   {!isVerified && (
                     <Button
                       type="button"
-                      onClick={handleVerify}
+                      onClick={handleSendOtp}
                       disabled={isLoading || otpSent}
                       className="w-[120px]"
                     >
-                      {isLoading ? (
-                        <LoaderIcon className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Verify"
-                      )}
+                      {isLoading ? <LoaderIcon className="h-4 w-4 animate-spin" /> : "Send OTP"}
                     </Button>
                   )}
                 </div>
@@ -231,7 +226,7 @@ export default function PropertyRegistrationForm() {
                     />
                     <Button
                       type="button"
-                      onClick={verifyOTP}
+                      onClick={handleVerifyOtp}
                       disabled={isLoading}
                       className="w-[120px]"
                     >
@@ -245,11 +240,7 @@ export default function PropertyRegistrationForm() {
                 </div>
               )}
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isSubmitting || !isVerified}
-              >
+              <Button type="submit" className="w-full" disabled={isSubmitting || !isVerified}>
                 {isSubmitting ? (
                   <LoaderIcon className="h-4 w-4 animate-spin mr-2" />
                 ) : null}
