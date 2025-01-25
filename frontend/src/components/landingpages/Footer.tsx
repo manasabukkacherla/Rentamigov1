@@ -1,9 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import rentamigologo from '/images/rentamigologo.png';
-//
+
 const Footer: React.FC = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8000/api/forms/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email }),
+      });
+
+      if (response.ok) {
+        setMessage("Subscription successful! Check your email for confirmation.");
+        setName("");
+        setEmail("");
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || "Failed to subscribe");
+      }
+    } catch (error) {
+      setMessage("An error occurred. Please try again.");
+      console.error(error);
+    }
+  };
+
   const styles = {
     footer: {
       backgroundColor: "black",
@@ -47,7 +74,7 @@ const Footer: React.FC = () => {
       display: "flex",
       justifyContent: "space-evenly",
       alignItems: "center",
-      marginTop: "-5px",
+      marginTop: "10px",
       fontSize: "14px",
       gap: "15px", // Adjust spacing between numbers
       marginRight: "138px",
@@ -92,7 +119,7 @@ const Footer: React.FC = () => {
       color: "white",
       border: "1px solid #555",
       padding: "10px",
-      margin: "10px 0", // Added margin for padding effect
+      margin: "10px 0",
       borderRadius: "5px",
       width: "95%",
       marginLeft: "auto",
@@ -118,7 +145,6 @@ const Footer: React.FC = () => {
       fontWeight: "bold" as "bold",
       transition: "background-color 0.3s, color 0.3s, border-color 0.3s",
       alignSelf: "center",
-      marginTop: "auto", // Pushes the button to the bottom
     },
     formButtonHover: {
       backgroundColor: "black",
@@ -148,7 +174,7 @@ const Footer: React.FC = () => {
               className="mb-3"
               style={{ width: "100px" }}
             />
-            <p style={{ marginLeft: "15px" }}>
+            <p>
               170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru, <br />
               Karnataka, 560068
             </p>
@@ -216,7 +242,6 @@ const Footer: React.FC = () => {
               >
                 <i className="fab fa-linkedin"></i>
               </a>
-
             </div>
           </div>
 
@@ -228,12 +253,8 @@ const Footer: React.FC = () => {
                 <a
                   href="#"
                   style={styles.link}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
-                  }}
+                  onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
+                  onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
                 >
                   Contact Us
                 </a>
@@ -242,12 +263,8 @@ const Footer: React.FC = () => {
                 <a
                   href="#"
                   style={styles.link}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
-                  }}
+                  onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
+                  onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
                 >
                   About
                 </a>
@@ -256,12 +273,8 @@ const Footer: React.FC = () => {
                 <a
                   href="#"
                   style={styles.link}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
-                  }}
+                  onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
+                  onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
                 >
                   Services
                 </a>
@@ -270,12 +283,8 @@ const Footer: React.FC = () => {
                 <a
                   href="#"
                   style={styles.link}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
-                  }}
+                  onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
+                  onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
                 >
                   Privacy Policy
                 </a>
@@ -284,12 +293,8 @@ const Footer: React.FC = () => {
                 <a
                   href="#"
                   style={styles.link}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.linkHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.link);
-                  }}
+                  onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
+                  onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
                 >
                   Terms of Service
                 </a>
@@ -297,60 +302,37 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Section 3: Form */}
+          {/* Section 3: Subscription Form */}
           <div className="col-md-4">
             <div style={styles.formSection}>
               <h2>Subscribe With Us</h2>
-              <form style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", height: "100%" }}>
                 <input
                   type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   style={styles.formInput}
                   placeholder="Name"
                   required
-                  onFocus={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInputFocus);
-                  }}
-                  onBlur={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInput);
-                  }}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInputHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInput);
-                  }}
                 />
                 <input
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   style={styles.formInput}
                   placeholder="Email"
                   required
-                  onFocus={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInputFocus);
-                  }}
-                  onBlur={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInput);
-                  }}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInputHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formInput);
-                  }}
                 />
                 <button
                   type="submit"
                   style={styles.formButton}
-                  onMouseOver={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formButtonHover);
-                  }}
-                  onMouseOut={(e) => {
-                    Object.assign(e.currentTarget.style, styles.formButton);
-                  }}
+                  onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.formButtonHover)}
+                  onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.formButton)}
                 >
                   Subscribe
                 </button>
               </form>
+              {message && <p style={{ color: "white", textAlign: "center", marginTop: "10px" }}>{message}</p>}
             </div>
           </div>
         </div>
