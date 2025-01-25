@@ -18,14 +18,14 @@ interface Property {
 const Tenanthome: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [, setSearchQuery] = useState<string>("");
 
   // Fetch properties from the API
   useEffect(() => {
     const fetchProperties = async () => {
       try {
         const response = await axios.get(
-          "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties"
+          "http://localhost:8000/api/properties/property"
         );
 
         const formattedProperties = response.data.map((property: any) => ({

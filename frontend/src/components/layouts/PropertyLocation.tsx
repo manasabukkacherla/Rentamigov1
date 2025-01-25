@@ -3,6 +3,7 @@ import { Home, Building, MapPin, Map, Navigation, MapPinned, Map as MapIcon, Has
 import { InputField } from './InputField';
 
 export interface LocationData {
+  propertyName: ReactNode;
 
   flatNo: string;
   addressLine1: string;

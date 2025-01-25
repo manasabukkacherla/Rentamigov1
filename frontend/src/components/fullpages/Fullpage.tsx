@@ -12,15 +12,10 @@ import RentDetails from "./Rent_monthly";
 import { useParams } from "react-router-dom";
 import PropertyDetails from "./PropertyDetails";
 
-interface FullpageProps {
-  propertyId: string;
-}
-const NearbyComponent: React.FC = () => {
+const NearbyComponent: React.FC<{ propertyId: string }> = ({ propertyId }) => {
   const descriptionRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
-  const [descriptionHeight, setDescriptionHeight] = useState<
-    number | undefined
-  >(undefined);
+  const [descriptionHeight, setDescriptionHeight] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const updateHeight = () => {
@@ -71,19 +66,18 @@ const NearbyComponent: React.FC = () => {
   return (
     <div style={containerStyle} className="description-map-container">
       <div style={descriptionStyle} ref={descriptionRef}>
-        <Description propertyId={""} />
+        <Description propertyId={propertyId} />
       </div>
       <div style={mapStyle} ref={mapRef}>
-        <MapComponent />
+        <MapComponent propertyId={propertyId} />
       </div>
     </div>
   );
 };
 
-const Fullpage: React.FC<FullpageProps> = () => {
-  const { id } = useParams<{ id: string }>();
-  if (!id) return <div>Property not found</div>;
-  const bookingFormRef = useRef<HTMLDivElement>(null);
+const Fullpage: React.FC = () => {
+  const { id: propertyId } = useParams<{ id: string }>();
+  if (!propertyId) return <div>Property not found</div>;
 
   const homepageStyle: React.CSSProperties = {
     marginTop: "50px",
@@ -125,79 +119,27 @@ const Fullpage: React.FC<FullpageProps> = () => {
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   };
 
-  const bookingFormStyle: React.CSSProperties = {
-    position: "relative",
-    marginTop: "50px",
-  };
-
-  const rentDetailsStyle: React.CSSProperties = {
-    marginTop: "-70px", // Added margin bottom
-    //marginLeft: "20px",
-  };
-
   return (
     <div style={homepageStyle}>
       <HeaderWithSearchBar />
-      <ImageGallery propertyId={id} />
-      <PropertyDetails style={{ marginLeft: '70px' }} />
+      <ImageGallery propertyId={propertyId} />
+      <RentDetails propertyId={propertyId} monthlyRent={null} maintenanceAmount={null} securityDeposit={null} />
 
       <div style={layoutStyle} className="layout">
         <div style={leftColumnStyle} className="left-column">
-          <div style={rentDetailsStyle}>
-            <RentDetails monthlyRent={null} maintenanceAmount={null} securityDeposit={null} />
-          </div>
-          <App propertyId={id} />
-          <BuildingAmenities propertyId={id} />
-          <NearbyComponent propertyId={id} />
+        <PropertyDetails propertyId={propertyId} style={{ marginLeft: "70px" }} />
+                    <App propertyId={propertyId} />
+          <BuildingAmenities propertyId={propertyId} />
+          <NearbyComponent propertyId={propertyId} />
         </div>
         <div style={rightColumnStyle} className="right-column">
-          <PropertyRegistrationForm  />
+          <PropertyRegistrationForm propertyId={propertyId} />
         </div>
       </div>
       <div style={transportNearbyStyle} className="transport-nearby">
-        <TransportNearby />
+        <TransportNearby propertyId={propertyId} />
       </div>
-      <div>
-        <Footer />
-      </div>
-      <style>
-        {`
-          @media (max-width: 1200px) {
-            .layout {
-              gap: 15px;
-            }
-          }
-
-          @media (max-width: 992px) {
-            .layout {
-              flex-direction: column;
-            }
-            .left-column, .right-column {
-              width: 100%;
-            }
-            .description-map-container {
-              flex-direction: column;
-              gap: 10px;
-            }
-          }
-
-          @media (max-width: 768px) {
-            .transport-nearby {
-              width: 100%;
-              margin-top: 15px;
-            }
-          }
-
-          @media (max-width: 576px) {
-            .layout {
-              gap: 10px;
-            }
-            .description-map-container {
-              gap: 5px;
-            }
-          }
-        `}
-      </style>
+      <Footer />
     </div>
   );
 };
