@@ -300,6 +300,7 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
       builtupArea,
       carpetArea,
       propertyAge,
+      propertyDescription,
     } = req.body;
 
     // Validate property reference
@@ -322,6 +323,7 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
       builtupArea,
       carpetArea,
       propertyAge,
+      propertyDescription,
     });
 
     // Save to the database
@@ -339,34 +341,34 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
 });
 
 //Route get details with property id
-propertyRouter.get("/:propertyId/features", async (req: Request, res: Response) => {
-  try {
-    const { propertyId } = req.params;
+  propertyRouter.get("/:propertyId/features", async (req: Request, res: Response) => {
+    try {
+      const { propertyId } = req.params;
 
-    // Validate propertyId
-    if (!propertyId) {
-      return res.status(400).send({ error: "Property ID is required" });
+      // Validate propertyId
+      if (!propertyId) {
+        return res.status(400).send({ error: "Property ID is required" });
+      }
+
+      // Find features associated with the given property ID
+      const features = await PropertyFeatures.find({ property: propertyId });
+
+      // If no features are found
+      if (!features || features.length === 0) {
+        return res.status(404).send({ error: "No features found for this property" });
+      }
+
+      // Return the features
+      res.status(200).send(features);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(500).send({ error: error.message });
+      } else {
+        res.status(500).send({ error: "An unknown error occurred." });
+      }
     }
-
-    // Find features associated with the given property ID
-    const features = await PropertyFeatures.find({ property: propertyId });
-
-    // If no features are found
-    if (!features || features.length === 0) {
-      return res.status(404).send({ error: "No features found for this property" });
-    }
-
-    // Return the features
-    res.status(200).send(features);
-  } catch (error) {
-    // Handle errors
-    if (error instanceof Error) {
-      res.status(500).send({ error: error.message });
-    } else {
-      res.status(500).send({ error: "An unknown error occurred." });
-    }
-  }
-});
+  });
 propertyRouter.get("/property-features/:featuresId", async (req: Request, res: Response) => {
   try {
     const { featuresId } = req.params;
@@ -989,68 +991,7 @@ propertyRouter.get("/property-commercials", async (req: Request, res: Response) 
     const query: any = {};
     if (property) query.property = property;
     if (_id) query._id = _id;
-
-
-  //Rpute to get commercials with property id 
-  propertyRouter.get("/:propertyId/commercials", async (req: Request, res: Response) => {
-    try {
-      const { propertyId } = req.params;
-  
-      // Validate propertyId
-      if (!propertyId) {
-        return res.status(400).send({ error: "Property ID is required" });
-      }
-  
-      // Find property commercials associated with the given property ID
-      const commercials = await PropertyCommercials.find({ property: propertyId });
-  
-      // If no commercials are found
-      if (!commercials || commercials.length === 0) {
-        return res.status(404).send({ error: "No commercials found for this property" });
-      }
-  
-      // Return the commercials
-      res.status(200).send(commercials);
-    } catch (error) {
-      // Handle errors
-      if (error instanceof Error) {
-        res.status(500).send({ error: error.message });
-      } else {
-        res.status(500).send({ error: "An unknown error occurred." });
-      }
-    }
-  });
-  propertyRouter.get("/property-commercials/:commercialsId", async (req: Request, res: Response) => {
-    try {
-      const { commercialsId } = req.params;
-  
-      // Validate commercialsId
-      if (!commercialsId) {
-        return res.status(400).send({ error: "Commercials ID is required" });
-      }
-  
-      // Find the commercials document by ID
-      const commercials = await PropertyCommercials.findById(commercialsId);
-  
-      // If the commercials document is not found
-      if (!commercials) {
-        return res.status(404).send({ error: "Commercials not found" });
-      }
-  
-      // Return the commercials document
-      res.status(200).send(commercials);
-    } catch (error) {
-      // Handle errors
-      if (error instanceof Error) {
-        res.status(500).send({ error: error.message });
-      } else {
-        res.status(500).send({ error: "An unknown error occurred." });
-      }
-    }
-  });
-    
-
-    // Fetch property commercials from the database
+       // Fetch property commercials from the database
     const propertyCommercials = await PropertyCommercials.find(query)
       .populate("property", "propertyName") // Populate propertyName from the Property model
       .exec();
@@ -1060,6 +1001,62 @@ propertyRouter.get("/property-commercials", async (req: Request, res: Response) 
     }
 
     res.status(200).send(propertyCommercials);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+propertyRouter.get("/:propertyId/commercials", async (req: Request, res: Response) => {
+  try {
+    const { propertyId } = req.params;
+
+    // Validate propertyId
+    if (!propertyId) {
+      return res.status(400).send({ error: "Property ID is required" });
+    }
+
+    // Find property commercials associated with the given property ID
+    const commercials = await PropertyCommercials.find({ property: propertyId });
+
+    // If no commercials are found
+    if (!commercials || commercials.length === 0) {
+      return res.status(404).send({ error: "No commercials found for this property" });
+    }
+
+    // Return the commercials
+    res.status(200).send(commercials);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).send({ error: error.message });
+    } else {
+      res.status(500).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+propertyRouter.get("/property-commercials/:commercialsId", async (req: Request, res: Response) => {
+  try {
+    const { commercialsId } = req.params;
+
+    // Validate commercialsId
+    if (!commercialsId) {
+      return res.status(400).send({ error: "Commercials ID is required" });
+    }
+
+    // Find the commercials document by ID
+    const commercials = await PropertyCommercials.findById(commercialsId);
+
+    // If the commercials document is not found
+    if (!commercials) {
+      return res.status(404).send({ error: "Commercials not found" });
+    }
+
+    // Return the commercials document
+    res.status(200).send(commercials);
   } catch (error) {
     // Handle errors
     if (error instanceof Error) {

@@ -42,6 +42,7 @@ function Base() {
   });
 
   const [locationData, setLocationData] = useState<LocationData>({
+    propertyName: '',
     flatNo: '',
     addressLine1: '',
     addressLine2: '',
@@ -63,7 +64,8 @@ function Base() {
     superBuiltupArea: '',
     builtupArea: '',
     carpetArea: '',
-    propertyAge: ''
+    propertyAge: '',
+    propertyDescription:'',
   });
 
   const [amenitiesData, setAmenitiesData] = useState<AmenitiesData>({
@@ -104,26 +106,15 @@ function Base() {
     livingRoom: null,
     kitchen: null,
     diningRoom: null,
-    bedroom1: null,
-    bedroom2: null,
-    bedroom3: null,
-    bedroom4: null,
-    bathroom1: null,
-    bathroom2: null,
-    bathroom3: null,
-    bathroom4: null,
-    balcony1: null,
-    balcony2: null,
-    balcony3: null,
-    balcony4: null,
-    studyRoom: null,
-    pujaRoom: null,
-    theaterRoom: null,
-    gymRoom: null,
     utilityArea: null,
     others: null,
-    propertyVideo: null
+    propertyVideo: null,
+    bedrooms: {}, // Object with dynamic keys for bedroom images
+    bathrooms: {}, // Object with dynamic keys for bathroom images
+    balconies: {}, // Object with dynamic keys for balcony images
+    extraRooms: {}, // Object with dynamic keys for extra room images
   });
+  
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -253,7 +244,9 @@ function Base() {
   const renderStepContent = () => {
     switch (activeStep) {
       case 'form':
-        return <PropertyForm formData={formData} setFormData={setFormData} />;
+        return <PropertyForm formData={formData} setFormData={setFormData} onSubmit={function (): void {
+          throw new Error('Function not implemented.');
+        } } />;
       case 'location':
         return <PropertyLocation locationData={locationData} setLocationData={setLocationData} />;
       case 'features':
@@ -414,8 +407,7 @@ function Base() {
           restrictionsData={restrictionsData}
           commercialsData={commercialsData}
           availabilityData={availabilityData}
-          photoData={photoData}
-        />
+          photoData={photoData}      />
       )}
     </div>
   );

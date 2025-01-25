@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 interface DescriptionProps {
-  propertyId: string; // Accepting propertyId as a prop
+  propertyId: string; // The parent component provides this prop
 }
 
 const Description: React.FC<DescriptionProps> = ({ propertyId }) => {
@@ -13,12 +13,19 @@ const Description: React.FC<DescriptionProps> = ({ propertyId }) => {
   useEffect(() => {
     const fetchDescription = async () => {
       try {
+        setLoading(true);
+        setError(null);
+
         const response = await axios.get(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}`
+          `http://localhost:8000/api/properties/${propertyId}/features`
         );
-        setDescription(response.data.propertyDescription); // Assuming `propertyDescription` is the field name
+
+        // Extract propertyDescription from the first object in the response array
+        const propertyDescription = response.data[0]?.propertyDescription || null;
+
+        setDescription(propertyDescription);
       } catch (err: any) {
-        setError(err.response?.data?.error || err.message);
+        setError(err.response?.data?.error || "Failed to fetch property description.");
       } finally {
         setLoading(false);
       }
@@ -34,11 +41,11 @@ const Description: React.FC<DescriptionProps> = ({ propertyId }) => {
   }
 
   if (error) {
-    return <div style={{ color: 'red' }}>Error: {error}</div>;
+    return <div style={{ color: "red" }}>Error: {error}</div>;
   }
 
   return (
-    <div style={{ fontFamily: 'Arial, sans-serif', lineHeight: '1.6', color: '#333' }}>
+    <div style={{ fontFamily: "Arial, sans-serif", lineHeight: "1.6", color: "#333" }}>
       <h2>About the Property</h2>
       {description ? (
         <p>

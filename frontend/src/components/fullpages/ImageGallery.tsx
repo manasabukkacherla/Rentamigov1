@@ -1,74 +1,102 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
 
-const ImageGallery: React.FC = ({ propertyId }) => {
+interface ImageGalleryProps {
+  propertyId: string;
+}
+
+const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
   const [images, setImages] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
   const [propertyDetails, setPropertyDetails] = useState<{
     propertyName: string;
     locality: string;
-    city: string;
+    area: string;
+    address: string; 
   }>({
     propertyName: "",
     locality: "",
-    city: "",
+    area: "",
+    address: "",
   });
 
-  // Fetch property details
+  const placeholderImage = "https://via.placeholder.com/800x400?text=No+Image";
+
+  // Fetch property details (name, locality, area)
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
-        const response = await fetch(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}`
-        );
+        const response = await fetch(`http://localhost:8000/api/properties/${propertyId}/locations`);
         if (!response.ok) {
           throw new Error("Failed to fetch property details");
         }
         const data = await response.json();
-
-        setPropertyDetails({
-          propertyName: data.propertyName || "Unknown Property",
-          locality: data.locality || "Unknown Locality",
-          city: data.area || "Unknown City",
-        });
+  
+        if (data.length > 0) {
+          const location = data[0]; // Assuming the first location is relevant
+          setPropertyDetails({
+            propertyName: location.propertyName || "Unknown Property",
+            locality: location.locality || "Unknown Locality",
+            area: location.area || "Unknown Area",
+            address: `${location.flatNo || ""}, ${location.addressLine1 || ""}, ${
+              location.addressLine2 || ""
+            }, ${location.addressLine3 || ""}`.replace(/, ,/g, ",").replace(/, $/, ""), // Format address properly
+          });
+        }
       } catch (error) {
         console.error("Error fetching property details:", error);
+        setPropertyDetails({
+          propertyName: "Unknown Property",
+          locality: "Unknown Locality",
+          area: "Unknown Area",
+          address: "Unknown Address",
+        });
       }
     };
-
+  
     fetchPropertyDetails();
   }, [propertyId]);
+  
 
-  // Fetching photos
+  // Fetch property photos
   useEffect(() => {
     const fetchImages = async () => {
-      const dummyImages = Array.from(
-        { length: 20 },
-        (_, i) => `https://via.placeholder.com/800x400?text=Image+${i + 1}`
-      );
-      setImages(dummyImages);
-
       try {
-        const response = await fetch(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${propertyId}/photos`
-        );
+        const response = await fetch(`http://localhost:8000/api/photos/${propertyId}/photos`);
         if (!response.ok) {
-          throw new Error("Failed to fetch images");
+          throw new Error("Failed to fetch property photos");
         }
         const data = await response.json();
-        setImages(data.exteriorView || []);
+        const photos = data.photos;
+
+        const allImages = [
+          photos.coverImage,
+          photos.exteriorView,
+          photos.livingRoom,
+          photos.kitchen,
+          photos.diningRoom,
+          photos.utilityArea,
+          photos.others,
+          ...Object.values(photos.bedrooms || {}),
+          ...Object.values(photos.bathrooms || {}),
+          ...Object.values(photos.balconies || {}),
+          ...Object.values(photos.extraRooms || {}),
+        ].filter(Boolean); // Remove null or undefined images
+
+        setImages(allImages.length > 0 ? allImages : Array(10).fill(placeholderImage));
       } catch (error) {
-        console.error("Error fetching images:", error);
+        console.error("Error fetching property photos:", error);
+        setImages(Array(10).fill(placeholderImage));
       }
     };
 
     fetchImages();
-  }, []);
+  }, [propertyId]);
 
+  // Handle resizing for mobile view
   useEffect(() => {
     const handleResize = () => {
       setIsMobileView(window.innerWidth <= 768);
@@ -98,31 +126,26 @@ const ImageGallery: React.FC = ({ propertyId }) => {
     setIsModalOpen(false);
   };
 
-  const toggleExpand = () => {
-    setIsExpanded(!isExpanded);
-  };
-
   return (
     <div style={styles.mainContainer}>
       {/* Property Info Section */}
       <div style={styles.propertyInfo}>
         <h2 style={styles.propertyName}>{propertyDetails.propertyName}</h2>
         <p style={styles.propertyDetails}>
-          {propertyDetails.locality}, {propertyDetails.city}
+          {propertyDetails.locality}, {propertyDetails.area}
         </p>
+        <p style={styles.propertyDetails}>{propertyDetails.address}</p>
       </div>
 
       <div style={isMobileView ? styles.mobileContainer : styles.container}>
         {/* Carousel Section */}
         <div style={styles.carouselContainer}>
           {images.length > 0 && (
-            <>
-              <img
-                src={images[currentIndex]}
-                alt={`Carousel Image ${currentIndex + 1}`}
-                style={styles.carouselImage}
-              />
-            </>
+            <img
+              src={images[currentIndex]}
+              alt={`Carousel Image ${currentIndex + 1}`}
+              style={styles.carouselImage}
+            />
           )}
           <button
             style={{ ...styles.navButton, ...styles.prevButton }}
@@ -140,37 +163,28 @@ const ImageGallery: React.FC = ({ propertyId }) => {
 
         {/* Thumbnails Section */}
         {!isMobileView && (
-          <div style={styles.rightContainer}>
-            <div style={styles.thumbnailGrid}>
-              {images.slice(0, 10).map((image, index) => (
-                <div style={styles.thumbnailWrapper} key={index}>
-                  <img
-                    src={image}
-                    alt={`Thumbnail ${index}`}
-                    style={styles.thumbnail}
-                    onClick={() => setCurrentIndex(index)}
-                  />
-                  {index === 8 && (
-                    <button
-                      style={styles.overlayButton}
-                      onClick={() => openModal(0)}
-                    >
-                      View All
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
+          <div style={styles.thumbnailGrid}>
+            {images.slice(0, 10).map((image, index) => (
+              <div key={index} style={styles.thumbnailWrapper}>
+                <img
+                  src={image}
+                  alt={`Thumbnail ${index}`}
+                  style={styles.thumbnail}
+                  onClick={() => setCurrentIndex(index)}
+                />
+                {index === 9 && images.length > 10 && (
+                  <button
+                    style={styles.viewAllButton}
+                    onClick={() => openModal(0)}
+                  >
+                    View All
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </div>
-
-      {/* View All Button for Mobile */}
-      {isMobileView && (
-        <button style={styles.viewAllButtonMobile} onClick={() => openModal(0)}>
-          View All
-        </button>
-      )}
 
       {/* Modal for Fullscreen Carousel */}
       <Modal
@@ -216,6 +230,7 @@ const styles = {
     display: "flex",
     flexDirection: "column" as const,
     gap: "20px",
+    padding: "20px",
   },
   propertyInfo: {
     textAlign: "left" as const,
@@ -229,28 +244,24 @@ const styles = {
     fontSize: "20px",
     color: "#666",
   },
-
   container: {
     display: "flex",
     gap: "20px",
-    padding: "20px",
   },
   mobileContainer: {
     display: "flex",
     flexDirection: "column" as const,
     gap: "20px",
-    padding: "10px",
-    alignItems: "center",
   },
   carouselContainer: {
     position: "relative" as const,
-    flex: 3,
+    flex: 1,
     borderRadius: "10px",
     overflow: "hidden",
   },
   carouselImage: {
     width: "100%",
-    height: "100%",
+    height: "300px",
     objectFit: "cover" as const,
   },
   navButton: {
@@ -270,30 +281,22 @@ const styles = {
   nextButton: {
     right: "10px",
   },
-  rightContainer: {
-    display: "flex",
-    flexDirection: "column" as const,
-    alignItems: "center",
-    flex: 1,
-    gap: "10px",
-  },
   thumbnailGrid: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(5, 1fr)",
     gap: "10px",
-    width: "100%",
   },
   thumbnailWrapper: {
     position: "relative" as const,
   },
   thumbnail: {
     width: "100%",
-    height: "110px",
+    height: "80px",
     objectFit: "cover" as const,
     borderRadius: "5px",
     cursor: "pointer",
   },
-  overlayButton: {
+  viewAllButton: {
     position: "absolute" as const,
     top: 0,
     left: 0,
@@ -306,19 +309,6 @@ const styles = {
     padding: "10px",
     borderRadius: "5px",
     cursor: "pointer",
-    fontSize: "14px",
-    textAlign: "center" as const,
-  },
-  viewAllButtonMobile: {
-    backgroundColor: "#007bff",
-    color: "white",
-    border: "none",
-    padding: "10px 20px",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "16px",
-    alignSelf: "center",
-    marginTop: "20px",
   },
   modal: {
     position: "absolute" as const,

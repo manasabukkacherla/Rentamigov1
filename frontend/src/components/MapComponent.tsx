@@ -1,62 +1,94 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   GoogleMap,
   LoadScript,
   Marker,
   InfoWindow,
 } from "@react-google-maps/api";
+import axios from "axios";
 
-const MapComponent = () => {
-  const [location] = useState({
-    lat: 37.4239163, // Default to Google's coordinates
-    lng: -122.0947209,
-  });
+interface Location {
+  latitude: string;
+  longitude: string;
+  locality: string;
+  area?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  addressLine3?: string;
+}
+
+interface MapComponentProps {
+  propertyId: string;
+}
+
+const MapComponent: React.FC<MapComponentProps> = ({ propertyId }) => {
+  const [location, setLocation] = useState<Location | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
 
   const containerStyle = {
     width: "100%",
-    height: "400px",
+    height: "600px", // Increased height
   };
 
-  // Function to create marker
-  const createMarker = (map: google.maps.Map) => {
-    if (marker) {
-      marker.setMap(null); // Remove existing marker
-    }
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/properties/${propertyId}/locations`
+        );
+        if (response.data && response.data.length > 0) {
+          // Assuming the API returns an array of locations, pick the first one
+          const locationData = response.data[0];
+          setLocation(locationData);
+        } else {
+          console.error("No locations found for the given property.");
+        }
+      } catch (error) {
+        console.error("Error fetching location data:", error);
+      }
+    };
 
-    const newMarker = new google.maps.Marker({
-      position: location,
-      map: map,
-      animation: google.maps.Animation.DROP,
-      title: "Click for location details",
-    });
-
-    newMarker.addListener("click", () => {
-      setIsOpen(!isOpen);
-    });
-
-    setMarker(newMarker);
-  };
+    fetchLocation();
+  }, [propertyId]);
 
   return (
     <div>
       <LoadScript googleMapsApiKey="AIzaSyAtamavZgGRRKvXmK8L5DGXCPqYuGj5_Qw">
         <GoogleMap
           mapContainerStyle={containerStyle}
-          center={location}
+          center={
+            location
+              ? {
+                  lat: parseFloat(location.latitude),
+                  lng: parseFloat(location.longitude),
+                }
+              : { lat: 0, lng: 0 } // Default center if no location is available
+          }
           zoom={15}
-          onLoad={(map) => createMarker(map)}
         >
-          {isOpen && marker && (
+          {location && (
+            <Marker
+              position={{
+                lat: parseFloat(location.latitude),
+                lng: parseFloat(location.longitude),
+              }}
+              onClick={() => setIsOpen(!isOpen)}
+              animation={google.maps.Animation.DROP}
+            />
+          )}
+          {isOpen && location && (
             <InfoWindow
-              position={location}
+              position={{
+                lat: parseFloat(location.latitude),
+                lng: parseFloat(location.longitude),
+              }}
               onCloseClick={() => setIsOpen(false)}
             >
               <div>
-                <h3>Location Details</h3>
-                <p>Latitude: {location.lat}</p>
-                <p>Longitude: {location.lng}</p>
+                <h3>{location.locality}</h3>
+                <p>{location.addressLine1}</p>
+                {location.addressLine2 && <p>{location.addressLine2}</p>}
+                {location.addressLine3 && <p>{location.addressLine3}</p>}
               </div>
             </InfoWindow>
           )}

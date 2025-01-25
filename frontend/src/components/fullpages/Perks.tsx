@@ -8,48 +8,57 @@ interface Perk {
   icon: string; // URL or class name for the icon
 }
 
-// Define props for the component
+// Define props for the Perks component
 interface PerksProps {
   perks: Perk[]; // List of amenities
 }
-// Add interface for App component props
+
+// Define props for the App component
 interface AppProps {
   propertyId: string;
 }
 
+// Perks Component
 const Perks: React.FC<PerksProps> = ({ perks }) => {
   return (
     <div style={{ padding: "2rem", fontFamily: "Arial, sans-serif" }}>
       <h2 style={{ marginBottom: "1.5rem", fontSize: "1.8rem", color: "#333" }}>
-        FLAT AMENITIES:
+        Flat Amenities:
       </h2>
       <div className="responsive-grid">
-        {perks.map((perk) => (
-          <div
-            key={perk.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "0.5rem",
-              transition: "transform 0.2s",
-              maxWidth: "200px", // Keep the card width as needed
-              margin: "0",
-            }}
-          >
-            <img
-              src={perk.icon}
-              alt={perk.name}
+        {perks.length > 0 ? (
+          perks.map((perk) => (
+            <div
+              key={perk.id}
               style={{
-                width: "40px", // Decreased icon size to fit compact design
-                height: "40px",
-                marginRight: "0.5rem", // Reduced spacing
+                display: "flex",
+                alignItems: "center",
+                padding: "0.5rem",
+                transition: "transform 0.2s",
+                maxWidth: "200px",
+                margin: "0",
               }}
-            />
-            <span style={{ fontSize: "0.9rem", color: "#555" }}>
-              {perk.name}
-            </span>
-          </div>
-        ))}
+            >
+              <img
+                src={perk.icon}
+                alt={perk.name}
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  marginRight: "0.5rem",
+                }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/images/default-icon.png"; // Fallback icon
+                }}
+              />
+              <span style={{ fontSize: "0.9rem", color: "#555" }}>{perk.name}</span>
+            </div>
+          ))
+        ) : (
+          <p style={{ color: "#888", fontSize: "1rem" }}>
+            No flat amenities available for this property.
+          </p>
+        )}
       </div>
       <style>
         {`
@@ -72,79 +81,71 @@ const Perks: React.FC<PerksProps> = ({ perks }) => {
 
 // Sample data for perks
 const perksData: Perk[] = [
-  {
-    id: 1,
-    name: "Air Conditioner",
-    icon: "/images/FlatAmenities/Air Conditioner.png",
-  },
+  { id: 1, name: "Air Conditioner", icon: "/images/FlatAmenities/Air Conditioner.png" },
   { id: 2, name: "Bed", icon: "/images/FlatAmenities/Bed.png" },
-  {
-    id: 3,
-    name: "Dining Table",
-    icon: "/images/FlatAmenities/Dining Table.png",
-  },
-  {
-    id: 4,
-    name: "Gas Connection",
-    icon: "/images/FlatAmenities/Gas Connection.png",
-  },
-  { id: 5, name: "Matress", icon: "/images/FlatAmenities/Matress.png" },
+  { id: 3, name: "Dining Table", icon: "/images/FlatAmenities/Dining Table.png" },
+  { id: 4, name: "Gas Connection", icon: "/images/FlatAmenities/Gas Connection.png" },
+  { id: 5, name: "Mattress", icon: "/images/FlatAmenities/Mattress.png" },
   { id: 6, name: "Microwave", icon: "/images/FlatAmenities/Microwave.png" },
-  {
-    id: 7,
-    name: "Play Station",
-    icon: "/images/FlatAmenities/Play Station.png",
-  },
-  {
-    id: 8,
-    name: "Refrigerator",
-    icon: "/images/FlatAmenities/Refrigerator.png",
-  },
+  { id: 7, name: "Play Station", icon: "/images/FlatAmenities/Play Station.png" },
+  { id: 8, name: "Refrigerator", icon: "/images/FlatAmenities/Refrigerator.png" },
   { id: 9, name: "Sofa", icon: "/images/FlatAmenities/Sofa.png" },
   { id: 10, name: "TV", icon: "/images/FlatAmenities/TV.png" },
   { id: 11, name: "Wardrobe", icon: "/images/FlatAmenities/Wardrobe.png" },
-  {
-    id: 12,
-    name: "Washing Machine",
-    icon: "/images/FlatAmenities/Washing Machine.png",
-  },
+  { id: 12, name: "Washing Machine", icon: "/images/FlatAmenities/Washing Machine.png" },
 ];
 
 // App Component
 const App: React.FC<AppProps> = ({ propertyId }) => {
   const [filteredPerks, setFilteredPerks] = useState<Perk[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAmenities = async () => {
       try {
-        const response = await axios.get(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/details/${propertyId}`
-        );
-        const { flatAmenities } = response.data;
+        setLoading(true);
+        setError(null);
 
-        // Combine and convert all amenities to lowercase
-        const activeAmenities = [...flatAmenities].map((amenity) =>
+        const response = await axios.get(
+          `http://localhost:8000/api/properties/${propertyId}/flat-amenities`
+        );
+
+        console.log("API Response:", response.data);
+
+        const selectedAmenities = response.data[0]?.selectedAmenities || [];
+
+        const normalizedAmenities = selectedAmenities.map((amenity: string) =>
           amenity.replace(/\s+/g, "").toLowerCase()
         );
-        console.log("activeamenities", activeAmenities);
 
-        // Filter perks with case-insensitive matching
-        const activePerks = perksData.filter((perk) =>
-          activeAmenities.includes(perk.name.replace(/\s+/g, "").toLowerCase())
+        const matchedPerks = perksData.filter((perk) =>
+          normalizedAmenities.includes(perk.name.replace(/\s+/g, "").toLowerCase())
         );
-        console.log("Active perks", activePerks);
-        setFilteredPerks(activePerks);
+
+        setFilteredPerks(matchedPerks);
       } catch (error) {
-        console.error("Error fetching amenities:", error);
+        console.error("Error fetching flat amenities:", error);
+        setError("Failed to load amenities. Please try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchAmenities();
   }, [propertyId]);
 
+  if (loading) {
+    return <p style={{ color: "#888", fontSize: "1rem", textAlign: "center" }}>Loading amenities...</p>;
+  }
+
   return (
     <div>
-      <Perks perks={filteredPerks} />
+      {error ? (
+        <p style={{ color: "red", fontSize: "1.2rem", textAlign: "center" }}>{error}</p>
+      ) : (
+        <Perks perks={filteredPerks} />
+      )}
     </div>
   );
 };
