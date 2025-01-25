@@ -2,6 +2,7 @@ import React from 'react';
 import { Users, Utensils, Dog, TreePine, Car, Bike, Grid } from 'lucide-react';
 
 export interface RestrictionsData {
+  _id: any;
   bachelorTenants: string;
   nonVegTenants: string;
   tenantWithPets: string;
