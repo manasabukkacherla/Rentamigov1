@@ -111,6 +111,7 @@ export function PreviewModal({
               <div><span className="font-medium">Super Builtup Area:</span> {featuresData.superBuiltupArea} sq ft</div>
               <div><span className="font-medium">Builtup Area:</span> {featuresData.builtupArea} sq ft</div>
               <div><span className="font-medium">Carpet Area:</span> {featuresData.carpetArea} sq ft</div>
+              <div><span className="font-medium">Property Description:</span> {featuresData.propertyDescription}</div>
             </div>
           ))}
 
@@ -180,6 +181,7 @@ export function PreviewModal({
               ))}
             </div>
           ))}
+
         </div>
       </div>
     </div>

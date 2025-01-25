@@ -12,6 +12,7 @@ interface Perk {
 interface PerksProps {
   perks: Perk[]; // List of amenities
 }
+
 interface BuildingAmenitiesProps {
   propertyId: string;
 }
@@ -49,10 +50,11 @@ const Perks: React.FC<PerksProps> = ({ perks }) => {
                 height: "40px",
                 marginRight: "0.5rem",
               }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "/images/default-icon.png"; // Fallback icon
+              }}
             />
-            <span style={{ fontSize: "0.9rem", color: "#555" }}>
-              {perk.name}
-            </span>
+            <span style={{ fontSize: "0.9rem", color: "#555" }}>{perk.name}</span>
           </div>
         ))}
       </div>
@@ -77,105 +79,33 @@ const Perks: React.FC<PerksProps> = ({ perks }) => {
 
 // List of all available perks
 const perksData: Perk[] = [
-  {
-    id: 1,
-    name: "Badminton",
-    icon: "/images/SocietyAmenties/Badminton Court.png",
-  },
-  {
-    id: 2,
-    name: "Basketball Court",
-    icon: "/images/SocietyAmenties/Basketball Court.png",
-  },
+  { id: 1, name: "Badminton", icon: "/images/SocietyAmenties/Badminton Court.png" },
+  { id: 2, name: "Basketball Court", icon: "/images/SocietyAmenties/Basketball Court.png" },
   { id: 3, name: "Carrom", icon: "/images/SocietyAmenties/carrom.png" },
   { id: 4, name: "CCTV", icon: "/images/SocietyAmenties/CCTV.png" },
-  {
-    id: 5,
-    name: "Chess Board",
-    icon: "/images/SocietyAmenties/Chess Board.png",
-  },
-  {
-    id: 6,
-    name: "Children Play Area",
-    icon: "/images/SocietyAmenties/Children Play Area.png",
-  },
-  {
-    id: 7,
-    name: "Club House",
-    icon: "/images/SocietyAmenties/Club House.png",
-  },
-  {
-    id: 8,
-    name: "Day-to-Day Utility Stores",
-    icon: "/images/SocietyAmenties/Day-to-Day Utility Stores.png",
-  },
-  {
-    id: 9,
-    name: "Flower Park",
-    icon: "/images/SocietyAmenties/Flower Park.png",
-  },
+  { id: 5, name: "Chess Board", icon: "/images/SocietyAmenties/Chess Board.png" },
+  { id: 6, name: "Children Play Area", icon: "/images/SocietyAmenties/Children Play Area.png" },
+  { id: 7, name: "Club House", icon: "/images/SocietyAmenties/Club House.png" },
+  { id: 8, name: "Day-to-Day Utility Stores", icon: "/images/SocietyAmenties/Day-to-Day Utility Stores.png" },
+  { id: 9, name: "Flower Park", icon: "/images/SocietyAmenties/Flower Park.png" },
   { id: 10, name: "Gym", icon: "/images/SocietyAmenties/Gym.png" },
   { id: 11, name: "Jacuzzi", icon: "/images/SocietyAmenties/Jacuzzi.png" },
-  {
-    id: 12,
-    name: "Jogging Track",
-    icon: "/images/SocietyAmenties/Jogging Track.png",
-  },
+  { id: 12, name: "Jogging Track", icon: "/images/SocietyAmenties/Jogging Track.png" },
   { id: 13, name: "Kids Pool", icon: "/images/SocietyAmenties/Kids Pool.png" },
-  {
-    id: 14,
-    name: "Lawn Tennis Court",
-    icon: "/images/SocietyAmenties/Lawn Tennis Court.png",
-  },
+  { id: 14, name: "Lawn Tennis Court", icon: "/images/SocietyAmenties/Lawn Tennis Court.png" },
   { id: 15, name: "Lift", icon: "/images/SocietyAmenties/Lift.png" },
-  {
-    id: 16,
-    name: "Massage Parlor",
-    icon: "/images/SocietyAmenties/Massage Parlor.png",
-  },
-  {
-    id: 17,
-    name: "Meditation Room",
-    icon: "/images/SocietyAmenties/Meditation Room.png",
-  },
-  {
-    id: 18,
-    name: "Multipurpose Hall",
-    icon: "/images/SocietyAmenties/Multipurpose Hall.png",
-  },
-  {
-    id: 19,
-    name: "Power Backup",
-    icon: "/images/SocietyAmenties/Power Backup.png",
-  },
+  { id: 16, name: "Massage Parlor", icon: "/images/SocietyAmenties/Massage Parlor.png" },
+  { id: 17, name: "Meditation Room", icon: "/images/SocietyAmenties/Meditation Room.png" },
+  { id: 18, name: "Multipurpose Hall", icon: "/images/SocietyAmenties/Multipurpose Hall.png" },
+  { id: 19, name: "Power Backup", icon: "/images/SocietyAmenties/Power Backup.png" },
   { id: 20, name: "Salon", icon: "/images/SocietyAmenties/Salon.png" },
   { id: 21, name: "Security", icon: "/images/SocietyAmenties/Security.png" },
   { id: 22, name: "Snooker", icon: "/images/SocietyAmenties/Snooker.png" },
-  {
-    id: 23,
-    name: "Squash Court",
-    icon: "/images/SocietyAmenties/Squash Court.png",
-  },
-  {
-    id: 24,
-    name: "Steam Room",
-    icon: "/images/SocietyAmenties/Steam Room.png",
-  },
-  {
-    id: 25,
-    name: "Barbecue Grill",
-    icon: "/images/SocietyAmenties/Swimming Pool.png",
-  },
-  {
-    id: 26,
-    name: "Table Tennis",
-    icon: "/images/SocietyAmenties/Table Tennis.png",
-  },
-  {
-    id: 27,
-    name: "Yoga Center",
-    icon: "/images/SocietyAmenties/Yoga Center.png",
-  },
+  { id: 23, name: "Squash Court", icon: "/images/SocietyAmenties/Squash Court.png" },
+  { id: 24, name: "Steam Room", icon: "/images/SocietyAmenties/Steam Room.png" },
+  { id: 25, name: "Barbecue Grill", icon: "/images/SocietyAmenties/Swimming Pool.png" },
+  { id: 26, name: "Table Tennis", icon: "/images/SocietyAmenties/Table Tennis.png" },
+  { id: 27, name: "Yoga Center", icon: "/images/SocietyAmenties/Yoga Center.png" },
 ];
 
 const BuildingAmenities: React.FC<BuildingAmenitiesProps> = ({ propertyId }) => {
@@ -185,24 +115,22 @@ const BuildingAmenities: React.FC<BuildingAmenitiesProps> = ({ propertyId }) => 
     const fetchAmenities = async () => {
       try {
         const response = await axios.get(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/details/${propertyId}`
+          `http://localhost:8000/api/properties/${propertyId}/society-amenities`
         );
-        const { flatAmenities, societyAmenities } = response.data;
 
-        // Combine and convert all amenities to lowercase
-        const activeAmenities = [...flatAmenities, ...societyAmenities].map(
-          (amenity) => amenity.replace(/\s+/g, "").toLowerCase()
-        );
-        console.log("activeamenities", activeAmenities);
+        const selectedAmenities = response.data[0]?.selectedAmenities || [];
 
-        // Filter perks with case-insensitive matching
-        const activePerks = perksData.filter((perk) =>
-          activeAmenities.includes(perk.name.replace(/\s+/g, "").toLowerCase())
+        const normalizedAmenities = selectedAmenities.map((amenity: string) =>
+          amenity.replace(/\s+/g, "").toLowerCase()
         );
-        console.log("Active perks", activePerks);
-        setFilteredPerks(activePerks);
+
+        const matchedPerks = perksData.filter((perk) =>
+          normalizedAmenities.includes(perk.name.replace(/\s+/g, "").toLowerCase())
+        );
+
+        setFilteredPerks(matchedPerks);
       } catch (error) {
-        console.error("Error fetching amenities:", error);
+        console.error("Error fetching society amenities:", error);
       }
     };
 

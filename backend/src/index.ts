@@ -16,7 +16,7 @@ import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
 import propertyRouter from "./routes/Propertydetails";
-
+import photosRouter from "./routes/Propertyphoto";
 dotenv.config();
 
 // Validate required environment variables
@@ -30,12 +30,17 @@ if (missingEnvVars.length > 0) {
 }
 
 const app: Express = express();
-connectToDatabase();
-
+connectToDatabase()
+  .then(() => console.log("Successfully connected to MongoDB"))
+  .catch((error) => {
+    console.error("Failed to connect to MongoDB:", error.message);
+    process.exit(1); // Terminate the process if the database connection fails
+  });
 // Middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" })); // Set JSON payload size limit
+app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encoded payload size limit
+
 
 // Routes
 app.use("/api/verify", verifyRouter);
@@ -46,6 +51,7 @@ app.use("/api/employees", employeeRouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
 app.use("/api/properties", propertyRouter); // Property routes
+app.use("/api/Photos",photosRouter);
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
@@ -59,7 +65,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   res.status(500).json({
     success: false,
     message:
-      process.env.NODE_ENV === "development"
+      process.env.NODE_ENV === "production"
         ? "Something went wrong!"
         : err.message,
   });
