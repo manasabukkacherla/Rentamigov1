@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 
 export interface AmenitiesData {
+  _id: any;
   selectedAmenities: string[];
   powerBackupType?: 'Partially' | 'Fully';
 }

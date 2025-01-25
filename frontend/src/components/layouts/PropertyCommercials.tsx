@@ -4,6 +4,7 @@ import { InputField } from './InputField';
 import { SelectField } from './SelectField';
 
 export interface CommercialsData {
+  _id: any;
   monthlyRent: string;
   maintenance: string;
   maintenanceAmount: string;

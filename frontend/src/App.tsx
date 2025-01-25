@@ -45,7 +45,7 @@ const App = () => {
           <Route path="/google" element={<MapComponent />} />
           <Route path="/property-page/:id" element={<PropertyDetails />} />
           <Route path="/Empdashboard" element={<PropertyDashboard />} />
-          <Route path="/base" element={<PropertyPage/>} />
+          <Route path="/property-listing-form" element={<PropertyPage/>} />
         </Routes>
       </BrowserRouter>
     </GoogleOAuthProvider>

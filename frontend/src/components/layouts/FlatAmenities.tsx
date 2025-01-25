@@ -2,6 +2,7 @@ import React from 'react';
 import { Wind, Bed as BedIcon, DoorClosed, Tv, Refrigerator, Waves, Microwave, Sofa as SofaIcon, UtensilsCrossed, Flame, Gamepad2 } from 'lucide-react';
 
 export interface FlatAmenitiesData {
+  _id: any;
   selectedAmenities: string[];
 }
 
