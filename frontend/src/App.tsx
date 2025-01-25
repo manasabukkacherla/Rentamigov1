@@ -54,6 +54,7 @@ const App = () => {
           <Route path="/admin-dashboard" element={<AccessManagementTable />} />
           <Route path="/Empdashboard" element={<PropertyDashboard />} />
 
+          <Route path="/property-listing-form" element={<PropertyPage/>} />
           {/* Base Layout */}
           <Route path="/base" element={<PropertyPage />} />
 

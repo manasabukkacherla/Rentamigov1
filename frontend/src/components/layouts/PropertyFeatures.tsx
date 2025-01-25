@@ -3,6 +3,7 @@ import { Bed, Bath, Home, Building2, Warehouse, Clock, FileText } from 'lucide-r
 import { InputField } from './InputField';
 
 export interface FeaturesData {
+  _id: any;
   bedrooms: string;
   bathrooms: string;
   balconies: string;
