@@ -104,7 +104,7 @@ const Details: React.FC = () => {
             restrictionsData[0].bachelorTenants === "Yes" ? "Bachelors" : "",
             restrictionsData[0].nonVegTenants === "Yes" ? "Non-Vegetarian" : "",
             restrictionsData[0].tenantWithPets === "Yes" ? "Pets Allowed" : "",
-          ].filter((pref) => pref), // Filter out empty preferences
+          ].filter((pref) => pref),
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unknown error occurred");
@@ -136,7 +136,6 @@ const Details: React.FC = () => {
   }
 
   return (
-
     <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden">
       <div className="p-8">
         <div className="flex items-center space-x-3 mb-6">
@@ -144,147 +143,71 @@ const Details: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Property Details</h1>
         </div>
 
-    <div className="h-[45%] w-[95%] md:w-[70%] bg-[whitesmoke]">
-      <div className="p-6 rounded-lg shadow-lg overflow-hidden bg-[whitesmoke]">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Property Details</h1>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Configuration */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Home className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Configuration</h3>
-                <p className="text-gray-600 mt-1">{propertyDetails.configuration}</p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Home className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Configuration</h3>
+            <p>{propertyDetails.configuration}</p>
           </div>
 
-          {/* Furnishing Status */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Sofa className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Furnishing Status</h3>
-                <p className="text-gray-600 mt-1">{propertyDetails.furnishingStatus}</p>
-              </div>
-            </div>
+          {/* Furnishing */}
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Sofa className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Furnishing</h3>
+            <p>{propertyDetails.furnishingStatus}</p>
           </div>
 
           {/* Facing */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Compass className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Facing</h3>
-                <p className="text-gray-600 mt-1">{propertyDetails.facing}</p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Compass className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Facing</h3>
+            <p>{propertyDetails.facing}</p>
           </div>
 
           {/* Floor */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Building2 className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Floor</h3>
-                <p className="text-gray-600 mt-1">
-                  {propertyDetails.floor.current} out of {propertyDetails.floor.total} Floors
-                </p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Building2 className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Floor</h3>
+            <p>
+              {propertyDetails.floor.current} of {propertyDetails.floor.total} floors
+            </p>
           </div>
 
           {/* Parking */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Car className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Parking</h3>
-                <p className="text-gray-600 mt-1">
-                  {propertyDetails.parking.twoWheeler} Two Wheeler
-                  {propertyDetails.parking.fourWheeler > 0 &&
-                    ` • ${propertyDetails.parking.fourWheeler} Four Wheeler`}
-                </p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Car className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Parking</h3>
+            <p>
+              {propertyDetails.parking.twoWheeler} ({propertyDetails.parking.twoWheelerCount}) Two
+              Wheeler
+              <br />
+              {propertyDetails.parking.fourWheeler} ({propertyDetails.parking.fourWheelerCount}) Four
+              Wheeler
+            </p>
           </div>
 
           {/* Area */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <SquareFootage className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Area</h3>
-                <p className="text-gray-600 mt-1">
-                  {propertyDetails.area.value.toLocaleString()} {propertyDetails.area.unit}
-                </p>
-              </div>
-
-          {/* Area */}
-          <div className="flex items-start space-x-3 bg-[whitesmoke] p-3 rounded-md shadow-sm hover:shadow-md transition-shadow">
-            <SquareFootage className="w-6 h-6 text-blue-600 shrink-0" />
-            <div className="min-w-0">
-              <h3 className="font-medium text-gray-900 text-sm">Area</h3>
-              <p className="text-gray-600 text-sm truncate">
-                {propertyDetails.area.value} {propertyDetails.area.unit}
-              </p>
-            </div>
-          </div>
-
-          {/* Parking */}
-          <div className="flex items-start space-x-3 bg-[whitesmoke] p-3 rounded-md shadow-sm hover:shadow-md transition-shadow">
-            <Car className="w-6 h-6 text-blue-600 shrink-0" />
-            <div className="min-w-0">
-              <h3 className="font-medium text-gray-900 text-sm">Parking</h3>
-              <p className="text-gray-600 text-sm truncate">
-                {propertyDetails.parking.twoWheeler} ({propertyDetails.parking.twoWheelerCount}) Two Wheeler{" "}
-                • {propertyDetails.parking.fourWheeler} ({propertyDetails.parking.fourWheelerCount}) Four Wheeler
-              </p>
-
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <SquareFootage className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Area</h3>
+            <p>
+              {propertyDetails.area.value} {propertyDetails.area.unit}
+            </p>
           </div>
 
           {/* Availability Date */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Calendar className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Availability Date</h3>
-                <p className="text-gray-600 mt-1">
-                  {formatDate(propertyDetails.availabilityDate)}
-                </p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Calendar className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Availability Date</h3>
+            <p>{formatDate(propertyDetails.availabilityDate)}</p>
           </div>
 
           {/* Tenant Preference */}
-          <div className="bg-white p-4 rounded-xl border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-start space-x-3">
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Tenant Preference</h3>
-                <p className="text-gray-600 mt-1">
-                  {propertyDetails.tenantPreference.join(" • ")}
-                </p>
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
+            <Users className="w-6 h-6 text-blue-600" />
+            <h3 className="font-semibold">Tenant Preference</h3>
+            <p>{propertyDetails.tenantPreference.join(" • ")}</p>
           </div>
         </div>
       </div>

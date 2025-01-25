@@ -28,7 +28,6 @@ const NearbyComponent: React.FC<{ propertyId: string }> = ({ propertyId }) => {
       }
     };
 
-    // Set height initially and on resize
     updateHeight();
     window.addEventListener("resize", updateHeight);
     return () => {
@@ -108,7 +107,7 @@ const Fullpage: React.FC = () => {
     minWidth: "300px",
     position: "sticky",
     top: "20px",
-    marginTop: "-100px"
+    marginTop: "-100px",
   };
 
   const transportNearbyStyle: React.CSSProperties = {
@@ -124,42 +123,30 @@ const Fullpage: React.FC = () => {
     <div style={homepageStyle}>
       <HeaderWithSearchBar />
 
-      <ImageGallery propertyId={id} />
-      
-
-      <div style={layoutStyle} className="layout">
-        <div style={leftColumnStyle} className="left-column">
-          <div style={rentDetailsStyle}>
-            <RentDetails monthlyRent={null} maintenanceAmount={null} securityDeposit={null} />
-          </div>
-          <PropertyDetails style={{ marginLeft: '70px' }} />
-          <App propertyId={id} />
-          <BuildingAmenities propertyId={id} />
-          <NearbyComponent propertyId={id} />
-
       <ImageGallery propertyId={propertyId} />
-      <RentDetails propertyId={propertyId} monthlyRent={null} maintenanceAmount={null} securityDeposit={null} />
 
       <div style={layoutStyle} className="layout">
         <div style={leftColumnStyle} className="left-column">
-        <PropertyDetails propertyId={propertyId} style={{ marginLeft: "70px" }} />
-                    <App propertyId={propertyId} />
+          <RentDetails
+            propertyId={propertyId}
+            monthlyRent={null}
+            maintenanceAmount={null}
+            securityDeposit={null}
+          />
+          <PropertyDetails propertyId={propertyId} />
+          <App propertyId={propertyId} />
           <BuildingAmenities propertyId={propertyId} />
           <NearbyComponent propertyId={propertyId} />
-
         </div>
         <div style={rightColumnStyle} className="right-column">
           <PropertyRegistrationForm propertyId={propertyId} />
         </div>
       </div>
+
       <div style={transportNearbyStyle} className="transport-nearby">
         <TransportNearby propertyId={propertyId} />
+      </div>
 
-        {/*<TransportNearby />*/} 
-      </div>
-      <div>
-        <Footer />
-      </div>
       <Footer />
     </div>
   );
