@@ -2,20 +2,18 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ArrowDownWideNarrow, Filter } from "lucide-react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import SearchBar from "./searchbar";
-import ResponsiveSearchBar from "./responsiveSearch";
+import { Filter } from "lucide-react";
 
-const FilterComponent: React.FC = () => {
+interface FilterComponentProps {
+  onApplyFilters: (filters: Record<string, string[]>, priceRange: string | null) => void;
+  onClearFilters: () => void;
+}
+
+const FilterComponent: React.FC<FilterComponentProps> = ({ onApplyFilters, onClearFilters }) => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [isFilterVisible, setIsFilterVisible] = useState(true);
-  const [selectedFilters, setSelectedFilters] = useState<
-    Record<string, string[]>
-  >({});
-  const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(
-    null
-  );
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({});
+  const [selectedPriceRange, setSelectedPriceRange] = useState<string | null>(null);
 
   const handleResize = () => {
     if (window.innerWidth <= 768) {
@@ -55,16 +53,11 @@ const FilterComponent: React.FC = () => {
   const clearAllFilters = () => {
     setSelectedFilters({});
     setSelectedPriceRange(null);
+    onClearFilters();
   };
 
   const applyFilters = () => {
-    console.log(
-      "Applied Filters:",
-      selectedFilters,
-      "Price Range:",
-      selectedPriceRange
-    );
-    // Here you would typically update the parent component or make an API call
+    onApplyFilters(selectedFilters, selectedPriceRange);
   };
 
   const priceRanges = [
@@ -82,31 +75,29 @@ const FilterComponent: React.FC = () => {
     <div className="font-sans">
       {isMinimized && (
         <div className="fixed top-10 md:top-12 right-4 md:right-8 lg:right-12 flex items-center justify-center space-x-4">
-  <Button
-    onClick={toggleFilter}
-    className="text-white hover:bg-gray-800 p-3 mt-11"
-  >
-    <Filter />
-  </Button>
-</div>
-
-
-)}
-
+          <Button
+            onClick={toggleFilter}
+            className="text-white hover:bg-gray-800 p-3 mt-11"
+          >
+            <Filter />
+          </Button>
+        </div>
+      )}
 
       {isFilterVisible && (
-        <Card className="fixed top-1/5 left-5 w-[91%] md:w-1/4 h-[70vh] bg-white text-black shadow-lg rounded-lg flex flex-col">
-          <ScrollArea className="flex-grow px-6 py-4">
-            <h3 className="text-xl font-medium mb-4 text-center text-gray-700">
+        <Card className="fixed top-2/5 left-5 w-[98%] md:w-[350px] h-[65vh] bg-white text-black shadow-lg rounded-lg flex flex-col">
+          <ScrollArea className="flex-grow px-4 py-4">
+            <h3 className="text-lg font-medium mb-4 text-center text-gray-700">
               Filters
             </h3>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
+              {/* BHK Type */}
               <div>
-                <h4 className="text-base font-medium mb-2 text-gray-600">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">
                   BHK Type
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   {["1 RK", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"].map(
                     (type) => (
                       <Button
@@ -117,7 +108,7 @@ const FilterComponent: React.FC = () => {
                             : "outline"
                         }
                         onClick={() => toggleSelection("BHK Type", type)}
-                        className="text-sm"
+                        className="text-xs px-2 py-1 h-7"
                       >
                         {type}
                       </Button>
@@ -126,11 +117,12 @@ const FilterComponent: React.FC = () => {
                 </div>
               </div>
 
+              {/* Price Range */}
               <div>
-                <h4 className="text-base font-medium mb-2 text-gray-600">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Price Range
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   {priceRanges.map((range) => (
                     <Button
                       key={range}
@@ -138,7 +130,7 @@ const FilterComponent: React.FC = () => {
                         selectedPriceRange === range ? "default" : "outline"
                       }
                       onClick={() => handlePriceRangeSelection(range)}
-                      className="text-sm"
+                      className="text-xs px-2 py-1 h-7"
                     >
                       {range}
                     </Button>
@@ -146,11 +138,12 @@ const FilterComponent: React.FC = () => {
                 </div>
               </div>
 
+              {/* Furnishing Type */}
               <div>
-                <h4 className="text-base font-medium mb-2 text-gray-600">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Furnishing Type
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   {[
                     "Semi Furnished",
                     "Partially Furnished",
@@ -164,7 +157,7 @@ const FilterComponent: React.FC = () => {
                           : "outline"
                       }
                       onClick={() => toggleSelection("Furnishing Type", type)}
-                      className="text-sm"
+                      className="text-xs px-2 py-1 h-7"
                     >
                       {type}
                     </Button>
@@ -172,11 +165,12 @@ const FilterComponent: React.FC = () => {
                 </div>
               </div>
 
+              {/* Property Type */}
               <div>
-                <h4 className="text-base font-medium mb-2 text-gray-600">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Property Type
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   {[
                     "Apartment",
                     "Standalone Building",
@@ -193,7 +187,7 @@ const FilterComponent: React.FC = () => {
                           : "outline"
                       }
                       onClick={() => toggleSelection("Property Type", type)}
-                      className="text-sm"
+                      className="text-xs px-2 py-1 h-7"
                     >
                       {type}
                     </Button>
@@ -201,11 +195,12 @@ const FilterComponent: React.FC = () => {
                 </div>
               </div>
 
+              {/* Availability Date */}
               <div>
-                <h4 className="text-base font-medium mb-2 text-gray-600">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Availability Date
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   {[
                     "Immediate",
                     "Within 15 Days",
@@ -220,7 +215,7 @@ const FilterComponent: React.FC = () => {
                           : "outline"
                       }
                       onClick={() => toggleSelection("Availability Date", date)}
-                      className="text-sm"
+                      className="text-xs px-2 py-1 h-7"
                     >
                       {date}
                     </Button>
@@ -228,11 +223,12 @@ const FilterComponent: React.FC = () => {
                 </div>
               </div>
 
+              {/* Preferred Tenants */}
               <div>
-                <h4 className="text-base font-medium mb-2 text-gray-600">
+                <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Preferred Tenants
                 </h4>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1">
                   {[
                     "Family",
                     "Bachelor Male",
@@ -246,10 +242,8 @@ const FilterComponent: React.FC = () => {
                           ? "default"
                           : "outline"
                       }
-                      onClick={() =>
-                        toggleSelection("Preferred Tenants", tenant)
-                      }
-                      className="text-sm"
+                      onClick={() => toggleSelection("Preferred Tenants", tenant)}
+                      className="text-xs px-2 py-1 h-7"
                     >
                       {tenant}
                     </Button>
@@ -259,17 +253,17 @@ const FilterComponent: React.FC = () => {
             </div>
           </ScrollArea>
 
-          <div className="flex justify-between p-4 border-t border-gray-200">
+          <div className="flex justify-between p-3 border-t border-gray-200">
             <Button
               onClick={clearAllFilters}
               variant="outline"
-              className="w-[48%]"
+              className="w-[48%] text-xs h-8"
             >
               Clear All
             </Button>
             <Button
               onClick={applyFilters}
-              className="w-[48%] bg-black text-white hover:bg-gray-800"
+              className="w-[48%] bg-black text-white hover:bg-gray-800 text-xs h-8"
             >
               Apply
             </Button>

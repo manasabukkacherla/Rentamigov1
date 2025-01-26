@@ -6,6 +6,31 @@ interface PropertyCardProps {
   propertyId: string;
 }
 
+const PropertyCardSkeleton = () => (
+  <div className="w-full max-w-[380px] border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white">
+    {/* Image skeleton */}
+    <div className="w-full h-[230px] bg-gray-200 animate-pulse" />
+    
+    {/* Content skeleton */}
+    <div className="p-4 space-y-3">
+      {/* Title skeleton */}
+      <div className="h-5 bg-gray-200 rounded w-3/4 animate-pulse" />
+      {/* Address skeleton */}
+      <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse" />
+    </div>
+    
+    {/* Footer skeleton */}
+    <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50">
+      <div className="space-y-2">
+        <div className="h-3 bg-gray-200 rounded w-20 animate-pulse" />
+        <div className="h-4 bg-gray-200 rounded w-24 animate-pulse" />
+      </div>
+      {/* Button skeleton */}
+      <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />
+    </div>
+  </div>
+);
+
 const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
   const navigate = useNavigate();
   const [propertyData, setPropertyData] = useState<{
@@ -71,33 +96,40 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
   };
 
   if (!propertyData) {
-    return <p>Loading...</p>;
+    return <PropertyCardSkeleton />;
   }
 
   return (
-    <div onClick={handleClick} style={styles.cardLink}>
-      <div style={styles.card} className="md:max-w-[450px]">
+    <div 
+      onClick={handleClick} 
+      className="cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+    >
+      <div className="w-full max-w-[380px] border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white">
         {/* Image Section */}
-        <img src={propertyData.image} alt={propertyData.title} style={styles.image} />
+        <img 
+          src={propertyData.image} 
+          alt={propertyData.title} 
+          className="w-full h-[230px] object-cover"
+        />
 
-        {/* Title and Address */}
-        <div style={styles.content}>
-          <h3 style={styles.title}>{propertyData.title}</h3>
-          <p style={styles.address}>
+        {/* Content Section */}
+        <div className="p-4">
+          <h3 className="text-lg font-bold mb-1">{propertyData.title}</h3>
+          <p className="text-sm text-gray-600">
             {propertyData.locality}, {propertyData.area}
           </p>
         </div>
 
-        {/* Footer */}
-        <div style={styles.footer}>
-          <div style={styles.rent}>
-            <p>Rent Starting From</p>
-            <p style={styles.rentPrice}>{propertyData.rent}/month</p>
+        {/* Footer Section */}
+        <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50">
+          <div>
+            <p className="text-sm text-gray-600">Rent Starting From</p>
+            <p className="text-base font-bold text-gray-800">₹{propertyData.rent}/month</p>
           </div>
           <button
-            style={styles.callbackButton}
+            className="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors duration-200"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent card navigation when clicking the button
+              e.stopPropagation();
             }}
           >
             Enquiry
@@ -106,70 +138,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
       </div>
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  cardLink: {
-    textDecoration: "none",
-    color: "inherit",
-    cursor: "pointer",
-  },
-  card: {
-    width: "100%",
-    maxWidth: "380px",
-    border: "1px solid #ddd",
-    borderRadius: "10px",
-    overflow: "hidden",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    margin: "20px auto",
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "#fff",
-  },
-  image: {
-    width: "100%",
-    height: "230px",
-    objectFit: "cover",
-  },
-  content: {
-    padding: "15px",
-  },
-  title: {
-    fontSize: "18px",
-    fontWeight: "bold",
-    marginBottom: "5px",
-  },
-  address: {
-    fontSize: "14px",
-    color: "#666",
-    marginBottom: "15px",
-  },
-  footer: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "10px 15px",
-    borderTop: "1px solid #ddd",
-    backgroundColor: "#f9f9f9",
-  },
-  rent: {
-    fontSize: "14px",
-  },
-  rentPrice: {
-    fontSize: "16px",
-    fontWeight: "bold",
-    color: "#333",
-  },
-  callbackButton: {
-    padding: "10px 20px",
-    fontSize: "14px",
-    color: "#050404",
-    backgroundColor: "#28a745",
-    border: "none",
-    borderRadius: "5px",
-    cursor: "pointer",
-    textAlign: "center",
-  },
 };
 
 export default PropertyCard;
