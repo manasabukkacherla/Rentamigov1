@@ -1,10 +1,11 @@
 import express, { Request, Response } from "express";
 import PropertyEnquiry from "../models/propertenquiry";
 import sendOtpService from "../services/sendOtpService"; // Twilio-based OTP service
+import transporter from "../utils/emailservice"; // Email transporter
 
 const router = express.Router();
 
-// POST: Handle sending OTP or submitting property enquiry
+// POST: Handle sending OTP
 router.post("/send-otp", async (req: Request, res: Response) => {
   const { name, email, contactNumber } = req.body;
 
@@ -19,25 +20,18 @@ router.post("/send-otp", async (req: Request, res: Response) => {
 
     // Send OTP using Twilio Verify
     const formattedNumber = `+91${contactNumber.replace(/\D/g, "")}`;
-    try {
-      const otpResponse = await sendOtpService.sendOtp(formattedNumber, "sms");
-      return res.status(200).json({
-        success: true,
-        message: "OTP sent successfully.",
-        sid: otpResponse.sid,
-      });
-    } catch (error: any) {
-      console.error("Error sending OTP:", error.message || error);
-      return res.status(500).json({
-        success: false,
-        message: "Failed to send OTP. Check phone number or Twilio configuration.",
-      });
-    }
-  } catch (error) {
+    const otpResponse = await sendOtpService.sendOtp(formattedNumber, "sms");
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP sent successfully.",
+      sid: otpResponse.sid,
+    });
+  } catch (error: any) {
     console.error("Error in send-otp route:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message: "Failed to send OTP. Please try again.",
     });
   }
 });
@@ -56,37 +50,29 @@ router.post("/verify-otp", async (req: Request, res: Response) => {
 
     // Verify OTP using Twilio Verify
     const formattedNumber = `+91${contactNumber.replace(/\D/g, "")}`;
-    try {
-      const verificationResponse = await sendOtpService.verifyOtp(formattedNumber, otp);
+    const verificationResponse = await sendOtpService.verifyOtp(formattedNumber, otp);
 
-      if (!verificationResponse.success) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid OTP.",
-        });
-      }
-
-      return res.status(200).json({
-        success: true,
-        message: "OTP verified successfully.",
-      });
-    } catch (error: any) {
-      console.error("Error verifying OTP:", error.message || error);
-      return res.status(500).json({
+    if (!verificationResponse.success) {
+      return res.status(400).json({
         success: false,
-        message: "Failed to verify OTP. Check the OTP or phone number.",
+        message: "Invalid OTP.",
       });
     }
-  } catch (error) {
+
+    return res.status(200).json({
+      success: true,
+      message: "OTP verified successfully.",
+    });
+  } catch (error: any) {
     console.error("Error in verify-otp route:", error);
     return res.status(500).json({
       success: false,
-      message: "Internal server error.",
+      message: "Failed to verify OTP. Please try again.",
     });
   }
 });
 
-// POST: Submit property enquiry (after verification)
+// POST: Submit property enquiry
 router.post("/submit-form", async (req: Request, res: Response) => {
   const { name, email, contactNumber, isVerified } = req.body;
 
@@ -107,18 +93,56 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       isVerified,
     });
 
-    await newEnquiry.save();
+    const savedEnquiry = await newEnquiry.save();
+
+    // Send email to the user
+    const userEmailContent = `
+      <h1>Thank You for Your Property Enquiry</h1>
+      <p>Dear ${name},</p>
+      <p>We have successfully received your property enquiry with the following details:</p>
+      <ul>
+        <li><strong>Name:</strong> ${name}</li>
+        <li><strong>Email:</strong> ${email}</li>
+        <li><strong>Contact Number:</strong> ${contactNumber}</li>
+      </ul>
+      <p>We will get back to you shortly.</p>
+      <p>Best regards,<br>RentAmigo Team</p>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, // Your email
+      to: email, // User's email
+      subject: "Property Enquiry Confirmation",
+      html: userEmailContent,
+    });
+
+    // Send email to the company
+    const companyEmailContent = `
+      <h1>New Property Enquiry</h1>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Contact Number:</strong> ${contactNumber}</p>
+      <p><strong>Verified:</strong> ${isVerified ? "Yes" : "No"}</p>
+      <p><strong>Submission Date:</strong> ${savedEnquiry.createdAt}</p>
+    `;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, // Your email
+      to: "contact@rentamigo.in", // Company's email
+      subject: "New Property Enquiry Received",
+      html: companyEmailContent,
+    });
 
     return res.status(201).json({
       success: true,
-      message: "Property enquiry submitted successfully.",
-      data: newEnquiry,
+      message: "Property enquiry submitted successfully, and emails sent.",
+      data: savedEnquiry,
     });
   } catch (error) {
-    console.error("Error submitting property enquiry:", error);
+    console.error("Error submitting property enquiry or sending emails:", error);
     return res.status(500).json({
       success: false,
-      message: "Failed to submit property enquiry.",
+      message: "Failed to submit property enquiry or send emails.",
     });
   }
 });

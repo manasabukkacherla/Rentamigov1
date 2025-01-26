@@ -18,10 +18,10 @@ import ownerIntrstrouter from "./routes/ownerIntrst";
 import propertyRouter from "./routes/Propertydetails";
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
-import ownerInterestRoutes from "./routes/ownerInterest";
 import photosRouter from "./routes/Propertyphoto";
 import propertyEnquiryRoutes from "./routes/propertyEnquiryRoutes";
 import enquiryRoutes from "./routes/enquiryRoutes";
+
 dotenv.config();
 
 // Validate required environment variables
@@ -58,7 +58,6 @@ app.use("/api", ownerIntrstrouter); // Owner interest routes
 app.use("/api/properties", propertyRouter); // Property routes
 app.use("/api/forms",subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter)
-app.use("/api/owner-interest", ownerInterestRoutes);
 app.use("/api/Photos",photosRouter);
 app.use("/api/property",propertyEnquiryRoutes)
 app.use("/api/service", enquiryRoutes);

@@ -1,18 +1,9 @@
 import express, { Request, Response } from "express";
-import EnquiryForm from "../models/EnqiuryForm";// Ensure this path matches your model file
+import EnquiryForm from "../models/EnqiuryForm"; // Ensure this path matches your model file
 import sendOtpService from "../services/sendOtpService"; // Assuming Twilio OTP service is defined here
-import nodemailer from "nodemailer";
+import transporter from "../utils/emailservice"; // Import email transporter
 
 const router = express.Router();
-
-// Configure Nodemailer
-const transporter = nodemailer.createTransport({
-  service: "Gmail", // Replace with your preferred service
-  auth: {
-    user: process.env.SMTP_USER, // Add this to your .env file
-    pass: process.env.SMTP_PASS, // Add this to your .env file
-  },
-});
 
 /**
  * POST: Send OTP
@@ -46,36 +37,6 @@ router.post("/send-otp", async (req: Request, res: Response) => {
 });
 
 /**
- * POST: Verify OTP
- */
-router.post("/verify-otp", async (req: Request, res: Response) => {
-  const { contactNumber, otp } = req.body;
-
-  if (!contactNumber || !otp) {
-    return res.status(400).json({
-      success: false,
-      message: "Contact number and OTP are required.",
-    });
-  }
-
-  try {
-    const response = await sendOtpService.verifyOtp(contactNumber, otp);
-
-    if (response.success) {
-      res.status(200).json({ success: true, message: "OTP verified successfully." });
-    } else {
-      throw new Error("Invalid OTP.");
-    }
-  } catch (error: any) {
-    console.error("Error verifying OTP:", error.message || error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to verify OTP. Please try again.",
-    });
-  }
-});
-
-/**
  * POST: Submit Form
  */
 router.post("/submit-form", async (req: Request, res: Response) => {
@@ -100,9 +61,25 @@ router.post("/submit-form", async (req: Request, res: Response) => {
 
     const savedEnquiry = await newEnquiry.save();
 
-    // Send email notification
-    const emailContent = `
-      <h1>New Service Enquiry Submitted</h1>
+    // Email content for the user
+    const userEmailContent = `
+      <h1>Thank You for Your Enquiry</h1>
+      <p>Dear ${savedEnquiry.name},</p>
+      <p>We have received your enquiry with the following details:</p>
+      <ul>
+        <li><strong>Contact Number:</strong> ${savedEnquiry.mobileNo}</li>
+        <li><strong>Selected Services:</strong></li>
+        <ul>
+          ${savedEnquiry.selectedServices.map((service: string) => `<li>${service}</li>`).join("")}
+        </ul>
+      </ul>
+      <p>We will get back to you shortly.</p>
+      <p>Best Regards,<br>RentAmigo Team</p>
+    `;
+
+    // Email content for the company
+    const companyEmailContent = `
+      <h1>New Service Enquiry</h1>
       <p><strong>Name:</strong> ${savedEnquiry.name}</p>
       <p><strong>Email:</strong> ${savedEnquiry.email}</p>
       <p><strong>Contact Number:</strong> ${savedEnquiry.mobileNo}</p>
@@ -114,23 +91,32 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       <p><strong>Submission Date:</strong> ${savedEnquiry.createdAt}</p>
     `;
 
+    // Send email to the user
     await transporter.sendMail({
-      from: `RentAmigo <${process.env.SMTP_USER}>`,
-      to: "tech@rentamigo.in",
-      subject: "New Service Enquiry Submitted",
-      html: emailContent,
+      from: process.env.EMAIL_USER, // Your email
+      to: savedEnquiry.email, // User's email
+      subject: "Your Service Enquiry Confirmation",
+      html: userEmailContent,
+    });
+
+    // Send email to the company
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER, // Your email
+      to: "contact@rentamigo.in", // Company's email
+      subject: "New Service Enquiry",
+      html: companyEmailContent,
     });
 
     res.status(201).json({
       success: true,
-      message: "Enquiry submitted successfully and email sent to tech@rentamigo.in.",
+      message: "Enquiry submitted successfully, and emails sent.",
       data: savedEnquiry,
     });
   } catch (error) {
-    console.error("Error submitting form or sending email:", error);
+    console.error("Error submitting form or sending emails:", error);
     res.status(500).json({
       success: false,
-      message: "Failed to submit enquiry or send email.",
+      message: "Failed to submit enquiry or send emails.",
     });
   }
 });

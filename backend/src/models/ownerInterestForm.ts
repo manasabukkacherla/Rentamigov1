@@ -4,7 +4,7 @@ import { Schema, model, models, Document } from "mongoose";
 interface IOwnerInterestForm extends Document {
   name: string;
   email: string;
-  contactNumber: string; // Matches `contactNumber` from the form
+  mobileNo: string; // Consistent with "mobileNo"
   propertyName: string;
   locality: string;
   city: string;
@@ -22,14 +22,15 @@ const OwnerInterestFormSchema = new Schema<IOwnerInterestForm>(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: true, // To ensure no duplicate email submissions
-      match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // Email validation
+      unique: true, // Ensure no duplicate submissions for the same email
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // Valid email regex
       trim: true,
     },
-    contactNumber: {
+    mobileNo: {
       type: String,
-      required: [true, "Contact number is required"],
-      match: [/^\+?\d{10,}$/, "Invalid phone number format"], // Ensures valid international phone format
+      required: [true, "Mobile number is required"],
+      unique: true, // Ensure no duplicate submissions for the same mobile number
+      match: [/^\+?\d{10,}$/, "Invalid phone number format"], // Valid international format
       trim: true,
     },
     propertyName: {
@@ -50,11 +51,11 @@ const OwnerInterestFormSchema = new Schema<IOwnerInterestForm>(
     isVerified: {
       type: Boolean,
       required: true,
-      default: false, // Initially not verified
+      default: false, // Default value is false until OTP is verified
     },
   },
   {
-    timestamps: true, // Automatically add `createdAt` and `updatedAt` fields
+    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
   }
 );
 
