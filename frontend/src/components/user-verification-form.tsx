@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { ToastAction } from "@/components/ui/toast";
 import { LoaderIcon } from "lucide-react";
 
 export default function UserVerificationForm() {
@@ -18,7 +17,7 @@ export default function UserVerificationForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    contactNumber: "",
+    mobileNo: "", // Updated to "mobileNo" for consistency
     propertyName: "",
     locality: "",
     city: "",
@@ -39,7 +38,7 @@ export default function UserVerificationForm() {
       const response = await fetch("http://localhost:8000/api/owner-interest/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobileNo: formData.contactNumber }),
+        body: JSON.stringify({ mobileNo: formData.mobileNo }),
       });
 
       if (!response.ok) throw new Error("Failed to send OTP");
@@ -66,7 +65,7 @@ export default function UserVerificationForm() {
       const response = await fetch("http://localhost:8000/api/owner-interest/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobileNo: formData.contactNumber, otp }),
+        body: JSON.stringify({ mobileNo: formData.mobileNo, otp }),
       });
 
       if (!response.ok) throw new Error("Invalid OTP");
@@ -112,6 +111,19 @@ export default function UserVerificationForm() {
         title: "Success!",
         description: "Your details have been successfully submitted.",
       });
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        mobileNo: "",
+        propertyName: "",
+        locality: "",
+        city: "",
+      });
+      setOtp("");
+      setOtpSent(false);
+      setIsVerified(false);
     } catch (error) {
       toast({
         variant: "destructive",
@@ -151,12 +163,12 @@ export default function UserVerificationForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="contactNumber">Contact Number</Label>
+              <Label htmlFor="mobileNo">Mobile Number</Label>
               <div className="flex space-x-2">
                 <Input
-                  id="contactNumber"
-                  name="contactNumber"
-                  value={formData.contactNumber}
+                  id="mobileNo"
+                  name="mobileNo"
+                  value={formData.mobileNo}
                   onChange={handleInputChange}
                   disabled={otpSent && isVerified}
                   required
