@@ -119,52 +119,52 @@ const Details: React.FC = () => {
     });
 
   if (loading) {
-    return <p className="text-center text-gray-600">Loading property details...</p>;
+    return <p className="text-center text-gray-600 text-sm md:text-base">Loading property details...</p>;
   }
 
   if (error) {
-    return <p className="text-center text-red-600">Error: {error}</p>;
+    return <p className="text-center text-red-600 text-sm md:text-base">Error: {error}</p>;
   }
 
   if (!propertyDetails) {
-    return <p className="text-center text-gray-600">No property details available.</p>;
+    return <p className="text-center text-gray-600 text-sm md:text-base">No property details available.</p>;
   }
 
   return (
-    <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden">
-      <div className="p-8">
+    <div className="w-full max-w-6xl bg-white rounded-2xl shadow-xl overflow-hidden mx-auto">
+      <div className="p-6 md:p-8">
         <div className="flex items-center space-x-3 mb-6">
           <Home className="w-8 h-8 text-blue-600" />
-          <h1 className="text-3xl font-bold text-gray-900">Property Details</h1>
+          <h1 className="text-xl md:text-3xl font-bold text-gray-900">Property Details</h1>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {/* Configuration */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Home className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Configuration</h3>
-            <p>{propertyDetails.configuration}</p>
+            <h3 className="font-semibold text-sm md:text-base">Configuration</h3>
+            <p className="text-sm md:text-base">{propertyDetails.configuration}</p>
           </div>
 
           {/* Furnishing */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Sofa className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Furnishing</h3>
-            <p>{propertyDetails.furnishingStatus}</p>
+            <h3 className="font-semibold text-sm md:text-base">Furnishing</h3>
+            <p className="text-sm md:text-base">{propertyDetails.furnishingStatus}</p>
           </div>
 
           {/* Facing */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Compass className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Facing</h3>
-            <p>{propertyDetails.facing}</p>
+            <h3 className="font-semibold text-sm md:text-base">Facing</h3>
+            <p className="text-sm md:text-base">{propertyDetails.facing}</p>
           </div>
 
           {/* Floor */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Building2 className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Floor</h3>
-            <p>
+            <h3 className="font-semibold text-sm md:text-base">Floor</h3>
+            <p className="text-sm md:text-base">
               {propertyDetails.floor.current} of {propertyDetails.floor.total} floors
             </p>
           </div>
@@ -172,8 +172,8 @@ const Details: React.FC = () => {
           {/* Parking */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Car className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Parking</h3>
-            <p>
+            <h3 className="font-semibold text-sm md:text-base">Parking</h3>
+            <p className="text-sm md:text-base">
               {propertyDetails.parking.twoWheeler} ({propertyDetails.parking.twoWheelerCount}) Two
               Wheeler
               <br />
@@ -185,8 +185,8 @@ const Details: React.FC = () => {
           {/* Area */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <SquareFootage className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Area</h3>
-            <p>
+            <h3 className="font-semibold text-sm md:text-base">Area</h3>
+            <p className="text-sm md:text-base">
               {propertyDetails.area.value} {propertyDetails.area.unit}
             </p>
           </div>
@@ -194,15 +194,15 @@ const Details: React.FC = () => {
           {/* Availability Date */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Calendar className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Availability Date</h3>
-            <p>{formatDate(propertyDetails.availabilityDate)}</p>
+            <h3 className="font-semibold text-sm md:text-base">Availability Date</h3>
+            <p className="text-sm md:text-base">{formatDate(propertyDetails.availabilityDate)}</p>
           </div>
 
           {/* Tenant Preference */}
           <div className="bg-white p-4 rounded-xl border hover:shadow-lg">
             <Users className="w-6 h-6 text-blue-600" />
-            <h3 className="font-semibold">Tenant Preference</h3>
-            <p>{propertyDetails.tenantPreference.join(" • ")}</p>
+            <h3 className="font-semibold text-sm md:text-base">Tenant Preference</h3>
+            <p className="text-sm md:text-base">{propertyDetails.tenantPreference.join(" • ")}</p>
           </div>
         </div>
       </div>

@@ -17,25 +17,6 @@ interface Property {
   details?: any;
 }
 
-const LoadingCard = () => (
-  <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
-    <div className="h-48 bg-gray-200"></div>
-    <div className="p-4 space-y-3">
-      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-    </div>
-  </div>
-);
-
-const LoadingGrid = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {[...Array(6)].map((_, index) => (
-      <LoadingCard key={index} />
-    ))}
-  </div>
-);
-
 const Tenanthome: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
@@ -75,6 +56,23 @@ const Tenanthome: React.FC = () => {
     fetchProperties();
   }, []);
 
+  const fetchDetailedProperties = async () => {
+    const detailedProperties = await Promise.all(
+      properties.map(async (property) => {
+        try {
+          const response = await axios.get(
+            `http://localhost:8000/api/properties/property-details/${property.propertyId}`
+          );
+          return { ...property, details: response.data };
+        } catch (error) {
+          console.error("Error fetching property details:", error);
+          return property;
+        }
+      })
+    );
+    return detailedProperties;
+  };
+
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     setIsFiltering(true);
@@ -88,7 +86,7 @@ const Tenanthome: React.FC = () => {
     setIsFiltering(false);
   };
 
-   const handleApplyFilters = async (
+  const handleApplyFilters = async (
     filters: Record<string, string[]>,
     priceRange: string | null
   ) => {
@@ -175,35 +173,14 @@ const Tenanthome: React.FC = () => {
   };
 
   const PropertySection = styled.div`
-    flex: 1;
+    width: 75%;
+    margin-left: 25%;
     padding: 20px;
-    margin-left: 20px;
 
     @media (max-width: 768px) {
-      padding: 10px;
+      width: 100%;
       margin-left: 0;
     }
-  `;
-
-  const PropertyGrid = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-    width: 100%;
-
-    @media (max-width: 768px) {
-      grid-template-columns: 1fr;
-    }
-  `;
-
-  const LoadingContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    width: 100%;
-    gap: 16px;
   `;
 
   const styles: Record<string, React.CSSProperties> = {
@@ -223,16 +200,21 @@ const Tenanthome: React.FC = () => {
     },
     mainContent: {
       display: "flex",
-      flexDirection: "row",
       width: "100%",
       position: "relative",
-      gap: "20px",
-      padding: "0 20px",
     },
     filterSection: {
-      top: "10px",
-      width: "300px",
-      flexShrink: 0,
+      width: "5%",
+      right: "500px",
+      left: 0,
+      top: "200px",
+      bottom: 0,
+    },
+    propertyGrid: {
+      display: "grid",
+      gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+      gap: "10px",
+      width: "100%",
     },
   };
 
@@ -248,7 +230,6 @@ const Tenanthome: React.FC = () => {
               </div>
             </div>
           </div>
-          <LoadingGrid />
         </div>
       );
     }
@@ -262,37 +243,16 @@ const Tenanthome: React.FC = () => {
               <span>Filtering properties...</span>
             </div>
           </div>
-          <PropertyGrid>
-            {filteredProperties.map((property, index) => (
-              <div
-                key={property.propertyId || index}
-                className="transition-opacity duration-300 animate-pulse"
-              >
-                <PropertyCard
-                  image={property.image}
-                  title={property.title}
-                  address={property.address}
-                  rent={property.rent}
-                  link={property.link}
-                  propertyId={property.propertyId}
-                />
-              </div>
-            ))}
-          </PropertyGrid>
         </div>
       );
     }
 
     if (filteredProperties.length === 0) {
-      return (
-        <LoadingContainer>
-          <p className="text-gray-600 text-lg">No properties found.</p>
-        </LoadingContainer>
-      );
+      return <p style={{ textAlign: "center" }}>No properties found.</p>;
     }
 
     return (
-      <PropertyGrid>
+      <div style={styles.propertyGrid}>
         {filteredProperties.map((property, index) => (
           <PropertyCard
             key={property.propertyId || index}
@@ -304,7 +264,7 @@ const Tenanthome: React.FC = () => {
             propertyId={property.propertyId}
           />
         ))}
-      </PropertyGrid>
+      </div>
     );
   };
 
