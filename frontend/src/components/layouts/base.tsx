@@ -125,6 +125,9 @@ function Base() {
     propertyVideo: null
   });
 
+
+  
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeStep]);
@@ -135,6 +138,20 @@ function Base() {
     try {
       switch (activeStep) {
         case 'form':
+          // Validate form data
+          if (
+            !formData.propertyName ||
+            !formData.ownerName ||
+            !formData.ownerNumber ||
+            !formData.propertyType ||
+            !formData.propertyConfiguration ||
+            !formData.furnishingStatus ||
+            !formData.facing
+          ) {
+            alert('Please fill in all required fields in the Basic Details step.');
+            return; // Stop here if validation fails
+          }
+    
           const formResponse = await fetch('http://localhost:8000/api/properties/property', {
             method: 'POST',
             headers: {
@@ -142,16 +159,28 @@ function Base() {
             },
             body: JSON.stringify(formData),
           });
-
+    
           if (!formResponse.ok) {
             throw new Error('Failed to save property form data');
           }
-
+    
           const createdProperty = await formResponse.json();
           setPropertyId(createdProperty._id);
           break;
-
+    
         case 'location':
+          // Validate location data
+          if (
+            !locationData.flatNo ||
+            !locationData.addressLine1 ||
+            !locationData.locality ||
+            !locationData.area ||
+            !locationData.pinCode
+          ) {
+            alert('Please fill in all required fields in the Location step.');
+            return; // Stop here if validation fails
+          }
+    
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/property-location', {
             method: 'POST',
@@ -161,8 +190,25 @@ function Base() {
             body: JSON.stringify({ ...locationData, property: propertyId }),
           });
           break;
-
+    
         case 'features':
+          // Validate features data
+          if (
+            !featuresData.bedrooms ||
+            !featuresData.bathrooms ||
+            !featuresData.balconies ||
+            !featuresData.floorNumber ||
+            !featuresData.totalFloors ||
+            !featuresData.superBuiltupArea ||
+            !featuresData.builtupArea ||
+            !featuresData.carpetArea ||
+            !featuresData.propertyAge ||
+            !featuresData.propertyDescription
+          ) {
+            alert('Please fill in all required fields in the Features step.');
+            return; // Stop here if validation fails
+          }
+    
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/property-features', {
             method: 'POST',
@@ -172,7 +218,7 @@ function Base() {
             body: JSON.stringify({ ...featuresData, property: propertyId }),
           });
           break;
-
+    
         case 'amenities':
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/society-amenities', {
@@ -183,7 +229,7 @@ function Base() {
             body: JSON.stringify({ ...amenitiesData, property: propertyId }),
           });
           break;
-
+    
         case 'flatAmenities':
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/flat-amenities', {
@@ -194,7 +240,7 @@ function Base() {
             body: JSON.stringify({ ...flatAmenitiesData, property: propertyId }),
           });
           break;
-
+    
         case 'restrictions':
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/property-restrictions', {
@@ -205,8 +251,14 @@ function Base() {
             body: JSON.stringify({ ...restrictionsData, property: propertyId }),
           });
           break;
-
+    
         case 'commercials':
+          // Validate commercials data
+          if (!commercialsData.monthlyRent || !commercialsData.securityDeposit) {
+            alert('Please fill in all required fields in the Commercials step.');
+            return; // Stop here if validation fails
+          }
+    
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/property-commercials', {
             method: 'POST',
@@ -216,8 +268,14 @@ function Base() {
             body: JSON.stringify({ ...commercialsData, property: propertyId }),
           });
           break;
-
+    
         case 'availability':
+          // Validate availability data
+          if (!availabilityData.availableFrom) {
+            alert('Please select a date in the Availability step.');
+            return; // Stop here if validation fails
+          }
+    
           if (!propertyId) throw new Error('Property ID is missing');
           await fetch('http://localhost:8000/api/properties/property-availability', {
             method: 'POST',
@@ -227,11 +285,11 @@ function Base() {
             body: JSON.stringify({ ...availabilityData, property: propertyId }),
           });
           break;
-
+    
         default:
           break;
       }
-
+    
       if (currentIndex < steps.length - 1) {
         setActiveStep(steps[currentIndex + 1].id);
         setShowMobileMenu(false);
@@ -240,7 +298,7 @@ function Base() {
       console.error('Error saving data:', error);
       alert('Failed to save data. Please try again.');
     }
-  };
+  }
 
   const handlePrevious = () => {
     const currentIndex = steps.findIndex((step) => step.id === activeStep);
@@ -265,7 +323,9 @@ function Base() {
       case 'flatAmenities':
         return <FlatAmenities amenitiesData={flatAmenitiesData} setAmenitiesData={setFlatAmenitiesData} />;
       case 'restrictions':
-        return <PropertyRestrictions restrictionsData={restrictionsData} setRestrictionsData={setRestrictionsData} />;
+        return <PropertyRestrictions restrictionsData={restrictionsData} setRestrictionsData={setRestrictionsData} onValidationError={function (message: string): void {
+          throw new Error('Function not implemented.');
+        } } />;
       case 'commercials':
         return <PropertyCommercials commercialsData={commercialsData} setCommercialsData={setCommercialsData} />;
       case 'availability':
@@ -421,6 +481,6 @@ function Base() {
       )}
     </div>
   );
-}
+  }
 
 export default Base;

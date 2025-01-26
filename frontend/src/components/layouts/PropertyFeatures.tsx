@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Bed, Bath, Home, Building2, Warehouse, Clock, FileText } from 'lucide-react';
 import { InputField } from './InputField';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export interface FeaturesData {
   _id: any;
@@ -36,14 +38,30 @@ const AGE_OPTIONS = [
   { value: '>10 Years', label: 'More than 10 Years' },
 ];
 
-export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeaturesProps) {
-  const handleExtraRoomChange = (room: string) => {
-    setFeaturesData(prev => ({
-      ...prev,
-      extraRooms: prev.extraRooms.includes(room)
-        ? prev.extraRooms.filter(r => r !== room)
-        : [...prev.extraRooms, room],
-    }));
+export function PropertyFeatures({
+  featuresData,
+  setFeaturesData,
+}: PropertyFeaturesProps) {
+  const [isValid, setIsValid] = useState({
+    bedrooms: true,
+    bathrooms: true,
+    balconies: true,
+    floorNumber: true,
+    totalFloors: true,
+    superBuiltupArea: true,
+    builtupArea: true,
+    carpetArea: true,
+    propertyAge: true,
+    propertyDescription: true,
+  });
+
+  const validateField = (field: keyof FeaturesData, value: string) => {
+    if (!value) {
+      setIsValid((prev) => ({ ...prev, [field]: false }));
+      toast.error(`${field.replace(/([A-Z])/g, ' $1')} is required`);
+    } else {
+      setIsValid((prev) => ({ ...prev, [field]: true }));
+    }
   };
 
   return (
@@ -53,33 +71,45 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
           label="Number of Bedrooms"
           icon={Bed}
           value={featuresData.bedrooms}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, bedrooms: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, bedrooms: value }));
+            validateField('bedrooms', value);
+          }}
           type="number"
           placeholder="Enter number of bedrooms"
           min="1"
           max="10"
+          className={!isValid.bedrooms ? 'border-red-500' : ''}
         />
 
         <InputField
           label="Number of Bathrooms"
           icon={Bath}
           value={featuresData.bathrooms}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, bathrooms: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, bathrooms: value }));
+            validateField('bathrooms', value);
+          }}
           type="number"
           placeholder="Enter number of bathrooms"
           min="1"
           max="10"
+          className={!isValid.bathrooms ? 'border-red-500' : ''}
         />
 
         <InputField
           label="Number of Balconies"
           icon={Home}
           value={featuresData.balconies}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, balconies: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, balconies: value }));
+            validateField('balconies', value);
+          }}
           type="number"
           placeholder="Enter number of balconies"
           min="0"
           max="10"
+          className={!isValid.balconies ? 'border-red-500' : ''}
         />
 
         <div>
@@ -90,7 +120,14 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
                 <input
                   type="checkbox"
                   checked={featuresData.extraRooms.includes(room)}
-                  onChange={() => handleExtraRoomChange(room)}
+                  onChange={() =>
+                    setFeaturesData((prev) => ({
+                      ...prev,
+                      extraRooms: prev.extraRooms.includes(room)
+                        ? prev.extraRooms.filter((r) => r !== room)
+                        : [...prev.extraRooms, room],
+                    }))
+                  }
                   className="rounded border-gray-300 text-red-500 focus:ring-red-500"
                 />
                 <span className="text-sm text-gray-700">{room}</span>
@@ -103,47 +140,67 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
           label="Floor of the property"
           icon={Building2}
           value={featuresData.floorNumber}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, floorNumber: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, floorNumber: value }));
+            validateField('floorNumber', value);
+          }}
           type="number"
           placeholder="Enter floor number"
           min="0"
+          className={!isValid.floorNumber ? 'border-red-500' : ''}
         />
 
         <InputField
           label="Total No of floors"
           icon={Building2}
           value={featuresData.totalFloors}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, totalFloors: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, totalFloors: value }));
+            validateField('totalFloors', value);
+          }}
           type="number"
           placeholder="Enter total floors"
           min="1"
+          className={!isValid.totalFloors ? 'border-red-500' : ''}
         />
 
         <InputField
           label="Super Builtup Area (sq ft)"
           icon={Warehouse}
           value={featuresData.superBuiltupArea}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, superBuiltupArea: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, superBuiltupArea: value }));
+            validateField('superBuiltupArea', value);
+          }}
           type="number"
           placeholder="Super Builtup Area"
+          className={!isValid.superBuiltupArea ? 'border-red-500' : ''}
         />
 
         <InputField
           label="Built Up Area (sq ft)"
           icon={Warehouse}
           value={featuresData.builtupArea}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, builtupArea: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, builtupArea: value }));
+            validateField('builtupArea', value);
+          }}
           type="number"
           placeholder="Built Up Area"
+          className={!isValid.builtupArea ? 'border-red-500' : ''}
         />
 
         <InputField
           label="Carpet Area (sq ft)"
           icon={Warehouse}
           value={featuresData.carpetArea}
-          onChange={(value) => setFeaturesData(prev => ({ ...prev, carpetArea: value }))}
+          onChange={(value) => {
+            setFeaturesData((prev) => ({ ...prev, carpetArea: value }));
+            validateField('carpetArea', value);
+          }}
           type="number"
           placeholder="Carpet Area"
+          className={!isValid.carpetArea ? 'border-red-500' : ''}
         />
 
         <div>
@@ -159,7 +216,13 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
                   name="propertyAge"
                   value={option.value}
                   checked={featuresData.propertyAge === option.value}
-                  onChange={(e) => setFeaturesData(prev => ({ ...prev, propertyAge: e.target.value }))}
+                  onChange={(e) => {
+                    setFeaturesData((prev) => ({
+                      ...prev,
+                      propertyAge: e.target.value,
+                    }));
+                    validateField('propertyAge', e.target.value);
+                  }}
                   className="border-gray-300 text-red-500 focus:ring-red-500"
                 />
                 <span className="text-sm text-gray-700">{option.label}</span>
@@ -177,11 +240,24 @@ export function PropertyFeatures({ featuresData, setFeaturesData }: PropertyFeat
         </label>
         <textarea
           value={featuresData.propertyDescription}
-          onChange={(e) => setFeaturesData(prev => ({ ...prev, propertyDescription: e.target.value }))}
+          onChange={(e) => {
+            setFeaturesData((prev) => ({
+              ...prev,
+              propertyDescription: e.target.value,
+            }));
+            validateField('propertyDescription', e.target.value);
+          }}
           rows={4}
           placeholder="Enter a detailed description of the property"
-          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm"
+          className={`block w-full border ${
+            !isValid.propertyDescription ? 'border-red-500' : 'border-gray-300'
+          } rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm`}
         ></textarea>
+        {!isValid.propertyDescription && (
+          <p className="text-sm text-red-500 mt-1">
+            Property Description is required.
+          </p>
+        )}
       </div>
     </div>
   );

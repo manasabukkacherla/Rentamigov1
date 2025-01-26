@@ -131,7 +131,8 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
     if (!formData.ownerName) errors.ownerName = "Owner Name is required.";
     if (!formData.ownerNumber) errors.ownerNumber = "Owner Number is required.";
     if (!formData.propertyType) errors.propertyType = "Property Type is required.";
-    if (!formData.propertyConfiguration) errors.propertyConfiguration = "Property Configuration is required.";
+    if (!formData.propertyConfiguration)
+      errors.propertyConfiguration = "Property Configuration is required.";
     if (!formData.furnishingStatus) errors.furnishingStatus = "Furnishing Status is required.";
     if (!formData.facing) errors.facing = "Facing is required.";
 
@@ -142,7 +143,7 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSubmit(); // Trigger the parent’s submit logic
+      onSubmit();
     }
   };
 
@@ -158,23 +159,20 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           value={formData.propertyName}
           onChange={updateField("propertyName")}
           placeholder="Enter property name"
-          error={validationErrors.propertyName}
         />
         <InputField
           label="Owner Name"
           icon={User}
           value={formData.ownerName}
           onChange={updateField("ownerName")}
-          placeholder="Enter the owner's name"
-          error={validationErrors.ownerName}
+          placeholder="Enter owner's name"
         />
         <InputField
           label="Owner Number"
           icon={Phone}
           value={formData.ownerNumber}
           onChange={updateField("ownerNumber")}
-          placeholder="Enter the contact number"
-          error={validationErrors.ownerNumber}
+          placeholder="Enter contact number"
         />
         <SelectField
           label="Property Type"
@@ -182,7 +180,6 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           value={formData.propertyType}
           onChange={updateField("propertyType")}
           options={PROPERTY_TYPES}
-          error={validationErrors.propertyType}
         />
         <SelectField
           label="Property Configuration"
@@ -190,7 +187,6 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           value={formData.propertyConfiguration}
           onChange={updateField("propertyConfiguration")}
           options={PROPERTY_CONFIGURATIONS}
-          error={validationErrors.propertyConfiguration}
         />
         <SelectField
           label="Furnishing Status"
@@ -198,7 +194,6 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           value={formData.furnishingStatus}
           onChange={updateField("furnishingStatus")}
           options={FURNISHING_STATUS}
-          error={validationErrors.furnishingStatus}
         />
         <SelectField
           label="Facing"
@@ -206,13 +201,12 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           value={formData.facing}
           onChange={updateField("facing")}
           options={FACING_OPTIONS}
-          error={validationErrors.facing}
         />
       </div>
       {["Semi Furnished", "Fully Furnished", "Partially Furnished"].includes(
         formData.furnishingStatus
       ) && (
-        <div className="mt-4">
+        <div>
           <p className="text-lg font-medium">Amenities</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {amenities.map(({ id, label, icon: Icon }) => (
@@ -232,10 +226,10 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           </div>
         </div>
       )}
-      <div className="mt-4 flex justify-end">
+      <div className="flex justify-end">
         <button
           onClick={handleSubmit}
-          className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
         >
           Next
         </button>

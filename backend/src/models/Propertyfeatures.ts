@@ -7,7 +7,7 @@ interface IPropertyFeatures extends Document {
   bedrooms: number;
   bathrooms: number;
   balconies: number;
-  extraRooms: string[]; // List of extra rooms
+  extraRooms?: string[]; // Optional field for extra rooms
   floorNumber: number;
   totalFloors: number;
   superBuiltupArea: number; // in sq ft
