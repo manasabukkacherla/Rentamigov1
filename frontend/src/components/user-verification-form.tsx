@@ -35,7 +35,7 @@ export default function UserVerificationForm() {
   const sendOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/owner-interest/send-otp", {
+      const response = await fetch("https://api.rentamigo.in/api/owner-interest/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobileNo: formData.mobileNo }),
@@ -62,7 +62,7 @@ export default function UserVerificationForm() {
   const verifyOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/owner-interest/verify-otp", {
+      const response = await fetch("https://api.rentamigo.in/api/owner-interest/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ mobileNo: formData.mobileNo, otp }),
@@ -99,7 +99,7 @@ export default function UserVerificationForm() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/api/owner-interest/owner", {
+      const response = await fetch("https://api.rentamigo.in/api/owner-interest/owner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, isVerified: true }),

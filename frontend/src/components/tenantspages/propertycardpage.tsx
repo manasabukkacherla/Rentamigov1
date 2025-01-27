@@ -44,8 +44,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
   useEffect(() => {
     const fetchPropertyData = async () => {
       try {
-        const propertiesBaseUrl = "http://localhost:8000/api/properties";
-        const photosBaseUrl = "http://localhost:8000/api/photos";
+        const propertiesBaseUrl = "https://api.rentamigo.in/api/properties";
+        const photosBaseUrl = "https://api.rentamigo.in/api/photos";
 
         // Fetch locality and area
         const locationResponse = await axios.get(`${propertiesBaseUrl}/${propertyId}/locations`);

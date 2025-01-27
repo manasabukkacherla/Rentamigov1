@@ -28,7 +28,7 @@ useEffect(() => {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:8000/api/properties/allproperties");
+      const response = await fetch("https://api.rentamigo.in/api/properties/allproperties");
       if (!response.ok) {
         throw new Error("Failed to fetch properties.");
       }
@@ -77,7 +77,7 @@ useEffect(() => {
   const handleDeleteProperty = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this property?')) {
       try {
-        const response = await fetch(`http://localhost:8000/api/properties/${id}`, {
+        const response = await fetch(`https://api.rentamigo.in/api/properties/${id}`, {
           method: "DELETE",
         });
         if (!response.ok) {

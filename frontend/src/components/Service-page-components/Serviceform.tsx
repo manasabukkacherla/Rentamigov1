@@ -60,7 +60,7 @@ export default function ServiceEnquiryForm() {
   const handleSendOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/service/send-otp", {
+      const response = await fetch("https://api.rentamigo.in/api/service/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export default function ServiceEnquiryForm() {
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/service/verify-otp", {
+      const response = await fetch("https://api.rentamigo.in/api/service/verify-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,7 +156,7 @@ export default function ServiceEnquiryForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/service/submit-form", {
+      const response = await fetch("https://api.rentamigo.in/api/service/submit-form", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
