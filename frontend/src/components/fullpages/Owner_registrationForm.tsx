@@ -32,10 +32,11 @@ export default function PropertyRegistrationForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSendOtp = async () => {
+  {
+    /*const handleSendOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/property/send-otp", {
+      const response = await fetch("https://api.rentamigo.in/api/property/send-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -68,12 +69,14 @@ export default function PropertyRegistrationForm() {
     } finally {
       setIsLoading(false);
     }
-  };
+  };*/
+  }
 
-  const handleVerifyOtp = async () => {
+  {
+    /*const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:8000/api/property/verify-otp", {
+      const response = await fetch("https://api.rentamigo.in/api/property/verify-otp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,33 +108,37 @@ export default function PropertyRegistrationForm() {
     } finally {
       setIsLoading(false);
     }
-  };
+  };*/
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isVerified) {
+    {/*if (!isVerified) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Please verify your phone number before submission.",
       });
       return;
-    }
+    }*/}
 
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/property/submit-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          isVerified: true,
-        }),
-      });
+      const response = await fetch(
+        "https://api.rentamigo.in/api/property/submit-form",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            isVerified: true,
+          }),
+        }
+      );
 
       if (!response.ok) throw new Error("Failed to submit form");
 
@@ -200,7 +207,7 @@ export default function PropertyRegistrationForm() {
                     required
                     className="flex-1 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
                   />
-                  {!isVerified && (
+                  {/* {!isVerified && (
                     <Button
                       type="button"
                       onClick={handleSendOtp}
@@ -209,11 +216,11 @@ export default function PropertyRegistrationForm() {
                     >
                       {isLoading ? <LoaderIcon className="h-4 w-4 animate-spin" /> : "Send OTP"}
                     </Button>
-                  )}
+                  )}*/}
                 </div>
               </div>
 
-              {otpSent && !isVerified && (
+              {/*{otpSent && !isVerified && (
                 <div className="space-y-2">
                   <Label htmlFor="otp">Enter OTP</Label>
                   <div className="flex space-x-2">
@@ -238,9 +245,9 @@ export default function PropertyRegistrationForm() {
                     </Button>
                   </div>
                 </div>
-              )}
+              )}*/}
 
-              <Button type="submit" className="w-full" disabled={isSubmitting || !isVerified}>
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
                 {isSubmitting ? (
                   <LoaderIcon className="h-4 w-4 animate-spin mr-2" />
                 ) : null}

@@ -152,7 +152,7 @@ function Base() {
             return; // Stop here if validation fails
           }
     
-          const formResponse = await fetch('http://localhost:8000/api/properties/property', {
+          const formResponse = await fetch('https://api.rentamigo.in/api/properties/property', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -182,7 +182,7 @@ function Base() {
           }
     
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/property-location', {
+          await fetch('https://api.rentamigo.in/api/properties/property-location', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -210,7 +210,7 @@ function Base() {
           }
     
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/property-features', {
+          await fetch('https://api.rentamigo.in/api/properties/property-features', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -221,7 +221,7 @@ function Base() {
     
         case 'amenities':
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/society-amenities', {
+          await fetch('https://api.rentamigo.in/api/properties/society-amenities', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -232,7 +232,7 @@ function Base() {
     
         case 'flatAmenities':
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/flat-amenities', {
+          await fetch('https://api.rentamigo.in/api/properties/flat-amenities', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -243,7 +243,7 @@ function Base() {
     
         case 'restrictions':
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/property-restrictions', {
+          await fetch('https://api.rentamigo.in/api/properties/property-restrictions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -260,7 +260,7 @@ function Base() {
           }
     
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/property-commercials', {
+          await fetch('https://api.rentamigo.in/api/properties/property-commercials', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ function Base() {
           }
     
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('http://localhost:8000/api/properties/property-availability', {
+          await fetch('https://api.rentamigo.in/api/properties/property-availability', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

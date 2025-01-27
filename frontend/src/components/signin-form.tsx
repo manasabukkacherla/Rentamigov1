@@ -25,7 +25,7 @@ export function LoginForm() {
 
       // Step 1: Get user data from Google
       const response = await axios.post(
-        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/auth/google",
+        "https://api.rentamigo.in//api/auth/google",
         {
           credential: credentialResponse.credential,
         }
@@ -36,7 +36,7 @@ export function LoginForm() {
 
       // Step 2: Verify if the user is an employee
       const verificationResponse = await axios.post(
-        "https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/employees/verify",
+        "https://api.rentamigo.in//api/employees/verify",
         {
           email: userData.user.email,
         }

@@ -27,7 +27,7 @@ const PropertyDetails: React.FC = () => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await axios.get(
-          `https://c5zaskxsitwlc33abxxgi3smli0lydfl.lambda-url.us-east-1.on.aws/api/properties/${id}`
+          `https://api.rentamigo.in//api/properties/${id}`
         );
         setProperty(response.data);
         setLoading(false);

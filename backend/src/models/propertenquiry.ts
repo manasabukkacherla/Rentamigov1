@@ -31,7 +31,6 @@ const PropertyEnquirySchema = new Schema<IPropertyEnquiry>(
     },
     isVerified: {
       type: Boolean,
-      required: true,
       default: false, // Initially not verified
     },
   },

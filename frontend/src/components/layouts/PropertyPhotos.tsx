@@ -54,7 +54,7 @@ export function PropertyPhotos({
       setLoading(true);
 
       const response = await fetch(
-        "http://localhost:8000/api/photos/upload-photos",
+        "https://api.rentamigo.in/api/photos/upload-photos",
         {
           method: "POST",
           headers: {

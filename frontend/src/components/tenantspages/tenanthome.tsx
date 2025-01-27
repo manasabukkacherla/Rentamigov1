@@ -29,7 +29,7 @@ const Tenanthome: React.FC = () => {
       try {
         setIsLoading(true);
         const response = await axios.get(
-          "http://localhost:8000/api/properties/property"
+          "https://api.rentamigo.in/api/properties/property"
         );
 
         const formattedProperties = response.data.map((property: any) => ({
@@ -39,7 +39,7 @@ const Tenanthome: React.FC = () => {
           address: `${property.locality || "Unknown Locality"}, ${
             property.area || "Unknown Area"
           }`,
-          rent: `₹${property.monthlyRent?.toLocaleString() || "0"}`,
+          rent: property.monthlyRent || 0,
           link: `/Fullpage/${property._id}`,
           propertyId: property._id,
         }));
@@ -61,7 +61,7 @@ const Tenanthome: React.FC = () => {
       properties.map(async (property) => {
         try {
           const response = await axios.get(
-            `http://localhost:8000/api/properties/property-details/${property.propertyId}`
+            `https://api.rentamigo.in/api/properties/property-details/${property.propertyId}`
           );
           return { ...property, details: response.data };
         } catch (error) {
@@ -90,6 +90,7 @@ const Tenanthome: React.FC = () => {
     filters: Record<string, string[]>,
     priceRange: string | null
   ) => {
+    setIsFiltering(true);
     const detailedProperties = await fetchDetailedProperties();
 
     const filtered = detailedProperties.filter((property) => {
@@ -107,9 +108,17 @@ const Tenanthome: React.FC = () => {
 
       if (priceRange) {
         const rent = details.propertyCommercials?.monthlyRent || 0;
-        const [min, max] = priceRange.split("-").map((x) => x.trim().replace(/\D/g, ""));
-        if (min && rent < parseInt(min, 10)) return false;
-        if (max && rent > parseInt(max, 10)) return false;
+        if (priceRange === "< 10k") {
+          if (rent >= 10000) return false;
+        } else if (priceRange === "> 70k") {
+          if (rent <= 70000) return false;
+        } else {
+          const [min, max] = priceRange
+            .split("-")
+            .map((x) => parseInt(x.trim().replace(/\D/g, "")) * 1000);
+          if (min && rent < min) return false;
+          if (max && rent > max) return false;
+        }
       }
 
       if (
@@ -137,7 +146,7 @@ const Tenanthome: React.FC = () => {
           const daysDifference = Math.ceil(
             (availableFrom.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
           );
-          if (date === "Immediate" && daysDifference <= 0) return true;
+          if (date === "Immediate" && daysDifference <= 2) return true;
           if (date === "Within 15 Days" && daysDifference <= 15) return true;
           if (date === "Within 30 Days" && daysDifference <= 30) return true;
           if (date === "After 30 Days" && daysDifference > 30) return true;
@@ -147,16 +156,27 @@ const Tenanthome: React.FC = () => {
         return false;
       }
 
+
       if (
         filters["Preferred Tenants"] &&
         filters["Preferred Tenants"].length > 0 &&
         !filters["Preferred Tenants"].some((tenant) => {
-          const preferred = [
-            details.propertyRestrictions.bachelorTenants === "Yes" && "Bachelor Male",
-            details.propertyRestrictions.bachelorTenants === "Yes" && "Bachelor Female",
-            details.propertyRestrictions.tenantWithPets === "Yes" && "Family",
-          ];
-          return preferred.includes(tenant);
+          if (tenant === "BachelorTenants") {
+            return details.propertyRestrictions.bachelorTenants === "Yes";
+          }
+          if (tenant === "nonVegTenants") {
+            return details.propertyRestrictions.nonVegTenants === "Yes";
+          }
+          if (tenant === "tenantWithPets") {
+            return details.propertyRestrictions.tenantWithPets === "Yes";
+          }
+          if (tenant === "Family") {
+            return (
+              details.propertyRestrictions.bachelorTenants === "No" ||
+              details.propertyRestrictions.bachelorTenants === "NA"
+            );
+          }
+          return false;
         })
       ) {
         return false;
@@ -166,6 +186,7 @@ const Tenanthome: React.FC = () => {
     });
 
     setFilteredProperties(filtered);
+    setIsFiltering(false);
   };
 
   const handleClearFilters = () => {
@@ -259,7 +280,7 @@ const Tenanthome: React.FC = () => {
             image={property.image}
             title={property.title}
             address={property.address}
-            rent={property.rent}
+            rent={`₹${property.rent.toLocaleString()}`}
             link={property.link}
             propertyId={property.propertyId}
           />

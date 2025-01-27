@@ -195,7 +195,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ onApplyFilters, onCle
                 </div>
               </div>
 
-              {/* Availability Date */}
+              {/* Availability Date 
               <div>
                 <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Availability Date
@@ -223,17 +223,17 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ onApplyFilters, onCle
                 </div>
               </div>
 
-              {/* Preferred Tenants */}
+              {/* Preferred Tenants 
               <div>
                 <h4 className="text-sm font-medium mb-2 text-gray-600">
                   Preferred Tenants
                 </h4>
                 <div className="flex flex-wrap gap-1">
                   {[
+                    "BachelorTenants",
+                    "nonVegTenants",
                     "Family",
-                    "Bachelor Male",
-                    "Bachelor Female",
-                    "Company",
+                    "tenantWithPets",
                   ].map((tenant) => (
                     <Button
                       key={tenant}
@@ -249,7 +249,7 @@ const FilterComponent: React.FC<FilterComponentProps> = ({ onApplyFilters, onCle
                     </Button>
                   ))}
                 </div>
-              </div>
+              </div>*/}
             </div>
           </ScrollArea>
 
