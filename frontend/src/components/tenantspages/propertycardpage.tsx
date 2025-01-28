@@ -123,7 +123,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
         {/* Footer Section */}
         <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50">
           <div>
-            <p className="text-sm text-gray-600">Rent Starting From</p>
+            <p className="text-sm text-gray-600">Rent:</p>
             <p className="text-base font-bold text-gray-800">₹{propertyData.rent}/month</p>
           </div>
           <button
