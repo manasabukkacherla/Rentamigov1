@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Mail, Lock, LogIn, Apple, ExternalLink } from 'lucide-react';
 import TermsAndConditions from './TermsAndConditions';
+import ForgotPassword from './ForgotPassword';
 
 interface LoginProps {
   onSwitchToSignup: () => void;
+  onLoginSuccess: (email: string) => void;
 }
 
 interface GoogleAccount {
@@ -17,20 +19,47 @@ interface AppleAccount {
   name: string;
 }
 
-function Login({ onSwitchToSignup }: LoginProps) {
+function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const [showTerms, setShowTerms] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showGoogleAccounts, setShowGoogleAccounts] = useState(false);
   const [showAppleAccounts, setShowAppleAccounts] = useState(false);
   const [googleAccounts, setGoogleAccounts] = useState<GoogleAccount[]>([]);
   const [appleAccounts, setAppleAccounts] = useState<AppleAccount[]>([]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login:', formData);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Call onLoginSuccess with the user's email
+      onLoginSuccess(formData.email);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleLogin = async () => {
@@ -71,27 +100,49 @@ function Login({ onSwitchToSignup }: LoginProps) {
     }
   };
 
-  const handleSelectAccount = (email: string, type: 'google' | 'apple') => {
-    console.log(`Selected ${type} account:`, email);
-    setShowGoogleAccounts(false);
-    setShowAppleAccounts(false);
+  const handleSelectAccount = async (email: string, type: 'google' | 'apple') => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch('/api/oauth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, provider: type }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      onLoginSuccess(email);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during login');
+    } finally {
+      setLoading(false);
+      setShowGoogleAccounts(false);
+      setShowAppleAccounts(false);
+    }
   };
 
-  const handleForgotPassword = () => {
-    console.log('Forgot password for:', formData.email);
-  };
+  if (showForgotPassword) {
+    return <ForgotPassword onBack={() => setShowForgotPassword(false)} />;
+  }
 
   return (
     <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full relative z-10">
       {/* Logo */}
       <div className="absolute top-8 left-8">
         <img 
-          src="./images/rentamigologou.png" 
+          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=96&h=96&q=80" 
           alt="Company Logo"
           className="w-8 h-8 object-cover rounded-lg"
         />
       </div>
-
 
       <div className="text-center mb-8">
         <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Welcome Back</h2>
@@ -189,6 +240,12 @@ function Login({ onSwitchToSignup }: LoginProps) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        {error && (
+          <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+        
         <div>
           <label className="block text-gray-700 text-sm font-medium mb-2">
             Email Address
@@ -213,7 +270,7 @@ function Login({ onSwitchToSignup }: LoginProps) {
             </label>
             <button
               type="button"
-              onClick={handleForgotPassword}
+              onClick={() => setShowForgotPassword(true)}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
             >
               Forgot Password?
@@ -234,10 +291,17 @@ function Login({ onSwitchToSignup }: LoginProps) {
 
         <button
           type="submit"
-          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
+          disabled={loading}
+          className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          <LogIn className="h-5 w-5" />
-          Sign In
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <LogIn className="h-5 w-5" />
+              Sign In
+            </>
+          )}
         </button>
 
         <div className="text-sm text-gray-500 mt-4">
