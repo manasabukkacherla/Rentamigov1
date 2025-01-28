@@ -17,6 +17,7 @@ import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 import PropertyPage from "./components/layouts/base";
+import Loginhome from "./components/Logins/Loginhome";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -57,6 +58,9 @@ const App = () => {
           <Route path="/property-listing-form" element={<PropertyPage/>} />
           {/* Base Layout */}
           <Route path="/base" element={<PropertyPage />} />
+
+          {/* Logins Layout */}
+          <Route path="/Login" element={<Loginhome />} />
 
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />

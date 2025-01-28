@@ -45,25 +45,25 @@ const Owner_testimonials: React.FC = () => {
               <div className="col-12 col-md-4">
                 <div style={styles.testimonialCard}>
                  
-                  <h5>Mohan Krishna</h5>
+                  <h5>Dheeraj Singh</h5>
                   <p>Bangalore</p>
-                  <p>Partnering with this property management company has been the best decision I’ve made. They handle everything – tenant screening, rent collection, and maintenance – so I can enjoy the benefits of owning property without the stress.													</p>
+                  <p>I had to move to USA in 2023 because of my work with my family. A friend of mine referred me the services of Rentamigo as he was already using the same since last two years. I would definitely say they have been very helpful in managing my duplex house. I visited my house last year and are really impressed by the condition in which it has been maintained.</p>
                 </div>
               </div>
               <div className="col-12 col-md-4 d-none d-md-block">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Madhusudhana Chowdary</h5>
+                  <h5>Swati Ahuja</h5>
                   <p>Marathalle</p>
-                  <p>The onboarding process was smooth and professional. They took the time to understand my property and goals and provided a customized management plan that has worked perfectly.I appreciate how transparent and communicative they are. They keep me updated on everything, from tenant issues to maintenance costs, and ensure I’m never caught off guard.																					</p>
+                  <p>I appreciate their timely payment of rent and transparency in the maintaining of the accounts. I get the rent credited to my account and account statement in my mailbox every month unfailingly by 5th of the month.</p>
                 </div>
               </div>
               <div className="col-12 col-md-4 d-none d-md-block">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Priyanka Reddy</h5>
+                  <h5>Deepak Sanyal</h5>
                   <p>Electronic City</p>
-                  <p>"	Living overseas, I was worried about managing my property back home, but this company has taken care of everything. I have complete peace of mind knowing my investment is in good hands.They’ve done an excellent job retaining tenants. By addressing tenant needs promptly and maintaining the property well, I’ve had no vacancies for over two years!																				"</p>
+                  <p>Rentamigo manages my 3BHK located at Electronics City. Although my tenants couldn’t pay their rent for 2 consecutive months because of loss of job, which I empathize with, Rentamigo ensured that the rent is credited to my account. I came to know of this when they finally decided to vacate and I noticed the settlement statement that Rentamigo was shared with them.</p>
                 </div>
               </div>
             </div>
@@ -74,17 +74,17 @@ const Owner_testimonials: React.FC = () => {
               <div className="col-12 col-md-4">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Sujith</h5>
-                  <p>Jigini</p>
-                  <p>"Amazing experience, would visit again."</p>
+                  <h5>Aditya Prakash</h5>
+                  <p>Bellandur</p>
+                  <p>I had rented a flat in Bellandur from Rentamigo. I never faced any issues from them and also they were very prompt in the refund of Security deposit when I vacated the flat.</p>
                 </div>
               </div>
               <div className="col-12 col-md-4 d-none d-md-block">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Yamini</h5>
+                  <h5>Divya Menon</h5>
                   <p>Yelahanka</p>
-                  <p>"Top-notch facilities and services."</p>
+                  <p>I had rented a flat from Rentamigo along with my friends. When we moved in there were quite a few issues like pigeon mess and a seepage that occurred within 40 days of us moving in. however, Rentamigo attended to all the problems highlighted by us and they ensured that they were taken care of.</p>
                 </div>
               </div>
               <div className="col-12 col-md-4 d-none d-md-block">

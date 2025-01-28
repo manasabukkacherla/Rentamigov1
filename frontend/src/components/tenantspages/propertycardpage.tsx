@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PropertyRegistrationForm from "../fullpages/Owner_registrationForm";
 
 interface PropertyCardProps {
   propertyId: string;
@@ -33,6 +34,7 @@ const PropertyCardSkeleton = () => (
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
   const navigate = useNavigate();
+  const [showEnquiryForm, setShowEnquiryForm] = useState(false);
   const [propertyData, setPropertyData] = useState<{
     image: string;
     title: string;
@@ -61,7 +63,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
             rent = commercialsData.monthlyRent;
           }
         } catch (err) {
-          console.warn("No commercials found, using default rent:", rent);
+          console.warn("No commercials found for property", propertyId);
         }
 
         let coverImage = ""; // Default to an empty string if no cover image is found
@@ -72,19 +74,32 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
           const photosData = photosResponse.data.photos;
           coverImage = photosData.coverImage || ""; // Use coverImage if available
         } catch (err) {
-          console.warn("No photos found, using default image.");
+          console.warn("No photos found for property", propertyId);
         }
 
         // Set property data
         setPropertyData({
-          image: coverImage || locationData.image || "", // Prioritize coverImage
+          image: coverImage || locationData.image || "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80", // Fallback to default image
           title: locationData.propertyName || "Property Title",
           locality: locationData.locality || "Locality not available",
           area: locationData.area || "Area not available",
           rent, // Use fetched or default rent
         });
       } catch (error) {
-        console.error("Error fetching property data:", error);
+        if (error instanceof Error) {
+          console.error("Error fetching property data for ID", propertyId, ":", error.message);
+        } else {
+          console.error("Unknown error fetching property data for ID", propertyId);
+        }
+        
+        // Set fallback data in case of error
+        setPropertyData({
+          image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=80",
+          title: "Property Title",
+          locality: "Locality not available",
+          area: "Area not available",
+          rent: "25000"
+        });
       }
     };
 
@@ -95,48 +110,60 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
     navigate(`/Fullpage/${propertyId}`);
   };
 
+  const handleEnquiryClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowEnquiryForm(true);
+  };
+
   if (!propertyData) {
     return <PropertyCardSkeleton />;
   }
 
   return (
-    <div 
-      onClick={handleClick} 
-      className="cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-    >
-      <div className="w-full max-w-[380px] border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white">
-        {/* Image Section */}
-        <img 
-          src={propertyData.image} 
-          alt={propertyData.title} 
-          className="w-full h-[230px] object-cover"
-        />
+    <>
+      <div 
+        onClick={handleClick} 
+        className="cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+      >
+        <div className="w-full max-w-[380px] border border-gray-200 rounded-lg overflow-hidden shadow-md bg-white">
+          {/* Image Section */}
+          <img 
+            src={propertyData.image} 
+            alt={propertyData.title} 
+            className="w-full h-[230px] object-cover"
+          />
 
-        {/* Content Section */}
-        <div className="p-4">
-          <h3 className="text-lg font-bold mb-1">{propertyData.title}</h3>
-          <p className="text-sm text-gray-600">
-            {propertyData.locality}, {propertyData.area}
-          </p>
-        </div>
-
-        {/* Footer Section */}
-        <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50">
-          <div>
-            <p className="text-sm text-gray-600">Rent Starting From</p>
-            <p className="text-base font-bold text-gray-800">₹{propertyData.rent}/month</p>
+          {/* Content Section */}
+          <div className="p-4">
+            <h3 className="text-lg font-bold mb-1">{propertyData.title}</h3>
+            <p className="text-sm text-gray-600">
+              {propertyData.locality}, {propertyData.area}
+            </p>
           </div>
-          <button
-            className="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors duration-200"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            Enquiry
-          </button>
+
+          {/* Footer Section */}
+          <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50">
+            <div>
+              <p className="text-sm text-gray-600">Rent Starting From</p>
+              <p className="text-base font-bold text-gray-800">₹{propertyData.rent}/month</p>
+            </div>
+            <button
+              className="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors duration-200"
+              onClick={handleEnquiryClick}
+            >
+              Enquiry
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showEnquiryForm && (
+        <PropertyRegistrationForm
+          propertyTitle={propertyData.title}
+          onClose={() => setShowEnquiryForm(false)}
+        />
+      )}
+    </>
   );
 };
 
