@@ -39,6 +39,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Submitting formData:", formData);
     setLoading(true);
     setError(null);
     setSuccess(false);
