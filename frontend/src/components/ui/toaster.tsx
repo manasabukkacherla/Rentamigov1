@@ -1,4 +1,4 @@
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 import {
   Toast,
   ToastClose,
@@ -6,10 +6,10 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from "@/components/ui/toast"
+} from "@/components/ui/toast";
 
 export function Toaster() {
-  const { toasts } = useToast()
+  const { toasts } = useToast();
 
   return (
     <ToastProvider>
@@ -25,9 +25,11 @@ export function Toaster() {
             {action}
             <ToastClose />
           </Toast>
-        )
+        );
       })}
-      <ToastViewport />
+
+      {/* Ensure the toast container is styled to appear above all elements */}
+      <ToastViewport className="fixed top-0 right-0 m-4 z-[9999]" />
     </ToastProvider>
-  )
+  );
 }

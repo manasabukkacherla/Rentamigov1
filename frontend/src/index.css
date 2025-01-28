@@ -6,3 +6,6 @@
     --radius: 0.5rem
   }
 }
+[data-radix-toast-viewport] {
+  z-index: 9999; /* Ensure the toast appears above all other UI elements */
+}
