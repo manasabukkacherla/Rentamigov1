@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import User from "../models/user"; // Import the User model
+import User from "../models/signup"; // Import the User model
 import transporter from "../utils/emailservice"; // Import the email transporter
 
 const signupRouter = express.Router();
