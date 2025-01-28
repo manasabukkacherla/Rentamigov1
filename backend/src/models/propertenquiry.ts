@@ -19,11 +19,12 @@ const PropertyEnquirySchema = new Schema<IPropertyEnquiry>(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: true, // Ensure no duplicate email submissions
+       // Ensure no duplicate email submissions
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // Email validation
       trim: true,
     },
     contactNumber: {
+      
       type: String,
       required: [true, "Contact number is required"],
       match: [/^\+?\d{10,}$/, "Invalid phone number format"], // Ensures valid international phone format

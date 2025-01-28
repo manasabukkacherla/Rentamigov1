@@ -144,15 +144,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
           {/* Footer Section */}
           <div className="flex justify-between items-center p-4 border-t border-gray-100 bg-gray-50">
             <div>
-              <p className="text-sm text-gray-600">Rent Starting From</p>
+              <p className="text-sm text-gray-600">Property Rent </p>
               <p className="text-base font-bold text-gray-800">₹{propertyData.rent}/month</p>
             </div>
-            <button
+            {/*<button
               className="px-5 py-2.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors duration-200"
               onClick={handleEnquiryClick}
             >
-              Enquiry
-            </button>
+              Enquiry 
+            </button>*/}
           </div>
         </div>
       </div>

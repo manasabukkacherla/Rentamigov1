@@ -8,7 +8,7 @@ interface IOwnerInterestForm extends Document {
   propertyName: string;
   locality: string;
   city: string;
-  isVerified: boolean; // To track OTP verification status
+  isVerified: boolean; // Optional but defaults to true now
 }
 
 // Define the Owner Interest Form schema
@@ -22,14 +22,12 @@ const OwnerInterestFormSchema = new Schema<IOwnerInterestForm>(
     email: {
       type: String,
       required: [true, "Email is required"],
-      unique: true, // Ensure no duplicate submissions for the same email
       match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // Valid email regex
       trim: true,
     },
     mobileNo: {
       type: String,
       required: [true, "Mobile number is required"],
-      unique: true, // Ensure no duplicate submissions for the same mobile number
       match: [/^\+?\d{10,}$/, "Invalid phone number format"], // Valid international format
       trim: true,
     },
@@ -50,8 +48,8 @@ const OwnerInterestFormSchema = new Schema<IOwnerInterestForm>(
     },
     isVerified: {
       type: Boolean,
-      required: true,
-      default: false, // Default value is false until OTP is verified
+      required: true, // Ensure that it is always submitted with the request
+      default: true, // Default is true to avoid mandatory OTP verification
     },
   },
   {
