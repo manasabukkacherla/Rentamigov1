@@ -45,7 +45,7 @@ const Testimonials: React.FC = () => {
               <div className="col-12 col-md-4">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Amarnath Reddy</h5>
+                  <h5>LOHIT </h5>
                   <p>bangalore</p>
                   <p>"	The property is clean, safe, and well-maintained. I’ve been living here for two years, and I couldn’t be happier. The management team genuinely cares about the tenants.									"</p>
                 </div>
@@ -53,7 +53,7 @@ const Testimonials: React.FC = () => {
               <div className="col-12 col-md-4 d-none d-md-block">
                 <div style={styles.testimonialCard}>
                   
-                  <h5>Jayanthi</h5>
+                  <h5>VINUTHNA</h5>
                   <p>Sivajinagar</p>
                   <p>"	Moving in was a breeze! The team provided clear instructions, had everything ready on time, and even followed up to ensure I was comfortable in my new home. Exceptional service!										"</p>
                 </div>
