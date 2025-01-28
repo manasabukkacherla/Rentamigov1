@@ -43,6 +43,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     console.log('Apple signup');
   };
 
+  
   return (
     <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full relative z-10">
       {/* Logo */}

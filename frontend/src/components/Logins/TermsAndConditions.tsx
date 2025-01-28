@@ -96,4 +96,5 @@ function TermsAndConditions({ onClose }: TermsAndConditionsProps) {
   );
 }
 
+
 export default TermsAndConditions;
