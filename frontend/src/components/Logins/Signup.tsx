@@ -8,10 +8,17 @@ interface SignupProps {
 
 type UserRole = 'owner' | 'agent' | 'tenant' | 'pg' | 'employee';
 
+interface ApiError {
+  error: string;
+}
+
 function Signup({ onSwitchToLogin }: SignupProps) {
   const [showTerms, setShowTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     phone: '',
     address: '',
@@ -30,40 +37,100 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: 'employee', label: 'Employee' },
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Signup:', formData);
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/sign/register", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error((data as ApiError).error || 'Registration failed');
+      }
+
+      setSuccess(true);
+      // Reset form
+      setFormData({
+        username: '',
+        email: '',
+        phone: '',
+        address: '',
+        city: '',
+        state: '',
+        password: '',
+        role: '' as UserRole,
+        acceptTerms: false,
+      });
+
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        onSwitchToLogin();
+      }, 2000);
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred during registration');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleGoogleSignup = () => {
-    console.log('Google signup');
+    // Implement Google OAuth signup
+    console.log('Google signup - to be implemented');
   };
 
   const handleAppleSignup = () => {
-    console.log('Apple signup');
+    // Implement Apple OAuth signup
+    console.log('Apple signup - to be implemented');
   };
 
-  
   return (
     <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full relative z-10">
       {/* Logo */}
       <div className="absolute top-8 left-8">
         <img 
-          src="./images/rentamigologou.png" 
+          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=96&h=96&q=80" 
           alt="Company Logo"
           className="w-8 h-8 object-cover rounded-lg"
         />
       </div>
 
       <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Create Account</h2>
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Create Account
+        </h2>
         <p className="text-gray-600 text-sm mt-1">Join our property management platform</p>
       </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* Success Message */}
+      {success && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-lg text-sm">
+          Registration successful! Redirecting to login...
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 mb-6">
         <button
           onClick={handleGoogleSignup}
           className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 group"
+          disabled={loading}
         >
           <svg className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" viewBox="0 0 24 24">
             <path
@@ -89,6 +156,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         <button
           onClick={handleAppleSignup}
           className="flex items-center justify-center gap-2 px-4 py-2.5 bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-200 group"
+          disabled={loading}
         >
           <Apple className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" />
           <span className="font-medium">Apple</span>
@@ -110,9 +178,10 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <UserCog className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <select
               required
-              className="w-full pl-12 pr-10 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 appearance-none text-sm"
+              className="w-full pl-12 pr-10 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 appearance-none text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               value={formData.role}
               onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
+              disabled={loading}
             >
               <option value="">Select role</option>
               {roles.map((role) => (
@@ -135,10 +204,14 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <input
               type="text"
               required
-              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Full name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.username}
+              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              pattern="^[a-zA-Z0-9]{8,20}$"
+              title="Username should be 8-20 alphanumeric characters."
+              
+              disabled={loading}
             />
           </div>
         </div>
@@ -149,10 +222,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <input
               type="email"
               required
-              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Email address"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -163,10 +237,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <input
               type="tel"
               required
-              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Phone number"
               value={formData.phone}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -177,10 +252,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <input
               type="password"
               required
-              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Password"
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -191,10 +267,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <input
               type="text"
               required
-              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Address"
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              disabled={loading}
             />
           </div>
         </div>
@@ -204,10 +281,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
           <input
             type="text"
             required
-            className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+            className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
             placeholder="City"
             value={formData.city}
             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            disabled={loading}
           />
         </div>
 
@@ -216,10 +294,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
           <input
             type="text"
             required
-            className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm"
+            className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
             placeholder="State"
             value={formData.state}
             onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+            disabled={loading}
           />
         </div>
 
@@ -231,7 +310,8 @@ function Signup({ onSwitchToLogin }: SignupProps) {
                 required
                 checked={formData.acceptTerms}
                 onChange={(e) => setFormData({ ...formData, acceptTerms: e.target.checked })}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors duration-200 cursor-pointer"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors duration-200 cursor-pointer disabled:cursor-not-allowed"
+                disabled={loading}
               />
             </div>
             <div className="text-xs">
@@ -256,10 +336,23 @@ function Signup({ onSwitchToLogin }: SignupProps) {
 
         <button
           type="submit"
-          className="col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
+          className="col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
+          disabled={loading}
         >
-          <UserPlus className="h-5 w-5" />
-          Create Account
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating Account...
+            </div>
+          ) : (
+            <>
+              <UserPlus className="h-5 w-5" />
+              Create Account
+            </>
+          )}
         </button>
       </form>
 
@@ -269,6 +362,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
           <button
             onClick={onSwitchToLogin}
             className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200"
+            disabled={loading}
           >
             Sign in
           </button>
