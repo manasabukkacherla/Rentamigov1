@@ -88,12 +88,31 @@ export function Properties() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {properties.map((property) => (
-            <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden">
-              <img
-                src={property.image}
-                alt={property.title}
-                className="w-full h-40 sm:h-48 object-cover"
-              />
+            <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden group">
+              <div className="relative">
+                <img
+                  src={property.image}
+                  alt={property.title}
+                  className="w-full h-40 sm:h-48 object-cover"
+                />
+                {/* Overlay with edit/delete buttons */}
+                <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handleEdit(property)}
+                    className="p-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+                    title="Edit Property"
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(property.id)}
+                    className="p-2 bg-white text-red-600 rounded-lg hover:bg-red-50 transition-colors"
+                    title="Delete Property"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
               <div className="p-3 sm:p-4">
                 <h3 className="font-semibold text-base sm:text-lg">{property.title}</h3>
                 <p className="text-gray-500 text-xs sm:text-sm">{property.address}</p>
@@ -108,23 +127,6 @@ export function Properties() {
                   }`}>
                     {property.status}
                   </span>
-                </div>
-                {/* Action buttons */}
-                <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
-                  <button
-                    onClick={() => handleEdit(property)}
-                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    title="Edit Property"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(property.id)}
-                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Delete Property"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
                 </div>
               </div>
             </div>
