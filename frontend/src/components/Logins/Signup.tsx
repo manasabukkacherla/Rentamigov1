@@ -23,6 +23,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
   });
 
   const roles = [
+    { value: 'admin', label: 'Admin' },
     { value: 'owner', label: 'Owner' },
     { value: 'agent', label: 'Agent' },
     { value: 'tenant', label: 'Tenant' },

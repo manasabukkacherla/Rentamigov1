@@ -5,7 +5,7 @@ import Signup from './Signup';
 function Loginhome() {
   const [isLogin, setIsLogin] = useState(true);
 
-  
+
   return (
     <div className="min-h-screen relative bg-gray-50 flex items-center justify-center p-4 overflow-hidden">
       {/* Main content */}
@@ -13,7 +13,9 @@ function Loginhome() {
         <div className="absolute inset-0 bg-white/50 backdrop-blur-lg rounded-2xl transform -rotate-2"></div>
         <div className="absolute inset-0 bg-white/50 backdrop-blur-lg rounded-2xl transform rotate-2"></div>
         {isLogin ? (
-          <Login onSwitchToSignup={() => setIsLogin(false)} />
+          <Login onSwitchToSignup={() => setIsLogin(false)} onLoginSuccess={function (email: string): void {
+                      throw new Error('Function not implemented.');
+                  } } />
         ) : (
           <Signup onSwitchToLogin={() => setIsLogin(true)} />
         )}

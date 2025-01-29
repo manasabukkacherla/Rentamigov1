@@ -18,6 +18,7 @@ import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 import PropertyPage from "./components/layouts/base";
 import Loginhome from "./components/Logins/Loginhome";
+import CommonDashboard from "./components/DashboardFiles/CommonDashboard";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -61,6 +62,9 @@ const App = () => {
 
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
+
+          {/* Dashboard Layout */}
+          <Route path="/CommonDashboard" element={<CommonDashboard />} />
 
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />
