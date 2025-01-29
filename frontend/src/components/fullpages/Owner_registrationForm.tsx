@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -14,155 +13,106 @@ import { Toaster } from "@/components/ui/toaster";
 import { ToastAction } from "@/components/ui/toast";
 import { LoaderIcon } from "lucide-react";
 
-export default function PropertyRegistrationForm() {
+interface PropertyRegistrationFormProps {
+  propertyId: string;
+}
+
+export default function PropertyRegistrationForm({ propertyId }: PropertyRegistrationFormProps) {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     contactNumber: "",
+    propertyId: propertyId, // ✅ Kept for backend submission
+    propertyName: "", // ✅ Kept for backend submission
   });
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [isVerified, setIsVerified] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch property name based on propertyId
+  useEffect(() => {
+    const fetchPropertyDetails = async () => {
+      try {
+        const response = await fetch(`https://api.rentamigo.in/api/properties/propertyds/${propertyId}`);
+        if (!response.ok) throw new Error("Property not found");
+        
+        const data = await response.json();
+        setFormData((prev) => ({ ...prev, propertyName: data.propertyName }));
+      } catch (error) {
+        console.error("Error fetching property details:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch property details.",
+        });
+      }
+    };
+
+    if (propertyId) {
+      fetchPropertyDetails();
+    }
+  }, [propertyId, toast]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  {
-    /*const handleSendOtp = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("https://api.rentamigo.in/api/property/send-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          contactNumber: formData.contactNumber,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to send OTP");
-      }
-
-      setOtpSent(true);
-      toast({
-        title: "OTP Sent",
-        description: "Please check your phone for the verification code.",
-        action: <ToastAction altText="Close">Close</ToastAction>,
-      });
-    } catch (error) {
-      console.error("Error sending OTP:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to send OTP. Please try again.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };*/
-  }
-
-  {
-    /*const handleVerifyOtp = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("https://api.rentamigo.in/api/property/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contactNumber: formData.contactNumber,
-          otp,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Invalid OTP");
-      }
-
-      setIsVerified(true);
-      toast({
-        title: "Success",
-        description: "Phone number verified successfully!",
-        action: <ToastAction altText="Close">Close</ToastAction>,
-      });
-    } catch (error) {
-      console.error("Error verifying OTP:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid OTP. Please try again.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };*/
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    {/*if (!isVerified) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please verify your phone number before submission.",
-      });
-      return;
-    }*/}
-
     setIsSubmitting(true);
-
+  
     try {
-      const response = await fetch(
-        "https://api.rentamigo.in/api/property/submit-form",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            isVerified: true,
-          }),
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to submit form");
-
+      const response = await fetch("http://localhost:8000/api/property/submit-form", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, isVerified: true }), // ✅ Sending `propertyId` & `propertyName`
+      });
+  
+      // ✅ Handle duplicate enquiry response (409 Conflict)
+      if (response.status === 409) {
+        const errorData = await response.json();
+        toast({
+          variant: "destructive",
+          title: "Duplicate Enquiry",
+          description: errorData.message || "You have already submitted an enquiry for this property.",
+          action: <ToastAction altText="Close">Close</ToastAction>,
+        });
+        return;
+      }
+  
+      // ✅ Handle generic errors
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to submit form");
+      }
+  
       toast({
         title: "Success!",
         description: "Your details have been successfully submitted.",
         action: <ToastAction altText="Close">Close</ToastAction>,
       });
-      setFormData({ name: "", email: "", contactNumber: "" });
-      setOtpSent(false);
-      setIsVerified(false);
-    } catch (error) {
+  
+      // ✅ Reset form data after successful submission
+      setFormData((prev) => ({
+        ...prev,
+        name: "",
+        email: "",
+        contactNumber: "",
+      }));
+    } catch (error: any) {
       console.error("Error submitting form:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to submit form. Please try again.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
+        description: error.message || "Failed to submit form. Please try again.",
+        action: <ToastAction altText="Retry">Retry</ToastAction>,
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false); // ✅ Always executed
     }
   };
-
+  
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-4 mt-16">
       <Card className="w-full max-w-[600px]">
@@ -197,60 +147,22 @@ export default function PropertyRegistrationForm() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="contactNumber">Contact Number</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    id="contactNumber"
-                    name="contactNumber"
-                    value={formData.contactNumber}
-                    onChange={handleInputChange}
-                    disabled={otpSent && isVerified}
-                    required
-                    className="flex-1 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
-                  />
-                  {/* {!isVerified && (
-                    <Button
-                      type="button"
-                      onClick={handleSendOtp}
-                      disabled={isLoading || otpSent}
-                      className="w-[120px]"
-                    >
-                      {isLoading ? <LoaderIcon className="h-4 w-4 animate-spin" /> : "Send OTP"}
-                    </Button>
-                  )}*/}
-                </div>
+                <Input
+                  id="contactNumber"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleInputChange}
+                  required
+                  className="hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
+                />
               </div>
 
-              {/*{otpSent && !isVerified && (
-                <div className="space-y-2">
-                  <Label htmlFor="otp">Enter OTP</Label>
-                  <div className="flex space-x-2">
-                    <Input
-                      id="otp"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      required
-                      className="flex-1 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500"
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleVerifyOtp}
-                      disabled={isLoading}
-                      className="w-[120px]"
-                    >
-                      {isLoading ? (
-                        <LoaderIcon className="h-4 w-4 animate-spin" />
-                      ) : (
-                        "Verify OTP"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}*/}
+              {/* ✅ Property ID & Property Name hidden from display but still sent to backend */}
+              <input type="hidden" name="propertyId" value={formData.propertyId} />
+              <input type="hidden" name="propertyName" value={formData.propertyName} />
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? (
-                  <LoaderIcon className="h-4 w-4 animate-spin mr-2" />
-                ) : null}
+                {isSubmitting ? <LoaderIcon className="h-4 w-4 animate-spin mr-2" /> : null}
                 {isSubmitting ? "Submitting..." : "Submit"}
               </Button>
             </div>
@@ -261,3 +173,4 @@ export default function PropertyRegistrationForm() {
     </div>
   );
 }
+  

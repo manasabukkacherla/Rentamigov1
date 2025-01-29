@@ -1,6 +1,7 @@
-import React, { useState, Fragment } from 'react';
-import { Pencil, Trash2, X } from 'lucide-react';
-import { Dialog, Transition } from '@headlessui/react';
+import React, { useState, Fragment } from "react";
+import { Pencil, Trash2, X } from "lucide-react";
+import { Dialog, Transition } from "@headlessui/react";
+import { useNavigate } from "react-router-dom";
 
 interface Property {
   id: number;
@@ -8,8 +9,9 @@ interface Property {
   title: string;
   address: string;
   price: string;
-  status: 'Occupied' | 'Available' | 'Maintenance';
+  status: "Occupied" | "Available" | "Maintenance";
 }
+
 
 const initialProperties: Property[] = [
   {
@@ -18,7 +20,7 @@ const initialProperties: Property[] = [
     title: "Modern Apartment",
     address: "123 Main St, Suite 4B",
     price: "$2,500/month",
-    status: "Occupied"
+    status: "Occupied",
   },
   {
     id: 2,
@@ -26,7 +28,7 @@ const initialProperties: Property[] = [
     title: "Luxury Condo",
     address: "456 Park Ave, Unit 12",
     price: "$3,200/month",
-    status: "Available"
+    status: "Available",
   },
   {
     id: 3,
@@ -34,20 +36,22 @@ const initialProperties: Property[] = [
     title: "Family Home",
     address: "789 Oak Rd",
     price: "$4,000/month",
-    status: "Maintenance"
-  }
+    status: "Maintenance",
+  },
 ];
 
 export function Properties() {
   const [properties, setProperties] = useState<Property[]>(initialProperties);
-  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null
+  );
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
-    title: '',
-    address: '',
-    price: '',
-    status: 'Available' as Property['status']
+    title: "",
+    address: "",
+    price: "",
+    status: "Available" as Property["status"],
   });
 
   const handleEdit = (property: Property) => {
@@ -56,7 +60,7 @@ export function Properties() {
       title: property.title,
       address: property.address,
       price: property.price,
-      status: property.status
+      status: property.status,
     });
     setIsEditModalOpen(true);
   };
@@ -68,7 +72,7 @@ export function Properties() {
 
   const confirmDelete = () => {
     if (selectedProperty) {
-      setProperties(properties.filter(p => p.id !== selectedProperty.id));
+      setProperties(properties.filter((p) => p.id !== selectedProperty.id));
       setIsDeleteModalOpen(false);
       setSelectedProperty(null);
     }
@@ -76,45 +80,59 @@ export function Properties() {
 
   const handleSaveEdit = () => {
     if (selectedProperty) {
-      setProperties(properties.map(p => 
-        p.id === selectedProperty.id 
-          ? { ...p, ...editForm }
-          : p
-      ));
+      setProperties(
+        properties.map((p) =>
+          p.id === selectedProperty.id ? { ...p, ...editForm } : p
+        )
+      );
       setIsEditModalOpen(false);
       setSelectedProperty(null);
     }
   };
-
+  const navigate = useNavigate();
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h2 className="text-lg sm:text-xl font-bold">Properties</h2>
-          <button className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          <button
+            onClick={() => navigate("/property-listing-form")}
+            className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
             Add New Property
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {properties.map((property) => (
-            <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden">
+            <div
+              key={property.id}
+              className="border border-gray-200 rounded-lg overflow-hidden"
+            >
               <img
                 src={property.image}
                 alt={property.title}
                 className="w-full h-40 sm:h-48 object-cover"
               />
               <div className="p-3 sm:p-4">
-                <h3 className="font-semibold text-base sm:text-lg">{property.title}</h3>
-                <p className="text-gray-500 text-xs sm:text-sm">{property.address}</p>
+                <h3 className="font-semibold text-base sm:text-lg">
+                  {property.title}
+                </h3>
+                <p className="text-gray-500 text-xs sm:text-sm">
+                  {property.address}
+                </p>
                 <div className="flex items-center justify-between mt-3 sm:mt-4">
-                  <span className="font-bold text-blue-600 text-sm sm:text-base">{property.price}</span>
-                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
-                    property.status === 'Occupied' 
-                      ? 'bg-green-100 text-green-800'
-                      : property.status === 'Available'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-orange-100 text-orange-800'
-                  }`}>
+                  <span className="font-bold text-blue-600 text-sm sm:text-base">
+                    {property.price}
+                  </span>
+                  <span
+                    className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
+                      property.status === "Occupied"
+                        ? "bg-green-100 text-green-800"
+                        : property.status === "Available"
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-orange-100 text-orange-800"
+                    }`}
+                  >
                     {property.status}
                   </span>
                 </div>
@@ -143,7 +161,11 @@ export function Properties() {
 
       {/* Edit Modal */}
       <Transition appear show={isEditModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsEditModalOpen(false)}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => setIsEditModalOpen(false)}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -189,7 +211,9 @@ export function Properties() {
                       <input
                         type="text"
                         value={editForm.title}
-                        onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, title: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -200,7 +224,9 @@ export function Properties() {
                       <input
                         type="text"
                         value={editForm.address}
-                        onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, address: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -211,7 +237,9 @@ export function Properties() {
                       <input
                         type="text"
                         value={editForm.price}
-                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                        onChange={(e) =>
+                          setEditForm({ ...editForm, price: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
@@ -221,7 +249,12 @@ export function Properties() {
                       </label>
                       <select
                         value={editForm.status}
-                        onChange={(e) => setEditForm({ ...editForm, status: e.target.value as Property['status'] })}
+                        onChange={(e) =>
+                          setEditForm({
+                            ...editForm,
+                            status: e.target.value as Property["status"],
+                          })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="Available">Available</option>
@@ -253,7 +286,11 @@ export function Properties() {
 
       {/* Delete Confirmation Modal */}
       <Transition appear show={isDeleteModalOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={() => setIsDeleteModalOpen(false)}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => setIsDeleteModalOpen(false)}
+        >
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -287,7 +324,8 @@ export function Properties() {
                         Delete Property
                       </Dialog.Title>
                       <Dialog.Description className="mt-2 text-sm text-gray-500">
-                        Are you sure you want to delete this property? This action cannot be undone.
+                        Are you sure you want to delete this property? This
+                        action cannot be undone.
                       </Dialog.Description>
                     </div>
                   </div>
