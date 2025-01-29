@@ -674,7 +674,6 @@ Please follow up with the customer regarding their service request.
           </DialogContent>
         </Dialog>
       </div>
-      <Toaster />
     </div>
   );
 }

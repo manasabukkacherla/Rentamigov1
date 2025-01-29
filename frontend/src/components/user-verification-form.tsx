@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { LoaderIcon } from "lucide-react";
 
 export default function UserVerificationForm() {
   const { toast } = useToast();
@@ -22,9 +21,6 @@ export default function UserVerificationForm() {
     locality: "",
     city: "",
   });
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,73 +28,11 @@ export default function UserVerificationForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const sendOtp = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("https://api.rentamigo.in/api/owner-interest/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobileNo: formData.mobileNo }),
-      });
-
-      if (!response.ok) throw new Error("Failed to send OTP");
-
-      setOtpSent(true);
-      toast({
-        title: "OTP Sent",
-        description: "An OTP has been sent to your phone number.",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to send OTP. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const verifyOtp = async () => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("https://api.rentamigo.in/api/owner-interest/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mobileNo: formData.mobileNo, otp }),
-      });
-
-      if (!response.ok) throw new Error("Invalid OTP");
-
-      setIsVerified(true);
-      toast({
-        title: "Success",
-        description: "Phone number verified successfully!",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Invalid OTP. Please try again.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isVerified) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please verify your phone number before submission.",
-      });
-      return;
-    }
-
     try {
+      setIsLoading(true);
       const response = await fetch("https://api.rentamigo.in/api/owner-interest/owner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -121,15 +55,14 @@ export default function UserVerificationForm() {
         locality: "",
         city: "",
       });
-      setOtp("");
-      setOtpSent(false);
-      setIsVerified(false);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
         description: "Failed to submit form. Please try again.",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -164,38 +97,14 @@ export default function UserVerificationForm() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="mobileNo">Mobile Number</Label>
-              <div className="flex space-x-2">
-                <Input
-                  id="mobileNo"
-                  name="mobileNo"
-                  value={formData.mobileNo}
-                  onChange={handleInputChange}
-                  disabled={otpSent && isVerified}
-                  required
-                />
-                {!isVerified && (
-                  <Button onClick={sendOtp} disabled={isLoading || otpSent}>
-                    {isLoading ? <LoaderIcon className="animate-spin" /> : "Send OTP"}
-                  </Button>
-                )}
-              </div>
+              <Input
+                id="mobileNo"
+                name="mobileNo"
+                value={formData.mobileNo}
+                onChange={handleInputChange}
+                required
+              />
             </div>
-            {otpSent && !isVerified && (
-              <div className="space-y-2">
-                <Label htmlFor="otp">Enter OTP</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    id="otp"
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    required
-                  />
-                  <Button onClick={verifyOtp} disabled={isLoading}>
-                    {isLoading ? <LoaderIcon className="animate-spin" /> : "Verify OTP"}
-                  </Button>
-                </div>
-              </div>
-            )}
             <div className="space-y-2">
               <Label htmlFor="propertyName">Property Name</Label>
               <Input
@@ -226,8 +135,8 @@ export default function UserVerificationForm() {
                 required
               />
             </div>
-            <Button type="submit" disabled={!isVerified}>
-              Submit
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Submitting..." : "Submit"}
             </Button>
           </form>
         </CardContent>

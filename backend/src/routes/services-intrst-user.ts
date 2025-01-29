@@ -13,7 +13,7 @@ router.post("/service-enquiry", async (req: Request, res: Response) => {
     // Validate required fields
     if (
       !name ||
-      !email ||
+      !email ||+
       !mobileNo ||
       !selectedServices ||
       selectedServices.length === 0

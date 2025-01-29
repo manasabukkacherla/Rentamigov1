@@ -21,7 +21,9 @@ import ownerInterestRouter from "./routes/ownerInterest";
 import photosRouter from "./routes/Propertyphoto";
 import propertyEnquiryRoutes from "./routes/propertyEnquiryRoutes";
 import enquiryRoutes from "./routes/enquiryRoutes";
-
+import signupRouter from "./routes/signupform";// Replace with the correct file path for User
+import loginRouter from "./routes/authRoutes";
+import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -49,7 +51,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encod
 
 // Routes
 app.use("/api/verify", verifyRouter);
-app.use("/api/users", userRouter); // User routes
+
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", employeeRouter); // Employee routes
@@ -61,6 +63,9 @@ app.use("/api/owner-interest", ownerInterestRouter)
 app.use("/api/Photos",photosRouter);
 app.use("/api/property",propertyEnquiryRoutes)
 app.use("/api/service", enquiryRoutes);
+app.use("/api/sign",signupRouter);
+app.use("/api/auth", loginRouter);
+app.use("/api", forgotPasswordRoutes); 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Welcome to the API" });

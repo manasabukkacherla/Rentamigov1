@@ -29,7 +29,7 @@ function ForgotPassword({ onBack }: ForgotPasswordProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/forgot-password', {
+      const response = await fetch('http://localhost:8000/api/forgot-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ function ForgotPassword({ onBack }: ForgotPasswordProps) {
 
     try {
       const otpString = otp.join('');
-      const response = await fetch('/api/verify-otp', {
+      const response = await fetch('http://localhost:8000/api/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ function ForgotPassword({ onBack }: ForgotPasswordProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/reset-password', {
+      const response = await fetch('http://localhost:8000/api/reset-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

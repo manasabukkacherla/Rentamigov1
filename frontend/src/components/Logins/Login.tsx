@@ -39,7 +39,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch('http://localhost:8000/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,7 +105,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     setError(null);
 
     try {
-      const response = await fetch('/api/oauth/login', {
+      const response = await fetch('http://localhost:8000/api/oauth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
