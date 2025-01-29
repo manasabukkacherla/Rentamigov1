@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import PropertyEnquiry from "../models/propertenquiry";
 import sendOtpService from "../services/sendOtpService"; // Twilio-based OTP service
 import transporter from "../utils/emailservice"; // Email transporter
+import Property from "../models/Propertydetails";
 
 const router = express.Router();
 
@@ -73,36 +74,60 @@ router.post("/verify-otp", async (req: Request, res: Response) => {
 });
 
 // POST: Submit property enquiry
+// POST: Submit property enquiry
+// POST: Submit property enquiry
+
+
 router.post("/submit-form", async (req: Request, res: Response) => {
-  const { name, email, contactNumber, isVerified } = req.body;
+  const { name, email, contactNumber, isVerified, propertyId, propertyName } = req.body;
 
   try {
-    // Validate required fields
-    if (!name || !email || !contactNumber || !isVerified) {
+    // ✅ Validate required fields
+    if (!name || !email || !contactNumber || !isVerified || !propertyId || !propertyName) {
       return res.status(400).json({
         success: false,
-        message: "Name, email, contact number, and verification status are required.",
+        message: "Name, email, contact number, verification status, propertyId, and propertyName are required.",
       });
     }
 
-    // Save the enquiry
+    // ✅ Ensure the propertyId exists in the Property collection
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      return res.status(404).json({
+        success: false,
+        message: "Invalid property ID. Property not found.",
+      });
+    }
+
+    // ✅ Only block duplicate submissions for the same propertyId and email
+    const existingEnquiry = await PropertyEnquiry.findOne({ email, propertyId });
+
+    if (existingEnquiry) {
+      return res.status(409).json({
+        success: false,
+        message: "You have already submitted an enquiry for this property. Please check your email for details.",
+      });
+    }
+
+    // ✅ Save the new enquiry (allow same email for different properties)
     const newEnquiry = new PropertyEnquiry({
       name,
       email,
       contactNumber,
       isVerified,
+      propertyId,
+      propertyName,
     });
 
     const savedEnquiry = await newEnquiry.save();
 
-    // Send email to the user
+    // ✅ Send confirmation email to the user
     const userEmailContent = `
       <h1>Thank You for Your Property Enquiry</h1>
       <p>Dear ${name},</p>
-      <p>We have successfully received your property enquiry with the following details:</p>
+      <p>We have successfully received your enquiry for:</p>
       <ul>
-        <li><strong>Name:</strong> ${name}</li>
-        <li><strong>Email:</strong> ${email}</li>
+        <li><strong>Property Name:</strong> ${propertyName}</li>
         <li><strong>Contact Number:</strong> ${contactNumber}</li>
       </ul>
       <p>We will get back to you shortly.</p>
@@ -110,15 +135,16 @@ router.post("/submit-form", async (req: Request, res: Response) => {
     `;
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER, // Your email
-      to: email, // User's email
+      from: process.env.EMAIL_USER,
+      to: email,
       subject: "Property Enquiry Confirmation",
       html: userEmailContent,
     });
 
-    // Send email to the company
+    // ✅ Send enquiry notification to the company
     const companyEmailContent = `
       <h1>New Property Enquiry</h1>
+      <p><strong>Property Name:</strong> ${propertyName}</p>
       <p><strong>Name:</strong> ${name}</p>
       <p><strong>Email:</strong> ${email}</p>
       <p><strong>Contact Number:</strong> ${contactNumber}</p>
@@ -127,8 +153,8 @@ router.post("/submit-form", async (req: Request, res: Response) => {
     `;
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER, // Your email
-      to: "contact@rentamigo.in", // Company's email
+      from: process.env.EMAIL_USER,
+      to: "contact@rentamigo.in",
       subject: "New Property Enquiry Received",
       html: companyEmailContent,
     });
@@ -146,7 +172,6 @@ router.post("/submit-form", async (req: Request, res: Response) => {
     });
   }
 });
-
 // GET: Retrieve all property enquiries
 router.get("/enquiries", async (_req: Request, res: Response) => {
   try {

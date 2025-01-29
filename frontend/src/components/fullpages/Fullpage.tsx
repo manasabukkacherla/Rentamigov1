@@ -13,27 +13,7 @@ import { useParams } from "react-router-dom";
 import Details from "./PropertyDetails";
 
 const NearbyComponent: React.FC<{ propertyId: string }> = ({ propertyId }) => {
-  const descriptionRef = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const [descriptionHeight, setDescriptionHeight] = useState<number | undefined>(undefined);
-
-  useEffect(() => {
-    const updateHeight = () => {
-      if (descriptionRef.current) {
-        const height = descriptionRef.current.offsetHeight;
-        setDescriptionHeight(height);
-        if (mapRef.current) {
-          mapRef.current.style.height = `${height}px`;
-        }
-      }
-    };
-
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-    };
-  }, []);
+  const fixedHeight = 200; // ✅ Set a fixed height for both Description & Map
 
   const containerStyle: React.CSSProperties = {
     display: "flex",
@@ -46,7 +26,10 @@ const NearbyComponent: React.FC<{ propertyId: string }> = ({ propertyId }) => {
 
   const descriptionStyle: React.CSSProperties = {
     flex: 1,
-    minWidth: "300px",
+    minWidth: "400px",
+    maxWidth: "600px", // ✅ Prevent excessive growth
+    height: `${fixedHeight}px`, // ✅ Fixed height
+    overflow: "auto", // ✅ Enable scrolling if content overflows
     border: "1px solid #ddd",
     borderRadius: "8px",
     padding: "20px",
@@ -55,19 +38,21 @@ const NearbyComponent: React.FC<{ propertyId: string }> = ({ propertyId }) => {
 
   const mapStyle: React.CSSProperties = {
     flex: 1,
-    minWidth: "300px",
+    minWidth: "400px",
+    maxWidth: "600px", // ✅ Prevent excessive growth
+    height: `${fixedHeight}px`, // ✅ Fixed height
     border: "1px solid #ddd",
     borderRadius: "8px",
-    overflow: "hidden",
+    overflow: "hidden", // ✅ Ensures map stays within its box
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   };
 
   return (
     <div style={containerStyle} className="description-map-container">
-      <div style={descriptionStyle} ref={descriptionRef}>
+      <div style={descriptionStyle}>
         <Description propertyId={propertyId} />
       </div>
-      <div style={mapStyle} ref={mapRef}>
+      <div style={mapStyle}>
         <MapComponent propertyId={propertyId} />
       </div>
     </div>
@@ -89,7 +74,7 @@ const Fullpage: React.FC = () => {
     justifyContent: "space-between",
     gap: "20px",
     alignItems: "flex-start",
-    marginTop: "50px",
+    marginTop: "30px",
     flexWrap: "wrap",
   };
 
@@ -97,8 +82,10 @@ const Fullpage: React.FC = () => {
     flex: 2,
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "0px",
     minWidth: "300px",
+    marginTop: "-62px",
+    marginLeft: "20px",
   };
 
   const rightColumnStyle: React.CSSProperties = {
@@ -108,6 +95,7 @@ const Fullpage: React.FC = () => {
     position: "sticky",
     top: "20px",
     marginTop: "-100px",
+    marginLeft: "72px",
   };
 
   const transportNearbyStyle: React.CSSProperties = {
@@ -115,7 +103,7 @@ const Fullpage: React.FC = () => {
     width: "100%",
     border: "1px solid #ddd",
     borderRadius: "8px",
-    padding: "20px",
+    
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   };
 
@@ -133,7 +121,7 @@ const Fullpage: React.FC = () => {
             maintenanceAmount={null}
             securityDeposit={null}
           />
-          <Details  />
+          <Details />
           <App propertyId={propertyId} />
           <BuildingAmenities propertyId={propertyId} />
           <NearbyComponent propertyId={propertyId} />
