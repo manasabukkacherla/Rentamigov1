@@ -22,6 +22,7 @@ import photosRouter from "./routes/Propertyphoto";
 import propertyEnquiryRoutes from "./routes/propertyEnquiryRoutes";
 import enquiryRoutes from "./routes/enquiryRoutes";
 import signupRouter from "./routes/signupform";// Replace with the correct file path for User
+import loginrouter from "./routes/login";
 
 dotenv.config();
 
@@ -63,6 +64,7 @@ app.use("/api/Photos",photosRouter);
 app.use("/api/property",propertyEnquiryRoutes)
 app.use("/api/service", enquiryRoutes);
 app.use("/api/sign",signupRouter);
+app.use("/api/auth",loginrouter);
 // Basic route
 app.get("/", (req: Request, res: Response) => {
   res.json({ message: "Welcome to the API" });

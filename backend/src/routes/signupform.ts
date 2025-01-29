@@ -1,23 +1,30 @@
 import express, { Request, Response } from "express";
+import bcrypt from "bcryptjs";
 import User from "../models/signup"; // Import the User model
 import transporter from "../utils/emailservice"; // Import the email transporter
 
 const signupRouter = express.Router();
 
-// POST: Handle user signup
-
-
-// POST: Handle user signup
+// ✅ POST: Handle user registration
 signupRouter.post("/register", async (req: Request, res: Response) => {
   try {
     const { username, email, phone, address, city, state, password, role, acceptTerms } = req.body;
 
-    // Validate required fields
+    // ✅ Validate required fields
     if (!username || !email || !phone || !address || !city || !state || !password || !role || acceptTerms !== true) {
       return res.status(400).json({ error: "All fields are required, and terms must be accepted." });
     }
 
-    // Save the user to the database
+    // ✅ Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
+    // ✅ Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // ✅ Save user to the database
     const newUser = new User({
       username,
       email,
@@ -25,14 +32,14 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
       address,
       city,
       state,
-      password,
+      password: hashedPassword, // Save the hashed password
       role,
       acceptTerms,
     });
 
     await newUser.save();
 
-    // Send confirmation email to the user
+    // ✅ Send confirmation email to the user
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -40,7 +47,7 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
       html: `<h1>Welcome to RentAmigo</h1><p>Dear ${username},</p><p>Thank you for signing up for RentAmigo!</p>`,
     });
 
-    // Send user details to the company email
+    // ✅ Send user details to the company email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: "venkat.s@rentamigo.in",
@@ -55,9 +62,9 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
       `,
     });
 
-    // Respond with user details
+    // ✅ Respond with user details (excluding password)
     res.status(201).json({
-      message: "User registered successfully, and emails sent.",
+      message: "User registered successfully.",
       user: {
         id: newUser._id,
         username: newUser.username,
@@ -79,9 +86,7 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
   }
 });
 
-
-
-// PUT: Update user by email
+// ✅ PUT: Update user by email
 signupRouter.put("/update", async (req: Request, res: Response) => {
   try {
     const { email, username, phone, address, city, state, role } = req.body;
@@ -107,10 +112,10 @@ signupRouter.put("/update", async (req: Request, res: Response) => {
   }
 });
 
-// GET: Fetch all users
+// ✅ GET: Fetch all users
 signupRouter.get("/users", async (_req: Request, res: Response) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password"); // Exclude passwords
     res.status(200).json(users);
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -118,12 +123,12 @@ signupRouter.get("/users", async (_req: Request, res: Response) => {
   }
 });
 
-// GET: Fetch a specific user by email
+// ✅ GET: Fetch a specific user by email
 signupRouter.get("/users/:email", async (req: Request, res: Response) => {
   try {
     const { email } = req.params;
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("-password");
     if (!user) {
       return res.status(404).json({ error: "User not found." });
     }
