@@ -291,8 +291,8 @@ const styles = {
     flexDirection: "column" as const,
     gap: "20px",
     padding: "20px",
-    maxWidth: "1400px",
-    margin: "0 auto",
+    maxWidth: "1600px",
+    margin: "0",
   },
   propertyInfo: {
     textAlign: "left" as const,
@@ -312,6 +312,7 @@ const styles = {
     display: "flex",
     gap: "20px",
     height: "85vh",
+    //width: "70vh",
   },
   mobileContainer: {
     display: "flex",
