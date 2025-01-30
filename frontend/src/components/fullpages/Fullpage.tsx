@@ -106,6 +106,10 @@ const Fullpage: React.FC = () => {
     
     boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
   };
+  const rentDetailsStyle: React.CSSProperties = {
+    marginLeft: "60px",// Add margin left only to RentDetails
+   
+  };
 
   return (
     <div style={homepageStyle}>
@@ -115,12 +119,14 @@ const Fullpage: React.FC = () => {
 
       <div style={layoutStyle} className="layout">
         <div style={leftColumnStyle} className="left-column">
+        <div style={rentDetailsStyle}>
           <RentDetails
             propertyId={propertyId}
             monthlyRent={null}
             maintenanceAmount={null}
             securityDeposit={null}
           />
+        </div>
           <Details />
           <App propertyId={propertyId} />
           <BuildingAmenities propertyId={propertyId} />
