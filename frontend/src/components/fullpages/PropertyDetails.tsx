@@ -53,7 +53,7 @@ const Details: React.FC = () => {
         const propertyData = await propertyResponse.json();
 
         const featuresResponse = await fetch(
-          `https://api.rentamigo.in/api/properties/${propertyId}/features`
+          `https://api.rentamigo.in/api/properties/${propertyId}/property-features`
         );
         if (!featuresResponse.ok) {
           throw new Error("Failed to fetch property features");
@@ -61,7 +61,7 @@ const Details: React.FC = () => {
         const featuresData = await featuresResponse.json();
 
         const availabilityResponse = await fetch(
-          `https://api.rentamigo.in/api/properties/${propertyId}/availability`
+          `https://api.rentamigo.in/api/properties/${propertyId}/property-availability`
         );
         if (!availabilityResponse.ok) {
           throw new Error("Failed to fetch availability details");
@@ -69,7 +69,7 @@ const Details: React.FC = () => {
         const availabilityData = await availabilityResponse.json();
 
         const restrictionsResponse = await fetch(
-          `https://api.rentamigo.in/api/properties/${propertyId}/restrictions`
+          `https://api.rentamigo.in/api/properties/${propertyId}/property-restrictions`
         );
         if (!restrictionsResponse.ok) {
           throw new Error("Failed to fetch parking and tenant preferences");

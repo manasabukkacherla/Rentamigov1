@@ -1,7 +1,7 @@
 import React, { useState, Fragment } from 'react';
 import { Pencil, Trash2, X } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
-
+import { Navigate, useNavigate } from 'react-router-dom';
 interface Property {
   id: number;
   image: string;
@@ -66,6 +66,14 @@ export function Properties() {
     setIsDeleteModalOpen(true);
   };
 
+  const handleStatusChange = (propertyId: number, newStatus: Property['status']) => {
+    setProperties(properties.map(property =>
+      property.id === propertyId
+        ? { ...property, status: newStatus }
+        : property
+    ));
+  };
+
   const confirmDelete = () => {
     if (selectedProperty) {
       setProperties(properties.filter(p => p.id !== selectedProperty.id));
@@ -85,59 +93,100 @@ export function Properties() {
       setSelectedProperty(null);
     }
   };
-
+  const navigate = useNavigate(); // Initialize navigation
   return (
-    <div className="max-w-7xl mx-auto p-4 sm:p-6">
-      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6">
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-bold">Properties</h2>
-          <button className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+    <div className="w-full max-w-[1400px] mx-auto p-2 sm:p-4 lg:p-6">
+      <div className="bg-white rounded-xl shadow-sm">
+        {/* Header */}
+        <div className="p-3 sm:p-4 lg:p-6 border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">Properties</h2>
+            <button
+            onClick={() => navigate('/property-listing-form')} // Navigate to the form page
+            className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
             Add New Property
           </button>
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {properties.map((property) => (
-            <div key={property.id} className="border border-gray-200 rounded-lg overflow-hidden">
-              <img
-                src={property.image}
-                alt={property.title}
-                className="w-full h-40 sm:h-48 object-cover"
-              />
-              <div className="p-3 sm:p-4">
-                <h3 className="font-semibold text-base sm:text-lg">{property.title}</h3>
-                <p className="text-gray-500 text-xs sm:text-sm">{property.address}</p>
-                <div className="flex items-center justify-between mt-3 sm:mt-4">
-                  <span className="font-bold text-blue-600 text-sm sm:text-base">{property.price}</span>
-                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm ${
-                    property.status === 'Occupied' 
-                      ? 'bg-green-100 text-green-800'
-                      : property.status === 'Available'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-orange-100 text-orange-800'
-                  }`}>
-                    {property.status}
-                  </span>
+
+        {/* Property Grid */}
+        <div className="p-2 sm:p-4 lg:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+            {properties.map((property) => (
+              <div key={property.id} className="flex flex-col bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200">
+                {/* Image Container */}
+                <div className="relative aspect-[16/10] overflow-hidden">
+                  <img
+                    src={property.image}
+                    alt={property.title}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
                 </div>
-                {/* Action buttons */}
-                <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
-                  <button
-                    onClick={() => handleEdit(property)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                  >
-                    <Pencil className="h-4 w-4" />
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(property)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </button>
+
+                {/* Content */}
+                <div className="flex flex-col flex-grow p-3 sm:p-4">
+                  {/* Property Info */}
+                  <div className="flex-grow space-y-2">
+                    <h3 className="font-semibold text-sm sm:text-base lg:text-lg line-clamp-1">
+                      {property.title}
+                    </h3>
+                    <p className="text-gray-500 text-xs sm:text-sm line-clamp-1">
+                      {property.address}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-blue-600 text-sm sm:text-base">
+                        {property.price}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        property.status === 'Occupied' 
+                          ? 'bg-green-100 text-green-800'
+                          : property.status === 'Available'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {property.status}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-3 pt-3 border-t border-gray-100">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      {/* Status Dropdown */}
+                      <select
+                        value={property.status}
+                        onChange={(e) => handleStatusChange(property.id, e.target.value as Property['status'])}
+                        className="w-full sm:w-auto text-xs sm:text-sm px-2 py-1.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      >
+                        <option value="Available">Available</option>
+                        <option value="Occupied">Occupied</option>
+                        <option value="Maintenance">Maintenance</option>
+                      </select>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => handleEdit(property)}
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                        >
+                          <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="whitespace-nowrap">Edit</span>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(property)}
+                          className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                        >
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="whitespace-nowrap">Delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -190,7 +239,7 @@ export function Properties() {
                         type="text"
                         value={editForm.title}
                         onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -201,7 +250,7 @@ export function Properties() {
                         type="text"
                         value={editForm.address}
                         onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -212,7 +261,7 @@ export function Properties() {
                         type="text"
                         value={editForm.price}
                         onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
@@ -222,7 +271,7 @@ export function Properties() {
                       <select
                         value={editForm.status}
                         onChange={(e) => setEditForm({ ...editForm, status: e.target.value as Property['status'] })}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                       >
                         <option value="Available">Available</option>
                         <option value="Occupied">Occupied</option>
@@ -230,16 +279,16 @@ export function Properties() {
                       </select>
                     </div>
                   </div>
-                  <div className="p-4 sm:p-6 border-t border-gray-200 flex justify-end gap-3">
+                  <div className="p-4 sm:p-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
                     <button
                       onClick={() => setIsEditModalOpen(false)}
-                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSaveEdit}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
                       Save Changes
                     </button>
@@ -291,16 +340,16 @@ export function Properties() {
                       </Dialog.Description>
                     </div>
                   </div>
-                  <div className="p-4 sm:p-6 border-t border-gray-200 flex flex-col-reverse sm:flex-row justify-end gap-3">
+                  <div className="p-4 sm:p-6 border-t border-gray-200 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
                     <button
                       onClick={() => setIsDeleteModalOpen(false)}
-                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={confirmDelete}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="w-full sm:w-auto px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                     >
                       Delete Property
                     </button>
