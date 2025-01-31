@@ -1,6 +1,9 @@
 import React from 'react';
 import { Building2, ArrowUpRight, Users, Building, Plus } from 'lucide-react';
-import type { Property } from '../App';
+import type { Property } from './CommonDashboard';
+import { useNavigate } from "react-router-dom";  
+
+
 
 const stats = [
   { 
@@ -34,7 +37,7 @@ interface DashboardProps {
 export function Dashboard({ onNavigate, properties }: DashboardProps) {
   // Show only the 3 most recent properties
   const recentProperties = properties.slice(0, 3);
-
+  const navigate = useNavigate();
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       {/* Stats */}
@@ -75,12 +78,11 @@ export function Dashboard({ onNavigate, properties }: DashboardProps) {
               View all
             </button>
             <button
-              onClick={() => onNavigate?.('properties')}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-sm px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              Add New Property
-            </button>
+            onClick={() => navigate("/property-listing-form")}
+            className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Add New Property
+          </button>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
