@@ -20,14 +20,11 @@ function Loginhome() {
         <div className="absolute inset-0 bg-white/50 backdrop-blur-lg rounded-2xl transform -rotate-2"></div>
         <div className="absolute inset-0 bg-white/50 backdrop-blur-lg rounded-2xl transform rotate-2"></div>
         {isLogin ? (
+  <Login onSwitchToSignup={() => setIsLogin(false)} onLoginSuccess={handleLoginSuccess} />
+) : (
+  <Signup onSwitchToLogin={() => setIsLogin(true)} />
+)}
 
-          <><Login onSwitchToSignup={() => setIsLogin(false)} onLoginSuccess={function (_email: string): void {
-            throw new Error('Function not implemented.');
-          } } /><Login onSwitchToSignup={() => setIsLogin(false)} onLoginSuccess={handleLoginSuccess} /></>
-
-        ) : (
-          <Signup onSwitchToLogin={() => setIsLogin(true)} />
-        )}
       </div>
     </div>
   );
