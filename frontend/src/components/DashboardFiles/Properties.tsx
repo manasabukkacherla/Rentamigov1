@@ -2,6 +2,8 @@ import React, { useState, Fragment } from 'react';
 import { Pencil, Trash2, X, Search, Filter } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
 import type { Property } from './CommonDashboard';
+import { useNavigate } from "react-router-dom";  
+
 
 interface PropertiesProps {
   properties: Property[];
@@ -76,7 +78,7 @@ export function Properties({
     
     return matchesSearch && matchesStatus;
   });
-
+  const navigate = useNavigate();
   return (
     <div className="w-full max-w-[1400px] mx-auto p-2 sm:p-4 lg:p-6">
       <div className="bg-white rounded-xl shadow-sm">
@@ -118,9 +120,12 @@ export function Properties({
                 </div>
               </div>
             </div>
-            <button className="w-full sm:w-auto text-xs sm:text-sm lg:text-base px-3 py-2 sm:px-4 sm:py-2 lg:px-6 lg:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-              Add New Property
-            </button>
+            <button
+            onClick={() => navigate("/property-listing-form")}
+            className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Add New Property
+          </button>
           </div>
         </div>
 
