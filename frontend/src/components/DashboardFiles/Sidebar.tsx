@@ -34,10 +34,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               e.preventDefault();
               onNavigate(item.id);
             }}
-            className={`flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2 rounded-lg ${
+            className={`flex items-center gap-2 sm:gap-3 px-3 py-2 sm:px-4 sm:py-2 rounded-lg transition-colors ${
               currentPage === item.id
-                ? 'bg-blue-50 text-blue-600' 
-                : 'text-gray-600 hover:bg-gray-50'
+                ? 'bg-red-50 text-red-600' 
+                : 'text-gray-600 hover:bg-red-50/70 hover:text-red-600'
             }`}
           >
             <item.icon className="h-4 w-4 sm:h-5 sm:w-5" />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { User, Mail, Phone, MapPin, Building, Crown } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Building, Crown, Lock, Eye, EyeOff } from 'lucide-react';
 
 interface UserProfile {
   name: string;
@@ -11,6 +11,12 @@ interface UserProfile {
   state: string;
   address: string;
   membership: 'silver' | 'gold' | 'platinum';
+}
+
+interface PasswordForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 export function Settings() {
@@ -26,7 +32,20 @@ export function Settings() {
     membership: 'silver'
   });
 
+  const [passwordForm, setPasswordForm] = useState<PasswordForm>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
+
   const [isEditing, setIsEditing] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
 
   const membershipColors = {
     silver: 'bg-gray-100 text-gray-800',
@@ -46,6 +65,43 @@ export function Settings() {
   const handleMembershipUpdate = (newMembership: 'silver' | 'gold' | 'platinum') => {
     setProfile(prev => ({ ...prev, membership: newMembership }));
     setIsEditing(false);
+  };
+
+  const handlePasswordChange = (field: keyof PasswordForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPasswordForm(prev => ({ ...prev, [field]: e.target.value }));
+    setPasswordError('');
+  };
+
+  const togglePasswordVisibility = (field: keyof typeof showPasswords) => {
+    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  const handleUpdatePassword = () => {
+    // Password validation
+    if (!passwordForm.currentPassword) {
+      setPasswordError('Current password is required');
+      return;
+    }
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters long');
+      return;
+    }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('New passwords do not match');
+      return;
+    }
+
+    // Here you would typically make an API call to update the password
+    console.log('Updating password...');
+    
+    // Reset form after successful update
+    setPasswordForm({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+    setPasswordError('');
+    // Show success message or handle response
   };
 
   return (
@@ -132,6 +188,87 @@ export function Settings() {
                 onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
                 className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+            </div>
+          </div>
+
+          {/* Password Section */}
+          <div className="border-t pt-6">
+            <div className="flex items-center gap-2 text-gray-600 mb-4">
+              <Lock className="h-5 w-5" />
+              <span className="font-medium">Change Password</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="space-y-2">
+                <span className="text-sm text-gray-600">Current Password</span>
+                <div className="relative">
+                  <input
+                    type={showPasswords.current ? 'text' : 'password'}
+                    value={passwordForm.currentPassword}
+                    onChange={handlePasswordChange('currentPassword')}
+                    className="w-full pl-3 pr-10 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('current')}
+                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-sm text-gray-600">New Password</span>
+                <div className="relative">
+                  <input
+                    type={showPasswords.new ? 'text' : 'password'}
+                    value={passwordForm.newPassword}
+                    onChange={handlePasswordChange('newPassword')}
+                    className="w-full pl-3 pr-10 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('new')}
+                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-sm text-gray-600">Confirm New Password</span>
+                <div className="relative">
+                  <input
+                    type={showPasswords.confirm ? 'text' : 'password'}
+                    value={passwordForm.confirmPassword}
+                    onChange={handlePasswordChange('confirmPassword')}
+                    className="w-full pl-3 pr-10 py-2 text-sm sm:text-base border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => togglePasswordVisibility('confirm')}
+                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                  >
+                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {passwordError && (
+                <div className="sm:col-span-2">
+                  <p className="text-sm text-red-600">{passwordError}</p>
+                </div>
+              )}
+
+              <div className="sm:col-span-2">
+                <button
+                  onClick={handleUpdatePassword}
+                  className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Update Password
+                </button>
+              </div>
             </div>
           </div>
 
