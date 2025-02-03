@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Mail, Lock, LogIn, Apple, ExternalLink } from "lucide-react";
+import { Mail, Lock, LogIn } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import TermsAndConditions from "./TermsAndConditions";
@@ -26,41 +26,37 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Credential Response:", credentialResponse);
-  
+
       // 🔹 1️⃣ Send Google credential to backend for verification
       const response = await axios.post("http://localhost:8000/api/loginuser/google", {
         credential: credentialResponse.credential,
       });
-  
+
       const userData = response.data;
-  
+
       if (userData.error) {
         // 🔹 2️⃣ If user is NOT registered, prevent login and prompt signup
-        alert("You are not registered. Please sign up first.");
-        onSwitchToSignup(); // Redirect to signup page
+        setError("You are not registered. Please sign up first.");
         return;
       }
-  
+
       // 🔹 3️⃣ If user exists, proceed with login
       localStorage.setItem("user", JSON.stringify(userData.user));
       localStorage.setItem("token", userData.token);
-  
+
       // Redirect to homepage
       navigate("/homepage");
-  
+
       // Notify parent component of login success
       onLoginSuccess(userData.user.email);
     } catch (error) {
-      console.error("Google Login Error:", error);
-      alert("You are not registered. Please SignUp.");
+      setError("Your are not registered. Please Signup.");
     }
   };
-  
 
   // 🔹 Handle Google Authentication Error
   const handleGoogleError = () => {
-    console.log("Google Login Failed");
-    alert("Google login failed. Please try again.");
+    setError("Google login failed. Please try again.");
   };
 
   // 🔹 Handle Manual Form Submission (Email & Password)
@@ -77,7 +73,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage");
       onLoginSuccess(userData.user.email);
     } catch (err) {
-      setError("Invalid email or password");
+      setError("Invalid email or password.");
     } finally {
       setLoading(false);
     }
@@ -119,9 +115,9 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm">{error}</div>}
+      {error && <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">{error}</div>}
 
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-gray-700 text-sm font-medium mb-2">Email Address</label>
           <div className="relative">
@@ -166,9 +162,13 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
           disabled={loading}
           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <>
-            <LogIn className="h-5 w-5" /> Sign In
-          </>}
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <>
+              <LogIn className="h-5 w-5" /> Sign In
+            </>
+          )}
         </button>
       </form>
 
