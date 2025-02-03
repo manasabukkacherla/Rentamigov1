@@ -75,4 +75,5 @@ function OTPModal({ isOpen, onClose, onVerify, loading }: OTPModalProps) {
   );
 }
 
+
 export default OTPModal;

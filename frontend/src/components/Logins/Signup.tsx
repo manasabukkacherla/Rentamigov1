@@ -22,6 +22,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
   const [emailVerified, setEmailVerified] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
+    fullName: '',
     email: '',
     phone: '',
     address: '',
@@ -41,46 +42,30 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: 'employee', label: 'Employee' },
   ];
 
-  const handleApiResponse = async (response: Response) => {
-    const contentType = response.headers.get('content-type');
-    if (!contentType || !contentType.includes('application/json')) {
-      throw new Error('Server error: Expected JSON response but received different content');
-    }
-    
-    try {
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error((data as ApiError).error || `Server error: ${response.status}`);
-      }
-      return data;
-    } catch (err) {
-      if (err instanceof SyntaxError) {
-        throw new Error('Server error: Invalid JSON response');
-      }
-      throw err;
-    }
-  };
-
   const handleSendOTP = async () => {
     if (!formData.email) {
       setError('Please enter your email address first');
       return;
     }
 
-    setLoading(true);
-    setError(null);
-    
     try {
-      const response = await fetch("http://localhost:8000/api/sign/send-otp", {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('http://localhost:8000/api/sign/send-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({ email: formData.email }),
       });
 
-      await handleApiResponse(response);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send OTP');
+      }
+
       setShowOTPModal(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send OTP');
@@ -91,20 +76,27 @@ function Signup({ onSwitchToLogin }: SignupProps) {
   };
 
   const handleVerifyOTP = async (otp: string) => {
-    setLoading(true);
-    setError(null);
-
     try {
-      const response = await fetch("http://localhost:8000/api/sign/verify-otp", {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch('http://localhost:8000/api/sign/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        body: JSON.stringify({ email: formData.email, otp }),
+        body: JSON.stringify({ 
+          email: formData.email, 
+          otp: otp 
+        }),
       });
 
-      await handleApiResponse(response);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to verify OTP');
+      }
+
       setEmailVerified(true);
       setShowOTPModal(false);
     } catch (err) {
@@ -121,21 +113,26 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     setSuccess(false);
 
     try {
-      const response = await fetch("http://localhost:8000/api/sign/register", {
+      const response = await fetch('http://localhost:8000/api/sign/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
-      await handleApiResponse(response);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
       setSuccess(true);
       
       // Reset form
       setFormData({
         username: '',
+        fullName: '',
         email: '',
         phone: '',
         address: '',
@@ -189,6 +186,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
           Registration successful! Redirecting to login...
         </div>
       )}
+
       <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
         <div className="col-span-2">
           <div className="relative">
@@ -222,7 +220,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
               type="text"
               required
               className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
-              placeholder="Full name"
+              placeholder="Username"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               pattern="^[a-zA-Z0-9]{8,20}$"
@@ -233,6 +231,21 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         </div>
 
         <div className="col-span-2 sm:col-span-1">
+          <div className="relative">
+            <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              type="text"
+              required
+              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+              placeholder="Full name"
+              value={formData.fullName}
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <div className="col-span-2">
           <div className="relative">
             <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
             <input
