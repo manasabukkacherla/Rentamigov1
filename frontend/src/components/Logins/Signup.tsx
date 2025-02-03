@@ -9,17 +9,14 @@ interface SignupProps {
 
 type UserRole = 'owner' | 'agent' | 'tenant' | 'pg' | 'employee';
 
-interface ApiError {
-  error: string;
-}
-
 function Signup({ onSwitchToLogin }: SignupProps) {
   const [showTerms, setShowTerms] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false); // Track OTP verification
+
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -31,6 +28,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     password: '',
     role: '' as UserRole,
     acceptTerms: false,
+    emailVerified: false,
   });
 
   const roles = [
@@ -42,16 +40,19 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: 'employee', label: 'Employee' },
   ];
 
+  /**
+   * 1️⃣ Send OTP when user enters email
+   */
   const handleSendOTP = async () => {
     if (!formData.email) {
-      setError('Please enter your email address first');
+      setError('Please enter your email address first.');
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      
+
       const response = await fetch('http://localhost:8000/api/sign/send-otp', {
         method: 'POST',
         headers: {
@@ -75,61 +76,85 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     }
   };
 
+  /**
+   * 2️⃣ Verify OTP when user enters OTP
+   */
   const handleVerifyOTP = async (otp: string) => {
     try {
       setLoading(true);
       setError(null);
-
+  
       const response = await fetch('http://localhost:8000/api/sign/verify-otp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email: formData.email, 
-          otp: otp 
-        }),
+        body: JSON.stringify({ email: formData.email, otp }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.error || 'Failed to verify OTP');
       }
-
-      setEmailVerified(true);
+  
+      setEmailVerified(true); // ✅ Store email as verified
+  
+      // ✅ Update formData to include emailVerified
+      setFormData((prevData) => ({
+        ...prevData,
+        emailVerified: true, // ✅ Add this field
+      }));
+  
       setShowOTPModal(false);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to verify OTP');
     } finally {
       setLoading(false);
     }
   };
+  
+  
+  
 
+  /**
+   * 3️⃣ Submit Registration Form (Only After OTP Verification)
+   */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+  
+    // 🚨 Prevent registration if email is not verified
+    if (!emailVerified) {
+      setError("Please verify your email before submitting.");
+      return;
+    }
+  
     setLoading(true);
     setError(null);
     setSuccess(false);
-
+  
     try {
       const response = await fetch('http://localhost:8000/api/sign/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          emailVerified: true, // ✅ Include email verification status in payload
+        }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
         throw new Error(data.error || 'Registration failed');
       }
-
+  
       setSuccess(true);
-      
-      // Reset form
+  
+      // Reset form after successful registration
       setFormData({
         username: '',
         fullName: '',
@@ -141,10 +166,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         password: '',
         role: '' as UserRole,
         acceptTerms: false,
+        emailVerified: false, // Reset email verification status
       });
-      setEmailVerified(false);
-
-      // Redirect to login after 2 seconds
+  
+      setEmailVerified(false); // ✅ Reset email verification state
+  
       setTimeout(() => {
         onSwitchToLogin();
       }, 2000);
@@ -154,6 +180,8 @@ function Signup({ onSwitchToLogin }: SignupProps) {
       setLoading(false);
     }
   };
+  
+  
 
   return (
     <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full relative z-10">
