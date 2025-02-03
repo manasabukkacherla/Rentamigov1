@@ -3,6 +3,7 @@ import { Schema, model, Document, models } from "mongoose";
 // Define an interface for the User document
 interface IUser extends Document {
   username: string;
+  fullName:string;
   email: string;
   phone: string;
   address: string;
@@ -21,6 +22,11 @@ const UserSchema = new Schema<IUser>(
       required: [true, "Username is required!"],
       unique: true,
       match: [/^[a-zA-Z0-9]{8,20}$/, "Username invalid, it should contain 8-20 alphanumeric letters and be unique!"],
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: [true, "Full name is required!"],
       trim: true,
     },
     email: {
