@@ -47,12 +47,14 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Credential Response:", credentialResponse);
-
-      const response = await axios.post("http://localhost:8000/api/auth/google", {
+  
+      // 🔹 1️⃣ Send Google credential to backend for verification
+      const response = await axios.post("http://localhost:8000/api/loginuser/google", {
         credential: credentialResponse.credential,
       });
-
+  
       const userData = response.data;
+
       console.log("Google Login Successful:", userData);
 
       // Store user data in session storage
@@ -68,12 +70,25 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
 
       // Redirect user based on role
       redirectUser(userData.user.role);
+  
+      if (userData.error) {
+        // 🔹 2️⃣ If user is NOT registered, prevent login and prompt signup
+        alert("You are not registered. Please sign up first.");
+        onSwitchToSignup(); // Redirect to signup page
+        return;
+      }
+  
+      // 🔹 3️⃣ If user exists, proceed with login
+      localStorage.setItem("user", JSON.stringify(userData.user));
+      localStorage.setItem("token", userData.token);
+ 
       onLoginSuccess(userData.user.email);
     } catch (error) {
       console.error("Google Login Error:", error);
-      alert("Google login failed. Please try again.");
+      alert("You are not registered. Please SignUp.");
     }
   };
+  
 
   // 🔹 Handle Google Authentication Error
   const handleGoogleError = () => {
