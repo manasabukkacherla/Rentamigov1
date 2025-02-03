@@ -1,10 +1,11 @@
-import React, { useState } from "react";
-import { Mail, Lock, LogIn, Apple, ExternalLink } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Mail, Lock, LogIn } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import TermsAndConditions from "./TermsAndConditions";
 import ForgotPassword from "./ForgotPassword";
 import { useNavigate } from "react-router-dom";
+
 
 interface LoginProps {
   onSwitchToSignup: () => void;
@@ -14,34 +15,59 @@ interface LoginProps {
 function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const [showTerms, setShowTerms] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // 🔹 Check session storage on component mount
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      console.log("User already logged in:", userData);
+      redirectUser(userData.role); // Auto-redirect if already logged in
+    }
+  }, [navigate]);
+
+  // 🔹 Function to redirect user based on role
+  const redirectUser = (role: string) => {
+    if (["owner", "pg", "agent"].includes(role)) {
+      navigate("/commondashboard");
+    } else if (role === "user") {
+      navigate("/homepage");
+    } else if (role === "admin" || role === "employee") {
+      navigate("/empdashboard");
+    } else {
+      navigate("/homepage"); // Default route if role is unknown
+    }
+  };
 
   // 🔹 Handle Google Authentication Success
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Credential Response:", credentialResponse);
 
-      // Step 1: Send Google credential to backend for verification
       const response = await axios.post("http://localhost:8000/api/auth/google", {
         credential: credentialResponse.credential,
       });
 
       const userData = response.data;
-      console.log("Google Login Successful", userData);
+      console.log("Google Login Successful:", userData);
 
-      // Step 2: Store user data in local storage
-      localStorage.setItem("user", JSON.stringify(userData.user));
+      // Store user data in session storage
+      sessionStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: userData.user.id,
+          email: userData.user.email,
+          username: userData.user.username,
+          role: userData.user.role,
+        })
+      );
 
-      // Step 3: Navigate to Dashboard
-      navigate("/homepage");
-
-      // Notify parent component of login success
+      // Redirect user based on role
+      redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (error) {
       console.error("Google Login Error:", error);
@@ -65,8 +91,19 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       const response = await axios.post("http://localhost:8000/api/auth/login", formData);
       const userData = response.data;
 
-      localStorage.setItem("user", JSON.stringify(userData.user));
-      navigate("/homepage");
+      // Store user data in session storage
+      sessionStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: userData.user.id,
+          email: userData.user.email,
+          username: userData.user.username,
+          role: userData.user.role,
+        })
+      );
+
+      // Redirect user based on role
+      redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (err) {
       setError("Invalid email or password");

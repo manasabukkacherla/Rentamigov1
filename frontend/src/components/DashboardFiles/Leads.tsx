@@ -15,7 +15,7 @@ interface Lead {
   notes?: string;
   propertyId: number;
   propertyName: string;
-  propertyCategory: 'Apartment' | 'House' | 'Commercial' | 'Land';
+  propertyCategory: 'Rent' | 'Lease' | 'Sale';
 }
 
 // Sample data
@@ -33,7 +33,7 @@ const leadsData: Lead[] = [
     notes: 'Interested in 2-bedroom apartments in downtown area',
     propertyId: 101,
     propertyName: 'Modern Apartment',
-    propertyCategory: 'Apartment'
+    propertyCategory: 'Rent'
   },
   { 
     id: 2, 
@@ -48,7 +48,7 @@ const leadsData: Lead[] = [
     notes: 'Looking for pet-friendly properties',
     propertyId: 102,
     propertyName: 'Luxury House',
-    propertyCategory: 'House'
+    propertyCategory: 'Lease'
   },
   { 
     id: 3, 
@@ -63,7 +63,7 @@ const leadsData: Lead[] = [
     notes: 'Interested in commercial properties',
     propertyId: 103,
     propertyName: 'Downtown Office',
-    propertyCategory: 'Commercial'
+    propertyCategory: 'Sale'
   },
   { 
     id: 4, 
@@ -78,7 +78,7 @@ const leadsData: Lead[] = [
     notes: 'Looking for investment properties',
     propertyId: 104,
     propertyName: 'Retail Space',
-    propertyCategory: 'Commercial'
+    propertyCategory: 'Rent'
   }
 ];
 
