@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Mail, Lock, User, Phone, MapPin, Building, Map, UserPlus, Apple, UserCog, ExternalLink } from 'lucide-react';
+import { Mail, Lock, User, Phone, MapPin, Building, Map, UserPlus, UserCog, ExternalLink } from 'lucide-react';
 import TermsAndConditions from './TermsAndConditions';
+import OTPModal from './OTPModal';
 
 interface SignupProps {
   onSwitchToLogin: () => void;
@@ -14,9 +15,11 @@ interface ApiError {
 
 function Signup({ onSwitchToLogin }: SignupProps) {
   const [showTerms, setShowTerms] = useState(false);
+  const [showOTPModal, setShowOTPModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -38,9 +41,81 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: 'employee', label: 'Employee' },
   ];
 
+  const handleApiResponse = async (response: Response) => {
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server error: Expected JSON response but received different content');
+    }
+    
+    try {
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error((data as ApiError).error || `Server error: ${response.status}`);
+      }
+      return data;
+    } catch (err) {
+      if (err instanceof SyntaxError) {
+        throw new Error('Server error: Invalid JSON response');
+      }
+      throw err;
+    }
+  };
+
+  const handleSendOTP = async () => {
+    if (!formData.email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await fetch("http://localhost:8000/api/sign/send-otp", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email }),
+      });
+
+      await handleApiResponse(response);
+      setShowOTPModal(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send OTP');
+      setShowOTPModal(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (otp: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/sign/verify-otp", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email, otp }),
+      });
+
+      await handleApiResponse(response);
+      setEmailVerified(true);
+      setShowOTPModal(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to verify OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitting formData:", formData);
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -50,17 +125,14 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error((data as ApiError).error || 'Registration failed');
-      }
-
+      await handleApiResponse(response);
       setSuccess(true);
+      
       // Reset form
       setFormData({
         username: '',
@@ -73,20 +145,18 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         role: '' as UserRole,
         acceptTerms: false,
       });
+      setEmailVerified(false);
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
         onSwitchToLogin();
       }, 2000);
-
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred during registration');
     } finally {
       setLoading(false);
     }
   };
-
- 
 
   return (
     <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full relative z-10">
@@ -157,7 +227,6 @@ function Signup({ onSwitchToLogin }: SignupProps) {
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               pattern="^[a-zA-Z0-9]{8,20}$"
               title="Username should be 8-20 alphanumeric characters."
-              
               disabled={loading}
             />
           </div>
@@ -169,12 +238,20 @@ function Signup({ onSwitchToLogin }: SignupProps) {
             <input
               type="email"
               required
-              className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+              className="w-full pl-12 pr-24 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
               placeholder="Email address"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              disabled={loading}
+              disabled={loading || emailVerified}
             />
+            <button
+              type="button"
+              onClick={handleSendOTP}
+              disabled={loading || !formData.email || emailVerified}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              {emailVerified ? 'Verified' : 'Verify'}
+            </button>
           </div>
         </div>
 
@@ -284,7 +361,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         <button
           type="submit"
           className="col-span-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2.5 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:transform-none"
-          disabled={loading}
+          disabled={loading || !emailVerified}
         >
           {loading ? (
             <div className="flex items-center gap-2">
@@ -317,6 +394,12 @@ function Signup({ onSwitchToLogin }: SignupProps) {
       </div>
 
       {showTerms && <TermsAndConditions onClose={() => setShowTerms(false)} />}
+      <OTPModal
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onVerify={handleVerifyOTP}
+        loading={loading}
+      />
     </div>
   );
 }
