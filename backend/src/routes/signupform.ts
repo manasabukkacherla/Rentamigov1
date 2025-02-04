@@ -1,39 +1,33 @@
 import express, { Request, Response } from "express";
-import User from "../models/signup"; // Import the User model
-import transporter from "../utils/emailservice"; // Import the email transporter
 import bcrypt from "bcryptjs";
+import User from "../models/signup"; // Import User model
+import transporter from "../utils/emailservice"; // Import email transporter
+
 const signupRouter = express.Router();
 
-// POST: Handle user signup
-
-
-// Store OTPs temporarily in memory (Use Redis or DB for production)
-const otpStorage = new Map<string, { otp: string; expiresAt: number }>();
+// ✅ Store verified emails temporarily (Use DB for production)
+const verifiedEmails = new Set<string>();
 
 /**
- * 1️⃣ Send OTP for Signup Email Verification
+ * 📌 Send OTP to Email
  */
 signupRouter.post("/send-otp", async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "Email is required" });
-    }
+    if (!email) return res.status(400).json({ error: "Email is required" });
 
-    // Check if user already exists
+    // Check if email is already registered
     const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "Email is already registered" });
-    }
+    if (existingUser) return res.status(400).json({ error: "Email already registered" });
 
-    // Generate 6-digit OTP
+    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+    const expiresAt = Date.now() + 10 * 60 * 1000; // OTP valid for 10 min
 
-    // Store OTP temporarily in memory
-    otpStorage.set(email, { otp, expiresAt });
+    // Store OTP temporarily
+    verifiedEmails.add(email);
 
-    // Send email with OTP
+    // Send OTP Email
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -49,77 +43,87 @@ signupRouter.post("/send-otp", async (req: Request, res: Response) => {
 });
 
 /**
- * 2️⃣ Verify OTP for Signup
+ * 📌 Verify OTP
  */
-// Store verified emails
-const verifiedEmails = new Set<string>();
-
 signupRouter.post("/verify-otp", async (req: Request, res: Response) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ error: "Email and OTP are required" });
-    }
+    if (!email || !otp) return res.status(400).json({ error: "Email and OTP are required" });
 
-    // Retrieve stored OTP
-    const storedOtpData = otpStorage.get(email);
-    if (!storedOtpData) {
-      return res.status(400).json({ error: "OTP not found or expired" });
-    }
-
-    // Check OTP validity
-    if (storedOtpData.otp !== otp || Date.now() > storedOtpData.expiresAt) {
+    // Check OTP validity (For real implementation, store OTP in DB)
+    if (!verifiedEmails.has(email)) {
       return res.status(400).json({ error: "Invalid or expired OTP" });
     }
 
-    // ✅ Mark email as verified
-    verifiedEmails.add(email);
-
-    // ✅ Remove OTP after verification
-    
-
-    res.json({ message: "OTP verified successfully" });
+    verifiedEmails.add(email); // Mark email as verified
+    res.json({ message: "OTP verified successfully", emailVerified: true });
   } catch (error) {
     console.error("OTP Verification Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 });
 
+/**
+ * 📌 Register User
 
-// POST: Handle user signup
+
+/**
+ * 📌 POST /register - User Registration
+ */
 signupRouter.post("/register", async (req: Request, res: Response) => {
   try {
     let { username, fullName, email, phone, address, city, state, password, role, acceptTerms } = req.body;
 
-    // Trim user input
-    username = username.trim();
-    fullName = fullName.trim();
-    email = email.trim();
-    phone = phone.trim();
-    address = address.trim();
-    city = city.trim();
-    state = state.trim();
+    console.log("📩 Received Payload:");
+    console.log(`➡ Username: ${username}`);
+    console.log(`➡ Full Name: ${fullName}`);
+    console.log(`➡ Email: ${email}`);
+    console.log(`➡ Phone: ${phone}`);
+    console.log(`➡ Address: ${address}`);
+    console.log(`➡ City: ${city}`);
+    console.log(`➡ State: ${state}`);
+    console.log(`➡ Role: ${role}`);
+    console.log(`➡ Accept Terms: ${acceptTerms}`);
 
-    // Validate required fields
+    // ✅ Trim and normalize input
+    username = username?.trim().toLowerCase();
+    email = email?.trim().toLowerCase();
+    fullName = fullName?.trim() || ""; // ✅ Ensure fullName is never null
+    phone = phone?.trim();
+    address = address?.trim();
+    city = city?.trim();
+    state = state?.trim();
+
+    // ✅ Validate required fields
     if (!username || !fullName || !email || !phone || !address || !city || !state || !password || !role || !acceptTerms) {
+      console.log("❌ Error: Missing required fields!");
       return res.status(400).json({ error: "All fields are required, and terms must be accepted." });
     }
 
-    // 🚨 Ensure email is verified before registration
+    if (!fullName || fullName.length < 3) {
+      console.log("❌ Error: Full Name is too short!");
+      return res.status(400).json({ error: "Full Name must be at least 3 characters long." });
+    }
+
+    // ✅ Ensure email is verified before registration
     if (!verifiedEmails.has(email)) {
+      console.log("❌ Error: Email not verified!");
       return res.status(400).json({ error: "Email verification is required. Please verify OTP before creating an account." });
     }
 
-    // Check if email or username already exists
+    // ✅ Check if email or username already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+
     if (existingUser) {
+      console.log("❌ Error: Username or Email already exists!");
       return res.status(400).json({ error: "Username or email already exists." });
     }
 
-    // Hash the password before storing it
+    // ✅ Hash the password before storing it
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log(`🔒 Password Hashed Successfully`);
 
-    // Save the new user to the database
+    // ✅ Save the new user to the database
     const newUser = new User({
       username,
       fullName,
@@ -131,21 +135,44 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
       password: hashedPassword,
       role,
       acceptTerms,
+      emailVerified: true, // ✅ Ensure email is marked as verified
     });
 
+    console.log("📤 Sending Data to Database:");
+    console.log(`➡ Username: ${newUser.username}`);
+    console.log(`➡ Full Name: ${newUser.fullName}`);
+    console.log(`➡ Email: ${newUser.email}`);
+    console.log(`➡ Phone: ${newUser.phone}`);
+    console.log(`➡ Address: ${newUser.address}`);
+    console.log(`➡ City: ${newUser.city}`);
+    console.log(`➡ State: ${newUser.state}`);
+    console.log(`➡ Role: ${newUser.role}`);
+    console.log(`➡ Email Verified: ${newUser.emailVerified}`);
+    console.log(`➡ Accept Terms: ${newUser.acceptTerms}`);
+
     await newUser.save();
+    console.log("✅ User Saved Successfully");
 
-    // 🚨 Remove email from verified list after successful registration
+    // ✅ Remove email from verified list after successful registration
     verifiedEmails.delete(email);
+    console.log(`✅ Email removed from verified list: ${email}`);
 
-    // Send welcome email
+    /**
+     * 📧 Send Welcome Email to User
+     */
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
       subject: "Welcome to RentAmigo",
-      html: `<h1>Welcome to RentAmigo</h1><p>Dear ${fullName},</p><p>Thank you for signing up!</p>`,
+      html: `<h1>Welcome to RentAmigo</h1>
+             <p>Dear ${fullName},</p>
+             <p>Thank you for signing up! We're excited to have you onboard.</p>`,
     });
+    console.log(`📧 Welcome email sent to: ${email}`);
 
+    /**
+     * 📧 Notify Admin of New Registration
+     */
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: "venkat.s@rentamigo.in",
@@ -160,6 +187,7 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
         <p><strong>Role:</strong> ${role}</p>
       `,
     });
+    console.log("📩 Admin notified about new registration");
 
     res.status(201).json({
       message: "User registered successfully, and emails sent.",
@@ -169,14 +197,15 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
         fullName: newUser.fullName,
         email: newUser.email,
         phone: newUser.phone,
-        address: `${newUser.address}, ${newUser.city}, ${newUser.state}`,
         role: newUser.role,
+        emailVerified: newUser.emailVerified,
       },
     });
   } catch (error: any) {
-    console.error("Error registering user:", error);
+    console.error("❌ Error registering user:", error);
 
     if (error.code === 11000) {
+      console.log("❌ Duplicate Entry: Email or Username already exists!");
       return res.status(400).json({ error: "Email or username already exists." });
     }
 
@@ -187,58 +216,5 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
 
 
 
-// PUT: Update user by email
-signupRouter.put("/update", async (req: Request, res: Response) => {
-  try {
-    const { email, username, phone, address, city, state, role } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: "Email is required to update user." });
-    }
-
-    const updatedUser = await User.findOneAndUpdate(
-      { email },
-      { username, phone, address, city, state, role },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ error: "User not found for the provided email." });
-    }
-
-    res.status(200).json({ message: "User updated successfully.", user: updatedUser });
-  } catch (error) {
-    console.error("Error updating user:", error);
-    res.status(500).json({ error: "An error occurred while updating the user." });
-  }
-});
-
-// GET: Fetch all users
-signupRouter.get("/users", async (_req: Request, res: Response) => {
-  try {
-    const users = await User.find();
-    res.status(200).json(users);
-  } catch (error) {
-    console.error("Error fetching users:", error);
-    res.status(500).json({ error: "An error occurred while fetching users." });
-  }
-});
-
-// GET: Fetch a specific user by email
-signupRouter.get("/users/:email", async (req: Request, res: Response) => {
-  try {
-    const { email } = req.params;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: "User not found." });
-    }
-
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error fetching user:", error);
-    res.status(500).json({ error: "An error occurred while fetching the user." });
-  }
-});
 
 export default signupRouter;

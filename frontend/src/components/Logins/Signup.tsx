@@ -13,9 +13,10 @@ function Signup({ onSwitchToLogin }: SignupProps) {
   const [showTerms, setShowTerms] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [otpSent, setOTPSent] = useState(false); // ✅ Track OTP sent status
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false); // Track OTP verification
+  const [emailVerified, setEmailVerified] = useState(false); // ✅ Track OTP verification
 
   const [formData, setFormData] = useState({
     username: '',
@@ -32,7 +33,6 @@ function Signup({ onSwitchToLogin }: SignupProps) {
   });
 
   const roles = [
-    { value: 'admin', label: 'Admin' },
     { value: 'owner', label: 'Owner' },
     { value: 'agent', label: 'Agent' },
     { value: 'tenant', label: 'Tenant' },
@@ -40,12 +40,17 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: 'employee', label: 'Employee' },
   ];
 
+
   /**
-   * 1️⃣ Send OTP when user enters email
+   * 1️⃣ Send OTP for Email Verification
    */
   const handleSendOTP = async () => {
     if (!formData.email) {
       setError('Please enter your email address first.');
+      return;
+    }
+    if (emailVerified) {
+      setError('Email is already verified.');
       return;
     }
 
@@ -55,22 +60,17 @@ function Signup({ onSwitchToLogin }: SignupProps) {
 
       const response = await fetch('http://localhost:8000/api/sign/send-otp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email }),
       });
 
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to send OTP');
-      }
+      if (!response.ok) throw new Error(data.error || 'Failed to send OTP');
 
       setShowOTPModal(true);
+      setOTPSent(true); // ✅ Mark OTP as sent
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send OTP');
-      setShowOTPModal(false);
     } finally {
       setLoading(false);
     }
@@ -83,77 +83,63 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     try {
       setLoading(true);
       setError(null);
-  
+
       const response = await fetch('http://localhost:8000/api/sign/verify-otp', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: formData.email, otp }),
       });
-  
+
       const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to verify OTP');
-      }
-  
-      setEmailVerified(true); // ✅ Store email as verified
-  
+
+      if (!response.ok) throw new Error(data.error || 'Failed to verify OTP');
+
+      setEmailVerified(true);
+      setOTPSent(false); // ✅ Reset OTP Sent Status
+
       // ✅ Update formData to include emailVerified
       setFormData((prevData) => ({
         ...prevData,
-        emailVerified: true, // ✅ Add this field
+        emailVerified: true,
       }));
-  
+
       setShowOTPModal(false);
-      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to verify OTP');
     } finally {
       setLoading(false);
     }
   };
-  
-  
-  
 
   /**
    * 3️⃣ Submit Registration Form (Only After OTP Verification)
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    // 🚨 Prevent registration if email is not verified
+
+    // ✅ Prevent registration if email is not verified
     if (!emailVerified) {
-      setError("Please verify your email before submitting.");
+      setError('Please verify your email before submitting.');
       return;
     }
-  
+
     setLoading(true);
     setError(null);
     setSuccess(false);
-  
+
     try {
       const response = await fetch('http://localhost:8000/api/sign/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          emailVerified: true, // ✅ Include email verification status in payload
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, emailVerified: true }),
       });
-  
+
       const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
-      }
-  
+
+      if (!response.ok) throw new Error(data.error || 'Registration failed');
+
       setSuccess(true);
-  
+
       // Reset form after successful registration
       setFormData({
         username: '',
@@ -166,11 +152,11 @@ function Signup({ onSwitchToLogin }: SignupProps) {
         password: '',
         role: '' as UserRole,
         acceptTerms: false,
-        emailVerified: false, // Reset email verification status
+        emailVerified: false,
       });
-  
-      setEmailVerified(false); // ✅ Reset email verification state
-  
+
+      setEmailVerified(false);
+
       setTimeout(() => {
         onSwitchToLogin();
       }, 2000);

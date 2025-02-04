@@ -103,7 +103,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8000/api/auth/login", formData);
+      const response = await axios.post("http://localhost:8000/api/loginuser/login", formData);
       const userData = response.data;
 
       // Store user data in session storage
