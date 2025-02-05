@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Dashboard } from './Dashboard';
@@ -44,13 +45,28 @@ const initialProperties: Property[] = [
 ];
 
 function CommonDashboard() {
+  const navigate = useNavigate(); // Hook for navigation
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Retrieve user data from sessionStorage
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setIsAuthenticated(false);
+      navigate('/Login'); // Redirect to login if no user found
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
+    sessionStorage.clear(); // Clear all session storage
     setIsAuthenticated(false);
+    navigate("/Login"); // Redirect to login page
   };
 
   const handleNavigate = (page: string) => {
@@ -100,12 +116,8 @@ function CommonDashboard() {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  if (!isAuthenticated) {
-    return <Login onSwitchToSignup={function (): void {
-      throw new Error('Function not implemented.');
-    } } onLoginSuccess={function (email: string): void {
-      throw new Error('Function not implemented.');
-    } } />;
+  if (!isAuthenticated || !user) {
+    return <Login onSwitchToSignup={() => {}} onLoginSuccess={() => {}} />;
   }
 
   return (
@@ -127,7 +139,11 @@ function CommonDashboard() {
       </div>
 
       <div className="flex-1 flex flex-col min-h-screen sm:min-h-0">
-        <Header onMenuClick={toggleSidebar} onLogout={handleLogout} />
+        <Header 
+          onMenuClick={toggleSidebar} 
+          onLogout={handleLogout} 
+          user={user} 
+        />
         <main className="flex-1 overflow-auto">
           {renderPage()}
         </main>
