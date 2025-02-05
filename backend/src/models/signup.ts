@@ -1,9 +1,9 @@
-import { Schema, model, Document, models } from "mongoose";
+import mongoose, { Schema, Document, model, models } from "mongoose";
 
-// Define an interface for the User document
+// Define User Interface
 interface IUser extends Document {
   username: string;
-  fullName:string;
+  fullName: string;
   email: string;
   phone: string;
   address: string;
@@ -12,74 +12,71 @@ interface IUser extends Document {
   password: string;
   role: "owner" | "agent" | "tenant" | "pg" | "employee";
   acceptTerms: boolean;
+  emailVerified: boolean;
 }
 
-// Define the User schema
+// Define the User Schema
 const UserSchema = new Schema<IUser>(
   {
     username: {
       type: String,
-      required: [true, "Username is required!"],
+      required: true,
       unique: true,
-      match: [/^[a-zA-Z0-9]{8,20}$/, "Username invalid, it should contain 8-20 alphanumeric letters and be unique!"],
       trim: true,
     },
     fullName: {
       type: String,
-      required: [true, "Full name is required!"],
+      required: true,
       trim: true,
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: true,
       unique: true,
-      match: [/^\S+@\S+\.\S+$/, "Invalid email address format"],
       trim: true,
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
     phone: {
       type: String,
-      required: [true, "Phone number is required"],
-      match: [/^\+?\d{10,}$/, "Invalid phone number format"], // Supports international numbers
+      required: true,
       trim: true,
     },
     address: {
       type: String,
-      required: [true, "Address is required"],
+      required: true,
       trim: true,
     },
     city: {
       type: String,
-      required: [true, "City is required"],
+      required: true,
       trim: true,
     },
     state: {
       type: String,
-      required: [true, "State is required"],
+      required: true,
       trim: true,
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters long"],
+      required: true,
     },
     role: {
       type: String,
       enum: ["owner", "agent", "tenant", "pg", "employee"],
-      required: [true, "Role is required"],
+      required: true,
     },
     acceptTerms: {
       type: Boolean,
-      required: [true, "You must accept the terms and conditions"],
+      required: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
   },
-  {
-    timestamps: true,
-    strict: true,
-     // Automatically adds createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
-// Export the model, ensuring it is not recreated if already defined
+// Export the User model
 const User = models.User || model<IUser>("User", UserSchema);
-
 export default User;
