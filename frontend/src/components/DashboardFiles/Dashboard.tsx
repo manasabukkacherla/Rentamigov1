@@ -1,9 +1,7 @@
-import React from 'react';
-import { Building2, ArrowUpRight, Users, Building, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Building2, ArrowUpRight, Users, Building, Plus, X, Home, Key, DollarSign } from 'lucide-react';
 import type { Property } from './CommonDashboard';
 import { useNavigate } from "react-router-dom";  
-
-
 
 const stats = [
   { 
@@ -35,9 +33,15 @@ interface DashboardProps {
 }
 
 export function Dashboard({ onNavigate, properties }: DashboardProps) {
-  // Show only the 3 most recent properties
+  const [showPopup, setShowPopup] = useState(false);
   const recentProperties = properties.slice(0, 3);
   const navigate = useNavigate();
+
+  const handlePropertyTypeSelect = (type: 'rent' | 'lease' | 'sell') => {
+    setShowPopup(false);
+    navigate(`/property-listing-form?type=${type}`);
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6">
       {/* Stats */}
@@ -78,11 +82,12 @@ export function Dashboard({ onNavigate, properties }: DashboardProps) {
               View all
             </button>
             <button
-            onClick={() => navigate("/property-listing-form")}
-            className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Add New Property
-          </button>
+              onClick={() => setShowPopup(true)}
+              className="text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add New Property
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -123,6 +128,65 @@ export function Dashboard({ onNavigate, properties }: DashboardProps) {
           ))}
         </div>
       </div>
+
+      {/* Property Type Selection Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full mx-auto overflow-hidden shadow-2xl transform transition-all">
+            <div className="relative p-6 pb-4 bg-gradient-to-br from-blue-600 to-blue-700">
+              <button
+                onClick={() => setShowPopup(false)}
+                className="absolute right-4 top-4 text-white/80 hover:text-white transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+              <h3 className="text-2xl font-bold text-white mb-2">List Your Property</h3>
+              <p className="text-blue-100">Choose how you want to list your property</p>
+            </div>
+            
+            <div className="p-6 pt-4 grid gap-4">
+              <button
+                onClick={() => handlePropertyTypeSelect('rent')}
+                className="flex items-center gap-4 p-4 bg-white border-2 border-blue-100 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all group"
+              >
+                <div className="p-3 rounded-lg bg-blue-100 group-hover:bg-blue-500 transition-colors">
+                  <Home className="h-6 w-6 text-blue-600 group-hover:text-white transition-colors" />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Rent Property</h4>
+                  <p className="text-sm text-gray-500">List your property for short-term rental</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handlePropertyTypeSelect('lease')}
+                className="flex items-center gap-4 p-4 bg-white border-2 border-green-100 rounded-xl hover:border-green-500 hover:bg-green-50 transition-all group"
+              >
+                <div className="p-3 rounded-lg bg-green-100 group-hover:bg-green-500 transition-colors">
+                  <Key className="h-6 w-6 text-green-600 group-hover:text-white transition-colors" />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Lease Property</h4>
+                  <p className="text-sm text-gray-500">List your property for long-term lease</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handlePropertyTypeSelect('sell')}
+                className="flex items-center gap-4 p-4 bg-white border-2 border-purple-100 rounded-xl hover:border-purple-500 hover:bg-purple-50 transition-all group"
+              >
+                <div className="p-3 rounded-lg bg-purple-100 group-hover:bg-purple-500 transition-colors">
+                  <DollarSign className="h-6 w-6 text-purple-600 group-hover:text-white transition-colors" />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Sell Property</h4>
+                  <p className="text-sm text-gray-500">List your property for sale</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
