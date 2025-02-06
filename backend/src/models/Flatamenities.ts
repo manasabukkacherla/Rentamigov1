@@ -95,4 +95,3 @@ const FlatAmenities =
   models.FlatAmenities || model<IFlatAmenities>("FlatAmenities", FlatAmenitiesSchema);
 
 export default FlatAmenities;
-git
