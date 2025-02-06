@@ -51,11 +51,25 @@ const uploadToS3 = async (
 // POST API to upload photos
 photosRouter.post("/upload-photos", async (req, res) => {
   try {
-    const { propertyId, fileName, base64Data, fieldName } = req.body;
+    // Extract user fields correctly
+    let { propertyId, fileName, base64Data, fieldName, user, userId, username, fullName, role } = req.body;
+
+    // If user object is provided, extract fields from it
+    if (user) {
+      userId = user.id;
+      username = user.username;
+      fullName = user.fullName || "Unknown";
+      role = user.role;
+    }
 
     // Validate required fields
-    if (!propertyId || !fileName || !base64Data || !fieldName) {
-      return res.status(400).json({ error: "Missing required fields" });
+    const requiredFields = ["propertyId", "userId", "username", "role", "fileName", "base64Data", "fieldName"];
+    const missingFields = requiredFields.filter((field) => !eval(field));
+
+    if (missingFields.length > 0) {
+      return res.status(400).json({
+        error: `Missing required fields: ${missingFields.join(", ")}`,
+      });
     }
 
     // Fetch property details
@@ -64,13 +78,13 @@ photosRouter.post("/upload-photos", async (req, res) => {
       return res.status(404).json({ error: "Property not found" });
     }
 
-    // Validate Base64 data
+    // Validate Base64 data format
     const base64Pattern = /^data:(image|video)\/(\w+);base64,/;
     const fileTypeMatch = base64Data.match(base64Pattern);
     if (!fileTypeMatch) {
       return res.status(400).json({ error: "Invalid file format" });
     }
-    const fileType = fileTypeMatch[2]; // Extract file type (e.g., jpeg, png, mp4)
+    const fileType = fileTypeMatch[2];
 
     // Convert Base64 to Buffer
     const fileBuffer = Buffer.from(base64Data.replace(base64Pattern, ""), "base64");
@@ -94,8 +108,12 @@ photosRouter.post("/upload-photos", async (req, res) => {
       {
         $set: updateField,
         $setOnInsert: {
+          userId,
+          username,
+          role,
           propertyName: property.propertyName,
           property: propertyId,
+          fullName,
         },
       },
       { new: true, upsert: true }
@@ -110,6 +128,37 @@ photosRouter.post("/upload-photos", async (req, res) => {
     });
   } catch (error) {
     console.error("Error in /upload-photos:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
+
+//Get api through userid or usernmae 
+photosRouter.get("/upload-photos", async (req, res) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch photo uploads based on query
+    const photoUploads = await PhotoUpload.find(query).populate("property", "propertyName");
+
+    if (photoUploads.length === 0) {
+      return res.status(404).json({ message: "No photo uploads found for the given criteria." });
+    }
+
+    res.status(200).json(photoUploads);
+  } catch (error) {
+    console.error("Error in /upload-photos GET:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 });

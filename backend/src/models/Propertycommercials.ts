@@ -3,6 +3,10 @@ import { Schema, model, models, Document, Types } from "mongoose";
 // Define the interface for PropertyCommercials
 interface IPropertyCommercials extends Document {
   property: Types.ObjectId; // Reference to the Property collection
+  userId: Types.ObjectId; // User ID who added the property
+  username: string; // Username of the user
+  fullName: string; // Full name of the user
+  role: "owner" | "agent" | "tenant" | "pg" | "employee"; // User role
   propertyName: string; // Name of the property from the Property collection
   monthlyRent: string; // Monthly rent for the property
   maintenance: string; // Maintenance status (Included or Excluded)
@@ -18,6 +22,26 @@ const PropertyCommercialsSchema = new Schema<IPropertyCommercials>(
       type: Schema.Types.ObjectId,
       ref: "Property", // Reference to the Property collection
       required: [true, "Property reference is required"],
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User", // Reference to the User collection
+      required: [true, "User ID is required"],
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: [true, "Full name is required"],
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: ["owner", "agent", "tenant", "pg", "employee"],
+      required: [true, "User role is required"],
     },
     propertyName: {
       type: String,

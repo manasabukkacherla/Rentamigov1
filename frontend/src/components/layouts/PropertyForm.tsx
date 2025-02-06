@@ -28,8 +28,6 @@ import { SelectField } from "./SelectField";
 
 export interface FormData {
   propertyName: string;
-  ownerName: string;
-  ownerNumber: string;
   propertyType: string;
   propertyConfiguration: string;
   furnishingStatus: string;
@@ -128,8 +126,6 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
     const errors: Record<string, string> = {};
 
     if (!formData.propertyName) errors.propertyName = "Property Name is required.";
-    if (!formData.ownerName) errors.ownerName = "Owner Name is required.";
-    if (!formData.ownerNumber) errors.ownerNumber = "Owner Number is required.";
     if (!formData.propertyType) errors.propertyType = "Property Type is required.";
     if (!formData.propertyConfiguration)
       errors.propertyConfiguration = "Property Configuration is required.";
@@ -159,20 +155,6 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           value={formData.propertyName}
           onChange={updateField("propertyName")}
           placeholder="Enter property name"
-        />
-        <InputField
-          label="Owner Name"
-          icon={User}
-          value={formData.ownerName}
-          onChange={updateField("ownerName")}
-          placeholder="Enter owner's name"
-        />
-        <InputField
-          label="Owner Number"
-          icon={Phone}
-          value={formData.ownerNumber}
-          onChange={updateField("ownerNumber")}
-          placeholder="Enter contact number"
         />
         <SelectField
           label="Property Type"

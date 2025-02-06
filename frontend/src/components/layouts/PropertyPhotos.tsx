@@ -45,35 +45,34 @@ export function PropertyPhotos({
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const navigate = useNavigate();
 
-  const uploadToS3 = async (
-    fileName: string,
-    base64Data: string,
-    fieldName: string
-  ): Promise<string | null> => {
+  const user = JSON.parse(sessionStorage.getItem("user") || "{}"); // Retrieve user session
+
+  if (!user || !user.id || !user.username || !user.role) {
+    alert("User not found. Please log in again.");
+    return;
+  }
+  const uploadToS3 = async (fileName: string, base64Data: string, fieldName: string): Promise<string | null> => {
     try {
       setLoading(true);
-
-      const response = await fetch(
-        "https://api.rentamigo.in/api/photos/upload-photos",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            propertyId, // Use the propertyId from parent
-            fileName,
-            base64Data,
-            fieldName,
-          }),
-        }
-      );
-
+      const response = await fetch("http://localhost:8000/api/photos/upload-photos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          propertyId,
+          fileName,
+          base64Data,
+          fieldName,
+          userId: user.id, // Extract and send as separate fields
+          username: user.username,
+          fullName: user.fullName || "Unknown",
+          role: user.role,
+        }),
+        
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to upload photos");
       }
-
       const data = await response.json();
       return data.fileUrl;
     } catch (error) {
