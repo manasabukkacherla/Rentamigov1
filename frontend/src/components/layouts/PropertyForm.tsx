@@ -36,12 +36,17 @@ export interface FormData {
   facing: string;
   amenities: string[];
 }
+type UserRole = "owner" | "employee" | "agent" | "tenant" | "pg";
 
-interface PropertyFormProps {
+
+export interface PropertyFormProps {
   formData: FormData;
   setFormData: React.Dispatch<React.SetStateAction<FormData>>;
   onSubmit: () => void;
+  userRole: UserRole; // ✅ Use UserRole instead of userType
 }
+
+
 
 interface Amenity {
   id: string;
@@ -107,8 +112,13 @@ const FACING_OPTIONS = [
   { value: "North-West", label: "North-West" },
   { value: "South-West", label: "South-West" },
 ];
-
-export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormProps) {
+export interface PropertyFormProps {
+  formData: FormData;
+  setFormData: React.Dispatch<React.SetStateAction<FormData>>;
+  onSubmit: () => void;
+  userType: "Employee" | "Owner"; // Assuming "Other" for tenants or other roles
+}
+export function PropertyForm({ formData, setFormData, onSubmit,  userRole }: PropertyFormProps) {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const updateField = (field: keyof FormData) => (value: string) => {
@@ -128,8 +138,10 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
     const errors: Record<string, string> = {};
 
     if (!formData.propertyName) errors.propertyName = "Property Name is required.";
-    if (!formData.ownerName) errors.ownerName = "Owner Name is required.";
-    if (!formData.ownerNumber) errors.ownerNumber = "Owner Number is required.";
+    if ( userRole === "owner" ||  userRole === "employee") {
+      if (!formData.ownerName) errors.ownerName = "Owner Name is required.";
+      if (!formData.ownerNumber) errors.ownerNumber = "Owner Number is required.";
+    }
     if (!formData.propertyType) errors.propertyType = "Property Type is required.";
     if (!formData.propertyConfiguration)
       errors.propertyConfiguration = "Property Configuration is required.";
@@ -160,20 +172,24 @@ export function PropertyForm({ formData, setFormData, onSubmit }: PropertyFormPr
           onChange={updateField("propertyName")}
           placeholder="Enter property name"
         />
-        <InputField
-          label="Owner Name"
-          icon={User}
-          value={formData.ownerName}
-          onChange={updateField("ownerName")}
-          placeholder="Enter owner's name"
-        />
-        <InputField
-          label="Owner Number"
-          icon={Phone}
-          value={formData.ownerNumber}
-          onChange={updateField("ownerNumber")}
-          placeholder="Enter contact number"
-        />
+        {( userRole === "owner" ||  userRole === "employee") && (
+          <>
+            <InputField
+              label="Owner Name"
+              icon={User}
+              value={formData.ownerName}
+              onChange={updateField("ownerName")}
+              placeholder="Enter owner's name"
+            />
+            <InputField
+              label="Owner Number"
+              icon={Phone}
+              value={formData.ownerNumber}
+              onChange={updateField("ownerNumber")}
+              placeholder="Enter contact number"
+            />
+          </>
+        )}
         <SelectField
           label="Property Type"
           icon={Sofa}
