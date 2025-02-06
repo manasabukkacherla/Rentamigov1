@@ -4,6 +4,10 @@ import { CallbackError } from "mongoose";
 // Define the interface for PhotoUpload
 export interface IPhotoUpload extends Document {
   property: Types.ObjectId;
+  userId: Types.ObjectId; // User ID who uploaded the photos
+  username: string; // Username of the user
+  fullName: string; // Full name of the user
+  role: "owner" | "agent" | "tenant" | "pg" | "employee"; // User role
   propertyName: string;
   photos: {
     coverImage?: string | null;
@@ -31,6 +35,25 @@ const PhotoUploadSchema = new Schema<IPhotoUpload>(
       ref: "Property",
       required: [true, "Property reference is required"],
       index: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User", // Reference to the User collection
+      required: [true, "User ID is required"],
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: ["owner", "agent", "tenant", "pg", "employee"],
+      required: [true, "User role is required"],
     },
     propertyName: {
       type: String,

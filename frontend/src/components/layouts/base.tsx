@@ -30,6 +30,7 @@ function Base() {
   const [activeStep, setActiveStep] = useState<StepType>('form');
   const [showPreview, setShowPreview] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+   const [userData, setUserData] = useState<{ userId: string; username: string; fullName: string; role: string } | null>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     ownerName: '',
@@ -128,177 +129,129 @@ function Base() {
 
   
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activeStep]);
-
-  const handleNext = async () => {
-    const currentIndex = steps.findIndex((step) => step.id === activeStep);
-
-    try {
-      switch (activeStep) {
-        case 'form':
-          // Validate form data
-          if (
-            !formData.propertyName ||
-            !formData.ownerName ||
-            !formData.ownerNumber ||
-            !formData.propertyType ||
-            !formData.propertyConfiguration ||
-            !formData.furnishingStatus ||
-            !formData.facing
-          ) {
-            alert('Please fill in all required fields in the Basic Details step.');
-            return; // Stop here if validation fails
-          }
-    
-          const formResponse = await fetch('https://api.rentamigo.in/api/properties/property', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
-          });
-    
-          if (!formResponse.ok) {
-            throw new Error('Failed to save property form data');
-          }
-    
-          const createdProperty = await formResponse.json();
-          setPropertyId(createdProperty._id);
-          break;
-    
-        case 'location':
-          // Validate location data
-          if (
-            !locationData.flatNo ||
-            !locationData.addressLine1 ||
-            !locationData.locality ||
-            !locationData.area ||
-            !locationData.pinCode
-          ) {
-            alert('Please fill in all required fields in the Location step.');
-            return; // Stop here if validation fails
-          }
-    
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-location', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...locationData, property: propertyId }),
-          });
-          break;
-    
-        case 'features':
-          // Validate features data
-          if (
-            !featuresData.bedrooms ||
-            !featuresData.bathrooms ||
-            !featuresData.balconies ||
-            !featuresData.floorNumber ||
-            !featuresData.totalFloors ||
-            !featuresData.superBuiltupArea ||
-            !featuresData.builtupArea ||
-            !featuresData.carpetArea ||
-            !featuresData.propertyAge ||
-            !featuresData.propertyDescription
-          ) {
-            alert('Please fill in all required fields in the Features step.');
-            return; // Stop here if validation fails
-          }
-    
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-features', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...featuresData, property: propertyId }),
-          });
-          break;
-    
-        case 'amenities':
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/society-amenities', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...amenitiesData, property: propertyId }),
-          });
-          break;
-    
-        case 'flatAmenities':
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/flat-amenities', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...flatAmenitiesData, property: propertyId }),
-          });
-          break;
-    
-        case 'restrictions':
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-restrictions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...restrictionsData, property: propertyId }),
-          });
-          break;
-    
-        case 'commercials':
-          // Validate commercials data
-          if (!commercialsData.monthlyRent || !commercialsData.securityDeposit) {
-            alert('Please fill in all required fields in the Commercials step.');
-            return; // Stop here if validation fails
-          }
-    
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-commercials', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...commercialsData, property: propertyId }),
-          });
-          break;
-    
-        case 'availability':
-          // Validate availability data
-          if (!availabilityData.availableFrom) {
-            alert('Please select a date in the Availability step.');
-            return; // Stop here if validation fails
-          }
-    
-          if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-availability', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...availabilityData, property: propertyId }),
-          });
-          break;
-    
-        default:
-          break;
-      }
-    
-      if (currentIndex < steps.length - 1) {
-        setActiveStep(steps[currentIndex + 1].id);
-        setShowMobileMenu(false);
-      }
-    } catch (error) {
-      console.error('Error saving data:', error);
-      alert('Failed to save data. Please try again.');
-    }
+// 🔹 Fetch user session from sessionStorage
+useEffect(() => {
+  const storedUser = sessionStorage.getItem("user");
+  if (storedUser) {
+    const userData = JSON.parse(storedUser);
+    setUserData(userData); // Set user details in state
+  } else {
+    console.warn("No user session found. Please log in.");
   }
+}, []);
+
+// 🔹 Scroll to top when step changes
+useEffect(() => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}, [activeStep]);
+
+const handleNext = async () => {
+  if (!userData) {
+    alert("User session not found. Please log in.");
+    return;
+  }
+
+  const { id: userId, username, role } = userData;
+  const fullName = userData.fullName || "Unknown"; // Fallback for missing fullName
+  const currentIndex = steps.findIndex((step) => step.id === activeStep);
+  let payload = { userId, username, fullName, role };
+
+  try {
+    switch (activeStep) {
+      case 'form':
+        if (!formData.propertyName || !formData.propertyType || !formData.propertyConfiguration || !formData.furnishingStatus || !formData.facing) {
+          alert('Please fill in all required fields in the Basic Details step.');
+          return;
+        }
+
+        const formResponse = await fetch('http://localhost:8000/api/properties/property', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...formData, ...payload }),
+        });
+
+        if (!formResponse.ok) throw new Error('Failed to save property form data');
+        const createdProperty = await formResponse.json();
+        setPropertyId(createdProperty._id);
+        break;
+
+      case 'location':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/property-location', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...locationData, property: propertyId, ...payload }),
+        });
+        break;
+
+      case 'features':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/property-features', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...featuresData, property: propertyId, ...payload }),
+        });
+        break;
+
+      case 'amenities':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/society-amenities', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...amenitiesData, property: propertyId, ...payload }),
+        });
+        break;
+
+      case 'flatAmenities':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/flat-amenities', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...flatAmenitiesData, property: propertyId, ...payload }),
+        });
+        break;
+
+      case 'restrictions':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/property-restrictions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...restrictionsData, property: propertyId, ...payload }),
+        });
+        break;
+
+      case 'commercials':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/property-commercials', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...commercialsData, property: propertyId, ...payload }),
+        });
+        break;
+
+      case 'availability':
+        if (!propertyId) throw new Error('Property ID is missing');
+        await fetch('http://localhost:8000/api/properties/property-availability', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...availabilityData, property: propertyId, ...payload }),
+        });
+        break;
+
+      default:
+        break;
+    }
+
+    if (currentIndex < steps.length - 1) {
+      setActiveStep(steps[currentIndex + 1].id);
+      setShowMobileMenu(false);
+    }
+  } catch (error) {
+    console.error('Error saving data:', error);
+    alert('Failed to save data. Please try again.');
+  }
+};
+
 
   const handlePrevious = () => {
     const currentIndex = steps.findIndex((step) => step.id === activeStep);

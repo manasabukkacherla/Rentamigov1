@@ -128,6 +128,10 @@ propertyRouter.post("/property-location", async (req: Request, res: Response) =>
   try {
     const {
       property,
+      userId,
+      username,
+      fullName,
+      role,
       flatNo,
       addressLine1,
       addressLine2,
@@ -145,9 +149,18 @@ propertyRouter.post("/property-location", async (req: Request, res: Response) =>
       return res.status(404).send({ error: "Property not found" });
     }
 
+    // Validate user details
+    if (!userId || !username || !fullName || !role) {
+      return res.status(400).send({ error: "User details are required" });
+    }
+
     // Create a new PropertyLocation document
     const propertyLocation = new PropertyLocation({
       property,
+      userId,
+      username,
+      fullName,
+      role,
       propertyName: propertyDoc.propertyName, // Dynamically set propertyName
       flatNo,
       addressLine1,
@@ -173,6 +186,7 @@ propertyRouter.post("/property-location", async (req: Request, res: Response) =>
     }
   }
 });
+
 
 //Get function based on property id 
 propertyRouter.get("/:propertyId/locations", async (req: Request, res: Response) => {
@@ -251,6 +265,39 @@ propertyRouter.get("/property-location", async (req: Request, res: Response) => 
     }
   }
 });
+//route to get property location through username or userid 
+propertyRouter.get("/property-location/user", async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch property locations based on query
+    const propertyLocations = await PropertyLocation.find(query).populate("property", "propertyName");
+
+    if (propertyLocations.length === 0) {
+      return res.status(404).json({ message: "No property locations found for the given criteria." });
+    }
+
+    res.status(200).json(propertyLocations);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 //route to put the property location
 propertyRouter.put("/property-location/:id", async (req: Request, res: Response) => {
   try {
@@ -290,6 +337,10 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
   try {
     const {
       property,
+      userId,
+      username,
+      fullName,
+      role,
       bedrooms,
       bathrooms,
       balconies,
@@ -309,9 +360,18 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
       return res.status(404).send({ error: "Property not found" });
     }
 
+    // Validate user details
+    if (!userId || !username || !fullName || !role) {
+      return res.status(400).send({ error: "User details are required" });
+    }
+
     // Create a new PropertyFeatures document
     const propertyFeatures = new PropertyFeatures({
       property,
+      userId,
+      username,
+      fullName,
+      role,
       propertyName: propertyDoc.propertyName, // Dynamically set propertyName
       bedrooms,
       bathrooms,
@@ -339,6 +399,39 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
     }
   }
 });
+// Route to get property feautures from the userid or user name 
+propertyRouter.get("/property-features/user", async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch property features based on query
+    const propertyFeatures = await PropertyFeatures.find(query).populate("property", "propertyName");
+
+    if (propertyFeatures.length === 0) {
+      return res.status(404).json({ message: "No property features found for the given criteria." });
+    }
+
+    res.status(200).json(propertyFeatures);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 
 //Route get details with property id
   propertyRouter.get("/:propertyId/features", async (req: Request, res: Response) => {
@@ -464,36 +557,78 @@ propertyRouter.put("/property-features/:id", async (req: Request, res: Response)
 
 // route to post society-amenities
 propertyRouter.post("/society-amenities", async (req: Request, res: Response) => {
-    try {
-      const { property, selectedAmenities, powerBackupType } = req.body;
-  
-      // Validate property reference
-      const propertyDoc = await Property.findById(property);
-      if (!propertyDoc) {
-        return res.status(404).send({ error: "Property not found" });
-      }
-  
-      // Create a new SocietyAmenities document
-      const societyAmenities = new SocietyAmenities({
-        property,
-        propertyName: propertyDoc.propertyName, // Dynamically set propertyName
-        selectedAmenities,
-        powerBackupType,
-      });
-  
-      // Save to the database
-      await societyAmenities.save();
-  
-      res.status(201).send(societyAmenities);
-    } catch (error) {
-      // Handle errors
-      if (error instanceof Error) {
-        res.status(400).send({ error: error.message });
-      } else {
-        res.status(400).send({ error: "An unknown error occurred." });
-      }
+  try {
+    const { property, userId, username, fullName, role, selectedAmenities, powerBackupType } = req.body;
+
+    // Validate property reference
+    const propertyDoc = await Property.findById(property);
+    if (!propertyDoc) {
+      return res.status(404).send({ error: "Property not found" });
     }
-  });
+
+    // Validate user details
+    if (!userId || !username || !fullName || !role) {
+      return res.status(400).send({ error: "User details are required" });
+    }
+
+    // Create a new SocietyAmenities document
+    const societyAmenities = new SocietyAmenities({
+      property,
+      userId,
+      username,
+      fullName,
+      role,
+      propertyName: propertyDoc.propertyName, // Dynamically set propertyName
+      selectedAmenities,
+      powerBackupType,
+    });
+
+    // Save to the database
+    await societyAmenities.save();
+
+    res.status(201).send(societyAmenities);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(400).send({ error: error.message });
+    } else {
+      res.status(400).send({ error: "An unknown error occurred." });
+    }
+  }
+});
+
+// route to get society amenities by userid and username 
+propertyRouter.get("/society-amenities/user", async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch society amenities based on query
+    const societyAmenities = await SocietyAmenities.find(query).populate("property", "propertyName");
+
+    if (societyAmenities.length === 0) {
+      return res.status(404).json({ message: "No society amenities found for the given criteria." });
+    }
+
+    res.status(200).json(societyAmenities);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  }
+});
 
 //Get with property id as for society amenities 
 propertyRouter.get("/:propertyId/society-amenities", async (req: Request, res: Response) => {
@@ -620,19 +755,28 @@ propertyRouter.put("/society-amenities/:id", async (req: Request, res: Response)
 
 
   // Route to create new flat amenities
-propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
+  propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
     try {
-      const { property, selectedAmenities } = req.body;
+      const { property, userId, username, fullName, role, selectedAmenities } = req.body;
   
       // Validate property reference
       const propertyDoc = await Property.findById(property);
       if (!propertyDoc) {
         return res.status(404).send({ error: "Property not found" });
       }
+
+      // Validate user details
+      if (!userId || !username || !fullName || !role) {
+        return res.status(400).send({ error: "User details are required" });
+      }
   
       // Create a new FlatAmenities document
       const flatAmenities = new FlatAmenities({
         property,
+        userId,
+        username,
+        fullName,
+        role,
         propertyName: propertyDoc.propertyName, // Dynamically set propertyName
         selectedAmenities,
       });
@@ -649,7 +793,40 @@ propertyRouter.post("/flat-amenities", async (req: Request, res: Response) => {
         res.status(400).send({ error: "An unknown error occurred." });
       }
     }
-  });
+});
+
+// Route to get flat amenities by user id and username 
+propertyRouter.get("/flat-amenities/user", async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch flat amenities based on query
+    const flatAmenities = await FlatAmenities.find(query).populate("property", "propertyName");
+
+    if (flatAmenities.length === 0) {
+      return res.status(404).json({ message: "No flat amenities found for the given criteria." });
+    }
+
+    res.status(200).json(flatAmenities);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  }
+});
 
 //Get function with property id 
 propertyRouter.get("/:propertyId/flat-amenities", async (req: Request, res: Response) => {
@@ -775,10 +952,14 @@ propertyRouter.put("/flat-amenities/:id", async (req: Request, res: Response) =>
 });
 
   //property restrictions post api
-  propertyRouter.post("/property-restrictions", async (req: Request, res: Response) => {
+ propertyRouter.post("/property-restrictions", async (req: Request, res: Response) => {
     try {
       const {
         property,
+        userId,
+        username,
+        fullName,
+        role,
         bachelorTenants,
         nonVegTenants,
         tenantWithPets,
@@ -795,10 +976,19 @@ propertyRouter.put("/flat-amenities/:id", async (req: Request, res: Response) =>
       if (!propertyDoc) {
         return res.status(404).send({ error: "Property not found" });
       }
+
+      // Validate user details
+      if (!userId || !username || !fullName || !role) {
+        return res.status(400).send({ error: "User details are required" });
+      }
   
       // Create a new PropertyRestrictions document
       const propertyRestrictions = new PropertyRestrictions({
         property,
+        userId,
+        username,
+        fullName,
+        role,
         propertyName: propertyDoc.propertyName, // Dynamically set propertyName
         bachelorTenants,
         nonVegTenants,
@@ -823,7 +1013,41 @@ propertyRouter.put("/flat-amenities/:id", async (req: Request, res: Response) =>
         res.status(400).send({ error: "An unknown error occurred." });
       }
     }
+});
+  
+  //Get function to get property restriction through username and user id 
+  propertyRouter.get("/property-restrictions/user", async (req: Request, res: Response) => {
+    try {
+      const { userId, username } = req.query;
+  
+      // Validate at least one filter is provided
+      if (!userId && !username) {
+        return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+      }
+  
+      // Build query conditions dynamically
+      const query: any = {};
+      if (userId) query.userId = userId;
+      if (username) query.username = username;
+  
+      // Fetch property restrictions based on query
+      const propertyRestrictions = await PropertyRestrictions.find(query).populate("property", "propertyName");
+  
+      if (propertyRestrictions.length === 0) {
+        return res.status(404).json({ message: "No property restrictions found for the given criteria." });
+      }
+  
+      res.status(200).json(propertyRestrictions);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unknown error occurred." });
+      }
+    }
   });
+  
 
   //Get function of  restriction with property id 
   propertyRouter.get("/:propertyId/restrictions", async (req: Request, res: Response) => {
@@ -951,17 +1175,36 @@ propertyRouter.put("/property-restrictions/:id", async (req: Request, res: Respo
   //Property commercials post api 
   propertyRouter.post("/property-commercials", async (req: Request, res: Response) => {
     try {
-      const { property, monthlyRent, maintenance, maintenanceAmount, securityDeposit } = req.body;
+      const { 
+        property, 
+        userId, 
+        username, 
+        fullName, 
+        role, 
+        monthlyRent, 
+        maintenance, 
+        maintenanceAmount, 
+        securityDeposit 
+      } = req.body;
   
       // Validate property reference
       const propertyDoc = await Property.findById(property);
       if (!propertyDoc) {
         return res.status(404).send({ error: "Property not found" });
       }
+
+      // Validate user details
+      if (!userId || !username || !fullName || !role) {
+        return res.status(400).send({ error: "User details are required" });
+      }
   
       // Create a new PropertyCommercials document
       const propertyCommercials = new PropertyCommercials({
         property,
+        userId,
+        username,
+        fullName,
+        role,
         propertyName: propertyDoc.propertyName, // Dynamically set propertyName
         monthlyRent,
         maintenance,
@@ -981,7 +1224,41 @@ propertyRouter.put("/property-restrictions/:id", async (req: Request, res: Respo
         res.status(400).send({ error: "An unknown error occurred." });
       }
     }
-  });
+});
+
+//route get property commercials through user id or username 
+propertyRouter.get("/property-commercials/user", async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch property commercials based on query
+    const propertyCommercials = await PropertyCommercials.find(query).populate("property", "propertyName");
+
+    if (propertyCommercials.length === 0) {
+      return res.status(404).json({ message: "No property commercials found for the given criteria." });
+    }
+
+    res.status(200).json(propertyCommercials);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 //route to get the propertycommercials
 propertyRouter.get("/property-commercials", async (req: Request, res: Response) => {
   try {
@@ -1101,36 +1378,79 @@ propertyRouter.put("/property-commercials/:id", async (req: Request, res: Respon
 });
 
   // Route to create new property availability
-propertyRouter.post("/property-availability", async (req: Request, res: Response) => {
-  try {
-    const { property, availableFrom } = req.body;
-
-    // Validate property reference
-    const propertyDoc = await Property.findById(property);
-    if (!propertyDoc) {
-      return res.status(404).send({ error: "Property not found" });
+  propertyRouter.post("/property-availability", async (req: Request, res: Response) => {
+    try {
+      const { property, userId, username, fullName, role, availableFrom } = req.body;
+  
+      // Validate property reference
+      const propertyDoc = await Property.findById(property);
+      if (!propertyDoc) {
+        return res.status(404).send({ error: "Property not found" });
+      }
+  
+      // Validate user details
+      if (!userId || !username || !fullName || !role) {
+        return res.status(400).send({ error: "User details are required" });
+      }
+  
+      // Create a new PropertyAvailability document
+      const propertyAvailability = new PropertyAvailability({
+        property,
+        userId,
+        username,
+        fullName,
+        role,
+        propertyName: propertyDoc.propertyName, // Dynamically set propertyName
+        availableFrom,
+      });
+  
+      // Save to the database
+      await propertyAvailability.save();
+  
+      res.status(201).send(propertyAvailability);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(400).send({ error: error.message });
+      } else {
+        res.status(400).send({ error: "An unknown error occurred." });
+      }
     }
+  });
 
-    // Create a new PropertyAvailability document
-    const propertyAvailability = new PropertyAvailability({
-      property,
-      propertyName: propertyDoc.propertyName, // Dynamically set propertyName
-      availableFrom,
-    });
-
-    // Save to the database
-    await propertyAvailability.save();
-
-    res.status(201).send(propertyAvailability);
-  } catch (error) {
-    // Handle errors
-    if (error instanceof Error) {
-      res.status(400).send({ error: error.message });
-    } else {
-      res.status(400).send({ error: "An unknown error occurred." });
+  // Route to get property availability by user name and user id 
+  propertyRouter.get("/property-availability/user", async (req: Request, res: Response) => {
+    try {
+      const { userId, username } = req.query;
+  
+      // Validate at least one filter is provided
+      if (!userId && !username) {
+        return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+      }
+  
+      // Build query conditions dynamically
+      const query: any = {};
+      if (userId) query.userId = userId;
+      if (username) query.username = username;
+  
+      // Fetch property availability based on query
+      const propertyAvailability = await PropertyAvailability.find(query).populate("property", "propertyName");
+  
+      if (propertyAvailability.length === 0) {
+        return res.status(404).json({ message: "No property availability records found for the given criteria." });
+      }
+  
+      res.status(200).json(propertyAvailability);
+    } catch (error) {
+      // Handle errors
+      if (error instanceof Error) {
+        res.status(500).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unknown error occurred." });
+      }
     }
-  }
-});
+  });
+  
 
 //Get function with property id for availlability 
 propertyRouter.get("/:propertyId/availability", async (req: Request, res: Response) => {

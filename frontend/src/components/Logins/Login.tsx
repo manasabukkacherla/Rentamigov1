@@ -63,10 +63,12 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
         JSON.stringify({
           id: userData.user.id,
           email: userData.user.email,
+          fullName: userData.user.fullName, // Added fullName
           username: userData.user.username,
           role: userData.user.role,
         })
       );
+      
 
       // Redirect user based on role
       redirectUser(userData.user.role);
@@ -112,6 +114,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
         JSON.stringify({
           id: userData.user.id,
           email: userData.user.email,
+          fullName: userData.user.fullName, // Added fullName
           username: userData.user.username,
           role: userData.user.role,
         })
