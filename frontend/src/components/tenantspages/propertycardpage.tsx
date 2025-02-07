@@ -156,7 +156,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ propertyId }) => {
           </div>
         </div>
       </div>
-
+as;lasl;as;lasl;
       {showEnquiryForm && (
         <PropertyRegistrationForm
           propertyTitle={propertyData.title}
