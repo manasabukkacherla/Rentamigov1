@@ -99,12 +99,10 @@ const PropertyFeaturesSchema = new Schema<IPropertyFeatures>(
     },
     builtupArea: {
       type: Number,
-      required: [true, "Built-up Area is required"],
       min: [1, "Built-up Area must be greater than 0"],
     },
     carpetArea: {
       type: Number,
-      required: [true, "Carpet Area is required"],
       min: [1, "Carpet Area must be greater than 0"],
     },
     propertyAge: {

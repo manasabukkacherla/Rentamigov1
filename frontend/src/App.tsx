@@ -19,6 +19,7 @@ import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 import PropertyPage from "./components/layouts/base";
 import Loginhome from "./components/Logins/Loginhome";
 import CommonDashboard from "./components/DashboardFiles/CommonDashboard";
+import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -47,6 +48,8 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
           <Route path="/Tenanthome" element={<Tenanthome />} />
+          <Route path="/Userdashboard/*" element={<UsrDashboard />} /> {/* Ensure wildcard `/*` */}
+
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />
