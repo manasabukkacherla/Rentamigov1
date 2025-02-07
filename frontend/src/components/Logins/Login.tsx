@@ -47,12 +47,12 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Credential Response:", credentialResponse);
-  
+
       // 🔹 1️⃣ Send Google credential to backend for verification
       const response = await axios.post("http://localhost:8000/api/loginuser/google", {
         credential: credentialResponse.credential,
       });
-  
+
       const userData = response.data;
 
       console.log("Google Login Successful:", userData);
@@ -70,25 +70,25 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
 
       // Redirect user based on role
       redirectUser(userData.user.role);
-  
+
       if (userData.error) {
         // 🔹 2️⃣ If user is NOT registered, prevent login and prompt signup
         alert("You are not registered. Please sign up first.");
         onSwitchToSignup(); // Redirect to signup page
         return;
       }
-  
+
       // 🔹 3️⃣ If user exists, proceed with login
       localStorage.setItem("user", JSON.stringify(userData.user));
       localStorage.setItem("token", userData.token);
- 
+
       onLoginSuccess(userData.user.email);
     } catch (error) {
       console.error("Google Login Error:", error);
       alert("You are not registered. Please SignUp.");
     }
   };
-  
+
 
   // 🔹 Handle Google Authentication Error
   const handleGoogleError = () => {
@@ -103,7 +103,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     setError(null);
 
     try {
-      const response = await axios.post("http://localhost:8000/api/loginuser/login", formData);
+      const response = await axios.post("http://localhost:8000/api/auth/login", formData);
       const userData = response.data;
 
       // Store user data in session storage
@@ -135,17 +135,18 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     <div className="bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl p-8 w-full relative z-10">
       {/* Logo */}
       <div className="absolute top-8 left-8">
-        <img 
-          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=96&h=96&q=80" 
+        <img
+          src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=96&h=96&q=80"
           alt="Company Logo"
           className="w-8 h-8 object-cover rounded-lg"
         />
       </div>
 
       <div className="text-center mb-8">
-        <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h2 className="text-4xl font-bold text-black">
           Welcome Back
         </h2>
+
         <p className="text-gray-600 mt-2">Please sign in to your account</p>
       </div>
 
