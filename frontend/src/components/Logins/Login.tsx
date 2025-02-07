@@ -33,7 +33,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   // 🔹 Function to redirect user based on role
   const redirectUser = (role: string) => {
     if (["owner", "pg", "agent"].includes(role)) {
-      navigate("/commondashboard");
+      navigate("/Userdashboard");  // ✅ Redirect PG, Owner, Agent to Userdashboard
     } else if (role === "user") {
       navigate("/homepage");
     } else if (role === "admin" || role === "employee") {
@@ -42,6 +42,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage"); // Default route if role is unknown
     }
   };
+  
 
   // 🔹 Handle Google Authentication Success
   const handleGoogleSuccess = async (credentialResponse: any) => {
