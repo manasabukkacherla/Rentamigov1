@@ -13,6 +13,8 @@ export interface Lead {
   email: string;
   phone: string;
   date: string;
+  flatNo: string;
+  status: 'New' | 'Contacted' | 'Interested' | 'Not Interested' | 'Converted' | 'Visited' | 'RNR' | 'Call Back' | 'No Requirement' | 'Different Requirement';
 }
 
 export interface DashboardStats {
