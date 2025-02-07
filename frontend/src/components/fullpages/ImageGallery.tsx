@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
 import Modal from "react-modal";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, Play } from "lucide-react";
 
-// Bind modal to your appElement for accessibility
 Modal.setAppElement("#root");
+
+interface MediaItem {
+  url: string;
+  type: 'image' | 'video';
+}
 
 interface ImageGalleryProps {
   propertyId: string;
 }
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
-  const [images, setImages] = useState<string[]>([]);
+  const [media, setMedia] = useState<MediaItem[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
@@ -30,16 +34,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
 
   const placeholderImage = "https://via.placeholder.com/800x400?text=No+Image";
 
-  // Fetch property details
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await fetch(
           `https://api.rentamigo.in/api/properties/${propertyId}/locations`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch property details");
-        }
+        if (!response.ok) throw new Error("Failed to fetch property details");
         const data = await response.json();
 
         if (data.length > 0) {
@@ -50,9 +51,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
             area: location.area || "Unknown Area",
             address: `${location.flatNo || ""}, ${location.addressLine1 || ""}, ${
               location.addressLine2 || ""
-            }, ${location.addressLine3 || ""}`
-              .replace(/, ,/g, ",")
-              .replace(/, $/, ""),
+            }, ${location.addressLine3 || ""}`.replace(/, ,/g, ",").replace(/, $/, ""),
           });
         }
       } catch (error) {
@@ -69,60 +68,54 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
     fetchPropertyDetails();
   }, [propertyId]);
 
-  // Fetch property photos
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchMedia = async () => {
       try {
         const response = await fetch(
           `https://api.rentamigo.in/api/photos/${propertyId}/photos`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch property photos");
-        }
+        if (!response.ok) throw new Error("Failed to fetch property media");
         const data = await response.json();
         const photos = data.photos;
 
-        const allImages = [
-          photos.coverImage,
-          photos.exteriorView,
-          photos.livingRoom,
-          photos.kitchen,
-          photos.diningRoom,
-          photos.utilityArea,
-          photos.others,
-          ...Object.values(photos.bedrooms || {}),
-          ...Object.values(photos.bathrooms || {}),
-          ...Object.values(photos.balconies || {}),
-          ...Object.values(photos.extraRooms || {}),
-        ].filter(Boolean);
+        const allMedia = [
+          { url: photos.coverImage, type: 'image' },
+          { url: photos.exteriorView, type: 'image' },
+          { url: photos.livingRoom, type: 'image' },
+          { url: photos.kitchen, type: 'image' },
+          { url: photos.diningRoom, type: 'image' },
+          { url: photos.utilityArea, type: 'image' },
+          { url: photos.others, type: 'image' },
+          ...(photos.propertyVideo ? [{ url: photos.propertyVideo, type: 'video' }] : []),
+          ...Object.values(photos.bedrooms || {}).map(url => ({ url, type: 'image' })),
+          ...Object.values(photos.bathrooms || {}).map(url => ({ url, type: 'image' })),
+          ...Object.values(photos.balconies || {}).map(url => ({ url, type: 'image' })),
+          ...Object.values(photos.extraRooms || {}).map(url => ({ url, type: 'image' })),
+        ].filter(item => item.url) as MediaItem[];
 
-        setImages(allImages.length > 0 ? allImages : Array(10).fill(placeholderImage));
+        setMedia(allMedia.length > 0 ? allMedia : Array(10).fill({ url: placeholderImage, type: 'image' }));
       } catch (error) {
-        console.error("Error fetching property photos:", error);
-        setImages(Array(10).fill(placeholderImage));
+        console.error("Error fetching property media:", error);
+        setMedia(Array(10).fill({ url: placeholderImage, type: 'image' }));
       }
     };
 
-    fetchImages();
+    fetchMedia();
   }, [propertyId]);
 
-  // Handle resizing for mobile view
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobileView(window.innerWidth <= 768);
-    };
-
+    const handleResize = () => setIsMobileView(window.innerWidth <= 768);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const handlePrev = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
+    setCurrentIndex((prevIndex) => (prevIndex - 1 + media.length) % media.length);
   };
 
   const handleNext = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % media.length);
   };
 
   const openModal = (index: number) => {
@@ -150,9 +143,54 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
     }
   };
 
+  const MediaRenderer = ({ item, isFullscreen = false }: { item: MediaItem; isFullscreen?: boolean }) => {
+    if (item.type === 'video') {
+      return (
+        <video
+          src={item.url}
+          controls
+          autoPlay
+          loop
+          muted
+          playsInline
+          style={isFullscreen ? styles.modalCarouselImage : styles.carouselImage}
+        />
+      );
+    }
+    return (
+      <img
+        src={item.url}
+        alt="Property"
+        style={isFullscreen ? styles.modalCarouselImage : styles.carouselImage}
+      />
+    );
+  };
+
+  const ThumbnailRenderer = ({ item, index }: { item: MediaItem; index: number }) => {
+    if (item.type === 'video') {
+      return (
+        <div style={styles.thumbnailVideoContainer}>
+          <video src={item.url} style={styles.thumbnail} muted />
+          <div style={styles.playIconOverlay}>
+            <Play size={24} color="white" />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <img
+        src={item.url}
+        alt={`Thumbnail ${index}`}
+        style={{
+          ...styles.thumbnail,
+          ...(currentIndex === index && styles.activeThumbnail),
+        }}
+      />
+    );
+  };
+
   return (
     <div style={styles.mainContainer}>
-      {/* Property Info Section */}
       <div style={styles.propertyInfo}>
         <h2 style={styles.propertyName}>{propertyDetails.propertyName}</h2>
         <p style={styles.propertyDetails}>
@@ -162,14 +200,9 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
       </div>
 
       <div style={isMobileView ? styles.mobileContainer : styles.container}>
-        {/* Carousel Section */}
         <div style={styles.carouselContainer}>
-          {images.length > 0 && (
-            <img
-              src={images[currentIndex]}
-              alt={`Carousel Image ${currentIndex + 1}`}
-              style={styles.carouselImage}
-            />
+          {media.length > 0 && (
+            <MediaRenderer item={media[currentIndex]} />
           )}
           <button
             style={{ ...styles.navButton, ...styles.prevButton }}
@@ -185,8 +218,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
           </button>
         </div>
 
-        {/* Mobile Thumbnails Row */}
-        {isMobileView && (
+        {isMobileView ? (
           <div style={styles.mobileThumbnailContainer}>
             <button 
               style={{ ...styles.mobileScrollButton, ...styles.mobileScrollButtonLeft }}
@@ -195,17 +227,13 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
               <ChevronLeft size={24} />
             </button>
             <div id="thumbnailRow" style={styles.mobileThumbnailRow}>
-              {images.map((image, index) => (
-                <div key={index} style={styles.mobileThumbnailWrapper}>
-                  <img
-                    src={image}
-                    alt={`Thumbnail ${index}`}
-                    style={{
-                      ...styles.mobileThumbnail,
-                      ...(currentIndex === index && styles.activeThumbnail),
-                    }}
-                    onClick={() => setCurrentIndex(index)}
-                  />
+              {media.map((item, index) => (
+                <div 
+                  key={index} 
+                  style={styles.mobileThumbnailWrapper}
+                  onClick={() => setCurrentIndex(index)}
+                >
+                  <ThumbnailRenderer item={item} index={index} />
                 </div>
               ))}
             </div>
@@ -216,23 +244,16 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
               <ChevronRight size={24} />
             </button>
           </div>
-        )}
-
-        {/* Desktop Thumbnails Grid */}
-        {!isMobileView && (
+        ) : (
           <div style={styles.thumbnailGrid}>
-            {images.slice(0, 10).map((image, index) => (
-              <div key={index} style={styles.thumbnailWrapper}>
-                <img
-                  src={image}
-                  alt={`Thumbnail ${index}`}
-                  style={{
-                    ...styles.thumbnail,
-                    ...(currentIndex === index && styles.activeThumbnail),
-                  }}
-                  onClick={() => setCurrentIndex(index)}
-                />
-                {index === 9 && images.length > 10 && (
+            {media.slice(0, 10).map((item, index) => (
+              <div 
+                key={index} 
+                style={styles.thumbnailWrapper}
+                onClick={() => setCurrentIndex(index)}
+              >
+                <ThumbnailRenderer item={item} index={index} />
+                {index === 9 && media.length > 10 && (
                   <button
                     style={styles.viewAllButton}
                     onClick={() => openModal(0)}
@@ -246,11 +267,10 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
         )}
       </div>
 
-      {/* Modal for Fullscreen Carousel */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={closeModal}
-        contentLabel="View All Images"
+        contentLabel="View All Media"
         style={{
           content: styles.modal,
           overlay: styles.overlay,
@@ -260,12 +280,8 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
           &times;
         </button>
         <div style={styles.modalCarouselContainer}>
-          {images.length > 0 && (
-            <img
-              src={images[currentIndex]}
-              alt={`Modal Carousel Image ${currentIndex}`}
-              style={styles.modalCarouselImage}
-            />
+          {media.length > 0 && (
+            <MediaRenderer item={media[currentIndex]} isFullscreen={true} />
           )}
           <button
             style={{ ...styles.navButton, ...styles.prevButton }}
@@ -286,6 +302,24 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
 };
 
 const styles = {
+  thumbnailVideoContainer: {
+    position: 'relative' as const,
+    width: '100%',
+    height: '100%',
+  },
+  playIconOverlay: {
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    background: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: '50%',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   mainContainer: {
     display: "flex",
     flexDirection: "column" as const,
@@ -312,7 +346,6 @@ const styles = {
     display: "flex",
     gap: "20px",
     height: "85vh",
-    //width: "70vh",
   },
   mobileContainer: {
     display: "flex",
@@ -367,7 +400,7 @@ const styles = {
     gap: "10px",
     padding: "0 50px",
     msOverflowStyle: "none",
-    scrollbarWidth: "none",
+    scrollbarWidth: "none" as const,
   },
   mobileThumbnailWrapper: {
     flex: "0 0 auto",

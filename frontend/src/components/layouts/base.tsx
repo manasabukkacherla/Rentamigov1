@@ -10,6 +10,7 @@ import { PropertyAvailability, AvailabilityData } from './PropertyAvailability';
 import { PropertyPhotos, PhotoData } from './PropertyPhotos';
 import { PreviewModal } from "./Previewmodal";
 import { ArrowRight, ArrowLeft, Home, MapPin, Building2, Dumbbell, Sofa, Ban, IndianRupee, Calendar, Image, Eye, Menu } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 type StepType = 'form' | 'location' | 'features' | 'amenities' | 'flatAmenities' | 'restrictions' | 'commercials' | 'availability' | 'photos';
 
@@ -30,7 +31,7 @@ function Base() {
   const [activeStep, setActiveStep] = useState<StepType>('form');
   const [showPreview, setShowPreview] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-   const [userData, setUserData] = useState<{ userId: string; username: string; fullName: string; role: string } | null>(null);
+  const [userData, setUserData] = useState<{ userId: string; username: string; fullName: string; role: string } | null>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     ownerName: '',
@@ -126,132 +127,233 @@ function Base() {
     propertyVideo: null
   });
 
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUserData(userData);
+    } else {
+      console.warn("No user session found. Please log in.");
+    }
+  }, []);
 
-  
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeStep]);
 
-// 🔹 Fetch user session from sessionStorage
-useEffect(() => {
-  const storedUser = sessionStorage.getItem("user");
-  if (storedUser) {
-    const userData = JSON.parse(storedUser);
-    setUserData(userData); // Set user details in state
-  } else {
-    console.warn("No user session found. Please log in.");
-  }
-}, []);
-
-// 🔹 Scroll to top when step changes
-useEffect(() => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}, [activeStep]);
-
-const handleNext = async () => {
-  if (!userData) {
-    alert("User session not found. Please log in.");
-    return;
-  }
-
-  const { id: userId, username, role } = userData;
-  const fullName = userData.fullName || "Unknown"; // Fallback for missing fullName
-  const currentIndex = steps.findIndex((step) => step.id === activeStep);
-  let payload = { userId, username, fullName, role };
-
-  try {
-    switch (activeStep) {
+  const validateStep = (step: StepType): boolean => {
+    switch (step) {
       case 'form':
-        if (!formData.propertyName || !formData.propertyType || !formData.propertyConfiguration || !formData.furnishingStatus || !formData.facing) {
-          alert('Please fill in all required fields in the Basic Details step.');
-          return;
+        const formErrors: string[] = [];
+        if (!formData.propertyName) formErrors.push('Property Name');
+        if (!formData.propertyType) formErrors.push('Property Type');
+        if (!formData.propertyConfiguration) formErrors.push('Property Configuration');
+        if (!formData.furnishingStatus) formErrors.push('Furnishing Status');
+        if (!formData.facing) formErrors.push('Facing');
+        
+        if (formErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${formErrors.join(', ')}`);
+          return false;
         }
-
-        const formResponse = await fetch('http://localhost:8000/api/properties/property', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...formData, ...payload }),
-        });
-
-        if (!formResponse.ok) throw new Error('Failed to save property form data');
-        const createdProperty = await formResponse.json();
-        setPropertyId(createdProperty._id);
-        break;
+        return true;
 
       case 'location':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/property-location', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...locationData, property: propertyId, ...payload }),
-        });
-        break;
+        const locationErrors: string[] = [];
+        if (!locationData.addressLine1) locationErrors.push('Address Line 1');
+        if (!locationData.locality) locationErrors.push('Locality');
+        if (!locationData.pinCode || !/^\d{6}$/.test(locationData.pinCode)) {
+          locationErrors.push('Pin Code (must be 6 digits)');
+      }
+  
+        if (!locationData.addressLine2) locationErrors.push('Address Line 2');
+        if (!locationData.addressLine3) locationErrors.push('Address Line 3');
+        if (!locationData.latitude) locationErrors.push('Latitude');
+        if (!locationData.longitude) locationErrors.push('Longitude');
+        if (!locationData.area) locationErrors.push('Area');
+        if (locationErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${locationErrors.join(', ')}`);
+          return false;
+        }
+        return true;
 
       case 'features':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/property-features', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...featuresData, property: propertyId, ...payload }),
-        });
-        break;
+        const featureErrors: string[] = [];
+        if (!featuresData.bedrooms) featureErrors.push('Bedrooms');
+    if (!featuresData.bathrooms) featureErrors.push('Bathrooms');
+    if (!featuresData.balconies) featureErrors.push('Balconies');
+    if (!featuresData.floorNumber) featureErrors.push('Floor Number');
+    if (!featuresData.totalFloors) featureErrors.push('Total Floors');
+    if (!featuresData.superBuiltupArea) featureErrors.push('Super Built-up Area');
+    if (!featuresData.propertyAge) featureErrors.push('Property Age');
+    if (!featuresData.propertyDescription) featureErrors.push('Property Description');
 
-      case 'amenities':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/society-amenities', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...amenitiesData, property: propertyId, ...payload }),
-        });
-        break;
+        
+        if (featureErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${featureErrors.join(', ')}`);
+          return false;
+        }
+        return true;
 
-      case 'flatAmenities':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/flat-amenities', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...flatAmenitiesData, property: propertyId, ...payload }),
-        });
-        break;
-
-      case 'restrictions':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/property-restrictions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...restrictionsData, property: propertyId, ...payload }),
-        });
-        break;
+        case 'restrictions':
+          const restrictionErrors: string[] = [];
+      
+          if (!restrictionsData.bachelorTenants) restrictionErrors.push('Bachelor Tenants');
+          if (!restrictionsData.nonVegTenants) restrictionErrors.push('Non-Veg Tenants');
+          if (!restrictionsData.tenantWithPets) restrictionErrors.push('Tenant With Pets');
+          if (!restrictionsData.propertyOverlooking) restrictionErrors.push('Property Overlooking');
+          if (!restrictionsData.carParking) restrictionErrors.push('Car Parking');
+          if (restrictionsData.carParking === "Yes" && !restrictionsData.carParkingCount) 
+              restrictionErrors.push('Car Parking Count');
+          if (!restrictionsData.twoWheelerParking) restrictionErrors.push('Two-Wheeler Parking');
+          if (restrictionsData.twoWheelerParking === "Yes" && !restrictionsData.twoWheelerParkingCount) 
+              restrictionErrors.push('Two-Wheeler Parking Count');
+          if (!restrictionsData.flooringType) restrictionErrors.push('Flooring Type');
+      
+          if (restrictionErrors.length > 0) {
+              toast.error(`Please fill in required fields: ${restrictionErrors.join(', ')}`);
+              return false;
+          }
+          return true;
+      
 
       case 'commercials':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/property-commercials', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...commercialsData, property: propertyId, ...payload }),
-        });
-        break;
+        const commercialErrors: string[] = [];
+        if (!commercialsData.monthlyRent) commercialErrors.push('Monthly Rent');
+        if (!commercialsData.securityDeposit) commercialErrors.push('Security Deposit');
+        
+        if (commercialErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${commercialErrors.join(', ')}`);
+          return false;
+        }
+        return true;
 
       case 'availability':
-        if (!propertyId) throw new Error('Property ID is missing');
-        await fetch('http://localhost:8000/api/properties/property-availability', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...availabilityData, property: propertyId, ...payload }),
-        });
-        break;
+        if (!availabilityData.availableFrom) {
+          toast.error('Please select availability date');
+          return false;
+        }
+        return true;
 
       default:
-        break;
+        return true;
+        
+    }
+  };
+
+  const handleNext = async () => {
+    if (!userData) {
+      toast.error("User session not found. Please log in.");
+      return;
     }
 
-    if (currentIndex < steps.length - 1) {
-      setActiveStep(steps[currentIndex + 1].id);
-      setShowMobileMenu(false);
+    if (!validateStep(activeStep)) {
+      return;
     }
-  } catch (error) {
-    console.error('Error saving data:', error);
-    alert('Failed to save data. Please try again.');
-  }
-};
 
+    const { id: userId, username, role } = userData;
+    const fullName = userData.fullName || "Unknown";
+    const currentIndex = steps.findIndex((step) => step.id === activeStep);
+    let payload = { userId, username, fullName, role };
+
+    try {
+      switch (activeStep) {
+        case 'form':
+          const formResponse = await fetch('http://localhost:8000/api/properties/property', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...formData, ...payload }),
+          });
+
+          if (!formResponse.ok) throw new Error('Failed to save property form data');
+          const createdProperty = await formResponse.json();
+          setPropertyId(createdProperty._id);
+          toast.success('Basic details saved successfully');
+          break;
+
+        case 'location':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-location', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...locationData, property: propertyId, ...payload }),
+          });
+          toast.success('Location details saved successfully');
+          break;
+
+        case 'features':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-features', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...featuresData, property: propertyId, ...payload }),
+          });
+          toast.success('Features saved successfully');
+          break;
+
+        case 'amenities':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/society-amenities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...amenitiesData, property: propertyId, ...payload }),
+          });
+          toast.success('Society amenities saved successfully');
+          break;
+
+        case 'flatAmenities':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/flat-amenities', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...flatAmenitiesData, property: propertyId, ...payload }),
+          });
+          toast.success('Flat amenities saved successfully');
+          break;
+
+        case 'restrictions':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-restrictions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...restrictionsData, property: propertyId, ...payload }),
+          });
+          toast.success('Restrictions saved successfully');
+          break;
+
+        case 'commercials':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-commercials', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...commercialsData, property: propertyId, ...payload }),
+          });
+          toast.success('Commercial details saved successfully');
+          break;
+
+        case 'availability':
+          if (!propertyId) throw new Error('Property ID is missing');
+          await fetch('http://localhost:8000/api/properties/property-availability', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...availabilityData, property: propertyId, ...payload }),
+          });
+          toast.success('Availability details saved successfully');
+          break;
+
+        default:
+          break;
+      
+      }
+
+      if (currentIndex < steps.length - 1) {
+        setActiveStep(steps[currentIndex + 1].id);
+        setShowMobileMenu(false);
+      }
+    } catch (error) {
+      console.error('Error saving data:', error);
+      toast.error('Failed to save data. Please try again.');
+    }
+  };
 
   const handlePrevious = () => {
     const currentIndex = steps.findIndex((step) => step.id === activeStep);
@@ -303,6 +405,7 @@ const handleNext = async () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto">
         <div className="md:hidden fixed top-0 left-0 right-0 bg-white z-20 shadow-sm">
           <div className="flex items-center justify-between px-4 py-3">
@@ -434,6 +537,6 @@ const handleNext = async () => {
       )}
     </div>
   );
-  }
+}
 
 export default Base;
