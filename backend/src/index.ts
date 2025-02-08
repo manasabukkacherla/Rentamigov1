@@ -24,7 +24,7 @@ import enquiryRoutes from "./routes/enquiryRoutes";
 import signupRouter from "./routes/signupform";// Replace with the correct file path for User
 import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
-
+import leadsRouter from "./routes/leads";
 dotenv.config();
 
 // Validate required environment variables
@@ -67,6 +67,7 @@ app.use("/api/service", enquiryRoutes);
 app.use("/api/sign",signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes); 
+app.use("/api/leads", leadsRouter);
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {

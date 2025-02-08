@@ -70,12 +70,13 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
     setIsSubmitting(true);
   
     try {
+      // Submit the enquiry form
       const response = await fetch("http://localhost:8000/api/property/submit-form", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          isVerified: true,
+          isVerified: true, // Ensuring form submission includes verification
         }),
       });
   
@@ -101,6 +102,9 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
         action: <ToastAction altText="Close">Close</ToastAction>,
       });
   
+      // 🔄 Trigger the Lead Synchronization API
+      await syncLeads();
+  
       setFormData((prev) => ({
         ...prev,
         name: "",
@@ -117,6 +121,23 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  // 🔄 Function to Trigger Lead Synchronization API
+  const syncLeads = async () => {
+    try {
+      const syncResponse = await fetch("http://localhost:8000/api/leads/sync-leads", {
+        method: "POST",
+      });
+  
+      if (!syncResponse.ok) {
+        throw new Error("Lead synchronization failed");
+      }
+  
+      console.log("Leads synchronized successfully!");
+    } catch (error) {
+      console.error("Error syncing leads:", error);
     }
   };
   

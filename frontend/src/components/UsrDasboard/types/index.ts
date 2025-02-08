@@ -15,7 +15,9 @@ export interface Lead {
   date: string;
   flatNo: string;
   status: 'New' | 'Contacted' | 'Interested' | 'Not Interested' | 'Converted' | 'Visited' | 'RNR' | 'Call Back' | 'No Requirement' | 'Different Requirement';
+  createdAt: string;
 }
+
 
 export interface DashboardStats {
   totalProperties: number;
