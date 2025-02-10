@@ -49,48 +49,39 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     try {
       console.log("Google Credential Response:", credentialResponse);
   
-      // 🔹 1️⃣ Send Google credential to backend for verification
       const response = await axios.post("http://localhost:8000/api/loginuser/google", {
         credential: credentialResponse.credential,
       });
   
       const userData = response.data;
-
       console.log("Google Login Successful:", userData);
-
-      // Store user data in session storage
-      sessionStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: userData.user.id,
-          email: userData.user.email,
-          fullName: userData.user.fullName, // Added fullName
-          username: userData.user.username,
-          role: userData.user.role,
-        })
-      );
-      
-
-      // Redirect user based on role
-      redirectUser(userData.user.role);
   
       if (userData.error) {
-        // 🔹 2️⃣ If user is NOT registered, prevent login and prompt signup
         alert("You are not registered. Please sign up first.");
-        onSwitchToSignup(); // Redirect to signup page
+        onSwitchToSignup();
         return;
       }
   
-      // 🔹 3️⃣ If user exists, proceed with login
-      localStorage.setItem("user", JSON.stringify(userData.user));
-      localStorage.setItem("token", userData.token);
- 
+      // Store user data in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify({
+        id: userData.user.id,
+        email: userData.user.email,
+        fullName: userData.user.fullName,
+        username: userData.user.username,
+        role: userData.user.role
+      }));
+  
+      // ✅ Log to console to verify
+      console.log("Session Storage Updated:", sessionStorage.getItem("user"));
+  
+      redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (error) {
       console.error("Google Login Error:", error);
-      alert("You are not registered. Please SignUp.");
+      alert("Google login failed. Please try again.");
     }
   };
+  
   
 
   // 🔹 Handle Google Authentication Error
@@ -104,24 +95,23 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-
+  
     try {
       const response = await axios.post("http://localhost:8000/api/loginuser/login", formData);
       const userData = response.data;
-
-      // Store user data in session storage
-      sessionStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: userData.user.id,
-          email: userData.user.email,
-          fullName: userData.user.fullName, // Added fullName
-          username: userData.user.username,
-          role: userData.user.role,
-        })
-      );
-
-      // Redirect user based on role
+  
+      // Store user data in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify({
+        id: userData.user.id,
+        email: userData.user.email,
+        fullName: userData.user.fullName,
+        username: userData.user.username,
+        role: userData.user.role
+      }));
+  
+      // ✅ Log to console to verify
+      console.log("Session Storage Updated:", sessionStorage.getItem("user"));
+  
       redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (err) {
@@ -130,6 +120,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       setLoading(false);
     }
   };
+  
 
   if (showForgotPassword) {
     return <ForgotPassword onBack={() => setShowForgotPassword(false)} />;

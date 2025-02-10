@@ -30,6 +30,41 @@ propertyRouter.post("/property", async (req: Request, res: Response) => {
     }
   }
 });
+
+//Route get properties of a specified user by user id or username 
+
+propertyRouter.get("/property/user", async (req: Request, res: Response) => {
+  try {
+    const { userId, username } = req.query;
+
+    // Validate at least one filter is provided
+    if (!userId && !username) {
+      return res.status(400).json({ error: "Please provide a userId or username to filter data." });
+    }
+
+    // Build query conditions dynamically
+    const query: any = {};
+    if (userId) query.userId = userId;
+    if (username) query.username = username;
+
+    // Fetch properties based on query
+    const userProperties = await Property.find(query);
+
+    if (userProperties.length === 0) {
+      return res.status(404).json({ message: "No properties found for the given criteria." });
+    }
+
+    res.status(200).json(userProperties);
+  } catch (error) {
+    // Handle errors
+    if (error instanceof Error) {
+      res.status(500).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: "An unknown error occurred." });
+    }
+  }
+});
+
 // Route to get a specific property by ID
 propertyRouter.get("/propertyds/:id", async (req: Request, res: Response) => {
   try {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Lead } from '../types';
+import { Lead } from './types';
 import { Download, Search, Mail, Phone, Calendar, Building, Eye, AlertTriangle } from 'lucide-react';
 
 interface LeadsTableProps {
