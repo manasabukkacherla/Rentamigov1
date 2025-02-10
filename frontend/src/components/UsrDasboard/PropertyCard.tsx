@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Edit2, Trash2, ToggleRight, Home, Clock, CheckCircle } from 'lucide-react';
 import { Property } from './types';
 
@@ -10,6 +11,49 @@ interface PropertyCardProps {
 }
 
 export function PropertyCard({ property, onEdit, onDelete, onStatusUpdate }: PropertyCardProps) {
+  const [coverImageUrl, setCoverImageUrl] = useState<string>('https://via.placeholder.com/300'); // Default placeholder
+  const [monthlyRent, setMonthlyRent] = useState<number>(property.rent); // Default to provided rent
+
+  useEffect(() => {
+    const fetchPropertyDetails = async () => {
+      try {
+        const storedUser = sessionStorage.getItem("user");
+        if (!storedUser) {
+          console.warn("No user found in session.");
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.id;
+
+        // Fetch property images
+        const imagesResponse = await axios.get("http://localhost:8000/api/photos/upload-photos", {
+          params: { userId }
+        });
+
+        const image = imagesResponse.data.find((img: any) => img.property._id === property.id);
+        if (image?.photos?.coverImage) {
+          setCoverImageUrl(image.photos.coverImage);
+        }
+
+        // Fetch property commercials (Rent)
+        const commercialsResponse = await axios.get("http://localhost:8000/api/properties/property-commercials/user", {
+          params: { userId }
+        });
+
+        const commercial = commercialsResponse.data.find((com: any) => com.property._id === property.id);
+        if (commercial?.monthlyRent) {
+          setMonthlyRent(commercial.monthlyRent);
+        }
+
+      } catch (error) {
+        console.error("Error fetching property details:", error);
+      }
+    };
+
+    fetchPropertyDetails();
+  }, [property.id]);
+
   const statusConfig = {
     Available: {
       color: 'bg-green-100 text-green-800',
@@ -28,31 +72,37 @@ export function PropertyCard({ property, onEdit, onDelete, onStatusUpdate }: Pro
     }
   };
 
-  const StatusIcon = statusConfig[property.status].icon;
+  const StatusIcon = statusConfig[property.status]?.icon || Home;
 
   return (
     <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-black/10">
+      {/* ✅ Display Cover Image */}
       <div className="aspect-[16/9] overflow-hidden">
         <img
-          src={property.imageUrl}
+          src={coverImageUrl}
           alt={property.name}
           className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
           loading="lazy"
+          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300'; }}
         />
       </div>
+
       <div className="p-2 sm:p-3 md:p-4 space-y-1.5 sm:space-y-2">
         <h3 className="text-sm sm:text-base font-semibold text-black line-clamp-1">{property.name}</h3>
-        <p className="text-xs sm:text-sm text-black/60">₹{property.rent.toLocaleString()}/month</p>
-        
+        <p className="text-xs sm:text-sm text-black/60">
+          ₹{monthlyRent ? monthlyRent.toLocaleString() : 'N/A'}/month
+        </p>
+
         {/* Status Badge with Icon and Description */}
-        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusConfig[property.status].color}`}>
+        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusConfig[property.status]?.color || 'bg-gray-100 text-gray-800'}`}>
           <StatusIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           <span>{property.status}</span>
           <span className="hidden sm:inline text-[10px] opacity-75">
-            • {statusConfig[property.status].description}
+            • {statusConfig[property.status]?.description || 'Unknown Status'}
           </span>
         </div>
-        
+
+        {/* Action Buttons */}
         <div className="flex justify-end items-center gap-1 pt-1.5 sm:pt-2">
           {/* Edit Button */}
           <div className="group relative">

@@ -70,11 +70,16 @@ export function Sidebar({ onNewNotification }: SidebarProps) {
 
   const handleLogout = () => {
     setIsLoggingOut(true);
+  
+    // Clear session storage
+    sessionStorage.clear();
+  
     setTimeout(() => {
-      navigate('/');
+      navigate('/Login'); // Redirect to Login page
       window.location.reload(); // Force reload to clear all state
     }, 2000);
   };
+  
 
   const handleMarkAsRead = (id: string) => {
     setNotifications(notifications.map(notification =>

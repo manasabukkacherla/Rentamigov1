@@ -3,6 +3,7 @@ import { Plus, Filter, X, Home, Clock, CheckCircle, Search } from 'lucide-react'
 import { PropertyCard } from '../PropertyCard';
 import { Property } from '../types';
 import { LoadingOverlay } from '../LoadingOverlay';
+import axios from 'axios';
 
 const initialProperties: Property[] = [
   {
@@ -55,43 +56,109 @@ export function Properties() {
   });
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
+    const fetchUserProperties = async () => {
+      try {
+        const storedUser = sessionStorage.getItem("user");
+        if (!storedUser) {
+          console.warn("No user found in session.");
+          setIsLoading(false);
+          return;
+        }
+
+        const userData = JSON.parse(storedUser);
+        const userId = userData.id;
+
+        // Fetch properties, images, and commercials
+        const [propertiesRes, imagesRes, commercialsRes] = await Promise.all([
+          axios.get("http://localhost:8000/api/properties/property/user", { params: { userId } }),
+          axios.get("http://localhost:8000/api/photos/upload-photos", { params: { userId } }),
+          axios.get("http://localhost:8000/api/properties/property-commercials/user", { params: { userId } })
+        ]);
+
+        const userProperties = propertiesRes.data;
+        const propertyImages = imagesRes.data;
+        const propertyCommercials = commercialsRes.data;
+
+        // Merge Data & Sort by createdAt (Newest First)
+        const finalProperties = userProperties
+          .map((property: any) => {
+            const image = propertyImages.find((img: any) => img.property._id === property._id);
+            const commercial = propertyCommercials.find((com: any) => com.property._id === property._id);
+
+            return {
+              id: property._id,
+              name: property.propertyName,
+              rent: commercial?.monthlyRent || 0, // Ensure rent is set
+              status: property.status || 'Available',
+              imageUrl: image?.photos?.coverImage || 'https://via.placeholder.com/300', // Fallback Image
+              createdAt: new Date(property.createdAt) || new Date(0) // Handle missing createdAt
+            };
+          })
+          .sort((a: { createdAt: { getTime: () => number; }; }, b: { createdAt: { getTime: () => number; }; }) => b.createdAt.getTime() - a.createdAt.getTime()); // Sort by most recent
+
+        setProperties(finalProperties);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserProperties();
   }, []);
 
-  const handleEdit = (id: string) => {
-    const property = properties.find(p => p.id === id);
-    if (property) {
-      setNewProperty(property);
-      setShowAddModal(true);
-    }
-  };
+   /** ✅ Handle Property Edit */
+ /** ✅ Handle Property Editing */
+ const handleEdit = (id: string) => {
+  const property = properties.find((p) => p.id === id);
+  if (property) {
+    setSelectedPropertyId(property);
+    setShowAddModal(true);
+  }
+};
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this property?')) {
-      setProperties(properties.filter(p => p.id !== id));
-    }
-  };
+/** ✅ Handle Property Deletion */
+const handleDelete = async (id: string) => {
+  if (!window.confirm('Are you sure you want to delete this property?')) return;
 
-  const handleStatusUpdate = (id: string) => {
-    setSelectedPropertyId(id);
+  try {
+    await axios.delete(`http://localhost:8000/api/properties/property/${id}`);
+    setProperties((prevProperties) => prevProperties.filter((p) => p.id !== id));
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    alert("Failed to delete property. Please try again.");
+  }
+};
+
+/** ✅ Handle Status Update */
+const handleStatusUpdate = (id: string) => {
+  const property = properties.find((p) => p.id === id);
+  if (property) {
+    setSelectedPropertyId(property);
     setShowStatusModal(true);
-  };
+  }
+};
 
-  const handleStatusChange = (newStatus: Property['status']) => {
-    if (selectedPropertyId) {
-      setProperties(properties.map(property => 
-        property.id === selectedPropertyId
-          ? { ...property, status: newStatus }
-          : property
-      ));
-      setShowStatusModal(false);
-      setSelectedPropertyId(null);
-    }
-  };
+/** ✅ Handle Status Change */
+const handleStatusChange = async (newStatus: Property['status']) => {
+  if (!selectedProperty) return;
 
+  try {
+    await axios.patch(`http://localhost:8000/api/properties/property/${selectedProperty.id}`, { status: newStatus });
+
+    setProperties((prevProperties) =>
+      prevProperties.map((property) =>
+        property.id === selectedProperty.id ? { ...property, status: newStatus } : property
+      )
+    );
+
+    setShowStatusModal(false);
+    setSelectedPropertyId(null);
+  } catch (error) {
+    console.error("Error updating status:", error);
+    alert("Failed to update property status. Please try again.");
+  }
+};
   const handleAddProperty = (e: React.FormEvent) => {
     e.preventDefault();
     if (newProperty.name && newProperty.rent && newProperty.imageUrl) {
@@ -181,7 +248,7 @@ export function Properties() {
           {/* Properties Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4 md:gap-6">
             {filteredProperties.map((property) => (
-              <PropertyCard
+           <PropertyCard
                 key={property.id}
                 property={property}
                 onEdit={handleEdit}

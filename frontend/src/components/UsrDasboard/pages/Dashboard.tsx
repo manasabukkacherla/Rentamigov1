@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import { Home, Users, TrendingUp, DollarSign, Plus, Download, Bell, ArrowUpRight } from 'lucide-react';
 import { StatCard } from '../StatCard';
 import { Link } from 'react-router-dom';
@@ -109,7 +109,27 @@ const demoNotifications: Notification[] = [
 
 export function Dashboard() {
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number | null>(null);
+  const [username, setUsername] = useState<string>('User'); // Default value
+  const [role, setRole] = useState<string>(''); // Default value
 
+  useEffect(() => {
+    // Retrieve and parse user data from sessionStorage
+    const storedUser = sessionStorage.getItem('user');
+
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        if (userData.username) setUsername(userData.username);
+        if (userData.role) setRole(userData.role);
+
+        // ✅ Log session data to verify
+        console.log("Session User Data:", userData);
+      } catch (error) {
+        console.error("Error parsing session user data:", error);
+      }
+    }
+  }, []);
+  
   // Function to get a random notification from the demo list
   const getRandomNotification = () => {
     const randomIndex = Math.floor(Math.random() * demoNotifications.length);
@@ -119,6 +139,7 @@ export function Dashboard() {
       id: Date.now().toString(),
       timestamp: 'Just now'
     };
+    
   };
 
   return (
@@ -126,11 +147,11 @@ export function Dashboard() {
       {/* Welcome Section */}
       <div className="relative overflow-hidden bg-white border border-black/10 rounded-lg sm:rounded-xl p-3 sm:p-6 md:p-8 shadow-md sm:shadow-xl">
         <div className="relative z-10">
-          <h1 className="text-xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-3 text-black">
-            Welcome back, John! <span className="inline-block animate-wave">👋</span>
+        <h1 className="text-xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-3 text-black">
+            Welcome back, {username}! <span className="inline-block animate-wave">👋</span>
           </h1>
           <p className="text-black/70 text-xs sm:text-base md:text-lg max-w-lg">
-            Here's what's happening with your properties today.
+            Your Role: <strong>{role}</strong>
           </p>
           
           {/* Demo Toast Button */}
