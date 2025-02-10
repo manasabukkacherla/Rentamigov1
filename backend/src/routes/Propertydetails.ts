@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import Property from "../models/Propertydetails"; // Adjust the path to your Property model file
 import PropertyLocation from "../models/PropertyLocation"; // Adjust the path to your PropertyLocation model file
-import PropertyFeatures from "../models/Propertyfeatures"; // Adjust the path to your PropertyFeatures model file
+import PropertyFeatures, { IPropertyFeatures } from "../models/Propertyfeatures"; // Adjust the path to your PropertyFeatures model file
 import SocietyAmenities from "../models/Societyamenities";
 import FlatAmenities from "../models/Flatamenities";
 import PropertyRestrictions from "../models/Propertyrestrictions";
@@ -389,19 +389,22 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
       propertyDescription,
     } = req.body;
 
-    // Validate property reference
+    // 🔹 Validate required fields
+    if (!property || !userId || !username || !fullName || !role) {
+      return res.status(400).json({ error: "Property and user details are required" });
+    }
+    if (!bedrooms || !bathrooms || !balconies || !floorNumber || !totalFloors || !superBuiltupArea || !propertyAge || !propertyDescription) {
+      return res.status(400).json({ error: "All required fields must be filled" });
+    }
+
+    // 🔹 Validate property reference
     const propertyDoc = await Property.findById(property);
     if (!propertyDoc) {
-      return res.status(404).send({ error: "Property not found" });
+      return res.status(404).json({ error: "Property not found" });
     }
 
-    // Validate user details
-    if (!userId || !username || !fullName || !role) {
-      return res.status(400).send({ error: "User details are required" });
-    }
-
-    // Create a new PropertyFeatures document
-    const propertyFeatures = new PropertyFeatures({
+    // 🔹 Create property features object dynamically (optional fields only added if provided)
+    const propertyFeaturesData: Partial<IPropertyFeatures> = {
       property,
       userId,
       username,
@@ -411,29 +414,29 @@ propertyRouter.post("/property-features", async (req: Request, res: Response) =>
       bedrooms,
       bathrooms,
       balconies,
-      extraRooms,
       floorNumber,
       totalFloors,
       superBuiltupArea,
-      builtupArea,
-      carpetArea,
       propertyAge,
       propertyDescription,
-    });
+    };
 
-    // Save to the database
+    // 🔹 Only add optional fields if they exist
+    if (extraRooms) propertyFeaturesData.extraRooms = extraRooms;
+    if (builtupArea) propertyFeaturesData.builtupArea = builtupArea;
+    if (carpetArea) propertyFeaturesData.carpetArea = carpetArea;
+
+    // 🔹 Save to the database
+    const propertyFeatures = new PropertyFeatures(propertyFeaturesData);
     await propertyFeatures.save();
 
-    res.status(201).send(propertyFeatures);
+    res.status(201).json({ message: "Property features added successfully", propertyFeatures });
   } catch (error) {
-    // Handle errors
-    if (error instanceof Error) {
-      res.status(400).send({ error: error.message });
-    } else {
-      res.status(400).send({ error: "An unknown error occurred." });
-    }
+    console.error("Error adding property features:", error);
+    res.status(500).json({ error: "An error occurred while adding property features" });
   }
 });
+
 // Route to get property feautures from the userid or user name 
 propertyRouter.get("/property-features/user", async (req: Request, res: Response) => {
   try {

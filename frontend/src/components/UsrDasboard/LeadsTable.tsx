@@ -39,14 +39,14 @@ const getStatusColor = (status: Lead['status']) => {
   }
 };
 
-export function LeadsTable({ 
-  leads, 
-  onExport, 
-  searchTerm, 
-  onSearchChange, 
-  onViewDetails, 
+export function LeadsTable({
+  leads,
+  onExport,
+  searchTerm,
+  onSearchChange,
+  onViewDetails,
   onStatusChange,
-  reportedLeads 
+  reportedLeads
 }: LeadsTableProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-black/10">
@@ -75,10 +75,10 @@ export function LeadsTable({
       <div className="sm:hidden divide-y divide-black/10">
         {leads.map((lead) => {
           const isReported = reportedLeads.includes(lead.id);
-          
+
           return (
-            <div 
-              key={lead.id} 
+            <div
+              key={lead.id}
               className={`p-3 space-y-2 ${isReported ? 'bg-red-50' : ''}`}
             >
               <div className="flex items-start justify-between">
@@ -92,7 +92,7 @@ export function LeadsTable({
                   {lead.status}
                 </span>
               </div>
-              
+
               <div className="space-y-1.5">
                 <div className="flex items-center text-sm text-black/70">
                   <Building className="w-4 h-4 mr-2 text-black" />
@@ -155,8 +155,9 @@ export function LeadsTable({
                 Status
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-black/60 uppercase tracking-wider">
-                Date
+                CreatedAt
               </th>
+
               <th className="px-4 py-3 text-center text-xs font-medium text-black/60 uppercase tracking-wider">
                 Actions
               </th>
@@ -165,10 +166,10 @@ export function LeadsTable({
           <tbody className="bg-white divide-y divide-black/10">
             {leads.map((lead) => {
               const isReported = reportedLeads.includes(lead.id);
-              
+
               return (
-                <tr 
-                  key={lead.id} 
+                <tr
+                  key={lead.id}
                   className={`hover:bg-black/5 transition-colors ${isReported ? 'bg-red-50' : ''}`}
                 >
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-black">
@@ -195,12 +196,16 @@ export function LeadsTable({
                       {lead.phone}
                     </a>
                   </td>
+
                   <td className="px-4 py-3 text-sm whitespace-nowrap">
                     <select
                       value={lead.status}
-                      onChange={(e) => onStatusChange(lead.id, e.target.value as Lead['status'])}
+                      onChange={(e) => {
+                        console.log("Dropdown changed:", { leadId: lead.id, newStatus: e.target.value }); // Debugging Log
+                        onStatusChange(lead.id, e.target.value as Lead["status"]);
+                      }}
                       className={`px-2 py-1 rounded-full text-xs border-0 ${getStatusColor(lead.status)}`}
-                      disabled={isReported}
+                      disabled={reportedLeads.includes(lead.id)}
                     >
                       <option value="New">New</option>
                       <option value="Contacted">Contacted</option>
@@ -213,10 +218,16 @@ export function LeadsTable({
                       <option value="Different Requirement">Different Requirement</option>
                       <option value="Converted">Converted</option>
                     </select>
+
                   </td>
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-black">
-                    {lead.date}
-                  </td>
+  {lead.createdAt ? lead.createdAt : "N/A"}
+</td>
+
+
+
+
+
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-center">
                     <button
                       onClick={() => onViewDetails(lead)}

@@ -1,7 +1,7 @@
 import { Schema, model, models, Document, Types } from "mongoose";
 
 // Define the interface for PropertyFeatures
-interface IPropertyFeatures extends Document {
+ export interface IPropertyFeatures extends Document {
   property: Types.ObjectId; // Reference to the Property collection
   userId: Types.ObjectId; // User ID who added the features
   username: string; // Username of the user
@@ -99,10 +99,12 @@ const PropertyFeaturesSchema = new Schema<IPropertyFeatures>(
     },
     builtupArea: {
       type: Number,
+      
       min: [1, "Built-up Area must be greater than 0"],
     },
     carpetArea: {
       type: Number,
+    
       min: [1, "Carpet Area must be greater than 0"],
     },
     propertyAge: {
