@@ -20,9 +20,15 @@ export function Leads() {
   useEffect(() => {
     const fetchLeads = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/leads");
+        const storedUserId = sessionStorage.getItem("userId"); // ✅ Get logged-in userId from session
+        if (!storedUserId) {
+          console.warn("⚠️ No userId found in sessionStorage!");
+          return;
+        }
   
-        console.log("Fetched Leads:", response.data); // 🔍 Debug API Response
+        const response = await axios.get(`http://localhost:8000/api/leads?userId=${storedUserId}`);
+  
+        console.log("🔍 Fetched Leads:", response.data); // ✅ Debug API Response
   
         const formattedLeads = response.data.map((lead: any) => ({
           id: lead._id,
@@ -32,13 +38,13 @@ export function Leads() {
           propertyName: lead.propertyName,
           flatNo: lead.flatNo,
           status: lead.status,
-          createdAt: lead.createdAt 
+          createdAt: lead.createdAt
             ? new Date(lead.createdAt).toLocaleDateString("en-US", {
                 year: "numeric",
                 month: "short",
                 day: "numeric",
-              }) 
-            : "N/A", // ✅ Ensures valid date formatting
+              })
+            : "N/A",
         }));
   
         setLeads(formattedLeads);
@@ -49,6 +55,7 @@ export function Leads() {
   
     fetchLeads();
   }, []);
+  
   
   
   // 🔹 Handle Export as CSV

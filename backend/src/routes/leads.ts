@@ -64,16 +64,31 @@ leadsRouter.get("/glead", async (req, res) => {
 });
 leadsRouter.get("/", async (req, res) => {
   try {
-    const leads = await Lead.find({}, "name email phone propertyName flatNo status createdAt updatedAt");
+    const { userId } = req.query; // ✅ Get logged-in user ID from query params
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required." });
+    }
+
+    // ✅ Step 1: Find properties posted by this user
+    const userProperties = await PropertyEnquiry.find({ userId }).select("propertyId");
+
+    if (!userProperties.length) {
+      return res.status(200).json([]); // No properties = No leads
+    }
+
+    // ✅ Step 2: Extract property IDs
+    const propertyIds = userProperties.map((property) => property.propertyId);
+
+    // ✅ Step 3: Fetch leads only for these properties
+    const leads = await Lead.find({ propertyId: { $in: propertyIds } });
+
     res.status(200).json(leads);
   } catch (error) {
-    console.error("Error fetching leads:", error);
+    console.error("❌ Error fetching leads:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 });
-
-  
-  
 
 // 🔹 Update Lead Status
 
