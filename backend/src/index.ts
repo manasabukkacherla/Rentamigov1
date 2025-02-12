@@ -25,6 +25,7 @@ import signupRouter from "./routes/signupform";// Replace with the correct file 
 import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
 import leadsRouter from "./routes/leads";
+import Reportrouter from "./routes/Reportleads";
 dotenv.config();
 
 // Validate required environment variables
@@ -52,7 +53,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encod
 
 // Routes
 app.use("/api/verify", verifyRouter);
-
+app.use("/api/Report", Reportrouter); // Report routers 
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", employeeRouter); // Employee routes

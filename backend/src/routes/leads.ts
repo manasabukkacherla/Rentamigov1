@@ -52,16 +52,23 @@ leadsRouter.post("/sync-leads", async (req, res) => {
   }
 });
 
-// 🔹 Fetch Leads
+// 🔹 Fetch Leads by user id 
 leadsRouter.get("/glead", async (req, res) => {
   try {
-    const leads = await Lead.find();
+    const userId = req.query.userId; // Get userId from query params
+
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required." });
+    }
+
+    const leads = await Lead.find({ userId }); // Filter leads by userId
     res.status(200).json(leads);
   } catch (error) {
     console.error("Error fetching leads:", error);
     res.status(500).json({ error: "Internal server error." });
   }
 });
+
 leadsRouter.get("/", async (req, res) => {
   try {
     const leads = await Lead.find({}, "name email phone propertyName flatNo status createdAt updatedAt");

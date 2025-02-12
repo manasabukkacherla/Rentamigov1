@@ -48,70 +48,68 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Credential Response:", credentialResponse);
-  
+
       const response = await axios.post("http://localhost:8000/api/loginuser/google", {
         credential: credentialResponse.credential,
       });
-  
+
       const userData = response.data;
-      console.log("Google Login Successful:", userData);
-  
+      console.log("✅ Google Login Successful:", userData);
+
       if (userData.error) {
         alert("You are not registered. Please sign up first.");
         onSwitchToSignup();
         return;
       }
-  
-      // Store user data in sessionStorage
-      sessionStorage.setItem("user", JSON.stringify({
-        id: userData.user.id,
-        email: userData.user.email,
-        fullName: userData.user.fullName,
-        username: userData.user.username,
-        role: userData.user.role
-      }));
-  
-      // ✅ Log to console to verify
-      console.log("Session Storage Updated:", sessionStorage.getItem("user"));
-  
+
+      // ✅ Store full user details in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(userData.user));
+
+      // ✅ Store userId separately for easy API access
+      sessionStorage.setItem("userId", userData.user.id);
+      sessionStorage.setItem("role", userData.user.role);
+      sessionStorage.setItem("email", userData.user.email);
+      sessionStorage.setItem("fullName", userData.user.fullName);
+      sessionStorage.setItem("username", userData.user.username);
+
+      console.log("✅ Session Storage Updated:", sessionStorage.getItem("user"));
+
       redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (error) {
-      console.error("Google Login Error:", error);
+      console.error("❌ Google Login Error:", error);
       alert("Google login failed. Please try again.");
     }
   };
-  
-  
 
   // 🔹 Handle Google Authentication Error
   const handleGoogleError = () => {
-    console.log("Google Login Failed");
+    console.log("❌ Google Login Failed");
     alert("Google login failed. Please try again.");
   };
 
-  // 🔹 Handle Manual Form Submission (Email & Password)
+  // 🔹 Handle Manual Login (Email & Password)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-  
+
     try {
       const response = await axios.post("http://localhost:8000/api/loginuser/login", formData);
       const userData = response.data;
-  
-      // Store user data in sessionStorage
-      sessionStorage.setItem("user", JSON.stringify({
-        id: userData.user.id,
-        email: userData.user.email,
-        fullName: userData.user.fullName,
-        username: userData.user.username,
-        role: userData.user.role
-      }));
-  
-      // ✅ Log to console to verify
-      console.log("Session Storage Updated:", sessionStorage.getItem("user"));
-  
+
+      // ✅ Store full user details in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(userData.user));
+
+      // ✅ Store userId separately for easy API access
+      sessionStorage.setItem("userId", userData.user.id);
+      sessionStorage.setItem("role", userData.user.role);
+      sessionStorage.setItem("email", userData.user.email);
+      sessionStorage.setItem("fullName", userData.user.fullName);
+      sessionStorage.setItem("username", userData.user.username);
+
+      console.log("✅ Session Storage Updated:", sessionStorage.getItem("user"));
+
       redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (err) {
@@ -120,7 +118,6 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       setLoading(false);
     }
   };
-  
 
   if (showForgotPassword) {
     return <ForgotPassword onBack={() => setShowForgotPassword(false)} />;

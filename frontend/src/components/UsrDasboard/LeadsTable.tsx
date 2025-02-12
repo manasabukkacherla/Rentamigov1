@@ -1,6 +1,15 @@
-import React from 'react';
-import { Lead } from './types';
-import { Download, Search, Mail, Phone, Calendar, Building, Eye, AlertTriangle } from 'lucide-react';
+import React from "react";
+import { Lead } from "./types";
+import {
+  Download,
+  Search,
+  Mail,
+  Phone,
+  Calendar,
+  Building,
+  Eye,
+  AlertTriangle,
+} from "lucide-react";
 
 interface LeadsTableProps {
   leads: Lead[];
@@ -8,34 +17,34 @@ interface LeadsTableProps {
   searchTerm: string;
   onSearchChange: (term: string) => void;
   onViewDetails: (lead: Lead) => void;
-  onStatusChange: (leadId: string, status: Lead['status']) => void;
+  onStatusChange: (leadId: string, status: Lead["status"]) => void;
   reportedLeads: string[];
 }
 
-const getStatusColor = (status: Lead['status']) => {
+const getStatusColor = (status: Lead["status"]) => {
   switch (status) {
-    case 'New':
-      return 'bg-blue-100 text-blue-800';
-    case 'Contacted':
-      return 'bg-yellow-100 text-yellow-800';
-    case 'Interested':
-      return 'bg-green-100 text-green-800';
-    case 'Not Interested':
-      return 'bg-red-100 text-red-800';
-    case 'Converted':
-      return 'bg-purple-100 text-purple-800';
-    case 'Visited':
-      return 'bg-indigo-100 text-indigo-800';
-    case 'RNR':
-      return 'bg-orange-100 text-orange-800';
-    case 'Call Back':
-      return 'bg-cyan-100 text-cyan-800';
-    case 'No Requirement':
-      return 'bg-slate-100 text-slate-800';
-    case 'Different Requirement':
-      return 'bg-pink-100 text-pink-800';
+    case "New":
+      return "bg-blue-100 text-blue-800";
+    case "Contacted":
+      return "bg-yellow-100 text-yellow-800";
+    case "Interested":
+      return "bg-green-100 text-green-800";
+    case "Not Interested":
+      return "bg-red-100 text-red-800";
+    case "Converted":
+      return "bg-purple-100 text-purple-800";
+    case "Visited":
+      return "bg-indigo-100 text-indigo-800";
+    case "RNR":
+      return "bg-orange-100 text-orange-800";
+    case "Call Back":
+      return "bg-cyan-100 text-cyan-800";
+    case "No Requirement":
+      return "bg-slate-100 text-slate-800";
+    case "Different Requirement":
+      return "bg-pink-100 text-pink-800";
     default:
-      return 'bg-gray-100 text-gray-800';
+      return "bg-gray-100 text-gray-800";
   }
 };
 
@@ -45,8 +54,7 @@ export function LeadsTable({
   searchTerm,
   onSearchChange,
   onViewDetails,
-  onStatusChange,
-  reportedLeads
+  reportedLeads,
 }: LeadsTableProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-black/10">
@@ -79,7 +87,7 @@ export function LeadsTable({
           return (
             <div
               key={lead.id}
-              className={`p-3 space-y-2 ${isReported ? 'bg-red-50' : ''}`}
+              className={`p-3 space-y-2 ${isReported ? "bg-red-50" : ""}`}
             >
               <div className="flex items-start justify-between">
                 <h3 className="font-medium text-black flex items-center gap-2">
@@ -88,7 +96,11 @@ export function LeadsTable({
                     <AlertTriangle className="w-4 h-4 text-red-500" />
                   )}
                 </h3>
-                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(lead.status)}`}>
+                <span
+                  className={`text-xs px-2 py-1 rounded-full ${getStatusColor(
+                    lead.status
+                  )}`}
+                >
                   {lead.status}
                 </span>
               </div>
@@ -155,9 +167,8 @@ export function LeadsTable({
                 Status
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-black/60 uppercase tracking-wider">
-                CreatedAt
+                Date
               </th>
-
               <th className="px-4 py-3 text-center text-xs font-medium text-black/60 uppercase tracking-wider">
                 Actions
               </th>
@@ -167,10 +178,16 @@ export function LeadsTable({
             {leads.map((lead) => {
               const isReported = reportedLeads.includes(lead.id);
 
+              function onStatusChange(_id: string, _arg1: string): void {
+                throw new Error("Function not implemented.");
+              }
+
               return (
                 <tr
                   key={lead.id}
-                  className={`hover:bg-black/5 transition-colors ${isReported ? 'bg-red-50' : ''}`}
+                  className={`hover:bg-black/5 transition-colors ${
+                    isReported ? "bg-red-50" : ""
+                  }`}
                 >
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-black">
                     <div className="flex items-center gap-2">
@@ -187,25 +204,34 @@ export function LeadsTable({
                     {lead.flatNo}
                   </td>
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-black">
-                    <a href={`mailto:${lead.email}`} className="hover:text-blue-600">
+                    <a
+                      href={`mailto:${lead.email}`}
+                      className="hover:text-blue-600"
+                    >
                       {lead.email}
                     </a>
                   </td>
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-black">
-                    <a href={`tel:${lead.phone}`} className="hover:text-blue-600">
+                    <a
+                      href={`tel:${lead.phone}`}
+                      className="hover:text-blue-600"
+                    >
                       {lead.phone}
                     </a>
                   </td>
-
                   <td className="px-4 py-3 text-sm whitespace-nowrap">
                     <select
                       value={lead.status}
-                      onChange={(e) => {
-                        console.log("Dropdown changed:", { leadId: lead.id, newStatus: e.target.value }); // Debugging Log
-                        onStatusChange(lead.id, e.target.value as Lead["status"]);
-                      }}
-                      className={`px-2 py-1 rounded-full text-xs border-0 ${getStatusColor(lead.status)}`}
-                      disabled={reportedLeads.includes(lead.id)}
+                      onChange={(e) =>
+                        onStatusChange(
+                          lead.id,
+                          e.target.value as Lead["status"]
+                        )
+                      }
+                      className={`px-2 py-1 rounded-full text-xs border-0 ${getStatusColor(
+                        lead.status
+                      )}`}
+                      disabled={isReported}
                     >
                       <option value="New">New</option>
                       <option value="Contacted">Contacted</option>
@@ -215,19 +241,15 @@ export function LeadsTable({
                       <option value="RNR">RNR</option>
                       <option value="Call Back">Call Back</option>
                       <option value="No Requirement">No Requirement</option>
-                      <option value="Different Requirement">Different Requirement</option>
+                      <option value="Different Requirement">
+                        Different Requirement
+                      </option>
                       <option value="Converted">Converted</option>
                     </select>
-
                   </td>
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-black">
-  {lead.createdAt ? lead.createdAt : "N/A"}
-</td>
-
-
-
-
-
+                    {lead.createdAt ? lead.createdAt : "N/A"}
+                  </td>
                   <td className="px-4 py-3 text-sm whitespace-nowrap text-center">
                     <button
                       onClick={() => onViewDetails(lead)}
