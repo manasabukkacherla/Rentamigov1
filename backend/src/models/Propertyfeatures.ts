@@ -1,8 +1,12 @@
 import { Schema, model, models, Document, Types } from "mongoose";
 
 // Define the interface for PropertyFeatures
-interface IPropertyFeatures extends Document {
+ export interface IPropertyFeatures extends Document {
   property: Types.ObjectId; // Reference to the Property collection
+  userId: Types.ObjectId; // User ID who added the features
+  username: string; // Username of the user
+  fullName: string; // Full name of the user
+  role: "owner" | "agent" | "tenant" | "pg" | "employee"; // User role
   propertyName: string; // Name of the property from the Property collection
   bedrooms: number;
   bathrooms: number;
@@ -25,6 +29,26 @@ const PropertyFeaturesSchema = new Schema<IPropertyFeatures>(
       type: Schema.Types.ObjectId,
       ref: "Property", // Reference to the Property collection
       required: [true, "Property reference is required"],
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User", // Reference to the User collection
+      required: [true, "User ID is required"],
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: [true, "Full name is required"],
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: ["owner", "agent", "tenant", "pg", "employee"],
+      required: [true, "User role is required"],
     },
     propertyName: {
       type: String,
@@ -75,12 +99,12 @@ const PropertyFeaturesSchema = new Schema<IPropertyFeatures>(
     },
     builtupArea: {
       type: Number,
-      required: [true, "Built-up Area is required"],
+      
       min: [1, "Built-up Area must be greater than 0"],
     },
     carpetArea: {
       type: Number,
-      required: [true, "Carpet Area is required"],
+    
       min: [1, "Carpet Area must be greater than 0"],
     },
     propertyAge: {

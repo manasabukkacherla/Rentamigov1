@@ -33,7 +33,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   // 🔹 Function to redirect user based on role
   const redirectUser = (role: string) => {
     if (["owner", "pg", "agent"].includes(role)) {
-      navigate("/commondashboard");
+      navigate("/Userdashboard");  // ✅ Redirect PG, Owner, Agent to Userdashboard
     } else if (role === "user") {
       navigate("/homepage");
     } else if (role === "admin" || role === "employee") {
@@ -42,61 +42,53 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage"); // Default route if role is unknown
     }
   };
+  
 
   // 🔹 Handle Google Authentication Success
   const handleGoogleSuccess = async (credentialResponse: any) => {
     try {
       console.log("Google Credential Response:", credentialResponse);
-  
-      // 🔹 1️⃣ Send Google credential to backend for verification
+
       const response = await axios.post("http://localhost:8000/api/loginuser/google", {
         credential: credentialResponse.credential,
       });
-  
+
       const userData = response.data;
+      console.log("✅ Google Login Successful:", userData);
 
-      console.log("Google Login Successful:", userData);
-
-      // Store user data in session storage
-      sessionStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: userData.user.id,
-          email: userData.user.email,
-          username: userData.user.username,
-          role: userData.user.role,
-        })
-      );
-
-      // Redirect user based on role
-      redirectUser(userData.user.role);
-  
       if (userData.error) {
-        // 🔹 2️⃣ If user is NOT registered, prevent login and prompt signup
         alert("You are not registered. Please sign up first.");
-        onSwitchToSignup(); // Redirect to signup page
+        onSwitchToSignup();
         return;
       }
-  
-      // 🔹 3️⃣ If user exists, proceed with login
-      localStorage.setItem("user", JSON.stringify(userData.user));
-      localStorage.setItem("token", userData.token);
- 
+
+      // ✅ Store full user details in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(userData.user));
+
+      // ✅ Store userId separately for easy API access
+      sessionStorage.setItem("userId", userData.user.id);
+      sessionStorage.setItem("role", userData.user.role);
+      sessionStorage.setItem("email", userData.user.email);
+      sessionStorage.setItem("fullName", userData.user.fullName);
+      sessionStorage.setItem("username", userData.user.username);
+
+      console.log("✅ Session Storage Updated:", sessionStorage.getItem("user"));
+
+      redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (error) {
-      console.error("Google Login Error:", error);
-      alert("You are not registered. Please SignUp.");
+      console.error("❌ Google Login Error:", error);
+      alert("Google login failed. Please try again.");
     }
   };
-  
 
   // 🔹 Handle Google Authentication Error
   const handleGoogleError = () => {
-    console.log("Google Login Failed");
+    console.log("❌ Google Login Failed");
     alert("Google login failed. Please try again.");
   };
 
-  // 🔹 Handle Manual Form Submission (Email & Password)
+  // 🔹 Handle Manual Login (Email & Password)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -106,18 +98,18 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       const response = await axios.post("http://localhost:8000/api/loginuser/login", formData);
       const userData = response.data;
 
-      // Store user data in session storage
-      sessionStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: userData.user.id,
-          email: userData.user.email,
-          username: userData.user.username,
-          role: userData.user.role,
-        })
-      );
+      // ✅ Store full user details in sessionStorage
+      sessionStorage.setItem("user", JSON.stringify(userData.user));
 
-      // Redirect user based on role
+      // ✅ Store userId separately for easy API access
+      sessionStorage.setItem("userId", userData.user.id);
+      sessionStorage.setItem("role", userData.user.role);
+      sessionStorage.setItem("email", userData.user.email);
+      sessionStorage.setItem("fullName", userData.user.fullName);
+      sessionStorage.setItem("username", userData.user.username);
+
+      console.log("✅ Session Storage Updated:", sessionStorage.getItem("user"));
+
       redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
     } catch (err) {
