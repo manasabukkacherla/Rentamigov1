@@ -3,7 +3,11 @@ import { Schema, model, models, Document, Types } from "mongoose";
 // Define the interface for FlatAmenities
 interface IFlatAmenities extends Document {
   property: Types.ObjectId; // Reference to the Property collection
-  propertyName: string; // Name of the property from the Property collection
+  userId: Types.ObjectId; // User ID who added the amenities
+  username: string; // Username of the user
+  fullName: string; // Full name of the user
+  role: "owner" | "agent" | "tenant" | "pg" | "employee"; // User role
+  propertyName: string;
   selectedAmenities: string[]; // List of selected flat amenities
   createdAt: Date;
 }
@@ -13,12 +17,32 @@ const FlatAmenitiesSchema = new Schema<IFlatAmenities>(
   {
     property: {
       type: Schema.Types.ObjectId,
-      ref: "Property", // Reference to the Property collection
+      ref: "Property",
       required: [true, "Property reference is required"],
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "User ID is required"],
+    },
+    username: {
+      type: String,
+      required: [true, "Username is required"],
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: [true, "Full name is required"],
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: ["owner", "agent", "tenant", "pg", "employee"],
+      required: [true, "User role is required"],
     },
     propertyName: {
       type: String,
-      required: false, // Will be populated dynamically
+      required: false,
       trim: true,
     },
     selectedAmenities: {
@@ -49,7 +73,7 @@ const FlatAmenitiesSchema = new Schema<IFlatAmenities>(
     },
   },
   {
-    timestamps: true, // Automatically adds `createdAt` and `updatedAt` fields
+    timestamps: true,
   }
 );
 
@@ -58,10 +82,9 @@ FlatAmenitiesSchema.pre("save", async function (next) {
   const flatAmenities = this as IFlatAmenities;
 
   if (flatAmenities.property) {
-    // Fetch the associated property document
     const property = await model("Property").findById(flatAmenities.property);
     if (property) {
-      flatAmenities.propertyName = property.propertyName; // Dynamically assign propertyName
+      flatAmenities.propertyName = property.propertyName;
     }
   }
   next();

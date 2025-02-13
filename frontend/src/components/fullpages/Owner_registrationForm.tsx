@@ -33,11 +33,17 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
-        const response = await fetch(`https://api.rentamigo.in/api/properties/propertyds/${propertyId}`);
+        const response = await fetch(`http://localhost:8000/api/properties/propertyds/${propertyId}`);
         if (!response.ok) throw new Error("Property not found");
         
         const data = await response.json();
-        setFormData((prev) => ({ ...prev, propertyName: data.propertyName }));
+        setFormData((prev) => ({
+          ...prev,
+          propertyName: data.propertyName,
+          userId: data.userId, // ✅ Added
+          username: data.username, // ✅ Added
+          role: data.role, // ✅ Added
+        }));
       } catch (error) {
         console.error("Error fetching property details:", error);
         toast({
@@ -47,11 +53,12 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
         });
       }
     };
-
+  
     if (propertyId) {
       fetchPropertyDetails();
     }
   }, [propertyId, toast]);
+  
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -63,13 +70,16 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
     setIsSubmitting(true);
   
     try {
+      // Submit the enquiry form
       const response = await fetch("http://localhost:8000/api/property/submit-form", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, isVerified: true }), // ✅ Sending `propertyId` & `propertyName`
+        body: JSON.stringify({
+          ...formData,
+          isVerified: true, // Ensuring form submission includes verification
+        }),
       });
   
-      // ✅ Handle duplicate enquiry response (409 Conflict)
       if (response.status === 409) {
         const errorData = await response.json();
         toast({
@@ -81,7 +91,6 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
         return;
       }
   
-      // ✅ Handle generic errors
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Failed to submit form");
@@ -93,7 +102,9 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
         action: <ToastAction altText="Close">Close</ToastAction>,
       });
   
-      // ✅ Reset form data after successful submission
+      // 🔄 Trigger the Lead Synchronization API
+      await syncLeads();
+  
       setFormData((prev) => ({
         ...prev,
         name: "",
@@ -109,9 +120,27 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
         action: <ToastAction altText="Retry">Retry</ToastAction>,
       });
     } finally {
-      setIsSubmitting(false); // ✅ Always executed
+      setIsSubmitting(false);
     }
   };
+  
+  // 🔄 Function to Trigger Lead Synchronization API
+  const syncLeads = async () => {
+    try {
+      const syncResponse = await fetch("http://localhost:8000/api/leads/sync-leads", {
+        method: "POST",
+      });
+  
+      if (!syncResponse.ok) {
+        throw new Error("Lead synchronization failed");
+      }
+  
+      console.log("Leads synchronized successfully!");
+    } catch (error) {
+      console.error("Error syncing leads:", error);
+    }
+  };
+  
   
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-4 mt-16">

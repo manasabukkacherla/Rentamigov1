@@ -99,6 +99,9 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       });
     }
 
+    // ✅ Extract user details from the property
+    const { userId, username, fullName = "", role } = property; // `fullName` is optional, defaults to ""
+
     // ✅ Only block duplicate submissions for the same propertyId and email
     const existingEnquiry = await PropertyEnquiry.findOne({ email, propertyId });
 
@@ -109,7 +112,7 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       });
     }
 
-    // ✅ Save the new enquiry (allow same email for different properties)
+    // ✅ Save the new enquiry (now including user details)
     const newEnquiry = new PropertyEnquiry({
       name,
       email,
@@ -117,6 +120,10 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       isVerified,
       propertyId,
       propertyName,
+      userId, // Storing the user ID from the property
+      username, // Storing the username from the property
+      fullName, // Storing the full name from the property (optional)
+      role, // Storing the role from the property
     });
 
     const savedEnquiry = await newEnquiry.save();
@@ -150,6 +157,8 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       <p><strong>Contact Number:</strong> ${contactNumber}</p>
       <p><strong>Verified:</strong> ${isVerified ? "Yes" : "No"}</p>
       <p><strong>Submission Date:</strong> ${savedEnquiry.createdAt}</p>
+      <p><strong>Property Owner:</strong> ${fullName || "N/A"} (${username})</p> <!-- Shows "N/A" if fullName is missing -->
+      <p><strong>Role:</strong> ${role}</p>
     `;
 
     await transporter.sendMail({
@@ -172,6 +181,8 @@ router.post("/submit-form", async (req: Request, res: Response) => {
     });
   }
 });
+
+
 // GET: Retrieve all property enquiries
 router.get("/enquiries", async (_req: Request, res: Response) => {
   try {

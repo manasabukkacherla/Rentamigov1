@@ -21,6 +21,10 @@ import Loginhome from "./components/Logins/Loginhome";
 import CommonDashboard from "./components/DashboardFiles/CommonDashboard";
 import Propertyy from "./components/Propertyforms/App";
 
+
+import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
+
+
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("VITE_GOOGLE_CLIENT_ID is not defined");
@@ -50,6 +54,8 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
           <Route path="/Tenanthome" element={<Tenanthome />} />
+          <Route path="/Userdashboard/*" element={<UsrDashboard />} /> {/* Ensure wildcard `/*` */}
+
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />
@@ -67,7 +73,7 @@ const App = () => {
           <Route path="/Login" element={<Loginhome />} />
 
           {/* Dashboard Layout */}
-          <Route path="/CommonDashboard" element={<CommonDashboard />} />
+
 
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />

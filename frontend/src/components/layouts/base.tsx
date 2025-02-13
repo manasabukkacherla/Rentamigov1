@@ -10,6 +10,7 @@ import { PropertyAvailability, AvailabilityData } from './PropertyAvailability';
 import { PropertyPhotos, PhotoData } from './PropertyPhotos';
 import { PreviewModal } from "./Previewmodal";
 import { ArrowRight, ArrowLeft, Home, MapPin, Building2, Dumbbell, Sofa, Ban, IndianRupee, Calendar, Image, Eye, Menu } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 type StepType = 'form' | 'location' | 'features' | 'amenities' | 'flatAmenities' | 'restrictions' | 'commercials' | 'availability' | 'photos';
 
@@ -30,6 +31,7 @@ function Base() {
   const [activeStep, setActiveStep] = useState<StepType>('form');
   const [showPreview, setShowPreview] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [userData, setUserData] = useState<{ userId: string; username: string; fullName: string; role: string } | null>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     ownerName: '',
@@ -125,180 +127,233 @@ function Base() {
     propertyVideo: null
   });
 
-
-  
+  useEffect(() => {
+    const storedUser = sessionStorage.getItem("user");
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUserData(userData);
+    } else {
+      console.warn("No user session found. Please log in.");
+    }
+  }, []);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeStep]);
 
+  const validateStep = (step: StepType): boolean => {
+    switch (step) {
+      case 'form':
+        const formErrors: string[] = [];
+        if (!formData.propertyName) formErrors.push('Property Name');
+        if (!formData.propertyType) formErrors.push('Property Type');
+        if (!formData.propertyConfiguration) formErrors.push('Property Configuration');
+        if (!formData.furnishingStatus) formErrors.push('Furnishing Status');
+        if (!formData.facing) formErrors.push('Facing');
+        
+        if (formErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${formErrors.join(', ')}`);
+          return false;
+        }
+        return true;
+
+      case 'location':
+        const locationErrors: string[] = [];
+        if (!locationData.addressLine1) locationErrors.push('Address Line 1');
+        if (!locationData.locality) locationErrors.push('Locality');
+        if (!locationData.pinCode || !/^\d{6}$/.test(locationData.pinCode)) {
+          locationErrors.push('Pin Code (must be 6 digits)');
+      }
+  
+        if (!locationData.addressLine2) locationErrors.push('Address Line 2');
+        if (!locationData.addressLine3) locationErrors.push('Address Line 3');
+        if (!locationData.latitude) locationErrors.push('Latitude');
+        if (!locationData.longitude) locationErrors.push('Longitude');
+        if (!locationData.area) locationErrors.push('Area');
+        if (locationErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${locationErrors.join(', ')}`);
+          return false;
+        }
+        return true;
+
+      case 'features':
+        const featureErrors: string[] = [];
+        if (!featuresData.bedrooms) featureErrors.push('Bedrooms');
+    if (!featuresData.bathrooms) featureErrors.push('Bathrooms');
+    if (!featuresData.balconies) featureErrors.push('Balconies');
+    if (!featuresData.floorNumber) featureErrors.push('Floor Number');
+    if (!featuresData.totalFloors) featureErrors.push('Total Floors');
+    if (!featuresData.superBuiltupArea) featureErrors.push('Super Built-up Area');
+    if (!featuresData.propertyAge) featureErrors.push('Property Age');
+    if (!featuresData.propertyDescription) featureErrors.push('Property Description');
+
+        
+        if (featureErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${featureErrors.join(', ')}`);
+          return false;
+        }
+        return true;
+
+        case 'restrictions':
+          const restrictionErrors: string[] = [];
+      
+          if (!restrictionsData.bachelorTenants) restrictionErrors.push('Bachelor Tenants');
+          if (!restrictionsData.nonVegTenants) restrictionErrors.push('Non-Veg Tenants');
+          if (!restrictionsData.tenantWithPets) restrictionErrors.push('Tenant With Pets');
+          if (!restrictionsData.propertyOverlooking) restrictionErrors.push('Property Overlooking');
+          if (!restrictionsData.carParking) restrictionErrors.push('Car Parking');
+          if (restrictionsData.carParking === "Yes" && !restrictionsData.carParkingCount) 
+              restrictionErrors.push('Car Parking Count');
+          if (!restrictionsData.twoWheelerParking) restrictionErrors.push('Two-Wheeler Parking');
+          if (restrictionsData.twoWheelerParking === "Yes" && !restrictionsData.twoWheelerParkingCount) 
+              restrictionErrors.push('Two-Wheeler Parking Count');
+          if (!restrictionsData.flooringType) restrictionErrors.push('Flooring Type');
+      
+          if (restrictionErrors.length > 0) {
+              toast.error(`Please fill in required fields: ${restrictionErrors.join(', ')}`);
+              return false;
+          }
+          return true;
+      
+
+      case 'commercials':
+        const commercialErrors: string[] = [];
+        if (!commercialsData.monthlyRent) commercialErrors.push('Monthly Rent');
+        if (!commercialsData.securityDeposit) commercialErrors.push('Security Deposit');
+        
+        if (commercialErrors.length > 0) {
+          toast.error(`Please fill in required fields: ${commercialErrors.join(', ')}`);
+          return false;
+        }
+        return true;
+
+      case 'availability':
+        if (!availabilityData.availableFrom) {
+          toast.error('Please select availability date');
+          return false;
+        }
+        return true;
+
+      default:
+        return true;
+        
+    }
+  };
+
   const handleNext = async () => {
+    if (!userData) {
+      toast.error("User session not found. Please log in.");
+      return;
+    }
+
+    if (!validateStep(activeStep)) {
+      return;
+    }
+
+    const { id: userId, username, role } = userData;
+    const fullName = userData.fullName || "Unknown";
     const currentIndex = steps.findIndex((step) => step.id === activeStep);
+    let payload = { userId, username, fullName, role };
 
     try {
       switch (activeStep) {
         case 'form':
-          // Validate form data
-          if (
-            !formData.propertyName ||
-            !formData.ownerName ||
-            !formData.ownerNumber ||
-            !formData.propertyType ||
-            !formData.propertyConfiguration ||
-            !formData.furnishingStatus ||
-            !formData.facing
-          ) {
-            alert('Please fill in all required fields in the Basic Details step.');
-            return; // Stop here if validation fails
-          }
-    
-          const formResponse = await fetch('https://api.rentamigo.in/api/properties/property', {
+          const formResponse = await fetch('http://localhost:8000/api/properties/property', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...formData, ...payload }),
           });
-    
-          if (!formResponse.ok) {
-            throw new Error('Failed to save property form data');
-          }
-    
+
+          if (!formResponse.ok) throw new Error('Failed to save property form data');
           const createdProperty = await formResponse.json();
           setPropertyId(createdProperty._id);
+          toast.success('Basic details saved successfully');
           break;
-    
+
         case 'location':
-          // Validate location data
-          if (
-            !locationData.flatNo ||
-            !locationData.addressLine1 ||
-            !locationData.locality ||
-            !locationData.area ||
-            !locationData.pinCode
-          ) {
-            alert('Please fill in all required fields in the Location step.');
-            return; // Stop here if validation fails
-          }
-    
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-location', {
+          await fetch('http://localhost:8000/api/properties/property-location', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...locationData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...locationData, property: propertyId, ...payload }),
           });
+          toast.success('Location details saved successfully');
           break;
-    
+
         case 'features':
-          // Validate features data
-          if (
-            !featuresData.bedrooms ||
-            !featuresData.bathrooms ||
-            !featuresData.balconies ||
-            !featuresData.floorNumber ||
-            !featuresData.totalFloors ||
-            !featuresData.superBuiltupArea ||
-            !featuresData.builtupArea ||
-            !featuresData.carpetArea ||
-            !featuresData.propertyAge ||
-            !featuresData.propertyDescription
-          ) {
-            alert('Please fill in all required fields in the Features step.');
-            return; // Stop here if validation fails
-          }
-    
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-features', {
+          await fetch('http://localhost:8000/api/properties/property-features', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...featuresData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...featuresData, property: propertyId, ...payload }),
           });
+          toast.success('Features saved successfully');
           break;
-    
+
         case 'amenities':
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/society-amenities', {
+          await fetch('http://localhost:8000/api/properties/society-amenities', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...amenitiesData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...amenitiesData, property: propertyId, ...payload }),
           });
+          toast.success('Society amenities saved successfully');
           break;
-    
+
         case 'flatAmenities':
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/flat-amenities', {
+          await fetch('http://localhost:8000/api/properties/flat-amenities', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...flatAmenitiesData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...flatAmenitiesData, property: propertyId, ...payload }),
           });
+          toast.success('Flat amenities saved successfully');
           break;
-    
+
         case 'restrictions':
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-restrictions', {
+          await fetch('http://localhost:8000/api/properties/property-restrictions', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...restrictionsData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...restrictionsData, property: propertyId, ...payload }),
           });
+          toast.success('Restrictions saved successfully');
           break;
-    
+
         case 'commercials':
-          // Validate commercials data
-          if (!commercialsData.monthlyRent || !commercialsData.securityDeposit) {
-            alert('Please fill in all required fields in the Commercials step.');
-            return; // Stop here if validation fails
-          }
-    
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-commercials', {
+          await fetch('http://localhost:8000/api/properties/property-commercials', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...commercialsData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...commercialsData, property: propertyId, ...payload }),
           });
+          toast.success('Commercial details saved successfully');
           break;
-    
+
         case 'availability':
-          // Validate availability data
-          if (!availabilityData.availableFrom) {
-            alert('Please select a date in the Availability step.');
-            return; // Stop here if validation fails
-          }
-    
           if (!propertyId) throw new Error('Property ID is missing');
-          await fetch('https://api.rentamigo.in/api/properties/property-availability', {
+          await fetch('http://localhost:8000/api/properties/property-availability', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ ...availabilityData, property: propertyId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...availabilityData, property: propertyId, ...payload }),
           });
+          toast.success('Availability details saved successfully');
           break;
-    
+
         default:
           break;
+      
       }
-    
+
       if (currentIndex < steps.length - 1) {
         setActiveStep(steps[currentIndex + 1].id);
         setShowMobileMenu(false);
       }
     } catch (error) {
       console.error('Error saving data:', error);
-      alert('Failed to save data. Please try again.');
+      toast.error('Failed to save data. Please try again.');
     }
-  }
+  };
 
   const handlePrevious = () => {
     const currentIndex = steps.findIndex((step) => step.id === activeStep);
@@ -350,6 +405,7 @@ function Base() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Toaster position="top-right" />
       <div className="max-w-7xl mx-auto">
         <div className="md:hidden fixed top-0 left-0 right-0 bg-white z-20 shadow-sm">
           <div className="flex items-center justify-between px-4 py-3">
@@ -481,6 +537,6 @@ function Base() {
       )}
     </div>
   );
-  }
+}
 
 export default Base;

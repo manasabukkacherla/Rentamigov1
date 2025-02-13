@@ -1,10 +1,12 @@
-import { Schema, model, models, Document } from "mongoose";
+import { Schema, model, models, Document, Types } from "mongoose";
 
 // Define the interface for the Property document
 interface IProperty extends Document {
+  userId: Types.ObjectId; // Reference to the user who added the property
+  username: string; // Username of the user
+  fullName: string; // Full name of the user
+  role: "owner" | "agent" | "tenant" | "pg" | "employee"; // Role of the user
   propertyName: string; // Name of the property
-  ownerName: string; // Owner's name
-  ownerNumber: string; // Owner's contact number
   propertyType: string; // Type of property
   propertyConfiguration: string; // E.g., 1 BHK, 2 BHK, etc.
   furnishingStatus: "Unfurnished" | "Semi Furnished" | "Fully Furnished" | "Partially Furnished"; // Furnishing status
@@ -17,31 +19,40 @@ interface IProperty extends Document {
 // Define the Mongoose schema for Property
 const PropertySchema = new Schema<IProperty>(
   {
+    userId: {
+      type: Schema.Types.ObjectId, // Correct type definition
+      ref: "User", // References the User model
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: ["owner", "agent", "tenant", "pg", "employee"],
+      required: true,
+    },
     propertyName: {
       type: String,
       required: [true, "Property name is required"],
       trim: true,
     },
-    ownerName: {
-      type: String,
-      required: [true, "Owner name is required"],
-      trim: true,
-    },
-    ownerNumber: {
-      type: String,
-      required: [true, "Owner contact number is required"],
-      match: [/^\d{10}$/, "Please provide a valid 10-digit contact number"], // Adjust regex if needed
-      trim: true,
-    },
     propertyType: {
       type: String,
-      enum: ["Apartment", "Standalone Building", "Villa", "Row House"], // Matches frontend options
+      enum: ["Apartment", "Standalone Building", "Villa", "Row House"],
       required: [true, "Property type is required"],
     },
     propertyConfiguration: {
       type: String,
       required: [true, "Property configuration is required"],
-      enum: ["Studio Room (1 RK)", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"], // List of configurations
+      enum: ["Studio Room (1 RK)", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"],
     },
     furnishingStatus: {
       type: String,
@@ -51,19 +62,10 @@ const PropertySchema = new Schema<IProperty>(
     facing: {
       type: String,
       required: [true, "Facing direction is required"],
-      enum: [
-        "North",
-        "East",
-        "South",
-        "West",
-        "North-East",
-        "South-East",
-        "North-West",
-        "South-West",
-      ],
+      enum: ["North", "East", "South", "West", "North-East", "South-East", "North-West", "South-West"],
     },
     amenities: {
-      type: [String], // Array of amenity IDs
+      type: [String],
       validate: {
         validator: (value: string[]) => Array.isArray(value),
         message: "Amenities must be an array of strings",
