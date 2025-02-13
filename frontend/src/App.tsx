@@ -18,8 +18,12 @@ import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 import PropertyPage from "./components/layouts/base";
 import Loginhome from "./components/Logins/Loginhome";
+import CommonDashboard from "./components/DashboardFiles/CommonDashboard";
+import Propertyy from "./components/Propertyforms/App";
+
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
+
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -43,6 +47,8 @@ const App = () => {
           <Route path="/Contactus" element={<ContactUs />} />
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
+          
+          <Route path="/Propertyform" element={<Propertyy />} />
 
           {/* Owner and Tenant Routes */}
           <Route path="/owner-page" element={<OwnerPage />} />
