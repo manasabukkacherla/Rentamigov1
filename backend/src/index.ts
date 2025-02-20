@@ -26,6 +26,29 @@ import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
 import leadsRouter from "./routes/leads";
 import Reportrouter from "./routes/Reportleads";
+import aboutPropertyRouter from "./routes/newaboutproperty";
+import additionalFinancialsRouter from "./routes/newadditionalFinancialsRouter";
+import dgUpsChargesRouter from "./routes/newdgUpsChargesRouter";
+import electricityChargesRouter from "./routes/newelectricityChargesRouter"; // ✅ Import the Electricity Charges Router
+import facilitiesRouter from "./routes/facilitiesRouter"; // ✅ Import the Facilities Router
+import financialPriceRouter from "./routes/financialPriceRouter"; 
+import financialsRouter from "./routes/financialsRouter"; // ✅ Import Financials Router
+import floorRouter from "./routes/floorRouter"; // ✅ Import Floor Router
+import liftsStaircasesRouter from "./routes/liftsStaircasesRouter"; // ✅ Import Router
+import negotiableRouter from "./routes/negotiableRouter"; // ✅ Import Router
+import propertyDetailsRouter from "./routes/propertyDetailsRouter"; // ✅ Import Router
+import otherPropertyDetailsRouter from "./routes/otherPropertyDetailsRouter"; // ✅ Import Router
+import parkingRouter from "./routes/parkingRouter"; // ✅ Import Router
+import periodDetailsRouter from "./routes/periodDetailsRouter";
+import plotPropertyRouter from "./routes/plotPropertyRouter"; // ✅ Import Router
+import possessionRouter from "./routes/possessionRouter"; // ✅ Import Router
+import propertyAmenitiesRouter from "./routes/propertyAmenitiesRouter"; // ✅ Import Router
+import NewPropertyDetailsRouter from "./routes/newpropertydetailsform";
+import retailPropertyRouter from "./routes/newretailproperty";
+import sellFacilitiesRouter from "./routes/newsellFacilities";
+import taxGovtChargesRouter from "./routes/newtacgovtcharges";
+import warehousePropertyRouter from "./routes/newwarehouseproperty";
+import waterChargesRouter from "./routes/newwatercharges";
 dotenv.config();
 
 // Validate required environment variables
@@ -69,6 +92,29 @@ app.use("/api/sign",signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes); 
 app.use("/api/leads", leadsRouter);
+app.use("/api/about-property", aboutPropertyRouter);
+app.use("/api/additional-financials", additionalFinancialsRouter);
+app.use("/api/dg-ups-charges", dgUpsChargesRouter);
+app.use("/api/electricity-charges", electricityChargesRouter);
+app.use("/api/facilities", facilitiesRouter); // ✅ Register Facilities API
+app.use("/api/financialPrice", financialPriceRouter); // ✅ Register Financial Price API
+app.use("/api/financials", financialsRouter); // ✅ Register Financials API
+app.use("/api/floors", floorRouter); // ✅ Register Floor API
+app.use("/api/lifts-staircases", liftsStaircasesRouter); // ✅ Register API
+app.use("/api/negotiable", negotiableRouter); // ✅ Register API
+app.use("/api/newproperty", propertyDetailsRouter); // ✅ Register API
+app.use("/api/other-property", otherPropertyDetailsRouter); // ✅ Register API
+app.use("/api/parking", parkingRouter); // ✅ Register API
+app.use("/api/period", periodDetailsRouter); // ✅ Register API
+app.use("/api/plot", plotPropertyRouter); // ✅ Register API
+app.use("/api/possession", possessionRouter); // ✅ Register API
+app.use("/api/property-amenities", propertyAmenitiesRouter); // ✅ Register API
+app.use("/api/property-details", NewPropertyDetailsRouter); // ✅ Register API
+app.use("/api/retail-property", retailPropertyRouter);
+app.use("/api/sell-facilities", sellFacilitiesRouter);
+app.use("/api/tax-govt-charges", taxGovtChargesRouter);
+app.use("/api/warehouse-property", warehousePropertyRouter);
+app.use("/api/water-charges", waterChargesRouter);
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
