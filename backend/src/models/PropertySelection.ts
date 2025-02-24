@@ -25,38 +25,44 @@ const PropertySelectionSchema = new Schema<IPropertySelection>(
 PropertySelectionSchema.pre("validate", async function (next) {
   const selection = this as IPropertySelection;
 
-  // Mapping for ID Generation
+  // Normalize Inputs (Convert to Lowercase & Trim Extra Spaces)
+  selection.category = selection.category.trim().toLowerCase();
+  selection.listingType = selection.listingType.trim().toLowerCase();
+  selection.subCategory = selection.subCategory.trim().toLowerCase();
+
+  // Mapping for ID Generation (Use Lowercase Keys)
   const categoryCodes: Record<string, string> = {
-    Residential: "RES",
-    Commercial: "COM",
-    Other: "OT",
+    residential: "RES",
+    commercial: "COM",
+    other: "OT",
   };
 
   const listingCodes: Record<string, string> = {
-    Rent: "RE",
-    Sell: "SE",
-    Lease: "LE",
-    "PG/Co-living": "PG",
+    rent: "RE",
+    sell: "SE",
+    lease: "LE",
+    "pg/co-living": "PG",
   };
 
+  // Normalize Property Type Mapping
   const subCategoryCodes: Record<string, string> = {
-    Shop: "SH",
-    "Retail Store Space": "RS",
-    Showroom: "SR",
-    "Office Space": "OS",
-    Warehouse: "WH",
-    Shed: "SD",
-    "Covered/Open Space": "CS",
-    Plot: "PL",
-    "Agricultural Land": "AL",
-    Others: "OT",
-    Apartment: "AP",
-    "Independent House": "IH",
-    "Builder Floor": "BF",
-    "Shared Space": "SS",
+    shop: "SH",
+    "retail store space": "RS",
+    showroom: "SR",
+    "office space": "OS",
+    warehouse: "WH",
+    shed: "SD",
+    "covered/open space": "CS",
+    plot: "PL",
+    "agricultural land": "AL",
+    others: "OT",
+    apartment: "AP",
+    "independent house": "IH",
+    "builder floor": "BF",
+    "shared space": "SS",
   };
 
-  // Get the corresponding codes
+  // Get the corresponding codes (Handle missing values gracefully)
   const categoryCode = categoryCodes[selection.category] || "OT";
   const listingCode = listingCodes[selection.listingType] || "XX";
   const subCategoryCode = subCategoryCodes[selection.subCategory] || "OT";
