@@ -18,7 +18,6 @@ import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 import PropertyPage from "./components/layouts/base";
 import Loginhome from "./components/Logins/Loginhome";
-import CommonDashboard from "./components/DashboardFiles/CommonDashboard";
 import Propertyy from "./components/Propertyforms/App";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
 
