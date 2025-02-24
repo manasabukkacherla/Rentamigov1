@@ -19,6 +19,7 @@ import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 
 import Loginhome from "./components/Logins/Loginhome";
 
+import Propertmain from "./components/updatedpropertyForms/Propertmain";
 
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
@@ -48,6 +49,8 @@ const App = () => {
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
           
          
+         
+          <Route path="/updatePropertyform" element={<Propertmain/>} />
 
           {/* Owner and Tenant Routes */}
           <Route path="/owner-page" element={<OwnerPage />} />
