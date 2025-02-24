@@ -16,10 +16,9 @@ import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import PropertyDashboard from "./components/Empdashboard/Empdasboard";
-import PropertyPage from "./components/layouts/base";
+
 import Loginhome from "./components/Logins/Loginhome";
-import CommonDashboard from "./components/DashboardFiles/CommonDashboard";
-import Propertyy from "./components/Propertyforms/App";
+
 
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
@@ -48,7 +47,7 @@ const App = () => {
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
           
-          <Route path="/Propertyform" element={<Propertyy />} />
+         
 
           {/* Owner and Tenant Routes */}
           <Route path="/owner-page" element={<OwnerPage />} />
@@ -65,9 +64,7 @@ const App = () => {
           <Route path="/admin-dashboard" element={<AccessManagementTable />} />
           <Route path="/Empdashboard" element={<PropertyDashboard />} />
 
-          <Route path="/property-listing-form" element={<PropertyPage/>} />
-          {/* Base Layout */}
-          <Route path="/base" element={<PropertyPage />} />
+
 
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
