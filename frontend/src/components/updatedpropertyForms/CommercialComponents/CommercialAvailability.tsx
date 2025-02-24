@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { ArrowRight, Calendar, Clock, Users, Dog, Clock4 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
-import "react-datepicker/dist/react-datepicker.css";
+import 'react-datepicker/dist/react-datepicker.css';
+
 
 interface CommercialAvailabilityProps {
   onAvailabilityChange?: (availability: Record<string, any>) => void;
@@ -32,6 +33,14 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
       : availability.preferredTenants.filter(t => t !== tenant);
     
     handleChange('preferredTenants', updatedTenants);
+  };
+
+  const handleOperatingHoursChange = (field: string, value: any) => {
+    const updatedHours = {
+      ...availability.operatingHours,
+      [field]: value
+    };
+    handleChange('operatingHours', updatedHours);
   };
 
   const tenantTypes = [
@@ -187,7 +196,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                     <input
                       type="radio"
                       checked={availability.operatingHours.restricted}
-                      onChange={() => handleChange('operatingHours', { restricted: true, restrictions: availability.operatingHours.restrictions })}
+                      onChange={() => handleOperatingHoursChange('restricted', true)}
                       className="text-white border-white/20 bg-transparent focus:ring-white"
                     />
                     <span className="text-white/80">Yes</span>
@@ -196,7 +205,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                     <input
                       type="radio"
                       checked={!availability.operatingHours.restricted}
-                      onChange={() => handleChange('operatingHours', { restricted: false, restrictions: '' })}
+                      onChange={() => handleOperatingHoursChange('restricted', false)}
                       className="text-white border-white/20 bg-transparent focus:ring-white"
                     />
                     <span className="text-white/80">No</span>
@@ -206,7 +215,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                   <input
                     type="text"
                     value={availability.operatingHours.restrictions}
-                    onChange={(e) => handleChange('operatingHours', { restricted: true, restrictions: e.target.value })}
+                    onChange={(e) => handleOperatingHoursChange('restrictions', e.target.value)}
                     placeholder="Specify operating hours restrictions"
                     className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
                   />
