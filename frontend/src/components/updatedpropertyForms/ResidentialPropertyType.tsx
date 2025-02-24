@@ -1,35 +1,7 @@
-import { Store, Building2, Warehouse, Home, Building, Users, Map, Factory, TreePine } from 'lucide-react';
+import { useState } from "react";
+import { Store, Building2, Warehouse, Home, Building, Users, Map, Factory, TreePine, CheckCircle2 } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
-import RentShopMain from './CommercialPropertyTypes/RentShopMain';
-import RentRetailStoreMain from './CommercialPropertyTypes/RentRetailStoreMain';
-import RentShowroomMain from './CommercialPropertyTypes/RentShowroomMain';
-import RentOfficeSpace from './CommercialPropertyTypes/RentOfficeSpace';
-import RentWarehouse from './CommercialPropertyTypes/RentWarehouse';
-import RentShed from './CommercialPropertyTypes/RentShed';
-import RentCoveredSpace from './CommercialPropertyTypes/RentCoveredSpace';
-import RentPlot from './CommercialPropertyTypes/RentPlot';
-import RentAgriculture from './CommercialPropertyTypes/RentAgriculture';
-import RentOthers from './CommercialPropertyTypes/RentOthers';
-import SellShopMain from './CommercialPropertyTypes/SellShopMain';
-import SellRetailShopMain from './CommercialPropertyTypes/SellRetailShopMain';
-import SellShowroomMain from './CommercialPropertyTypes/SellShowroomMain';
-import SellOfficeSpaceMain from './CommercialPropertyTypes/SellOfficeSpaceMain';
-import SellWarehouseMain from './CommercialPropertyTypes/SellWarehouseMain';
-import SellShedMain from './CommercialPropertyTypes/SellShedMain';
-import SellCoveredSpaceMain from './CommercialPropertyTypes/SellCoveredSpaceMain';
-import SellPlotMain from './CommercialPropertyTypes/SellPlotMain';
-import SellAgricultureMain from './CommercialPropertyTypes/SellAgricultureMain';
-import SellOthersMain from './CommercialPropertyTypes/SellOthersMain';
-import LeaseShopMain from './CommercialPropertyTypes/LeaseShopMain';
-import LeaseRetailStoreMain from './CommercialPropertyTypes/LeaseRetailStoreMain';
-import LeaseShowroomMain from './CommercialPropertyTypes/LeaseShowroomMain';
-import LeaseOfficeSpaceMain from './CommercialPropertyTypes/LeaseOfficeSpaceMain';
-import LeaseWarehouseMain from './CommercialPropertyTypes/LeaseWarehouseMain';
-import LeaseShedMain from './CommercialPropertyTypes/LeaseShedMain';
-import LeaseCoveredSpaceMain from './CommercialPropertyTypes/LeaseCoveredSpaceMain';
-import LeasePropertyMain from './CommercialPropertyTypes/LeasePropertyMain';
-import LeaseAgricultureMain from './CommercialPropertyTypes/LeaseAgricultureMain';
-import LeaseOthersMain from './CommercialPropertyTypes/LeaseOthersMain';
+
 import Apartment from './property-types/Apartment';
 import IndependentHouse from './property-types/IndependentHouse';
 import BuilderFloor from './property-types/BuilderFloor';
@@ -41,6 +13,36 @@ import SellApartment from './property-types/SellApartment';
 import SellIndependentHouse from './property-types/SellIndependentHouse';
 import SellBuilderFloor from './property-types/SellBuilderFloor';
 import SellPlot from './property-types/SellPlot';
+import LeaseAgricultureMain from "./commercialpropertytypes/LeaseAgricultureMain";
+import LeaseCoveredSpaceMain from "./commercialpropertytypes/LeaseCoveredSpaceMain";
+import LeaseOfficeSpaceMain from "./commercialpropertytypes/LeaseOfficeSpaceMain";
+import LeaseOthersMain from "./commercialpropertytypes/LeaseOthersMain";
+import LeasePropertyMain from "./commercialpropertytypes/LeasePropertyMain";
+import LeaseRetailStoreMain from "./commercialpropertytypes/LeaseRetailStoreMain";
+import LeaseShedMain from "./commercialpropertytypes/LeaseShedMain";
+import LeaseShopMain from "./commercialpropertytypes/LeaseShopMain";
+import LeaseShowroomMain from "./commercialpropertytypes/LeaseShowroomMain";
+import LeaseWarehouseMain from "./commercialpropertytypes/LeaseWarehouseMain";
+import RentAgriculture from "./commercialpropertytypes/RentAgriculture";
+import RentCoveredSpace from "./commercialpropertytypes/RentCoveredSpace";
+import RentOfficeSpace from "./commercialpropertytypes/RentOfficeSpace";
+import RentOthers from "./commercialpropertytypes/RentOthers";
+import RentPlot from "./commercialpropertytypes/RentPlot";
+import RentRetailStoreMain from "./commercialpropertytypes/RentRetailStoreMain";
+import RentShed from "./commercialpropertytypes/RentShed";
+import RentShopMain from "./commercialpropertytypes/RentShopMain";
+import RentShowroomMain from "./commercialpropertytypes/RentShowroomMain";
+import RentWarehouse from "./commercialpropertytypes/RentWarehouse";
+import SellAgricultureMain from "./commercialpropertytypes/SellAgricultureMain";
+import SellCoveredSpaceMain from "./commercialpropertytypes/SellCoveredSpaceMain";
+import SellOfficeSpaceMain from "./commercialpropertytypes/SellOfficeSpaceMain";
+import SellOthersMain from "./commercialpropertytypes/SellOthersMain";
+import SellPlotMain from "./commercialpropertytypes/SellPlotMain";
+import SellRetailShopMain from "./commercialpropertytypes/SellRetailShopMain";
+import SellShedMain from "./commercialpropertytypes/SellShedMain";
+import SellShopMain from "./commercialpropertytypes/SellShopMain";
+import SellShowroomMain from "./commercialpropertytypes/SellShowroomMain";
+import SellWarehouseMain from "./commercialpropertytypes/SellWarehouseMain";
 
 interface ResidentialPropertyTypeProps {
   listingType: string;
@@ -50,6 +52,8 @@ interface ResidentialPropertyTypeProps {
 }
 
 const ResidentialPropertyType = ({ listingType, selectedType, onSelect, propertyType }: ResidentialPropertyTypeProps) => {
+  const [showForm, setShowForm] = useState(false);
+
   const getPropertyTypes = () => {
     if (propertyType === 'Commercial') {
       return [
@@ -195,148 +199,240 @@ const ResidentialPropertyType = ({ listingType, selectedType, onSelect, property
 
   const propertyTypes = getPropertyTypes();
 
-  // Check if we should display specific components
-  if (propertyType === 'Commercial') {
-    if (listingType === 'Rent') {
-      switch (selectedType) {
-        case 'shop':
-          return <RentShopMain />;
-        case 'retail-store-space':
-          return <RentRetailStoreMain />;
-        case 'showroom':
-          return <RentShowroomMain />;
-        case 'office-space':
-          return <RentOfficeSpace />;
-        case 'warehouse':
-          return <RentWarehouse />;
-        case 'shed':
-          return <RentShed />;
-        case 'covered-open-space':
-          return <RentCoveredSpace />;
-        case 'plot':
-          return <RentPlot />;
-        case 'agricultural-land':
-          return <RentAgriculture />;
-        case 'others':
-          return <RentOthers />;
+  const getSelectedPropertyName = () => {
+    const selectedProperty = propertyTypes.find(type => type.id === selectedType);
+    return selectedProperty ? selectedProperty.name : '';
+  };
+
+  const renderPropertyForm = () => {
+    if (propertyType === 'Commercial') {
+      if (listingType === 'Rent') {
+        switch (selectedType) {
+          case 'shop':
+            return <RentShopMain />;
+          case 'retail-store-space':
+            return <RentRetailStoreMain />;
+          case 'showroom':
+            return <RentShowroomMain />;
+          case 'office-space':
+            return <RentOfficeSpace />;
+          case 'warehouse':
+            return <RentWarehouse />;
+          case 'shed':
+            return <RentShed />;
+          case 'covered-open-space':
+            return <RentCoveredSpace />;
+          case 'plot':
+            return <RentPlot />;
+          case 'agricultural-land':
+            return <RentAgriculture />;
+          case 'others':
+            return <RentOthers />;
+        }
+      } else if (listingType === 'Sell') {
+        switch (selectedType) {
+          case 'shop':
+            return <SellShopMain />;
+          case 'retail-store-space':
+            return <SellRetailShopMain />;
+          case 'showroom':
+            return <SellShowroomMain />;
+          case 'office-space':
+            return <SellOfficeSpaceMain />;
+          case 'warehouse':
+            return <SellWarehouseMain />;
+          case 'shed':
+            return <SellShedMain />;
+          case 'covered-open-space':
+            return <SellCoveredSpaceMain />;
+          case 'plot':
+            return <SellPlotMain />;
+          case 'agricultural-land':
+            return <SellAgricultureMain />;
+          case 'others':
+            return <SellOthersMain />;
+        }
+      } else if (listingType === 'Lease') {
+        switch (selectedType) {
+          case 'shop':
+            return <LeaseShopMain />;
+          case 'retail-store-space':
+            return <LeaseRetailStoreMain />;
+          case 'showroom':
+            return <LeaseShowroomMain />;
+          case 'office-space':
+            return <LeaseOfficeSpaceMain />;
+          case 'warehouse':
+            return <LeaseWarehouseMain />;
+          case 'shed':
+            return <LeaseShedMain />;
+          case 'covered-open-space':
+            return <LeaseCoveredSpaceMain />;
+          case 'plot':
+            return <LeasePropertyMain />;
+          case 'agricultural-land':
+            return <LeaseAgricultureMain />;
+          case 'others':
+            return <LeaseOthersMain />;
+        }
       }
-    } else if (listingType === 'Sell') {
-      switch (selectedType) {
-        case 'shop':
-          return <SellShopMain />;
-        case 'retail-store-space':
-          return <SellRetailShopMain />;
-        case 'showroom':
-          return <SellShowroomMain />;
-        case 'office-space':
-          return <SellOfficeSpaceMain />;
-        case 'warehouse':
-          return <SellWarehouseMain />;
-        case 'shed':
-          return <SellShedMain />;
-        case 'covered-open-space':
-          return <SellCoveredSpaceMain />;
-        case 'plot':
-          return <SellPlotMain />;
-        case 'agricultural-land':
-          return <SellAgricultureMain />;
-        case 'others':
-          return <SellOthersMain />;
-      }
-    } else if (listingType === 'Lease') {
-      switch (selectedType) {
-        case 'shop':
-          return <LeaseShopMain />;
-        case 'retail-store-space':
-          return <LeaseRetailStoreMain />;
-        case 'showroom':
-          return <LeaseShowroomMain />;
-        case 'office-space':
-          return <LeaseOfficeSpaceMain />;
-        case 'warehouse':
-          return <LeaseWarehouseMain />;
-        case 'shed':
-          return <LeaseShedMain />;
-        case 'covered-open-space':
-          return <LeaseCoveredSpaceMain />;
-        case 'plot':
-          return <LeasePropertyMain />;
-        case 'agricultural-land':
-          return <LeaseAgricultureMain />;
-        case 'others':
-          return <LeaseOthersMain />;
+    } else if (propertyType === 'Residential') {
+      if (listingType === 'Rent') {
+        switch (selectedType) {
+          case 'apartment':
+            return <Apartment />;
+          case 'independent-house':
+            return <IndependentHouse />;
+          case 'builder-floor':
+            return <BuilderFloor />;
+          case 'shared-space':
+            return <SharedSpace />;
+        }
+      } else if (listingType === 'Lease') {
+        switch (selectedType) {
+          case 'apartment':
+            return <LeaseApartment />;
+          case 'independent-house':
+            return <LeaseIndependentHouse />;
+          case 'builder-floor':
+            return <LeaseBuilderFloor />;
+        }
+      } else if (listingType === 'Sell') {
+        switch (selectedType) {
+          case 'apartment':
+            return <SellApartment />;
+          case 'independent-house':
+            return <SellIndependentHouse />;
+          case 'builder-floor':
+            return <SellBuilderFloor />;
+          case 'plot':
+            return <SellPlot />;
+        }
       }
     }
-  } else if (propertyType === 'Residential') {
-    if (listingType === 'Rent') {
-      switch (selectedType) {
-        case 'apartment':
-          return <Apartment />;
-        case 'independent-house':
-          return <IndependentHouse />;
-        case 'builder-floor':
-          return <BuilderFloor />;
-        case 'shared-space':
-          return <SharedSpace />;
-      }
-    } else if (listingType === 'Lease') {
-      switch (selectedType) {
-        case 'apartment':
-          return <LeaseApartment />;
-        case 'independent-house':
-          return <LeaseIndependentHouse />;
-        case 'builder-floor':
-          return <LeaseBuilderFloor />;
-      }
-    } else if (listingType === 'Sell') {
-      switch (selectedType) {
-        case 'apartment':
-          return <SellApartment />;
-        case 'independent-house':
-          return <SellIndependentHouse />;
-        case 'builder-floor':
-          return <SellBuilderFloor />;
-        case 'plot':
-          return <SellPlot />;
-      }
-    }
-  }
+    return null;
+  };
 
   if (propertyTypes.length === 0) return null;
 
+  if (showForm && selectedType) {
+    return (
+      <div>
+        {/* Stepper */}
+        <div className="mb-8">
+          <div className="flex items-center">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="ml-2">
+                <p className="text-sm font-medium">{propertyType}</p>
+                <p className="text-xs text-white/60">Property Category</p>
+              </div>
+            </div>
+            <div className="flex-1 mx-4 h-px bg-white/20" />
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="ml-2">
+                <p className="text-sm font-medium">{listingType}</p>
+                <p className="text-xs text-white/60">Listing Type</p>
+              </div>
+            </div>
+            <div className="flex-1 mx-4 h-px bg-white/20" />
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+                <CheckCircle2 size={20} />
+              </div>
+              <div className="ml-2">
+                <p className="text-sm font-medium">{getSelectedPropertyName()}</p>
+                <p className="text-xs text-white/60">Property Type</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {renderPropertyForm()}
+      </div>
+    );
+  }
+
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Property Type</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Select Category</span>
+      {/* Stepper */}
+      <div className="mb-8">
+        <div className="flex items-center">
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+              <CheckCircle2 size={20} />
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium">{propertyType}</p>
+              <p className="text-xs text-white/60">Property Category</p>
+            </div>
+          </div>
+          <div className="flex-1 mx-4 h-px bg-white/20" />
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+              <CheckCircle2 size={20} />
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium">{listingType}</p>
+              <p className="text-xs text-white/60">Listing Type</p>
+            </div>
+          </div>
+          <div className="flex-1 mx-4 h-px bg-white/20" />
+          <div className="flex items-center">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white">
+              <span>3</span>
+            </div>
+            <div className="ml-2">
+              <p className="text-sm font-medium">Property Type</p>
+              <p className="text-xs text-white/60">Select Category</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {propertyTypes.map(({ id, name, icon: Icon, description }) => (
-          <button
-            key={id}
-            onClick={() => onSelect(id)}
-            className={`flex flex-col p-4 rounded-lg border transition-all duration-200 ${
-              selectedType === id
-                ? "bg-white text-black border-white"
-                : "border-white/20 hover:border-white"
-            }`}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Icon
-                size={20}
-                className={selectedType === id ? "text-black" : "text-white/80"}
-              />
-              <h4 className="font-medium">{name}</h4>
-            </div>
-            <p className={`text-sm ${
-              selectedType === id ? "text-black/70" : "text-white/60"
-            }`}>
-              {description}
-            </p>
-          </button>
-        ))}
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {propertyTypes.map(({ id, name, icon: Icon, description }) => (
+            <button
+              key={id}
+              onClick={() => onSelect(id)}
+              className={`flex flex-col p-4 rounded-lg border transition-all duration-200 ${
+                selectedType === id
+                  ? "bg-white text-black border-white"
+                  : "border-white/20 hover:border-white"
+              }`}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Icon
+                  size={20}
+                  className={selectedType === id ? "text-black" : "text-white/80"}
+                />
+                <h4 className="font-medium">{name}</h4>
+              </div>
+              <p className={`text-sm ${
+                selectedType === id ? "text-black/70" : "text-white/60"
+              }`}>
+                {description}
+              </p>
+            </button>
+          ))}
+        </div>
+
+        {selectedType && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowForm(true)}
+              className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
