@@ -1,92 +1,234 @@
-import React from 'react';
-import { Bed } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowRight, Home, Building2, Users, Bed, User } from 'lucide-react';
 
 interface SharingMembersProps {
-  onOccupancyChange: (occupancy: {
+  onSharingTypeChange?: (type: string) => void;
+  onSharingDetailsChange?: (details: {
     totalBeds: number;
     occupiedBeds: number;
+    availableFor: string;
     availableBeds: number;
-    occupancyType: 'male' | 'female' | 'any';
   }) => void;
 }
 
-const SharingMembers: React.FC<SharingMembersProps> = ({ onOccupancyChange }) => {
-  const [totalBeds, setTotalBeds] = React.useState(1);
-  const [occupiedBeds, setOccupiedBeds] = React.useState(0);
-  const [occupancyType, setOccupancyType] = React.useState<'male' | 'female' | 'any'>('any');
+const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: SharingMembersProps) => {
+  const [selectedType, setSelectedType] = useState<string>('');
+  const [sharingDetails, setSharingDetails] = useState({
+    totalBeds: 1,
+    occupiedBeds: 0,
+    availableFor: '',
+    availableBeds: 1
+  });
 
-  React.useEffect(() => {
-    onOccupancyChange({
-      totalBeds,
-      occupiedBeds,
-      availableBeds: totalBeds - occupiedBeds,
-      occupancyType
-    });
-  }, [totalBeds, occupiedBeds, occupancyType, onOccupancyChange]);
+  const roomTypes = [
+    {
+      id: 'single-room-shared',
+      name: 'Single Room - Shared',
+      description: 'Single room in a shared accommodation',
+      icon: Users
+    },
+    {
+      id: 'studio',
+      name: 'Studio Room',
+      description: 'Single room apartment with attached bathroom',
+      icon: Home
+    },
+    {
+      id: '1bhk',
+      name: '1 BHK',
+      description: '1 Bedroom, Hall, Kitchen',
+      icon: Building2
+    },
+    {
+      id: '2bhk',
+      name: '2 BHK',
+      description: '2 Bedrooms, Hall, Kitchen',
+      icon: Building2
+    },
+    {
+      id: '3bhk',
+      name: '3 BHK',
+      description: '3 Bedrooms, Hall, Kitchen',
+      icon: Building2
+    },
+    {
+      id: '3plus-bhk',
+      name: '3+ BHK',
+      description: 'More than 3 Bedrooms',
+      icon: Building2
+    }
+  ];
+
+  const handleTypeSelect = (type: string) => {
+    setSelectedType(type);
+    onSharingTypeChange?.(type);
+  };
+
+  const handleSharingDetailsChange = (field: string, value: number | string) => {
+    const updatedDetails = { ...sharingDetails, [field]: value };
+    
+    // Automatically calculate available beds
+    if (field === 'totalBeds' || field === 'occupiedBeds') {
+      const total = field === 'totalBeds' ? value : sharingDetails.totalBeds;
+      const occupied = field === 'occupiedBeds' ? value : sharingDetails.occupiedBeds;
+      updatedDetails.availableBeds = Math.max(0, Number(total) - Number(occupied));
+    }
+
+    setSharingDetails(updatedDetails);
+    onSharingDetailsChange?.(updatedDetails);
+  };
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-xl font-semibold">Sharing Details</h3>
-      
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Total Beds
-          </label>
-          <div className="flex items-center space-x-4">
-            <input
-              type="number"
-              min="1"
-              value={totalBeds}
-              onChange={(e) => setTotalBeds(Math.max(1, parseInt(e.target.value)))}
-              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            />
-            <Bed className="w-5 h-5 text-gray-400" />
-          </div>
+    <div className="space-y-8">
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <h3 className="text-2xl font-semibold">Room Configuration</h3>
+          <ArrowRight className="opacity-40" size={20} />
+          <span className="text-sm opacity-70">Select Room Type</span>
         </div>
 
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Occupied Beds
-          </label>
-          <input
-            type="number"
-            min="0"
-            max={totalBeds}
-            value={occupiedBeds}
-            onChange={(e) => setOccupiedBeds(Math.min(totalBeds, Math.max(0, parseInt(e.target.value))))}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Available for
-        </label>
-        <div className="flex space-x-4">
-          {(['male', 'female', 'any'] as const).map((type) => (
-            <label key={type} className="flex items-center space-x-2">
-              <input
-                type="radio"
-                checked={occupancyType === type}
-                onChange={() => setOccupancyType(type)}
-                className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm capitalize">{type}</span>
-            </label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
+          {roomTypes.map(({ id, name, description, icon: Icon }) => (
+            <button
+              key={id}
+              onClick={() => handleTypeSelect(id)}
+              className={`flex flex-col p-6 rounded-lg border transition-all duration-200 ${
+                selectedType === id
+                  ? 'bg-white text-black border-white'
+                  : 'border-white/20 hover:border-white'
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <Icon
+                  size={24}
+                  className={selectedType === id ? 'text-black' : 'text-white/60'}
+                />
+                <h4 className="font-medium text-lg">{name}</h4>
+              </div>
+              <p className={`text-sm ${
+                selectedType === id ? 'text-black/70' : 'text-white/60'
+              }`}>
+                {description}
+              </p>
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-blue-800">Available Beds</span>
-          <span className="text-2xl font-bold text-blue-800">
-            {totalBeds - occupiedBeds}
-          </span>
+      {selectedType === 'single-room-shared' && (
+        <div>
+          <div className="flex items-center gap-3 mb-6">
+            <h3 className="text-2xl font-semibold">Sharing Details</h3>
+            <ArrowRight className="opacity-40" size={20} />
+            <span className="text-sm opacity-70">Enter Bed Information</span>
+          </div>
+
+          <div className="space-y-6 max-w-4xl">
+            {/* Total and Occupied Beds */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-white/80 text-sm">Total Beds</label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <Bed size={20} className="text-white/40" />
+                  </div>
+                  <input
+                    type="number"
+                    min="1"
+                    value={sharingDetails.totalBeds}
+                    onChange={(e) => handleSharingDetailsChange('totalBeds', parseInt(e.target.value) || 0)}
+                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-white/80 text-sm">Occupied Beds</label>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <User size={20} className="text-white/40" />
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    max={sharingDetails.totalBeds}
+                    value={sharingDetails.occupiedBeds}
+                    onChange={(e) => handleSharingDetailsChange('occupiedBeds', parseInt(e.target.value) || 0)}
+                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Available For */}
+            <div className="space-y-2">
+              <label className="text-white/80 text-sm">Available For</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="availableFor"
+                    value="male"
+                    checked={sharingDetails.availableFor === 'male'}
+                    onChange={(e) => handleSharingDetailsChange('availableFor', e.target.value)}
+                    className="text-white border-white/20 bg-transparent focus:ring-white"
+                  />
+                  <span className="text-white/80">Male</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="availableFor"
+                    value="female"
+                    checked={sharingDetails.availableFor === 'female'}
+                    onChange={(e) => handleSharingDetailsChange('availableFor', e.target.value)}
+                    className="text-white border-white/20 bg-transparent focus:ring-white"
+                  />
+                  <span className="text-white/80">Female</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="availableFor"
+                    value="any"
+                    checked={sharingDetails.availableFor === 'any'}
+                    onChange={(e) => handleSharingDetailsChange('availableFor', e.target.value)}
+                    className="text-white border-white/20 bg-transparent focus:ring-white"
+                  />
+                  <span className="text-white/80">Any</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Available Beds */}
+            <div className="bg-white/5 p-4 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span className="text-white/80">Available Beds</span>
+                <span className="text-2xl font-semibold">{sharingDetails.availableBeds}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {selectedType && selectedType !== 'single-room-shared' && (
+        <div className="mt-8 p-4 bg-white/5 rounded-lg">
+          <h4 className="text-lg font-medium mb-2">Selected Configuration</h4>
+          <p className="text-white/80">
+            {roomTypes.find(type => type.id === selectedType)?.description}
+          </p>
+          {selectedType === 'studio' && (
+            <p className="mt-2 text-sm text-white/60">
+              Ideal for individuals or couples seeking a compact, self-contained living space
+            </p>
+          )}
+          {['1bhk', '2bhk', '3bhk', '3plus-bhk'].includes(selectedType) && (
+            <p className="mt-2 text-sm text-white/60">
+              Suitable for families or professionals requiring more space and privacy
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
