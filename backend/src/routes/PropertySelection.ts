@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
 import PropertySelection from "../models/PropertySelection";
 
-const Propertyrouter = express.Router();
+const PropertyRouter = express.Router();
 
-// ✅ **1. API to Add a Property Selection & Generate ID**
-Propertyrouter.post("/add", async (req: Request, res: Response) => {
+// ✅ **1. API to Add a Property Selection & Generate Property ID**
+PropertyRouter.post("/add", async (req: Request, res: Response) => {
   const { category, listingType, subCategory } = req.body;
 
   if (!category || !listingType || !subCategory) {
@@ -27,7 +27,7 @@ Propertyrouter.post("/add", async (req: Request, res: Response) => {
 });
 
 // ✅ **2. API to Get All Property Selections**
-Propertyrouter.get("/all", async (req: Request, res: Response) => {
+PropertyRouter.get("/all", async (req: Request, res: Response) => {
   try {
     const selections = await PropertySelection.find().sort({ createdAt: -1 });
 
@@ -39,7 +39,7 @@ Propertyrouter.get("/all", async (req: Request, res: Response) => {
 });
 
 // ✅ **3. API to Get a Specific Property Selection by ID**
-Propertyrouter.get("/:id", async (req: Request, res: Response) => {
+PropertyRouter.get("/:id", async (req: Request, res: Response) => {
   try {
     const selection = await PropertySelection.findById(req.params.id);
 
@@ -55,7 +55,7 @@ Propertyrouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 // ✅ **4. API to Delete a Property Selection**
-Propertyrouter.delete("/:id", async (req: Request, res: Response) => {
+PropertyRouter.delete("/:id", async (req: Request, res: Response) => {
   try {
     const deletedSelection = await PropertySelection.findByIdAndDelete(req.params.id);
 
@@ -70,4 +70,4 @@ Propertyrouter.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-export default Propertyrouter;
+export default PropertyRouter;
