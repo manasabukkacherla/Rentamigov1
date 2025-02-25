@@ -26,6 +26,8 @@ import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
 //import leadsRouter from "./routes/leads";
 import Reportrouter from "./routes/Reportleads";
 import Propertyrouter from "./routes/PropertySelection";
+import BasicDetails from "./models/Basicdetails";
+import BasicDetailsrouter from "./routes/Basicdetails";
 dotenv.config();
 
 // Validate required environment variables
@@ -63,12 +65,17 @@ app.use("/api", ownerIntrstrouter); // Owner interest routes
 app.use("/api/forms",subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter)
 
+//Property listing apis 
+app.use("/api/property-selection", Propertyrouter);
+app.use("/api/basicdetails", BasicDetailsrouter)
+
+
 app.use("/api/service", enquiryRoutes);
 app.use("/api/sign",signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes); 
 //app.use("/api/leads", leadsRouter);
-app.use("/api/property-selection", Propertyrouter);
+
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
