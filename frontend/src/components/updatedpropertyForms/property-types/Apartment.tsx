@@ -60,8 +60,11 @@ const Apartment = ({ onSubmit }: ApartmentProps) => {
           />
           <PropertyAddress
             onLatitudeChange={(lat) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude: lat } }))}
-            onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))}
-          />
+            onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))} onPropertyNameChange={function (name: string): void {
+              throw new Error('Function not implemented.');
+            } } onPropertyTypeSelect={function (type: string): void {
+              throw new Error('Function not implemented.');
+            } }          />
           <MapCoordinates
             latitude={formData.coordinates.latitude}
             longitude={formData.coordinates.longitude}

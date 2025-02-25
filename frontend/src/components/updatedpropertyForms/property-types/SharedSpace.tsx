@@ -14,6 +14,7 @@ import OtherCharges from '../residentialrent/OtherCharges';
 import MediaUpload from '../MediaUpload';
 import FlatAmenities from '../FlatAmenities';
 import SocietyAmenities from '../SocietyAmenities';
+import SharingMembers from '../Sharingmembers';
 
 interface SharedSpaceProps {
   onSubmit?: (formData: any) => void;
@@ -38,7 +39,13 @@ const SharedSpace = ({ onSubmit }: SharedSpaceProps) => {
     otherCharges: {},
     media: { photos: [], video: null },
     flatAmenities: {},
-    societyAmenities: {}
+    societyAmenities: {},
+    sharingDetails: {
+      totalBeds: 1,
+      occupiedBeds: 0,
+      availableBeds: 1,
+      occupancyType: 'any'
+    }
   });
 
   const [step, setStep] = useState(0);
@@ -69,6 +76,14 @@ const SharedSpace = ({ onSubmit }: SharedSpaceProps) => {
             propertyType="shared-space"
           />
         </>
+      )
+    },
+    {
+      title: 'Sharing Details',
+      component: (
+        <SharingMembers 
+          onOccupancyChange={(sharingDetails) => setFormData(prev => ({ ...prev, sharingDetails }))}
+        />
       )
     },
     {

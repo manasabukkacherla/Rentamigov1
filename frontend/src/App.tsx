@@ -18,11 +18,6 @@ import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import PropertyDashboard from "./components/Empdashboard/Empdasboard";
 
 import Loginhome from "./components/Logins/Loginhome";
-<<<<<<< HEAD
-
-=======
-import Propertyy from "./components/Propertyforms/App";
->>>>>>> 85146117ee3eac786933a0917ff768f9e3b637ee
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
 
 
