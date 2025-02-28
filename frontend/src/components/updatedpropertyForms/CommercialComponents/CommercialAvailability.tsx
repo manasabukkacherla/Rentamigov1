@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowRight, Calendar, Clock, Users, Dog, Clock4 } from 'lucide-react';
 import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
-
+import "react-datepicker/dist/react-datepicker.css";
 
 interface CommercialAvailabilityProps {
   onAvailabilityChange?: (availability: Record<string, any>) => void;
@@ -79,7 +78,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
             </div>
             <DatePicker
               selected={availability.availableFrom}
-              onChange={(date) => handleChange('availableFrom', date)}
+              onChange={(date: any) => handleChange('availableFrom', date)}
               minDate={today}
               placeholderText="Select availability date"
               dateFormat="dd/MM/yyyy"
