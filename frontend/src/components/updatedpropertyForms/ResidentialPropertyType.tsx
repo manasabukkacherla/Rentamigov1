@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Store, Building2, Warehouse, Home, Building, Users, Map, Factory, TreePine, CheckCircle2 } from 'lucide-react';
 import { ArrowRight } from 'lucide-react';
-
 import Apartment from './property-types/Apartment';
 import IndependentHouse from './property-types/IndependentHouse';
 import BuilderFloor from './property-types/BuilderFloor';
@@ -44,6 +43,8 @@ import SellShopMain from "./commercialpropertytypes/SellShopMain";
 import SellShowroomMain from "./commercialpropertytypes/SellShowroomMain";
 import SellWarehouseMain from "./commercialpropertytypes/SellWarehouseMain";
 
+import Pgmain from "./PG/Pgmain";
+
 interface ResidentialPropertyTypeProps {
   listingType: string;
   selectedType: string | null;
@@ -53,9 +54,11 @@ interface ResidentialPropertyTypeProps {
 
 const ResidentialPropertyType = ({ listingType, selectedType, onSelect, propertyType }: ResidentialPropertyTypeProps) => {
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // If it's PG/Co-living, show PGMain component directly
+  if (listingType === 'PG/Co-living') {
+    return <Pgmain />;
+  }
 
   const getPropertyTypes = () => {
     if (propertyType === 'Commercial') {
@@ -318,41 +321,6 @@ const ResidentialPropertyType = ({ listingType, selectedType, onSelect, property
 
   if (propertyTypes.length === 0) return null;
 
-  const handleNextClick = async () => {
-    if (!selectedType) return alert("Please select a property type.");
-
-    setLoading(true);
-    setSuccessMessage(null);
-    setErrorMessage(null);
-
-    try {
-      const response = await fetch("http://localhost:8000/api/property-selection/add", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          category: propertyType, // Residential or Commercial
-          listingType: listingType, // Rent, Sell, Lease, PG/Co-living
-          subCategory: selectedType, // Apartment, Shop, Warehouse, etc.
-        }),
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        setSuccessMessage("Property selection saved successfully! ✅");
-        setShowForm(true); // Proceed to the next step after storing data
-      } else {
-        setErrorMessage("Error: " + data.error);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setErrorMessage("Failed to connect to the server.");
-    }
-
-    setLoading(false);
-  };
-
   if (showForm && selectedType) {
     return (
       <div>
@@ -438,7 +406,10 @@ const ResidentialPropertyType = ({ listingType, selectedType, onSelect, property
           {propertyTypes.map(({ id, name, icon: Icon, description }) => (
             <button
               key={id}
-              onClick={() => onSelect(id)}
+              onClick={() => {
+                onSelect(id);
+                setShowForm(true);
+              }}
               className={`flex flex-col p-4 rounded-lg border transition-all duration-200 ${
                 selectedType === id
                   ? "bg-white text-black border-white"
@@ -460,33 +431,9 @@ const ResidentialPropertyType = ({ listingType, selectedType, onSelect, property
             </button>
           ))}
         </div>
-
-          {/* Success & Error Messages */}
-      {successMessage && <div className="p-4 bg-green-500 text-white rounded-lg text-center">{successMessage}</div>}
-      {errorMessage && <div className="p-4 bg-red-500 text-white rounded-lg text-center">{errorMessage}</div>}
-
-
-      {selectedType && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleNextClick}
-            disabled={loading}
-            className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-          >
-            {loading ? "Saving..." : "Next"}
-          </button>
-        </div>
-      )}
-
       </div>
     </div>
   );
 };
 
 export default ResidentialPropertyType;
-
-
-
-
-
-
