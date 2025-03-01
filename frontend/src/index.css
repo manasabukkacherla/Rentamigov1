@@ -9,3 +9,42 @@
 [data-radix-toast-viewport] {
   z-index: 9999; /* Ensure the toast appears above all other UI elements */
 }
+
+
+/* React DatePicker Custom Styles */
+.react-datepicker {
+  @apply !bg-black !border-white/20 !text-white;
+}
+
+.react-datepicker__header {
+  @apply !bg-black !border-white/20;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  @apply !text-white;
+}
+
+.react-datepicker__day {
+  @apply !text-white hover:!bg-white/20;
+}
+
+.react-datepicker__day--selected {
+  @apply !bg-white !text-black;
+}
+
+.react-datepicker__day--disabled {
+  @apply !text-white/20;
+}
+
+.react-datepicker__navigation-icon::before {
+  @apply !border-white/60;
+}
+
+.react-datepicker__day--keyboard-selected {
+  @apply !bg-white/20 !text-white;
+}
+
+.react-datepicker__triangle {
+  @apply !hidden;
+}

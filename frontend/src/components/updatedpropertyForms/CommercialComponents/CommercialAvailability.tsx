@@ -84,8 +84,11 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
               dateFormat="dd/MM/yyyy"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
               wrapperClassName="w-full"
-              calendarClassName="!bg-black !border-white/20 !text-white"
+              popperClassName="!bg-gray-900 !border-white/20 !text-white"
               showPopperArrow={false}
+              dayClassName={() => "!text-white hover:!bg-white/20"}
+              monthClassName={() => "!text-white"}
+              weekDayClassName={() => "!text-white"}
             />
           </div>
         </div>
