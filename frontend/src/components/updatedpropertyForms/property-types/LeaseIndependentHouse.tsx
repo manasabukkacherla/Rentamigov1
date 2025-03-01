@@ -138,10 +138,6 @@ const LeaseIndependentHouse = ({ propertyId, onSubmit }: LeaseIndependentHousePr
       )
     },
     {
-      title: 'Property Media',
-      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-    },
-    {
       title: 'Property Details',
       component: (
         <>
@@ -167,6 +163,10 @@ const LeaseIndependentHouse = ({ propertyId, onSubmit }: LeaseIndependentHousePr
     {
       title: 'Availability',
       component: <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+    },
+    {
+      title: 'Property Media',
+      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
     }
   ];
 

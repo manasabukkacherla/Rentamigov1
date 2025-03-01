@@ -140,10 +140,6 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
       )
     },
     {
-      title: 'Property Media',
-      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-    },
-    {
       title: 'Property Details',
       component: (
         <>
@@ -169,6 +165,11 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     {
       title: 'Availability',
       component: <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+    }
+    ,
+    {
+      title: 'Property Media',
+      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
     }
   ];
 
