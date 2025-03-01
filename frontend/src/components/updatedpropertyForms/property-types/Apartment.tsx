@@ -23,7 +23,7 @@ const handleRestrictionsChange = (restrictions: {
   petsAllowed: string;
   tenantType: string;
 }) => {
-  setFormData(prev => ({ ...prev, restrictions }));
+  new FormData((prev: any) => ({ ...prev, restrictions }));
 };
 const Apartment = ({ onSubmit }: ApartmentProps) => {
   const [formData, setFormData] = useState({
@@ -75,10 +75,7 @@ const Apartment = ({ onSubmit }: ApartmentProps) => {
         </>
       )
     },
-    {
-      title: 'Property Media',
-      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-    },
+    
     {
       title: 'Property Details',
       component: (
@@ -107,7 +104,11 @@ const Apartment = ({ onSubmit }: ApartmentProps) => {
     {
       title: 'Availability',
       component: <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
-    }
+    },
+    {
+      title: 'Property Media',
+      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
+    },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
