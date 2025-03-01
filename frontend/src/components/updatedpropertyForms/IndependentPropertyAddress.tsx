@@ -1,49 +1,52 @@
 import { ArrowRight, Building, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface IndependentPropertyAddressProps {
   onPropertyNameChange: (name: string) => void;
   onPropertyTypeSelect: (type: string) => void;
   onLatitudeChange: (lat: string) => void;
   onLongitudeChange: (lng: string) => void;
+  onAddressChange: (addressData: {
+    houseName: string;
+    address: string;
+    pinCode: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }) => void; // ✅ New prop to send address data
 }
 
 const IndependentPropertyAddress = ({
   onPropertyNameChange,
   onPropertyTypeSelect,
   onLatitudeChange,
-  onLongitudeChange
+  onLongitudeChange,
+  onAddressChange
 }: IndependentPropertyAddressProps) => {
   const [propertyName, setPropertyName] = useState<string>("");
   const [selectedPropertyType, setSelectedPropertyType] = useState<string | null>(null);
   const [latitude, setLatitude] = useState<string>("");
   const [longitude, setLongitude] = useState<string>("");
-  
+
   // Property Address states
-  const [buildingName, setBuildingName] = useState<string>("");
+  const [houseName, setHouseName] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [pinCode, setPinCode] = useState<string>("");
   const [city, setCity] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [zipCode, setZipCode] = useState<string>("");
 
-  const handlePropertyNameChange = (value: string) => {
-    setPropertyName(value);
-    onPropertyNameChange(value);
-  };
-
-  const handlePropertyTypeSelect = (type: string) => {
-    setSelectedPropertyType(type);
-    onPropertyTypeSelect(type);
-  };
-
-  const handleLatitudeChange = (value: string) => {
-    setLatitude(value);
-    onLatitudeChange(value);
-  };
-
-  const handleLongitudeChange = (value: string) => {
-    setLongitude(value);
-    onLongitudeChange(value);
-  };
+  // Update address in parent component whenever any field changes
+  useEffect(() => {
+    onAddressChange({
+      houseName,
+      address,
+      pinCode,
+      city,
+      state,
+      zipCode
+    });
+  }, [houseName, address, pinCode, city, state, zipCode, onAddressChange]);
 
   return (
     <div>
@@ -61,8 +64,8 @@ const IndependentPropertyAddress = ({
             </div>
             <input
               type="text"
-              value={buildingName}
-              onChange={(e) => setBuildingName(e.target.value)}
+              value={houseName}
+              onChange={(e) => setHouseName(e.target.value)}
               placeholder="House Name"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
             />
@@ -80,11 +83,8 @@ const IndependentPropertyAddress = ({
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
             />
           </div>
-          
+
           <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <MapPin size={20} className="text-white/40" />
-            </div>
             <input
               type="text"
               value={pinCode}
@@ -93,16 +93,33 @@ const IndependentPropertyAddress = ({
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
             />
           </div>
-          
+
           <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <MapPin size={20} className="text-white/40" />
-            </div>
             <input
               type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="City"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
+            />
+          </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              value={state}
+              onChange={(e) => setState(e.target.value)}
+              placeholder="State"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
+            />
+          </div>
+
+          <div className="relative">
+            <input
+              type="text"
+              value={zipCode}
+              onChange={(e) => setZipCode(e.target.value)}
+              placeholder="Zip Code"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
             />
           </div>

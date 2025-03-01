@@ -54,6 +54,8 @@ interface ResidentialPropertyTypeProps {
 const ResidentialPropertyType = ({ listingType, selectedType, onSelect, propertyType }: ResidentialPropertyTypeProps) => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  //PROPERTY ID PROPS 
+  const [propertyId, setPropertyId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -283,31 +285,31 @@ const ResidentialPropertyType = ({ listingType, selectedType, onSelect, property
       if (listingType === 'Rent') {
         switch (selectedType) {
           case 'apartment':
-            return <Apartment />;
+            return <Apartment propertyId={""} />;
           case 'independent-house':
-            return <IndependentHouse />;
+            return <IndependentHouse propertyId={""} />;
           case 'builder-floor':
-            return <BuilderFloor />;
+            return <BuilderFloor propertyId={""} />;
           case 'shared-space':
-            return <SharedSpace />;
+            return <SharedSpace propertyId={""} />;
         }
       } else if (listingType === 'Lease') {
         switch (selectedType) {
           case 'apartment':
-            return <LeaseApartment />;
+            return <LeaseApartment propertyId={""} />;
           case 'independent-house':
-            return <LeaseIndependentHouse />;
+            return <LeaseIndependentHouse propertyId={""} />;
           case 'builder-floor':
-            return <LeaseBuilderFloor />;
+            return <LeaseBuilderFloor propertyId={""} />;
         }
       } else if (listingType === 'Sell') {
         switch (selectedType) {
           case 'apartment':
-            return <SellApartment />;
+            return <SellApartment propertyId={""} />;
           case 'independent-house':
-            return <SellIndependentHouse />;
+            return <SellIndependentHouse propertyId={""} />;
           case 'builder-floor':
-            return <SellBuilderFloor />;
+            return <SellBuilderFloor propertyId={""} />;
           case 'plot':
             return <SellPlot />;
         }
@@ -315,44 +317,46 @@ const ResidentialPropertyType = ({ listingType, selectedType, onSelect, property
     }
     return null;
   };
+  
 
   if (propertyTypes.length === 0) return null;
 
   const handleNextClick = async () => {
     if (!selectedType) return alert("Please select a property type.");
-
+  
     setLoading(true);
     setSuccessMessage(null);
     setErrorMessage(null);
-
+  
     try {
       const response = await fetch("http://localhost:8000/api/property-selection/add", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          category: propertyType, // Residential or Commercial
-          listingType: listingType, // Rent, Sell, Lease, PG/Co-living
-          subCategory: selectedType, // Apartment, Shop, Warehouse, etc.
+          category: propertyType,
+          listingType: listingType,
+          subCategory: selectedType,
         }),
       });
-
+  
       const data = await response.json();
       if (data.success) {
+        setPropertyId(data.propertyId); // ✅ Store propertyId
         setSuccessMessage("Property selection saved successfully! ✅");
-        setShowForm(true); // Proceed to the next step after storing data
-      } else {
+  
+        // 🔥 Delay rendering to ensure state updates
+        setTimeout(() => {
+          setShowForm(true);  // ✅ Pass propertyId
+        }, 500);} else {
         setErrorMessage("Error: " + data.error);
       }
     } catch (error) {
       console.error("Error:", error);
       setErrorMessage("Failed to connect to the server.");
     }
-
+  
     setLoading(false);
   };
-
   if (showForm && selectedType) {
     return (
       <div>

@@ -3,20 +3,26 @@ import PropertySelection from "./PropertySelection"; // Ensure correct import
 
 interface IBasicDetails extends Document {
   propertyName: string;
-  propertyType: "apartment" | "independent-house" | "shared-space";
-  latitude: string;
-  longitude: string;
-  addressDetails: {
+  propertyAddress: {
     flatNo?: string;
     floor?: string;
-    buildingName?: string;
+    houseName?: string;
     address: string;
     pinCode: string;
     city: string;
-    showFlatNo?: boolean;
+    street?: string;
+    state: string;
+    zipCode: string;
   };
-  propertySize: "studio" | "1bhk" | "2bhk" | "3bhk" | "3plus" | "single-room-shared";
-  propertyId: string; // Updated from generatedId to propertyId
+  coordinates: {
+    latitude: string;
+    longitude: string;
+  };
+  propertySize: "studio" | "1bhk" | "2bhk" | "3bhk" | "3plus";
+  plotType: string;
+  landmark: string[];
+  cornerProperty: boolean;
+  propertyId: string;
 }
 
 const BasicDetailsSchema = new Schema<IBasicDetails>(
@@ -25,36 +31,41 @@ const BasicDetailsSchema = new Schema<IBasicDetails>(
       type: String,
       required: [true, "Property name is required"],
     },
-    propertyType: {
-      type: String,
-      enum: ["apartment", "independent-house", "shared-space"],
-      required: [true, "Property type is required"],
-    },
-    latitude: {
-      type: String,
-      required: [true, "Latitude is required"],
-    },
-    longitude: {
-      type: String,
-      required: [true, "Longitude is required"],
-    },
-    addressDetails: {
+    propertyAddress: {
       flatNo: { type: String, default: "" },
       floor: { type: String, default: "" },
-      buildingName: { type: String, default: "" },
-      address: { type: String, required: [true, "Address is required"] },
-      pinCode: { type: String, required: [true, "Pin Code is required"] },
-      city: { type: String, required: [true, "City is required"] },
-      showFlatNo: { type: Boolean, default: true },
+      houseName: { type: String, default: "" },
+      address: { type: String, required: [ "Address is required"] },
+      pinCode: { type: String, required: [ "Pin Code is required"] },
+      city: { type: String, required: [ "City is required"] },
+      street: { type: String, default: "" },
+      state: { type: String, required: [ "State is required"] },
+      zipCode: { type: String, required: [ "Zip Code is required"] },
+    },
+    coordinates: {
+      latitude: { type: String, required: [ "Latitude is required"] },
+      longitude: { type: String, required: [ "Longitude is required"] },
     },
     propertySize: {
       type: String,
-      enum: ["studio", "1bhk", "2bhk", "3bhk", "3plus", "single-room-shared"],
-      required: [true, "Property size is required"],
+      enum: ["studio", "1bhk", "2bhk", "3bhk", "3plus"],
+      
+    },
+    plotType: {
+      type: String,
+      
+    },
+    landmark: {
+      type: [String],
+      default: [],
+    },
+    cornerProperty: {
+      type: Boolean,
+      required: [false, "Corner property field is required"],
     },
     propertyId: {
       type: String,
-      required: [true, "Property ID is required"], // Updated field name
+      required: [false, "Property ID is required"],
       unique: true,
     },
   },
@@ -85,7 +96,6 @@ BasicDetailsSchema.pre("validate", async function (next: (err?: CallbackError) =
 });
 
 // ✅ **Check if the model already exists to prevent re-compilation**
-const BasicDetails =
-  models.BasicDetails || model<IBasicDetails>("BasicDetails", BasicDetailsSchema);
+const BasicDetails = models.BasicDetails || model<IBasicDetails>("BasicDetails", BasicDetailsSchema);
 
 export default BasicDetails;
