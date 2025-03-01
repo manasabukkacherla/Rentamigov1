@@ -100,14 +100,12 @@ const SellShopMain = () => {
         return (
           <>
             <CommercialContactDetails onContactChange={(contact) => handleChange('contactDetails', contact)} />
-            <CommercialMediaUpload onMediaChange={(media) => handleChange('media', media)} />
+           
           </>
         );
       case 5:
         return (
-          <pre className="bg-gray-100 p-4 rounded-lg">
-            {JSON.stringify(formData, null, 2)}
-          </pre>
+          <CommercialMediaUpload onMediaChange={(media) => handleChange('media', media)} />
         );
       default:
         return null;

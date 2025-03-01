@@ -51,7 +51,7 @@ const LeaseShopMain = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     console.log('Form Data:', formData);
   };
@@ -62,11 +62,6 @@ const LeaseShopMain = () => {
         <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
         <ShopType onShopTypeChange={(type) => setFormData(prev => ({ ...prev, shopType: type }))} />
         <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
-      </>
-    ),
-    (
-      <>
-        <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
         <MapCoordinates
           latitude={formData.coordinates.latitude}
           longitude={formData.coordinates.longitude}
@@ -74,6 +69,7 @@ const LeaseShopMain = () => {
           onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))}
         />
         <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
+        <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
       </>
     ),
     (
@@ -87,18 +83,24 @@ const LeaseShopMain = () => {
         <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
         <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
         <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
-      </>
-    ),
-    (
-      <>
         <OtherCharges onOtherChargesChange={(charges) => setFormData(prev => ({ ...prev, otherCharges: charges }))} />
         <Brokerage onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
       </>
     ),
     (
       <>
-        <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+               <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+      </>
+    ),
+    
+    (
+      <>
+
         <CommercialContactDetails onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
+      </>
+    ),
+    (
+      <>
         <CommercialMediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
       </>
     ),
