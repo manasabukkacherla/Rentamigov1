@@ -3,9 +3,7 @@ import PropertyTypeSelector from './PropertyTypeSelector';
 
 
 function Propertmain() {
-  const handlePropertyNameChange = (name: string) => {
-    // Handle property name change
-  };
+ 
 
   const handlePropertyTypeSelect = (type: string) => {
     // Handle property type selection
