@@ -8,6 +8,7 @@ import CornerProperty from '../CommercialComponents/CornerProperty';
 import RetailStoreDetails from '../CommercialComponents/RetailStoreDetails';
 import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
 import Rent from '../residentialrent/Rent';
+
 import SecurityDeposit from '../residentialrent/SecurityDeposit';
 import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
 import OtherCharges from '../residentialrent/OtherCharges';
@@ -123,7 +124,7 @@ const RentRetailStoreMain = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     console.log('Form Data:', formData);
   };
