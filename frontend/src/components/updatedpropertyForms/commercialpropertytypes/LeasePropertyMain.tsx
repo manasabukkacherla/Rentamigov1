@@ -14,7 +14,8 @@ import OtherCharges from '../residentialrent/OtherCharges';
 import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+
+import MediaUpload from '../MediaUpload';
 
 const LeasePropertyMain = () => {
   const [formData, setFormData] = useState({
@@ -78,7 +79,7 @@ const LeasePropertyMain = () => {
     </>,
     <CommercialAvailability onAvailabilityChange={availability => setFormData(prev => ({ ...prev, availability }))} />,
     <CommercialContactDetails onContactChange={contact => setFormData(prev => ({ ...prev, contactDetails: contact }))} />,
-    <CommercialMediaUpload onMediaChange={media => setFormData(prev => ({ ...prev, media }))} />,
+    <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
   ];
 
   return (
