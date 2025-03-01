@@ -68,10 +68,6 @@ const SellApartment = ({ onSubmit }: SellApartmentProps) => {
       )
     },
     {
-      title: 'Property Media',
-      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-    },
-    {
       title: 'Property Details',
       component: (
         <>
@@ -99,6 +95,10 @@ const SellApartment = ({ onSubmit }: SellApartmentProps) => {
     {
       title: 'Availability',
       component: <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+    },
+    {
+      title: 'Property Media',
+      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
     }
   ];
 

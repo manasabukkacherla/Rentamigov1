@@ -87,10 +87,6 @@ const SharedSpace = ({ onSubmit }: SharedSpaceProps) => {
       )
     },
     {
-      title: 'Property Media',
-      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-    },
-    {
       title: 'Property Details',
       component: (
         <>
@@ -118,6 +114,10 @@ const SharedSpace = ({ onSubmit }: SharedSpaceProps) => {
     {
       title: 'Availability',
       component: <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+    },
+    {
+      title: 'Property Media',
+      component: <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
     }
   ];
 
