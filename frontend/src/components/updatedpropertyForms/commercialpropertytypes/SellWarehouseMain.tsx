@@ -56,7 +56,7 @@ const SellWarehouseMain = () => {
     if (currentStep > 0) setCurrentStep(prev => prev - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     console.log('Form Data:', formData);
   };

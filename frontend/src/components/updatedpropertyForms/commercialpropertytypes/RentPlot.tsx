@@ -14,7 +14,6 @@ import OtherCharges from '../residentialrent/OtherCharges';
 import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import MediaUpload from '../MediaUpload';
 
 const RentPlot = () => {

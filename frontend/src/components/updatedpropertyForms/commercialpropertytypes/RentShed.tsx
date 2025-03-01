@@ -133,7 +133,7 @@ const RentShed = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     console.log('Form Data:', formData);
   };
