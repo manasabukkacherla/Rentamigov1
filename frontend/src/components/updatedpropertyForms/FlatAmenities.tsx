@@ -1,96 +1,66 @@
-import { useState } from 'react';
-import { ArrowRight, CheckSquare } from 'lucide-react';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { ArrowRight } from "lucide-react";
 
 interface FlatAmenitiesProps {
-  onAmenitiesChange?: (amenities: Record<string, number | boolean>) => void;
+  flatId: string;
+  onNext?: () => void;
 }
 
-const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
-  const [amenities, setAmenities] = useState<Record<string, number | boolean>>({
-    lights: 0,
-    ceilingFan: 0,
-    geysers: 0,
-    chimney: false,
-    callingBell: false,
-    wardrobes: 0,
-    lofts: 0,
-    kitchenCabinets: 0,
-    clothHanger: 0,
-    pipedGasConnection: false,
-    gasStoveWithCylinder: false,
-    ironingStand: false,
-    bathtub: false,
-    shower: false,
-    sofa: false,
-    coffeeTable: false,
-    tvUnit: false,
-    diningTableWithChairs: 0,
-    cotWithMattress: 0,
-    sideTable: 0,
-    studyTableWithChair: 0,
-    television: false,
-    refrigerator: false,
-    washingMachine: false,
-    dishwasher: false,
-    waterPurifier: false,
-    microwaveOven: false,
-    inductionCooktop: false,
-    gasStove: false,
-    airConditioner: 0,
-    desertCooler: 0,
-    ironBox: false,
-    exhaustFan: 0,
-  });
+const FlatAmenities = ({ flatId, onNext }: FlatAmenitiesProps) => {
+  const [amenities, setAmenities] = useState<Record<string, number | boolean>>({});
+  const [loading, setLoading] = useState(false);
+  const [isNew, setIsNew] = useState(true); // Track if amenities exist
 
-  const handleNumberChange = (key: string, value: string) => {
-    const newValue = value === '' ? 0 : parseInt(value, 10);
-    setAmenities(prev => ({ ...prev, [key]: newValue }));
-    onAmenitiesChange?.({ ...amenities, [key]: newValue });
+  // Fetch amenities from backend on component mount
+  useEffect(() => {
+    if (!flatId) return;
+
+    axios
+      .get(`http://localhost:5000/api/flat-amenities/${flatId}`)
+      .then((response) => {
+        if (response.data) {
+          setAmenities(response.data);
+          setIsNew(false); // Mark as an existing entry
+        }
+      })
+      .catch((error) => {
+        console.error("No existing flat amenities found, will create new:", error);
+      });
+  }, [flatId]);
+
+  // Handle input changes
+  const handleInputChange = (key: string, value: number | boolean) => {
+    setAmenities((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleBooleanChange = (key: string, value: boolean) => {
-    setAmenities(prev => ({ ...prev, [key]: value }));
-    onAmenitiesChange?.({ ...amenities, [key]: value });
+  // Save or update amenities
+  const handleNextClick = () => {
+    if (!flatId) {
+      console.error("Flat ID is missing.");
+      return;
+    }
+
+    setLoading(true);
+
+    // If amenities exist, update them; otherwise, create new ones
+    const request = isNew
+      ? axios.post(`http://localhost:5000/api/flat-amenities`, { flatId, ...amenities })
+      : axios.put(`http://localhost:5000/api/flat-amenities/${flatId}`, amenities);
+
+    request
+      .then(() => {
+        console.log("Flat amenities saved successfully");
+        setIsNew(false); // Mark as existing after first save
+        onNext?.();
+      })
+      .catch((error) => {
+        console.error("Error saving flat amenities:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
-
-  const numberInputs = [
-    { key: 'lights', label: 'Lights' },
-    { key: 'ceilingFan', label: 'Ceiling Fan (With/Without Remote)' },
-    { key: 'geysers', label: 'Geysers' },
-    { key: 'wardrobes', label: 'Wardrobes' },
-    { key: 'lofts', label: 'Lofts' },
-    { key: 'kitchenCabinets', label: 'Kitchen Cabinets' },
-    { key: 'clothHanger', label: 'Cloth Hanger' },
-    { key: 'diningTableWithChairs', label: 'Dining Table with Chairs (4/6)' },
-    { key: 'cotWithMattress', label: 'Cot with Mattress (No.s)' },
-    { key: 'sideTable', label: 'Side Table' },
-    { key: 'airConditioner', label: 'Air Conditioner' },
-    { key: 'desertCooler', label: 'Desert Cooler' },
-    { key: 'exhaustFan', label: 'Exhaust Fan (No.s)' },
-  ];
-
-  const booleanInputs = [
-    { key: 'chimney', label: 'Chimney' },
-    { key: 'callingBell', label: 'Calling Bell' },
-    { key: 'pipedGasConnection', label: 'Piped Gas Connection' },
-    { key: 'gasStoveWithCylinder', label: 'Gas Stove with Cylinder' },
-    { key: 'ironingStand', label: 'Ironing Stand' },
-    { key: 'bathtub', label: 'Bathtub' },
-    { key: 'shower', label: 'Shower' },
-    { key: 'sofa', label: 'Sofa' },
-    { key: 'coffeeTable', label: 'Coffee Table' },
-    { key: 'tvUnit', label: 'TV Unit' },
-    { key: 'studyTableWithChair', label: 'Study Table with Chair' },
-    { key: 'television', label: 'Television' },
-    { key: 'refrigerator', label: 'Refrigerator' },
-    { key: 'washingMachine', label: 'Washing Machine' },
-    { key: 'dishwasher', label: 'Dish-washer' },
-    { key: 'waterPurifier', label: 'Water Purifier' },
-    { key: 'microwaveOven', label: 'Microwave oven' },
-    { key: 'inductionCooktop', label: 'Induction cooktop' },
-    { key: 'gasStove', label: 'Gas Stove' },
-    { key: 'ironBox', label: 'Iron Box' },
-  ];
 
   return (
     <div>
@@ -101,16 +71,27 @@ const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
       </div>
 
       <div className="space-y-8 max-w-6xl">
+        {/* Quantity Inputs */}
         <div>
           <h4 className="text-lg font-medium mb-4">Quantity Items</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {numberInputs.map(({ key, label }) => (
+            {[
+              { key: "lights", label: "Lights" },
+              { key: "ceilingFan", label: "Ceiling Fan" },
+              { key: "geysers", label: "Geysers" },
+              { key: "wardrobes", label: "Wardrobes" },
+              { key: "kitchenCabinets", label: "Kitchen Cabinets" },
+              { key: "diningTableWithChairs", label: "Dining Table with Chairs" },
+              { key: "cotWithMattress", label: "Cot with Mattress" },
+              { key: "airConditioner", label: "Air Conditioner" },
+              { key: "exhaustFan", label: "Exhaust Fan" },
+            ].map(({ key, label }) => (
               <div key={key} className="flex items-center gap-3 bg-white/5 p-3 rounded-lg">
                 <input
                   type="number"
                   min="0"
-                  value={amenities[key] || ''}
-                  onChange={(e) => handleNumberChange(key, e.target.value)}
+                  value={amenities[key] || 0}
+                  onChange={(e) => handleInputChange(key, parseInt(e.target.value, 10))}
                   className="w-16 px-3 py-2 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
                 />
                 <label className="text-white/80 flex-1">{label}</label>
@@ -119,21 +100,45 @@ const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
           </div>
         </div>
 
+        {/* Boolean Inputs (Checkboxes) */}
         <div>
           <h4 className="text-lg font-medium mb-4">Available Items</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {booleanInputs.map(({ key, label }) => (
+            {[
+              { key: "chimney", label: "Chimney" },
+              { key: "callingBell", label: "Calling Bell" },
+              { key: "pipedGasConnection", label: "Piped Gas Connection" },
+              { key: "sofa", label: "Sofa" },
+              { key: "refrigerator", label: "Refrigerator" },
+              { key: "washingMachine", label: "Washing Machine" },
+              { key: "dishwasher", label: "Dishwasher" },
+              { key: "waterPurifier", label: "Water Purifier" },
+              { key: "microwaveOven", label: "Microwave Oven" },
+              { key: "inductionCooktop", label: "Induction Cooktop" },
+              { key: "gasStove", label: "Gas Stove" },
+            ].map(({ key, label }) => (
               <label key={key} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg text-white/80">
                 <input
                   type="checkbox"
                   checked={!!amenities[key]}
-                  onChange={(e) => handleBooleanChange(key, e.target.checked)}
+                  onChange={(e) => handleInputChange(key, e.target.checked)}
                   className="rounded border-white/20 bg-transparent focus:ring-white text-white"
                 />
                 {label}
               </label>
             ))}
           </div>
+        </div>
+
+        {/* Next Button */}
+        <div className="mt-6">
+          <button
+            onClick={handleNextClick}
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-all"
+          >
+            {loading ? "Saving..." : "Next"}
+          </button>
         </div>
       </div>
     </div>

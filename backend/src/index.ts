@@ -28,6 +28,8 @@ import Reportrouter from "./routes/Reportleads";
 import Propertyrouter from "./routes/PropertySelection";
 import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
+import amenitiesRoutes from "./routes/newsocietyamenities"
+import flatAmenitiesRoutes from "./routes/flatAmenities";
 dotenv.config();
 
 // Validate required environment variables
@@ -74,6 +76,9 @@ app.use("/api/service", enquiryRoutes);
 app.use("/api/sign",signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes); 
+app.use("/api/societyamenities",amenitiesRoutes)
+app.use("/api/flat-amenities", flatAmenitiesRoutes);
+
 //app.use("/api/leads", leadsRouter);
 
 
