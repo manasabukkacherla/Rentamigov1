@@ -15,6 +15,7 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import MediaUpload from '../MediaUpload';
 
 const RentPlot = () => {
   const [formData, setFormData] = useState({
@@ -94,7 +95,7 @@ const RentPlot = () => {
     },
     {
       title: 'Property Media',
-      content: <CommercialMediaUpload onMediaChange={handleMediaChange} />
+      content:<MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
     }
   ];
 
