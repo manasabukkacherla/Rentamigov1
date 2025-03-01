@@ -28,6 +28,7 @@ import Reportrouter from "./routes/Reportleads";
 import Propertyrouter from "./routes/PropertySelection";
 import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
+import PropertyDetailsrouter from "./routes/Propertydetails";
 dotenv.config();
 
 // Validate required environment variables
@@ -68,6 +69,7 @@ app.use("/api/owner-interest", ownerInterestRouter)
 //Property listing apis 
 app.use("/api/property-selection", Propertyrouter);
 app.use("/api/basicdetails", BasicDetailsrouter)
+app.use("/api/properties", PropertyDetailsrouter);
 
 
 app.use("/api/service", enquiryRoutes);
