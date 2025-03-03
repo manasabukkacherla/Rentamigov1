@@ -3,7 +3,9 @@ import { ArrowRight, CheckSquare } from 'lucide-react';
 
 interface FlatAmenitiesProps {
   onAmenitiesChange?: (amenities: Record<string, number | boolean>) => void;
+  onSubmit?: () => void; // Parent will handle submission
 }
+
 
 const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
   const [amenities, setAmenities] = useState<Record<string, number | boolean>>({
@@ -43,16 +45,18 @@ const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
   });
 
   const handleNumberChange = (key: string, value: string) => {
-    const newValue = value === '' ? 0 : parseInt(value, 10);
-    setAmenities(prev => ({ ...prev, [key]: newValue }));
-    onAmenitiesChange?.({ ...amenities, [key]: newValue });
+    const newValue = value === "" ? 0 : parseInt(value, 10);
+    const updatedAmenities = { ...amenities, [key]: newValue };
+    setAmenities(updatedAmenities);
+    onAmenitiesChange?.(updatedAmenities); // Send updated data to parent
   };
-
+  
   const handleBooleanChange = (key: string, value: boolean) => {
-    setAmenities(prev => ({ ...prev, [key]: value }));
-    onAmenitiesChange?.({ ...amenities, [key]: value });
+    const updatedAmenities = { ...amenities, [key]: value };
+    setAmenities(updatedAmenities);
+    onAmenitiesChange?.(updatedAmenities); // Send updated data to parent
   };
-
+  
   const numberInputs = [
     { key: 'lights', label: 'Lights' },
     { key: 'ceilingFan', label: 'Ceiling Fan (With/Without Remote)' },

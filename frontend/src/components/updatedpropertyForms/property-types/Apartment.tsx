@@ -48,6 +48,7 @@ const Apartment = ({ onSubmit }: ApartmentProps) => {
   });
 
   const [step, setStep] = useState(0);
+  const [selectedAmenities, setSelectedAmenities] = useState<Record<string, number | boolean>>({});
 
   const steps = [
     {
