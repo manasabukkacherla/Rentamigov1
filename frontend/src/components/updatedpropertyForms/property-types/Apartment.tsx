@@ -64,12 +64,15 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Ensure propertyId is always updated in formData when it changes
+
   useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      propertyId,
-    }));
-  }, [propertyId]);
+    console.log("📌 Updated propertyId in useEffect:", formData.propertyId);
+  }, [formData.propertyId]);
+  
+  useEffect(() => {
+    console.log("📌 Updated Flat Amenities in useEffect:", formData.flatAmenities);
+  }, [formData.flatAmenities]);
+  
 
   // Function to update property address details
   const handleAddressChange = useCallback((addressData: any) => {
@@ -78,7 +81,14 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       propertyAddress: { ...prev.propertyAddress, ...addressData },
     }));
   }, []);
-
+  const handleFlatAmenitiesChange = (updatedAmenities: Record<string, number | boolean>) => {
+    console.log("📌 Flat Amenities Updated Before State:", updatedAmenities);
+    setFormData((prev) => ({
+      ...prev,
+      flatAmenities: updatedAmenities,
+    }));
+  };
+  
   // Steps Configuration
   const steps = [
     {
@@ -216,40 +226,74 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
     }
   ];
 
-  // Function to save data at each step
   const saveStepData = async () => {
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
-
-    const endpoint = step === 0 ? "basicdetails" : "properties";
-
+  
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/${endpoint}`,
-        {
+      if (step === 0) {
+        // ✅ Save Basic Details first
+        const basicDetailsResponse = await fetch(`http://localhost:8000/api/basicdetails`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData), // propertyId is always included
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccessMessage("Step saved successfully! ✅");
-      } else {
-        setErrorMessage(`Error saving step: ${result.message}`);
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            propertyId: formData.propertyId,
+            propertyName: formData.propertyName,
+            propertyAddress: formData.propertyAddress,
+            coordinates: formData.coordinates,
+            size: formData.size,
+            features: formData.features,
+            rent: formData.rent,
+            securityDeposit: formData.securityDeposit,
+            maintenanceAmount: formData.maintenanceAmount,
+            brokerage: formData.brokerage,
+            availability: formData.availability,
+            otherCharges: formData.otherCharges,
+            media: formData.media,
+            restrictions: formData.restrictions
+          })
+        });
+  
+        if (!basicDetailsResponse.ok) throw new Error("Failed to save Basic Details");
+  
+      } else if (step === 1) {
+        // ✅ Save Flat Amenities
+        const flatAmenitiesResponse = await fetch(`http://localhost:8000/api/flat-amenities`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            propertyId: formData.propertyId,
+            amenities: formData.flatAmenities
+          })
+        });
+  
+        if (!flatAmenitiesResponse.ok) throw new Error("Failed to save Flat Amenities");
+  
+        // ✅ Save Society Amenities
+        const societyAmenitiesResponse = await fetch(`http://localhost:8000/api/society-amenities`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            propertyId: formData.propertyId,
+            amenities: formData.societyAmenities
+          })
+        });
+  
+        if (!societyAmenitiesResponse.ok) throw new Error("Failed to save Society Amenities");
       }
+  
+      setSuccessMessage("Step saved successfully! ✅");
     } catch (error) {
       console.error("Error saving step:", error);
       setErrorMessage("Failed to save step. Check your connection.");
     }
-
+  
     setLoading(false);
   };
+  
+  
+  
 
   // Function to handle Next button click
   const handleNext = async () => {

@@ -1,66 +1,82 @@
-import express from "express";
-import newsocietyamenities from "../models/newsocietyamenities";
+import { Router, Request, Response } from "express";
+import SocietyAmenitiesModel from "../models/newsocietyamenities";
 
-const router = express.Router();
+const router = Router();
 
-// ✅ Get all amenities
-router.get("/", async (req, res) => {
+// 🔹 Create Society Amenities (POST)
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const amenities = await newsocietyamenities.find();
+    console.log("Received Data:", req.body); // Debugging incoming request data
+
+    const { propertyId, amenities } = req.body;
+
+    // Validate required fields
+    if (!propertyId || !amenities) {
+      return res.status(400).json({ message: "Property ID and amenities are required" });
+    }
+
+    // Create a new SocietyAmenities document
+    const newAmenities = new SocietyAmenitiesModel({
+      propertyId,
+      amenities
+    });
+
+    // Save to database
+    await newAmenities.save();
+    res.status(201).json(newAmenities);
+  } catch (error) {
+    res.status(500).json({ message: "Error saving amenities", error });
+  }
+});
+
+// 🔹 Get Society Amenities by Property ID (GET)
+router.get("/:propertyId", async (req: Request, res: Response) => {
+  try {
+    const { propertyId } = req.params;
+    const amenities = await SocietyAmenitiesModel.findOne({ propertyId });
+
+    if (!amenities) {
+      return res.status(404).json({ message: "Amenities not found for this property" });
+    }
+
     res.status(200).json(amenities);
   } catch (error) {
-    res.status(500).json({ error: "Error fetching amenities" });
+    res.status(500).json({ message: "Error fetching amenities", error });
   }
 });
 
-// ✅ Add amenities in bulk
-router.post("/bulk-add", async (req, res) => {
+// 🔹 Update Society Amenities (PUT)
+router.put("/:propertyId", async (req: Request, res: Response) => {
   try {
-    const { amenities } = req.body; // Expecting an array of amenities
+    const { propertyId } = req.params;
+    const { amenities } = req.body;
 
-    if (!amenities || !Array.isArray(amenities)) {
-      return res.status(400).json({ error: "Invalid amenities data" });
-    }
-
-    const insertedAmenities = await newsocietyamenities.insertMany(amenities);
-    res.status(201).json(insertedAmenities);
-  } catch (error) {
-    res.status(500).json({ error: "Error adding amenities" });
-  }
-});
-
-// ✅ Update an amenity availability
-router.put("/:id", async (req, res) => {
-  try {
-    const { isAvailable } = req.body;
-    const amenity = await newsocietyamenities.findByIdAndUpdate(
-      req.params.id,
-      { isAvailable },
-      { new: true }
+    const updatedAmenities = await SocietyAmenitiesModel.findOneAndUpdate(
+      { propertyId },
+      { amenities },
+      { new: true, upsert: true } // Creates new entry if not found
     );
 
-    if (!amenity) {
-      return res.status(404).json({ error: "Amenity not found" });
-    }
-
-    res.status(200).json(amenity);
+    res.status(200).json(updatedAmenities);
   } catch (error) {
-    res.status(500).json({ error: "Error updating amenity" });
+    res.status(500).json({ message: "Error updating amenities", error });
   }
 });
 
-// ✅ Delete an amenity
-router.delete("/:id", async (req, res) => {
+// 🔹 Delete Society Amenities (DELETE)
+router.delete("/:propertyId", async (req: Request, res: Response) => {
   try {
-    const amenity = await newsocietyamenities.findByIdAndDelete(req.params.id);
+    const { propertyId } = req.params;
 
-    if (!amenity) {
-      return res.status(404).json({ error: "Amenity not found" });
+    const deletedAmenities = await SocietyAmenitiesModel.findOneAndDelete({ propertyId });
+
+    if (!deletedAmenities) {
+      return res.status(404).json({ message: "Amenities not found for this property" });
     }
 
-    res.status(200).json({ message: "Amenity deleted successfully" });
+    res.status(200).json({ message: "Amenities deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: "Error deleting amenity" });
+    res.status(500).json({ message: "Error deleting amenities", error });
   }
 });
 
