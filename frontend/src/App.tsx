@@ -22,6 +22,9 @@ import Propertmain from "./components/updatedpropertyForms/Propertmain";
 
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
+import PropertypageM from "./components/Property-pageM/Propertydetailspage";
+import admindash from "./components/dashadmin/admdashboard";
+import Admindash from "./components/dashadmin/admdashboard";
 
 
 const App = () => {
@@ -66,6 +69,10 @@ const App = () => {
           <Route path="/admin-dashboard" element={<AccessManagementTable />} />
           <Route path="/Empdashboard" element={<PropertyDashboard />} />
 
+          {/* Propery details Page*/}
+          <Route path="/PropertypageM" element={<PropertypageM />} />
+          {/* new admin dashboard*/}
+          <Route path="/admindash" element={<Admindash/>} />
 
 
           {/* Logins Layout */}

@@ -29,6 +29,7 @@ import Propertyrouter from "./routes/PropertySelection";
 import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
 import PropertyDetailsrouter from "./routes/Propertydetails";
+
 dotenv.config();
 
 // Validate required environment variables
