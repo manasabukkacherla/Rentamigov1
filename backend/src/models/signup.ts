@@ -10,7 +10,7 @@ interface IUser extends Document {
   city: string;
   state: string;
   password: string;
-  role: "owner" | "agent" | "tenant" | "pg" | "employee";
+  role: "owner" | "agent" | "tenant" | "pg" | "employee" | "admin";
   acceptTerms: boolean;
   emailVerified: boolean;
 }
@@ -62,7 +62,7 @@ const UserSchema = new Schema<IUser>(
     },
     role: {
       type: String,
-      enum: ["owner", "agent", "tenant", "pg", "employee"],
+      enum: ["owner", "agent", "tenant", "pg", "employee","admin"],
       required: true,
     },
     acceptTerms: {
