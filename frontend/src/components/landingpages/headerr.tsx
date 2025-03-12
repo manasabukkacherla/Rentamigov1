@@ -17,6 +17,9 @@ const Headerr: React.FC = () => {
       case "About":
         navigate("/Aboutus");
         break;
+        case "Blogs":
+        navigate("/Blogs");
+        break;
       case "Properties":
         navigate("/Tenanthome");
         break;
@@ -87,6 +90,7 @@ const Headerr: React.FC = () => {
             "Home",
             "About",
             "Properties",
+            "Blogs",
             "For home owners",
             "Privacy Policy",
             "Tenancy Policy",
