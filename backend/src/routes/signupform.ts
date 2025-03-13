@@ -240,6 +240,116 @@ signupRouter.get("/user/:id", async (req: Request, res: Response) => {
   }
 });
 
+signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    let { username, fullName, email, phone, address, city, state, role } = req.body;
+
+    console.log("🔄 Update Request Received for User ID:", id);
+
+    // ✅ Validate User ID
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      console.error("❌ Invalid user ID format.");
+      return res.status(400).json({ success: false, error: "Invalid user ID format" });
+    }
+
+    // ✅ Trim and normalize input
+    username = username?.trim().toLowerCase();
+    email = email?.trim().toLowerCase();
+    fullName = fullName?.trim();
+    phone = phone?.trim();
+    address = address?.trim();
+    city = city?.trim();
+    state = state?.trim();
+
+    // ✅ Ensure required fields are not empty
+    if (!username || !fullName || !email || !phone || !address || !city || !state || !role) {
+      console.error("❌ Missing required fields.");
+      return res.status(400).json({ success: false, error: "All fields are required for update." });
+    }
+
+    // ✅ Check if user exists
+    const existingUser = await User.findById(id);
+    if (!existingUser) {
+      console.error("❌ User not found.");
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    // ✅ Check if the new username or email is already taken by another user
+    const duplicateUser = await User.findOne({
+      $or: [{ email }, { username }],
+      _id: { $ne: id }, // Exclude the current user from the check
+    });
+
+    if (duplicateUser) {
+      console.error("❌ Username or Email already exists.");
+      return res.status(400).json({ success: false, error: "Username or email already exists." });
+    }
+
+    // ✅ Update user details
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { username, fullName, email, phone, address, city, state, role },
+      { new: true, runValidators: true }
+    ).select("-password"); // Exclude password from response
+
+    console.log("✅ User Updated Successfully:", updatedUser);
+
+    return res.status(200).json({
+      success: true, // ✅ Ensure `success: true` is included
+      message: "User details updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("❌ Error updating user details:", error);
+    return res.status(500).json({ success: false, error: "An error occurred while updating user details." });
+  }
+});
+
+signupRouter.put("/user/update-password/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { currentPassword, newPassword } = req.body;
+
+    console.log("🔄 Password change request for User ID:", id);
+
+    // ✅ Validate User ID format
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ success: false, error: "Invalid user ID format" });
+    }
+
+    // ✅ Validate password fields
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, error: "Both current and new passwords are required." });
+    }
+
+    // ✅ Find user in database
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found." });
+    }
+
+    // ✅ Verify the current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, error: "Incorrect current password." });
+    }
+
+    // ✅ Hash the new password before storing it
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // ✅ Update password in database
+    user.password = hashedPassword;
+    await user.save();
+
+    console.log("✅ Password updated successfully for user:", user.email);
+
+    return res.status(200).json({ success: true, message: "Password updated successfully." });
+  } catch (error) {
+    console.error("❌ Error updating password:", error);
+    return res.status(500).json({ success: false, error: "An error occurred while updating password." });
+  }
+});
 
 
 export default signupRouter;
