@@ -38,9 +38,12 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage");
     } else if (role === "admin") {
       navigate("/admindash");
+
     }  else if (role === "employee") {
       navigate("/empdash");
     }else {
+
+   
       navigate("/homepage"); // Default route if role is unknown
     }
   };
