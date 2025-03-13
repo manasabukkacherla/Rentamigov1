@@ -36,9 +36,11 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/Userdashboard");  // ✅ Redirect PG, Owner, Agent to Userdashboard
     } else if (role === "user") {
       navigate("/homepage");
-    } else if (role === "admin" || role === "employee") {
-      navigate("/empdashboard");
-    } else {
+    } else if (role === "admin") {
+      navigate("/admindash");
+    }  else if (role === "employee") {
+      navigate("/empdash");
+    }else {
       navigate("/homepage"); // Default route if role is unknown
     }
   };

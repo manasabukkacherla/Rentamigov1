@@ -5,7 +5,7 @@ import { LoginForm } from "./components/signin-form";
 import AccessManagementTable from "./components/access-management-table";
 import Services from "./components/Service-page-components/Services";
 import Homepage from "./components/landingpages/home";
-import Tenanthome from "./components/tenantspages/tenanthome";
+
 import OwnerPage from "./components/ownerPage-components/OwnerPage";
 import Fullpage from "./components/fullpages/Fullpage";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -15,18 +15,18 @@ import AboutUs from "./components/landingpages/Aboutus";
 import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
-import PropertyDashboard from "./components/Empdashboard/Empdasboard";
+
 
 import Loginhome from "./components/Logins/Loginhome";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
 
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
-import PropertypageM from "./components/Property-pageM/Propertydetailspage";
-import admindash from "./components/dashadmin/admdashboard";
+
+
 import Admindash from "./components/dashadmin/admdashboard";
-
-
+import Empapp from "./components/Empdashboaed/App";
+import Propertydetail from "./components/propertiesdetails/App";
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("VITE_GOOGLE_CLIENT_ID is not defined");
@@ -49,7 +49,7 @@ const App = () => {
           <Route path="/Contactus" element={<ContactUs />} />
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
-          
+          <Route path="/propertydetails" element={<Propertydetail />} />
          
          
           <Route path="/updatePropertyform" element={<Propertmain/>} />
@@ -57,7 +57,7 @@ const App = () => {
           {/* Owner and Tenant Routes */}
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
-          <Route path="/Tenanthome" element={<Tenanthome />} />
+         
           <Route path="/Userdashboard/*" element={<UsrDashboard />} /> {/* Ensure wildcard `/*` */}
 
 
@@ -67,13 +67,13 @@ const App = () => {
 
           {/* Admin Dashboard */}
           <Route path="/admin-dashboard" element={<AccessManagementTable />} />
-          <Route path="/Empdashboard" element={<PropertyDashboard />} />
+         
 
           {/* Propery details Page*/}
-          <Route path="/PropertypageM" element={<PropertypageM />} />
+          
           {/* new admin dashboard*/}
           <Route path="/admindash" element={<Admindash/>} />
-
+          <Route path="/empdash" element={<Empapp/>} />
 
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
