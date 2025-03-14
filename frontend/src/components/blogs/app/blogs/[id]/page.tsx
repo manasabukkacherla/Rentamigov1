@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import Navbar from "@/components/Navbar"
-import BlogDetail from "@/components/BlogDetail"
-import HomeFooter from "@/components/HomeFooter"
+import BlogDetail from "../../../BlogDetail"
 import { getBlogById } from "@/services/blogService"
 import type { BlogPostType } from "@/types"
 
@@ -17,7 +16,7 @@ export default function BlogDetailPage() {
     if (params.id) {
       const blogId = Number(params.id)
       const foundBlog = getBlogById(blogId)
-      setBlog(foundBlog || null)
+      setBlog(foundBlog ? { ...foundBlog, views: foundBlog.views ?? 0 } : null)
       setLoading(false)
     }
   }, [params.id])
@@ -35,7 +34,6 @@ export default function BlogDetailPage() {
             <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
           </div>
         </div>
-        <HomeFooter />
       </div>
     )
   }
@@ -44,7 +42,6 @@ export default function BlogDetailPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       <BlogDetail />
-      <HomeFooter />
     </div>
   )
 }

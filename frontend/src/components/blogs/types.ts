@@ -4,7 +4,7 @@ export interface Author {
 }
 
 export interface Comment {
-  id: number
+  id: string
   text: string
   author: Author
   date: string
@@ -36,26 +36,30 @@ export interface BlogPostType {
   tags: string[]
   userHasLiked?: boolean
   excerpt: string
-  views?: number
+  views: number | undefined
 }
-
 export interface Blogpost {
-  id: number
+  id: string;
+  title: string;
+  views?: number;
+  likes: number;
+}
+export interface Blog {
+  id: string
   title: string
-  excerpt: string
   content: string
+  rating: number
+  excerpt: string
   coverImage: string
   tags: string[]
   date: string
-  category: string
-  readTime: number
-  author: Author
+  author: string
+  authorImage: string
+  readTime: string
   likes: number
   comments: number
+  category: string
   commentsList: Comment[]
   reviews: Review[]
   shares: number
-  userHasLiked?: boolean
-  views?: number
 }
-

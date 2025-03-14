@@ -10,7 +10,21 @@ export interface Comment {
   date: string
   likes: number
 }
-
+export interface Blog {
+  id: string
+  title: string
+  content: string
+  rating: number
+  excerpt: string
+  coverImage: string
+  tags: string[]
+  date: string
+  author: string
+  authorImage: string
+  readTime: string
+  likes: number
+  comments: number
+}
 export interface Review {
   id: number
   rating: number
@@ -20,6 +34,7 @@ export interface Review {
 }
 
 export interface BlogPostType {
+  views: number | undefined
   id: number
   title: string
   content: string

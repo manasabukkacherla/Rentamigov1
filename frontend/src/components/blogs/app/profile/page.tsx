@@ -3,11 +3,12 @@
 import type React from "react"
 
 import { useState } from "react"
-import Navbar from "@/components/Navbar"
-import HomeFooter from "@/components/HomeFooter"
+import { useNavigate } from "react-router-dom"
+import Navbar from "../../components/Navbar"
 import { User, Mail, Phone, MapPin, Camera } from "lucide-react"
 
 export default function ProfilePage() {
+  const navigate = useNavigate()
   const [user, setUser] = useState({
     name: "Alex Johnson",
     email: "alex.johnson@example.com",
@@ -187,7 +188,6 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <HomeFooter />
     </div>
   )
 }

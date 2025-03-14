@@ -2,13 +2,13 @@
 
 import { useState } from "react"
 import Navbar from "@/components/Navbar"
-import SearchBar from "@/components/SearchBar"
-import BlogList from "@/components/BlogList"
-import TrendingSection from "@/components/TrendingSection"
-import FeaturedBlog from "@/components/FeaturedBlog"
-import TopicPicks from "@/components/TopicPicks"
-import Pagination from "@/components/Pagination"
-import HomeFooter from "@/components/HomeFooter"
+import SearchBar from "../SearchBar"
+import BlogList from "../BlogList"
+import TrendingSection from "../TrendingSection"
+import FeaturedBlog from "../FeaturedBlog"
+import TopicPicks from "../TopicPicks"
+import Pagination from "../Pagination"
+import HomeFooter from "../HomeFooter"
 import { blogPosts } from "@/data/blogData"
 
 export default function HomePage() {
@@ -94,7 +94,7 @@ export default function HomePage() {
               <TrendingSection blogs={trendingBlogs} />
 
               {/* Topic Picks */}
-              <TopicPicks topics={popularTopics} />
+              <TopicPicks topics={popularTopics} blogs={[]} />
             </div>
           </div>
         </div>

@@ -1,57 +1,35 @@
 "use client"
 
 import type React from "react"
-
 import { useEffect, useState } from "react"
-import { useParams, Link, useNavigate } from "react-router-dom"
-import {
-  Clock,
-  ThumbsUp,
-  MessageCircle,
-  Share2,
-  ArrowLeft,
-  Star,
-  Send,
-  Edit,
-  Trash2,
-  AlertTriangle,
-} from "lucide-react"
-import { getBlogById, toggleLike, addComment, incrementViews, deleteBlog, getAllBlogs } from "./services/blogService"
-import type { BlogPostType, Review } from "./types"
+import {   useParams, Link } from 'react-router-dom';
+import { Clock, ThumbsUp, MessageCircle, Share2, ArrowLeft, Star, Send } from "lucide-react"
+import {  blogPosts as initialBlogPosts } from "../Blogs/data/blogData"
+import type { BlogPostType, Comment, Review } from "../Blogs/types/type"
+import Navbar from "./Navbar";
 
 const BlogDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
   const [post, setPost] = useState<BlogPostType | null>(null)
   const [newComment, setNewComment] = useState("")
   const [newReview, setNewReview] = useState("")
   const [rating, setRating] = useState(5)
   const [activeTab, setActiveTab] = useState<"comments" | "reviews">("comments")
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (id) {
-      const blogId = Number.parseInt(id)
-      const foundPost = getBlogById(blogId)
+      const foundPost = initialBlogPosts.find((post) => post.id === Number.parseInt(id))
       setPost(foundPost || null)
-
-      // Increment view count
-      incrementViews(blogId)
     }
   }, [id])
 
   const handleLike = () => {
-    if (post && id) {
-      const blogId = Number.parseInt(id)
-      const updatedBlog = toggleLike(blogId)
-      if (updatedBlog) {
-        setPost({
-          ...post,
-          likes: updatedBlog.likes,
-          userHasLiked: updatedBlog.userHasLiked,
-        })
-      }
+    if (post) {
+      setPost({
+        ...post,
+        likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
+        userHasLiked: !post.userHasLiked,
+      })
     }
   }
 
@@ -68,21 +46,25 @@ const BlogDetail: React.FC = () => {
 
   const handleAddComment = (e: React.FormEvent) => {
     e.preventDefault()
-    if (post && id && newComment.trim()) {
-      const blogId = Number.parseInt(id)
-      const updatedBlog = addComment(blogId, {
+    if (post && newComment.trim()) {
+      const newCommentObj: Comment = {
+        id: post.commentsList.length + 1,
         text: newComment,
         author: {
           name: "You",
           avatar:
             "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1760&q=80",
         },
-      })
-
-      if (updatedBlog) {
-        setPost(updatedBlog)
-        setNewComment("")
+        date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+        likes: 0,
       }
+
+      setPost({
+        ...post,
+        comments: post.comments + 1,
+        commentsList: [newCommentObj, ...post.commentsList],
+      })
+      setNewComment("")
     }
   }
 
@@ -110,38 +92,22 @@ const BlogDetail: React.FC = () => {
     }
   }
 
-  const handleDeleteBlog = () => {
-    if (id) {
-      setIsDeleting(true)
-      const blogId = Number.parseInt(id)
-      const success = deleteBlog(blogId)
-
-      if (success) {
-        // Redirect to blogs page after deletion
-        navigate("/blogs")
-      } else {
-        setIsDeleting(false)
-        setShowDeleteModal(false)
-        // Show error message
-        alert("Failed to delete blog. Please try again.")
-      }
-    }
-  }
-
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-12 w-full max-w-7xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog post not found</h2>
         <Link to="/blogs" className="text-black hover:text-grey-900 flex items-center">
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to blogs
+          Back to home
         </Link>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-7xl w-full mx-auto px-4 sm:px-6">
+      <br /><br />
+      <Navbar/>
       <Link to="/blogs" className="inline-flex items-center text-black hover:text-grey-900 mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to all posts
@@ -151,35 +117,15 @@ const BlogDetail: React.FC = () => {
         <img src={post.coverImage || "/placeholder.svg"} alt={post.title} className="w-full h-96 object-cover" />
 
         <div className="p-8">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center">
-              <span className="inline-block bg-indigo-100 text-grey-900 text-sm px-3 py-1 rounded-full">
-                {post.category}
-              </span>
-              <div className="flex items-center text-gray-500 text-sm ml-4">
-                <Clock className="h-4 w-4 mr-1" />
-                <span>{post.readTime} min read</span>
-              </div>
-              <span className="text-gray-500 text-sm ml-4">{post.date}</span>
+          <div className="flex items-center mb-4">
+            <span className="inline-block bg-indigo-100 text-grey-900 text-sm px-3 py-1 rounded-full">
+              {post.category}
+            </span>
+            <div className="flex items-center text-gray-500 text-sm ml-4">
+              <Clock className="h-4 w-4 mr-1" />
+              <span>{post.readTime} min read</span>
             </div>
-
-            {/* Edit and Delete buttons */}
-            <div className="flex space-x-2">
-              <Link
-                to={`/blogs/edit/${post.id}`}
-                className="flex items-center text-gray-600 hover:text-black px-3 py-1 rounded-md hover:bg-gray-100"
-              >
-                <Edit className="h-4 w-4 mr-1" />
-                Edit
-              </Link>
-              <button
-                onClick={() => setShowDeleteModal(true)}
-                className="flex items-center text-red-600 hover:text-red-800 px-3 py-1 rounded-md hover:bg-red-50"
-              >
-                <Trash2 className="h-4 w-4 mr-1" />
-                Delete
-              </button>
-            </div>
+            <span className="text-gray-500 text-sm ml-4">{post.date}</span>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-6">{post.title}</h1>
@@ -196,7 +142,24 @@ const BlogDetail: React.FC = () => {
             </div>
           </div>
 
-          <div className="prose max-w-none text-gray-700 mb-8" dangerouslySetInnerHTML={{ __html: post.content }} />
+          <div className="prose max-w-none text-gray-700 mb-8">
+            <p className="mb-4">{post.content}</p>
+            <p className="mb-4">
+              This beautiful property showcases modern architecture with spacious interiors and natural light
+              throughout. The open floor plan creates a seamless flow between living spaces, perfect for both relaxation
+              and entertaining.
+            </p>
+            <p className="mb-4">
+              Located in a prime neighborhood, this home offers convenient access to local amenities, schools, and
+              transportation. The property features high-quality finishes, energy-efficient appliances, and smart home
+              technology for comfortable living.
+            </p>
+            <p>
+              Whether you're looking for your dream home or an investment opportunity, this property deserves your
+              attention. Contact us today to schedule a viewing and experience the exceptional quality and design
+              firsthand.
+            </p>
+          </div>
 
           <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
             <div className="flex space-x-4">
@@ -269,6 +232,9 @@ const BlogDetail: React.FC = () => {
                 </div>
               </div>
             </form>
+            <main className="max-w-full mx-auto py-8">
+        
+            </main>
             <div className="space-y-6">
               {post.commentsList.map((comment) => (
                 <div key={comment.id} className="flex space-x-4">
@@ -377,63 +343,33 @@ const BlogDetail: React.FC = () => {
           </>
         )}
       </div>
-
+      <br /><br /><br />
       <div className="mt-12 w-full">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Related Posts</h3>
+        {/* <h3 className="text-xl font-bold text-gray-900 mb-6">Related Properties</h3> */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-          {getBlogById(Number.parseInt(id))?.category &&
-            getAllBlogs()
-              .filter((relatedPost) => relatedPost.id !== post.id && relatedPost.category === post.category)
-              .slice(0, 3)
-              .map((relatedPost) => (
-                <Link to={`/blogs/${relatedPost.id}`} key={relatedPost.id} className="block">
-                  <div className="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow duration-300">
-                    <img
-                      src={relatedPost.coverImage || "/placeholder.svg"}
-                      alt={relatedPost.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h4 className="font-medium text-gray-900 mb-1">{relatedPost.title}</h4>
-                      <p className="text-sm text-gray-500">{relatedPost.date}</p>
-                    </div>
+        
+          {initialBlogPosts
+            .filter((relatedPost) => relatedPost.id !== post.id && relatedPost.category === post.category)
+            .slice(0, 3)
+            .map((relatedPost) => (
+              <Link to={`/blog/${relatedPost.id}`} key={relatedPost.id} className="block">
+                <div className="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow duration-300">
+                  <img
+                    src={relatedPost.coverImage || "/placeholder.svg"}
+                    alt={relatedPost.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-4">
+                    <h4 className="font-medium text-gray-900 mb-1">{relatedPost.title}</h4>
+                    <p className="text-sm text-gray-500">{relatedPost.date}</p>
                   </div>
-                </Link>
-              ))}
+                </div>
+              </Link>
+            ))}
         </div>
       </div>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <div className="flex items-center text-red-600 mb-4">
-              <AlertTriangle className="h-6 w-6 mr-2" />
-              <h3 className="text-lg font-bold">Delete Blog Post</h3>
-            </div>
-            <p className="mb-6">Are you sure you want to delete this blog post? This action cannot be undone.</p>
-            <div className="flex justify-end space-x-3">
-              <button
-                onClick={() => setShowDeleteModal(false)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                disabled={isDeleting}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteBlog}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                disabled={isDeleting}
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default BlogDetail
-

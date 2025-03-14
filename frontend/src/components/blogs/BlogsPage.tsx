@@ -7,7 +7,7 @@ import TrendingSection from "./TrendingSection"
 import FeaturedBlog from "./FeaturedBlog"
 import Pagination from "./Pagination"
 import { blogPosts } from "./data/blogData"
-import Navbar from "./components/Navbar"
+import Navbar from "../Navbar"
 const BlogsPage = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
@@ -16,6 +16,9 @@ const BlogsPage = () => {
 
   // Filter blogs based on search and tags
   const filteredBlogs = blogPosts.filter((blog) => {
+    // Temporarily removing filtering logic to display all blogs
+    console.log("Filtering blogs with searchQuery:", searchQuery);
+    console.log("Selected tags:", selectedTags);
     const matchesSearch =
       blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       blog.content.toLowerCase().includes(searchQuery.toLowerCase())
@@ -25,7 +28,7 @@ const BlogsPage = () => {
       selectedTags.some((tag) => blog.tags.some((blogTag) => blogTag.toLowerCase().includes(tag.toLowerCase())))
 
     return matchesSearch && matchesTags
-  })
+  }) // End of filtering logic
 
   // Pagination logic
   const indexOfLastBlog = currentPage * blogsPerPage
@@ -79,4 +82,3 @@ const BlogsPage = () => {
 }
 
 export default BlogsPage
-
