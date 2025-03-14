@@ -711,17 +711,23 @@ const CreateBlogPage = () => {
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                         Category
                       </label>
-                      <input
-                        type="text"
+                      <select
                         id="category"
                         value={category}
                         onChange={(e) => {
-                          setCategory(e.target.value);
-                          handleAutoSave();
+                          setCategory(e.target.value)
+                          handleAutoSave()
                         }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                        placeholder="Enter category"
-                      />
+                      >
+                        <option value="Lifestyle">Lifestyle</option>
+                        <option value="Luxury">Luxury</option>
+                        <option value="Urban">Urban</option>
+                        <option value="Rural">Rural</option>
+                        <option value="Suburban">Suburban</option>
+                        <option value="Coastal">Coastal</option>
+                        <option value="Historic">Historic</option>
+                      </select>
                     </div>
                   </motion.div>
                 )}
