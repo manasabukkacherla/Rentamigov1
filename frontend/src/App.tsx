@@ -25,7 +25,7 @@ import Admindash from "./components/dashadmin/admdashboard";
 import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
 import UserDashboard from "./components/blogs/UserDashboard";
-import BlogDetail from "./components/BlogDetail";
+import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/Blogs/EditorMenuBar";
 
 const App = () => {
