@@ -25,7 +25,7 @@ import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 
 
 import Admindash from "./components/dashadmin/admdashboard";
-import Empapp from "./components/Empdashboaed/App";
+import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
