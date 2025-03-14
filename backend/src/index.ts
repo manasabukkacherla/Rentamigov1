@@ -29,6 +29,7 @@ import Propertyrouter from "./routes/PropertySelection";
 import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
 import PropertyDetailsrouter from "./routes/Propertydetails";
+import Employeerouter from "./routes/employee";
 
 dotenv.config();
 
@@ -60,7 +61,7 @@ app.use("/api/verify", verifyRouter);
 app.use("/api/Report", Reportrouter); // Report routers 
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
-app.use("/api/employees", employeeRouter); // Employee routes
+app.use("/api/employees", Employeerouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
 

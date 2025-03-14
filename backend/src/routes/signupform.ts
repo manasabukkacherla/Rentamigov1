@@ -243,29 +243,14 @@ signupRouter.get("/user/:id", async (req: Request, res: Response) => {
 signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    let { username, fullName, email, phone, address, city, state, role } = req.body;
+    const updateFields = req.body; // Get only the fields sent in the request
 
-    console.log("🔄 Update Request Received for User ID:", id);
+    console.log("🔄 Update Request Received for User ID:", id, "Data:", updateFields);
 
     // ✅ Validate User ID
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       console.error("❌ Invalid user ID format.");
       return res.status(400).json({ success: false, error: "Invalid user ID format" });
-    }
-
-    // ✅ Trim and normalize input
-    username = username?.trim().toLowerCase();
-    email = email?.trim().toLowerCase();
-    fullName = fullName?.trim();
-    phone = phone?.trim();
-    address = address?.trim();
-    city = city?.trim();
-    state = state?.trim();
-
-    // ✅ Ensure required fields are not empty
-    if (!username || !fullName || !email || !phone || !address || !city || !state || !role) {
-      console.error("❌ Missing required fields.");
-      return res.status(400).json({ success: false, error: "All fields are required for update." });
     }
 
     // ✅ Check if user exists
@@ -275,28 +260,38 @@ signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, error: "User not found" });
     }
 
-    // ✅ Check if the new username or email is already taken by another user
-    const duplicateUser = await User.findOne({
-      $or: [{ email }, { username }],
-      _id: { $ne: id }, // Exclude the current user from the check
-    });
+    // ✅ Trim and normalize only provided fields
+    if (updateFields.username) updateFields.username = updateFields.username.trim().toLowerCase();
+    if (updateFields.email) updateFields.email = updateFields.email.trim().toLowerCase();
+    if (updateFields.fullName) updateFields.fullName = updateFields.fullName.trim();
+    if (updateFields.phone) updateFields.phone = updateFields.phone.trim();
+    if (updateFields.address) updateFields.address = updateFields.address.trim();
+    if (updateFields.city) updateFields.city = updateFields.city.trim();
+    if (updateFields.state) updateFields.state = updateFields.state.trim();
 
-    if (duplicateUser) {
-      console.error("❌ Username or Email already exists.");
-      return res.status(400).json({ success: false, error: "Username or email already exists." });
+    // ✅ Check if username or email is already taken by another user (if they are being updated)
+    if (updateFields.email || updateFields.username) {
+      const duplicateUser = await User.findOne({
+        $or: [{ email: updateFields.email }, { username: updateFields.username }],
+        _id: { $ne: id }, // Exclude the current user from the check
+      });
+
+      if (duplicateUser) {
+        console.error("❌ Username or Email already exists.");
+        return res.status(400).json({ success: false, error: "Username or email already exists." });
+      }
     }
 
-    // ✅ Update user details
-    const updatedUser = await User.findByIdAndUpdate(
-      id,
-      { username, fullName, email, phone, address, city, state, role },
-      { new: true, runValidators: true }
-    ).select("-password"); // Exclude password from response
+    // ✅ Update user details with only provided fields
+    const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
+      new: true, // Return updated user
+      runValidators: true, // Ensure validation is applied
+    }).select("-password"); // Exclude password from response
 
     console.log("✅ User Updated Successfully:", updatedUser);
 
     return res.status(200).json({
-      success: true, // ✅ Ensure `success: true` is included
+      success: true,
       message: "User details updated successfully",
       user: updatedUser,
     });
@@ -305,6 +300,7 @@ signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, error: "An error occurred while updating user details." });
   }
 });
+
 
 signupRouter.put("/user/update-password/:id", async (req: Request, res: Response) => {
   try {
