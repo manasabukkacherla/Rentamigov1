@@ -30,6 +30,9 @@ import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
 import PropertyDetailsrouter from "./routes/Propertydetails";
 import Employeerouter from "./routes/employee";
+import blogRouter from "./routes/blogs/blogRoutes";
+import commentsRouter from "./routes/blogs/commentsRouter";
+import reviewRouter from "./routes/blogs/reviewRoutes";
 
 dotenv.config();
 
@@ -80,6 +83,9 @@ app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes); 
 //app.use("/api/leads", leadsRouter);
 
+app.use("/api/blog", blogRouter);
+app.use("/api/reviews", reviewRouter)
+app.use("/api/comments", commentsRouter)
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
