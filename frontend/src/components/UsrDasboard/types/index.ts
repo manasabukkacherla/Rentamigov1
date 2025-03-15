@@ -27,6 +27,16 @@ export interface DashboardStats {
 }
 
 export interface User {
+  id: any;
+  photoUrl: string | undefined;
+  role: any;
+  username: string | number | readonly string[] | undefined;
+  phone: string | number | readonly string[] | undefined;
+  company: string | number | readonly string[] | undefined;
+  address: string | number | readonly string[] | undefined;
+  plan: any;
+  planExpiry: ReactNode;
+  tokens: ReactNode;
   fullName: string;
   email: string;
   notifications: {
