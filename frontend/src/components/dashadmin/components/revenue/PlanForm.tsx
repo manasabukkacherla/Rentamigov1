@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import { showToast } from '../Toast'; // Ensure the correct import path for toast.tsx
+import { Plan } from '../Types';
 
 interface PlanFormData {
   name: string;
@@ -14,24 +16,104 @@ interface PlanFormData {
 }
 
 interface PlanFormProps {
-  data: PlanFormData;
-  onChange: (data: PlanFormData) => void;
-  onSubmit: () => void;
-  onCancel: () => void;
+  onClose: () => void;
+  onUpdate: (updatedPlan: Plan) => void;
+  editingPlan?: Plan; // ✅ Use optional `Plan` instead of `PlanFormData`
 }
 
-const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel }) => {
+
+
+
+
+const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
+  const [data, setData] = useState<PlanFormData>({
+    name: '',
+    price: 0,
+    billingCycle: 'monthly',
+    maxProperties: 0,
+    maxLeads: 0,
+    tokensPerLead: 0,
+    features: [''],
+    description: '',
+    trialDays: 0,
+  });
+
+  // ✅ Pre-fill form when editing an existing plan
+  useEffect(() => {
+    if (editingPlan) {
+      setData(editingPlan); // ✅ Load existing plan when editing
+    } else {
+      setData({
+        name: '',
+        price: 0,
+        billingCycle: 'monthly',
+        maxProperties: 0,
+        maxLeads: 0,
+        tokensPerLead: 0,
+        features: [''],
+        description: '',
+        trialDays: 0,
+      });
+    }
+  }, [editingPlan]); // ✅ Runs when `editingPlan` changes
+  
+
+  const handleChange = (updatedData: Partial<PlanFormData>) => {
+    setData((prev) => ({ ...prev, ...updatedData }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const planId = editingPlan?.id || editingPlan?._id; // ✅ Ensure correct ID
+  
+      if (editingPlan && !planId) {
+        console.error("Error: Editing plan has no valid ID");
+        showToast.error("Invalid subscription plan ID!");
+        return;
+      }
+  
+      const url = editingPlan
+        ? `http://localhost:8000/api/subscription/${planId}` // ✅ Use _id or id
+        : 'http://localhost:8000/api/subscription';
+  
+      const method = editingPlan ? 'PUT' : 'POST';
+  
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...data,
+          _id: planId, // ✅ Ensure API gets _id
+        }),
+      });
+  
+      if (!response.ok) throw new Error("Failed to save subscription plan");
+  
+      showToast.success(`Plan ${editingPlan ? 'updated' : 'created'} successfully!`);
+      onClose();
+    } catch (error) {
+      console.error("Error saving plan:", error);
+      showToast.error("Error saving subscription plan");
+    }
+  };
+  
+  
+  
+  
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <h3 className="text-xl font-semibold mb-4">Create New Subscription Plan</h3>
+        <h3 className="text-xl font-semibold mb-4">
+          {editingPlan ? 'Edit Subscription Plan' : 'Create New Subscription Plan'}
+        </h3>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Plan Name</label>
             <input
               type="text"
               value={data.name}
-              onChange={(e) => onChange({...data, name: e.target.value})}
+              onChange={(e) => handleChange({ name: e.target.value })}
               className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
               placeholder="e.g., Professional Plan"
             />
@@ -42,7 +124,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
               <input
                 type="number"
                 value={data.price}
-                onChange={(e) => onChange({...data, price: Number(e.target.value)})}
+                onChange={(e) => handleChange({ price: Number(e.target.value) })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
                 placeholder="99"
               />
@@ -51,7 +133,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
               <label className="block text-sm font-medium text-gray-700">Billing Cycle</label>
               <select
                 value={data.billingCycle}
-                onChange={(e) => onChange({...data, billingCycle: e.target.value})}
+                onChange={(e) => handleChange({ billingCycle: e.target.value })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
               >
                 <option value="monthly">Monthly</option>
@@ -66,7 +148,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
               <input
                 type="number"
                 value={data.maxProperties}
-                onChange={(e) => onChange({...data, maxProperties: Number(e.target.value)})}
+                onChange={(e) => handleChange({ maxProperties: Number(e.target.value) })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
                 placeholder="10"
               />
@@ -76,43 +158,11 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
               <input
                 type="number"
                 value={data.maxLeads}
-                onChange={(e) => onChange({...data, maxLeads: Number(e.target.value)})}
+                onChange={(e) => handleChange({ maxLeads: Number(e.target.value) })}
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
                 placeholder="100"
               />
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Tokens per Lead</label>
-              <input
-                type="number"
-                value={data.tokensPerLead}
-                onChange={(e) => onChange({...data, tokensPerLead: Number(e.target.value)})}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Trial Days</label>
-              <input
-                type="number"
-                value={data.trialDays}
-                onChange={(e) => onChange({...data, trialDays: Number(e.target.value)})}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-                placeholder="14"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Description</label>
-            <textarea
-              value={data.description}
-              onChange={(e) => onChange({...data, description: e.target.value})}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
-              rows={3}
-              placeholder="Describe the plan's benefits..."
-            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Features</label>
@@ -124,7 +174,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
                   onChange={(e) => {
                     const newFeatures = [...data.features];
                     newFeatures[index] = e.target.value;
-                    onChange({...data, features: newFeatures});
+                    handleChange({ features: newFeatures });
                   }}
                   className="flex-1 rounded-lg border border-gray-300 px-3 py-2"
                   placeholder="Add a feature"
@@ -132,7 +182,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
                 <button
                   onClick={() => {
                     const newFeatures = data.features.filter((_, i) => i !== index);
-                    onChange({...data, features: newFeatures});
+                    handleChange({ features: newFeatures });
                   }}
                   className="ml-2 p-2 text-red-600 hover:bg-red-50 rounded-lg"
                 >
@@ -141,7 +191,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
               </div>
             ))}
             <button
-              onClick={() => onChange({...data, features: [...data.features, '']})}
+              onClick={() => handleChange({ features: [...data.features, ''] })}
               className="mt-2 text-sm text-gray-600 hover:text-gray-900"
             >
               + Add feature
@@ -149,17 +199,11 @@ const PlanForm: React.FC<PlanFormProps> = ({ data, onChange, onSubmit, onCancel 
           </div>
         </div>
         <div className="mt-6 flex justify-end space-x-3">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
+          <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
             Cancel
           </button>
-          <button
-            onClick={onSubmit}
-            className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
-          >
-            Create Plan
+          <button onClick={handleSubmit} className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+            {editingPlan ? 'Update Plan' : 'Create Plan'}
           </button>
         </div>
       </div>
