@@ -29,7 +29,7 @@ import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
 import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
-import EditorMenuBar from "./components/Blogs/EditorMenuBar";
+import EditorMenuBar from "./components/blogs/EditorMenuBar";
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("VITE_GOOGLE_CLIENT_ID is not defined");

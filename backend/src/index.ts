@@ -30,9 +30,14 @@ import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
 import PropertyDetailsrouter from "./routes/Propertydetails";
 import Employeerouter from "./routes/employee";
+
+import Subscriptionrouter from "./routes/Subscriptionmodel";
+import TokenRouter from "./routes/Tokenform";
+
 import blogRouter from "./routes/blogs/blogRoutes";
 import commentsRouter from "./routes/blogs/commentsRouter";
 import reviewRouter from "./routes/blogs/reviewRoutes";
+
 
 dotenv.config();
 
@@ -76,6 +81,10 @@ app.use("/api/property-selection", Propertyrouter);
 app.use("/api/basicdetails", BasicDetailsrouter)
 app.use("/api/properties", PropertyDetailsrouter);
 
+//Subscription pllan routes
+app.use("/api/subscription", Subscriptionrouter)
+//Token plan routes
+app.use("/api/tokens", TokenRouter);
 
 app.use("/api/service", enquiryRoutes);
 app.use("/api/sign",signupRouter);
