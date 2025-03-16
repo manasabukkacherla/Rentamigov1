@@ -63,8 +63,7 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
 
-          <Route path="/Userdashboard/*" element={<UsrDashboard />} /> {/* Ensure wildcard `/*` */}
-
+          <Route path="/Userdashboard/" element={<UsrDashboard />} /> 
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />

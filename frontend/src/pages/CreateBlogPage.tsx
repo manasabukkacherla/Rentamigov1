@@ -12,13 +12,11 @@ import TipTapImage from "@tiptap/extension-image"
 import Link from "@tiptap/extension-link"
 import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
-import { getBlogById, createBlog, updateBlog } from "../blogs/blogService1"
-import TagInput from "../blogs/TagInput"
-import EditorMenuBar from "../blogs/EditorMenuBar"
-import type { Blogpost } from "../Blogs/types"
+import { getBlogById, createBlog, updateBlog } from "../services/blogService"
+import TagInput from "../components/editor/TagInput"
+import EditorMenuBar from "../components/editor/EditorMenuBar"
+import type { Blogpost } from "../types"
 import { motion, AnimatePresence } from "framer-motion"
-import axios from "axios"
-import { toast } from "react-toastify"
 
 const CreateBlogPage = () => {
   const navigate = useNavigate()
@@ -136,7 +134,7 @@ const CreateBlogPage = () => {
         if (editor) {
           editor.commands.setContent(blog.content)
         }
-
+        
         // Set active step to content to make it easier to edit
         setActiveStep(1)
       }
@@ -226,24 +224,27 @@ const CreateBlogPage = () => {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-  
-    if (activeStep === 0) {
-      if (!title.trim()) newErrors.title = "Title is required"
-      if (!excerpt.trim()) newErrors.excerpt = "Excerpt is required"
+
+    if (!title.trim()) {
+      newErrors.title = "Title is required"
     }
-  
-    if (activeStep === 1) {
-      if (!content.trim() || content === "<p></p>") newErrors.content = "Content is required"
+
+    if (!content.trim() || content === "<p></p>") {
+      newErrors.content = "Content is required"
     }
-  
-    if (activeStep === 2) {
-      if (!coverImage) newErrors.coverImage = "Cover image is required"
+
+    if (!excerpt.trim()) {
+      newErrors.excerpt = "Excerpt is required"
     }
-  
-    if (activeStep === 3) {
-      if (tags.length === 0) newErrors.tags = "At least one tag is required"
+
+    if (!coverImage) {
+      newErrors.coverImage = "Cover image is required"
     }
-  
+
+    if (tags.length === 0) {
+      newErrors.tags = "At least one tag is required"
+    }
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -271,51 +272,44 @@ const CreateBlogPage = () => {
           "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
       }
 
-      const blogData = {
+      const blogData: Omit<Blogpost, "id"> = {
         title,
         content,
         excerpt,
         tags,
-        media: {
-          coverImage: coverImage || "",
-        },
+        coverImage: coverImage || "",
         category,
         readTime,
-        // date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+        date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
+        author,
+        likes: 0,
+        comments: 0,
+        commentsList: [],
+        reviews: [],
+        shares: 0,
       }
 
-      const response = await axios.post('http://localhost:8000/api/blog/add', blogData)
-      console.log(response)
-      if(response.data.success) {
-        console.log(response.data)
-        toast.success(response.data.message)
+      if (isEditing && id) {
+        // Update existing blog
+        const updated = updateBlog(Number.parseInt(id), blogData)
+        if (updated) {
+          setSuccessMessage("Blog updated successfully!")
+          // Clear draft after successful update
+          localStorage.removeItem("blog_draft")
+          setTimeout(() => {
+            navigate(`/blog/${id}`)
+          }, 1500)
+        }
       } else {
-        toast.error("Failed to create a blog")
+        // Create new blog
+        const newBlog = createBlog(blogData)
+        setSuccessMessage("Blog created successfully!")
+        // Clear draft after successful creation
+        localStorage.removeItem("blog_draft")
+        setTimeout(() => {
+          navigate(`/blog/${newBlog.id}`)
+        }, 1500)
       }
-
-      navigate('/blogs')
-
-      // if (isEditing && id) {
-      //   // Update existing blog
-      //   const updated = updateBlog(Number.parseInt(id), blogData)
-      //   if (updated) {
-      //     setSuccessMessage("Blog updated successfully!")
-      //     // Clear draft after successful update
-      //     localStorage.removeItem("blog_draft")
-      //     setTimeout(() => {
-      //       navigate(`/blog/${id}`)
-      //     }, 1500)
-      //   }
-      // } else {
-      //   // Create new blog
-      //   const newBlog = createBlog(blogData)
-      //   setSuccessMessage("Blog created successfully!")
-      //   // Clear draft after successful creation
-      //   localStorage.removeItem("blog_draft")
-      //   setTimeout(() => {
-      //     navigate(`/blog/${newBlog.id}`)
-      //   }, 1500)
-      // }
     } catch (error) {
       console.error("Error saving blog:", error)
       setErrors({ submit: "Failed to save blog. Please try again." })
@@ -342,10 +336,8 @@ const CreateBlogPage = () => {
   }
 
   const nextStep = () => {
-    if (validateForm()) {
-      if (activeStep < steps.length - 1) {
-        setActiveStep(activeStep + 1)
-      }
+    if (activeStep < steps.length - 1) {
+      setActiveStep(activeStep + 1)
     }
   }
 
@@ -356,11 +348,9 @@ const CreateBlogPage = () => {
   }
 
   const goToStep = (index: number) => {
-    if (validateForm()) {
-      setActiveStep(index)
-    }
+    setActiveStep(index)
   }
-  
+
   // Calculate estimated read time based on content length
   useEffect(() => {
     if (content) {
@@ -451,16 +441,18 @@ const CreateBlogPage = () => {
               <button
                 key={step.id}
                 onClick={() => goToStep(index)}
-                className={`flex flex-col items-center ${index <= activeStep ? "text-black" : "text-gray-400"
-                  } transition-colors duration-300`}
+                className={`flex flex-col items-center ${
+                  index <= activeStep ? "text-black" : "text-gray-400"
+                } transition-colors duration-300`}
               >
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${index < activeStep
+                  className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
+                    index < activeStep
                       ? "bg-green-100 text-green-600"
                       : index === activeStep
                         ? "bg-black text-white"
                         : "bg-gray-100 text-gray-400"
-                    }`}
+                  }`}
                 >
                   {index < activeStep ? <Check className="h-5 w-5" /> : step.icon}
                 </div>
@@ -517,8 +509,9 @@ const CreateBlogPage = () => {
                           }
                           handleAutoSave()
                         }}
-                        className={`w-full px-4 py-3 border ${errors.title ? "border-red-500" : "border-gray-300"
-                          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
+                        className={`w-full px-4 py-3 border ${
+                          errors.title ? "border-red-500" : "border-gray-300"
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
                         placeholder="Enter a catchy title..."
                       />
                       {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
@@ -544,8 +537,9 @@ const CreateBlogPage = () => {
                           handleAutoSave()
                         }}
                         rows={3}
-                        className={`w-full px-4 py-3 border ${errors.excerpt ? "border-red-500" : "border-gray-300"
-                          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
+                        className={`w-full px-4 py-3 border ${
+                          errors.excerpt ? "border-red-500" : "border-gray-300"
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
                         placeholder="Write a brief summary of your blog post..."
                       />
                       {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>}
@@ -598,11 +592,12 @@ const CreateBlogPage = () => {
                         </div>
                         <div className="text-sm text-gray-500">
                           {content.length > 0
-                            ? `${content
-                              .replace(/<[^>]*>/g, "")
-                              .split(/\s+/)
-                              .filter(Boolean).length
-                            } words`
+                            ? `${
+                                content
+                                  .replace(/<[^>]*>/g, "")
+                                  .split(/\s+/)
+                                  .filter(Boolean).length
+                              } words`
                             : "Start writing..."}
                         </div>
                       </div>
@@ -666,8 +661,9 @@ const CreateBlogPage = () => {
                       ) : (
                         <div
                           onClick={triggerImageUpload}
-                          className={`w-full h-80 border-2 border-dashed ${errors.coverImage ? "border-red-500" : "border-gray-300"
-                            } rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors`}
+                          className={`w-full h-80 border-2 border-dashed ${
+                            errors.coverImage ? "border-red-500" : "border-gray-300"
+                          } rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors`}
                         >
                           <LucideImage size={48} className={errors.coverImage ? "text-red-400" : "text-gray-400"} />
                           <p className={`mt-2 text-sm ${errors.coverImage ? "text-red-500" : "text-gray-500"}`}>
@@ -715,17 +711,23 @@ const CreateBlogPage = () => {
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                         Category
                       </label>
-                      <input
-                        type="text"
+                      <select
                         id="category"
                         value={category}
                         onChange={(e) => {
-                          setCategory(e.target.value);
-                          handleAutoSave();
+                          setCategory(e.target.value)
+                          handleAutoSave()
                         }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                        placeholder="Enter category"
-                      />
+                      >
+                        <option value="Lifestyle">Lifestyle</option>
+                        <option value="Luxury">Luxury</option>
+                        <option value="Urban">Urban</option>
+                        <option value="Rural">Rural</option>
+                        <option value="Suburban">Suburban</option>
+                        <option value="Coastal">Coastal</option>
+                        <option value="Historic">Historic</option>
+                      </select>
                     </div>
                   </motion.div>
                 )}
@@ -837,8 +839,9 @@ const CreateBlogPage = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                          }`}
+                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${
+                          isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                        }`}
                       >
                         {isSubmitting ? (
                           <>
@@ -881,8 +884,9 @@ const CreateBlogPage = () => {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${activeStep === 0 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
+                    activeStep === 0 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   disabled={activeStep === 0}
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
