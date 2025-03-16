@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { Blog } from '../Blogs/types';
+import { Blog } from '../blogs/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import  sliderlink  from '../blogs/data/sliderlink';
 
 interface ImageSliderProps {
     blogs: Blog[];
   }
-
+console.log(sliderlink);
 const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     useEffect(() => {
@@ -32,15 +33,18 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
       };
     
       if (!blogs.length) return null;
+      console.log(blogs[currentIndex].imageUrl);
 
   return (
     <div className="relative w-full h-[600px] group">
         <div
         className="w-full h-full bg-center bg-cover duration-500 relative"
-        style={{ backgroundImage: `url(${blogs[currentIndex].imageUrl})` }}
+        style={{ backgroundImage: `url(${blogs[currentIndex]?.imageUrl || '/fallback-image.jpg'}) `}}
+
       >
+        
         {/* Overlay with text */}
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-end p-8">
+        <div className="absolute inset-0 bg-transparent bg-opacity-40 flex flex-col justify-end p-8">
         <h2 className="text-white text-3xl font-bold mb-2">{blogs[currentIndex].title}</h2>
         <p className="text-white text-lg mb-4 line-clamp-2">
             {blogs[currentIndex].content}
