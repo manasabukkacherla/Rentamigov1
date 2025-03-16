@@ -2,8 +2,30 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Blogpost } from '../Blogs/types';
 import BlogCardS from './BlogCardS';
 
+interface Blog {
+  id: string,
+  title: string;
+    excerpt: string;
+    content: string;
+    media: {
+        coverImage: string;
+        images?: string[];
+    };
+    tags: string[];
+    category: string;
+    readTime: number;
+    author: string;
+    likes: number;
+    views: number; // New: View count
+    shares: 0,
+    comments: string[];
+    reviews: string[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 interface BlogListProps {
-    blogs: Blogpost[];
+    blogs: Blog[];
   }
 
 const BlogList: React.FC<BlogListProps> = ({ blogs }) => {

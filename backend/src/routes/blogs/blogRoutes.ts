@@ -48,7 +48,7 @@ export const createBlog = async (
     });
 
     await newBlog.save();
-    res.status(201).json({ success: true, blog: newBlog });
+    res.status(201).json({ success: true, blog: newBlog, message: "Blog created succesfully!" });
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ error: 'Failed to create blog post' });
@@ -120,10 +120,28 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+  const listBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
+    try {
+        const blogs = await Blog.find({});
+        res.json({
+            success: true,
+            message: "Data fetched successfully",
+            data: blogs
+        })
+    } catch(error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error",
+        })
+    }
+}
   
   // ✅ Blog Router
   const blogRouter = express.Router();
   blogRouter.post("/add", createBlog);
+  blogRouter.get("/list", listBlogs);
   blogRouter.put("/edit/:id", editBlog);
   blogRouter.delete("/delete/:id", deleteBlog);
   blogRouter.get("/:id", getBlogById);

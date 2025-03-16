@@ -15,11 +15,11 @@ import AboutUs from "./components/landingpages/Aboutus";
 import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
-import HomePage from "./components/Blogs/HomePage";
+import HomePage from "./components/blogs/HomePage";
 
 import Loginhome from "./components/Logins/Loginhome";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
-import CreateBlogPage from "./components/Blogs/CreateBlogPage";
+import CreateBlogPage from "./components/blogs/CreateBlogPage";
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 
@@ -27,9 +27,10 @@ import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 import Admindash from "./components/dashadmin/admdashboard";
 import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
-import UserDashboard from "./components/Blogs/UserDashboard";
-import BlogDetail from "./components/Blogs/BlogDetail";
-import EditorMenuBar from "./components/Blogs/EditorMenuBar";
+import UserDashboard from "./components/blogs/UserDashboard";
+import BlogDetail from "./components/blogs/BlogDetail";
+import EditorMenuBar from "./components/blogs/EditorMenuBar";
+import { ToastContainer } from "react-toastify";
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("VITE_GOOGLE_CLIENT_ID is not defined");
@@ -39,6 +40,7 @@ const App = () => {
 
   return (
     <GoogleOAuthProvider clientId={client_id}>
+      <ToastContainer/>
       <BrowserRouter>
         <Routes>
           {/* Redirect "/" to "/Homepage" */}

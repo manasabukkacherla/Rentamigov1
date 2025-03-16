@@ -1,17 +1,38 @@
 import { useNavigate } from "react-router-dom"
-import ImageSlider from "../Blogs/ImageSlider";
-import { mockBlogs } from "../Blogs/data/mockData";
-import SearchBar from "../Blogs/SearchBar";
-import {  useState } from "react";
-import BlogList from "../Blogs/BlogList";
-import { blogPosts } from '../Blogs/data/blogData'
-import { Blogpost } from "../Blogs/types";
-import TrendingSection from "../Blogs/TrendingSection";
-import TopicPicks from "../Blogs/TopicPicks";
-import BlogCard from "../Blogs/BlogCard";
-import HomeFooter from "../Blogs/HomeFooter";
+import ImageSlider from "../blogs/ImageSlider";
+import { mockBlogs } from "../blogs/data/mockData";
+import SearchBar from "../blogs/SearchBar";
+import {  useEffect, useState } from "react";
+import BlogList from "../blogs/BlogList";
+import { blogPosts } from '../blogs/data/blogData'
+import { Blogpost } from "../types";
+import TrendingSection from "../blogs/TrendingSection";
+import TopicPicks from "../blogs/TopicPicks";
+import BlogCard from "../blogs/BlogCard";
+import HomeFooter from "../blogs/HomeFooter";
 import Navbar from "./Navbar";
+import axios from "axios";
 
+interface Blog {
+  id: string,
+  title: string;
+    excerpt: string;
+    content: string;
+    media: {
+        coverImage: string;
+        images?: string[];
+    };
+    tags: string[];
+    category: string;
+    readTime: number;
+    author: string;
+    likes: number;
+    views: number; // New: View count
+    comments: string[];
+    reviews: string[];
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -26,8 +47,6 @@ const HomePage = () => {
   const currentBlogs = mockBlogs.slice(indexOfFirstBlog, indexOfLastBlog);
 
   const [blogs] = useState<Blogpost[]>([]);
-
-  
 
 // useEffect(() => {
 //   fetchBlogs(); // ✅ Fetch data when component mounts
@@ -62,6 +81,30 @@ const HomePage = () => {
 
   const trendingBlogs = [...blogPosts].sort((a, b) => b.shares ?? 0 - (a.shares ?? 0)).slice(0, 3);
 
+  const fetchBlogs = async () => {
+    const response = await axios.get('http://localhost:8000/api/blog/list');
+    console.log(response.data)
+
+    if(response.data.success) {
+      return response.data.data;
+    }
+  }
+
+  const [allBlogs, setAllblogs] = useState<Blog[]>([]);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const response = await fetchBlogs(); 
+        setAllblogs(response); 
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+      }
+    };
+
+    getData();
+  }, []);
+
   return (
 
     <div className="bg-gray-50 min-h-screen">
@@ -82,7 +125,7 @@ const HomePage = () => {
           <p className="text-gray-600 pl-4">Discover the latest thoughts, ideas, and stories from our community.</p>
 
           <br />
-          <BlogList blogs={filteredBlogs} />
+          <BlogList blogs={allBlogs} />
         </div>
 
         {/* Random Blog Feature */}
