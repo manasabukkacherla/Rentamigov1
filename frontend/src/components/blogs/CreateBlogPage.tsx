@@ -12,9 +12,9 @@ import TipTapImage from "@tiptap/extension-image"
 import Link from "@tiptap/extension-link"
 import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
-import { getBlogById, createBlog, updateBlog } from "../Blogs/blogService1"
-import TagInput from "../Blogs/TagInput"
-import EditorMenuBar from "../Blogs/EditorMenuBar"
+import { getBlogById, createBlog, updateBlog } from "../blogs/blogService1"
+import TagInput from "../blogs/TagInput"
+import EditorMenuBar from "../blogs/EditorMenuBar"
 import type { Blogpost } from "../Blogs/types"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -224,27 +224,24 @@ const CreateBlogPage = () => {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-
-    if (!title.trim()) {
-      newErrors.title = "Title is required"
+  
+    if (activeStep === 0) {
+      if (!title.trim()) newErrors.title = "Title is required"
+      if (!excerpt.trim()) newErrors.excerpt = "Excerpt is required"
     }
-
-    if (!content.trim() || content === "<p></p>") {
-      newErrors.content = "Content is required"
+  
+    if (activeStep === 1) {
+      if (!content.trim() || content === "<p></p>") newErrors.content = "Content is required"
     }
-
-    if (!excerpt.trim()) {
-      newErrors.excerpt = "Excerpt is required"
+  
+    if (activeStep === 2) {
+      if (!coverImage) newErrors.coverImage = "Cover image is required"
     }
-
-    if (!coverImage) {
-      newErrors.coverImage = "Cover image is required"
+  
+    if (activeStep === 3) {
+      if (tags.length === 0) newErrors.tags = "At least one tag is required"
     }
-
-    if (tags.length === 0) {
-      newErrors.tags = "At least one tag is required"
-    }
-
+  
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -336,8 +333,10 @@ const CreateBlogPage = () => {
   }
 
   const nextStep = () => {
-    if (activeStep < steps.length - 1) {
-      setActiveStep(activeStep + 1)
+    if (validateForm()) {
+      if (activeStep < steps.length - 1) {
+        setActiveStep(activeStep + 1)
+      }
     }
   }
 
@@ -348,9 +347,11 @@ const CreateBlogPage = () => {
   }
 
   const goToStep = (index: number) => {
-    setActiveStep(index)
+    if (validateForm()) {
+      setActiveStep(index)
+    }
   }
-
+  
   // Calculate estimated read time based on content length
   useEffect(() => {
     if (content) {

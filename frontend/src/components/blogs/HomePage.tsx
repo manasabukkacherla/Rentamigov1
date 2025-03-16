@@ -1,16 +1,16 @@
 import { useNavigate } from "react-router-dom"
-import ImageSlider from "../Blogs/ImageSlider";
-import { mockBlogs } from "../Blogs/data/mockData";
-import SearchBar from "../Blogs/SearchBar";
+import ImageSlider from "../blogs/ImageSlider";
+import { mockBlogs } from "../blogs/data/mockData";
+import SearchBar from "../blogs/SearchBar";
 import {  useState } from "react";
-import BlogList from "../Blogs/BlogList";
-import { blogPosts } from '../Blogs/data/blogData'
-import { Blogpost } from "../Blogs/types";
-import TrendingSection from "../Blogs/TrendingSection";
-import TopicPicks from "../Blogs/TopicPicks";
-import BlogCard from "../Blogs/BlogCard";
-import HomeFooter from "../Blogs/HomeFooter";
+import BlogList from "../blogs/BlogList";
+import { blogPosts } from '../blogs/data/blogData'
+import TrendingSection from "../blogs/TrendingSection";
+import TopicPicks from "../blogs/TopicPicks";
+import HomeFooter from "../blogs/HomeFooter";
 import Navbar from "./Navbar";
+import { Blogpost } from "@/types";
+import BlogCard from "../BlogCard";
 
 
 const HomePage = () => {
