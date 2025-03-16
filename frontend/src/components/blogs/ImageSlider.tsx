@@ -36,11 +36,14 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
   return (
     <div className="relative w-full h-[600px] group">
         <div
-        className="w-full h-full bg-center bg-cover duration-500 relative"
-        style={{ backgroundImage: `url(${blogs[currentIndex].imageUrl})` }}
-      >
+  className="w-full h-full bg-center bg-cover duration-500 relative"
+  style={{
+    backgroundImage: `url(${blogs[currentIndex]?.imageUrl || '/fallback-image.jpg'})`,
+    backgroundColor: !blogs[currentIndex]?.imageUrl ? 'black' : 'transparent',
+  }}
+>
         {/* Overlay with text */}
-        <div className="absolute inset-0 bg-black bg-opacity-40 flex flex-col justify-end p-8">
+        <div className="absolute inset-0 bg-transparent bg-opacity-40 flex flex-col justify-end p-8">
         <h2 className="text-white text-3xl font-bold mb-2">{blogs[currentIndex].title}</h2>
         <p className="text-white text-lg mb-4 line-clamp-2">
             {blogs[currentIndex].content}
