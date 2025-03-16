@@ -134,7 +134,7 @@ const CreateBlogPage = () => {
         if (editor) {
           editor.commands.setContent(blog.content)
         }
-        
+
         // Set active step to content to make it easier to edit
         setActiveStep(1)
       }
@@ -441,18 +441,16 @@ const CreateBlogPage = () => {
               <button
                 key={step.id}
                 onClick={() => goToStep(index)}
-                className={`flex flex-col items-center ${
-                  index <= activeStep ? "text-black" : "text-gray-400"
-                } transition-colors duration-300`}
+                className={`flex flex-col items-center ${index <= activeStep ? "text-black" : "text-gray-400"
+                  } transition-colors duration-300`}
               >
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
-                    index < activeStep
+                  className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${index < activeStep
                       ? "bg-green-100 text-green-600"
                       : index === activeStep
                         ? "bg-black text-white"
                         : "bg-gray-100 text-gray-400"
-                  }`}
+                    }`}
                 >
                   {index < activeStep ? <Check className="h-5 w-5" /> : step.icon}
                 </div>
@@ -509,9 +507,8 @@ const CreateBlogPage = () => {
                           }
                           handleAutoSave()
                         }}
-                        className={`w-full px-4 py-3 border ${
-                          errors.title ? "border-red-500" : "border-gray-300"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
+                        className={`w-full px-4 py-3 border ${errors.title ? "border-red-500" : "border-gray-300"
+                          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
                         placeholder="Enter a catchy title..."
                       />
                       {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
@@ -537,9 +534,8 @@ const CreateBlogPage = () => {
                           handleAutoSave()
                         }}
                         rows={3}
-                        className={`w-full px-4 py-3 border ${
-                          errors.excerpt ? "border-red-500" : "border-gray-300"
-                        } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
+                        className={`w-full px-4 py-3 border ${errors.excerpt ? "border-red-500" : "border-gray-300"
+                          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
                         placeholder="Write a brief summary of your blog post..."
                       />
                       {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>}
@@ -592,12 +588,11 @@ const CreateBlogPage = () => {
                         </div>
                         <div className="text-sm text-gray-500">
                           {content.length > 0
-                            ? `${
-                                content
-                                  .replace(/<[^>]*>/g, "")
-                                  .split(/\s+/)
-                                  .filter(Boolean).length
-                              } words`
+                            ? `${content
+                              .replace(/<[^>]*>/g, "")
+                              .split(/\s+/)
+                              .filter(Boolean).length
+                            } words`
                             : "Start writing..."}
                         </div>
                       </div>
@@ -661,9 +656,8 @@ const CreateBlogPage = () => {
                       ) : (
                         <div
                           onClick={triggerImageUpload}
-                          className={`w-full h-80 border-2 border-dashed ${
-                            errors.coverImage ? "border-red-500" : "border-gray-300"
-                          } rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors`}
+                          className={`w-full h-80 border-2 border-dashed ${errors.coverImage ? "border-red-500" : "border-gray-300"
+                            } rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors`}
                         >
                           <LucideImage size={48} className={errors.coverImage ? "text-red-400" : "text-gray-400"} />
                           <p className={`mt-2 text-sm ${errors.coverImage ? "text-red-500" : "text-gray-500"}`}>
@@ -711,23 +705,17 @@ const CreateBlogPage = () => {
                       <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
                         Category
                       </label>
-                      <select
+                      <input
+                        type="text"
                         id="category"
                         value={category}
                         onChange={(e) => {
-                          setCategory(e.target.value)
-                          handleAutoSave()
+                          setCategory(e.target.value);
+                          handleAutoSave();
                         }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                      >
-                        <option value="Lifestyle">Lifestyle</option>
-                        <option value="Luxury">Luxury</option>
-                        <option value="Urban">Urban</option>
-                        <option value="Rural">Rural</option>
-                        <option value="Suburban">Suburban</option>
-                        <option value="Coastal">Coastal</option>
-                        <option value="Historic">Historic</option>
-                      </select>
+                        placeholder="Enter category"
+                      />
                     </div>
                   </motion.div>
                 )}
@@ -839,9 +827,8 @@ const CreateBlogPage = () => {
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${
-                          isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                        }`}
+                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                          }`}
                       >
                         {isSubmitting ? (
                           <>
@@ -884,9 +871,8 @@ const CreateBlogPage = () => {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
-                    activeStep === 0 ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${activeStep === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                   disabled={activeStep === 0}
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
