@@ -13,6 +13,7 @@ import Navbar from "../blogs/Navbar";
 import { Blogpost } from "@/types";
 
 
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [currentPage] = useState(1);
