@@ -12,17 +12,19 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { User as UserType } from "../types";
+import { toast } from "@/hooks/use-toast";
 
 export function Settings() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<UserType>({
+    id: "",
     fullName: "",
     username: "",
     email: "",
     role: "",
     photoUrl: "",
     tokens: 0,
-    plan: "basic",
+    plan: "basic" as PlanType, // ✅ Ensures TypeScript knows it's a valid key
     planExpiry: "",
     phone: "",
     company: "",
@@ -134,17 +136,37 @@ export function Settings() {
   };
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-
-    console.log("Updating profile with:", user); // Debugging log
-
-    // Check if user data exists before updating
-    if (!user) {
-      console.error("No user data to update.");
-      setError("No user data found.");
+  
+    const storedUser = sessionStorage.getItem("user");
+    let userId = "";
+  
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        userId = parsedUser.id || parsedUser._id;
+      } catch (error) {
+        console.error("❌ Error parsing session storage:", error);
+        setError("Error reading user data. Please log in again.");
+        toast.error("Error reading user data. Please log in again.");
+        return;
+      }
+    } else {
+      console.error("❌ No user data found in session storage.");
+      setError("No user data found. Please log in again.");
+      toast.error("No user data found. Please log in again.");
       return;
     }
-
-    fetch(`http://localhost:8000/api/sign/user/update/${user.id}`, {
+  
+    console.log("🔄 Using User ID from sessionStorage:", userId);
+  
+    if (!userId) {
+      console.error("❌ Error: User ID is missing. Cannot update profile.");
+      setError("User ID not found. Please try again.");
+      toast.error("User ID not found. Please try again.");
+      return;
+    }
+  
+    fetch(`http://localhost:8000/api/sign/user/update/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -153,31 +175,94 @@ export function Settings() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log("Profile update response:", data);
-        if (data.success) {
-          alert("Profile updated successfully!");
+        console.log("✅ Profile update response:", data);
+  
+        if (data.success || data.message === "User updated successfully") {
+          toast.success("✅ Profile updated successfully!");
         } else {
+          console.error("❌ Backend returned an error:", data.error);
           setError(data.error || "Failed to update profile.");
+          toast.error(data.error || "Failed to update profile.");
         }
       })
       .catch((error) => {
-        console.error("Error updating profile:", error);
+        console.error("❌ Network error updating profile:", error);
         setError("Network error while updating profile.");
+        toast.error("Network error while updating profile.");
       });
   };
+  
+  
+  
+  
+  
 
-  const handlePasswordChange = (e: React.FormEvent) => {
+  const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
+  
+    if (!passwords.current || !passwords.new || !passwords.confirm) {
+      alert("All password fields are required.");
+      return;
+    }
+  
     if (passwords.new !== passwords.confirm) {
       alert("New passwords do not match!");
       return;
     }
-    alert("Password changed successfully!");
-    setShowPasswordModal(false);
-    setPasswords({ current: "", new: "", confirm: "" });
+  
+    // Retrieve user ID from session storage
+    const storedUser = sessionStorage.getItem("user");
+    let userId = "";
+  
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        userId = parsedUser.id || parsedUser._id; // Ensure correct ID usage
+      } catch (error) {
+        console.error("❌ Error parsing session storage:", error);
+        setError("Error reading user data. Please log in again.");
+        return;
+      }
+    } else {
+      console.error("❌ No user data found in session storage.");
+      setError("No user data found. Please log in again.");
+      return;
+    }
+  
+    console.log("🔄 Changing password for User ID:", userId);
+  
+    try {
+      const response = await fetch(`http://localhost:8000/api/sign/user/update-password/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: passwords.current,
+          newPassword: passwords.new,
+        }),
+      });
+  
+      const data = await response.json();
+      console.log("✅ Password change response:", data);
+  
+      if (data.success) {
+        alert("✅ Password changed successfully!");
+        setShowPasswordModal(false);
+        setPasswords({ current: "", new: "", confirm: "" });
+      } else {
+        alert(`❌ Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error("❌ Error updating password:", error);
+      alert("❌ Network error while updating password.");
+    }
   };
+  
 
-  const planFeatures = {
+  type PlanType = "free" | "basic" | "premium" | "enterprise";
+
+  const planFeatures: Record<PlanType, string[]> = {
     free: ["5 Properties", "10 Leads/month", "Basic Analytics"],
     basic: [
       "20 Properties",
@@ -352,20 +437,26 @@ export function Settings() {
               <div className="bg-black/5 p-4 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <h3 className="font-medium text-black">Current Plan</h3>
-                  <span className="text-xs bg-black text-white px-2 py-1 rounded-full">
-                    {user.plan.toUpperCase()}
-                  </span>
+                  <span className="text-xs bg-black text-white px-2 py-1 rounded-full"></span>
                 </div>
                 <p className="text-sm text-black/60 mb-4">
                   Valid until {user.planExpiry}
                 </p>
                 <ul className="space-y-2">
-                  {planFeatures[user.plan].map((feature, index) => (
-                    <li key={index} className="text-sm flex items-center">
-                      <CheckCircle className="w-4 h-4 text-black mr-2" />
-                      {feature}
+                  {Object.keys(planFeatures).includes(user.plan) ? (
+                    planFeatures[user.plan as PlanType].map(
+                      (feature, index) => (
+                        <li key={index} className="text-sm flex items-center">
+                          <CheckCircle className="w-4 h-4 text-black mr-2" />
+                          {feature}
+                        </li>
+                      )
+                    )
+                  ) : (
+                    <li className="text-sm text-red-500">
+                      Invalid Plan Selected
                     </li>
-                  ))}
+                  )}
                 </ul>
                 <button className="w-full mt-4 px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-black/80 transition-colors">
                   Upgrade Plan
@@ -405,9 +496,8 @@ export function Settings() {
             <div className="flex items-center">
               <input
                 type="checkbox"
-                checked={user.notifications.emailNotifications}
+                checked={user.notifications?.emailNotifications || false}
                 onChange={() => handleNotificationChange("emailNotifications")}
-                className="w-4 h-4 sm:w-5 sm:h-5 rounded border-black/20 text-black focus:ring-red-500"
               />
               <label className="ml-2 text-sm sm:text-base text-black">
                 Email notifications for new leads
@@ -416,7 +506,7 @@ export function Settings() {
             <div className="flex items-center">
               <input
                 type="checkbox"
-                checked={user.notifications.smsNotifications}
+                checked={user.notifications?.smsNotifications|| false}
                 onChange={() => handleNotificationChange("smsNotifications")}
                 className="w-4 h-4 sm:w-5 sm:h-5 rounded border-black/20 text-black focus:ring-red-500"
               />

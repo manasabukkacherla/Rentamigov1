@@ -38,9 +38,12 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage");
     } else if (role === "admin") {
       navigate("/admindash");
-    } else if (role === "employee") {
-      navigate("/admindash");
-    } else {
+
+    }  else if (role === "employee") {
+      navigate("/empdash");
+    }else {
+
+   
       navigate("/homepage"); // Default route if role is unknown
     }
   };
@@ -71,10 +74,11 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       sessionStorage.setItem("userId", userData.user.id);
       sessionStorage.setItem("role", userData.user.role);
       sessionStorage.setItem("email", userData.user.email);
-      sessionStorage.setItem("fullName", userData.user.fullName);
+      sessionStorage.setItem("fullName", userData.user.fullName || userData.user.name || "");
       sessionStorage.setItem("username", userData.user.username);
 
       console.log("✅ Session Storage Updated:", sessionStorage.getItem("user"));
+      console.log("User Data Response:", userData.user);
 
       redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);
@@ -107,10 +111,11 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       sessionStorage.setItem("userId", userData.user.id);
       sessionStorage.setItem("role", userData.user.role);
       sessionStorage.setItem("email", userData.user.email);
-      sessionStorage.setItem("fullName", userData.user.fullName);
+      sessionStorage.setItem("fullName", userData.user.fullName || userData.user.name || "");
       sessionStorage.setItem("username", userData.user.username);
 
       console.log("✅ Session Storage Updated:", sessionStorage.getItem("user"));
+      console.log("User Data Response:", userData.user);
 
       redirectUser(userData.user.role);
       onLoginSuccess(userData.user.email);

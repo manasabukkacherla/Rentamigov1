@@ -23,6 +23,9 @@ const Headerr: React.FC = () => {
       case "For home owners":
         navigate("/owner-page");
         break;
+      case "Blogs":
+        navigate("/Blogs");
+        break;
       case "Privacy Policy":
         navigate("/Privacypolicy");
         break;
@@ -88,6 +91,7 @@ const Headerr: React.FC = () => {
             "About",
             "Properties",
             "For home owners",
+            "Blogs",
             "Privacy Policy",
             "Tenancy Policy",
             "Contact Us",
@@ -173,7 +177,7 @@ const styles: any = {
     width: "96%",
     height: "97%",
     backgroundColor: "white", // White background remains
-    zIndex: 1001, 
+    zIndex: 1001,
     boxSizing: "border-box",
     borderRadius: "15px",
     overflow: "hidden",
@@ -189,7 +193,7 @@ const styles: any = {
     backgroundSize: "40%", // Adjust size to make it large and centered
     backgroundPosition: "left bottom", // Center the logo
     backgroundRepeat: "no-repeat", // Prevent repeating the image
-   
+
     opacity: 1.9, // Adjust opacity for a lighter look (matches the gray effect)
   },
   closeBtn: {

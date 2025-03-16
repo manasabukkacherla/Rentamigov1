@@ -146,6 +146,8 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
       className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8"
       onMouseEnter={() => setAutoScrollPaused(true)}
       onMouseLeave={() => setAutoScrollPaused(false)}
+      onTouchStart={() => setAutoScrollPaused(true)}
+      onTouchEnd={() => setAutoScrollPaused(false)}
     >
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Property Details</h2>
@@ -169,7 +171,7 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
 
       <div 
         ref={tabsRef}
-        className="flex gap-3 mb-6 overflow-x-auto scrollbar-hide pb-2 scroll-smooth"
+        className="flex gap-3 mb-6 overflow-x-auto pb-2 scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
       >
         {tabs.map(tab => {
           const Icon = tab.icon;
@@ -189,9 +191,13 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
               {activeTab === tab.id && (
                 <div className="absolute bottom-0 left-0 w-full h-1">
                   <div 
-                    className="h-full bg-white/30 rounded-full transition-all duration-5000 animate-progress"
+                    className="h-full bg-white/30 rounded-full transition-all duration-5000"
                     style={{
-                      animation: autoScrollPaused ? 'none' : 'progress 5s linear'
+                      animation: autoScrollPaused ? 'none' : 'progress 5s linear',
+                      '@keyframes progress': {
+                        from: { width: '0%' },
+                        to: { width: '100%' }
+                      }
                     }}
                   />
                 </div>

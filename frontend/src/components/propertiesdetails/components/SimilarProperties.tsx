@@ -74,7 +74,6 @@ const properties = [
   }
 ];
 
-// Map property types to their respective icons
 const propertyTypeIcons: Record<string, React.FC> = {
   'Apartment': Building2,
   'Villa': Home,
@@ -179,8 +178,7 @@ export const SimilarProperties: React.FC = () => {
 
         <div 
           ref={scrollContainerRef}
-          className="flex overflow-x-auto snap-x snap-mandatory gap-6 scroll-smooth scrollbar-hide pb-4 px-2"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex overflow-x-auto snap-x snap-mandatory gap-6 scroll-smooth pb-4 px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {filteredProperties.map((property) => {
             const TypeIcon = propertyTypeIcons[property.type] || Building2;
@@ -201,13 +199,11 @@ export const SimilarProperties: React.FC = () => {
                       />
                     </div>
                     
-                    {/* Property Type Badge */}
                     <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-sm font-medium shadow-md rounded-lg">
                       <TypeIcon className="w-4 h-4" />
                       <span>{property.type}</span>
                     </div>
                     
-                    {/* Featured Ribbon */}
                     {property.featured && (
                       <div className="absolute top-0 left-0">
                         <div className="bg-gray-900 text-white py-1 px-8 rotate-[-45deg] translate-x-[-30%] translate-y-[40%] text-sm font-medium shadow-md">
@@ -216,7 +212,6 @@ export const SimilarProperties: React.FC = () => {
                       </div>
                     )}
                     
-                    {/* Bottom Actions */}
                     <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-t from-black/70 via-black/40 to-transparent">
                       <button 
                         onClick={() => toggleSave(property.id)}

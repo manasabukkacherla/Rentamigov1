@@ -12,9 +12,9 @@ import { Footer } from './components/Footer';
 import { propertyData } from './data';
 import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
-function PropertpageM() {
+function Propertydetail() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const allMedia = [propertyData.video, ...propertyData.images.map(img => img.url)];
+  const allMedia = [propertyData.video, ...propertyData.images.map((img: { url: any; }) => img.url)];
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % allMedia.length);
@@ -26,7 +26,7 @@ function PropertpageM() {
 
   return (
     <div className="min-h-screen bg-gray-100 pb-24 lg:pb-0">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Property Header */}
         <div className="bg-white rounded-xl shadow-lg p-4">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Prestige Lake Ridge</h1>
@@ -55,16 +55,16 @@ function PropertpageM() {
                     className="w-full aspect-video rounded-lg object-cover"
                   />
                 )}
-                
+
                 <button
                   onClick={goToPrevious}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 p-2 rounded-full text-white group-hover:opacity-100 transition-opacity md:opacity-0 opacity-100"
                 >
                   <ChevronLeft className="w-6 h-6" />
                 </button>
                 <button
                   onClick={goToNext}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 p-2 rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 p-2 rounded-full text-white group-hover:opacity-100 transition-opacity md:opacity-0 opacity-100"
                 >
                   <ChevronRight className="w-6 h-6" />
                 </button>
@@ -79,8 +79,8 @@ function PropertpageM() {
           </div>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6">
-          <div className="lg:w-2/3 space-y-6">
+        <div className="flex flex-col lg:flex-row gap-8 justify-center">
+          <div className="lg:w-[65%] space-y-8">
             <BasicInfo details={propertyData} />
             <AmenitiesTabs details={propertyData} />
             <LocationMap />
@@ -89,16 +89,17 @@ function PropertpageM() {
             <LatestInsights />
             <Reviews />
           </div>
-          <div className="lg:w-1/3 lg:max-w-xs">
-            <PricingCard />
+          <div className="lg:w-[30%]">
+            <div className="sticky top-4">
+              <PricingCard />
+            </div>
           </div>
         </div>
       </div>
 
       <Footer />
-      {/* Mobile pricing card is included in the PricingCard component itself */}
     </div>
   );
 }
 
-export default PropertpageM;
+export default Propertydetail;

@@ -1,10 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import PropertpageM from './Propertydetailspage';
+import Propertydetail from './App';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <PropertpageM />
+    <Propertydetail />
   </StrictMode>
 );
