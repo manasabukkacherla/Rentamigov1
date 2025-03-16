@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Blog } from '../blogs/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import  sliderlink  from '../blogs/data/sliderlink';
+
 
 interface ImageSliderProps {
     blogs: Blog[];
   }
-console.log(sliderlink);
+
 const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     useEffect(() => {
