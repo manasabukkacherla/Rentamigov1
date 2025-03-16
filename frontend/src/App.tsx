@@ -15,11 +15,11 @@ import AboutUs from "./components/landingpages/Aboutus";
 import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
-import HomePage from "./components/Blogs/HomePage";
+import HomePage from "./components/blogs/HomePage";
 
 import Loginhome from "./components/Logins/Loginhome";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
-import CreateBlogPage from "./components/Blogs/CreateBlogPage";
+import CreateBlogPage from "./components/blogs/CreateBlogPage";
 
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 
@@ -27,8 +27,8 @@ import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 import Admindash from "./components/dashadmin/admdashboard";
 import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
-import UserDashboard from "./components/Blogs/UserDashboard";
-import BlogDetail from "./components/Blogs/BlogDetail";
+import UserDashboard from "./components/blogs/UserDashboard";
+import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/Blogs/EditorMenuBar";
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -61,8 +61,7 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
 
-          <Route path="/Userdashboard/*" element={<UsrDashboard />} /> {/* Ensure wildcard `/*` */}
-
+          <Route path="/Userdashboard/" element={<UsrDashboard />} /> 
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />

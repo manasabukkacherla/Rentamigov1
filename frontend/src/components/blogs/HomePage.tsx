@@ -9,8 +9,10 @@ import TrendingSection from "../blogs/TrendingSection";
 import TopicPicks from "../blogs/TopicPicks";
 import BlogCard from "../blogs/BlogCard";
 import HomeFooter from "../blogs/HomeFooter";
-import Navbar from "../blogs/Navbar";
-import { Blogpost } from "./types";
+
+import Navbar from "./Navbar";
+import { Blogpost } from "@/types";
+
 
 
 const HomePage = () => {
