@@ -30,6 +30,7 @@ import Propertydetail from "./components/propertiesdetails/App";
 import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/editor/EditorMenuBar";
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -41,6 +42,7 @@ const App = () => {
   return (
     <GoogleOAuthProvider clientId={client_id}>
       <BrowserRouter>
+      <Toaster /> 
         <Routes>
           {/* Redirect "/" to "/Homepage" */}
           <Route path="/" element={<Navigate to="/Homepage" replace />} />
@@ -61,7 +63,7 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
 
-          <Route path="/Userdashboard/" element={<UsrDashboard />} /> 
+          <Route path="/Userdashboard/*" element={<UsrDashboard />} /> 
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />

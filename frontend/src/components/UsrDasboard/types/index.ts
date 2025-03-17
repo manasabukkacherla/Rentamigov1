@@ -15,9 +15,7 @@ export interface Lead {
   date: string;
   flatNo: string;
   status: 'New' | 'Contacted' | 'Interested' | 'Not Interested' | 'Converted' | 'Visited' | 'RNR' | 'Call Back' | 'No Requirement' | 'Different Requirement';
-  createdAt: string;
 }
-
 
 export interface DashboardStats {
   totalProperties: number;
@@ -27,18 +25,18 @@ export interface DashboardStats {
 }
 
 export interface User {
-  id: any;
-  photoUrl: string | undefined;
-  role: any;
-  username: string | number | readonly string[] | undefined;
-  phone: string | number | readonly string[] | undefined;
-  company: string | number | readonly string[] | undefined;
-  address: string | number | readonly string[] | undefined;
-  plan: any;
-  planExpiry: ReactNode;
-  tokens: ReactNode;
+  id: string;
   fullName: string;
+  username: string;
   email: string;
+  role: string;
+  photoUrl: string;
+  tokens: number;
+  plan: 'free' | 'basic' | 'premium' | 'enterprise';
+  planExpiry: string;
+  phone: string;
+  company: string;
+  address: string;
   notifications: {
     emailNotifications: boolean;
     smsNotifications: boolean;
