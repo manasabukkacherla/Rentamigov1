@@ -29,7 +29,8 @@ import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
 import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
-import EditorMenuBar from "./components/Blogs/EditorMenuBar";
+
+
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("VITE_GOOGLE_CLIENT_ID is not defined");
@@ -46,8 +47,7 @@ const App = () => {
 
           {/* Public Routes */}
           <Route path="/Homepage" element={<Homepage />} />
-          <Route path="/signin" element={<LoginForm />} />
-          <Route path="/signup" element={<SignUpForm />} />
+          
           <Route path="/Aboutus" element={<AboutUs />} />
           <Route path="/Contactus" element={<ContactUs />} />
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
@@ -76,7 +76,7 @@ const App = () => {
           {/* new admin dashboard*/}
           <Route path="/admindash" element={<Admindash />} />
           <Route path="/empdash" element={<Empapp />} />
-
+          <Route path="/propertypage" element={<Propertydetail />} />
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
           <Route path="/blogs" element={<HomePage />} />
