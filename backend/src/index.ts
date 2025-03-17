@@ -20,7 +20,7 @@ import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
 
 import enquiryRoutes from "./routes/enquiryRoutes";
-import signupRouter from "./routes/signupform";// Replace with the correct file path for User
+import signupRouter from "./routes/signupform"; // Replace with the correct file path for User
 import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
 //import leadsRouter from "./routes/leads";
@@ -37,7 +37,6 @@ import TokenRouter from "./routes/Tokenform";
 import blogRouter from "./routes/blogs/blogRoutes";
 import commentsRouter from "./routes/blogs/commentsRouter";
 import reviewRouter from "./routes/blogs/reviewRoutes";
-
 
 dotenv.config();
 
@@ -63,38 +62,37 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" })); // Set JSON payload size limit
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encoded payload size limit
 
-
 // Routes
 app.use("/api/verify", verifyRouter);
-app.use("/api/Report", Reportrouter); // Report routers 
+app.use("/api/Report", Reportrouter); // Report routers
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", Employeerouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
 
-app.use("/api/forms",subscriptionRouter);
-app.use("/api/owner-interest", ownerInterestRouter)
+app.use("/api/forms", subscriptionRouter);
+app.use("/api/owner-interest", ownerInterestRouter);
 
-//Property listing apis 
+//Property listing apis
 app.use("/api/property-selection", Propertyrouter);
-app.use("/api/basicdetails", BasicDetailsrouter)
+app.use("/api/basicdetails", BasicDetailsrouter);
 app.use("/api/properties", PropertyDetailsrouter);
 
 //Subscription pllan routes
-app.use("/api/subscription", Subscriptionrouter)
+app.use("/api/subscription", Subscriptionrouter);
 //Token plan routes
 app.use("/api/tokens", TokenRouter);
 
 app.use("/api/service", enquiryRoutes);
-app.use("/api/sign",signupRouter);
+app.use("/api/sign", signupRouter);
 app.use("/api/loginuser", loginRouter);
-app.use("/api", forgotPasswordRoutes); 
+app.use("/api", forgotPasswordRoutes);
 //app.use("/api/leads", leadsRouter);
 
 app.use("/api/blog", blogRouter);
-app.use("/api/reviews", reviewRouter)
-app.use("/api/comments", commentsRouter)
+app.use("/api/reviews", reviewRouter);
+app.use("/api/comments", commentsRouter);
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {
