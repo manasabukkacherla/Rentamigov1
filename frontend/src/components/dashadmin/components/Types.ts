@@ -14,6 +14,7 @@ export interface Plan {
   }
   export interface TokenPackage {
     id: string;
+    _id?: string; // ✅ Make _id optional
     name: string;
     tokens: number;
     price: number;
@@ -25,4 +26,6 @@ export interface Plan {
     description: string;
     status: string; // ✅ Added status property
   }
+  
+
   

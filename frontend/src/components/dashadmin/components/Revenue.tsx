@@ -27,7 +27,7 @@ const Revenue = () => {
       const data = await response.json();
       setSubscriptionPlans(data);
 
-      toast.success("Subscription plans loaded successfully!");
+      // toast.success("Subscription plans loaded successfully!");
     } catch (error) {
       console.error("Error fetching plans:", error);
       toast.error("Failed to fetch subscription plans!");
@@ -43,7 +43,7 @@ const Revenue = () => {
       const data = await response.json();
       setTokenPackages(data);
 
-      toast.success("Token packages loaded successfully!");
+      // toast.success("Token packages loaded successfully!");
     } catch (error) {
       console.error("Error fetching tokens:", error);
       toast.error("Failed to fetch token packages!");
