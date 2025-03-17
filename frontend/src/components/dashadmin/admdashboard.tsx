@@ -11,6 +11,8 @@ import {
   X,
   UserCircle
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import Dashboard from './components/Dashboard';
 import Properties from './components/Properties';
 import Revenue from './components/Revenue';
@@ -19,11 +21,13 @@ import Analytics from './components/Analytics';
 import Notifications from './components/Notifications';
 import Settings from './components/Settings';
 import Sidebar from './components/Sidebar';
-import UserStats from './components/UserStats.tsx';
+import UserStats from './components/UserStats';
 
 function Admindash() {
+  const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -35,6 +39,30 @@ function Admindash() {
     { id: 'notifications', label: 'Notifications', icon: Bell },
     { id: 'settings', label: 'Settings', icon: SettingsIcon },
   ];
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    // Clear session storage
+    sessionStorage.clear();
+    
+    // Show goodbye message
+    toast.success('Thank you for using RentAmigo. See you soon!', {
+      position: "top-center",
+      autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+    });
+
+    // Redirect after toast shows
+    setTimeout(() => {
+      navigate('/login');
+    }, 2000);
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -85,7 +113,8 @@ function Admindash() {
           onSectionChange={(section) => {
             setActiveSection(section);
             setIsMobileMenuOpen(false);
-          }} 
+          }}
+          onLogout={handleLogout}
         />
       </div>
 
@@ -103,6 +132,34 @@ function Admindash() {
           {renderContent()}
         </div>
       </main>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirm Logout
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to logout?
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

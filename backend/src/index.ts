@@ -29,6 +29,15 @@ import Propertyrouter from "./routes/PropertySelection";
 import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
 import PropertyDetailsrouter from "./routes/Propertydetails";
+import Employeerouter from "./routes/employee";
+
+import Subscriptionrouter from "./routes/Subscriptionmodel";
+import TokenRouter from "./routes/Tokenform";
+
+import blogRouter from "./routes/blogs/blogRoutes";
+import commentsRouter from "./routes/blogs/commentsRouter";
+import reviewRouter from "./routes/blogs/reviewRoutes";
+
 
 dotenv.config();
 
@@ -60,7 +69,7 @@ app.use("/api/verify", verifyRouter);
 app.use("/api/Report", Reportrouter); // Report routers 
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
-app.use("/api/employees", employeeRouter); // Employee routes
+app.use("/api/employees", Employeerouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
 
@@ -72,6 +81,10 @@ app.use("/api/property-selection", Propertyrouter);
 app.use("/api/basicdetails", BasicDetailsrouter)
 app.use("/api/properties", PropertyDetailsrouter);
 
+//Subscription pllan routes
+app.use("/api/subscription", Subscriptionrouter)
+//Token plan routes
+app.use("/api/tokens", TokenRouter);
 
 app.use("/api/service", enquiryRoutes);
 app.use("/api/sign",signupRouter);
@@ -79,6 +92,9 @@ app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes); 
 //app.use("/api/leads", leadsRouter);
 
+app.use("/api/blog", blogRouter);
+app.use("/api/reviews", reviewRouter)
+app.use("/api/comments", commentsRouter)
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {

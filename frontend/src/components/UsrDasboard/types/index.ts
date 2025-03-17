@@ -27,6 +27,7 @@ export interface DashboardStats {
 }
 
 export interface User {
+  id: any;
   photoUrl: string | undefined;
   role: any;
   username: string | number | readonly string[] | undefined;

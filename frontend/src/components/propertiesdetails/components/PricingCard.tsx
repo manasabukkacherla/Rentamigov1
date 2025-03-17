@@ -54,7 +54,7 @@ export const PricingCard: React.FC = () => {
   return (
     <>
       {/* Desktop Version - Fixed on the right side */}
-      <div className="hidden lg:block sticky top-6 bg-white rounded-lg p-4 shadow-lg max-h-[calc(100vh-3rem)] overflow-auto">
+      <div className="hidden lg:block sticky top-6 bg-white rounded-lg p-4 shadow-lg [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex items-center gap-2 mb-4">
           <IndianRupee className="w-8 h-5 text-gray-900" />
           <span className="text-2xl font-bold text-gray-900">25,000</span>
@@ -81,7 +81,7 @@ export const PricingCard: React.FC = () => {
         {showMobilePricing && (
           <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowMobilePricing(false)}>
             <div 
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[90vh] overflow-y-auto scrollbar-hide"
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-6 max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex justify-between items-center mb-6">
