@@ -82,7 +82,7 @@ app.use("/api/basicdetails", BasicDetailsrouter)
 app.use("/api/properties", PropertyDetailsrouter);
 
 //Subscription pllan routes
-app.use("/api/subscription", Subscriptionrouter)
+app.use("/api/subscription", Subscriptionrouter);
 //Token plan routes
 app.use("/api/tokens", TokenRouter);
 
