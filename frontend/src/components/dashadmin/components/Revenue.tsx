@@ -134,7 +134,11 @@ const Revenue = () => {
   const handleAddToken = () => {
     setShowTokenForm(true);
   };
-
+  const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
+  const handleEditToken = (tokenId: string) => {
+    setEditingToken(tokenId);
+    setShowTokenForm(true);
+  };
   const handleSubmitPlan = () => {
     const plan = {
       id: Date.now().toString(),
@@ -143,6 +147,8 @@ const Revenue = () => {
     };
     setSubscriptionPlans([...subscriptionPlans, plan]);
     setShowPlanForm(false);
+showToast.success("Plan created successfully!"); // ✅ Added success toast
+
     setNewPlan({
       name: "",
       price: 0,
@@ -164,6 +170,8 @@ const Revenue = () => {
     };
     setTokenPackages([...tokenPackages, token]);
     setShowTokenForm(false);
+showToast.success("Token package created successfully!"); // ✅ Added success toast
+
     setNewToken({
       name: "",
       tokens: 0,
@@ -213,10 +221,12 @@ const Revenue = () => {
       if (!response.ok) throw new Error("Failed to delete plan");
 
       // ✅ Remove the deleted plan from the state
-      setPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== id));
+      setSubscriptionPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== id));
+
 
       // ✅ Show success toast notification
-      showToast.success("Subscription Plan deleted successfully!");
+      showToast.success("Plan deleted successfully!");
+
     } catch (error) {
       console.error("Error deleting plan:", error);
       showToast.error("Failed to delete subscription plan");
@@ -224,9 +234,9 @@ const Revenue = () => {
   };
 
   const handleDeleteToken = (tokenId: string) => {
-    setTokenPackages((tokens) =>
-      tokens.filter((token) => token.id !== tokenId)
-    );
+    setTokenPackages((tokens) => tokens.filter((token) => token.id !== tokenId));
+    showToast.success("Token Package deleted successfully!"); // ✅ Fixed success toast
+    
   };
 
   return (
@@ -283,11 +293,7 @@ const Revenue = () => {
           </div>
           <div className="p-6">
             <SubscriptionPlans
-              onEdit={(plan) => {
-                console.log("Editing plan:", plan); // ✅ Debugging log
-                setEditingPlan(plan);
-                setShowPlanForm(true);
-              }}
+              onEdit={(plan) => handleEditPlan(plan)}
               onDelete={handleDelete}
             />
           </div>
@@ -305,7 +311,8 @@ const Revenue = () => {
           <div className="p-6">
             <TokenPackages
               packages={tokenPackages}
-              onEdit={setEditingToken}
+              onEdit={handleEditToken}
+
               onDelete={handleDeleteToken}
             />
           </div>
@@ -314,24 +321,26 @@ const Revenue = () => {
 
 {showPlanForm && (
   <PlanForm
-    editingPlan={editingPlan} // ✅ Ensure this is passed correctly
+    editingPlan={editingPlan}
+    onSave={handleSubmitPlan} // ✅ Fixing missing onSave prop
     onClose={() => {
       setShowPlanForm(false);
       setEditingPlan(undefined);
- // ✅ Reset after closing
     }}
   />
 )}
 
 
-      {showTokenForm && (
-        <TokenForm
-          data={newToken}
-          onChange={setNewToken}
-          onSubmit={handleSubmitToken}
-          onCancel={() => setShowTokenForm(false)}
-        />
-      )}
+
+{showTokenForm && (
+  <TokenForm
+    data={newToken}
+    onChange={setNewToken}
+    onSubmit={handleSubmitToken} // ✅ Fixing missing onSubmit prop
+    onCancel={() => setShowTokenForm(false)}
+  />
+)}
+
     </div>
   );
 };
