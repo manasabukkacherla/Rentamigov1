@@ -45,7 +45,7 @@ const Settings: React.FC = () => {
     currentPassword: "",
     newPassword: "",
   });
-  
+
   const [profile, setProfile] = useState<ProfileData>({
     name: "",
     email: "",
@@ -82,17 +82,17 @@ const Settings: React.FC = () => {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/sign/user/${userId}`
+          `http://localhost:8000/api/sign/employee/${userId}`
         );
         const data = await response.json();
 
         if (response.ok) {
           setProfile({
-            name: data.user.fullName || "",
-            email: data.user.email || "",
-            phone: data.user.phone || "",
+            name: data.employee.name || data.employee.fullName || "",
+            email: data.employee.email || "",
+            phone: data.employee.phone || "",
             avatar:
-              data.user.avatar ||
+              data.employee.avatar ||
               "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
           });
         } else {
@@ -134,11 +134,11 @@ const Settings: React.FC = () => {
     const userId = userData.id;
 
     const updatedUserData = {
-      fullName: profile.name || userData.fullName,
+      name: profile.name || userData.name,
       phone: profile.phone || userData.phone,
     };
 
-    if (!updatedUserData.fullName || !updatedUserData.phone) {
+    if (!updatedUserData.name || !updatedUserData.phone) {
       setToast({
         show: true,
         message: "Full name and phone number cannot be empty.",
@@ -150,7 +150,7 @@ const Settings: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/sign/user/update/${userId}`,
+        `http://localhost:8000/api/sign/employee/update/${userId}`,
         {
           method: "PUT",
           headers: {
@@ -171,14 +171,14 @@ const Settings: React.FC = () => {
 
         const updatedSessionUser = {
           ...userData,
-          fullName: updatedUserData.fullName,
+          fullName: updatedUserData.name,
           phone: updatedUserData.phone,
         };
         sessionStorage.setItem("user", JSON.stringify(updatedSessionUser));
 
         setProfile((prevProfile) => ({
           ...prevProfile,
-          name: updatedUserData.fullName,
+          name: updatedUserData.name,
           phone: updatedUserData.phone,
         }));
       } else {
@@ -228,7 +228,7 @@ const Settings: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/sign/user/update-password/${userId}`,
+        `http://localhost:8000/api/sign/employee/update-password/${userId}`,
         {
           method: "PUT",
           headers: {
