@@ -29,7 +29,7 @@ import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
 import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
-
+import EditorMenuBar from "./components/editor/EditorMenuBar";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -47,7 +47,7 @@ const App = () => {
 
           {/* Public Routes */}
           <Route path="/Homepage" element={<Homepage />} />
-          
+      
           <Route path="/Aboutus" element={<AboutUs />} />
           <Route path="/Contactus" element={<ContactUs />} />
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
