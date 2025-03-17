@@ -85,12 +85,13 @@ const Revenue = () => {
 
       const savedPlan = await response.json();
 
-      // ✅ Replace temp ID with backend ID
-      setSubscriptionPlans((prev) =>
-        prev.map((item) =>
-          item.id === plan.id || item.id === savedPlan.tempId ? savedPlan : item
-        )
-      );
+// ✅ Replace temporary ID or existing plan ID with the saved ID
+setSubscriptionPlans((prev) =>
+  prev.map((item) =>
+    item.id === plan.id || item.id === plan.tempId ? { ...savedPlan } : item
+  )
+);
+
 
       setShowPlanForm(false);
     } catch (error) {
@@ -107,43 +108,30 @@ const Revenue = () => {
       const url = token.id
         ? `http://localhost:8000/api/token/${token.id}`
         : `http://localhost:8000/api/token`;
-
-      // ✅ Optimistic Update
-      if (token.id) {
-        setTokenPackages((prev) =>
-          prev.map((item) => (item.id === token.id ? token : item))
-        );
-        toast.success(`Token package "${token.name}" updated successfully!`);
-      } else {
-        const tempId = Date.now().toString();
-        setTokenPackages((prev) => [...prev, { ...token, id: tempId }]);
-        toast.success(`New token package "${token.name}" created successfully!`);
-      }
-
+  
       const response = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(token),
       });
-
+  
       if (!response.ok) throw new Error("Failed to save token");
-
-      const savedToken = await response.json();
-
-      // ✅ Replace temp ID with backend ID
-      setTokenPackages((prev) =>
-        prev.map((item) =>
-          item.id === token.id || item.id === savedToken.tempId ? savedToken : item
-        )
-      );
-
+  
+      toast.success(`Token package "${token.name}" saved successfully!`);
+  
+      // ✅ Force state refresh from backend to avoid mismatch
+      await fetchTokenPackages();
+  
       setShowTokenForm(false);
     } catch (error) {
       console.error("Error saving token:", error);
       toast.error("Failed to save token package!");
-      fetchTokenPackages(); // ✅ Rollback if failed
+  
+      // ✅ Rollback by refetching from backend
+      fetchTokenPackages();
     }
   };
+  
 
   return (
     <div>

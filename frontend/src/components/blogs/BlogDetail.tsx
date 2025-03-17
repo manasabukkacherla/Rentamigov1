@@ -4,7 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import {   useParams, Link } from 'react-router-dom';
 import { Clock, ThumbsUp, MessageCircle, Share2, ArrowLeft, Star, Send } from "lucide-react"
-import {  blogPosts as initialBlogPosts } from "../Blogs/data/blogData"
+import {  blogPosts as initialBlogPosts } from "../blogs/data/blogData"
 import type { BlogPostType, Comment, Review } from "../Blogs/types/type"
 import Navbar from "./Navbar";
 
@@ -48,26 +48,44 @@ const BlogDetail: React.FC = () => {
     e.preventDefault()
     if (post && newComment.trim()) {
       const newCommentObj: Comment = {
-        id: post.commentsList.length + 1,
+        id: Date.now(), // ✅ Unique ID to avoid conflicts
         text: newComment,
         author: {
           name: "You",
           avatar:
-            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1760&q=80",
+            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlcnxlbnwwfHx8fHw%3D&auto=format&fit=crop&w=1760&q=80",
         },
         date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
         likes: 0,
       }
-
-      setPost({
-        ...post,
-        comments: post.comments + 1,
-        commentsList: [newCommentObj, ...post.commentsList],
-      })
+  
+      // ✅ Create a new object to avoid state mutation
+      setPost((prev) => 
+        prev
+          ? {
+              ...prev,
+              comments: prev.comments + 1,
+              commentsList: [newCommentObj, ...prev.commentsList],
+            }
+          : prev
+      )
+  
       setNewComment("")
     }
   }
-
+  
+  const handleDeleteComment = (commentId: number) => {
+    if (post) {
+      const updatedCommentsList = post.commentsList.filter((comment) => comment.id !== commentId);
+  
+      setPost({
+        ...post,
+        commentsList: updatedCommentsList,
+        comments: updatedCommentsList.length, // ✅ Update comment count
+      });
+    }
+  };
+  
   const handleAddReview = (e: React.FormEvent) => {
     e.preventDefault()
     if (post && newReview.trim()) {
@@ -233,7 +251,47 @@ const BlogDetail: React.FC = () => {
               </div>
             </form>
             <main className="max-w-full mx-auto py-8">
-        
+            <div className="space-y-6">
+  {post.commentsList.map((comment) => (
+    <div key={comment.id} className="flex space-x-4">
+      <img
+        src={comment.author.avatar || "/placeholder.svg"}
+        alt={comment.author.name}
+        className="h-10 w-10 rounded-full"
+      />
+      <div className="flex-1">
+        <div className="bg-gray-50 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <span className="font-medium text-gray-900">{comment.author.name}</span>
+              <span className="text-gray-500 text-sm ml-2">{comment.date}</span>
+            </div>
+            {/* ✅ Delete Button */}
+            <button
+              onClick={() => handleDeleteComment(comment.id)}
+              className="text-red-500 hover:text-red-700 text-sm"
+            >
+              Delete
+            </button>
+          </div>
+          <p className="text-gray-700">{comment.text}</p>
+        </div>
+        <div className="flex items-center mt-2 text-sm text-gray-500">
+          <button
+            className="flex items-center hover:text-black"
+            onClick={() => handleCommentLike(comment.id)}
+          >
+            <ThumbsUp className="h-4 w-4 mr-1" />
+            <span>{comment.likes} Likes</span>
+          </button>
+          <span className="mx-2">•</span>
+          <button className="hover:text-black">Reply</button>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
             </main>
             <div className="space-y-6">
               {post.commentsList.map((comment) => (

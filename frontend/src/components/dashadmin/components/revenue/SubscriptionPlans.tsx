@@ -71,22 +71,22 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ plans, onEdit, on
 
             {/* ✅ Features */}
             <ul className="mt-4 space-y-2">
-              {plan.features.map((feature, index) => (
-                <li key={index} className="flex items-center text-gray-600">
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-center text-gray-600">
                   <DollarSign className="w-5 h-5 text-green-500 mr-2" />
                   {feature}
                 </li>
               ))}
+
             </ul>
 
             {/* ✅ Status */}
             <div className="mt-4 pt-4 border-t">
               <span
-                className={`px-3 py-1 rounded-full text-sm ${
-                  plan.status === "active"
+                className={`px-3 py-1 rounded-full text-sm ${plan.status === "active"
                     ? "bg-green-100 text-green-800"
                     : "bg-yellow-100 text-yellow-800"
-                }`}
+                  }`}
               >
                 {plan.status}
               </span>
