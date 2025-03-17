@@ -42,7 +42,7 @@ const App = () => {
   return (
     <GoogleOAuthProvider clientId={client_id}>
       <BrowserRouter>
-      <Toaster /> 
+       <Toaster /> 
         <Routes>
           {/* Redirect "/" to "/Homepage" */}
           <Route path="/" element={<Navigate to="/Homepage" replace />} />
