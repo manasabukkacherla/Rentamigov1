@@ -114,7 +114,7 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
       }
   
       await blog.incrementViews(); // Increment views count
-      res.status(200).json(blog);
+      res.status(200).json({ success: true, blog});
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -141,7 +141,7 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
   // ✅ Blog Router
   const blogRouter = express.Router();
   blogRouter.post("/add", createBlog);
-  blogRouter.get("/list", listBlogs);
+  blogRouter.get("/", listBlogs);
   blogRouter.put("/edit/:id", editBlog);
   blogRouter.delete("/delete/:id", deleteBlog);
   blogRouter.get("/:id", getBlogById);

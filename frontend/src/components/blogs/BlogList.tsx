@@ -3,7 +3,7 @@ import { Blogpost } from '../Blogs/types';
 import BlogCardS from './BlogCardS';
 
 interface Blog {
-  id: string,
+  _id: string,
   title: string;
     excerpt: string;
     content: string;
@@ -18,7 +18,7 @@ interface Blog {
     likes: number;
     views: number; // New: View count
     shares: 0,
-    comments: string[];
+    comments: { userId: string; comment: string; createdAt: Date; }[]
     reviews: string[];
     createdAt: Date;
     updatedAt: Date;
@@ -88,7 +88,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {blogs.map(blog => (
-          <BlogCardS key={blog.id} blog={blog} />
+          <BlogCardS key={blog._id} blog={blog} />
         ))}
       </div>
     );
@@ -106,7 +106,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
         style={{ width: `${blogs.length * 33.33}%` }}
       >
         {blogs.map(blog => (
-          <div key={blog.id} className="w-1/3 px-4">
+          <div key={blog._id} className="w-1/3 px-4">
             <BlogCardS blog={blog} />
           </div>
         ))}

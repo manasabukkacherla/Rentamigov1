@@ -17,12 +17,13 @@ interface Blog {
     readTime: number;
     author: string;
     likes: number;
-    views?: number; // New: View count
+    views: number; // New: View count
     shares: 0,
     reviews: string[];
     comments: { userId: string; comment: string; createdAt: Date }[];
     createdAt: Date;
     updatedAt: Date;
+    userHasLiked?:boolean
 }
 
 interface BlogCardProps {
@@ -85,7 +86,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
           
           {blog.views && (
             <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-              {blog.views.toLocaleString()} views
+              {blog.views.toLocaleString()}views
             </span>
           )}
         </div>
@@ -106,8 +107,8 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
       <div className="flex items-center justify-between pt-4 border-t border-gray-100 px-6 pb-6">
           <div className="flex items-center">
             <img 
-              src={blog.author.avatar} 
-              alt={blog.author.name} 
+              // src={blog.author.avatar} 
+              // alt={blog.author.name} 
               className="h-8 w-8 rounded-full mr-2"
             />
             <span className="text-sm font-medium text-gray-900">John Doe</span>

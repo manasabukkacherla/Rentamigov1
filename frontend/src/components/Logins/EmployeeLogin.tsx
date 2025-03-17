@@ -11,7 +11,7 @@ interface LoginProps {
   onLoginSuccess: (email: string) => void;
 }
 
-function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
+function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const [showTerms, setShowTerms] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -19,7 +19,6 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const storedUser = sessionStorage.getItem("user");
   // 🔹 Check session storage on component mount
   useEffect(() => {
     const storedUser = sessionStorage.getItem("user");
@@ -44,11 +43,6 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage"); // Default route if role is unknown
     }
   };
-
-  // 🔹 Prevent rendering the login page if the user is already logged in
-  if (storedUser) {
-    return null; // Do not render the login page UI
-  }
 
   // 🔹 Handle Google Authentication Success
   const handleGoogleSuccess = async (credentialResponse: any) => {
@@ -112,32 +106,32 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/loginuser/login",
+        "http://localhost:8000/api/loginuser/emp-login",
         formData
       );
       const userData = response.data;
-
+      console.log(userData);
       // ✅ Store full user details in sessionStorage
-      sessionStorage.setItem("user", JSON.stringify(userData.user));
+      sessionStorage.setItem("user", JSON.stringify(userData.employee));
 
       // ✅ Store userId separately for easy API access
-      sessionStorage.setItem("userId", userData.user.id);
-      sessionStorage.setItem("role", userData.user.role);
-      sessionStorage.setItem("email", userData.user.email);
+      sessionStorage.setItem("userId", userData.employee.id);
+      sessionStorage.setItem("role", userData.employee.role);
+      sessionStorage.setItem("email", userData.employee.email);
       sessionStorage.setItem(
         "fullName",
-        userData.user.fullName || userData.user.name || ""
+        userData.employee.name || userData.employee.fullName || ""
       );
-      sessionStorage.setItem("username", userData.user.username);
+      sessionStorage.setItem("username", userData.employee.email);
 
       console.log(
         "✅ Session Storage Updated:",
         sessionStorage.getItem("user")
       );
-      console.log("User Data Response:", userData.user);
+      console.log("User Data Response:", userData.employee);
 
-      redirectUser(userData.user.role);
-      onLoginSuccess(userData.user.email);
+      redirectUser(userData.employee.role);
+      onLoginSuccess(userData.employee.email);
     } catch (err) {
       setError("Invalid email or password");
     } finally {
@@ -253,13 +247,6 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
             </>
           )}
         </button>
-        <button
-          type="button"
-          onClick={() => navigate("/emp-login")} // ✅ Direct navigation without role dependency
-          className="mt-4 w-full bg-gradient-to-r from-green-500 to-teal-500 text-white py-3 px-6 rounded-xl hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
-        >
-          Sign In as Employee
-        </button>
       </form>
 
       <div className="mt-8 text-center">
@@ -279,4 +266,4 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   );
 }
 
-export default Login;
+export default EmployeeLogin;

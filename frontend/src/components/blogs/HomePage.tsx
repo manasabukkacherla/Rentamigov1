@@ -82,8 +82,8 @@ const HomePage = () => {
   const trendingBlogs = [...blogPosts].sort((a, b) => b.shares ?? 0 - (a.shares ?? 0)).slice(0, 3);
 
   const fetchBlogs = async () => {
-    const response = await axios.get('http://localhost:8000/api/blog/list');
-    console.log(response.data)
+    const response = await axios.get('http://localhost:8000/api/blog/');
+    // console.log(response.data)
 
     if(response.data.success) {
       return response.data.data;
