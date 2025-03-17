@@ -87,35 +87,35 @@ const CreateBlogPage = () => {
       }
 
       // Trigger auto-save
-      handleAutoSave()
+      // handleAutoSave()
     },
   })
 
-  // Auto-save functionality
-  const handleAutoSave = () => {
-    setIsSaving(true)
-    // Simulate saving to localStorage
-    const blogData = {
-      title,
-      content,
-      excerpt,
-      tags,
-      coverImage,
-      category,
-      readTime,
-    }
-    localStorage.setItem("blog_draft", JSON.stringify(blogData))
+  // // Auto-save functionality
+  // const handleAutoSave = () => {
+  //   setIsSaving(true)
+  //   // Simulate saving to localStorage
+  //   const blogData = {
+  //     title,
+  //     content,
+  //     excerpt,
+  //     tags,
+  //     coverImage,
+  //     category,
+  //     readTime,
+  //   }
+  //   // localStorage.setItem("blog_draft", JSON.stringify(blogData))
 
-    setTimeout(() => {
-      setIsSaving(false)
-      setAutoSaveMessage("Draft saved automatically")
+  //   setTimeout(() => {
+  //     setIsSaving(false)
+  //     setAutoSaveMessage("Draft saved automatically")
 
-      // Clear the message after 3 seconds
-      setTimeout(() => {
-        setAutoSaveMessage("")
-      }, 3000)
-    }, 1000)
-  }
+  //     // Clear the message after 3 seconds
+  //     setTimeout(() => {
+  //       setAutoSaveMessage("")
+  //     }, 3000)
+  //   }, 1000)
+  // }
 
   // Load blog data if editing
   useEffect(() => {
@@ -187,14 +187,14 @@ const CreateBlogPage = () => {
       }
 
       // Trigger auto-save
-      handleAutoSave()
+      // handleAutoSave()
     }
   }
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove))
     // Trigger auto-save
-    handleAutoSave()
+    // handleAutoSave()
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,7 +214,7 @@ const CreateBlogPage = () => {
         }
 
         // Trigger auto-save
-        handleAutoSave()
+        // handleAutoSave()
       }
       reader.readAsDataURL(file)
     }
@@ -515,7 +515,7 @@ const CreateBlogPage = () => {
                               return newErrors
                             })
                           }
-                          handleAutoSave()
+                          // handleAutoSave()
                         }}
                         className={`w-full px-4 py-3 border ${errors.title ? "border-red-500" : "border-gray-300"
                           } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
@@ -541,7 +541,7 @@ const CreateBlogPage = () => {
                               return newErrors
                             })
                           }
-                          handleAutoSave()
+                          // handleAutoSave()
                         }}
                         rows={3}
                         className={`w-full px-4 py-3 border ${errors.excerpt ? "border-red-500" : "border-gray-300"
@@ -702,7 +702,7 @@ const CreateBlogPage = () => {
                         currentTag={currentTag}
                         onTagChange={(value) => {
                           setCurrentTag(value)
-                          handleAutoSave()
+                          // handleAutoSave()
                         }}
                         onAddTag={handleAddTag}
                         onRemoveTag={handleRemoveTag}
@@ -721,7 +721,7 @@ const CreateBlogPage = () => {
                         value={category}
                         onChange={(e) => {
                           setCategory(e.target.value);
-                          handleAutoSave();
+                          // handleAutoSave();
                         }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                         placeholder="Enter category"
@@ -756,7 +756,7 @@ const CreateBlogPage = () => {
                           value={readTime}
                           onChange={(e) => {
                             setReadTime(Number.parseInt(e.target.value) || 5)
-                            handleAutoSave()
+                            // handleAutoSave()
                           }}
                           min="1"
                           max="60"

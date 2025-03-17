@@ -28,6 +28,7 @@ import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/editor/EditorMenuBar";
 import EmployeeLogin from "./components/Logins/EmployeeLogin";
+import { ToastContainer } from "react-toastify";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {

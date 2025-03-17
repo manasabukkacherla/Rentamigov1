@@ -143,6 +143,8 @@ const BlogDetail: React.FC = () => {
     )
   }
 
+  const plainText = post.content.replace(/<\/?[^>]+(>|$)/g, "");
+
   return (
     <div className="max-w-7xl w-full mx-auto px-4 sm:px-6">
       <Navbar/>
@@ -182,7 +184,7 @@ const BlogDetail: React.FC = () => {
           </div>
 
           <div className="prose max-w-none text-gray-700 mb-8">
-            <p className="mb-4">{post.content}</p>
+            <p className="mb-4">{plainText}</p>
           </div>
 
           <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
