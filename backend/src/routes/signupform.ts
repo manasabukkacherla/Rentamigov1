@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import User from "../models/signup"; // Import User model
 import transporter from "../utils/emailservice"; // Import email transporter
+import Employee from "../models/employee";
 
 const signupRouter = express.Router();
 
@@ -18,7 +19,8 @@ signupRouter.post("/send-otp", async (req: Request, res: Response) => {
 
     // Check if email is already registered
     const existingUser = await User.findOne({ email });
-    if (existingUser) return res.status(400).json({ error: "Email already registered" });
+    if (existingUser)
+      return res.status(400).json({ error: "Email already registered" });
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -48,7 +50,8 @@ signupRouter.post("/send-otp", async (req: Request, res: Response) => {
 signupRouter.post("/verify-otp", async (req: Request, res: Response) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ error: "Email and OTP are required" });
+    if (!email || !otp)
+      return res.status(400).json({ error: "Email and OTP are required" });
 
     // Check OTP validity (For real implementation, store OTP in DB)
     if (!verifiedEmails.has(email)) {
@@ -72,7 +75,18 @@ signupRouter.post("/verify-otp", async (req: Request, res: Response) => {
  */
 signupRouter.post("/register", async (req: Request, res: Response) => {
   try {
-    let { username, fullName, email, phone, address, city, state, password, role, acceptTerms } = req.body;
+    let {
+      username,
+      fullName,
+      email,
+      phone,
+      address,
+      city,
+      state,
+      password,
+      role,
+      acceptTerms,
+    } = req.body;
 
     console.log("📩 Received Payload:");
     console.log(`➡ Username: ${username}`);
@@ -95,20 +109,38 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
     state = state?.trim();
 
     // ✅ Validate required fields
-    if (!username || !fullName || !email || !phone || !address || !city || !state || !password || !role || !acceptTerms) {
+    if (
+      !username ||
+      !fullName ||
+      !email ||
+      !phone ||
+      !address ||
+      !city ||
+      !state ||
+      !password ||
+      !role ||
+      !acceptTerms
+    ) {
       console.log("❌ Error: Missing required fields!");
-      return res.status(400).json({ error: "All fields are required, and terms must be accepted." });
+      return res.status(400).json({
+        error: "All fields are required, and terms must be accepted.",
+      });
     }
 
     if (!fullName || fullName.length < 3) {
       console.log("❌ Error: Full Name is too short!");
-      return res.status(400).json({ error: "Full Name must be at least 3 characters long." });
+      return res
+        .status(400)
+        .json({ error: "Full Name must be at least 3 characters long." });
     }
 
     // ✅ Ensure email is verified before registration
     if (!verifiedEmails.has(email)) {
       console.log("❌ Error: Email not verified!");
-      return res.status(400).json({ error: "Email verification is required. Please verify OTP before creating an account." });
+      return res.status(400).json({
+        error:
+          "Email verification is required. Please verify OTP before creating an account.",
+      });
     }
 
     // ✅ Check if email or username already exists
@@ -116,7 +148,9 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
 
     if (existingUser) {
       console.log("❌ Error: Username or Email already exists!");
-      return res.status(400).json({ error: "Username or email already exists." });
+      return res
+        .status(400)
+        .json({ error: "Username or email already exists." });
     }
 
     // ✅ Hash the password before storing it
@@ -206,13 +240,14 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
 
     if (error.code === 11000) {
       console.log("❌ Duplicate Entry: Email or Username already exists!");
-      return res.status(400).json({ error: "Email or username already exists." });
+      return res
+        .status(400)
+        .json({ error: "Email or username already exists." });
     }
 
     res.status(500).json({ error: "An error occurred during registration." });
   }
 });
-
 
 /**
  * 📌 GET /user/:id - Fetch User Details by ID
@@ -240,17 +275,52 @@ signupRouter.get("/user/:id", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * 📌 GET /employee/:id - Fetch Employee Details by ID
+ */
+signupRouter.get("/employee/:id", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    console.log("employee id", id);
+
+    // Validate the ID format
+    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
+
+    // Fetch employee details from the database
+    const employee = await Employee.findById(id).select("-password"); // Exclude password field
+    console.log(employee);
+    if (!employee) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json({ employee });
+  } catch (error) {
+    console.error("❌ Error fetching user details:", error);
+    res.status(500).json({ error: "Server error, please try again." });
+  }
+});
+
+// update user details
 signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const updateFields = req.body; // Get only the fields sent in the request
 
-    console.log("🔄 Update Request Received for User ID:", id, "Data:", updateFields);
+    console.log(
+      "🔄 Update Request Received for User ID:",
+      id,
+      "Data:",
+      updateFields
+    );
 
     // ✅ Validate User ID
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       console.error("❌ Invalid user ID format.");
-      return res.status(400).json({ success: false, error: "Invalid user ID format" });
+      return res
+        .status(400)
+        .json({ success: false, error: "Invalid user ID format" });
     }
 
     // ✅ Check if user exists
@@ -261,24 +331,33 @@ signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
     }
 
     // ✅ Trim and normalize only provided fields
-    if (updateFields.username) updateFields.username = updateFields.username.trim().toLowerCase();
-    if (updateFields.email) updateFields.email = updateFields.email.trim().toLowerCase();
-    if (updateFields.fullName) updateFields.fullName = updateFields.fullName.trim();
+    if (updateFields.username)
+      updateFields.username = updateFields.username.trim().toLowerCase();
+    if (updateFields.email)
+      updateFields.email = updateFields.email.trim().toLowerCase();
+    if (updateFields.fullName)
+      updateFields.fullName = updateFields.fullName.trim();
     if (updateFields.phone) updateFields.phone = updateFields.phone.trim();
-    if (updateFields.address) updateFields.address = updateFields.address.trim();
+    if (updateFields.address)
+      updateFields.address = updateFields.address.trim();
     if (updateFields.city) updateFields.city = updateFields.city.trim();
     if (updateFields.state) updateFields.state = updateFields.state.trim();
 
     // ✅ Check if username or email is already taken by another user (if they are being updated)
     if (updateFields.email || updateFields.username) {
       const duplicateUser = await User.findOne({
-        $or: [{ email: updateFields.email }, { username: updateFields.username }],
+        $or: [
+          { email: updateFields.email },
+          { username: updateFields.username },
+        ],
         _id: { $ne: id }, // Exclude the current user from the check
       });
 
       if (duplicateUser) {
         console.error("❌ Username or Email already exists.");
-        return res.status(400).json({ success: false, error: "Username or email already exists." });
+        return res
+          .status(400)
+          .json({ success: false, error: "Username or email already exists." });
       }
     }
 
@@ -297,55 +376,224 @@ signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("❌ Error updating user details:", error);
-    return res.status(500).json({ success: false, error: "An error occurred while updating user details." });
+    return res.status(500).json({
+      success: false,
+      error: "An error occurred while updating user details.",
+    });
   }
 });
 
+// update employee details
+signupRouter.put(
+  "/employee/update/:id",
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const updateFields = req.body; // Get only the fields sent in the request
 
-signupRouter.put("/user/update-password/:id", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const { currentPassword, newPassword } = req.body;
+      console.log(
+        "🔄 Update Request Received for User ID:",
+        id,
+        "Data:",
+        updateFields
+      );
 
-    console.log("🔄 Password change request for User ID:", id);
+      // ✅ Validate User ID
+      if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        console.error("❌ Invalid user ID format.");
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid user ID format" });
+      }
 
-    // ✅ Validate User ID format
-    if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({ success: false, error: "Invalid user ID format" });
+      // ✅ Check if user exists
+      const existingUser = await Employee.findById(id);
+      if (!existingUser) {
+        console.error("❌ User not found.");
+        return res
+          .status(404)
+          .json({ success: false, error: "User not found" });
+      }
+
+      // ✅ Trim and normalize only provided fields
+      if (updateFields.username)
+        updateFields.username = updateFields.username.trim().toLowerCase();
+      if (updateFields.email)
+        updateFields.email = updateFields.email.trim().toLowerCase();
+      if (updateFields.fullName)
+        updateFields.fullName = updateFields.fullName.trim();
+      if (updateFields.phone) updateFields.phone = updateFields.phone.trim();
+      if (updateFields.address)
+        updateFields.address = updateFields.address.trim();
+      if (updateFields.city) updateFields.city = updateFields.city.trim();
+      if (updateFields.state) updateFields.state = updateFields.state.trim();
+
+      // ✅ Check if username or email is already taken by another user (if they are being updated)
+      if (updateFields.email || updateFields.username) {
+        const duplicateUser = await Employee.findOne({
+          $or: [
+            { email: updateFields.email },
+            { username: updateFields.username },
+          ],
+          _id: { $ne: id }, // Exclude the current user from the check
+        });
+
+        if (duplicateUser) {
+          console.error("❌ Username or Email already exists.");
+          return res.status(400).json({
+            success: false,
+            error: "Username or email already exists.",
+          });
+        }
+      }
+
+      // ✅ Update user details with only provided fields
+      const updatedUser = await Employee.findByIdAndUpdate(id, updateFields, {
+        new: true, // Return updated user
+        runValidators: true, // Ensure validation is applied
+      }).select("-password"); // Exclude password from response
+
+      console.log("✅ User Updated Successfully:", updatedUser);
+
+      return res.status(200).json({
+        success: true,
+        message: "User details updated successfully",
+        user: updatedUser,
+      });
+    } catch (error) {
+      console.error("❌ Error updating user details:", error);
+      return res.status(500).json({
+        success: false,
+        error: "An error occurred while updating user details.",
+      });
     }
-
-    // ✅ Validate password fields
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({ success: false, error: "Both current and new passwords are required." });
-    }
-
-    // ✅ Find user in database
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).json({ success: false, error: "User not found." });
-    }
-
-    // ✅ Verify the current password
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ success: false, error: "Incorrect current password." });
-    }
-
-    // ✅ Hash the new password before storing it
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    // ✅ Update password in database
-    user.password = hashedPassword;
-    await user.save();
-
-    console.log("✅ Password updated successfully for user:", user.email);
-
-    return res.status(200).json({ success: true, message: "Password updated successfully." });
-  } catch (error) {
-    console.error("❌ Error updating password:", error);
-    return res.status(500).json({ success: false, error: "An error occurred while updating password." });
   }
-});
+);
 
+// update password for USERS
+signupRouter.put(
+  "/user/update-password/:id",
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { currentPassword, newPassword } = req.body;
+
+      console.log("🔄 Password change request for User ID:", id);
+
+      // ✅ Validate User ID format
+      if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid user ID format" });
+      }
+
+      // ✅ Validate password fields
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          error: "Both current and new passwords are required.",
+        });
+      }
+
+      // ✅ Find user in database
+      const user = await User.findById(id);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ success: false, error: "User not found." });
+      }
+
+      // ✅ Verify the current password
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Incorrect current password." });
+      }
+
+      // ✅ Hash the new password before storing it
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // ✅ Update password in database
+      user.password = hashedPassword;
+      await user.save();
+
+      console.log("✅ Password updated successfully for user:", user.email);
+
+      return res
+        .status(200)
+        .json({ success: true, message: "Password updated successfully." });
+    } catch (error) {
+      console.error("❌ Error updating password:", error);
+      return res.status(500).json({
+        success: false,
+        error: "An error occurred while updating password.",
+      });
+    }
+  }
+);
+
+// update password for employees
+signupRouter.put(
+  "/employee/update-password/:id",
+  async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const { currentPassword, newPassword } = req.body;
+
+      console.log("🔄 Password change request for User ID:", id);
+
+      // ✅ Validate User ID format
+      if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Invalid user ID format" });
+      }
+
+      // ✅ Validate password fields
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({
+          success: false,
+          error: "Both current and new passwords are required.",
+        });
+      }
+
+      // ✅ Find user in database
+      const employee = await Employee.findById(id);
+      if (!employee) {
+        return res
+          .status(404)
+          .json({ success: false, error: "User not found." });
+      }
+
+      // ✅ Verify the current password
+      const isMatch = await bcrypt.compare(currentPassword, employee.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ success: false, error: "Incorrect current password." });
+      }
+
+      // ✅ Hash the new password before storing it
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      // ✅ Update password in database
+      employee.password = hashedPassword;
+      await employee.save();
+
+      console.log("✅ Password updated successfully for user:", employee.email);
+
+      return res
+        .status(200)
+        .json({ success: true, message: "Password updated successfully." });
+    } catch (error) {
+      console.error("❌ Error updating password:", error);
+      return res.status(500).json({
+        success: false,
+        error: "An error occurred while updating password.",
+      });
+    }
+  }
+);
 
 export default signupRouter;

@@ -37,7 +37,7 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage");
     } else if (role === "admin") {
       navigate("/admindash");
-    } else if (role === "employee") {
+    } else if (role === "employee" || "manager") {
       navigate("/empdash");
     } else {
       navigate("/homepage"); // Default route if role is unknown
@@ -106,32 +106,32 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
 
     try {
       const response = await axios.post(
-        "http://localhost:8000/api/loginuser/login",
+        "http://localhost:8000/api/loginuser/emp-login",
         formData
       );
       const userData = response.data;
-
+      console.log(userData);
       // ✅ Store full user details in sessionStorage
-      sessionStorage.setItem("user", JSON.stringify(userData.user));
+      sessionStorage.setItem("user", JSON.stringify(userData.employee));
 
       // ✅ Store userId separately for easy API access
-      sessionStorage.setItem("userId", userData.user.id);
-      sessionStorage.setItem("role", userData.user.role);
-      sessionStorage.setItem("email", userData.user.email);
+      sessionStorage.setItem("userId", userData.employee.id);
+      sessionStorage.setItem("role", userData.employee.role);
+      sessionStorage.setItem("email", userData.employee.email);
       sessionStorage.setItem(
         "fullName",
-        userData.user.fullName || userData.user.name || ""
+        userData.employee.name || userData.employee.fullName || ""
       );
-      sessionStorage.setItem("username", userData.user.username);
+      sessionStorage.setItem("username", userData.employee.email);
 
       console.log(
         "✅ Session Storage Updated:",
         sessionStorage.getItem("user")
       );
-      console.log("User Data Response:", userData.user);
+      console.log("User Data Response:", userData.employee);
 
-      redirectUser(userData.user.role);
-      onLoginSuccess(userData.user.email);
+      redirectUser(userData.employee.role);
+      onLoginSuccess(userData.employee.email);
     } catch (err) {
       setError("Invalid email or password");
     } finally {
@@ -266,4 +266,4 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   );
 }
 
-export default Login;
+export default EmployeeLogin;
