@@ -19,7 +19,10 @@ interface Plan {
 
 interface SubscriptionPlansProps {
   onEdit: (plan: Plan) => void;
-  onDelete: (planId: string) => void;
+  
+  plans: Plan[];
+
+  onDelete: (planId: string) => Promise<void>;
 }
 
 const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit }) => {

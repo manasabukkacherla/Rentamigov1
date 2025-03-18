@@ -1,11 +1,16 @@
 import { useEffect, useState } from "react";
 import { showToast } from "../Toast";
 import { Trash2 } from "lucide-react";
+import { Plan } from "../Types";
 
 interface PlanFormProps {
   onClose: () => void;
   onSubmit: () => void;
   editingPlan?: PlanFormData;
+  
+  onSave: (plan: Plan) => Promise<void>;
+
+  onUpdate: (updatedPlan: Plan) => void;
 }
 
 interface PlanFormData {

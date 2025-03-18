@@ -1,331 +1,223 @@
-import  { useState } from "react";
-import { Plus } from "lucide-react";
-import RevenueStats from "./revenue/RevenueStats";
+import { useState, useEffect, SetStateAction } from "react";
 import SubscriptionPlans from "./revenue/SubscriptionPlans";
 import TokenPackages from "./revenue/TokenPackages";
 import PlanForm from "./revenue/PlanForm";
 import TokenForm from "./revenue/TokenForm";
-import { showToast } from "./Toast";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { Plan, TokenPackage } from "./Types";
 
 const Revenue = () => {
-  const [activeTab, setActiveTab] = useState("subscriptions");
+  const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
+  const [tokenPackages, setTokenPackages] = useState<TokenPackage[]>([]);
   const [editingPlan, setEditingPlan] = useState<Plan | undefined>(undefined);
+  const [editingToken, setEditingToken] = useState<TokenPackage | undefined>(undefined);
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [showTokenForm, setShowTokenForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<"subscriptions" | "tokens">("subscriptions");
 
-  const [newPlan, setNewPlan] = useState({
-    name: "",
-    price: 0,
-    billingCycle: "monthly",
-    maxProperties: 0,
-    maxLeads: 0,
-    tokensPerLead: 0,
-    features: [""],
-    description: "",
-    trialDays: 0,
-  });
-
-  const [newToken, setNewToken] = useState({
-    name: "",
-    tokens: 0,
-    price: 0,
-    bonusTokens: 0,
-    minPurchase: 0,
-    tokensPerLead: 0,
-    validityDays: 0,
-    features: [""],
-    description: "",
-  });
-
-  const revenueStats = [
-    {
-      id: 1,
-      title: "Total Revenue",
-      value: "$125,450",
-      change: "+15.2%",
-      period: "vs last month",
-    },
-    {
-      id: 2,
-      title: "Active Subscriptions",
-      value: "284",
-      change: "+12.5%",
-      period: "vs last month",
-    },
-    {
-      id: 3,
-      title: "Tokens Sold",
-      value: "15,240",
-      change: "+18.7%",
-      period: "vs last month",
-    },
-    {
-      id: 4,
-      title: "Average Revenue/User",
-      value: "$89.50",
-      change: "+8.4%",
-      period: "vs last month",
-    },
-  ];
-
-  const [tokenPackages, setTokenPackages] = useState([
-    {
-      id: "1",
-      name: "Starter Pack",
-      tokens: 100,
-      price: 25,
-      bonusTokens: 0,
-      minPurchase: 1,
-      tokensPerLead: 2,
-      validityDays: 365,
-      features: [
-        "Contact property owners",
-        "View detailed analytics",
-        "Access premium listings",
-        "No expiration",
-      ],
-      status: "active",
-    },
-    {
-      id: "2",
-      name: "Popular Pack",
-      tokens: 500,
-      price: 99,
-      bonusTokens: 50,
-      minPurchase: 1,
-      tokensPerLead: 2,
-      validityDays: 365,
-      features: [
-        "All Starter Pack features",
-        "Priority support",
-        "Bulk property access",
-        "10% bonus tokens",
-        "No expiration",
-      ],
-      status: "active",
-    },
-    {
-      id: "3",
-      name: "Premium Pack",
-      tokens: 1000,
-      price: 189,
-      bonusTokens: 150,
-      minPurchase: 1,
-      tokensPerLead: 1,
-      validityDays: 365,
-      features: [
-        "All Popular Pack features",
-        "VIP support",
-        "Advanced analytics",
-        "15% bonus tokens",
-        "Exclusive property previews",
-        "No expiration",
-      ],
-      status: "active",
-    },
-  ]);
-
-  const handleAddPlan = () => {
-    setShowPlanForm(true);
-  };
-
-  const handleAddToken = () => {
-    setShowTokenForm(true);
-  };
-
-  const handleSubmitPlan = () => {
-    const plan = {
-      id: Date.now().toString(),
-      ...newPlan,
-      status: "active",
-    };
-    setPlans((prevPlans) => [...prevPlans, plan]);
-    setShowPlanForm(false);
-    setNewPlan({
-      name: "",
-      price: 0,
-      billingCycle: "monthly",
-      maxProperties: 0,
-      maxLeads: 0,
-      tokensPerLead: 0,
-      features: [""],
-      description: "",
-      trialDays: 0,
-    });
-  };
-
-  const handleSubmitToken = () => {
-    const token = {
-      id: Date.now().toString(),
-      ...newToken,
-      status: "active",
-    };
-    setTokenPackages([...tokenPackages, token]);
-    setShowTokenForm(false);
-    setNewToken({
-      name: "",
-      tokens: 0,
-      price: 0,
-      bonusTokens: 0,
-      minPurchase: 0,
-      tokensPerLead: 0,
-      validityDays: 0,
-      features: [""],
-      description: "",
-    });
-  };
-
-  //edit subscription plan
-  const handleEditPlan = (plan: any) => {
-    if (!plan || (!plan.id && !plan._id)) {
-      console.error("Error: Plan does not have a valid ID", plan);
-      showToast.error("Invalid plan selected for editing!");
-      return;
-    }
-
-    setEditingPlan({
-      ...plan,
-      id: plan.id || plan._id, // Map _id to id
-    });
-
-    setShowPlanForm(true);
-  };
-
-  const handleDelete = async (id: string | undefined) => {
-    if (!id) {
-      showToast.error("Invalid plan ID!");
-      console.error("Error: Plan ID is undefined");
-      return;
-    }
-
+  // ✅ Fetch subscription plans from backend
+  const fetchSubscriptionPlans = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/subscription/${id}`,
-        {
-          method: "DELETE",
-        }
+      const response = await fetch("http://localhost:8000/api/subscription");
+      if (!response.ok) throw new Error("Failed to fetch plans");
+
+      const data = await response.json();
+      setSubscriptionPlans(data);
+    } catch (error) {
+      console.error("Error fetching plans:", error);
+      toast.error("Failed to fetch subscription plans!");
+    }
+  };
+
+  // ✅ Fetch token packages from backend
+  const fetchTokenPackages = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/tokens");
+      if (!response.ok) throw new Error("Failed to fetch tokens");
+
+      const data = await response.json();
+      setTokenPackages(data);
+    } catch (error) {
+      console.error("Error fetching tokens:", error);
+      toast.error("Failed to fetch token packages!");
+    }
+  };
+
+  useEffect(() => {
+    fetchSubscriptionPlans();
+    fetchTokenPackages(); // ✅ Fetch both tokens and subscriptions
+  }, []);
+
+  // ✅ Handle Save Plan (Add/Edit)
+  const handleSavePlan = async (plan: Plan) => {
+    try {
+      const method = plan.id ? "PUT" : "POST";
+      const url = plan.id
+        ? `http://localhost:8000/api/subscription/${plan.id}`
+        : `http://localhost:8000/api/subscription`;
+
+      // ✅ Optimistic Update for UI
+      if (plan.id) {
+        setSubscriptionPlans((prev) =>
+          prev.map((item) => (item.id === plan.id ? plan : item))
+        );
+        toast.success(`Subscription plan "${plan.name}" updated successfully!`);
+      } else {
+        const tempId = Date.now().toString();
+        setSubscriptionPlans((prev) => [...prev, { ...plan, id: tempId }]);
+        toast.success(`New plan "${plan.name}" created successfully!`);
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plan),
+      });
+
+      if (!response.ok) throw new Error("Failed to save plan");
+
+      const savedPlan = await response.json();
+
+      // ✅ Replace temporary ID or existing plan ID with the saved ID
+      setSubscriptionPlans((prev) =>
+        prev.map((item) =>
+          item.id === plan.id || item.id === plan.tempId ? { ...savedPlan } : item
+        )
       );
 
-      if (!response.ok) throw new Error("Failed to delete plan");
+      // Reload plans after successful save to ensure data is synced
+      fetchSubscriptionPlans();
 
-      setPlans((prevPlans) => prevPlans.filter((plan: { id: string; }) => plan.id !== id));
-
-      showToast.success("Subscription Plan deleted successfully!");
+      setShowPlanForm(false);
     } catch (error) {
-      console.error("Error deleting plan:", error);
-      showToast.error("Failed to delete subscription plan");
+      console.error("Error saving plan:", error);
+      toast.error("Failed to save subscription plan!");
+      fetchSubscriptionPlans(); // Rollback if failed
     }
   };
 
-  const handleDeleteToken = (tokenId: string) => {
-    setTokenPackages((tokens) =>
-      tokens.filter((token) => token.id !== tokenId)
-    );
+  // ✅ Handle Delete Plan
+  const handleDeletePlan = async (planId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/subscription/${planId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete plan. Status: ${response.status}`);
+      }
+
+      // Optimistic update: Immediately update the UI
+      setSubscriptionPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== planId));
+
+      toast.success("Subscription plan deleted successfully!");
+
+      // Reload subscription plans to ensure data is synced
+      fetchSubscriptionPlans();
+    } catch (error) {
+      console.error("Error deleting plan:", error);
+      toast.error("Failed to delete subscription plan!");
+    }
   };
 
-  function setEditingToken(_id: string): void {
+  // ✅ Handle Delete Token
+  const handleDeleteToken = async (tokenId: string) => {
+    try {
+      const response = await fetch(`http://localhost:8000/api/token/${tokenId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) throw new Error("Failed to delete token");
+
+      setTokenPackages((prevTokens) => prevTokens.filter((token) => token.id !== tokenId));
+
+      toast.success("Token package deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting token:", error);
+      toast.error("Failed to delete token package!");
+    }
+  };
+
+  function handleSaveToken(data: TokenPackage): Promise<void> {
     throw new Error("Function not implemented.");
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">Revenue Management</h2>
+    <div>
+      {/* ✅ Toast Container */}
+      <ToastContainer position="top-right" autoClose={3000} />
+
+      {/* ✅ Tabs */}
+      <div className="flex space-x-4 mb-6">
         <button
-          onClick={
-            activeTab === "subscriptions" ? handleAddPlan : handleAddToken
-          }
-          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 flex items-center"
+          onClick={() => setActiveTab("subscriptions")}
+          className={`px-4 py-2 ${activeTab === "subscriptions" ? "bg-gray-800 text-white" : "bg-gray-200"} rounded-lg`}
         >
-          <Plus className="w-5 h-5 mr-2" />
-          Create New {activeTab === "subscriptions" ? "Plan" : "Token Package"}
+          Subscription Plans
+        </button>
+        <button
+          onClick={() => setActiveTab("tokens")}
+          className={`px-4 py-2 ${activeTab === "tokens" ? "bg-gray-800 text-white" : "bg-gray-200"} rounded-lg`}
+        >
+          Token Packages
         </button>
       </div>
 
-      <RevenueStats stats={revenueStats} />
-
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8">
-          <button
-            onClick={() => setActiveTab("subscriptions")}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === "subscriptions"
-                ? "border-gray-900 text-gray-900"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            Subscription Plans
-          </button>
-          <button
-            onClick={() => setActiveTab("tokens")}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeTab === "tokens"
-                ? "border-gray-900 text-gray-900"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-          >
-            Token Packages
-          </button>
-        </nav>
-      </div>
-
+      {/* ✅ Subscription Plans */}
       {activeTab === "subscriptions" ? (
-        <div className="bg-white rounded-xl shadow-sm">
-          <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Subscription Plans Management
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Configure and manage your subscription plans
-            </p>
-          </div>
-          <div className="p-6">
-            <SubscriptionPlans
-              onEdit={handleEditPlan}
-              onDelete={handleDelete}
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-sm">
-          <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Token Packages Management
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Configure and manage your token packages
-            </p>
-          </div>
-          <div className="p-6">
-            <TokenPackages
-              packages={tokenPackages}
-              onEdit={setEditingToken}
-              onDelete={handleDeleteToken}
-            />
-          </div>
-        </div>
-      )}
-
-      {showPlanForm && (
-        <PlanForm
-          editingPlan={editingPlan} 
-          onClose={() => {
-            setShowPlanForm(false);
-            setEditingPlan(undefined);
+        <SubscriptionPlans
+          plans={subscriptionPlans}
+          onEdit={(plan) => {
+            setEditingPlan(plan);
+            setShowPlanForm(true);
           }}
-          onSubmit={handleSubmitPlan} 
+          onDelete={handleDeletePlan}  // Pass the delete handler for plans
+        />
+      ) : (
+        <TokenPackages
+          packages={tokenPackages}
+          onEdit={(id: string) => {
+            const token = tokenPackages.find((token) => token.id === id);
+            setEditingToken(token);
+            setShowTokenForm(true);
+          }}
+          onDelete={handleDeleteToken}  // Pass the delete handler for tokens
         />
       )}
 
+      {/* ✅ Plan Form */}
+      {showPlanForm && (
+        <PlanForm
+          editingPlan={editingPlan}
+          onSave={handleSavePlan}
+          onClose={() => setShowPlanForm(false)} onUpdate={function (_updatedPlan: Plan): void {
+            throw new Error("Function not implemented.");
+          } } onSubmit={function (): void {
+            throw new Error("Function not implemented.");
+          } }        />
+      )}
+
+      {/* ✅ Token Form */}
       {showTokenForm && (
         <TokenForm
-          token={newToken}
-          onChange={setNewToken}
-          onSubmit={handleSubmitToken}
-          onCancel={() => setShowTokenForm(false)} onSave={function (_data: TokenPackage): Promise<void> {
+          editingToken={editingToken}
+          onSave={handleSaveToken}
+          onClose={() => setShowTokenForm(false)} token={{
+            name: "",
+            tokens: 0,
+            price: 0,
+            bonusTokens: 0,
+            minPurchase: 0,
+            tokensPerLead: 0,
+            validityDays: 0,
+            features: [],
+            description: ""
+          }} onChange={function (_token: any): void {
             throw new Error("Function not implemented.");
-          } } onClose={function (): void {
+          } } onSubmit={function (): void {
+            throw new Error("Function not implemented.");
+          } } onCancel={function (): void {
             throw new Error("Function not implemented.");
           } }        />
       )}
@@ -334,7 +226,3 @@ const Revenue = () => {
 };
 
 export default Revenue;
-function setPlans(_arg0: (prevPlans: any) => any) {
-  throw new Error("Function not implemented.");
-}
-
