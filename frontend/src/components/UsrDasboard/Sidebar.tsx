@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, Home, Users, Settings, Menu, X, LogOut, Bell } from 'lucide-react';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, Home, Users, Settings, Menu, X, LogOut, Bell, CreditCard } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { NotificationDropdown } from './NotificationDropdown';
-import { Notification } from './types';
+import { Notification } from '../types';
 import { LogoutAnimation } from './LogoutAnimation';
 
 const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/Userdashboard' }, // ✅ Fixed path
-  { icon: Home, label: 'Properties', path: 'properties' }, // ✅ Fixed path
-  { icon: Users, label: 'Leads', path: 'leads' }, // ✅ Fixed path
-  { icon: Bell, label: 'Notifications', path: 'notifications' }, // ✅ Fixed path
-  { icon: Settings, label: 'Settings', path: 'settings' } // ✅ Fixed path
+  { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: Home, label: 'Properties', path: '/properties' },
+  { icon: Users, label: 'Leads', path: '/leads' },
+  { icon: Bell, label: 'Notifications', path: '/notifications' },
+  { icon: CreditCard, label: 'Plans', path: '/plans' },
+  { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
 // Mock notifications data
@@ -52,14 +53,12 @@ export function Sidebar({ onNewNotification }: SidebarProps) {
     const handleClickOutside = (event: MouseEvent) => {
       const sidebar = document.getElementById('sidebar');
       const menuButton = document.getElementById('menu-button');
-
-      if (
-        isMobileMenuOpen &&
-        sidebar &&
-        menuButton &&
-        !sidebar.contains(event.target as Node) &&
-        !menuButton.contains(event.target as Node)
-      ) {
+      
+      if (isMobileMenuOpen && 
+          sidebar && 
+          menuButton && 
+          !sidebar.contains(event.target as Node) && 
+          !menuButton.contains(event.target as Node)) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -70,16 +69,12 @@ export function Sidebar({ onNewNotification }: SidebarProps) {
 
   const handleLogout = () => {
     setIsLoggingOut(true);
-  
-    // Clear session storage
-    sessionStorage.clear();
-  
     setTimeout(() => {
-      navigate('/Login'); // Redirect to Login page
+      // Here you would typically clear user session, tokens etc
+      navigate('/');
       window.location.reload(); // Force reload to clear all state
     }, 2000);
   };
-  
 
   const handleMarkAsRead = (id: string) => {
     setNotifications(notifications.map(notification =>
@@ -128,49 +123,54 @@ export function Sidebar({ onNewNotification }: SidebarProps) {
       {/* Sidebar */}
       <aside
         id="sidebar"
-        className={`fixed top-0 left-0 h-full bg-white border-r border-black/10 z-40
+        className={`
+          fixed top-0 left-0 h-full bg-white border-r border-black/10 z-40
           transform transition-transform duration-300 ease-in-out
           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          w-64`}
+          w-64
+        `}
       >
         {/* Navigation */}
-        
         <nav className="mt-14 lg:mt-16">
-        {navItems.map((item) => {
-  const Icon = item.icon;
-  const isActive = location.pathname === item.path || location.pathname === `/Userdashboard/${item.path}`;
-
-  return (
-    <NavLink
-  key={item.path}
-  to={item.path.startsWith("/") ? item.path : `/Userdashboard/${item.path}`} 
-  className={`
-    flex items-center px-4 py-3 text-black/70 hover:bg-black/5 transition-colors
-    text-sm sm:text-base relative no-underline
-    ${isActive ? 'bg-black/5 border-r-4 border-black text-black font-medium' : ''}
-  `}
-  style={{ textDecoration: 'none' }} // ✅ Ensures no underline
->
-      <Icon className="w-5 h-5 mr-3" />
-      <span>{item.label}</span>
-    </NavLink>
-  );
-})}
-
-
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            const isNotifications = item.path === '/notifications';
+            
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`
+                  flex items-center px-3 sm:px-4 md:px-5 py-2.5 sm:py-3
+                  text-black/70 hover:bg-black/5 transition-colors
+                  text-sm sm:text-base relative
+                  ${isActive ? 'bg-black/5 border-r-4 border-black text-black font-medium' : ''}
+                `}
+              >
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5 mr-3" />
+                <span>{item.label}</span>
+                {isNotifications && unreadCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {unreadCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Bottom Section with User Info and Logout */}
         <div className="absolute bottom-0 left-0 right-0 border-t border-black/10">
           {/* User Info */}
-          <div className="p-4 border-b border-black/10">
+          <div className="p-3 sm:p-4 md:p-5 border-b border-black/10">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-black rounded-full flex items-center justify-center text-white font-medium text-sm sm:text-base">
                 JD
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-black truncate">John Doe</p>
-                <p className="text-xs text-black/60 truncate">john@example.com</p>
+                <p className="text-sm sm:text-base font-medium text-black truncate">John Doe</p>
+                <p className="text-xs sm:text-sm text-black/60 truncate">john@example.com</p>
               </div>
             </div>
           </div>
@@ -178,9 +178,9 @@ export function Sidebar({ onNewNotification }: SidebarProps) {
           {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-black/5 transition-colors text-sm sm:text-base"
+            className="w-full flex items-center px-3 sm:px-4 md:px-5 py-2.5 sm:py-3 text-red-500 hover:bg-black/5 transition-colors text-sm sm:text-base"
           >
-            <LogOut className="w-5 h-5 mr-3" />
+            <LogOut className="w-4 h-4 sm:w-5 sm:h-5 mr-3" />
             <span>Logout</span>
           </button>
         </div>
