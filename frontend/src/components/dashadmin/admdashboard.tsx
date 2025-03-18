@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -11,7 +11,7 @@ import {
   X,
   UserCircle
 } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Dashboard from './components/Dashboard';
 import Properties from './components/Properties';
@@ -23,23 +23,11 @@ import Settings from './components/Settings';
 import Sidebar from './components/Sidebar';
 import UserStats from './components/UserStats';
 
-interface AdmindashProps {
-  activeSection?: string;
-}
-
-const Admindash: React.FC<AdmindashProps> = ({ activeSection: initialSection }) => {
+function Admindash() {
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const [activeSection, setActiveSection] = useState(initialSection || 'dashboard');
+  const [activeSection, setActiveSection] = useState('dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
-  useEffect(() => {
-    // Update activeSection based on route
-    const section = location.pathname.replace('/', '') || 'dashboard';
-    setActiveSection(section);
-  }, [location]);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -57,20 +45,23 @@ const Admindash: React.FC<AdmindashProps> = ({ activeSection: initialSection }) 
   };
 
   const confirmLogout = () => {
+    // Clear session storage
     sessionStorage.clear();
+    
+    // Show goodbye message
     toast.success('Thank you for using RentAmigo. See you soon!', {
       position: "top-center",
       autoClose: 2000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
     });
+
+    // Redirect after toast shows
     setTimeout(() => {
       navigate('/login');
     }, 2000);
-  };
-
-  const handleSectionChange = (section: string) => {
-    setActiveSection(section);
-    navigate(`/${section}`);
-    setIsMobileMenuOpen(false);
   };
 
   const renderContent = () => {
@@ -119,7 +110,10 @@ const Admindash: React.FC<AdmindashProps> = ({ activeSection: initialSection }) 
         <Sidebar 
           menuItems={menuItems} 
           activeSection={activeSection} 
-          onSectionChange={handleSectionChange}
+          onSectionChange={(section) => {
+            setActiveSection(section);
+            setIsMobileMenuOpen(false);
+          }}
           onLogout={handleLogout}
         />
       </div>
@@ -168,6 +162,6 @@ const Admindash: React.FC<AdmindashProps> = ({ activeSection: initialSection }) 
       )}
     </div>
   );
-};
+}
 
 export default Admindash;
