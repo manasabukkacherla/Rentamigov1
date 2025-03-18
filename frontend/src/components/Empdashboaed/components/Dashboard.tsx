@@ -57,16 +57,16 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
 
       try {
         const response = await fetch(
-          `http://localhost:8000/api/sign/user/${userId}`
+          `http://localhost:8000/api/sign/employee/${userId}`
         );
         const data = await response.json();
 
         if (response.ok) {
           setEmployee({
-            name: data.user.fullName || "User",
-            role: data.user.role || "Unknown Role",
+            name: data.employee.name || "User",
+            role: data.employee.role || "Unknown Role",
             avatar:
-              data.user.avatar ||
+              data.employee.avatar ||
               "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
           });
         } else {
