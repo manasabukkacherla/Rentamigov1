@@ -53,3 +53,17 @@ export interface Notification {
   timestamp: string;
   read: boolean;
 }
+export interface TokenPackage {
+  id: string;
+  name: string;
+  tokens: number; // Number of tokens in the package
+  price: number;
+  description: string;
+}
+export interface Plan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: string; // For example: "1 month", "1 year"
+}
