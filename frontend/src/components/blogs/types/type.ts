@@ -1,4 +1,5 @@
 export interface Author {
+    fullName: ReactNode;
     name: string;
     avatar?: string;
   }
@@ -12,6 +13,9 @@ export interface Author {
   }
   
   export interface Review {
+    comment: ReactNode;
+    createdAt: string | number | Date;
+    _id: Key | null | undefined;
     id: number;
     rating: number;
     text: string;

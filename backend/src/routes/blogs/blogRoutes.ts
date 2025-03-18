@@ -17,21 +17,23 @@ export const createBlog = async (
     tags: string[];
     category: string;
     readTime: number;
+    author: string
   }>,
   res: Response
 ): Promise<void> => {
   try {
-    const { title, excerpt, content, media, tags, category, readTime } = req.body;
+    const { title, excerpt, content, media, tags, category, readTime, author } = req.body;
+    console.log(author)
 
     if (!title || !excerpt || !content || !media?.coverImage || !tags?.length || !category || !readTime) {
       res.status(400).json({ error: 'All required fields must be filled.' });
       return;
     }
 
-    // if (!req.user || !req.user._id) {
-    //   res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
-    //   return;
-    // }
+    if (!author) {
+      res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
+      return;
+    }
 
     const newBlog = new Blog({
       title,
@@ -44,11 +46,11 @@ export const createBlog = async (
       tags,
       category,
       readTime,
-    //   author: req.user._id,
+      author,
     });
 
     await newBlog.save();
-    res.status(201).json({ success: true, blog: newBlog });
+    res.status(201).json({ success: true, blog: newBlog, message: "Blog created succesfully!" });
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ error: 'Failed to create blog post' });
@@ -106,7 +108,9 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
   export const getBlogById = async (req: CustomRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const blog = await Blog.findById(id);
+      const blog = await Blog.findById(id)
+      .populate({ path: "reviews", populate: { path: "author" } })
+      .populate({ path: "comments", populate: { path: "author" } });
   
       if (!blog) {
         res.status(404).json({ message: "Blog not found" });
@@ -114,16 +118,34 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
       }
   
       await blog.incrementViews(); // Increment views count
-      res.status(200).json(blog);
+      res.status(200).json({ success: true, blog});
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
     }
   };
+
+  const listBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
+    try {
+        const blogs = await Blog.find({});
+        res.json({
+            success: true,
+            message: "Data fetched successfully",
+            data: blogs
+        })
+    } catch(error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: "Error",
+        })
+    }
+}
   
   // ✅ Blog Router
   const blogRouter = express.Router();
   blogRouter.post("/add", createBlog);
+  blogRouter.get("/", listBlogs);
   blogRouter.put("/edit/:id", editBlog);
   blogRouter.delete("/delete/:id", deleteBlog);
   blogRouter.get("/:id", getBlogById);

@@ -3,8 +3,31 @@ import { Clock, ArrowRight, Award, ThumbsUp,MessageCircle, Share2 } from 'lucide
 import { Blogpost } from '../Blogs/types';
 import { Link, useNavigate } from 'react-router-dom';
 
+interface Blog {
+  _id: string,
+  title: string;
+    excerpt: string;
+    content: string;
+    media: {
+        coverImage: string;
+        images?: string[];
+    };
+    tags: string[];
+    category: string;
+    readTime: number;
+    author: string;
+    likes: number;
+    views: number; // New: View count
+    shares: 0,
+    reviews: string[];
+    comments: { userId: string; comment: string; createdAt: Date }[];
+    createdAt: Date;
+    updatedAt: Date;
+    userHasLiked?:boolean
+}
+
 interface BlogCardProps {
-  blog: Blogpost;
+  blog: Blog;
 }
 
 const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
@@ -28,7 +51,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
     >
       <div className="relative overflow-hidden h-48">
         <img 
-          src={blog.coverImage} 
+          src={blog.media.coverImage} 
           alt={blog.title} 
           className={`w-full h-full object-cover transition-transform duration-700 ${isHovered ? 'scale-110' : 'scale-100'}`}
         />
@@ -58,12 +81,12 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
         <div className="flex items-center justify-between text-gray-500 text-sm mb-4">
           <div className="flex items-center">
             <Clock className="h-4 w-4 mr-1" />
-            <span>{blog.date}</span>
+            <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
           </div>
           
           {blog.views && (
             <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-              {blog.views.toLocaleString()} views
+              {blog.views.toLocaleString()}views
             </span>
           )}
         </div>
@@ -73,7 +96,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
       
       <div className="px-6 pb-6">
         <a 
-          onClick={() => navigate(`/blogs/${blog.id}`)} style={{cursor: 'pointer'}}
+          onClick={() => navigate(`/blogs/${blog._id}`)} style={{cursor: 'pointer'}}
           className="inline-flex items-center text-black hover:text-gray-700 font-medium transition"
         >
           Read more
@@ -84,11 +107,11 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
       <div className="flex items-center justify-between pt-4 border-t border-gray-100 px-6 pb-6">
           <div className="flex items-center">
             <img 
-              src={blog.author.avatar} 
-              alt={blog.author.name} 
+              // src={blog.author.avatar} 
+              // alt={blog.author.name} 
               className="h-8 w-8 rounded-full mr-2"
             />
-            <span className="text-sm font-medium text-gray-900">{blog.author.name}</span>
+            <span className="text-sm font-medium text-gray-900">John Doe</span>
           </div>
           
           <div className="flex space-x-3 text-gray-500">
@@ -98,9 +121,9 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
               <ThumbsUp className={`h-4 w-4 mr-1 ${blog.userHasLiked ? 'fill-indigo-600' : ''}`} />
               <span className="text-xs">{blog.likes}</span>
             </button>
-            <Link to={`/blogs/${blog.id}#comments`} className="flex items-center hover:text-indigo-600">
+            <Link to={`/blogs/${blog._id}#comments`} className="flex items-center hover:text-indigo-600">
               <MessageCircle className="h-4 w-4 mr-1" />
-              <span className="text-xs">{blog.comments}</span>
+              <span className="text-xs">{blog.comments.length}</span>
             </Link>
             <button className="flex items-center hover:text-indigo-600">
               <Share2 className="h-4 w-4" />

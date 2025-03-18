@@ -13,6 +13,7 @@ export interface Plan {
     description: string;
     status: string; // ✅ Ensure this is always a string, remove `undefined`
   }
+<<<<<<< HEAD
   export interface TokenPackage {
     id: string;
     _id?: string; // ✅ Make _id optional
@@ -29,4 +30,6 @@ export interface Plan {
   }
   
 
+=======
+>>>>>>> 04b2b2ac730be0163015e97498b4d82fb45e09ac
   

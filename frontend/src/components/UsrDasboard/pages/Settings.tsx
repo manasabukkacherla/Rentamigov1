@@ -423,66 +423,7 @@ export function Settings() {
         </div>
 
         {/* Subscription & Tokens */}
-        <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-black/10">
-          <div className="flex items-center mb-6">
-            <Coins className="w-5 h-5 sm:w-6 sm:h-6 text-black mr-2" />
-            <h2 className="text-lg sm:text-xl font-semibold text-black">
-              Subscription & Tokens
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Current Plan */}
-            <div className="space-y-4">
-              <div className="bg-black/5 p-4 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium text-black">Current Plan</h3>
-                  <span className="text-xs bg-black text-white px-2 py-1 rounded-full"></span>
-                </div>
-                <p className="text-sm text-black/60 mb-4">
-                  Valid until {user.planExpiry}
-                </p>
-                <ul className="space-y-2">
-                  {Object.keys(planFeatures).includes(user.plan) ? (
-                    planFeatures[user.plan as PlanType].map(
-                      (feature, index) => (
-                        <li key={index} className="text-sm flex items-center">
-                          <CheckCircle className="w-4 h-4 text-black mr-2" />
-                          {feature}
-                        </li>
-                      )
-                    )
-                  ) : (
-                    <li className="text-sm text-red-500">
-                      Invalid Plan Selected
-                    </li>
-                  )}
-                </ul>
-                <button className="w-full mt-4 px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-black/80 transition-colors">
-                  Upgrade Plan
-                </button>
-              </div>
-            </div>
-
-            {/* Tokens */}
-            <div className="space-y-4">
-              <div className="bg-black/5 p-4 rounded-lg">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium text-black">Available Tokens</h3>
-                  <span className="text-xl font-bold text-black">
-                    {user.tokens}
-                  </span>
-                </div>
-                <p className="text-sm text-black/60 mb-4">
-                  Use tokens to boost your listings
-                </p>
-                <button className="w-full px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-black/80 transition-colors">
-                  Buy More Tokens
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        
 
         {/* Notification Preferences */}
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-black/10">

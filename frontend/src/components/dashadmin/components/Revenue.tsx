@@ -8,22 +8,20 @@ import "react-toastify/dist/ReactToastify.css";
 import { Plan, TokenPackage } from "./Types";
 
 const Revenue = () => {
-  const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
-  const [tokenPackages, setTokenPackages] = useState<TokenPackage[]>([]);
   const [editingPlan, setEditingPlan] = useState<Plan | undefined>(undefined);
-  const [editingToken, setEditingToken] = useState<TokenPackage | undefined>(undefined);
   const [showPlanForm, setShowPlanForm] = useState(false);
+  const [editingToken, setEditingToken] = useState<string | null>(null);
   const [showTokenForm, setShowTokenForm] = useState(false);
   const [activeTab, setActiveTab] = useState<"subscriptions" | "tokens">("subscriptions");
 
   // ✅ Fetch subscription plans from backend
-  const fetchSubscriptionPlans = async () => {
+  const fetchSubscriptionPlans = async (data: any) => {
     try {
       const response = await fetch("http://localhost:8000/api/subscription");
       if (!response.ok) throw new Error("Failed to fetch plans");
 
       const data = await response.json();
-      setSubscriptionPlans(data);
+      fetchSubscriptionPlans(data);
     } catch (error) {
       console.error("Error fetching plans:", error);
       toast.error("Failed to fetch subscription plans!");
@@ -37,7 +35,7 @@ const Revenue = () => {
       if (!response.ok) throw new Error("Failed to fetch tokens");
 
       const data = await response.json();
-      setTokenPackages(data);
+      fetchTokenPackages(data);
     } catch (error) {
       console.error("Error fetching tokens:", error);
       toast.error("Failed to fetch token packages!");
@@ -59,13 +57,13 @@ const Revenue = () => {
 
       // ✅ Optimistic Update for UI
       if (plan.id) {
-        setSubscriptionPlans((prev) =>
+        fetchSubscriptionPlans((prev) =>
           prev.map((item) => (item.id === plan.id ? plan : item))
         );
         toast.success(`Subscription plan "${plan.name}" updated successfully!`);
       } else {
         const tempId = Date.now().toString();
-        setSubscriptionPlans((prev) => [...prev, { ...plan, id: tempId }]);
+        fetchSubscriptionPlans((prev) => [...prev, { ...plan, id: tempId }]);
         toast.success(`New plan "${plan.name}" created successfully!`);
       }
 
@@ -80,7 +78,7 @@ const Revenue = () => {
       const savedPlan = await response.json();
 
       // ✅ Replace temporary ID or existing plan ID with the saved ID
-      setSubscriptionPlans((prev) =>
+      fetchSubscriptionPlans((prev) =>
         prev.map((item) =>
           item.id === plan.id || item.id === plan.tempId ? { ...savedPlan } : item
         )
@@ -109,7 +107,7 @@ const Revenue = () => {
       }
 
       // Optimistic update: Immediately update the UI
-      setSubscriptionPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== planId));
+      fetchSubscriptionPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== planId));
 
       toast.success("Subscription plan deleted successfully!");
 
@@ -130,7 +128,7 @@ const Revenue = () => {
 
       if (!response.ok) throw new Error("Failed to delete token");
 
-      setTokenPackages((prevTokens) => prevTokens.filter((token) => token.id !== tokenId));
+      fetchTokenPackages((prevTokens) => prevTokens.filter((token) => token.id !== tokenId));
 
       toast.success("Token package deleted successfully!");
     } catch (error) {
@@ -144,12 +142,9 @@ const Revenue = () => {
   }
 
   return (
-    <div>
-      {/* ✅ Toast Container */}
-      <ToastContainer position="top-right" autoClose={3000} />
-
-      {/* ✅ Tabs */}
-      <div className="flex space-x-4 mb-6">
+    <div className="space-y-8">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold text-gray-900">Revenue Management</h2>
         <button
           onClick={() => setActiveTab("subscriptions")}
           className={`px-4 py-2 ${activeTab === "subscriptions" ? "bg-gray-800 text-white" : "bg-gray-200"} rounded-lg`}
@@ -164,10 +159,9 @@ const Revenue = () => {
         </button>
       </div>
 
-      {/* ✅ Subscription Plans */}
       {activeTab === "subscriptions" ? (
         <SubscriptionPlans
-          plans={subscriptionPlans}
+          plans={fetchSubscriptionPlans}
           onEdit={(plan) => {
             setEditingPlan(plan);
             setShowPlanForm(true);
@@ -176,9 +170,9 @@ const Revenue = () => {
         />
       ) : (
         <TokenPackages
-          packages={tokenPackages}
+          packages={TokenPackages}
           onEdit={(id: string) => {
-            const token = tokenPackages.find((token) => token.id === id);
+            const token = TokenPackages.find((token) => token.id === id);
             setEditingToken(token);
             setShowTokenForm(true);
           }}
@@ -198,7 +192,7 @@ const Revenue = () => {
           } }        />
       )}
 
-      {/* ✅ Token Form */}
+
       {showTokenForm && (
         <TokenForm
           editingToken={editingToken}

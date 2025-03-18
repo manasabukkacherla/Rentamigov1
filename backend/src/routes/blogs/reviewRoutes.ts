@@ -16,6 +16,7 @@ interface CustomRequest<T = {}, U = {}, V = {}> extends Request<T, U, V> {
 interface ReviewRequestBody {
   comment: string;
   rating: number;
+  author: string
 }
 
 reviewRouter.post('/:id', async (
@@ -24,12 +25,12 @@ reviewRouter.post('/:id', async (
 ): Promise<void> => {
   try {
     const blogId = req.params.id;
-    const { comment, rating } = req.body;
+    const { comment, rating, author } = req.body;
 
-    // if (!req.user) {
-    //   res.status(401).json({ success: false, message: 'Unauthorized' });
-    //   return;
-    // }
+    if (!author) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
 
     const blog = await blogsModel.findById(blogId);
     console.log(blog)
@@ -42,7 +43,7 @@ reviewRouter.post('/:id', async (
     const newReview = new reviewModel({
       comment,
       rating,
-      // author: req.user._id,
+      author,
       blogId
     });
 
@@ -69,85 +70,98 @@ reviewRouter.post('/:id', async (
   }
 });
 
-reviewRouter.put('/:id', async (
-  req: CustomRequest<{ id: string }, {}, { comment: string; rating: number }>,
-  res: Response
-): Promise<void> => {
-  try {
-    const reviewId = req.params.id;
-    const { comment, rating } = req.body;
+reviewRouter.put(
+  '/:id',
+  async (
+    req: CustomRequest<{ id: string }, {}, { comment: string; rating: number; author: string }>,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { comment, rating, author } = req.body;
 
-    // if (!req.user) {
-    //   res.status(401).json({ success: false, message: 'Unauthorized' });
-    //   return;
-    // }
+      if (!author) {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+        return;
+      }
 
-    const review = await reviewModel.findById(reviewId);
-    
-    if (!review) {
-      res.status(404).json({ success: false, message: 'Review not found' });
-      return;
+      const existingReview = await reviewModel.findById(id);
+
+      if (!existingReview) {
+        res.status(404).json({ success: false, message: 'Review not found' });
+        return;
+      }
+
+      // Check if the provided author matches the original review author
+      if (existingReview.author.toString() !== author) {
+        res.status(403).json({ success: false, message: 'Not authorized to update this review' });
+        return;
+      }
+
+      // Update the review
+      const updatedReview = await reviewModel.findByIdAndUpdate(
+        id,
+        { comment, rating },
+        { new: true } // Return the updated document
+      );
+
+      res.status(200).json({
+        success: true,
+        review: updatedReview,
+      });
+    } catch (error) {
+      console.error('Error updating review:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
     }
-
-    // Verify if the authenticated user is the author
-    // if (review.author.toString() !== req.user._id) {
-    //   res.status(403).json({ success: false, message: 'Not authorized to update this review' });
-    //   return;
-    // }
-
-    const updatedReview = await reviewModel.findByIdAndUpdate(
-      reviewId,
-      { comment, rating },
-      { new: true } // returns the updated document
-    );
-
-    res.status(200).json({
-      success: true,
-      review: updatedReview,
-    });
-  } catch (error) {
-    console.error('Error updating review:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
   }
-});
+);
 
 
-reviewRouter.delete('/:id', async (
-  req: CustomRequest<ParamsDictionary, {}, {}>,
-  res: Response
-): Promise<void> => {
-  try {
-    const { id } = req.params;
 
-    // if (!req.user) {
-    //   res.status(401).json({ success: false, message: 'Unauthorized' });
-    //   return;
-    // }
+reviewRouter.delete(
+  '/:id',
+  async (
+    req: CustomRequest<{ id: string }, {}, { author: string }>,
+    res: Response
+  ): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { author } = req.body;
 
-    const review = await reviewModel.findById(id);
+      if (!author) {
+        res.status(401).json({ success: false, message: 'Unauthorized' });
+        return;
+      }
 
-    if (!review) {
-      res.status(404).json({ success: false, message: 'Review not found' });
-      return;
+      const existingReview = await reviewModel.findById(id);
+
+      if (!existingReview) {
+        res.status(404).json({ success: false, message: 'Review not found' });
+        return;
+      }
+
+      // Check if the provided author matches the original review author
+      if (existingReview.author.toString() !== author) {
+        res.status(403).json({ success: false, message: 'Not authorized to delete this review' });
+        return;
+      }
+
+      // Delete the review
+      await reviewModel.findByIdAndDelete(id);
+
+      // Remove the reference from the related blog post
+      await blogsModel.updateOne(
+        { reviews: id },
+        { $pull: { reviews: id } }
+      );
+
+      res.status(200).json({ success: true, message: 'Review deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
     }
-
-    // if (review.author.toString() !== req.user._id) {
-    //   res.status(403).json({ success: false, message: 'Not authorized to delete this review' });
-    //   return;
-    // }
-
-    await reviewModel.findByIdAndDelete(id);
-
-    await blogsModel.updateOne(
-      { reviews: id },
-      { $pull: { reviews: id } }
-    );
-
-    res.status(200).json({ success: true, message: 'Review deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting review:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
   }
-});
+);
+
 
 export default reviewRouter;

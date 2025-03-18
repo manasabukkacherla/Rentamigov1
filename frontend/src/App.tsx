@@ -28,6 +28,8 @@ import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/editor/EditorMenuBar";
 import EmployeeLogin from "./components/Logins/EmployeeLogin";
+import { ToastContainer } from "react-toastify";
+import ErrorBoundary from "./components/blogs/ErrorBoundary";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -37,10 +39,11 @@ const App = () => {
   const client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const storedUser = sessionStorage.getItem("user");
-  console.log(storedUser);
+  // console.log(storedUser);
 
   return (
     <GoogleOAuthProvider clientId={client_id}>
+      <ToastContainer/>
       <BrowserRouter>
         <Routes>
           <Route
@@ -70,7 +73,7 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
 
-          <Route path="/Userdashboard/" element={<UsrDashboard />} />
+          <Route path="/Userdashboard/*" element={<UsrDashboard />} />
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />
@@ -87,11 +90,7 @@ const App = () => {
           <Route path="/propertypage" element={<Propertydetail />} />
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
-          <Route path="/emp-login" element={<EmployeeLogin onSwitchToSignup={function (): void {
-            throw new Error("Function not implemented.");
-          } } onLoginSuccess={function (): void {
-            throw new Error("Function not implemented.");
-          } } />} />
+          <Route path="/emp-login" element={<EmployeeLogin />} />
           <Route path="/blogs" element={<HomePage />} />
           <Route path="/blogs/Create" element={<CreateBlogPage />} />
           {/* Dashboard Layout */}
@@ -101,20 +100,10 @@ const App = () => {
             element={<EditorMenuBar editor={null} />}
           />
 
-          <Route path="/blogs/:id" element={<BlogDetail />} />
+          <Route path="/blogs/:id" element={<ErrorBoundary><BlogDetail /></ErrorBoundary>} />
 
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />
-          {/* Redirect to dashboard on load */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<Admindash />} />
-        <Route path="/properties" element={<Admindash activeSection="properties" />} />
-        <Route path="/revenue" element={<Admindash activeSection="revenue" />} />
-        <Route path="/employees" element={<Admindash activeSection="employees" />} />
-        <Route path="/analytics" element={<Admindash activeSection="analytics" />} />
-        <Route path="/users" element={<Admindash activeSection="users" />} />
-        <Route path="/notifications" element={<Admindash activeSection="notifications" />} />
-        <Route path="/settings" element={<Admindash activeSection="settings" />} />
         </Routes>
       </BrowserRouter>
     </GoogleOAuthProvider>
