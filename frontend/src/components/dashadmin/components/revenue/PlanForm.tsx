@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { Trash2 } from 'lucide-react';
-import { showToast } from '../Toast'; // Ensure the correct import path for toast.tsx
-import { Plan } from '../Types';
+import { useEffect, useState } from "react";
+import { showToast } from "../Toast";
+import { Trash2 } from "lucide-react";
+
+interface PlanFormProps {
+  onClose: () => void;
+  onSubmit: () => void;
+  editingPlan?: PlanFormData;
+}
 
 interface PlanFormData {
   name: string;
@@ -13,19 +18,9 @@ interface PlanFormData {
   features: string[];
   description: string;
   trialDays: number;
+  id?: string;
+  _id?: string;
 }
-
-interface PlanFormProps {
-  onClose: () => void;
-  onSave: (plan: Plan) => Promise<void>;
-
-  onUpdate: (updatedPlan: Plan) => void;
-  editingPlan?: Plan; // ✅ Use optional `Plan` instead of `PlanFormData`
-}
-
-
-
-
 
 const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
   const [data, setData] = useState<PlanFormData>({
@@ -43,7 +38,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
   // ✅ Pre-fill form when editing an existing plan
   useEffect(() => {
     if (editingPlan) {
-      setData(editingPlan); // ✅ Load existing plan when editing
+      setData(editingPlan); // Load existing plan when editing
     } else {
       setData({
         name: '',
@@ -57,8 +52,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
         trialDays: 0,
       });
     }
-  }, [editingPlan]); // ✅ Runs when `editingPlan` changes
-  
+  }, [editingPlan]);
 
   const handleChange = (updatedData: Partial<PlanFormData>) => {
     setData((prev) => ({ ...prev, ...updatedData }));
@@ -66,31 +60,31 @@ const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
 
   const handleSubmit = async () => {
     try {
-      const planId = editingPlan?.id || editingPlan?._id; // ✅ Ensure correct ID
-  
+      const planId = editingPlan?.id || editingPlan?._id;
+
       if (editingPlan && !planId) {
         console.error("Error: Editing plan has no valid ID");
         showToast.error("Invalid subscription plan ID!");
         return;
       }
-  
+
       const url = editingPlan
-        ? `http://localhost:8000/api/subscription/${planId}` // ✅ Use _id or id
+        ? `http://localhost:8000/api/subscription/${planId}`
         : 'http://localhost:8000/api/subscription';
-  
+
       const method = editingPlan ? 'PUT' : 'POST';
-  
+
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          _id: planId, // ✅ Ensure API gets _id
+          _id: planId, // Ensure API gets _id
         }),
       });
-  
+
       if (!response.ok) throw new Error("Failed to save subscription plan");
-  
+
       showToast.success(`Plan ${editingPlan ? 'updated' : 'created'} successfully!`);
       onClose();
     } catch (error) {
@@ -98,10 +92,21 @@ const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
       showToast.error("Error saving subscription plan");
     }
   };
-  
-  
-  
-  
+
+  const handleClose = () => {
+    onClose();
+    setData({
+      name: '',
+      price: 0,
+      billingCycle: 'monthly',
+      maxProperties: 0,
+      maxLeads: 0,
+      tokensPerLead: 0,
+      features: [''],
+      description: '',
+      trialDays: 0,
+    });
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -201,7 +206,7 @@ const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
           </div>
         </div>
         <div className="mt-6 flex justify-end space-x-3">
-          <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+          <button onClick={handleClose} className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
             Cancel
           </button>
           <button onClick={handleSubmit} className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">

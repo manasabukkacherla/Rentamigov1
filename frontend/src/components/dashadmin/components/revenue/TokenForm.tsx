@@ -6,9 +6,21 @@ interface TokenFormProps {
   editingToken?: TokenPackage;
   onSave: (data: TokenPackage) => Promise<void>;
   onClose: () => void;
-}
-
-
+  token: {
+    name: string;
+    tokens: number;
+    price: number;
+    bonusTokens: number;
+    minPurchase: number;
+    tokensPerLead: number;
+    validityDays: number;
+    features: string[];
+    description: string;
+  };
+  onChange: (token: any) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+};
 const TokenForm: React.FC<TokenFormProps> = ({ editingToken, onSave, onClose }) => {
   const [tokenData, setTokenData] = useState<TokenPackage>({
     id: '',
@@ -21,43 +33,50 @@ const TokenForm: React.FC<TokenFormProps> = ({ editingToken, onSave, onClose }) 
     validityDays: 0,
     features: [''],
     description: '',
-    status: '', // ✅ Default status value
+    status: '', // Default status value
   });
 
-  // ✅ Load existing token data if editingToken is passed
+  // Pre-fill form when editing an existing token
   useEffect(() => {
     if (editingToken) {
       setTokenData(editingToken);
     }
   }, [editingToken]);
 
-  // ✅ Handle form input changes
+  // Handle form input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setTokenData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ Handle feature changes
+  // Handle feature changes
   const handleFeatureChange = (index: number, value: string) => {
     const updatedFeatures = [...tokenData.features];
     updatedFeatures[index] = value;
     setTokenData((prev) => ({ ...prev, features: updatedFeatures }));
   };
 
-  // ✅ Remove a feature
+  // Remove a feature
   const removeFeature = (index: number) => {
     const updatedFeatures = tokenData.features.filter((_, i) => i !== index);
     setTokenData((prev) => ({ ...prev, features: updatedFeatures }));
   };
 
-  // ✅ Add a new feature
+  // Add a new feature
   const addFeature = () => {
     setTokenData((prev) => ({ ...prev, features: [...prev.features, ''] }));
   };
 
-  // ✅ Handle form submission
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Simple validation before submitting
+    if (!tokenData.name || tokenData.tokens <= 0 || tokenData.price <= 0) {
+      alert('Please fill out all required fields!');
+      return;
+    }
+
     await onSave(tokenData);
     onClose();
   };
