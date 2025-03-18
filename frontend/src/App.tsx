@@ -14,9 +14,11 @@ import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import HomePage from "./components/blogs/HomePage";
+
 import Loginhome from "./components/Logins/Loginhome";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
 import CreateBlogPage from "./components/blogs/CreateBlogPage";
+
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
 
 import Admindash from "./components/dashadmin/admdashboard";
@@ -25,8 +27,6 @@ import Propertydetail from "./components/propertiesdetails/App";
 import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/editor/EditorMenuBar";
-import { Toaster } from 'react-hot-toast';
-
 import EmployeeLogin from "./components/Logins/EmployeeLogin";
 
 const App = () => {
@@ -42,7 +42,6 @@ const App = () => {
   return (
     <GoogleOAuthProvider clientId={client_id}>
       <BrowserRouter>
-       <Toaster /> 
         <Routes>
           <Route
             path="/"
@@ -71,10 +70,8 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
 
+          <Route path="/Userdashboard/" element={<UsrDashboard />} />
 
-          <Route path="/Userdashboard/*" element={<UsrDashboard />} /> 
-
-         
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />
           <Route path="/google" element={<MapComponent propertyId={""} />} />
