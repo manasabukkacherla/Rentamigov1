@@ -16,14 +16,10 @@ import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import HomePage from "./components/blogs/HomePage";
-
 import Loginhome from "./components/Logins/Loginhome";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
 import CreateBlogPage from "./components/blogs/CreateBlogPage";
-
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
-
-
 import Admindash from "./components/dashadmin/admdashboard";
 import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
