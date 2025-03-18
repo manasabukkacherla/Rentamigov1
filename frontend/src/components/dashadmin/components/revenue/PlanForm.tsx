@@ -17,8 +17,6 @@ interface PlanFormData {
 
 interface PlanFormProps {
   onClose: () => void;
-  onSave: (plan: Plan) => Promise<void>;
-
   onUpdate: (updatedPlan: Plan) => void;
   editingPlan?: Plan; // ✅ Use optional `Plan` instead of `PlanFormData`
 }

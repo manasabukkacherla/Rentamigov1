@@ -73,7 +73,7 @@ const App = () => {
           <Route path="/owner-page" element={<OwnerPage />} />
           <Route path="/service-page" element={<Services />} />
 
-          <Route path="/Userdashboard/" element={<UsrDashboard />} />
+          <Route path="/Userdashboard/*" element={<UsrDashboard />} />
 
           {/* Property and Map Pages */}
           <Route path="/Fullpage/:id" element={<Fullpage />} />
@@ -90,11 +90,7 @@ const App = () => {
           <Route path="/propertypage" element={<Propertydetail />} />
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
-          <Route path="/emp-login" element={<EmployeeLogin onSwitchToSignup={function (): void {
-            throw new Error("Function not implemented.");
-          } } onLoginSuccess={function (): void {
-            throw new Error("Function not implemented.");
-          } } />} />
+          <Route path="/emp-login" element={<EmployeeLogin />} />
           <Route path="/blogs" element={<HomePage />} />
           <Route path="/blogs/Create" element={<CreateBlogPage />} />
           {/* Dashboard Layout */}
@@ -108,16 +104,6 @@ const App = () => {
 
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />
-          {/* Redirect to dashboard on load */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route path="/dashboard" element={<Admindash />} />
-        <Route path="/properties" element={<Admindash activeSection="properties" />} />
-        <Route path="/revenue" element={<Admindash activeSection="revenue" />} />
-        <Route path="/employees" element={<Admindash activeSection="employees" />} />
-        <Route path="/analytics" element={<Admindash activeSection="analytics" />} />
-        <Route path="/users" element={<Admindash activeSection="users" />} />
-        <Route path="/notifications" element={<Admindash activeSection="notifications" />} />
-        <Route path="/settings" element={<Admindash activeSection="settings" />} />
         </Routes>
       </BrowserRouter>
     </GoogleOAuthProvider>
