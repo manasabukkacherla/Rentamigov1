@@ -105,6 +105,14 @@ const HomePage = () => {
     getData();
   }, []);
 
+  // const user = sessionStorage.getItem('user');
+  // console.log(sessionStorage.getItem('user'))
+
+  // if (user) {
+  //   const parsedUser = JSON.parse(user);
+  //   console.log(parsedUser.id); 
+  // }
+
   return (
 
     <div className="bg-gray-50 min-h-screen">

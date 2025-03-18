@@ -29,6 +29,7 @@ import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/editor/EditorMenuBar";
 import EmployeeLogin from "./components/Logins/EmployeeLogin";
 import { ToastContainer } from "react-toastify";
+import ErrorBoundary from "./components/blogs/ErrorBoundary";
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -38,7 +39,7 @@ const App = () => {
   const client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const storedUser = sessionStorage.getItem("user");
-  console.log(storedUser);
+  // console.log(storedUser);
 
   return (
     <GoogleOAuthProvider clientId={client_id}>
@@ -103,7 +104,7 @@ const App = () => {
             element={<EditorMenuBar editor={null} />}
           />
 
-          <Route path="/blogs/:id" element={<BlogDetail />} />
+          <Route path="/blogs/:id" element={<ErrorBoundary><BlogDetail /></ErrorBoundary>} />
 
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />

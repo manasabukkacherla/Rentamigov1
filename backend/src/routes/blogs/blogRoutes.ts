@@ -17,21 +17,23 @@ export const createBlog = async (
     tags: string[];
     category: string;
     readTime: number;
+    author: string
   }>,
   res: Response
 ): Promise<void> => {
   try {
-    const { title, excerpt, content, media, tags, category, readTime } = req.body;
+    const { title, excerpt, content, media, tags, category, readTime, author } = req.body;
+    console.log(author)
 
     if (!title || !excerpt || !content || !media?.coverImage || !tags?.length || !category || !readTime) {
       res.status(400).json({ error: 'All required fields must be filled.' });
       return;
     }
 
-    // if (!req.user || !req.user._id) {
-    //   res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
-    //   return;
-    // }
+    if (!author) {
+      res.status(401).json({ error: 'Unauthorized: User not authenticated.' });
+      return;
+    }
 
     const newBlog = new Blog({
       title,
@@ -44,7 +46,7 @@ export const createBlog = async (
       tags,
       category,
       readTime,
-    //   author: req.user._id,
+      author,
     });
 
     await newBlog.save();
@@ -106,7 +108,9 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
   export const getBlogById = async (req: CustomRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const blog = await Blog.findById(id);
+      const blog = await Blog.findById(id)
+      .populate({ path: "reviews", populate: { path: "author" } })
+      .populate({ path: "comments", populate: { path: "author" } });
   
       if (!blog) {
         res.status(404).json({ message: "Blog not found" });

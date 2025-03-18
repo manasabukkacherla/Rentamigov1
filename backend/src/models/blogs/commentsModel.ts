@@ -4,7 +4,8 @@ interface Comment extends Document {
     comment: string,
     createdAt: Date,
     author: Types.ObjectId,
-    blogId: Types.ObjectId
+    blogId: Types.ObjectId,
+    likes: number
 }
 
 const commentSchema = new Schema<Comment>({
@@ -23,6 +24,10 @@ const commentSchema = new Schema<Comment>({
     blogId: {
         type: Schema.Types.ObjectId,
         ref: "Blog"
+    },
+    likes: {
+        type: Number,
+        default: 0
     }
 });
 
