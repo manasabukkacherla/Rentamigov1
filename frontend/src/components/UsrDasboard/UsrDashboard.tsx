@@ -7,9 +7,7 @@ import { Leads } from "./pages/Leads";
 import { Settings } from "./pages/Settings";
 import { Notifications } from "./pages/Notifications";
 import { ToastContainer } from "./ToastContainer";
-import { Plans } from './pages/Plans';
 import { Notification } from "./types";
-import { Toaster } from 'react-hot-toast';
 
 function UsrDashboard() {
   const [toasts, setToasts] = useState<Notification[]>([]);
@@ -36,7 +34,6 @@ function UsrDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-         <Toaster />
       {/* Sidebar */}
       <Sidebar onNewNotification={addToast} />
 
@@ -48,7 +45,6 @@ function UsrDashboard() {
           <Route path="properties" element={<Properties />} />
           <Route path="leads" element={<Leads />} />
           <Route path="settings" element={<Settings />} />
-          <Route path="plans" element={<Plans />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="*" element={<h1 className="text-center mt-10">Page Not Found</h1>} />
         </Routes>
