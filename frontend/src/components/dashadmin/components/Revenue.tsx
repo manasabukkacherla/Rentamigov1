@@ -5,8 +5,10 @@ import SubscriptionPlans from "./revenue/SubscriptionPlans";
 import TokenPackages from "./revenue/TokenPackages";
 import PlanForm from "./revenue/PlanForm";
 import TokenForm from "./revenue/TokenForm";
+import { Toaster } from "react-hot-toast";
 import { showToast } from "./Toast";
 import { Plan } from "./Types";
+import axios from "axios";
 
 const Revenue = () => {
   const [activeTab, setActiveTab] = useState("subscriptions");
@@ -14,7 +16,8 @@ const Revenue = () => {
   const [showPlanForm, setShowPlanForm] = useState(false);
   const [editingToken, setEditingToken] = useState<string | null>(null);
   const [showTokenForm, setShowTokenForm] = useState(false);
-
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [newPlan, setNewPlan] = useState({
     name: "",
     price: 0,
@@ -156,13 +159,30 @@ const Revenue = () => {
     });
   };
 
-  const handleSubmitToken = () => {
+  const handleSubmitToken = async () => {
     const token = {
       id: Date.now().toString(),
       ...newToken,
       status: "active",
     };
-    setTokenPackages([...tokenPackages, token]);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/tokens/",
+        token
+      );
+      if (response.status === 201) {
+        console.log(response.status);
+        showToast.success("Token added successfully");
+        setTokenPackages([...tokenPackages, token]);
+      }
+      const data = response.data;
+    } catch (err) {
+      setError("Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
+
     setShowTokenForm(false);
     setNewToken({
       name: "",
@@ -183,17 +203,16 @@ const Revenue = () => {
       showToast.error("Invalid plan selected for editing!");
       return;
     }
-  
+
     console.log("Editing plan:", plan); // ✅ Debugging log
-  
+
     setEditingPlan({
       ...plan,
       id: plan.id || plan._id, // ✅ Map _id to id
     });
-  
+
     setShowPlanForm(true);
   };
-  
 
   const handleDelete = async (id: string | undefined) => {
     if (!id) {
@@ -312,17 +331,16 @@ const Revenue = () => {
         </div>
       )}
 
-{showPlanForm && (
-  <PlanForm
-    editingPlan={editingPlan} // ✅ Ensure this is passed correctly
-    onClose={() => {
-      setShowPlanForm(false);
-      setEditingPlan(undefined);
- // ✅ Reset after closing
-    }}
-  />
-)}
-
+      {showPlanForm && (
+        <PlanForm
+          editingPlan={editingPlan} // ✅ Ensure this is passed correctly
+          onClose={() => {
+            setShowPlanForm(false);
+            setEditingPlan(undefined);
+            // ✅ Reset after closing
+          }}
+        />
+      )}
 
       {showTokenForm && (
         <TokenForm
