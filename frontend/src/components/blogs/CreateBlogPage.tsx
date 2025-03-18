@@ -17,6 +17,8 @@ import TagInput from "../blogs/TagInput"
 import EditorMenuBar from "../blogs/EditorMenuBar"
 import type { Blogpost } from "../Blogs/types"
 import { motion, AnimatePresence } from "framer-motion"
+import axios from "axios"
+import { toast } from "react-toastify"
 
 const CreateBlogPage = () => {
   const navigate = useNavigate()
@@ -85,35 +87,35 @@ const CreateBlogPage = () => {
       }
 
       // Trigger auto-save
-      handleAutoSave()
+      // handleAutoSave()
     },
   })
 
-  // Auto-save functionality
-  const handleAutoSave = () => {
-    setIsSaving(true)
-    // Simulate saving to localStorage
-    const blogData = {
-      title,
-      content,
-      excerpt,
-      tags,
-      coverImage,
-      category,
-      readTime,
-    }
-    localStorage.setItem("blog_draft", JSON.stringify(blogData))
+  // // Auto-save functionality
+  // const handleAutoSave = () => {
+  //   setIsSaving(true)
+  //   // Simulate saving to localStorage
+  //   const blogData = {
+  //     title,
+  //     content,
+  //     excerpt,
+  //     tags,
+  //     coverImage,
+  //     category,
+  //     readTime,
+  //   }
+  //   // localStorage.setItem("blog_draft", JSON.stringify(blogData))
 
-    setTimeout(() => {
-      setIsSaving(false)
-      setAutoSaveMessage("Draft saved automatically")
+  //   setTimeout(() => {
+  //     setIsSaving(false)
+  //     setAutoSaveMessage("Draft saved automatically")
 
-      // Clear the message after 3 seconds
-      setTimeout(() => {
-        setAutoSaveMessage("")
-      }, 3000)
-    }, 1000)
-  }
+  //     // Clear the message after 3 seconds
+  //     setTimeout(() => {
+  //       setAutoSaveMessage("")
+  //     }, 3000)
+  //   }, 1000)
+  // }
 
   // Load blog data if editing
   useEffect(() => {
@@ -185,14 +187,14 @@ const CreateBlogPage = () => {
       }
 
       // Trigger auto-save
-      handleAutoSave()
+      // handleAutoSave()
     }
   }
 
   const handleRemoveTag = (tagToRemove: string) => {
     setTags(tags.filter((tag) => tag !== tagToRemove))
     // Trigger auto-save
-    handleAutoSave()
+    // handleAutoSave()
   }
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -212,7 +214,7 @@ const CreateBlogPage = () => {
         }
 
         // Trigger auto-save
-        handleAutoSave()
+        // handleAutoSave()
       }
       reader.readAsDataURL(file)
     }
@@ -224,28 +226,29 @@ const CreateBlogPage = () => {
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {}
-  
+
     if (activeStep === 0) {
       if (!title.trim()) newErrors.title = "Title is required"
       if (!excerpt.trim()) newErrors.excerpt = "Excerpt is required"
     }
-  
+
     if (activeStep === 1) {
       if (!content.trim() || content === "<p></p>") newErrors.content = "Content is required"
     }
-  
+
     if (activeStep === 2) {
       if (!coverImage) newErrors.coverImage = "Cover image is required"
     }
-  
+
     if (activeStep === 3) {
       if (tags.length === 0) newErrors.tags = "At least one tag is required"
     }
-  
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+  // console.log(sessionStorage.getItem('user'))
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -262,50 +265,37 @@ const CreateBlogPage = () => {
     setIsSubmitting(true)
 
     try {
-      // Create author object (in a real app, this would come from auth context)
-      const author = {
-        name: "Alex Johnson",
-        avatar:
-          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80",
-      }
+      const user = sessionStorage.getItem('user');
+      console.log(sessionStorage.getItem('user'))
 
-      const blogData: Omit<Blogpost, "id"> = {
-        title,
-        content,
-        excerpt,
-        tags,
-        coverImage: coverImage || "",
-        category,
-        readTime,
-        date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-        author,
-        likes: 0,
-        comments: 0,
-        commentsList: [],
-        reviews: [],
-        shares: 0,
-      }
-
-      if (isEditing && id) {
-        // Update existing blog
-        const updated = updateBlog(Number.parseInt(id), blogData)
-        if (updated) {
-          setSuccessMessage("Blog updated successfully!")
-          // Clear draft after successful update
-          localStorage.removeItem("blog_draft")
-          setTimeout(() => {
-            navigate(`/blog/${id}`)
-          }, 1500)
+      if (user) {
+        const author = JSON.parse(user).id;
+        console.log(author); 
+        
+        const blogData = {
+          title,
+          content,
+          excerpt,
+          tags,
+          media: {
+            coverImage: coverImage || "",
+          },
+          category,
+          readTime,
+          author
+          // date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
         }
-      } else {
-        // Create new blog
-        const newBlog = createBlog(blogData)
-        setSuccessMessage("Blog created successfully!")
-        // Clear draft after successful creation
-        localStorage.removeItem("blog_draft")
-        setTimeout(() => {
-          navigate(`/blog/${newBlog.id}`)
-        }, 1500)
+  
+        const response = await axios.post('http://localhost:8000/api/blog/add', blogData)
+        // console.log(response)
+        if (response.data.success) {
+          // console.log(response.data)
+          toast.success(response.data.message)
+        } else {
+          toast.error("Failed to create a blog")
+        }
+  
+        navigate('/blogs')
       }
     } catch (error) {
       console.error("Error saving blog:", error)
@@ -351,7 +341,7 @@ const CreateBlogPage = () => {
       setActiveStep(index)
     }
   }
-  
+
   // Calculate estimated read time based on content length
   useEffect(() => {
     if (content) {
@@ -447,10 +437,10 @@ const CreateBlogPage = () => {
               >
                 <div
                   className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${index < activeStep
-                      ? "bg-green-100 text-green-600"
-                      : index === activeStep
-                        ? "bg-black text-white"
-                        : "bg-gray-100 text-gray-400"
+                    ? "bg-green-100 text-green-600"
+                    : index === activeStep
+                      ? "bg-black text-white"
+                      : "bg-gray-100 text-gray-400"
                     }`}
                 >
                   {index < activeStep ? <Check className="h-5 w-5" /> : step.icon}
@@ -506,7 +496,7 @@ const CreateBlogPage = () => {
                               return newErrors
                             })
                           }
-                          handleAutoSave()
+                          // handleAutoSave()
                         }}
                         className={`w-full px-4 py-3 border ${errors.title ? "border-red-500" : "border-gray-300"
                           } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
@@ -532,7 +522,7 @@ const CreateBlogPage = () => {
                               return newErrors
                             })
                           }
-                          handleAutoSave()
+                          // handleAutoSave()
                         }}
                         rows={3}
                         className={`w-full px-4 py-3 border ${errors.excerpt ? "border-red-500" : "border-gray-300"
@@ -693,7 +683,7 @@ const CreateBlogPage = () => {
                         currentTag={currentTag}
                         onTagChange={(value) => {
                           setCurrentTag(value)
-                          handleAutoSave()
+                          // handleAutoSave()
                         }}
                         onAddTag={handleAddTag}
                         onRemoveTag={handleRemoveTag}
@@ -712,7 +702,7 @@ const CreateBlogPage = () => {
                         value={category}
                         onChange={(e) => {
                           setCategory(e.target.value);
-                          handleAutoSave();
+                          // handleAutoSave();
                         }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                         placeholder="Enter category"
@@ -747,7 +737,7 @@ const CreateBlogPage = () => {
                           value={readTime}
                           onChange={(e) => {
                             setReadTime(Number.parseInt(e.target.value) || 5)
-                            handleAutoSave()
+                            // handleAutoSave()
                           }}
                           min="1"
                           max="60"

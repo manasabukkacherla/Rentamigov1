@@ -2,8 +2,30 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Blogpost } from '../Blogs/types';
 import BlogCardS from './BlogCardS';
 
+interface Blog {
+  _id: string,
+  title: string;
+    excerpt: string;
+    content: string;
+    media: {
+        coverImage: string;
+        images?: string[];
+    };
+    tags: string[];
+    category: string;
+    readTime: number;
+    author: string;
+    likes: number;
+    views: number; // New: View count
+    shares: 0,
+    comments: { userId: string; comment: string; createdAt: Date; }[]
+    reviews: string[];
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 interface BlogListProps {
-    blogs: Blogpost[];
+    blogs: Blog[];
   }
 
 const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
@@ -66,7 +88,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {blogs.map(blog => (
-          <BlogCardS key={blog.id} blog={blog} />
+          <BlogCardS key={blog._id} blog={blog} />
         ))}
       </div>
     );
@@ -84,7 +106,7 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
         style={{ width: `${blogs.length * 33.33}%` }}
       >
         {blogs.map(blog => (
-          <div key={blog.id} className="w-1/3 px-4">
+          <div key={blog._id} className="w-1/3 px-4">
             <BlogCardS blog={blog} />
           </div>
         ))}
