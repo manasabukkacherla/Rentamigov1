@@ -1,17 +1,21 @@
-import React from 'react';
-import { LogOut } from 'lucide-react';
+"use client"
+
+import type React from "react"
+import { LogOut } from "lucide-react"
+import { Link } from "react-router-dom"
 
 interface MenuItem {
-  id: string;
-  label: string;
-  icon: React.ElementType;
+  id: string
+  label: string
+  icon: React.ElementType
+  path: string
 }
 
 interface SidebarProps {
-  menuItems: MenuItem[];
-  activeSection: string;
-  onSectionChange: (section: string) => void;
-  onLogout: () => void;
+  menuItems: MenuItem[]
+  activeSection: string
+  onSectionChange: (section: string) => void
+  onLogout: () => void
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ menuItems, activeSection, onSectionChange, onLogout }) => {
@@ -24,26 +28,25 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, activeSection, onSectionCh
 
         <nav className="flex-1 px-4">
           {menuItems.map((item) => {
-            const Icon = item.icon;
+            const Icon = item.icon
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => onSectionChange(item.id)}
+                to={item.path}
                 className={`flex items-center w-full px-4 py-3 mb-2 rounded-lg ${
-                  activeSection === item.id
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                  activeSection === item.id ? "bg-gray-900 text-white" : "text-gray-600 hover:bg-gray-100"
                 }`}
+                onClick={() => onSectionChange(item.id)}
               >
                 <Icon className="w-5 h-5 mr-3" />
                 <span className="font-medium">{item.label}</span>
-              </button>
-            );
+              </Link>
+            )
           })}
         </nav>
 
         <div className="p-4 border-t border-gray-200">
-          <button 
+          <button
             onClick={onLogout}
             className="flex items-center w-full px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-lg"
           >
@@ -53,7 +56,8 @@ const Sidebar: React.FC<SidebarProps> = ({ menuItems, activeSection, onSectionCh
         </div>
       </div>
     </aside>
-  );
-};
+  )
+}
 
-export default Sidebar;
+export default Sidebar
+
