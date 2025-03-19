@@ -93,7 +93,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit, onDelete,
                   >
                     <Edit className="w-5 h-5" />
                   </button>
-
+{/*  */}
                   {/* ✅ Delete Button */}
                   <button
                     onClick={() => handleDelete(plan.id)}
