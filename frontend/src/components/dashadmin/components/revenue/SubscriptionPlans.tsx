@@ -3,6 +3,8 @@ import { DollarSign, Edit, Trash2, Users } from "lucide-react";
 import { showToast } from "../Toast";
 
 interface Plan {
+  tempId: string;
+  description: string;
   id: string;
   name: string;
   price: number;
@@ -17,58 +19,63 @@ interface Plan {
 
 interface SubscriptionPlansProps {
   onEdit: (plan: Plan) => void;
-  onDelete: (planId: string) => void;
+  
+  plans: Plan[];
+
+  onDelete: (planId: string) => Promise<void>;
 }
 
 const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit }) => {
   const [plans, setPlans] = useState<Plan[]>([]); // State to store plans
-  const [loading, setLoading] = useState<boolean>(false); 
+  const [loading, setLoading] = useState<boolean>(false); // State for loading indicator
 
   // ✅ Fetch subscription plans from the API
   useEffect(() => {
     const fetchPlans = async () => {
+      setLoading(true); // Set loading to true when fetching starts
       try {
-        const response = await fetch('http://localhost:8000/api/subscription');
-        if (!response.ok) throw new Error('Failed to fetch plans');
-        
+        const response = await fetch("http://localhost:8000/api/subscription");
+        if (!response.ok) throw new Error("Failed to fetch plans");
+
         const data = await response.json();
         console.log("Fetched Plans:", data); // Debugging log
         setPlans(data);
       } catch (error) {
-        console.error('Error fetching plans:', error);
+        console.error("Error fetching plans:", error);
+        showToast.error("Failed to fetch subscription plans!");
+      } finally {
+        setLoading(false); // Set loading to false when done
       }
     };
-  
+
     fetchPlans();
   }, []);
-  
 
   // ✅ Handle Delete Plan
   const handleDelete = async (id: string | undefined) => {
     if (!id) {
-      showToast.error('Invalid plan ID!');
-      console.error('Error: Plan ID is undefined');
+      showToast.error("Invalid plan ID!");
+      console.error("Error: Plan ID is undefined");
       return;
     }
-  
+
     try {
       const response = await fetch(`http://localhost:8000/api/subscription/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-  
-      if (!response.ok) throw new Error('Failed to delete plan');
-  
-      // ✅ Remove the deleted plan from the state
+
+      if (!response.ok) throw new Error("Failed to delete plan");
+
+      // ✅ Remove the deleted plan from the state optimistically
       setPlans((prevPlans) => prevPlans.filter((plan) => plan.id !== id));
-  
+
       // ✅ Show success toast notification
-      showToast.success('Subscription Plan deleted successfully!');
+      showToast.success("Subscription Plan deleted successfully!");
     } catch (error) {
-      console.error('Error deleting plan:', error);
-      showToast.error('Failed to delete subscription plan');
+      console.error("Error deleting plan:", error);
+      showToast.error("Failed to delete subscription plan");
     }
   };
-  
 
   return (
     <div className="space-y-6">
@@ -82,9 +89,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit }) => {
             <div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900">
-                    {plan.name}
-                  </h4>
+                  <h4 className="text-lg font-semibold text-gray-900">{plan.name}</h4>
                   <div className="mt-1 space-x-4">
                     <span className="text-2xl font-bold text-gray-900">
                       ${plan.price}/month
@@ -104,16 +109,15 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit }) => {
                   </button>
 
                   {/* ✅ Delete Button */}
-                  <button 
-  onClick={() => {
-    console.log("Deleting plan with ID:", plan.id); // Debugging log
-    handleDelete(plan.id);
-  }} 
-  className="p-2 text-gray-600 hover:text-red-600 border rounded-lg"
->
-  <Trash2 className="w-5 h-5" />
-</button>
-
+                  <button
+                    onClick={() => {
+                      console.log("Deleting plan with ID:", plan.id); // Debugging log
+                      handleDelete(plan.id);
+                    }}
+                    className="p-2 text-gray-600 hover:text-red-600 border rounded-lg"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-4">
@@ -121,9 +125,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit }) => {
                   <Users className="w-5 h-5 text-gray-400 mr-2" />
                   <span>
                     Max Properties:{" "}
-                    {plan.maxProperties === -1
-                      ? "Unlimited"
-                      : plan.maxProperties}
+                    {plan.maxProperties === -1 ? "Unlimited" : plan.maxProperties}
                   </span>
                 </div>
                 <div className="flex items-center text-gray-600">

@@ -4,6 +4,20 @@ import { showToast } from '../../components/Toast';
 import { Toaster } from 'react-hot-toast';
 import TokenForm from './TokenForm'; // Import the TokenForm component
 
+interface TokenFormData {
+  name: string;
+  tokens: number;
+  price: number;
+  bonusTokens: number;
+  minPurchase: number;
+  tokensPerLead: number;
+  validityDays: number;
+  features: string[];
+  description: string;
+  status: "active" | "inactive";  // Ensure status is required
+}
+
+
 interface TokenPackage {
   _id: string;
   name: string;
@@ -77,12 +91,12 @@ const TokenPackages: React.FC = () => {
   };
 
   // Handle Save (PUT API Call)
-  const handleSave = async (updatedPackage: TokenPackage) => {
+  const handleSave = async (data: TokenFormData & { status: "active" | "inactive" }, _isEdit: boolean, _id?: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tokens/${updatedPackage._id}`, {
+      const response = await fetch(`http://localhost:8000/api/tokens/${_id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedPackage),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) throw new Error('Failed to update package');
@@ -162,7 +176,7 @@ const TokenPackages: React.FC = () => {
         <TokenForm
           onClose={() => setEditingPackage(null)}
           initialData={editingPackage}
-          onSave={handleSave}
+          onSave={(data, isEdit, id) => handleSave(data, isEdit, id)}
         />
       )}
     </>

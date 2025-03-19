@@ -4,7 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import {   useParams, Link } from 'react-router-dom';
 import { Clock, ThumbsUp, MessageCircle, Share2, ArrowLeft, Star, Send } from "lucide-react"
-import {  blogPosts as initialBlogPosts } from "../Blogs/data/blogData"
+import {  blogPosts as initialBlogPosts } from "../blogs/data/blogData"
 import type { BlogPostType, Comment, Review } from "../Blogs/types/type"
 import Navbar from "./Navbar";
 
