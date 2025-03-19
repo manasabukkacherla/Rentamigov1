@@ -1,21 +1,22 @@
-import React, { useState } from "react";
-import { Plus } from "lucide-react";
-import RevenueStats from "./revenue/RevenueStats";
-import SubscriptionPlans from "./revenue/SubscriptionPlans";
-import TokenPackages from "./revenue/TokenPackages";
-import PlanForm from "./revenue/PlanForm";
-import TokenForm from "./revenue/TokenForm";
-import { showToast } from "./Toast";
-import { Plan } from "./Types";
+"use client"
 
-
+import type React from "react"
+import { useState } from "react"
+import { Plus } from "lucide-react"
+import RevenueStats from "./revenue/RevenueStats"
+import SubscriptionPlans from "./revenue/SubscriptionPlans"
+import TokenPackages from "./revenue/TokenPackages"
+import PlanForm from "./revenue/PlanForm"
+import TokenForm from "./revenue/TokenForm"
+import { showToast } from "./Toast"
+import type { Plan } from "./Types"
 
 const Revenue = () => {
-  const [activeTab, setActiveTab] = useState("subscriptions");
-  const [editingPlan, setEditingPlan] = useState<Plan | undefined>(undefined);
-  const [showPlanForm, setShowPlanForm] = useState(false);
-  const [showTokenForm, setShowTokenForm] = useState(false);
-
+  const [activeTab, setActiveTab] = useState("subscriptions")
+  const [editingPlan, setEditingPlan] = useState<Plan | undefined>(undefined)
+  const [showPlanForm, setShowPlanForm] = useState(false)
+  const [showTokenForm, setShowTokenForm] = useState(false)
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [newPlan, setNewPlan] = useState({
     name: "",
     price: 0,
@@ -26,7 +27,7 @@ const Revenue = () => {
     features: [""],
     description: "",
     trialDays: 0,
-  });
+  })
 
   const revenueStats = [
     {
@@ -57,28 +58,12 @@ const Revenue = () => {
       change: "+8.4%",
       period: "vs last month",
     },
-  ];
+  ]
 
   const handleAddPlan = () => {
-    setShowPlanForm(true);
-    showToast.info("Opening form to create a new subscription plan...");
-  };
-
-  const handleAddToken = () => {
-    setShowTokenForm(true);
-    showToast.info("Opening form to create a new token package...");
-  };
-
-  const handleSubmitPlan = () => {
-    if (!newPlan.name || !newPlan.price || !newPlan.maxProperties || !newPlan.maxLeads) {
-      showToast.error("Please fill in all required fields!");
-      return;
-    }
-
-
-    showToast.success("Subscription Plan created successfully!");
-    setShowPlanForm(false); 
-    setNewPlan({
+    setEditingPlan(undefined)
+    setFormData({
+      id: "",
       name: "",
       price: 0,
       billingCycle: "monthly",
@@ -88,44 +73,126 @@ const Revenue = () => {
       features: [""],
       description: "",
       trialDays: 0,
-    });
-  };
+      status: "active",
+    })
+    setShowPlanForm(true)
+    showToast.info("Opening form to create a new subscription plan...")
+  }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setNewPlan((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleAddToken = () => {
+    setShowTokenForm(true)
+    showToast.info("Opening form to create a new token package...")
+  }
 
-  const handleEditPlan = (plan: Plan) => {
-    showToast.info("Opening form to edit subscription plan...");
-    setEditingPlan({ ...plan, description: plan.description || "" });
-    setShowPlanForm(true);
-  };
+  // State for form data
+  const [formData, setFormData] = useState<Plan>({
+    id: "",
+    tempId: "",
+    name: "",
+    price: 0,
+    billingCycle: "monthly",
+    maxProperties: 0,
+    maxLeads: 0,
+    tokensPerLead: 0,
+    features: [""],
+    description: "",
+    trialDays: 0,
+    status: "active",
+  })
 
-  const handleDeletePlan = async (id: string | undefined) => {
-    if (!id) {
-      showToast.error("Invalid plan ID!");
-      return;
+  // Update the handleSubmitPlan function to refetch plans after submission
+  const handleSubmitPlan = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/subscription", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (!response.ok) throw new Error("Failed to create subscription plan");
+  
+      showToast.success("Subscription Plan created successfully!");
+      setRefreshTrigger((prev) => prev + 1); // ✅ Increment refresh trigger
+      setShowPlanForm(false);
+    } catch (error) {
+      console.error("Error creating plan:", error);
+      showToast.error("Failed to create subscription plan");
+    }
+  };
+  
+
+  // Update the handleUpdatePlan function
+  const handleUpdatePlan = async (updatedPlan: Plan) => {
+    if (!updatedPlan.id) {
+      showToast.error("Plan ID is missing!")
+      return
     }
 
+    try {
+      const response = await fetch(`http://localhost:8000/api/subscription/${updatedPlan.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedPlan),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update subscription plan")
+      }
+
+      showToast.success("Subscription Plan updated successfully!")
+      setShowPlanForm(false)
+      // No need for refreshTrigger, the component will refetch on its own
+    } catch (error) {
+      console.error("Error updating plan:", error)
+      showToast.error("Failed to update subscription plan")
+    }
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleEditPlan = (plan: Plan) => {
+    showToast.info("Opening form to edit subscription plan...")
+    setEditingPlan(plan)
+    setFormData({ ...plan })
+    setShowPlanForm(true)
+  }
+
+  // Update the handleDeletePlan function
+  const handleDeletePlan = async (id: string) => {
+    if (!id) {
+      showToast.error("Invalid plan ID!");
+      return Promise.reject("Invalid plan ID");
+    }
+  
     try {
       showToast.info("Deleting subscription plan...");
       const response = await fetch(`http://localhost:8000/api/subscription/${id}`, {
         method: "DELETE",
       });
-
+  
       if (!response.ok) throw new Error("Failed to delete plan");
-
+  
       showToast.success("Subscription Plan deleted successfully!");
+      setRefreshTrigger((prev) => prev + 1); // ✅ Increment refresh trigger to re-fetch plans
     } catch (error) {
       showToast.error("Failed to delete subscription plan");
+      return Promise.reject(error);
     }
   };
+  
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    showToast.info(`Switching to ${tab} tab`);
+    showToast.info(`Switching to ${tab} tab`); // Show toast for both subscriptions and tokens
   };
+
 
   return (
     <div className="space-y-8">
@@ -170,26 +237,25 @@ const Revenue = () => {
       {activeTab === "subscriptions" ? (
         <div className="bg-white rounded-xl shadow-sm">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Subscription Plans Management
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Configure and manage your subscription plans
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900">Subscription Plans Management</h3>
+            <p className="text-sm text-gray-500 mt-1">Configure and manage your subscription plans</p>
           </div>
           <div className="p-6">
-            <SubscriptionPlans onEdit={handleEditPlan} plans={[]} onDelete={handleDeletePlan} />
+          <SubscriptionPlans
+  onEdit={handleEditPlan}
+  onDelete={handleDeletePlan}
+  refreshTrigger={refreshTrigger}
+/>
+
+<TokenPackages refreshTrigger={refreshTrigger} />
+
           </div>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm">
           <div className="p-6 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Token Packages Management
-            </h3>
-            <p className="text-sm text-gray-500 mt-1">
-              Configure and manage your token packages
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900">Token Packages Management</h3>
+            <p className="text-sm text-gray-500 mt-1">Configure and manage your token packages</p>
           </div>
           <div className="p-6">
             <TokenPackages />
@@ -201,22 +267,18 @@ const Revenue = () => {
         <PlanForm
           editingPlan={editingPlan}
           onChange={handleInputChange}
-          onSubmit={handleSubmitPlan}
-          onClose={() => setShowPlanForm(false)} onUpdate={function (_updatedPlan: Plan): void {
-            throw new Error("Function not implemented.");
-          } }        />
+          onSubmit={editingPlan ? () => handleUpdatePlan(formData) : handleSubmitPlan}
+          onClose={() => setShowPlanForm(false)}
+          onUpdate={handleUpdatePlan}
+        />
       )}
 
       {showTokenForm && (
-        <TokenForm
-          onClose={() => setShowTokenForm(false)}
-          onSave={(_data, _isEdit) => {}}
-          initialData={undefined}
-        />
+        <TokenForm onClose={() => setShowTokenForm(false)} onSave={(_data, _isEdit) => {}} initialData={undefined} />
       )}
     </div>
-  );
+  )
 }
-export default Revenue;
 
+export default Revenue
 
