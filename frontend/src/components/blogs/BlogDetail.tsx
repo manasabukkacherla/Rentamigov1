@@ -2,93 +2,221 @@
 
 import type React from "react"
 import { useEffect, useState } from "react"
-import {   useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, ThumbsUp, MessageCircle, Share2, ArrowLeft, Star, Send } from "lucide-react"
+
 import {  blogPosts as initialBlogPosts } from "../blogs/data/blogData"
 import type { BlogPostType, Comment, Review } from "../Blogs/types/type"
+
+
+
 import Navbar from "./Navbar";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+interface Blog {
+  _id: string,
+  title: string;
+  excerpt: string;
+  content: string;
+  media: {
+    coverImage: string;
+    images?: string[];
+  };
+  tags: string[];
+  category: string;
+  readTime: number;
+  author: string;
+  likes: number;
+  views: number; // New: View count
+  shares: 0,
+  comments: Comment[]
+  reviews: Review[]
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: number
+}
+
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: number
+}
 
 const BlogDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
-  const [post, setPost] = useState<BlogPostType | null>(null)
+  const [post, setPost] = useState<Blog | null>(null)
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([])
   const [newComment, setNewComment] = useState("")
   const [newReview, setNewReview] = useState("")
   const [rating, setRating] = useState(5)
   const [activeTab, setActiveTab] = useState<"comments" | "reviews">("comments")
 
+  const navigate = useNavigate()
+
   useEffect(() => {
-    if (id) {
-      const foundPost = initialBlogPosts.find((post) => post.id === Number.parseInt(id))
-      setPost(foundPost || null)
-    }
+    const fetchBlog = async () => {
+      if (id) {
+        try {
+          const response = await axios.get(`http://localhost:8000/api/blog/${id}`);
+          // console.log(response.data.success)
+          if (response.data.success) {
+            // console.log(response.data)
+            setPost(response.data.blog);
+            // console.log(post)
+
+            const blog = response.data.blog
+            setComments(blog.comments)
+            setReviews(blog.reviews)
+            // console.log(blog.comments)
+          } else {
+            setPost(null);
+          }
+        } catch (error) {
+          console.error("Error fetching blog:", error);
+          toast.error('Something went wrong')
+          setPost(null);
+        }
+      }
+    };
+
+    fetchBlog();
   }, [id])
 
-  const handleLike = () => {
-    if (post) {
-      setPost({
-        ...post,
-        likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
-        userHasLiked: !post.userHasLiked,
-      })
-    }
-  }
+  // const handleLike = () => {
+  //   if (post) {
+  //     setPost({
+  //       ...post,
+  //       // likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
+  //       // userHasLiked: !post.userHasLiked,
+  //     })
+  //   }
+  // }
 
-  const handleCommentLike = (commentId: number) => {
-    if (post) {
-      setPost({
-        ...post,
-        commentsList: post.commentsList.map((comment) =>
-          comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-        ),
-      })
-    }
-  }
+  const handleCommentLike = async (commentId: string) => {
+    try {
+      const user = sessionStorage.getItem('user');
 
-  const handleAddComment = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (post && newComment.trim()) {
-      const newCommentObj: Comment = {
-        id: post.commentsList.length + 1,
-        text: newComment,
-        author: {
-          name: "You",
-          avatar:
-            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1760&q=80",
-        },
-        date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-        likes: 0,
+      if (user) {
+        const owner = JSON.parse(user).id;
+        if (post) {
+          setPost({
+            ...post,
+            comments: post.comments.map((comment) =>
+              comment._id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
+            ),
+          })
+        }
+        console.log(post)
+        if (post !== null) {
+          const sentData = {
+            like: post.likes + 1,
+            author: owner
+          }
+          const response = await axios.put(`http://localhost:8000/api/comments/${id}`, { sentData })
+          if (response.data.success) {
+            console.log(response.data)
+          }
+        }
       }
+      // if (post) {
+      //   setPost({
+      //     ...post,
+      //     comments: post.comments.map((comment) =>
+      //       comment._id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
+      //     ),
+      //   })
+      // }
+    } catch (error) {
+      console.error("Error liking comment:", error);
+      toast.error('Something went wrong')
+    }
+  }
 
-      setPost({
-        ...post,
-        comments: post.comments + 1,
-        commentsList: [newCommentObj, ...post.commentsList],
-      })
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    // console.log(newComment)
+    try {
+      const user = sessionStorage.getItem('user');
+
+      if (user) {
+        const owner = JSON.parse(user).id;
+        const Comment = {
+          author: owner,
+          comment: newComment
+        }
+        // console.log(Comment)
+
+        const response = await axios.post(`http://localhost:8000/api/comments/${id}`, Comment)
+        // console.log(response.data)
+        if (response.data.success) {
+          setNewComment("")
+          setComments([...comments, response.data.comment]);
+          toast.success('Comment added succesfully!')
+          navigate(`/blogs/${id}`)
+        } else {
+          setNewComment("");
+        }
+      } else {
+        toast.error('Login first')
+        navigate('/Login')
+      }
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      toast.error('Something went wrong')
       setNewComment("")
     }
   }
 
-  const handleAddReview = (e: React.FormEvent) => {
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (post && newReview.trim()) {
-      const newReviewObj: Review = {
-        id: post.reviews.length + 1,
-        rating: rating,
-        text: newReview,
-        author: {
-          name: "You",
-          avatar:
-            "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1760&q=80",
-        },
-        date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-      }
+    try {
+      const user = sessionStorage.getItem('user');
 
-      setPost({
-        ...post,
-        reviews: [newReviewObj, ...post.reviews],
-      })
-      setNewReview("")
-      setRating(5)
+      if (user) {
+        const owner = JSON.parse(user).id;
+        const Review = {
+          author: owner,
+          comment: newReview,
+          rating: rating
+        }
+        console.log(Review)
+
+        const response = await axios.post(`http://localhost:8000/api/reviews/${id}`, Review)
+        // console.log(response.data)
+        if (response.data.success) {
+          setNewReview("")
+          setReviews([...reviews, response.data.review]);
+          console.log(reviews)
+          toast.success('Review added succesfully!')
+          navigate(`/blogs/${id}`)
+        } else {
+          setNewReview("");
+        }
+      } else {
+        toast.error('Login first')
+        navigate('/Login')
+      }
+    } catch (error) {
+      console.error("Error adding review:", error);
+      toast.error('Something went wrong')
+      setNewComment("")
     }
   }
 
@@ -104,17 +232,19 @@ const BlogDetail: React.FC = () => {
     )
   }
 
+  const plainText = post.content.replace(/<\/?[^>]+(>|$)/g, "");
+
   return (
     <div className="max-w-7xl w-full mx-auto px-4 sm:px-6">
+      <Navbar />
       <br /><br />
-      <Navbar/>
       <Link to="/blogs" className="inline-flex items-center text-black hover:text-grey-900 mb-6">
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to all posts
       </Link>
 
       <article className="bg-white rounded-lg shadow-lg overflow-hidden w-full">
-        <img src={post.coverImage || "/placeholder.svg"} alt={post.title} className="w-full h-96 object-cover" />
+        <img src={post.media.coverImage || "/placeholder.svg"} alt={post.title} className="w-full h-96 object-cover" />
 
         <div className="p-8">
           <div className="flex items-center mb-4">
@@ -125,47 +255,32 @@ const BlogDetail: React.FC = () => {
               <Clock className="h-4 w-4 mr-1" />
               <span>{post.readTime} min read</span>
             </div>
-            <span className="text-gray-500 text-sm ml-4">{post.date}</span>
+            <span className="text-gray-500 text-sm ml-4">{new Date(post.createdAt).toLocaleDateString()}</span>
           </div>
 
           <h1 className="text-3xl font-bold text-gray-900 mb-6">{post.title}</h1>
 
           <div className="flex items-center mb-8">
             <img
-              src={post.author.avatar || "/placeholder.svg"}
-              alt={post.author.name}
+              // src={post.author.avatar || "/placeholder.svg"}
+              // alt={post.author.name}
               className="h-12 w-12 rounded-full mr-4"
             />
             <div>
-              <p className="font-medium text-gray-900">{post.author.name}</p>
+              <p className="font-medium text-gray-900">John Doe</p>
               <p className="text-sm text-gray-500">Author</p>
             </div>
           </div>
 
           <div className="prose max-w-none text-gray-700 mb-8">
-            <p className="mb-4">{post.content}</p>
-            <p className="mb-4">
-              This beautiful property showcases modern architecture with spacious interiors and natural light
-              throughout. The open floor plan creates a seamless flow between living spaces, perfect for both relaxation
-              and entertaining.
-            </p>
-            <p className="mb-4">
-              Located in a prime neighborhood, this home offers convenient access to local amenities, schools, and
-              transportation. The property features high-quality finishes, energy-efficient appliances, and smart home
-              technology for comfortable living.
-            </p>
-            <p>
-              Whether you're looking for your dream home or an investment opportunity, this property deserves your
-              attention. Contact us today to schedule a viewing and experience the exceptional quality and design
-              firsthand.
-            </p>
+            <p className="mb-4">{plainText}</p>
           </div>
 
           <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
             <div className="flex space-x-4">
               <button
                 className={`flex items-center ${post.userHasLiked ? "text-black" : "text-gray-500 hover:text-black"}`}
-                onClick={handleLike}
+              // onClick={handleLike}
               >
                 <ThumbsUp className={`h-5 w-5 mr-2 ${post.userHasLiked ? "fill-black" : ""}`} />
                 <span>{post.likes} Likes</span>
@@ -175,7 +290,7 @@ const BlogDetail: React.FC = () => {
                 onClick={() => setActiveTab("comments")}
               >
                 <MessageCircle className="h-5 w-5 mr-2" />
-                <span>{post.comments} Comments</span>
+                <span>{post.comments.length} Comments</span>
               </button>
             </div>
             <button className="flex items-center text-gray-500 hover:text-black">
@@ -192,7 +307,7 @@ const BlogDetail: React.FC = () => {
             className={`pb-3 px-4 font-medium ${activeTab === "comments" ? "text-black border-b-2 border-black" : "text-gray-500 hover:text-gray-700"}`}
             onClick={() => setActiveTab("comments")}
           >
-            Comments ({post.comments})
+            Comments ({post.comments.length})
           </button>
           <button
             className={`pb-3 px-4 font-medium ${activeTab === "reviews" ? "text-black border-b-2 border-black" : "text-gray-500 hover:text-gray-700"}`}
@@ -204,7 +319,7 @@ const BlogDetail: React.FC = () => {
 
         {activeTab === "comments" ? (
           <>
-            <form onSubmit={handleAddComment} className="mb-8">
+            <form className="mb-8" onSubmit={handleAddComment}>
               <div className="flex items-start space-x-4">
                 <img
                   src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1760&q=80"
@@ -233,30 +348,30 @@ const BlogDetail: React.FC = () => {
               </div>
             </form>
             <main className="max-w-full mx-auto py-8">
-        
+
             </main>
             <div className="space-y-6">
-              {post.commentsList.map((comment) => (
-                <div key={comment.id} className="flex space-x-4">
+              {comments.map((comment) => (
+                <div key={comment._id} className="flex space-x-4">
                   <img
-                    src={comment.author.avatar || "/placeholder.svg"}
-                    alt={comment.author.name}
+                    // src={comment.author.avatar || "/placeholder.svg"}
+                    // alt={comment.author.fullName}
                     className="h-10 w-10 rounded-full"
                   />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <span className="font-medium text-gray-900">{comment.author.name}</span>
-                          <span className="text-gray-500 text-sm ml-2">{comment.date}</span>
+                          <span className="font-medium text-gray-900">{comment.author.fullName}</span>
+                          <span className="text-gray-500 text-sm ml-2">{new Date(comment.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <p className="text-gray-700">{comment.text}</p>
+                      <p className="text-gray-700">{comment.comment}</p>
                     </div>
                     <div className="flex items-center mt-2 text-sm text-gray-500">
                       <button
                         className="flex items-center hover:text-black"
-                        onClick={() => handleCommentLike(comment.id)}
+                        onClick={() => handleCommentLike(comment._id)}
                       >
                         <ThumbsUp className="h-4 w-4 mr-1" />
                         <span>{comment.likes} Likes</span>
@@ -312,18 +427,18 @@ const BlogDetail: React.FC = () => {
 
             <div className="space-y-6">
               {post.reviews.map((review) => (
-                <div key={review.id} className="flex space-x-4">
+                <div key={review._id} className="flex space-x-4">
                   <img
-                    src={review.author.avatar || "/placeholder.svg"}
-                    alt={review.author.name}
+                    // src={review.author.avatar || "/placeholder.svg"}
+                    // alt={review.author.name}
                     className="h-10 w-10 rounded-full"
                   />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <span className="font-medium text-gray-900">{review.author.name}</span>
-                          <span className="text-gray-500 text-sm ml-2">{review.date}</span>
+                          <span className="font-medium text-gray-900">{review.author.fullName}</span>
+                          <span className="text-gray-500 text-sm ml-2">{new Date(review.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
                       <div className="flex items-center mb-2">
@@ -334,7 +449,7 @@ const BlogDetail: React.FC = () => {
                           />
                         ))}
                       </div>
-                      <p className="text-gray-700">{review.text}</p>
+                      <p className="text-gray-700">{review.comment}</p>
                     </div>
                   </div>
                 </div>
@@ -347,7 +462,7 @@ const BlogDetail: React.FC = () => {
       <div className="mt-12 w-full">
         {/* <h3 className="text-xl font-bold text-gray-900 mb-6">Related Properties</h3> */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        
+
           {initialBlogPosts
             .filter((relatedPost) => relatedPost.id !== post.id && relatedPost.category === post.category)
             .slice(0, 3)
