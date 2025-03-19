@@ -28,8 +28,12 @@ import UserDashboard from "./components/blogs/UserDashboard";
 import BlogDetail from "./components/blogs/BlogDetail";
 import EditorMenuBar from "./components/editor/EditorMenuBar";
 import EmployeeLogin from "./components/Logins/EmployeeLogin";
+
+import Revenue from "./components/dashadmin/components/Revenue";
+
 import { ToastContainer } from "react-toastify";
 import ErrorBoundary from "./components/blogs/ErrorBoundary";
+
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -90,7 +94,11 @@ const App = () => {
           <Route path="/propertypage" element={<Propertydetail />} />
           {/* Logins Layout */}
           <Route path="/Login" element={<Loginhome />} />
-          <Route path="/emp-login" element={<EmployeeLogin />} />
+          <Route path="/emp-login" element={<EmployeeLogin onSwitchToSignup={function (): void {
+            throw new Error("Function not implemented.");
+          } } onLoginSuccess={function (_email: string): void {
+            throw new Error("Function not implemented.");
+          } } />} />
           <Route path="/blogs" element={<HomePage />} />
           <Route path="/blogs/Create" element={<CreateBlogPage />} />
           {/* Dashboard Layout */}
@@ -99,6 +107,7 @@ const App = () => {
             path="/blogs/edit/:id"
             element={<EditorMenuBar editor={null} />}
           />
+          <Route path="revenue" element={<Revenue />} />
 
           <Route path="/blogs/:id" element={<ErrorBoundary><BlogDetail /></ErrorBoundary>} />
 
