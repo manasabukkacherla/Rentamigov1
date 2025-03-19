@@ -8,11 +8,12 @@ import TokenForm from "./revenue/TokenForm";
 import { showToast } from "./Toast";
 import { Plan } from "./Types";
 
+
+
 const Revenue = () => {
   const [activeTab, setActiveTab] = useState("subscriptions");
   const [editingPlan, setEditingPlan] = useState<Plan | undefined>(undefined);
   const [showPlanForm, setShowPlanForm] = useState(false);
-  const [editingToken, setEditingToken] = useState<string | null>(null);
   const [showTokenForm, setShowTokenForm] = useState(false);
 
   const [newPlan, setNewPlan] = useState({
@@ -74,11 +75,6 @@ const Revenue = () => {
       return;
     }
 
-    const plan = {
-      id: Date.now().toString(),
-      ...newPlan,
-      status: "active",
-    };
 
     showToast.success("Subscription Plan created successfully!");
     setShowPlanForm(false); 
@@ -220,6 +216,7 @@ const Revenue = () => {
       )}
     </div>
   );
-};
-
+}
 export default Revenue;
+
+
