@@ -247,7 +247,7 @@ const Revenue = () => {
   refreshTrigger={refreshTrigger}
 />
 
-<TokenPackages refreshTrigger={refreshTrigger} />
+<TokenPackages />
 
           </div>
         </div>
