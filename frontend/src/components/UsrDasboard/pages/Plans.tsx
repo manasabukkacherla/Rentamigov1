@@ -24,6 +24,16 @@ function Plans() {
       setLoading(false);
     }
   };
+  // Subscription Button Click Handler
+const handlePurchase = async (type: string, id: string, planName: string, planId: string) => {
+  handlePayment(type, id, planName, planId);  // Call payment function
+};
+
+// Token Button Click Handler
+const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
+  handlePayment("token", tokenId, tokenName, tokenId);  // Pass token info
+};
+
 
   // Fetch Token Packages
   const fetchTokenPackages = async () => {
@@ -43,11 +53,107 @@ function Plans() {
   useEffect(() => {
     fetchSubscriptionPlans();
     fetchTokenPackages();
-  }, []);
 
-  const handlePurchase = (type: string, id: string) => {
-    console.log(`Purchasing ${type} with id: ${id}`);
-    // Implement purchase logic here
+    // Check if Razorpay is loaded after the component mounts
+    if (window.Razorpay) {
+      // Razorpay is already loaded
+    } else {
+      // Wait for the Razorpay script to load
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.onload = () => {
+        // Razorpay is now loaded and ready to use
+        console.log("Razorpay script loaded");
+      };
+      document.body.appendChild(script);
+    }
+  }, []); // Empty dependency array means this runs only once when the component mounts
+
+  // Handle Purchase Button Click
+  const handlePayment = async (type: string, id: string, planName: string, planId: string) => {
+    setLoading(true);
+  
+    try {
+      const amount = type === "subscription" ? 1900 : 500; // Example amount, can be dynamically set based on plan/token
+  
+      // Fetch username from sessionStorage
+      const userName = sessionStorage.getItem("username");
+      const userId = sessionStorage.getItem("userId"); // Assuming you store userId in sessionStorage
+  
+      if (!userName || !userId) {
+        alert("User is not logged in. Please log in to continue.");
+        return;
+      }
+  
+      const response = await fetch("http://localhost:8000/api/payment/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount }), // Amount in INR (in paise)
+      });
+  
+      const data = await response.json();
+  
+      const options = {
+        key: data.key_id, // Razorpay key from backend
+        amount: data.amount, // Amount in paise
+        currency: data.currency,
+        name: "Token Package Purchase",
+        description: "Purchase tokens for your account",
+        image: "https://yourwebsite.com/logo.png", // Your logo URL
+        order_id: data.id,
+        handler: async function (response: any) {
+          alert(`Payment successful. Payment ID: ${response.razorpay_payment_id}`);
+  
+          // Send the transaction details to the backend to store in the database
+          const paymentDetails = {
+            userId, // Use the userId from sessionStorage
+            userName, // Use the userName from sessionStorage
+            amount: data.amount / 100, // Convert back to INR from paise
+            transactionId: response.razorpay_payment_id,
+            planName,
+            planId,
+            expirationDate: new Date(), // Add plan expiration date logic
+          };
+  
+          const saveResponse = await fetch("http://localhost:8000/api/payment/save-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentDetails),
+          });
+  
+          const saveData = await saveResponse.json();
+          if (saveResponse.ok) {
+            alert("Payment details saved successfully.");
+          } else {
+            alert("Error saving payment details.");
+          }
+        },
+        prefill: {
+          name: userName, // Automatically fetch user details if logged in
+          email: "user@example.com",
+          contact: "1234567890",
+        },
+        notes: {
+          address: "Corporate Office",
+        },
+        theme: {
+          color: "#F37254",
+        },
+      };
+  
+      // Open Razorpay Payment Window
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (error) {
+      console.error("Error occurred while fetching order:", error);
+      alert("Error occurred while fetching order");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,7 +204,7 @@ function Plans() {
                 <div
                   key={plan.id}
                   className={`bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-200 hover:scale-105 relative ${
-                    isCurrentPlan ? 'ring-2 ring-gray-800' : ''
+                    isCurrentPlan ? "ring-2 ring-gray-800" : ""
                   }`}
                 >
                   {isCurrentPlan && (
@@ -137,15 +243,15 @@ function Plans() {
                   </div>
                   <div className="p-6 bg-gray-50">
                     <button
-                      onClick={() => handlePurchase('subscription', plan.id)}
+                      onClick={() => handlePurchase("subscription", plan.id)}
                       className={`w-full py-3 px-6 rounded-lg font-medium transition-colors duration-200 ${
                         isCurrentPlan
-                          ? 'bg-gray-200 text-gray-600 cursor-not-allowed'
-                          : 'bg-gray-800 text-white hover:bg-gray-700'
+                          ? "bg-gray-200 text-gray-600 cursor-not-allowed"
+                          : "bg-gray-800 text-white hover:bg-gray-700"
                       }`}
                       disabled={isCurrentPlan}
                     >
-                      {isCurrentPlan ? 'Current Plan' : 'Subscribe Now'}
+                      {isCurrentPlan ? "Current Plan" : "Subscribe Now"}
                     </button>
                   </div>
                 </div>
@@ -163,7 +269,7 @@ function Plans() {
                 <div
                   key={token._id}
                   className={`bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-200 hover:scale-105 relative ${
-                    isCurrentPackage ? 'ring-2 ring-gray-800' : ''
+                    isCurrentPackage ? "ring-2 ring-gray-800" : ""
                   }`}
                 >
                   {isCurrentPackage && (
@@ -201,7 +307,7 @@ function Plans() {
                   </div>
                   <div className="p-6 bg-gray-50">
                     <button
-                      onClick={() => handlePurchase('token', token._id)}
+                      onClick={() => handlePurchase("token", token._id)}
                       className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
                     >
                       Purchase Tokens
