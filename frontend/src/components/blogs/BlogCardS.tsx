@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, ArrowRight, Award, ThumbsUp,MessageCircle, Share2 } from 'lucide-react';
-import { Blogpost } from '../Blogs/types';
 import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 interface Blog {
   _id: string,
@@ -15,15 +15,39 @@ interface Blog {
     tags: string[];
     category: string;
     readTime: number;
-    author: string;
+    author: User;
     likes: number;
     views: number; // New: View count
     shares: 0,
-    reviews: string[];
-    comments: { userId: string; comment: string; createdAt: Date }[];
+    reviews: Review[];
+    comments: Comment[];
     createdAt: Date;
     updatedAt: Date;
-    userHasLiked?:boolean
+    userHasLiked:boolean
+}
+
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: string[];
+  userHasLiked?: boolean;
+}
+
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: string[];
+  userHasLiked?: boolean;
 }
 
 interface BlogCardProps {
@@ -37,10 +61,13 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
   // Determine if this is a popular blog (for badge display)
   const isPopular = blog.views && blog.views > 2000;
 
-  // const handleLike = (e: React.MouseEvent) => {
+  // const handleLike =async (e: React.MouseEvent) => {
   //     e.preventDefault();
-  //     e.stopPropagation();
-  //     onLike(post.id);
+  //     try {
+  //       const response = await axios.get(`http://localhost:8000/api/likes/${id}`)
+  //     } catch (error) {
+        
+  //     }
   //   };
 
   return (
@@ -86,7 +113,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
           
           {blog.views && (
             <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">
-              {blog.views.toLocaleString()}views
+              {blog.views.toLocaleString()} views
             </span>
           )}
         </div>
@@ -111,7 +138,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
               // alt={blog.author.name} 
               className="h-8 w-8 rounded-full mr-2"
             />
-            <span className="text-sm font-medium text-gray-900">John Doe</span>
+            <span className="text-sm font-medium text-gray-900">{blog.author.fullName}</span>
           </div>
           
           <div className="flex space-x-3 text-gray-500">

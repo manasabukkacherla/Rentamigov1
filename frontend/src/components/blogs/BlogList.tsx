@@ -5,23 +5,46 @@ import BlogCardS from './BlogCardS';
 interface Blog {
   _id: string,
   title: string;
-    excerpt: string;
-    content: string;
-    media: {
-        coverImage: string;
-        images?: string[];
-    };
-    tags: string[];
-    category: string;
-    readTime: number;
-    author: string;
-    likes: number;
-    views: number; // New: View count
-    shares: 0,
-    comments: { userId: string; comment: string; createdAt: Date; }[]
-    reviews: string[];
-    createdAt: Date;
-    updatedAt: Date;
+  excerpt: string;
+  content: string;
+  media: {
+    coverImage: string;
+    images?: string[];
+  };
+  tags: string[];
+  category: string;
+  readTime: number;
+  author: User;
+  likes: number;
+  views: number; // New: View count
+  shares: 0,
+  comments: Comment[]
+  reviews: Review[]
+  createdAt: Date;
+  updatedAt: Date;
+  userHasLiked: boolean
+}
+
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: number
+}
+
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: number
 }
 
 interface BlogListProps {
@@ -30,8 +53,8 @@ interface BlogListProps {
 
 const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
-  const [autoSlide, setAutoSlide] = useState(true);
-  const sliderRef = useRef<HTMLDivElement>(null);
+    const [autoSlide, setAutoSlide] = useState(true);
+    const sliderRef = useRef<HTMLDivElement>(null);
   
   // Auto-slide functionality
   useEffect(() => {

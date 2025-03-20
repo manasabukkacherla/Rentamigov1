@@ -10,10 +10,6 @@ interface DashboardNavigationProps {
 }
 
 const DashboardNavigation: React.FC<DashboardNavigationProps> = ({ activeTab, setActiveTab }) => {
-  
-
- 
-
   return (
     <div className="w-full md:w-64 bg-white rounded-lg shadow-md p-6 mb-6 md:mb-0 md:sticky md:top-8 md:h-fit">
       <div className="flex items-center mb-6">

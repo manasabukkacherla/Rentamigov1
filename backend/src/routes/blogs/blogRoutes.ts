@@ -58,96 +58,122 @@ export const createBlog = async (
 };
 
 export const editBlog = async (req: CustomRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const { title, excerpt, content, media, tags, category, readTime } = req.body;
-  
-      const blog = await Blog.findById(id);
-      if (!blog) {
-        res.status(404).json({ error: "Blog not found" });
-        return;
-      }
-  
-      // Update fields
-      if (title) blog.title = title;
-      if (excerpt) blog.excerpt = excerpt;
-      if (content) blog.content = content;
-      if (media?.coverImage) blog.media.coverImage = media.coverImage;
-      if (media?.images) blog.media.images = media.images;
-      if (tags) blog.tags = tags;
-      if (category) blog.category = category;
-      if (readTime) blog.readTime = readTime;
-  
-      await blog.save();
-      res.status(200).json({ success: true, blog });
-    } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ error: "Failed to update blog post" });
+  try {
+    const { id } = req.params;
+    const { title, excerpt, content, media, tags, category, readTime } = req.body;
+
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      res.status(404).json({ error: "Blog not found" });
+      return;
     }
-  };
-  
-  // ✅ Delete Blog
-  export const deleteBlog = async (req: CustomRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-  
-      const blog = await Blog.findByIdAndDelete(id);
-      if (!blog) {
-        res.status(404).json({ error: "Blog not found" });
-        return;
-      }
-  
-      res.status(200).json({ success: true, message: "Blog deleted successfully" });
-    } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ error: "Failed to delete blog post" });
+
+    // Update fields
+    if (title) blog.title = title;
+    if (excerpt) blog.excerpt = excerpt;
+    if (content) blog.content = content;
+    if (media?.coverImage) blog.media.coverImage = media.coverImage;
+    if (media?.images) blog.media.images = media.images;
+    if (tags) blog.tags = tags;
+    if (category) blog.category = category;
+    if (readTime) blog.readTime = readTime;
+
+    await blog.save();
+    res.status(200).json({ success: true, blog });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to update blog post" });
+  }
+};
+
+// ✅ Delete Blog
+export const deleteBlog = async (req: CustomRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const blog = await Blog.findByIdAndDelete(id);
+    if (!blog) {
+      res.status(404).json({ error: "Blog not found" });
+      return;
     }
-  };
-  
-  // ✅ Increment Views
-  export const getBlogById = async (req: CustomRequest, res: Response): Promise<void> => {
-    try {
-      const { id } = req.params;
-      const blog = await Blog.findById(id)
+
+    res.status(200).json({ success: true, message: "Blog deleted successfully" });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to delete blog post" });
+  }
+};
+
+// ✅ Increment Views
+export const getBlogById = async (req: CustomRequest, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const blog = await Blog.findById(id)
+      .populate({ path: "reviews", populate: { path: "author" } })
+      .populate({ path: "comments", populate: { path: "author" } })
+      .populate("author");
+
+    if (!blog) {
+      res.status(404).json({ message: "Blog not found" });
+      return;
+    }
+
+    await blog.incrementViews(); // Increment views count
+    res.status(200).json({ success: true, blog });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+const listBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
+  try {
+    const blogs = await Blog.find({}).sort({ createdAt: -1 })
+      .populate({ path: "reviews", populate: { path: "author" } })
+      .populate({ path: "comments", populate: { path: "author" } })
+      .populate("author");
+
+    res.json({
+      success: true,
+      message: "Data fetched successfully",
+      data: blogs
+    })
+  } catch (error) {
+    console.log(error);
+    res.json({
+      success: false,
+      message: "Error",
+    })
+  }
+}
+
+//user's blog
+const getUsersBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
+  try {
+    const { userId } = req.params
+    const blogs = await Blog.find({ author: userId })
       .populate({ path: "reviews", populate: { path: "author" } })
       .populate({ path: "comments", populate: { path: "author" } });
-  
-      if (!blog) {
-        res.status(404).json({ message: "Blog not found" });
-        return;
-      }
-  
-      await blog.incrementViews(); // Increment views count
-      res.status(200).json({ success: true, blog});
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
-    }
-  };
 
-  const listBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
-    try {
-        const blogs = await Blog.find({});
-        res.json({
-            success: true,
-            message: "Data fetched successfully",
-            data: blogs
-        })
-    } catch(error) {
-        console.log(error);
-        res.json({
-            success: false,
-            message: "Error",
-        })
+    if (!blogs) {
+      res.status(404).json({ message: "Blogs not found" });
+      return;
     }
+
+    res.status(200).json({ success: true, blogs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 }
-  
-  // ✅ Blog Router
-  const blogRouter = express.Router();
-  blogRouter.post("/add", createBlog);
-  blogRouter.get("/", listBlogs);
-  blogRouter.put("/edit/:id", editBlog);
-  blogRouter.delete("/delete/:id", deleteBlog);
-  blogRouter.get("/:id", getBlogById);
-  
+
+// ✅ Blog Router
+const blogRouter = express.Router();
+blogRouter.post("/add", createBlog);
+blogRouter.get("/", listBlogs);
+blogRouter.put("/edit/:id", editBlog);
+blogRouter.delete("/delete/:id", deleteBlog);
+blogRouter.get("/myBlogs/:userId", getUsersBlogs)
+blogRouter.get("/:id", getBlogById);
+
 export default blogRouter;

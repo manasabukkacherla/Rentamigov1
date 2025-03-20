@@ -37,6 +37,7 @@ import TokenRouter from "./routes/Tokenform";
 import blogRouter from "./routes/blogs/blogRoutes";
 import commentsRouter from "./routes/blogs/commentsRouter";
 import reviewRouter from "./routes/blogs/reviewRoutes";
+import likesRouter from "./routes/blogs/likesRoutes";
 
 dotenv.config();
 
@@ -93,6 +94,7 @@ app.use("/api", forgotPasswordRoutes);
 app.use("/api/blog", blogRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/comments", commentsRouter);
+app.use("/api/likes", likesRouter)
 
 // Basic route
 app.get("/", (req: Request, res: Response) => {

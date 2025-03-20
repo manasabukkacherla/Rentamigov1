@@ -1,6 +1,51 @@
 import React, { useEffect, useState } from 'react';
-import { Blog } from '../Blogs/types';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+interface Blog {
+  _id: string,
+  title: string;
+  excerpt: string;
+  content: string;
+  media: {
+    coverImage: string;
+    images?: string[];
+  };
+  tags: string[];
+  category: string;
+  readTime: number;
+  author: User;
+  likes: number;
+  views: number; // New: View count
+  shares: 0,
+  comments: Comment[]
+  reviews: Review[]
+  createdAt: Date;
+  updatedAt: Date;
+  userHasLiked: boolean
+}
+
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: number
+}
+
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: number
+}
 
 interface ImageSliderProps {
   blogs: Blog[];
@@ -10,11 +55,12 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    if (!blogs || blogs.length === 0) return; // Prevent interval setup if blogs is empty
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % blogs.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [blogs.length]);
+  }, [blogs]);
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) =>
@@ -32,7 +78,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
     setCurrentIndex(slideIndex);
   };
 
-  if (!blogs.length) return null;
+  if (!blogs || blogs.length === 0 || !blogs[currentIndex]) return null; // Prevents undefined issues
 
   return (
     <div className="relative w-full h-[600px] group">
@@ -40,7 +86,7 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
       <div
         className="w-full h-full bg-center bg-cover duration-500"
         style={{
-          backgroundImage: `url(${blogs[currentIndex]?.imageUrl || '/fallback-image.jpg'})`,
+          backgroundImage: `url(${blogs[currentIndex]?.media.coverImage || '/fallback-image.jpg'})`,
         }}
       >
         {/* Overlay with text */}
@@ -49,22 +95,21 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
             {blogs[currentIndex]?.title}
           </h2>
           <p className="text-white text-lg mb-4 line-clamp-2">
-            {blogs[currentIndex]?.content}
+            {blogs[currentIndex]?.content.replace(/<\/?[^>]+(>|$)/g, "")}
           </p>
           <div className="flex items-center text-white mb-2">
             <span className="mr-4">
-              By {blogs[currentIndex]?.author?.name || 'Unknown'}
+              By {blogs[currentIndex]?.author.fullName || 'Unknown'}
             </span>
             <span className="mr-4">
               • {new Date(blogs[currentIndex]?.createdAt).toLocaleDateString()}
             </span>
-            <span>
-              • {blogs[currentIndex]?.rating?.toFixed(1) || 'N/A'} ★
-            </span>
           </div>
-          <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:bg-gray-100 transition">
-            Read More
-          </button>
+          <Link to={`/blogs/${blogs[currentIndex]._id}`}>
+            <button className="bg-white text-black px-6 py-2 rounded-md w-fit hover:bg-gray-100 transition">
+              Read More
+            </button>
+          </Link>
         </div>
       </div>
 
@@ -103,4 +148,4 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ blogs }) => {
   );
 };
 
-export default ImageSlider;
+export default ImageSlider

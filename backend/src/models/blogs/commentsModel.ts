@@ -5,7 +5,7 @@ interface Comment extends Document {
     createdAt: Date,
     author: Types.ObjectId,
     blogId: Types.ObjectId,
-    likes: number
+    likes: Types.ObjectId[];
 }
 
 const commentSchema = new Schema<Comment>({
@@ -25,10 +25,7 @@ const commentSchema = new Schema<Comment>({
         type: Schema.Types.ObjectId,
         ref: "Blog"
     },
-    likes: {
-        type: Number,
-        default: 0
-    }
+    likes: [{ type: Schema.Types.ObjectId, ref: "User" }]
 });
 
 const commentModel = mongoose.models.Comment || mongoose.model<Comment>("Comment", commentSchema);

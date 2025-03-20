@@ -1,10 +1,54 @@
 import React from 'react';
-import { TrendingUp, Share2 } from 'lucide-react';
-import { Blogpost } from '../types';
+import { TrendingUp, Share2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+interface Blog {
+  _id: string,
+  title: string;
+  excerpt: string;
+  content: string;
+  media: {
+    coverImage: string;
+    images?: string[];
+  };
+  tags: string[];
+  category: string;
+  readTime: number;
+  author: User;
+  likes: number;
+  views: number; // New: View count
+  shares: 0,
+  comments: Comment[]
+  reviews: Review[]
+  createdAt: Date;
+  updatedAt: Date;
+  userHasLiked: boolean
+}
+
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: number
+}
+
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: number
+}
+
 interface TrendingSectionProps {
-  blogs: Blogpost[];
+  blogs: Blog[];
 }
 
 const TrendingSection: React.FC<TrendingSectionProps> = ({ blogs }) => {
@@ -19,12 +63,12 @@ const TrendingSection: React.FC<TrendingSectionProps> = ({ blogs }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {blogs.map((blog, index) => (
           <div 
-            key={blog.id} 
+            key={blog._id} 
             className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-full border-t-4 border-black"
           >
             <div className="relative">
               <img 
-                src={blog.coverImage} 
+                src={blog.media.coverImage} 
                 alt={blog.title} 
                 className="w-full h-48 object-cover"
               />
@@ -38,7 +82,11 @@ const TrendingSection: React.FC<TrendingSectionProps> = ({ blogs }) => {
               <p className="text-gray-600 mb-4">{blog.excerpt}</p>
               
               <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
-                <span>{blog.date}</span>
+                <span>{new Date(blog.createdAt).toLocaleDateString()}</span>
+                <div className="flex items-center">
+                  <Eye className="h-4 w-4 mr-1" />
+                  <span>{blog.views} views</span>
+                </div>
                 <div className="flex items-center">
                   <Share2 className="h-4 w-4 mr-1" />
                   <span>{blog.shares} shares</span>
@@ -46,7 +94,7 @@ const TrendingSection: React.FC<TrendingSectionProps> = ({ blogs }) => {
               </div>
               
               <a 
-                onClick={() => navigate(`/blog/${blog.id}`)} style={{cursor: 'pointer'}}
+                onClick={() => navigate(`/blogs/${blog._id}`)} style={{cursor: 'pointer'}}
                 className="text-black hover:text-gray-700 font-medium text-sm"
               >
                 Read article
