@@ -3,12 +3,15 @@ import { DollarSign, Users, Coins, CheckCircle2, Crown } from "lucide-react";
 import { Plan, TokenPackage } from "../types";
 
 function Plans() {
-  const [activeTab, setActiveTab] = useState<"subscriptions" | "tokens">("subscriptions");
+  const [activeTab, setActiveTab] = useState<"subscriptions" | "tokens">(
+    "subscriptions"
+  );
   const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
   const [tokenPackages, setTokenPackages] = useState<TokenPackage[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPlanId, setCurrentPlanId] = useState<string>("plan2"); // Example: Replace with actual current plan ID
-  const [currentTokenPackageId, setCurrentTokenPackageId] = useState<string>("token1"); // Example: Replace with actual token package ID
+  const [currentTokenPackageId, setCurrentTokenPackageId] =
+    useState<string>("token1"); // Example: Replace with actual token package ID
 
   // Fetch Subscription Plans
   const fetchSubscriptionPlans = async () => {
@@ -25,15 +28,19 @@ function Plans() {
     }
   };
   // Subscription Button Click Handler
-const handlePurchase = async (type: string, id: string, planName: string, planId: string) => {
-  handlePayment(type, id, planName, planId);  // Call payment function
-};
+  const handlePurchase = async (
+    type: string,
+    id: string,
+    planName: string,
+    planId: string
+  ) => {
+    handlePayment(type, id, planName, planId); // Call payment function
+  };
 
-// Token Button Click Handler
-const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
-  handlePayment("token", tokenId, tokenName, tokenId);  // Pass token info
-};
-
+  // Token Button Click Handler
+  const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
+    handlePayment("token", tokenId, tokenName, tokenId); // Pass token info
+  };
 
   // Fetch Token Packages
   const fetchTokenPackages = async () => {
@@ -70,62 +77,99 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
   }, []); // Empty dependency array means this runs only once when the component mounts
 
   // Handle Purchase Button Click
-  const handlePayment = async (type: string, id: string, planName: string, planId: string) => {
+  const handlePayment = async (
+    type: string,
+    id: string,
+    planName: string,
+    planId: string
+  ) => {
+    console.log("Processing payment for:", { type, id, planName, planId });
+
+    if (!id || !planName || !planId) {
+      alert("Invalid selection. Please try again.");
+      return;
+    }
+
     setLoading(true);
-  
+
     try {
-      const amount = type === "subscription" ? 1900 : 500; // Example amount, can be dynamically set based on plan/token
-  
-      // Fetch username from sessionStorage
+      let selectedItem;
+      if (type === "subscription") {
+        const response = await fetch(
+          `http://localhost:8000/api/subscription/${id}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch subscription plan");
+        selectedItem = await response.json();
+      } else if (type === "token") {
+        const response = await fetch(`http://localhost:8000/api/tokens/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch token package");
+        selectedItem = await response.json();
+      }
+
+      if (!selectedItem) {
+        alert("Selected plan or token package not found.");
+        return;
+      }
+
+      const amount = selectedItem.price * 100; // Convert to paise for Razorpay
+
       const userName = sessionStorage.getItem("username");
-      const userId = sessionStorage.getItem("userId"); // Assuming you store userId in sessionStorage
-  
+      const userId = sessionStorage.getItem("userId");
+
       if (!userName || !userId) {
         alert("User is not logged in. Please log in to continue.");
         return;
       }
-  
-      const response = await fetch("http://localhost:8000/api/payment/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ amount }), // Amount in INR (in paise)
-      });
-  
+
+      const response = await fetch(
+        "http://localhost:8000/api/payment/create-order",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ amount }),
+        }
+      );
+
       const data = await response.json();
-  
+
       const options = {
-        key: data.key_id, // Razorpay key from backend
-        amount: data.amount, // Amount in paise
+        key: data.key_id,
+        amount: data.price,
         currency: data.currency,
-        name: "Token Package Purchase",
-        description: "Purchase tokens for your account",
-        image: "https://yourwebsite.com/logo.png", // Your logo URL
+        name:
+          type === "subscription"
+            ? "Subscription Plan Purchase"
+            : "Token Package Purchase",
+        description: `Purchase of ${planName}`,
         order_id: data.id,
         handler: async function (response: any) {
-          alert(`Payment successful. Payment ID: ${response.razorpay_payment_id}`);
-  
-          // Send the transaction details to the backend to store in the database
+          alert(
+            `Payment successful. Payment ID: ${response.razorpay_payment_id}`
+          );
+
           const paymentDetails = {
-            userId, // Use the userId from sessionStorage
-            userName, // Use the userName from sessionStorage
-            amount: data.amount / 100, // Convert back to INR from paise
+            userId,
+            userName,
+            amount: data.price / 100, // Convert back to INR
             transactionId: response.razorpay_payment_id,
             planName,
             planId,
-            expirationDate: new Date(), // Add plan expiration date logic
+            expirationDate: new Date(),
           };
-  
-          const saveResponse = await fetch("http://localhost:8000/api/payment/save-payment", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(paymentDetails),
-          });
-  
-          const saveData = await saveResponse.json();
+
+          const saveResponse = await fetch(
+            "http://localhost:8000/api/payment/save-payment",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(paymentDetails),
+            }
+          );
+
           if (saveResponse.ok) {
             alert("Payment details saved successfully.");
           } else {
@@ -133,19 +177,15 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
           }
         },
         prefill: {
-          name: userName, // Automatically fetch user details if logged in
+          name: userName,
           email: "user@example.com",
           contact: "1234567890",
-        },
-        notes: {
-          address: "Corporate Office",
         },
         theme: {
           color: "#F37254",
         },
       };
-  
-      // Open Razorpay Payment Window
+
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
@@ -160,8 +200,12 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Choose Your Plan</h1>
-          <p className="text-lg text-gray-600">Select the perfect plan for your business needs</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Choose Your Plan
+          </h1>
+          <p className="text-lg text-gray-600">
+            Select the perfect plan for your business needs
+          </p>
         </div>
 
         {/* Tabs */}
@@ -214,17 +258,24 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
                     </div>
                   )}
                   <div className="p-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{plan.name}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      {plan.name}
+                    </h3>
                     <p className="text-gray-600 mb-6">{plan.description}</p>
                     <div className="mb-6">
-                      <span className="text-4xl font-bold text-gray-900">${plan.price}</span>
+                      <span className="text-4xl font-bold text-gray-900">
+                        ${plan.price}
+                      </span>
                       <span className="text-gray-600">/month</span>
                     </div>
                     <div className="space-y-4">
                       <div className="flex items-center">
                         <Users className="w-5 h-5 text-gray-400 mr-3" />
                         <span className="text-gray-600">
-                          {plan.maxProperties === -1 ? "Unlimited" : plan.maxProperties} Properties
+                          {plan.maxProperties === -1
+                            ? "Unlimited"
+                            : plan.maxProperties}{" "}
+                          Properties
                         </span>
                       </div>
                       <div className="flex items-center">
@@ -243,15 +294,16 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
                   </div>
                   <div className="p-6 bg-gray-50">
                     <button
-                      onClick={() => handlePurchase("subscription", plan.id)}
-                      className={`w-full py-3 px-6 rounded-lg font-medium transition-colors duration-200 ${
-                        isCurrentPlan
-                          ? "bg-gray-200 text-gray-600 cursor-not-allowed"
-                          : "bg-gray-800 text-white hover:bg-gray-700"
-                      }`}
-                      disabled={isCurrentPlan}
+                      onClick={() =>
+                        handlePayment(
+                          "subscription",
+                          plan._id,
+                          plan.name,
+                          plan._id
+                        )
+                      }
                     >
-                      {isCurrentPlan ? "Current Plan" : "Subscribe Now"}
+                      Subscribe Now
                     </button>
                   </div>
                 </div>
@@ -275,13 +327,19 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
                   {isCurrentPackage && (
                     <div className="absolute top-4 right-4 bg-gray-800 text-white px-3 py-1 rounded-full flex items-center space-x-1">
                       <Crown className="w-4 h-4" />
-                      <span className="text-sm font-medium">Current Package</span>
+                      <span className="text-sm font-medium">
+                        Current Package
+                      </span>
                     </div>
                   )}
                   <div className="p-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">{token.name}</h3>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                      {token.name}
+                    </h3>
                     <div className="mb-6">
-                      <span className="text-4xl font-bold text-gray-900">${token.price}</span>
+                      <span className="text-4xl font-bold text-gray-900">
+                        ${token.price}
+                      </span>
                     </div>
                     <div className="mb-6">
                       <div className="flex items-center mb-2">
@@ -307,8 +365,9 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
                   </div>
                   <div className="p-6 bg-gray-50">
                     <button
-                      onClick={() => handlePurchase("token", token._id)}
-                      className="w-full bg-gray-800 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors duration-200"
+                      onClick={() =>
+                        handlePayment("token", token._id, token.name, token._id)
+                      }
                     >
                       Purchase Tokens
                     </button>
