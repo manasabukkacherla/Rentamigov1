@@ -1,11 +1,12 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
 
 interface Review extends Document {
-    comment?: string,
+    comment: string,
     rating: number,
     createdAt: Date,
     author: Types.ObjectId,
-    blogId: Types.ObjectId
+    blogId: Types.ObjectId,
+    likes: number
 }
 
 const reviewSchema = new Schema<Review>({
@@ -26,6 +27,10 @@ const reviewSchema = new Schema<Review>({
     blogId: {
         type: Schema.Types.ObjectId,
         ref: "Blog"
+    },
+    likes: {
+        type: Number,
+        default: 0
     }
 });
 

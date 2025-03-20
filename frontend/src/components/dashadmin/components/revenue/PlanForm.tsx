@@ -17,8 +17,11 @@ interface PlanFormData {
 
 interface PlanFormProps {
   onClose: () => void;
+  // editingPlan: Plan ; // Removed duplicate declaration
   onUpdate: (updatedPlan: Plan) => void;
-  editingPlan?: Plan; // ✅ Use optional `Plan` instead of `PlanFormData`
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  onSubmit: () => void;
+  editingPlan?: Plan | undefined; // ✅ Use optional `Plan` instead of `PlanFormData`
 }
 
 

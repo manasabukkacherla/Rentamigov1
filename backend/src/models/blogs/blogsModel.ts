@@ -15,6 +15,7 @@ interface IBlog extends Document {
     author: mongoose.Types.ObjectId;
     likes: number;
     views: number; // New: View count
+    shares: number,
     comments: mongoose.Types.ObjectId[];
     reviews: mongoose.Types.ObjectId[];
     createdAt: Date;
@@ -35,9 +36,10 @@ const BlogSchema = new Schema<IBlog>(
         tags: { type: [String], required: true },
         category: { type: String, required: true },
         readTime: { type: Number, required: true, min: 1 },
-        author: { type: Schema.Types.ObjectId, ref: "User", default:"67d2b9175023e5e4ca13f3df" , required: true },
+        author: { type: Schema.Types.ObjectId, ref: "User", required: true },
         likes: { type: Number, default: 0 },
         views: { type: Number, default: 0 }, // New: View count
+        shares: { type: Number, default: 0}, 
         comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
     },
