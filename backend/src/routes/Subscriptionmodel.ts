@@ -4,21 +4,21 @@ import SubscriptionPlan, {ISubscriptionPlan,} from "../models/Subscriptionmodel"
 const Subscriptionrouter = Router();
 
 // ✅ **Create a new subscription plan**
-Subscriptionrouter.post("/", async (req, res) => {
-  try {
-    const planData: ISubscriptionPlan = req.body;
-    const newPlan = new SubscriptionPlan(planData);
-    await newPlan.save();
-    res
-      .status(201)
-      .json({
-        message: "Subscription Plan created successfully",
-        plan: newPlan,
-      });
-  } catch (error) {
-    res.status(400).json({ error: (error as Error).message });
-  }
-});
+  Subscriptionrouter.post("/", async (req, res) => {
+    try {
+      const planData: ISubscriptionPlan = req.body;
+      const newPlan = new SubscriptionPlan(planData);
+      await newPlan.save();6
+      res
+        .status(201)
+        .json({
+          message: "Subscription Plan created successfully",
+          plan: newPlan,
+        });
+    } catch (error) {
+      res.status(400).json({ error: (error as Error).message });
+    }
+  });
 
 // ✅ **Get all subscription plans**
 Subscriptionrouter.get("/", async (req, res) => {
