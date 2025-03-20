@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface Property {
   id: string;
   name: string;
@@ -54,6 +56,7 @@ export interface Notification {
   read: boolean;
 }
 export interface TokenPackage {
+  _id(arg0: string, _id: any): void;
   id: string;
   name: string;
   tokens: number; // Number of tokens in the package
@@ -61,6 +64,7 @@ export interface TokenPackage {
   description: string;
 }
 export interface Plan {
+  _id(arg0: string, _id: any): void;
   id: string;
   name: string;
   description: string;
