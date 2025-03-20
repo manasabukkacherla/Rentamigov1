@@ -151,7 +151,7 @@ const CreateBlogPage = () => {
           setExcerpt(draftData.excerpt || "")
           setTags(draftData.tags || [])
           setCoverImage(draftData.coverImage || null)
-          setCategory(draftData.category || "Lifestyle")
+          setCategory(draftData.category || "")
           setReadTime(draftData.readTime || 5)
 
           // Update editor content
@@ -296,6 +296,9 @@ const CreateBlogPage = () => {
         }
   
         navigate('/blogs')
+      } else {
+        toast.error("You must be logged in!");
+        navigate('/login')
       }
     } catch (error) {
       console.error("Error saving blog:", error)

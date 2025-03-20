@@ -6,7 +6,7 @@ interface Review extends Document {
     createdAt: Date,
     author: Types.ObjectId,
     blogId: Types.ObjectId,
-    likes: number
+    likes: Types.ObjectId[]
 }
 
 const reviewSchema = new Schema<Review>({
@@ -28,10 +28,7 @@ const reviewSchema = new Schema<Review>({
         type: Schema.Types.ObjectId,
         ref: "Blog"
     },
-    likes: {
-        type: Number,
-        default: 0
-    }
+    likes: [{ type: Schema.Types.ObjectId, ref: "User" }]
 });
 
 const reviewModel = mongoose.models.Review || mongoose.model<Review>("Review", reviewSchema);

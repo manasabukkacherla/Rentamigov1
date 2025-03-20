@@ -50,6 +50,10 @@ commentsRouter.post('/:id', async (req: CustomRequest<{ id: string }, {}, Commen
       return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
+    if(!comment) {
+      return res.status(401).json({ success: false, message: 'Comment is required' });
+    }
+
     // Validate if the blogId is a valid ObjectId
     const blogId = new mongoose.Types.ObjectId(id);
     if (!mongoose.Types.ObjectId.isValid(blogId)) {
@@ -166,5 +170,51 @@ commentsRouter.delete('/:id', async (req: CustomRequest<{ id: string }, {}, { au
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
+
+commentsRouter.post("/:commentId/likes", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.body;
+    const comment = await commentModel.findById(req.params.commentId);
+    if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
+
+    if (!comment.likes.includes(userId)) {
+      comment.likes.push(userId);
+      await comment.save();
+    }
+
+    res.json({ success: true, message: "Comment liked successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
+
+commentsRouter.delete("/:commentId/likes/:userId", async (req: Request, res: Response) => {
+  try {
+    const { commentId, userId } = req.params;
+    const comment = await commentModel.findById(commentId);
+    if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
+
+    comment.likes = comment.likes.filter((id: { toString: () => string; }) => id.toString() !== userId);
+    await comment.save();
+
+    res.json({ success: true, message: "Comment unliked successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
+
+commentsRouter.get("/:commentId/liked/:userId", async (req: Request, res: Response) => {
+  try {
+    const { commentId, userId } = req.params;
+    const comment = await commentModel.findById(commentId);
+    if (!comment) return res.status(404).json({ success: false, message: "Comment not found" });
+
+    const liked = comment.likes.includes(userId);
+    res.json({ success: true, liked });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
+
 
 export default commentsRouter;

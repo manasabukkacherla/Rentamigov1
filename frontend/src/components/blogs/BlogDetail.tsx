@@ -1,15 +1,7 @@
-"use client"
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Clock, ThumbsUp, MessageCircle, Share2, ArrowLeft, Star, Send } from "lucide-react"
-
-import {  blogPosts as initialBlogPosts } from "../blogs/data/blogData"
-import type { BlogPostType, Comment, Review } from "../Blogs/types/type"
-
-
-
 import Navbar from "./Navbar";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -26,14 +18,15 @@ interface Blog {
   tags: string[];
   category: string;
   readTime: number;
-  author: string;
+  author: User;
   likes: number;
-  views: number; // New: View count
+  views: number;
   shares: 0,
   comments: Comment[]
   reviews: Review[]
   createdAt: Date;
   updatedAt: Date;
+  userHasLiked: boolean
 }
 
 interface Comment {
@@ -41,7 +34,8 @@ interface Comment {
   author: User;
   comment: string;
   createdAt: string;
-  likes: number
+  likes: string[];
+  userHasLiked?: boolean;
 }
 
 interface User {
@@ -55,7 +49,8 @@ interface Review {
   comment: string,
   rating: number,
   createdAt: string,
-  likes: number
+  likes: string[];
+  userHasLiked?: boolean;
 }
 
 const BlogDetail: React.FC = () => {
@@ -75,16 +70,44 @@ const BlogDetail: React.FC = () => {
       if (id) {
         try {
           const response = await axios.get(`http://localhost:8000/api/blog/${id}`);
-          // console.log(response.data.success)
           if (response.data.success) {
-            // console.log(response.data)
-            setPost(response.data.blog);
-            // console.log(post)
-
             const blog = response.data.blog
-            setComments(blog.comments)
-            setReviews(blog.reviews)
-            // console.log(blog.comments)
+            let userHasLiked = false
+
+            const user = sessionStorage.getItem('user');
+            if (user) {
+              const owner = JSON.parse(user).id;
+              const res = await axios.get(`http://localhost:8000/api/likes/${id}/liked/${owner}`)
+
+              if (res.data.success) {
+                userHasLiked = res.data.liked
+              }
+
+              // Check likes for comments and reviews
+              const commentsWithLikes = await Promise.all(blog.comments.map(async (comment: Comment) => {
+                const likeRes = await axios.get(`http://localhost:8000/api/comments/${comment._id}/liked/${owner}`);
+                return {
+                  ...comment,
+                  userHasLiked: likeRes.data.liked
+                };
+              }));
+
+              const reviewsWithLikes = await Promise.all(blog.reviews.map(async (review: Review) => {
+                const likeRes = await axios.get(`http://localhost:8000/api/reviews/${review._id}/liked/${owner}`);
+                return {
+                  ...review,
+                  userHasLiked: likeRes.data.liked
+                };
+              }));
+
+              setComments(commentsWithLikes);
+              setReviews(reviewsWithLikes);
+            }
+
+            setPost({
+              ...blog,
+              userHasLiked,
+            });
           } else {
             setPost(null);
           }
@@ -99,59 +122,124 @@ const BlogDetail: React.FC = () => {
     fetchBlog();
   }, [id])
 
-  // const handleLike = () => {
-  //   if (post) {
-  //     setPost({
-  //       ...post,
-  //       // likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
-  //       // userHasLiked: !post.userHasLiked,
-  //     })
-  //   }
-  // }
+  const handleLike = async () => {
+    if (id) {
+      try {
+        const user = sessionStorage.getItem('user')
+        if (user) {
+          const owner = JSON.parse(user).id;
+          const response = await axios.post(`http://localhost:8000/api/likes/${id}`, { userId: owner })
+          if (response.data.success) {
+            if (post) {
+              setPost({
+                ...post,
+                likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
+                userHasLiked: !post.userHasLiked,
+              })
+            }
+          }
+        }
+      } catch (error) {
+        toast.error('Something went wrong')
+      }
+    }
+  }
+
+  const handleDislike = async () => {
+    if (id) {
+      try {
+        const user = sessionStorage.getItem('user')
+        if (user) {
+          const owner = JSON.parse(user).id;
+          const response = await axios.delete(`http://localhost:8000/api/likes/${id}/${owner}`)
+          if (response.data.success) {
+            if (post) {
+              setPost({
+                ...post,
+                likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
+                userHasLiked: !post.userHasLiked,
+              })
+            }
+          }
+        }
+      } catch (error) {
+        toast.error('Something went wrong')
+      }
+    }
+  }
 
   const handleCommentLike = async (commentId: string) => {
     try {
       const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('Please login first');
+        return;
+      }
 
-      if (user) {
-        const owner = JSON.parse(user).id;
-        if (post) {
-          setPost({
-            ...post,
-            comments: post.comments.map((comment) =>
-              comment._id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-            ),
-          })
+      const owner = JSON.parse(user).id;
+      const comment = comments.find(c => c._id === commentId);
+
+      if (comment?.userHasLiked) {
+        const response = await axios.delete(`http://localhost:8000/api/comments/${commentId}/likes/${owner}`);
+        if (response.data.success) {
+          setComments(comments.map(c =>
+            c._id === commentId
+              ? { ...c, likes: c.likes.filter(id => id !== owner), userHasLiked: false }
+              : c
+          ));
         }
-        console.log(post)
-        if (post !== null) {
-          const sentData = {
-            like: post.likes + 1,
-            author: owner
-          }
-          const response = await axios.put(`http://localhost:8000/api/comments/${id}`, { sentData })
-          if (response.data.success) {
-            console.log(response.data)
-          }
+      } else {
+        const response = await axios.post(`http://localhost:8000/api/comments/${commentId}/likes`, { userId: owner });
+        if (response.data.success) {
+          setComments(comments.map(c =>
+            c._id === commentId
+              ? { ...c, likes: [...c.likes, owner], userHasLiked: true }
+              : c
+          ));
         }
       }
-      // if (post) {
-      //   setPost({
-      //     ...post,
-      //     comments: post.comments.map((comment) =>
-      //       comment._id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-      //     ),
-      //   })
-      // }
     } catch (error) {
-      console.error("Error liking comment:", error);
-      toast.error('Something went wrong')
+      toast.error('Something went wrong');
+    }
+  }
+
+  const handleReviewLike = async (reviewId: string) => {
+    try {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('Please login first');
+        return;
+      }
+
+      const owner = JSON.parse(user).id;
+      const review = reviews.find(r => r._id === reviewId);
+
+      if (review?.userHasLiked) {
+        const response = await axios.delete(`http://localhost:8000/api/reviews/${reviewId}/likes/${owner}`);
+        if (response.data.success) {
+          setReviews(reviews.map(r =>
+            r._id === reviewId
+              ? { ...r, likes: r.likes.filter(id => id !== owner), userHasLiked: false }
+              : r
+          ));
+        }
+      } else {
+        const response = await axios.post(`http://localhost:8000/api/reviews/${reviewId}/likes`, { userId: owner });
+        if (response.data.success) {
+          setReviews(reviews.map(r =>
+            r._id === reviewId
+              ? { ...r, likes: [...r.likes, owner], userHasLiked: true }
+              : r
+          ));
+        }
+      }
+    } catch (error) {
+      toast.error('Something went wrong');
     }
   }
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault()
-    // console.log(newComment)
     try {
       const user = sessionStorage.getItem('user');
 
@@ -161,14 +249,18 @@ const BlogDetail: React.FC = () => {
           author: owner,
           comment: newComment
         }
-        // console.log(Comment)
 
         const response = await axios.post(`http://localhost:8000/api/comments/${id}`, Comment)
-        // console.log(response.data)
         if (response.data.success) {
           setNewComment("")
-          setComments([...comments, response.data.comment]);
-          toast.success('Comment added succesfully!')
+          setComments([...comments, { ...response.data.comment, likes: [], userHasLiked: false }]);
+          if (post) {
+            setPost({
+              ...post,
+              comments: comments
+            })
+          }
+          toast.success('Comment added successfully!')
           navigate(`/blogs/${id}`)
         } else {
           setNewComment("");
@@ -196,15 +288,18 @@ const BlogDetail: React.FC = () => {
           comment: newReview,
           rating: rating
         }
-        console.log(Review)
 
         const response = await axios.post(`http://localhost:8000/api/reviews/${id}`, Review)
-        // console.log(response.data)
         if (response.data.success) {
           setNewReview("")
-          setReviews([...reviews, response.data.review]);
-          console.log(reviews)
-          toast.success('Review added succesfully!')
+          setReviews([...reviews, { ...response.data.review, likes: [], userHasLiked: false }]);
+          if (post) {
+            setPost({
+              ...post,
+              reviews: reviews
+            })
+          }
+          toast.success('Review added successfully!')
           navigate(`/blogs/${id}`)
         } else {
           setNewReview("");
@@ -216,9 +311,75 @@ const BlogDetail: React.FC = () => {
     } catch (error) {
       console.error("Error adding review:", error);
       toast.error('Something went wrong')
-      setNewComment("")
+      setNewReview("")
     }
   }
+
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      const user = sessionStorage.getItem("user");
+      if (!user) {
+        toast.error("Please login first");
+        return;
+      }
+  
+      const author = JSON.parse(user).id; // Get the logged-in user ID
+  
+      const response = await axios.delete(`http://localhost:8000/api/comments/${commentId}`, {
+        data: { author }, // Send author ID in request body
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        toast.success("Comment deleted successfully");
+  
+        // Remove the deleted comment from the state
+        setComments((prevComments) =>
+          prevComments.filter((comment) => comment._id !== commentId)
+        );
+      } else {
+        toast.error(response.data.message || "Failed to delete comment");
+      }
+    } catch (error) {
+      console.error("Error deleting comment:", error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    try {
+      const user = sessionStorage.getItem("user");
+      if (!user) {
+        toast.error("Please login first");
+        return;
+      }
+  
+      const author = JSON.parse(user).id; // Get the logged-in user ID
+  
+      const response = await axios.delete(`http://localhost:8000/api/reviews/${reviewId}`, {
+        data: { author }, // Send author ID in request body
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (response.data.success) {
+        toast.success("Comment deleted successfully");
+  
+        // Remove the deleted comment from the state
+        setReviews((prevReviews) =>
+          prevReviews.filter((review) => review._id !== reviewId)
+        );
+      } else {
+        toast.error(response.data.message || "Failed to delete review");
+      }
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      toast.error("Something went wrong");
+    }
+  };
 
   if (!post) {
     return (
@@ -262,12 +423,10 @@ const BlogDetail: React.FC = () => {
 
           <div className="flex items-center mb-8">
             <img
-              // src={post.author.avatar || "/placeholder.svg"}
-              // alt={post.author.name}
               className="h-12 w-12 rounded-full mr-4"
             />
             <div>
-              <p className="font-medium text-gray-900">John Doe</p>
+              <p className="font-medium text-gray-900">{post.author.fullName}</p>
               <p className="text-sm text-gray-500">Author</p>
             </div>
           </div>
@@ -280,7 +439,7 @@ const BlogDetail: React.FC = () => {
             <div className="flex space-x-4">
               <button
                 className={`flex items-center ${post.userHasLiked ? "text-black" : "text-gray-500 hover:text-black"}`}
-              // onClick={handleLike}
+                onClick={!post.userHasLiked ? handleLike : handleDislike}
               >
                 <ThumbsUp className={`h-5 w-5 mr-2 ${post.userHasLiked ? "fill-black" : ""}`} />
                 <span>{post.likes} Likes</span>
@@ -354,8 +513,6 @@ const BlogDetail: React.FC = () => {
               {comments.map((comment) => (
                 <div key={comment._id} className="flex space-x-4">
                   <img
-                    // src={comment.author.avatar || "/placeholder.svg"}
-                    // alt={comment.author.fullName}
                     className="h-10 w-10 rounded-full"
                   />
                   <div className="flex-1">
@@ -370,14 +527,20 @@ const BlogDetail: React.FC = () => {
                     </div>
                     <div className="flex items-center mt-2 text-sm text-gray-500">
                       <button
-                        className="flex items-center hover:text-black"
+                        className={`flex items-center hover:text-black ${comment.userHasLiked ? "text-black" : ""}`}
                         onClick={() => handleCommentLike(comment._id)}
                       >
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        <span>{comment.likes} Likes</span>
+                        <ThumbsUp className={`h-4 w-4 mr-1 ${comment.userHasLiked ? "fill-black" : ""}`} />
+                        <span>{comment.likes.length} Likes</span>
                       </button>
-                      <span className="mx-2">•</span>
-                      <button className="hover:text-black">Reply</button>
+                      {comment.author._id === JSON.parse(sessionStorage.getItem("user") || "{}").id && (
+                          <button
+                          className="ml-4 px-3 py-1 text-sm font-medium text-black-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition duration-200"
+                          onClick={() => handleDeleteComment(comment._id)}
+                        >
+                          Delete
+                        </button>
+                       )} 
                     </div>
                   </div>
                 </div>
@@ -426,11 +589,9 @@ const BlogDetail: React.FC = () => {
             </form>
 
             <div className="space-y-6">
-              {post.reviews.map((review) => (
+              {reviews.map((review) => (
                 <div key={review._id} className="flex space-x-4">
                   <img
-                    // src={review.author.avatar || "/placeholder.svg"}
-                    // alt={review.author.name}
                     className="h-10 w-10 rounded-full"
                   />
                   <div className="flex-1">
@@ -451,6 +612,23 @@ const BlogDetail: React.FC = () => {
                       </div>
                       <p className="text-gray-700">{review.comment}</p>
                     </div>
+                    <div className="flex items-center mt-2 text-sm text-gray-500">
+                      <button
+                        className={`flex items-center hover:text-black ${review.userHasLiked ? "text-black" : ""}`}
+                        onClick={() => handleReviewLike(review._id)}
+                      >
+                        <ThumbsUp className={`h-4 w-4 mr-1 ${review.userHasLiked ? "fill-black" : ""}`} />
+                        <span>{review.likes.length} Likes</span>
+                      </button>
+                      {review.author._id === JSON.parse(sessionStorage.getItem("user") || "{}").id && (
+                          <button
+                          className="ml-4 px-3 py-1 text-sm font-medium text-black-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition duration-200"
+                          onClick={() => handleDeleteReview(review._id)}
+                        >
+                          Delete
+                        </button>
+                       )} 
+                    </div>
                   </div>
                 </div>
               ))}
@@ -459,30 +637,6 @@ const BlogDetail: React.FC = () => {
         )}
       </div>
       <br /><br /><br />
-      <div className="mt-12 w-full">
-        {/* <h3 className="text-xl font-bold text-gray-900 mb-6">Related Properties</h3> */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-
-          {initialBlogPosts
-            .filter((relatedPost) => relatedPost.id !== post.id && relatedPost.category === post.category)
-            .slice(0, 3)
-            .map((relatedPost) => (
-              <Link to={`/blog/${relatedPost.id}`} key={relatedPost.id} className="block">
-                <div className="bg-white rounded-lg shadow overflow-hidden hover:shadow-md transition-shadow duration-300">
-                  <img
-                    src={relatedPost.coverImage || "/placeholder.svg"}
-                    alt={relatedPost.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <div className="p-4">
-                    <h4 className="font-medium text-gray-900 mb-1">{relatedPost.title}</h4>
-                    <p className="text-sm text-gray-500">{relatedPost.date}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-        </div>
-      </div>
     </div>
   )
 }

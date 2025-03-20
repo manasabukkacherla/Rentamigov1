@@ -4,6 +4,7 @@ import reviewModel from '../../models/blogs/reviewModel';
 import blogsModel from '../../models/blogs/blogsModel';
 import authBlog from '../../middleware/authBlog';
 import { ParamsDictionary } from 'express-serve-static-core';
+import mongoose from 'mongoose';
 
 const reviewRouter = express.Router();
 
@@ -163,5 +164,49 @@ reviewRouter.delete(
   }
 );
 
+reviewRouter.post("/:reviewId/likes", async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.body;
+    const review = await reviewModel.findById(req.params.reviewId);
+    if (!review) return res.status(404).json({ success: false, message: "Review not found" });
+
+    if (!review.likes.includes(userId)) {
+      review.likes.push(userId);
+      await review.save();
+    }
+
+    res.json({ success: true, message: "Review liked successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
+
+reviewRouter.delete("/:reviewId/likes/:userId", async (req: Request, res: Response) => {
+  try {
+    const { reviewId, userId } = req.params;
+    const review = await reviewModel.findById(reviewId);
+    if (!review) return res.status(404).json({ success: false, message: "Review not found" });
+
+    review.likes = review.likes.filter((id: { toString: () => string; }) => id.toString() !== userId);
+    await review.save();
+
+    res.json({ success: true, message: "Review unliked successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
+
+reviewRouter.get("/:reviewId/liked/:userId", async (req: Request, res: Response) => {
+  try {
+    const { reviewId, userId } = req.params;
+    const review = await reviewModel.findById(reviewId);
+    if (!review) return res.status(404).json({ success: false, message: "Review not found" });
+
+    const liked = review.likes.includes(userId);
+    res.json({ success: true, liked });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error", error });
+  }
+});
 
 export default reviewRouter;
