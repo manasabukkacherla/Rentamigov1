@@ -2,6 +2,7 @@ import express from 'express';
 import Razorpay from 'razorpay';
 import dotenv from 'dotenv';
 import Payment from '../models/paymentModel';
+import SubscriptionPlan from '../models/Subscriptionmodel';
 dotenv.config();  // Load environment variables from .env file
 
 const router = express.Router();
@@ -62,6 +63,20 @@ router.post('/create-order', async (req, res) => {
   } catch (error) {
     console.error('Error creating Razorpay order:', error);
     res.status(500).send('Error creating Razorpay order');
+  }
+});
+// Fetch Subscription Plan Details by ID
+router.get("/get-plan/:id", async (req, res) => {
+  try {
+    const planId = req.params.id;  // Get plan ID from URL
+    const plan = await SubscriptionPlan.findById(planId);  // Fetch the plan from database
+    if (!plan) {
+      return res.status(404).json({ message: "Subscription Plan not found" });
+    }
+
+    res.status(200).json(plan);  // Send the plan details
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error });
   }
 });
 

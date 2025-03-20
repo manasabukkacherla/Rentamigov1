@@ -70,53 +70,62 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
   }, []); // Empty dependency array means this runs only once when the component mounts
 
   // Handle Purchase Button Click
-  const handlePayment = async (type: string, id: string, planName: string, planId: string) => {
+  const handlePayment = async (type: string, id: string, planName: string) => {
     setLoading(true);
-  
+
     try {
-      const amount = type === "subscription" ? 1900 : 500; // Example amount, can be dynamically set based on plan/token
-  
-      // Fetch username from sessionStorage
+      // Fetch subscription plan or token package price dynamically from the backend
+      const fetchPlanDetails = await fetch(`http://localhost:8000/api/payment/get-plan/${id}`);
+      const planData = await fetchPlanDetails.json();
+
+      if (!planData || !planData.price) {
+        alert('Invalid plan data.');
+        return;
+      }
+
+      const amount = planData.price * 100; // Convert price to paise (multiply by 100)
+
       const userName = sessionStorage.getItem("username");
-      const userId = sessionStorage.getItem("userId"); // Assuming you store userId in sessionStorage
-  
+      const userId = sessionStorage.getItem("userId");
+
       if (!userName || !userId) {
         alert("User is not logged in. Please log in to continue.");
         return;
       }
-  
-      const response = await fetch("http://localhost:8000/api/payment/create-order", {
+
+      // Make an order request to backend to create a Razorpay order
+      const orderResponse = await fetch("http://localhost:8000/api/payment/create-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ amount }), // Amount in INR (in paise)
+        body: JSON.stringify({ amount }),
       });
-  
-      const data = await response.json();
-  
+
+      const orderData = await orderResponse.json();
+
       const options = {
-        key: data.key_id, // Razorpay key from backend
-        amount: data.amount, // Amount in paise
-        currency: data.currency,
-        name: "Token Package Purchase",
-        description: "Purchase tokens for your account",
-        image: "https://yourwebsite.com/logo.png", // Your logo URL
-        order_id: data.id,
+        key: orderData.key_id, // Razorpay key from backend
+        amount: orderData.amount, // Amount in paise
+        currency: orderData.currency,
+        name: planName,
+        description: "Purchase subscription for your account",
+        image: "https://yourwebsite.com/logo.png", // Add your logo URL
+        order_id: orderData.id,
         handler: async function (response: any) {
           alert(`Payment successful. Payment ID: ${response.razorpay_payment_id}`);
-  
+
           // Send the transaction details to the backend to store in the database
           const paymentDetails = {
-            userId, // Use the userId from sessionStorage
-            userName, // Use the userName from sessionStorage
-            amount: data.amount / 100, // Convert back to INR from paise
+            userId,
+            userName,
+            amount: orderData.amount / 100, // Convert back to INR from paise
             transactionId: response.razorpay_payment_id,
             planName,
-            planId,
-            expirationDate: new Date(), // Add plan expiration date logic
+            planId: id,
+            expirationDate: new Date(), // Plan expiration date logic here
           };
-  
+
           const saveResponse = await fetch("http://localhost:8000/api/payment/save-payment", {
             method: "POST",
             headers: {
@@ -124,7 +133,7 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
             },
             body: JSON.stringify(paymentDetails),
           });
-  
+
           const saveData = await saveResponse.json();
           if (saveResponse.ok) {
             alert("Payment details saved successfully.");
@@ -133,7 +142,7 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
           }
         },
         prefill: {
-          name: userName, // Automatically fetch user details if logged in
+          name: userName,
           email: "user@example.com",
           contact: "1234567890",
         },
@@ -144,7 +153,7 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
           color: "#F37254",
         },
       };
-  
+
       // Open Razorpay Payment Window
       const razorpay = new window.Razorpay(options);
       razorpay.open();
@@ -155,7 +164,6 @@ const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
