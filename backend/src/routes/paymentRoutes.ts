@@ -12,11 +12,11 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET, // Correct key_secret from .env
 });
 router.post("/save-payment", async (req, res) => {
-  const { userId, userName, amount, transactionId, planName, planId, expirationDate } = req.body;
+  const { userId, userName, amount, transactionId, planName, planId, expirationDate, plantype} = req.body;
 
   try {
     // Validate the incoming data
-    if (!userId || !userName || !amount || !transactionId || !planName || !planId || !expirationDate) {
+    if (!userId || !userName || !amount || !transactionId || !planName || !planId || !expirationDate || !plantype) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -29,6 +29,7 @@ router.post("/save-payment", async (req, res) => {
       planName,
       planId,
       expirationDate,
+      plantype,
     });
 
     await newPayment.save();

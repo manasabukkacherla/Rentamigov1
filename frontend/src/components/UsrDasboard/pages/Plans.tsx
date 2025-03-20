@@ -77,27 +77,20 @@ function Plans() {
   }, []); // Empty dependency array means this runs only once when the component mounts
 
   // Handle Purchase Button Click
-  const handlePayment = async (
-    type: string,
-    id: string,
-    planName: string,
-    planId: string
-  ) => {
+  const handlePayment = async (type: string, id: string, planName: string, planId: string) => {
     console.log("Processing payment for:", { type, id, planName, planId });
-
+  
     if (!id || !planName || !planId) {
       alert("Invalid selection. Please try again.");
       return;
     }
-
+  
     setLoading(true);
-
+  
     try {
       let selectedItem;
       if (type === "subscription") {
-        const response = await fetch(
-          `http://localhost:8000/api/subscription/${id}`
-        );
+        const response = await fetch(`http://localhost:8000/api/subscription/${id}`);
         if (!response.ok) throw new Error("Failed to fetch subscription plan");
         selectedItem = await response.json();
       } else if (type === "token") {
@@ -105,71 +98,68 @@ function Plans() {
         if (!response.ok) throw new Error("Failed to fetch token package");
         selectedItem = await response.json();
       }
-
+  
       if (!selectedItem) {
         alert("Selected plan or token package not found.");
         return;
       }
-
-      const amount = selectedItem.price * 100; // Convert to paise for Razorpay
-
+  
+      // Calculate the amount in INR and convert it to paise (1 INR = 100 paise)
+      const amountInPaise = selectedItem.price * 100;
+      console.log("Amount calculated for payment (in paise):", amountInPaise);
+  
       const userName = sessionStorage.getItem("username");
       const userId = sessionStorage.getItem("userId");
-
+  
       if (!userName || !userId) {
         alert("User is not logged in. Please log in to continue.");
         return;
       }
-
-      const response = await fetch(
-        "http://localhost:8000/api/payment/create-order",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ amount }),
-        }
-      );
-
-      const data = await response.json();
-
+  
+      // Create an order with Razorpay
+      const orderResponse = await fetch("http://localhost:8000/api/payment/create-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: amountInPaise }),
+      });
+  
+      const orderData = await orderResponse.json();
+      console.log("Razorpay order data:", orderData);
+  
+      // Set up Razorpay options
       const options = {
-        key: data.key_id,
-        amount: data.price,
-        currency: data.currency,
-        name:
-          type === "subscription"
-            ? "Subscription Plan Purchase"
-            : "Token Package Purchase",
+        key: orderData.key_id, // Razorpay key
+        amount: orderData.price, // Amount in paise
+        currency: orderData.currency,
+        name: type === "subscription" ? "Subscription Plan Purchase" : "Token Package Purchase",
         description: `Purchase of ${planName}`,
-        order_id: data.id,
+        order_id: orderData.id,
         handler: async function (response: any) {
-          alert(
-            `Payment successful. Payment ID: ${response.razorpay_payment_id}`
-          );
-
+          alert(`Payment successful. Payment ID: ${response.razorpay_payment_id}`);
+  
+          // Prepare the payment details to save in your database
           const paymentDetails = {
             userId,
             userName,
-            amount: data.price / 100, // Convert back to INR
+            amount: amountInPaise / 100, // Convert paise back to INR for storing (in INR)
             transactionId: response.razorpay_payment_id,
             planName,
             planId,
+            plantype: type, // This will either be 'subscription' or 'token'
             expirationDate: new Date(),
           };
-
-          const saveResponse = await fetch(
-            "http://localhost:8000/api/payment/save-payment",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(paymentDetails),
-            }
-          );
-
+  
+          // Save payment details to your backend
+          const saveResponse = await fetch("http://localhost:8000/api/payment/save-payment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(paymentDetails),
+          });
+  
           if (saveResponse.ok) {
             alert("Payment details saved successfully.");
           } else {
@@ -185,7 +175,8 @@ function Plans() {
           color: "#F37254",
         },
       };
-
+  
+      // Open Razorpay's payment window
       const razorpay = new window.Razorpay(options);
       razorpay.open();
     } catch (error) {
@@ -195,7 +186,9 @@ function Plans() {
       setLoading(false);
     }
   };
-
+  
+  
+  
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
