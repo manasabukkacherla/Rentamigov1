@@ -20,6 +20,7 @@ interface IBlog extends Document {
     reviews: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
+    status: "published" | "draft";
     incrementViews: () => Promise<void>; // Method to increase views
 }
 
@@ -42,6 +43,10 @@ const BlogSchema = new Schema<IBlog>(
         shares: { type: Number, default: 0}, 
         comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
         reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
+        status: { 
+            type: String, 
+            enum: ["published", "draft"],
+        },
     },
     { timestamps: true }
 );

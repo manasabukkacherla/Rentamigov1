@@ -1,32 +1,88 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { Link } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import { FileText, PenSquare, Search, Edit, Trash2, Eye, Filter, ChevronDown, ChevronUp, ThumbsUp } from 'lucide-react'
+import axios from "axios"
+import { toast } from "react-toastify"
 
 interface Blog {
-  id: number
-  title: string
-  status: string
-  date: string
-  coverImage: string
-  views?: number
-  likes: number
-  comments: number
-  lastEdited: string
+  _id: string,
+  title: string;
+  excerpt: string;
+  content: string;
+  media: {
+    coverImage: string;
+    images?: string[];
+  };
+  tags: string[];
+  category: string;
+  readTime: number;
+  author: User;
+  likes: number;
+  views: number;
+  shares: 0,
+  comments: Comment[]
+  reviews: Review[]
+  createdAt: Date;
+  updatedAt: Date;
+  status: "published" | "draft";
 }
 
-interface BlogManagementSectionProps {
-  blogs: Blog[]
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: string[];
 }
 
-const BlogManagementSection: React.FC<BlogManagementSectionProps> = ({ blogs }) => {
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: string[];
+}
+
+const BlogManagementSection = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all")
   const [sortBy, setSortBy] = useState<"date" | "views" | "likes" | "comments">("date")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [showFilters, setShowFilters] = useState(false)
+  const [blogs, setBlogs] = useState<Blog[]>([])
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    loadBlogs()
+  }, [])
+
+  const loadBlogs = async () => {
+    try {
+      const user = sessionStorage.getItem('user')
+      if(!user) {
+        toast.error('Login First!!')
+        navigate('/login')
+        return
+      }
+      const author = JSON.parse(user).id;
+
+      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
+      console.log(response.data)
+      setBlogs(response.data.blogs)
+    } catch (error) {
+      toast.error("Failed to load blogs")
+      console.error("Error loading blogs:", error)
+    }
+  }
 
   // Filter and sort blogs
   const filteredBlogs = blogs
@@ -38,14 +94,16 @@ const BlogManagementSection: React.FC<BlogManagementSectionProps> = ({ blogs }) 
     .sort((a, b) => {
       if (sortBy === "date") {
         return sortOrder === "asc"
-          ? new Date(a.date).getTime() - new Date(b.date).getTime()
-          : new Date(b.date).getTime() - new Date(a.date).getTime()
+          ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
+          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       } else if (sortBy === "views") {
         return sortOrder === "asc" ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0)
       } else if (sortBy === "likes") {
         return sortOrder === "asc" ? a.likes - b.likes : b.likes - a.likes
       } else {
-        return sortOrder === "asc" ? a.comments - b.comments : b.comments - a.comments
+        return sortOrder === "asc" 
+          ? a.comments.length - b.comments.length 
+          : b.comments.length - a.comments.length
       }
     })
 
@@ -53,9 +111,28 @@ const BlogManagementSection: React.FC<BlogManagementSectionProps> = ({ blogs }) 
     setSortOrder(sortOrder === "asc" ? "desc" : "asc")
   }
 
-  const handleDelete = (id: number) => {
-    // In a real app, you would delete the blog from the backend
-    alert(`Blog with ID ${id} would be deleted`)
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this blog post?")) {
+      return;
+    }
+
+    try {
+      const response = await axios.delete(`http://localhost:8000/api/blog/delete/${id}`)
+      if(response.data.success) {
+        toast.success("Blog deleted successfully!")
+        // Refresh the blog list
+        loadBlogs();
+      } else {
+        toast.error("Failed to delete blog")
+      }
+    } catch (error) {
+      toast.error("Error deleting blog")
+      console.error("Error deleting blog:", error)
+    }
+  }
+
+  const handleEdit = (blogId: string) => {
+    navigate(`/blogs/edit/${blogId}`);
   }
 
   return (
@@ -164,11 +241,11 @@ const BlogManagementSection: React.FC<BlogManagementSectionProps> = ({ blogs }) 
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredBlogs.map((blog) => (
-              <tr key={blog.id}>
+              <tr key={blog._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <img
-                      src={blog.coverImage || "/placeholder.svg"}
+                      src={blog.media.coverImage || "/placeholder.svg"}
                       alt={blog.title}
                       className="h-10 w-10 rounded-md object-cover mr-3"
                     />
@@ -196,22 +273,28 @@ const BlogManagementSection: React.FC<BlogManagementSectionProps> = ({ blogs }) 
                       </span>
                       <span className="flex items-center">
                         <Eye className="h-4 w-4 mr-1" />
-                        {blog.comments}
+                        {blog.comments.length}
                       </span>
                     </div>
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{blog.lastEdited}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {new Date(blog.updatedAt).toLocaleDateString()}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
-                    <Link to={`/blogs/${blog.id}`} className="text-gray-600 hover:text-gray-900" title="View">
+                    <Link to={`/blogs/${blog._id}`} className="text-gray-600 hover:text-gray-900" title="View">
                       <Eye className="h-5 w-5" />
                     </Link>
-                    <Link to={`/blogs/edit/${blog.id}`} className="text-blue-600 hover:text-blue-900" title="Edit">
-                      <Edit className="h-5 w-5" />
-                    </Link>
                     <button
-                      onClick={() => handleDelete(blog.id)}
+                      onClick={() => handleEdit(blog._id)}
+                      className="text-blue-600 hover:text-blue-900"
+                      title="Edit"
+                    >
+                      <Edit className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(blog._id)}
                       className="text-red-600 hover:text-red-900"
                       title="Delete"
                     >
@@ -235,3 +318,281 @@ const BlogManagementSection: React.FC<BlogManagementSectionProps> = ({ blogs }) 
 }
 
 export default BlogManagementSection
+
+// import React from 'react';
+// import { useState, useEffect } from 'react';
+// import { Link, useNavigate } from 'react-router-dom';
+// import { FileText, PenSquare, Search, Edit, Trash2, Eye, Filter, ChevronDown, ChevronUp, ThumbsUp, AlertCircle } from 'lucide-react';
+// import axios from 'axios';
+// import { toast } from 'react-toastify';
+
+// interface Blog {
+//   _id: string;
+//   title: string;
+//   content: string;
+//   status: 'draft' | 'published';
+//   createdAt: string;
+//   updatedAt: string;
+// }
+
+// const BlogManagementSection = () => {
+//   const [blogs, setBlogs] = useState<Blog[]>([]);
+//   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const [sortField, setSortField] = useState<keyof Blog>('createdAt');
+//   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+//   const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'published'>('all');
+//   const navigate = useNavigate();
+
+//   const loadBlogs = async () => {
+//     try {
+//       const user = sessionStorage.getItem('user')
+//       if (!user) {
+//         toast.error('Login First!!')
+//         navigate('/login')
+//         return
+//       }
+//       const author = JSON.parse(user).id;
+
+//       const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
+//       console.log(response.data)
+//       setBlogs(response.data.blogs)
+//     } catch (error) {
+//       toast.error("Failed to load blogs")
+//       console.error("Error loading blogs:", error)
+//     }
+//   }
+
+//   useEffect(() => {
+//     loadBlogs();
+//   }, []);
+
+//   useEffect(() => {
+//     let filtered = [...blogs];
+
+//     // Apply status filter
+//     if (statusFilter !== 'all') {
+//       filtered = filtered.filter(blog => blog.status === statusFilter);
+//     }
+
+//     // Apply search filter
+//     if (searchTerm) {
+//       filtered = filtered.filter(blog =>
+//         blog.title.toLowerCase().includes(searchTerm.toLowerCase())
+//       );
+//     }
+
+//     // Apply sorting
+//     filtered.sort((a, b) => {
+//       if (sortField === 'createdAt' || sortField === 'updatedAt') {
+//         const dateA = new Date(a[sortField]).getTime();
+//         const dateB = new Date(b[sortField]).getTime();
+//         return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+//       }
+//       return sortDirection === 'asc'
+//         ? a[sortField] > b[sortField] ? 1 : -1
+//         : a[sortField] < b[sortField] ? 1 : -1;
+//     });
+
+//     setFilteredBlogs(filtered);
+//   }, [blogs, searchTerm, sortField, sortDirection, statusFilter]);
+
+//   const handleDelete = async (blogId: string) => {
+//     if (window.confirm('Are you sure you want to delete this blog?')) {
+//       try {
+//         const response = await axios.delete(`http://localhost:8000/api/blog/delete/${blogId}`);
+//         if (response.data.success) {
+//           toast.success('Blog deleted successfully');
+//           loadBlogs();
+//         } else {
+//           toast.error('Failed to delete blog');
+//         }
+//       } catch (error) {
+//         console.error('Error deleting blog:', error);
+//         toast.error('Error deleting blog');
+//       }
+//     }
+//   };
+
+//   const handleEdit = (blog: Blog) => {
+//     if (blog.status === 'published') {
+//       toast.error('Published posts cannot be edited');
+//       return;
+//     }
+//     navigate(`/blogs/edit/${blog._id}`);
+//   };
+
+//   const handlePublishDraft = async (blog: Blog) => {
+//     try {
+//       const response = await axios.put(`http://localhost:8000/api/blog/edit/${blog._id}`, {
+//         ...blog,
+//         status: 'published'
+//       });
+
+//       if (response.data.success) {
+//         toast.success('Blog published successfully!');
+//         loadBlogs(); // Refresh the list
+//       } else {
+//         toast.error('Failed to publish blog');
+//       }
+//     } catch (error) {
+//       toast.error('Error publishing blog');
+//       console.error('Error publishing blog:', error);
+//     }
+//   };
+
+//   const toggleSort = (field: keyof Blog) => {
+//     if (sortField === field) {
+//       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+//     } else {
+//       setSortField(field);
+//       setSortDirection('asc');
+//     }
+//   };
+
+//   return (
+//     <div className="container mx-auto px-4 py-8">
+//       <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+//         <div className="flex items-center space-x-4">
+//           <div className="relative">
+//             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+//             <input
+//               type="text"
+//               placeholder="Search blogs..."
+//               className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+//               value={searchTerm}
+//               onChange={(e) => setSearchTerm(e.target.value)}
+//             />
+//           </div>
+//           <div className="relative">
+//             <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+//             <select
+//               className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+//               value={statusFilter}
+//               onChange={(e) => setStatusFilter(e.target.value as 'all' | 'draft' | 'published')}
+//             >
+//               <option value="all">All Status</option>
+//               <option value="draft">Drafts</option>
+//               <option value="published">Published</option>
+//             </select>
+//           </div>
+//         </div>
+//         <Link
+//           to="/blogs/new"
+//           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+//         >
+//           <FileText className="h-5 w-5" />
+//           <span>New Blog</span>
+//         </Link>
+//       </div>
+
+//       <div className="bg-white shadow-md rounded-lg overflow-hidden">
+//         <table className="min-w-full divide-y divide-gray-200">
+//           <thead className="bg-gray-50">
+//             <tr>
+//               <th
+//                 scope="col"
+//                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+//                 onClick={() => toggleSort('title')}
+//               >
+//                 <div className="flex items-center space-x-1">
+//                   <span>Title</span>
+//                   {sortField === 'title' && (
+//                     sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+//                   )}
+//                 </div>
+//               </th>
+//               <th
+//                 scope="col"
+//                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+//                 onClick={() => toggleSort('status')}
+//               >
+//                 <div className="flex items-center space-x-1">
+//                   <span>Status</span>
+//                   {sortField === 'status' && (
+//                     sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+//                   )}
+//                 </div>
+//               </th>
+//               <th
+//                 scope="col"
+//                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+//                 onClick={() => toggleSort('createdAt')}
+//               >
+//                 <div className="flex items-center space-x-1">
+//                   <span>Created At</span>
+//                   {sortField === 'createdAt' && (
+//                     sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />
+//                   )}
+//                 </div>
+//               </th>
+//               <th scope="col" className="relative px-6 py-3">
+//                 <span className="sr-only">Actions</span>
+//               </th>
+//             </tr>
+//           </thead>
+//           <tbody className="bg-white divide-y divide-gray-200">
+//             {filteredBlogs.map((blog) => (
+//               <tr key={blog._id}>
+//                 <td className="px-6 py-4 whitespace-nowrap">
+//                   <div className="text-sm font-medium text-gray-900">{blog.title}</div>
+//                 </td>
+//                 <td className="px-6 py-4 whitespace-nowrap">
+//                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${blog.status === 'published'
+//                       ? 'bg-green-100 text-green-800'
+//                       : 'bg-yellow-100 text-yellow-800'
+//                     }`}>
+//                     {blog.status}
+//                   </span>
+//                 </td>
+//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+//                   {new Date(blog.createdAt).toLocaleDateString()}
+//                 </td>
+//                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+//                   <div className="flex justify-end space-x-2">
+//                     <Link
+//                       to={`/blogs/${blog._id}`}
+//                       className="text-gray-600 hover:text-gray-900"
+//                       title="View"
+//                     >
+//                       <Eye className="h-5 w-5" />
+//                     </Link>
+
+//                     {blog.status === 'draft' && (
+//                       <>
+//                         <button
+//                           onClick={() => handleEdit(blog)}
+//                           className="text-blue-600 hover:text-blue-900"
+//                           title="Edit"
+//                         >
+//                           <Edit className="h-5 w-5" />
+//                         </button>
+//                         <button
+//                           onClick={() => handlePublishDraft(blog)}
+//                           className="text-green-600 hover:text-green-900"
+//                           title="Publish Draft"
+//                         >
+//                           <PenSquare className="h-5 w-5" />
+//                         </button>
+//                       </>
+//                     )}
+
+//                     <button
+//                       onClick={() => handleDelete(blog._id)}
+//                       className="text-red-600 hover:text-red-900"
+//                       title="Delete"
+//                     >
+//                       <Trash2 className="h-5 w-5" />
+//                     </button>
+//                   </div>
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default BlogManagementSection;

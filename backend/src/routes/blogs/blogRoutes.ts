@@ -17,15 +17,16 @@ export const createBlog = async (
     tags: string[];
     category: string;
     readTime: number;
-    author: string
+    author: string;
+    status: string
   }>,
   res: Response
 ): Promise<void> => {
   try {
-    const { title, excerpt, content, media, tags, category, readTime, author } = req.body;
+    const { title, excerpt, content, media, tags, category, readTime, author, status } = req.body;
     console.log(author)
 
-    if (!title || !excerpt || !content || !media?.coverImage || !tags?.length || !category || !readTime) {
+    if (!title || !excerpt || !content || !media?.coverImage || !tags?.length || !category || !readTime || !status) {
       res.status(400).json({ error: 'All required fields must be filled.' });
       return;
     }
@@ -47,10 +48,13 @@ export const createBlog = async (
       category,
       readTime,
       author,
+      status
     });
 
+    const message = status==="published"?"Blog created succesfully!":"Blog drafted successfully"
+
     await newBlog.save();
-    res.status(201).json({ success: true, blog: newBlog, message: "Blog created succesfully!" });
+    res.status(201).json({ success: true, blog: newBlog, message });
   } catch (error) {
     console.log('Error:', error);
     res.status(500).json({ error: 'Failed to create blog post' });
@@ -128,7 +132,7 @@ export const getBlogById = async (req: CustomRequest, res: Response): Promise<vo
 
 const listBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
-    const blogs = await Blog.find({}).sort({ createdAt: -1 })
+    const blogs = await Blog.find({status: "published"}).sort({ createdAt: -1 })
       .populate({ path: "reviews", populate: { path: "author" } })
       .populate({ path: "comments", populate: { path: "author" } })
       .populate("author");

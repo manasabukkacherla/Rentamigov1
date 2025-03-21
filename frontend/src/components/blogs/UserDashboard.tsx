@@ -2,19 +2,22 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import ProfileSection from "../Blogs/Dashboard/ProfileSection"
-import StatisticsSection from "../Blogs/Dashboard/StatisticsSection"
-import RecentBlogsSection from "../Blogs/Dashboard/RecentBlogsSection"
-import BlogManagementSection from "../Blogs/Dashboard/BlogManagementSection"
-import DashboardNavigation from "../Blogs/Dashboard/DashboardNavigation"
-import { getAllBlogs } from "../Blogs/blogService1"
-import { Link } from "react-router-dom"
+import ProfileSection from "../blogs/Dashboard/ProfileSection"
+import StatisticsSection from "../blogs/Dashboard/StatisticsSection"
+import RecentBlogsSection from "../blogs/Dashboard/RecentBlogsSection"
+import BlogManagementSection from "../blogs/Dashboard/BlogManagementSection"
+import DashboardNavigation from "../blogs/Dashboard/DashboardNavigation"
+import { getAllBlogs } from "../blogs/blogService1"
+import { Link, useNavigate } from "react-router-dom"
 import { PenSquare, RefreshCw } from 'lucide-react'
+import axios from "axios"
+import { toast } from "react-toastify"
 
 const UserDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "blogs" | "stats" | "settings">("overview")
   const [userBlogs, setUserBlogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   // Mock user data
   const user = {
@@ -52,21 +55,40 @@ const UserDashboard: React.FC = () => {
     loadBlogs()
   }, [])
 
-  const loadBlogs = () => {
-    setIsLoading(true)
-    // Get blogs from service
-    const blogs = getAllBlogs()
+  const loadBlogs = async () => {
+    try {
+      setIsLoading(true)
+      const user = sessionStorage.getItem('user')
+      if(!user) {
+        toast.error('Login First!!')
+        navigate('/login')
+        return
+      }
+      const author = JSON.parse(user).id;
 
-    // Transform blogs to include status and last edited
-    const transformedBlogs = blogs.map((blog) => ({
-      ...blog,
-      status: Math.random() > 0.3 ? "published" : "draft",
-      views: blog.views || Math.floor(Math.random() * 10000),
-      lastEdited: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
-    }))
+      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
+      console.log(response.data)
+      setUserBlogs(response.data.blogs)
 
-    setUserBlogs(transformedBlogs)
-    setIsLoading(false)
+      setIsLoading(false)
+    } catch (error) {
+      
+    }
+
+    // setIsLoading(true)
+    // // Get blogs from service
+    // const blogs = getAllBlogs()
+
+    // // Transform blogs to include status and last edited
+    // const transformedBlogs = blogs.map((blog) => ({
+    //   ...blog,
+    //   status: Math.random() > 0.3 ? "published" : "draft",
+    //   views: blog.views || Math.floor(Math.random() * 10000),
+    //   lastEdited: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
+    // }))
+
+    // setUserBlogs(transformedBlogs)
+    // setIsLoading(false)
   }
 
   // Add event listener to handle the custom event for switching tabs
@@ -127,7 +149,7 @@ const UserDashboard: React.FC = () => {
                   </div>
                 )}
 
-                {activeTab === "blogs" && <BlogManagementSection blogs={userBlogs} />}
+                {activeTab === "blogs" && <BlogManagementSection />}
 
                 {activeTab === "stats" && (
                   <div className="bg-white rounded-lg shadow-md p-6">
