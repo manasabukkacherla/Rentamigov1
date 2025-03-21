@@ -115,18 +115,7 @@ const Headerr: React.FC = () => {
                 Sign In
               </Link>
             </motion.div>
-            {/* <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.7 }}
-            >
-              <Link
-                to="/Signup"
-                className="bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Sign Up
-              </Link>
-            </motion.div> */}
+            
           </div>
 
           {/* Mobile Menu Button */}
@@ -228,19 +217,6 @@ const Headerr: React.FC = () => {
                       Sign In
                     </Link>
                   </motion.div>
-                  {/* <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: (navLinks.length + legalLinks.length + 1) * 0.1 }}
-                  >
-                    <Link
-                      to="/Signup"
-                      className="bg-black hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg text-center transition-colors no-underline"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  </motion.div> */}
                 </div>
               </nav>
             </div>
