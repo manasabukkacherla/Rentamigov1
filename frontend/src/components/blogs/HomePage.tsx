@@ -39,7 +39,7 @@ interface Comment {
   author: User;
   comment: string;
   createdAt: string;
-  likes: number
+  likes: string[]
 }
 
 interface User {
@@ -53,7 +53,7 @@ interface Review {
   comment: string,
   rating: number,
   createdAt: string,
-  likes: number
+  likes: string[]
 }
 
 const HomePage = () => {

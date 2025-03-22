@@ -39,6 +39,7 @@ import commentsRouter from "./routes/blogs/commentsRouter";
 import reviewRouter from "./routes/blogs/reviewRoutes";
 import likesRouter from "./routes/blogs/likesRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
+import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 
 dotenv.config();
 
@@ -96,6 +97,7 @@ app.use("/api/blog", blogRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/comments", commentsRouter);
 app.use("/api/likes", likesRouter)
+app.use("/api/stats", BlogStats)
 app.use('/api/payment', paymentRoutes); 
 
 // Basic route

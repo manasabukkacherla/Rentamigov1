@@ -1,6 +1,7 @@
 import express, { Response } from 'express';
 import Blog from '../../models/blogs/blogsModel';
 import { ParamsDictionary } from 'express-serve-static-core';
+import BlogStatistics from '../../models/blogs/BlogStatisticsModel';
 
 interface CustomRequest<T = ParamsDictionary, U = any, V = any> extends express.Request<T, U, V> {
   user?: {
@@ -51,6 +52,15 @@ export const createBlog = async (
       status
     });
 
+    const stats = await BlogStatistics.findOne({userId: author})
+    if(!stats) {
+      console.log("No stat found")
+      const newStat = new BlogStatistics({
+        userId: author
+      })
+      await newStat.save()
+    }
+
     const message = status==="published"?"Blog created succesfully!":"Blog drafted successfully"
 
     await newBlog.save();
@@ -64,7 +74,7 @@ export const createBlog = async (
 export const editBlog = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, excerpt, content, media, tags, category, readTime } = req.body;
+    const { title, excerpt, content, media, tags, category, readTime, status } = req.body;
 
     const blog = await Blog.findById(id);
     if (!blog) {
@@ -81,6 +91,7 @@ export const editBlog = async (req: CustomRequest, res: Response): Promise<void>
     if (tags) blog.tags = tags;
     if (category) blog.category = category;
     if (readTime) blog.readTime = readTime;
+    blog.status = status
 
     await blog.save();
     res.status(200).json({ success: true, blog });
@@ -155,7 +166,7 @@ const listBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
 const getUsersBlogs = async (req: CustomRequest, res: Response): Promise<void> => {
   try {
     const { userId } = req.params
-    const blogs = await Blog.find({ author: userId })
+    const blogs = await Blog.find({ author: userId }).sort({ createdAt: -1 })
       .populate({ path: "reviews", populate: { path: "author" } })
       .populate({ path: "comments", populate: { path: "author" } });
 

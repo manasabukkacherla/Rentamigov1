@@ -35,7 +35,7 @@ const CreateBlogPage = () => {
   const [readTime, setReadTime] = useState(5);
   // const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<("published" | "draft")>('draft');
 
   const navigate = useNavigate();
   const isEditing = window.location.pathname.includes('edit');
@@ -117,93 +117,6 @@ const CreateBlogPage = () => {
     },
   })
 
-  // // Auto-save functionality
-  // const handleAutoSave = () => {
-  //   setIsSaving(true)
-  //   // Simulate saving to localStorage
-  //   const blogData = {
-  //     title,
-  //     content,
-  //     excerpt,
-  //     tags,
-  //     coverImage,
-  //     category,
-  //     readTime,
-  //   }
-  //   // localStorage.setItem("blog_draft", JSON.stringify(blogData))
-
-  //   setTimeout(() => {
-  //     setIsSaving(false)
-  //     setAutoSaveMessage("Draft saved automatically")
-
-  //     // Clear the message after 3 seconds
-  //     setTimeout(() => {
-  //       setAutoSaveMessage("")
-  //     }, 3000)
-  //   }, 1000)
-  // }
-
-  // Load blog data if editing
-  // useEffect(() => {
-  //   const loadData = async () => {
-  //     if (isEditing && id) {
-  //       try {
-  //         const response = await axios.get(`http://localhost:8000/api/blog/${id}`)
-  //         if(response.data.success) {
-  //           let blog = response.data.blog
-  //           if (blog) {
-  //             setTitle(blog.title)
-  //             setContent(blog.content)
-  //             setExcerpt(blog.excerpt || "")
-  //             setTags(blog.tags)
-  //             setCoverImage(blog.coverImage)
-  //             setCategory(blog.category)
-  //             setReadTime(blog.readTime)
-  //             setStatus(blog.status)
-      
-  //             // Update editor content
-  //             if (editor) {
-  //               editor.commands.setContent(blog.content)
-  //             }
-      
-  //             // Set active step to content to make it easier to edit
-  //             // setActiveStep(1)
-  //           }
-  //         }
-          
-  //       } catch (error) {
-  //         toast.error('Blog not found!')
-  //       }
-  //     } 
-  //   }
-
-  //   loadData()
-    
-  //   // else {
-  //   //   // Check for saved draft
-  //   //   const savedDraft = localStorage.getItem("blog_draft")
-  //   //   if (savedDraft) {
-  //   //     try {
-  //   //       const draftData = JSON.parse(savedDraft)
-  //   //       setTitle(draftData.title || "")
-  //   //       setContent(draftData.content || "")
-  //   //       setExcerpt(draftData.excerpt || "")
-  //   //       setTags(draftData.tags || [])
-  //   //       setCoverImage(draftData.coverImage || null)
-  //   //       setCategory(draftData.category || "")
-  //   //       setReadTime(draftData.readTime || 5)
-
-  //   //       // Update editor content
-  //   //       if (editor && draftData.content) {
-  //   //         editor.commands.setContent(draftData.content)
-  //   //       }
-  //   //     } catch (error) {
-  //   //       console.error("Error loading draft:", error)
-  //   //     }
-  //   //   }
-  //   // }
-  // }, [isEditing, id, editor])
-
   useEffect(() => {
     const loadData = async () => {
       if (isEditing && id) {
@@ -213,11 +126,11 @@ const CreateBlogPage = () => {
             let blog = response.data.blog;
             if (blog) {
               // Check if the blog is published
-              if (blog.status === 'published') {
-                toast.error('Published posts cannot be edited');
-                navigate('/blogs/Dashboard');
-                return;
-              }
+              // if (blog.status === 'published') {
+              //   toast.error('Published posts cannot be edited');
+              //   navigate('/blogs/Dashboard');
+              //   return;
+              // }
 
               setTitle(blog.title);
               setContent(blog.content);
@@ -327,7 +240,7 @@ const CreateBlogPage = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, submitStatus: "draft" | "published") => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -360,11 +273,11 @@ const CreateBlogPage = () => {
           category,
           readTime,
           author,
-          status
+          status: submitStatus
         };
 
-        console.log(blogData)
-        console.log(status)
+        // console.log(blogData)
+        // console.log(status)
 
         if (isEditing && id) {
           const response = await axios.put(`http://localhost:8000/api/blog/edit/${id}`, blogData);
@@ -950,8 +863,10 @@ const CreateBlogPage = () => {
                         type="button"
                         onClick={() => {
                           setStatus('draft');
-                          handleSubmit(new Event('submit') as any);
+                          handleSubmit(new Event('submit') as any, "draft")
+                          // handleSubmit(new Event('submit') as any);
                         }}
+                        // onClick={handleDraft}
                         disabled={isSubmitting}
                         className={`inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                           }`}
@@ -964,7 +879,7 @@ const CreateBlogPage = () => {
                         type="button"
                         onClick={() => {
                           setStatus('published');
-                          handleSubmit(new Event('submit') as any);
+                          handleSubmit(new Event('submit') as any, "published");
                         }}
                         disabled={isSubmitting}
                         className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
