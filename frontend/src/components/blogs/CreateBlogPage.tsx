@@ -20,23 +20,49 @@ import { motion, AnimatePresence } from "framer-motion"
 import axios from "axios"
 import { toast } from "react-toastify"
 
-const CreateBlogPage = () => {
-  const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const isEditing = !!id
+// interface CreateBlog {
+//   isEditing: boolean
+// }
 
-  // Form state
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
-  const [excerpt, setExcerpt] = useState("")
-  const [tags, setTags] = useState<string[]>([])
+// const CreateBlogPage: React.FC<CreateBlog> = ({ isEditing }) => {
+const CreateBlogPage = () => {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [excerpt, setExcerpt] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [coverImage, setCoverImage] = useState('');
+  const [category, setCategory] = useState('');
+  const [readTime, setReadTime] = useState(5);
+  // const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<("published" | "draft")>('draft');
+
+  const navigate = useNavigate();
+  const isEditing = window.location.pathname.includes('edit');
+  const id = isEditing ? window.location.pathname.split('/').pop() : null;
+
+  // const validateForm = () => {
+  //   const newErrors = {};
+  //   // Add validation logic here
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
+  // const navigate = useNavigate()
+  // const { id } = useParams<{ id: string }>()
+  // const isEditing = !!id
+
+  // // Form state
+  // const [title, setTitle] = useState("")
+  // const [content, setContent] = useState("")
+  // const [excerpt, setExcerpt] = useState("")
+  // const [tags, setTags] = useState<string[]>([])
   const [currentTag, setCurrentTag] = useState("")
-  const [coverImage, setCoverImage] = useState<string | null>(null)
-  const [category, setCategory] = useState("Lifestyle")
-  const [readTime, setReadTime] = useState(5)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  // const [coverImage, setCoverImage] = useState<string | null>(null)
+  // const [category, setCategory] = useState("Lifestyle")
+  // const [readTime, setReadTime] = useState(5)
+  // const [isSubmitting, setIsSubmitting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const [successMessage, setSuccessMessage] = useState("")
+  // const [successMessage, setSuccessMessage] = useState("")
 
   // UI state
   const [activeStep, setActiveStep] = useState(0)
@@ -91,79 +117,45 @@ const CreateBlogPage = () => {
     },
   })
 
-  // // Auto-save functionality
-  // const handleAutoSave = () => {
-  //   setIsSaving(true)
-  //   // Simulate saving to localStorage
-  //   const blogData = {
-  //     title,
-  //     content,
-  //     excerpt,
-  //     tags,
-  //     coverImage,
-  //     category,
-  //     readTime,
-  //   }
-  //   // localStorage.setItem("blog_draft", JSON.stringify(blogData))
-
-  //   setTimeout(() => {
-  //     setIsSaving(false)
-  //     setAutoSaveMessage("Draft saved automatically")
-
-  //     // Clear the message after 3 seconds
-  //     setTimeout(() => {
-  //       setAutoSaveMessage("")
-  //     }, 3000)
-  //   }, 1000)
-  // }
-
-  // Load blog data if editing
   useEffect(() => {
-    if (isEditing && id) {
-      const blogId = Number.parseInt(id)
-      const blog = getBlogById(blogId)
-
-      if (blog) {
-        setTitle(blog.title)
-        setContent(blog.content)
-        setExcerpt(blog.excerpt || "")
-        setTags(blog.tags)
-        setCoverImage(blog.coverImage)
-        setCategory(blog.category)
-        setReadTime(blog.readTime)
-
-        // Update editor content
-        if (editor) {
-          editor.commands.setContent(blog.content)
-        }
-
-        // Set active step to content to make it easier to edit
-        setActiveStep(1)
-      }
-    } else {
-      // Check for saved draft
-      const savedDraft = localStorage.getItem("blog_draft")
-      if (savedDraft) {
+    const loadData = async () => {
+      if (isEditing && id) {
         try {
-          const draftData = JSON.parse(savedDraft)
-          setTitle(draftData.title || "")
-          setContent(draftData.content || "")
-          setExcerpt(draftData.excerpt || "")
-          setTags(draftData.tags || [])
-          setCoverImage(draftData.coverImage || null)
-          setCategory(draftData.category || "Lifestyle")
-          setReadTime(draftData.readTime || 5)
+          const response = await axios.get(`http://localhost:8000/api/blog/${id}`);
+          if (response.data.success) {
+            let blog = response.data.blog;
+            if (blog) {
+              // Check if the blog is published
+              // if (blog.status === 'published') {
+              //   toast.error('Published posts cannot be edited');
+              //   navigate('/blogs/Dashboard');
+              //   return;
+              // }
 
-          // Update editor content
-          if (editor && draftData.content) {
-            editor.commands.setContent(draftData.content)
+              setTitle(blog.title);
+              setContent(blog.content);
+              setExcerpt(blog.excerpt || '');
+              setTags(blog.tags);
+              setCoverImage(blog.coverImage);
+              setCategory(blog.category);
+              setReadTime(blog.readTime);
+              setStatus(blog.status);
+
+              // Update editor content
+              if (editor) {
+                editor.commands.setContent(blog.content);
+              }
+            }
           }
         } catch (error) {
-          console.error("Error loading draft:", error)
+          toast.error('Blog not found!');
+          navigate('/blogs/Dashboard');
         }
       }
-    }
-  }, [isEditing, id, editor])
+    };
+
+    loadData();
+  }, [isEditing, id, editor, navigate]);
 
   // Scroll to preview when toggled
   useEffect(() => {
@@ -248,30 +240,28 @@ const CreateBlogPage = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  // console.log(sessionStorage.getItem('user'))
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSubmit = async (e: React.FormEvent, submitStatus: "draft" | "published") => {
+    e.preventDefault();
 
     if (!validateForm()) {
-      // Scroll to the first error
-      const firstError = Object.keys(errors)[0]
-      const element = document.getElementById(firstError)
+      const firstError = Object.keys(errors)[0];
+      const element = document.getElementById(firstError);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" })
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
       }
-      return
+      return;
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
 
     try {
       const user = sessionStorage.getItem('user');
-      console.log(sessionStorage.getItem('user'))
+      console.log(sessionStorage.getItem('user'));
 
       if (user) {
         const author = JSON.parse(user).id;
-        console.log(author); 
-        
+        console.log(author);
+
         const blogData = {
           title,
           content,
@@ -282,28 +272,41 @@ const CreateBlogPage = () => {
           },
           category,
           readTime,
-          author
-          // date: new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }),
-        }
-  
-        const response = await axios.post('http://localhost:8000/api/blog/add', blogData)
-        // console.log(response)
-        if (response.data.success) {
-          // console.log(response.data)
-          toast.success(response.data.message)
+          author,
+          status: submitStatus
+        };
+
+        // console.log(blogData)
+        // console.log(status)
+
+        if (isEditing && id) {
+          const response = await axios.put(`http://localhost:8000/api/blog/edit/${id}`, blogData);
+          if (response.data.success) {
+            toast.success("Blog updated successfully");
+          } else {
+            toast.error("Failed to update the blog");
+          }
         } else {
-          toast.error("Failed to create a blog")
+          const response = await axios.post('http://localhost:8000/api/blog/add', blogData);
+          if (response.data.success) {
+            toast.success(response.data.message);
+          } else {
+            toast.error("Failed to create a blog");
+          }
         }
-  
-        navigate('/blogs')
+
+        navigate('/blogs/Dashboard');
+      } else {
+        toast.error("You must be logged in!");
+        navigate('/login');
       }
     } catch (error) {
-      console.error("Error saving blog:", error)
-      setErrors({ submit: "Failed to save blog. Please try again." })
+      console.error("Error saving blog:", error);
+      setErrors({ submit: "Failed to save blog. Please try again." });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const addImageToEditor = (url: string) => {
     if (editor) {
@@ -343,16 +346,16 @@ const CreateBlogPage = () => {
   }
 
   // Calculate estimated read time based on content length
-  useEffect(() => {
-    if (content) {
-      // Average reading speed: 200-250 words per minute
-      // Strip HTML tags and count words
-      const text = content.replace(/<[^>]*>/g, "")
-      const wordCount = text.split(/\s+/).filter(Boolean).length
-      const estimatedTime = Math.max(1, Math.ceil(wordCount / 200))
-      setReadTime(estimatedTime)
-    }
-  }, [content])
+  // useEffect(() => {
+  //   if (content) {
+  //     // Average reading speed: 200-250 words per minute
+  //     // Strip HTML tags and count words
+  //     const text = content.replace(/<[^>]*>/g, "")
+  //     const wordCount = text.split(/\s+/).filter(Boolean).length
+  //     const estimatedTime = Math.max(1, Math.ceil(wordCount / 200))
+  //     setReadTime(estimatedTime)
+  //   }
+  // }, [content])
 
   // Format date for preview
   const formattedDate = new Date().toLocaleDateString("en-US", {
@@ -403,7 +406,7 @@ const CreateBlogPage = () => {
           </div>
         </div>
 
-        {successMessage && (
+        {/* {successMessage && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -412,7 +415,7 @@ const CreateBlogPage = () => {
             <Check className="h-5 w-5 text-green-500 mr-2" />
             <p className="text-green-700">{successMessage}</p>
           </motion.div>
-        )}
+        )} */}
 
         {errors.submit && (
           <motion.div
@@ -637,7 +640,7 @@ const CreateBlogPage = () => {
                             </button>
                             <button
                               type="button"
-                              onClick={() => setCoverImage(null)}
+                              onClick={() => setCoverImage("null")}
                               className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600"
                             >
                               <X size={20} />
@@ -814,9 +817,70 @@ const CreateBlogPage = () => {
                     </div>
 
                     {/* Submit Button */}
-                    <div className="flex justify-end">
+                    {/* <div className="flex justify-end">
                       <button
                         type="submit"
+                        disabled={isSubmitting}
+                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                          }`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <svg
+                              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                            {isEditing ? "Updating..." : "Publishing..."}
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-5 w-5" />
+                            {isEditing ? "Update Post" : "Publish Post"}
+                          </>
+                        )}
+                      </button>
+                    </div> */}
+
+                    {/* Submit Buttons */}
+                    <div className="flex justify-end space-x-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStatus('draft');
+                          handleSubmit(new Event('submit') as any, "draft")
+                          // handleSubmit(new Event('submit') as any);
+                        }}
+                        // onClick={handleDraft}
+                        disabled={isSubmitting}
+                        className={`inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                          }`}
+                      >
+                        <Save className="mr-2 h-5 w-5" />
+                        Save as Draft
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStatus('published');
+                          handleSubmit(new Event('submit') as any, "published");
+                        }}
                         disabled={isSubmitting}
                         className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
                           }`}

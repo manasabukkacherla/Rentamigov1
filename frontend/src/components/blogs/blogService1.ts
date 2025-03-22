@@ -75,15 +75,15 @@ export const deleteBlog = (id: number): boolean => {
 }
 
 // Increment view count
-export const incrementViews = (id: number): void => {
-  const blogs = getAllBlogs()
-  const blog = blogs.find((blog) => blog.id === id)
+// export const incrementViews = (id: number): void => {
+//   const blogs = getAllBlogs()
+//   const blog = blogs.find((blog) => blog.id === id)
 
-  if (blog) {
-    blog.views = (blog.views || 0) + 1
-    localStorage.setItem("blogs", JSON.stringify(blogs))
-  }
-}
+//   if (blog) {
+//     blog.views = (blog.views || 0) + 1
+//     localStorage.setItem("blogs", JSON.stringify(blogs))
+//   }
+// }
 
 // Toggle like
 export const toggleLike = (id: number): Blogpost | undefined => {

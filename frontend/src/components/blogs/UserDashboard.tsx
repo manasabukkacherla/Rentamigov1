@@ -2,19 +2,44 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import ProfileSection from "../Blogs/Dashboard/ProfileSection"
-import StatisticsSection from "../Blogs/Dashboard/StatisticsSection"
-import RecentBlogsSection from "../Blogs/Dashboard/RecentBlogsSection"
-import BlogManagementSection from "../Blogs/Dashboard/BlogManagementSection"
-import DashboardNavigation from "../Blogs/Dashboard/DashboardNavigation"
-import { getAllBlogs } from "../Blogs/blogService1"
-import { Link } from "react-router-dom"
+import ProfileSection from "../blogs/Dashboard/ProfileSection"
+import StatisticsSection from "../blogs/Dashboard/StatisticsSection"
+import RecentBlogsSection from "../blogs/Dashboard/RecentBlogsSection"
+import BlogManagementSection from "../blogs/Dashboard/BlogManagementSection"
+import DashboardNavigation from "../blogs/Dashboard/DashboardNavigation"
+import { getAllBlogs } from "../blogs/blogService1"
+import { Link, useNavigate } from "react-router-dom"
 import { PenSquare, RefreshCw } from 'lucide-react'
+import axios from "axios"
+import { toast } from "react-toastify"
+
+interface StatisticsData {
+  totalBlogs: number;
+  totalViews: number;
+  totalLikes: number;
+  totalComments: number;
+  viewsThisMonth: number;
+  likesThisMonth: number;
+  commentsThisMonth: number;
+  previousViews: number;
+  previousLikes: number;
+  previousComments: number;
+  growthRateViews: number;
+  growthRateLikes: number;
+  growthRateComments: number;
+  mostViewedBlog: string;
+  mostLikedBlog: string;
+  mostCommentedBlog: string;
+  publishedBlogs: number;
+  drafts: number;
+  averageWordCount: number;
+}
 
 const UserDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "blogs" | "stats" | "settings">("overview")
   const [userBlogs, setUserBlogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
 
   // Mock user data
   const user = {
@@ -34,39 +59,58 @@ const UserDashboard: React.FC = () => {
   }
 
   // Mock statistics
-  const stats = {
-    totalBlogs: 24,
-    totalViews: 45892,
-    totalLikes: 2134,
-    totalComments: 847,
-    viewsThisMonth: 5280,
-    likesThisMonth: 312,
-    commentsThisMonth: 98,
-    mostViewedBlog: "Modern Luxury Villa with Ocean View",
-    mostLikedBlog: "Urban Loft in Downtown District",
-    mostCommentedBlog: "Charming Cottage in the Countryside",
-  }
+  // const stats = {
+  //   totalBlogs: 24,
+  //   totalViews: 45892,
+  //   totalLikes: 2134,
+  //   totalComments: 847,
+  //   viewsThisMonth: 5280,
+  //   likesThisMonth: 312,
+  //   commentsThisMonth: 98,
+  //   mostViewedBlog: "Modern Luxury Villa with Ocean View",
+  //   mostLikedBlog: "Urban Loft in Downtown District",
+  //   mostCommentedBlog: "Charming Cottage in the Countryside",
+  // }
 
   // Load blogs from service
   useEffect(() => {
     loadBlogs()
   }, [])
 
-  const loadBlogs = () => {
-    setIsLoading(true)
-    // Get blogs from service
-    const blogs = getAllBlogs()
+  const loadBlogs = async () => {
+    try {
+      setIsLoading(true)
+      const user = sessionStorage.getItem('user')
+      if(!user) {
+        toast.error('Login First!!')
+        navigate('/login')
+        return
+      }
+      const author = JSON.parse(user).id;
 
-    // Transform blogs to include status and last edited
-    const transformedBlogs = blogs.map((blog) => ({
-      ...blog,
-      status: Math.random() > 0.3 ? "published" : "draft",
-      views: blog.views || Math.floor(Math.random() * 10000),
-      lastEdited: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
-    }))
+      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
+      // console.log(response.data)
+      setUserBlogs(response.data.blogs)
 
-    setUserBlogs(transformedBlogs)
-    setIsLoading(false)
+      setIsLoading(false)
+    } catch (error) {
+      
+    }
+
+    // setIsLoading(true)
+    // // Get blogs from service
+    // const blogs = getAllBlogs()
+
+    // // Transform blogs to include status and last edited
+    // const transformedBlogs = blogs.map((blog) => ({
+    //   ...blog,
+    //   status: Math.random() > 0.3 ? "published" : "draft",
+    //   views: blog.views || Math.floor(Math.random() * 10000),
+    //   lastEdited: new Date(Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toLocaleDateString(),
+    // }))
+
+    // setUserBlogs(transformedBlogs)
+    // setIsLoading(false)
   }
 
   // Add event listener to handle the custom event for switching tabs
@@ -81,6 +125,33 @@ const UserDashboard: React.FC = () => {
       window.removeEventListener('switchToBlogsTab', handleSwitchToBlogsTab);
     };
   }, []);
+
+  const [stats, setStats] = useState<StatisticsData | null>(null);
+
+  useEffect(() => {
+    // Replace the URL with your actual backend API endpoint
+    const fetchStats = async () => {
+      try {
+        const user = sessionStorage.getItem('user');
+
+        if (user) {
+          const author = JSON.parse(user).id;
+          const response = await axios.get(`http://localhost:8000/api/stats/${author}`);
+
+          setStats(response.data); // Store the fetched data
+          // console.log(stats)
+        }
+      } catch (error) {
+        console.error("Error fetching stats:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  if (!stats) {
+    return <div>Loading...</div>; // Show loading message until data is fetched
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -122,12 +193,12 @@ const UserDashboard: React.FC = () => {
                 {activeTab === "overview" && (
                   <div className="space-y-8">
                     <ProfileSection user={user} />
-                    <StatisticsSection stats={stats} />
+                    <StatisticsSection />
                     <RecentBlogsSection blogs={userBlogs.slice(0, 3)} />
                   </div>
                 )}
 
-                {activeTab === "blogs" && <BlogManagementSection blogs={userBlogs} />}
+                {activeTab === "blogs" && <BlogManagementSection />}
 
                 {activeTab === "stats" && (
                   <div className="bg-white rounded-lg shadow-md p-6">
@@ -145,12 +216,12 @@ const UserDashboard: React.FC = () => {
                           <div className="flex justify-between">
                             <span className="text-gray-600">Published:</span>
                             <span className="font-bold">
-                              {userBlogs.filter((b) => b.status === "published").length}
+                              {stats.publishedBlogs}
                             </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Drafts:</span>
-                            <span className="font-bold">{userBlogs.filter((b) => b.status === "draft").length}</span>
+                            <span className="font-bold">{stats.drafts}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Avg. Word Count:</span>
@@ -164,15 +235,15 @@ const UserDashboard: React.FC = () => {
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Views:</span>
-                            <span className="font-bold">{stats.totalViews.toLocaleString()}</span>
+                            <span className="font-bold">{stats.totalViews}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Likes:</span>
-                            <span className="font-bold">{stats.totalLikes.toLocaleString()}</span>
+                            <span className="font-bold">{stats.totalLikes}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Comments:</span>
-                            <span className="font-bold">{stats.totalComments.toLocaleString()}</span>
+                            <span className="font-bold">{stats.totalComments}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Avg. Engagement Rate:</span>
@@ -186,7 +257,7 @@ const UserDashboard: React.FC = () => {
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">New Views:</span>
-                            <span className="font-bold text-green-600">+{stats.viewsThisMonth.toLocaleString()}</span>
+                            <span className="font-bold text-green-600">+{stats.viewsThisMonth}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">New Likes:</span>
@@ -229,7 +300,7 @@ const UserDashboard: React.FC = () => {
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
                           {userBlogs.slice(0, 5).map((blog) => (
-                            <tr key={blog.id}>
+                            <tr key={blog._id}>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm font-medium text-gray-900">{blog.title}</div>
                               </td>
@@ -237,14 +308,14 @@ const UserDashboard: React.FC = () => {
                                 <div className="text-sm text-gray-500">{blog.views?.toLocaleString()}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{blog.likes}</div>
+                                <div className="text-sm text-gray-500">{blog.likes.length}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{blog.comments}</div>
+                                <div className="text-sm text-gray-500">{blog.comments.length}</div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-500">
-                                  {(((blog.likes + blog.comments) / (blog.views || 1)) * 100).toFixed(1)}%
+                                  {(((blog.likes.length + blog.comments.length) / (blog.views || 1)) * 100).toFixed(1)}%
                                 </div>
                               </td>
                             </tr>
