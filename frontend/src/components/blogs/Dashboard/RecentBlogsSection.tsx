@@ -3,15 +3,50 @@ import { Link } from "react-router-dom"
 import { FileText, ArrowRight } from 'lucide-react'
 
 interface Blog {
-  id: number
-  title: string
-  coverImage: string
-  date: string
-  excerpt?: string
-  content: string
-  views?: number
-  likes: number
-  comments: number
+  _id: string,
+  title: string;
+  excerpt: string;
+  content: string;
+  media: {
+    coverImage: string;
+    images?: string[];
+  };
+  tags: string[];
+  category: string;
+  readTime: number;
+  author: User;
+  likes: number;
+  views: number;
+  shares: 0,
+  comments: Comment[]
+  reviews: Review[]
+  createdAt: Date;
+  updatedAt: Date;
+  userHasLiked: boolean
+}
+
+interface Comment {
+  _id: string;
+  author: User;
+  comment: string;
+  createdAt: string;
+  likes: string[];
+  userHasLiked?: boolean;
+}
+
+interface User {
+  _id: string;
+  fullName: string
+}
+
+interface Review {
+  _id: string,
+  author: User,
+  comment: string,
+  rating: number,
+  createdAt: string,
+  likes: string[];
+  userHasLiked?: boolean;
 }
 
 interface RecentBlogsSectionProps {
@@ -41,18 +76,18 @@ const RecentBlogsSection: React.FC<RecentBlogsSectionProps> = ({ blogs }) => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {blogs.map((blog) => (
           <Link
-            key={blog.id}
-            to={`/blogs/${blog.id}`}
+            key={blog._id}
+            to={`/blogs/${blog._id}`}
             className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition-shadow duration-200"
           >
-            <img src={blog.coverImage || "/placeholder.svg"} alt={blog.title} className="w-full h-40 object-cover" />
+            <img src={blog.media.coverImage || "/placeholder.svg"} alt={blog.title} className="w-full h-40 object-cover" />
             <div className="p-4">
               <h3 className="font-bold text-lg mb-2 line-clamp-1">{blog.title}</h3>
               <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                 {blog.excerpt || blog.content.substring(0, 120) + "..."}
               </p>
               <div className="flex justify-between text-sm text-gray-500">
-                <span>{blog.date}</span>
+                <span>{new Date(blog.updatedAt).toLocaleDateString()}</span>
                 <div className="flex items-center space-x-3">
                   <span>{blog.views?.toLocaleString() || 0} views</span>
                   <span>{blog.likes} likes</span>

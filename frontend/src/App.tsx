@@ -115,7 +115,8 @@ const App = () => {
             }
           />
           <Route path="/blogs" element={<HomePage />} />
-          <Route path="/blogs/Create" element={<CreateBlogPage />} />
+          <Route path="/blogs/Create" element={<CreateBlogPage/>} />
+          <Route path="/blogs/edit/:id" element={<CreateBlogPage />}/>
           {/* Dashboard Layout */}
           <Route path="/blogs/Dashboard" element={<UserDashboard />} />
           <Route path="/blogs/edit/:id" element={<EditorMenuBar editor={null} />} />
