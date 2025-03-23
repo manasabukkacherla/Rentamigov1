@@ -62,6 +62,7 @@ const BlogDetail: React.FC = () => {
   const [newReview, setNewReview] = useState("")
   const [rating, setRating] = useState(5)
   const [activeTab, setActiveTab] = useState<"comments" | "reviews">("comments")
+  const [isLoading, setIsloading] = useState(false);
 
   const navigate = useNavigate()
 
@@ -115,6 +116,8 @@ const BlogDetail: React.FC = () => {
           console.error("Error fetching blog:", error);
           toast.error('Something went wrong')
           setPost(null);
+        }finally {
+          setIsloading(false);
         }
       }
     };
@@ -384,11 +387,18 @@ const BlogDetail: React.FC = () => {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-12 w-full max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog post not found</h2>
-        <Link to="/blogs" className="text-black hover:text-grey-900 flex items-center">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to home
-        </Link>
+        {isLoading ? (<>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Blog</h2>
+        </>) : (<>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog post not found</h2>
+          <Link to="/blogs" className="text-black hover:text-grey-900 flex items-center">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to home
+          </Link>
+        </>)}
       </div>
     )
   }
