@@ -53,83 +53,60 @@ const Headerr: React.FC = () => {
   return (
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
+        scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
       }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center cursor-pointer"
-            onClick={() => navigate("/Homepage")}
-          >
+          <div className="flex items-center cursor-pointer" onClick={() => navigate("/Homepage")}>
             <img src="./images/rentamigologou.png" alt="Rentamigo Logo" className="h-10 w-10 object-contain" />
             <span className={`text-2xl font-bold ml-1 ${scrolled ? "text-black" : "text-white"}`}>entamigo</span>
-          </motion.div>
+          </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            {navLinks.map((link, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.1 }}
-              >
-                <Link
-                  to={link.path}
-                  className={`font-medium transition-colors relative no-underline ${
-                    activeLink === link.path
-                      ? "text-black"
-                      : scrolled
-                      ? "text-gray-800 hover:text-black"
-                      : "text-white hover:text-gray-200"
-                  }`}
-                  onClick={() => setActiveLink(link.path)}
-                >
-                  {link.name}
-                  {activeLink === link.path && (
-                    <motion.div className="absolute bottom-0 left-0 w-full h-0.5 bg-black" layoutId="underline" />
-                  )}
-                </Link>
-              </motion.div>
-            ))}
+          <nav className="hidden md:flex items-center">
+            <ul className="flex space-x-6">
+              {navLinks.map((link, index) => (
+                <li key={index}>
+                  <Link
+                    to={link.path}
+                    className={`font-medium transition-colors relative no-underline px-3 py-2 rounded-md ${
+                      activeLink === link.path
+                        ? scrolled
+                          ? "text-white bg-black"
+                          : "text-black bg-white"
+                        : scrolled
+                          ? "text-gray-800 hover:bg-gray-100"
+                          : "text-white hover:bg-gray-800"
+                    }`}
+                    onClick={() => setActiveLink(link.path)}
+                  >
+                    {link.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </nav>
 
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.6 }}
+            <Link
+              to="/Login"
+              className={`font-medium transition-colors no-underline px-4 py-2 rounded-md ${
+                scrolled ? "text-white bg-black hover:bg-gray-800" : "text-black bg-white hover:bg-gray-200"
+              }`}
             >
-              <Link
-                to="/Login"
-                className={`font-medium transition-colors no-underline ${
-                  scrolled ? "text-black hover:text-gray-700" : "text-white hover:text-gray-200"
-                }`}
-              >
-                Sign In
-              </Link>
-            </motion.div>
-            
+              Sign In
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="md:hidden text-black focus:outline-none"
-            onClick={toggleMenu}
-          >
+          <button className="md:hidden focus:outline-none" onClick={toggleMenu}>
             {isMenuOpen ? (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
+                className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -147,7 +124,7 @@ const Headerr: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             )}
-          </motion.button>
+          </button>
         </div>
       </div>
 
@@ -164,59 +141,41 @@ const Headerr: React.FC = () => {
             <div className="container mx-auto px-4 py-3">
               <nav className="flex flex-col space-y-3">
                 {navLinks.map((link, index) => (
-                  <motion.div
+                  <Link
                     key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                    to={link.path}
+                    className={`font-medium py-2 px-3 block transition-colors no-underline rounded-md ${
+                      activeLink === link.path ? "bg-black text-white" : "text-gray-800 hover:bg-gray-100"
+                    }`}
+                    onClick={() => {
+                      setActiveLink(link.path)
+                      setIsMenuOpen(false)
+                    }}
                   >
+                    {link.name}
+                  </Link>
+                ))}
+                <div className="border-t border-gray-200 my-2 pt-2">
+                  <p className="text-sm text-gray-500 mb-2 px-3">Legal</p>
+                  {legalLinks.map((link, index) => (
                     <Link
+                      key={index}
                       to={link.path}
-                      className={`font-medium py-2 block transition-colors no-underline ${
-                        activeLink === link.path ? "text-black font-bold" : "text-gray-800 hover:text-black"
-                      }`}
-                      onClick={() => {
-                        setActiveLink(link.path)
-                        setIsMenuOpen(false)
-                      }}
+                      className="font-medium text-gray-800 hover:bg-gray-100 py-2 px-3 block transition-colors no-underline rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
                     >
                       {link.name}
                     </Link>
-                  </motion.div>
-                ))}
-                <div className="border-t border-gray-200 my-2 pt-2">
-                  <p className="text-sm text-gray-500 mb-2">Legal</p>
-                  {legalLinks.map((link, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3, delay: (navLinks.length + index) * 0.1 }}
-                    >
-                      <Link
-                        to={link.path}
-                        className="font-medium text-gray-800 hover:text-black py-2 block transition-colors no-underline"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        {link.name}
-                      </Link>
-                    </motion.div>
                   ))}
                 </div>
-                <div className="flex flex-col space-y-3 pt-2">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.3, delay: (navLinks.length + legalLinks.length) * 0.1 }}
+                <div className="pt-2 border-t border-gray-200">
+                  <Link
+                    to="/Login"
+                    className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-2 px-3 block rounded-md"
+                    onClick={() => setIsMenuOpen(false)}
                   >
-                    <Link
-                      to="/Login"
-                      className="font-medium text-black hover:text-gray-700 transition-colors no-underline"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      Sign In
-                    </Link>
-                  </motion.div>
+                    Sign In
+                  </Link>
                 </div>
               </nav>
             </div>
@@ -228,3 +187,4 @@ const Headerr: React.FC = () => {
 }
 
 export default Headerr
+

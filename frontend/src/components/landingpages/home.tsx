@@ -4,9 +4,69 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import Header from "./headerr"
 import Footer from "./Footer"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import BlogList from "../blogs/BlogList"
 import { motion } from "framer-motion"
+
+// Location Selection Modal Component
+const LocationModal = ({
+  isOpen,
+  onClose,
+  onSelectLocation,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  onSelectLocation: (location: string) => void
+}) => {
+  const locations = ["Bangalore", "Mumbai", "Delhi", "Hyderabad", "Chennai", "Kolkata", "Pune", "Ahmedabad"]
+
+  if (!isOpen) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-2xl font-bold">Select Your Location</h3>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {locations.map((location) => (
+              <button
+                key={location}
+                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                onClick={() => onSelectLocation(location)}
+              >
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    ></path>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    ></path>
+                  </svg>
+                  {location}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 // Property Slider Component
 const PropertySlider = () => {
@@ -167,7 +227,7 @@ const PropertySlider = () => {
 // Stats Counter Component
 const StatsCounter = ({ value, label }: { value: string; label: string }) => {
   return (
-    <div className="text-center">
+    <div className="text-center p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
       <h3 className="text-4xl font-bold mb-2">{value}</h3>
       <p className="text-gray-600">{label}</p>
     </div>
@@ -182,7 +242,7 @@ const Testimonial = ({
   image,
 }: { quote: string; author: string; role: string; image: string }) => {
   return (
-    <div className="bg-white p-8 rounded-xl shadow-lg">
+    <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
       <div className="flex items-center mb-6">
         <img src={image || "/placeholder.svg"} alt={author} className="w-16 h-16 rounded-full object-cover mr-4" />
         <div>
@@ -211,6 +271,9 @@ const Testimonial = ({
 const Homepage: React.FC = () => {
   const [allBlogs, setAllBlogs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     // Use mock data with proper image URLs
@@ -284,6 +347,13 @@ const Homepage: React.FC = () => {
     setLoading(false)
   }, [])
 
+  const handleLocationSelect = (location: string) => {
+    setSelectedLocation(location)
+    setIsLocationModalOpen(false)
+    // Redirect to properties page with location parameter
+    navigate(`/Tenanthome?location=${location}`)
+  }
+
   // Animation variants for scroll animations
   const fadeInUp = {
     hidden: { opacity: 0, y: 60 },
@@ -291,19 +361,46 @@ const Homepage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
 
+      {/* Location Selection Modal */}
+      <LocationModal
+        isOpen={isLocationModalOpen}
+        onClose={() => setIsLocationModalOpen(false)}
+        onSelectLocation={handleLocationSelect}
+      />
+
       {/* Hero Section with Property Slider */}
-      <section className="pt-16 bg-black">
+      <section className="pt-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4 py-10">
           <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="text-center mb-10">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
               Find Your <span className="text-gray-300">Perfect</span> Home
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
               Discover thousands of properties that match your preferences and budget
             </p>
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition duration-300 flex items-center mx-auto"
+            >
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                ></path>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+              </svg>
+              Select Your Location
+            </button>
           </motion.div>
 
           <PropertySlider />
@@ -347,7 +444,7 @@ const Homepage: React.FC = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-gray-100">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
             initial="hidden"
@@ -365,7 +462,7 @@ const Homepage: React.FC = () => {
       </section>
 
       {/* Features Section with Creative Design */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="py-20 bg-gray-50 relative overflow-hidden">
         {/* Decorative Elements */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-gray-100 rounded-full opacity-50"></div>
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-gray-100 rounded-full opacity-50"></div>
@@ -476,7 +573,7 @@ const Homepage: React.FC = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-gray-100">
+      <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.div
             initial="hidden"
@@ -538,7 +635,7 @@ const Homepage: React.FC = () => {
       </section>
 
       {/* Latest Blogs Section with Enhanced Design */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-gray-50">
         <div className="container mx-auto px-4">
           <motion.div
             initial="hidden"
