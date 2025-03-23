@@ -58,21 +58,7 @@ const UserDashboard: React.FC = () => {
     },
   }
 
-  // Mock statistics
-  // const stats = {
-  //   totalBlogs: 24,
-  //   totalViews: 45892,
-  //   totalLikes: 2134,
-  //   totalComments: 847,
-  //   viewsThisMonth: 5280,
-  //   likesThisMonth: 312,
-  //   commentsThisMonth: 98,
-  //   mostViewedBlog: "Modern Luxury Villa with Ocean View",
-  //   mostLikedBlog: "Urban Loft in Downtown District",
-  //   mostCommentedBlog: "Charming Cottage in the Countryside",
-  // }
-
-  // Load blogs from service
+ 
   useEffect(() => {
     loadBlogs()
   }, [])

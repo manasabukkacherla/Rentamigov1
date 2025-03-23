@@ -1,118 +1,328 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
-import { MapPin, Globe, Twitter, Instagram, Linkedin, Edit } from "lucide-react"
+import { useState, useEffect } from "react"
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building,
+  Edit2,
+  Save,
+  X,
+  Shield,
+  Sun,
+  Moon,
+  Sparkles,
+} from "lucide-react"
 
-interface User {
-  name: string
+interface UserProfile {
+  username: string
+  fullName: string
   email: string
+  phone: string
+  address: string
+  city: string
+  state: string
+  role: "owner" | "agent" | "tenant" | "pg" | "employee" | "admin"
   joinDate: string
-  bio: string
   avatar: string
-  location: string
-  website: string
-  socialLinks: {
-    twitter: string
-    instagram: string
-    linkedin: string
-  }
+  bio: string
 }
 
 interface ProfileSectionProps {
-  user: User
+  user: UserProfile
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
   const [isEditing, setIsEditing] = useState(false)
-  const [editedBio, setEditedBio] = useState(user.bio)
+  const [editedUser, setEditedUser] = useState<UserProfile>({ ...user })
+  const [theme, setTheme] = useState<"light" | "dark">("light")
+  const [animateAvatar, setAnimateAvatar] = useState(false)
 
-  const handleSaveBio = () => {
-    // In a real app, you would save this to the backend
+  useEffect(() => {
+    if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark")
+    }
+
+    setTimeout(() => setAnimateAvatar(true), 500)
+  }, [])
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"))
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setEditedUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSave = () => {
     setIsEditing(false)
-    // For now we're just updating the local state
-    // user.bio = editedBio;
+  }
+
+  const handleCancel = () => {
+    setIsEditing(false)
+    setEditedUser({ ...user })
+  }
+
+  const getRoleColor = (role: UserProfile["role"]) => {
+    const colors = {
+      owner: "#8B5CF6",
+      agent: "#3B82F6",
+      tenant: "#10B981",
+      pg: "#F59E0B",
+      employee: "#EC4899",
+      admin: "#EF4444",
+    }
+    return colors[role] || "#6B7280"
+  }
+
+  const getRoleEmoji = (role: UserProfile["role"]) => {
+    const emojis = {
+      owner: "🏠",
+      agent: "🔑",
+      tenant: "👥",
+      pg: "☕",
+      employee: "💼",
+      admin: "🛡️",
+    }
+    return emojis[role] || "👤"
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <div className="h-32 bg-gradient-to-r from-gray-800 to-black"></div>
-      <div className="px-6 py-4 sm:px-8 sm:py-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end -mt-16 mb-4 gap-4">
-          <img
-            src={user.avatar || "/placeholder.svg"}
-            alt={user.name}
-            className="w-24 h-24 rounded-full border-4 border-white shadow-md"
-          />
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-900">{user.name}</h2>
-            <p className="text-gray-600">Member since {user.joinDate}</p>
-          </div>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition flex items-center"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            {isEditing ? "Cancel" : "Edit Profile"}
-          </button>
-        </div>
+    <div className={`${theme === "light" ? "light" : ""}`}>
+      <div className="relative min-h-[600px] overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 transition-all duration-500">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggleTheme}
+          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-gray-800 transition-all hover:scale-110"
+          aria-label="Toggle theme"
+        >
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
 
-        {isEditing ? (
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-            <textarea
-              value={editedBio}
-              onChange={(e) => setEditedBio(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-              rows={3}
-            />
-            <div className="mt-2 flex justify-end">
-              <button
-                onClick={handleSaveBio}
-                className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
+        {/* Edit Toggle */}
+        <button
+          onClick={() => setIsEditing(!isEditing)}
+          className="absolute top-4 right-16 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-gray-800 transition-all hover:scale-110"
+          aria-label={isEditing ? "Cancel editing" : "Edit profile"}
+        >
+          {isEditing ? <X size={18} /> : <Edit2 size={18} />}
+        </button>
+
+        {/* Left Panel - Avatar and Role */}
+        <div className="absolute top-0 left-0 bottom-0 w-full sm:w-1/3 bg-gradient-to-b from-white/5 to-white/20 backdrop-blur-sm overflow-hidden">
+          <div className="h-full flex flex-col items-center justify-center p-6 relative">
+            <div className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-gradient-to-r from-purple-300 to-pink-300 opacity-20 blur-2xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-24 h-24 rounded-full bg-gradient-to-r from-blue-300 to-teal-300 opacity-20 blur-2xl"></div>
+
+            {/* Avatar */}
+            <div
+              className={`relative mb-6 transition-all duration-1000 ease-in-out ${animateAvatar ? "scale-100 opacity-100" : "scale-90 opacity-0"}`}
+            >
+              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl">
+                <img
+                  src={user.avatar || "/placeholder.svg?height=200&width=200"}
+                  alt={user.fullName}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Role Badge */}
+              <div
+                className="absolute -bottom-2 -right-2 flex items-center justify-center w-16 h-16 rounded-full text-2xl shadow-lg"
+                style={{
+                  background: `linear-gradient(135deg, ${getRoleColor(user.role)}80, ${getRoleColor(user.role)})`,
+                  border: `2px solid #FFFFFF`,
+                }}
               >
-                Save Bio
-              </button>
+                {getRoleEmoji(user.role)}
+              </div>
+            </div>
+
+            {/* Username and Role */}
+            <div className="text-center mb-6">
+              <h1 className="text-xl font-semibold text-black mb-1">{user.fullName}</h1>
+              <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
+                <span>@{user.username}</span>
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                <span className="capitalize">{user.role}</span>
+              </div>
+            </div>
+
+            {/* Join Date */}
+            <div className="text-sm text-gray-500 mt-2">Member since {user.joinDate}</div>
+
+            {/* Bio */}
+            <div className="mt-6 w-full px-4">
+              <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1">
+                <Sparkles size={14} />
+                <span>Bio</span>
+              </h3>
+              {isEditing ? (
+                <textarea
+                  name="bio"
+                  value={editedUser.bio}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-black transition-all text-sm"
+                  rows={3}
+                  placeholder="Tell us about yourself..."
+                />
+              ) : (
+                <p className="text-black text-sm italic">{user.bio || "No bio provided yet."}</p>
+              )}
             </div>
           </div>
-        ) : (
-          <p className="text-gray-700 mb-4">{user.bio}</p>
-        )}
+        </div>
 
-        <div className="flex flex-wrap gap-4 text-gray-600">
-          <div className="flex items-center">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span>{user.location}</span>
-          </div>
-          <div className="flex items-center">
-            <Globe className="h-4 w-4 mr-1" />
-            <a href={`https://${user.website}`} className="hover:text-black transition">
-              {user.website}
-            </a>
-          </div>
-          <div className="flex items-center">
-            <Twitter className="h-4 w-4 mr-1" />
-            <a
-              href={`https://twitter.com/${user.socialLinks.twitter.replace("@", "")}`}
-              className="hover:text-black transition"
-            >
-              {user.socialLinks.twitter}
-            </a>
-          </div>
-          <div className="flex items-center">
-            <Instagram className="h-4 w-4 mr-1" />
-            <a
-              href={`https://instagram.com/${user.socialLinks.instagram.replace("@", "")}`}
-              className="hover:text-black transition"
-            >
-              {user.socialLinks.instagram}
-            </a>
-          </div>
-          <div className="flex items-center">
-            <Linkedin className="h-4 w-4 mr-1" />
-            <a href={`https://linkedin.com/in/${user.socialLinks.linkedin}`} className="hover:text-black transition">
-              {user.socialLinks.linkedin}
-            </a>
+        {/* Right Panel - User Information */}
+        <div className="absolute top-0 right-0 bottom-0 w-full sm:w-2/3 overflow-y-auto p-6">
+          <div className="space-y-10">
+            {/* Overview Section */}
+            <div>
+              <h2 className="text-2xl font-semibold text-black mb-4">Overview</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Username</h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="username"
+                      value={editedUser.username}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">@{user.username}</p>
+                  )}
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Full Name</h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={editedUser.fullName}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">{user.fullName}</p>
+                  )}
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Role</h3>
+                  <p className="text-black font-medium capitalize">{user.role}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Details Section */}
+            <div>
+              <h2 className="text-2xl font-semibold text-black mb-4">Contact Details</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Email</h3>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      name="email"
+                      value={editedUser.email}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">{user.email}</p>
+                  )}
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Phone Number</h3>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={editedUser.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">{user.phone}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Location Section */}
+            <div>
+              <h2 className="text-2xl font-semibold text-black mb-4">Location</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Address</h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="address"
+                      value={editedUser.address}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">{user.address}</p>
+                  )}
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">City</h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="city"
+                      value={editedUser.city}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">{user.city}</p>
+                  )}
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
+                  <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">State</h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="state"
+                      value={editedUser.state}
+                      onChange={handleInputChange}
+                      className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-black text-sm"
+                    />
+                  ) : (
+                    <p className="text-black font-medium">{user.state}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Save Button (Only visible in edit mode) */}
+            {isEditing && (
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={handleSave}
+                  className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl hover:from-purple-700 hover:to-indigo-700 transition-all duration-200 flex items-center gap-2 shadow-md"
+                >
+                  <Save size={18} />
+                  Save Changes
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -121,4 +331,3 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
 }
 
 export default ProfileSection
-
