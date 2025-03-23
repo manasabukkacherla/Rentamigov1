@@ -13,6 +13,12 @@ interface IUser extends Document {
   role: "owner" | "agent" | "tenant" | "pg" | "employee" | "admin";
   acceptTerms: boolean;
   emailVerified: boolean;
+  bio?: string;
+  twitter?: string;
+  instagram?: string;
+  website?: string;
+  linkedin?: string;
+  image?: string;
 }
 
 // Define the User Schema
@@ -73,6 +79,36 @@ const UserSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    bio: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    website: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    twitter: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    instagram: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    linkedin: {
+      type: String,
+      required: false,
+      default: ""
+    },
+    image: {
+      type: String,
+      required: false,
+      default: ""
+    }    
   },
   { timestamps: true }
 );

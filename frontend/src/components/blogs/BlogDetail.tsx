@@ -62,6 +62,7 @@ const BlogDetail: React.FC = () => {
   const [newReview, setNewReview] = useState("")
   const [rating, setRating] = useState(5)
   const [activeTab, setActiveTab] = useState<"comments" | "reviews">("comments")
+  const [isLoading, setIsloading] = useState(false)
 
   const navigate = useNavigate()
 
@@ -69,6 +70,7 @@ const BlogDetail: React.FC = () => {
     const fetchBlog = async () => {
       if (id) {
         try {
+          setIsloading(true)
           const response = await axios.get(`http://localhost:8000/api/blog/${id}`);
           if (response.data.success) {
             const blog = response.data.blog
@@ -115,6 +117,8 @@ const BlogDetail: React.FC = () => {
           console.error("Error fetching blog:", error);
           toast.error('Something went wrong')
           setPost(null);
+        } finally {
+          setIsloading(false)
         }
       }
     };
@@ -322,19 +326,19 @@ const BlogDetail: React.FC = () => {
         toast.error("Please login first");
         return;
       }
-  
+
       const author = JSON.parse(user).id; // Get the logged-in user ID
-  
+
       const response = await axios.delete(`http://localhost:8000/api/comments/${commentId}`, {
         data: { author }, // Send author ID in request body
         headers: {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
         toast.success("Comment deleted successfully");
-  
+
         // Remove the deleted comment from the state
         setComments((prevComments) =>
           prevComments.filter((comment) => comment._id !== commentId)
@@ -345,7 +349,7 @@ const BlogDetail: React.FC = () => {
     } catch (error) {
       console.error("Error deleting comment:", error);
       toast.error("Something went wrong");
-    }
+    }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
@@ -355,19 +359,19 @@ const BlogDetail: React.FC = () => {
         toast.error("Please login first");
         return;
       }
-  
+
       const author = JSON.parse(user).id; // Get the logged-in user ID
-  
+
       const response = await axios.delete(`http://localhost:8000/api/reviews/${reviewId}`, {
         data: { author }, // Send author ID in request body
         headers: {
           "Content-Type": "application/json",
         },
       });
-  
+
       if (response.data.success) {
         toast.success("Comment deleted successfully");
-  
+
         // Remove the deleted comment from the state
         setReviews((prevReviews) =>
           prevReviews.filter((review) => review._id !== reviewId)
@@ -384,11 +388,18 @@ const BlogDetail: React.FC = () => {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-12 w-full max-w-7xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog post not found</h2>
-        <Link to="/blogs" className="text-black hover:text-grey-900 flex items-center">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to home
-        </Link>
+        {isLoading ? (<>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Blog</h2>
+        </>) : (<>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog post not found</h2>
+          <Link to="/blogs" className="text-black hover:text-grey-900 flex items-center">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to home
+          </Link>
+        </>)}
       </div>
     )
   }
@@ -534,13 +545,13 @@ const BlogDetail: React.FC = () => {
                         <span>{comment.likes.length} Likes</span>
                       </button>
                       {comment.author._id === JSON.parse(sessionStorage.getItem("user") || "{}").id && (
-                          <button
+                        <button
                           className="ml-4 px-3 py-1 text-sm font-medium text-black-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition duration-200"
                           onClick={() => handleDeleteComment(comment._id)}
                         >
                           Delete
                         </button>
-                       )} 
+                      )}
                     </div>
                   </div>
                 </div>
@@ -621,13 +632,13 @@ const BlogDetail: React.FC = () => {
                         <span>{review.likes.length} Likes</span>
                       </button>
                       {review.author._id === JSON.parse(sessionStorage.getItem("user") || "{}").id && (
-                          <button
+                        <button
                           className="ml-4 px-3 py-1 text-sm font-medium text-black-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition duration-200"
                           onClick={() => handleDeleteReview(review._id)}
                         >
                           Delete
                         </button>
-                       )} 
+                      )}
                     </div>
                   </div>
                 </div>
