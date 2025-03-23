@@ -40,6 +40,7 @@ import reviewRouter from "./routes/blogs/reviewRoutes";
 import likesRouter from "./routes/blogs/likesRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
+import userRouter from "./routes/userRouter";
 
 dotenv.config();
 
@@ -93,6 +94,7 @@ app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes);
 //app.use("/api/leads", leadsRouter);
 
+app.use("/api/user", userRouter)
 app.use("/api/blog", blogRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/comments", commentsRouter);

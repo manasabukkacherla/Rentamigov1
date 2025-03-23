@@ -51,16 +51,7 @@ export const createBlog = async (
       author,
       status
     });
-
-    const stats = await BlogStatistics.findOne({userId: author})
-    if(!stats) {
-      console.log("No stat found")
-      const newStat = new BlogStatistics({
-        userId: author
-      })
-      await newStat.save()
-    }
-
+    
     const message = status==="published"?"Blog created succesfully!":"Blog drafted successfully"
 
     await newBlog.save();

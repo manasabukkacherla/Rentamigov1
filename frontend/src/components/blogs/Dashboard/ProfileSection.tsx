@@ -1,7 +1,11 @@
 "use client"
 
 import type React from "react"
+<<<<<<< HEAD
 import { useState, useEffect } from "react"
+=======
+import { useState, useEffect, useCallback } from "react"
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
 import {
   User,
   Mail,
@@ -16,6 +20,7 @@ import {
   Moon,
   Sparkles,
 } from "lucide-react"
+<<<<<<< HEAD
 
 interface UserProfile {
   username: string
@@ -29,6 +34,26 @@ interface UserProfile {
   joinDate: string
   avatar: string
   bio: string
+=======
+import axios from "axios"
+
+interface UserProfile {
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  password: string;
+  role: "owner" | "agent" | "tenant" | "pg" | "employee" | "admin";
+  bio?: string;
+  twitter?: string;
+  instagram?: string;
+  website?: string;
+  linkedin?: string;
+  image?: string;
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
 }
 
 interface ProfileSectionProps {
@@ -36,11 +61,16 @@ interface ProfileSectionProps {
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
+<<<<<<< HEAD
   const [isEditing, setIsEditing] = useState(false)
+=======
+  // const [isEditing, setIsEditing] = useState(false)
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
   const [editedUser, setEditedUser] = useState<UserProfile>({ ...user })
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [animateAvatar, setAnimateAvatar] = useState(false)
 
+<<<<<<< HEAD
   useEffect(() => {
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
       setTheme("dark")
@@ -52,6 +82,24 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"))
   }
+=======
+  // Initialize theme based on user's preference or system setting
+  useEffect(() => {
+    const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null
+    if (storedTheme) {
+      setTheme(storedTheme)
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      setTheme("dark")
+    }
+    setTimeout(() => setAnimateAvatar(true), 500)
+  }, [])
+
+  const toggleTheme = useCallback(() => {
+    const newTheme = theme === "light" ? "dark" : "light"
+    setTheme(newTheme)
+    localStorage.setItem("theme", newTheme)
+  }, [theme])
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -61,6 +109,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
     }))
   }
 
+<<<<<<< HEAD
   const handleSave = () => {
     setIsEditing(false)
   }
@@ -69,6 +118,17 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
     setIsEditing(false)
     setEditedUser({ ...user })
   }
+=======
+  // const handleSave = () => {
+  //   setIsEditing(false)
+  //   // Here you might want to update the profile in the backend
+  // }
+
+  // const handleCancel = () => {
+  //   setIsEditing(false)
+  //   setEditedUser({ ...user })
+  // }
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
 
   const getRoleColor = (role: UserProfile["role"]) => {
     const colors = {
@@ -98,12 +158,17 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
     <div className={`${theme === "light" ? "light" : ""}`}>
       <div className="relative min-h-[600px] overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 transition-all duration-500">
         {/* Theme Toggle */}
+<<<<<<< HEAD
         <button
+=======
+        {/* <button
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
           onClick={toggleTheme}
           className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-gray-800 transition-all hover:scale-110"
           aria-label="Toggle theme"
         >
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+<<<<<<< HEAD
         </button>
 
         {/* Edit Toggle */}
@@ -113,6 +178,19 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
           aria-label={isEditing ? "Cancel editing" : "Edit profile"}
         >
           {isEditing ? <X size={18} /> : <Edit2 size={18} />}
+=======
+        </button> */}
+
+        {/* Edit Toggle */}
+        <button
+          // onClick={() => setIsEditing(!isEditing)}
+          className="absolute top-4 right-16 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-gray-800 transition-all hover:scale-110"
+          // aria-label={isEditing ? "Cancel editing" : "Edit profile"}
+          aria-label="Edit profile"
+        >
+          {/* {isEditing ? <X size={18} /> : <Edit2 size={18} />} */}
+          <Edit2 size={18} />
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
         </button>
 
         {/* Left Panel - Avatar and Role */}
@@ -127,8 +205,13 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
             >
               <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl">
                 <img
+<<<<<<< HEAD
                   src={user.avatar || "/placeholder.svg?height=200&width=200"}
                   alt={user.fullName}
+=======
+                  src={user.image || "/placeholder.svg?height=200&width=200"}
+                  // alt={(userDetails)?userDetails.fullName: ""}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -156,7 +239,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
             </div>
 
             {/* Join Date */}
+<<<<<<< HEAD
             <div className="text-sm text-gray-500 mt-2">Member since {user.joinDate}</div>
+=======
+            {/* <div className="text-sm text-gray-500 mt-2">Member since {user.joinDate}</div> */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
 
             {/* Bio */}
             <div className="mt-6 w-full px-4">
@@ -164,18 +251,30 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                 <Sparkles size={14} />
                 <span>Bio</span>
               </h3>
+<<<<<<< HEAD
               {isEditing ? (
                 <textarea
+=======
+              {/* {isEditing ? ( */}
+                {/* <textarea
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                   name="bio"
                   value={editedUser.bio}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-black transition-all text-sm"
                   rows={3}
                   placeholder="Tell us about yourself..."
+<<<<<<< HEAD
                 />
               ) : (
                 <p className="text-black text-sm italic">{user.bio || "No bio provided yet."}</p>
               )}
+=======
+                /> */}
+              {/* ) : ( */}
+                <p className="text-black text-sm italic">{user.bio || "No bio provided yet."}</p>
+              {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
             </div>
           </div>
         </div>
@@ -189,7 +288,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Username</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="text"
                       name="username"
@@ -197,14 +300,24 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">@{user.username}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">@{user.username}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Full Name</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="text"
                       name="fullName"
@@ -212,9 +325,15 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">{user.fullName}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">{user.fullName}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
@@ -230,7 +349,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Email</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="email"
                       name="email"
@@ -238,14 +361,24 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">{user.email}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">{user.email}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Phone Number</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="tel"
                       name="phone"
@@ -253,9 +386,15 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">{user.phone}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">{user.phone}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
               </div>
             </div>
@@ -266,7 +405,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Address</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="text"
                       name="address"
@@ -274,14 +417,24 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">{user.address}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">{user.address}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">City</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="text"
                       name="city"
@@ -289,14 +442,24 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">{user.city}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">{user.city}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">State</h3>
+<<<<<<< HEAD
                   {isEditing ? (
+=======
+                  {/* {isEditing ? (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                     <input
                       type="text"
                       name="state"
@@ -304,15 +467,25 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-black text-sm"
                     />
+<<<<<<< HEAD
                   ) : (
                     <p className="text-black font-medium">{user.state}</p>
                   )}
+=======
+                  ) : ( */}
+                    <p className="text-black font-medium">{user.state}</p>
+                  {/* )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
                 </div>
               </div>
             </div>
 
             {/* Save Button (Only visible in edit mode) */}
+<<<<<<< HEAD
             {isEditing && (
+=======
+            {/* {isEditing && (
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleSave}
@@ -322,7 +495,11 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                   Save Changes
                 </button>
               </div>
+<<<<<<< HEAD
             )}
+=======
+            )} */}
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef
           </div>
         </div>
       </div>
@@ -330,4 +507,8 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
   )
 }
 
+<<<<<<< HEAD
 export default ProfileSection
+=======
+export default ProfileSection
+>>>>>>> 681e0dd3adc6341d9f645fe91838624d95bcdaef

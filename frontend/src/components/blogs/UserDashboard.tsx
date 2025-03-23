@@ -35,11 +35,102 @@ interface StatisticsData {
   averageWordCount: number;
 }
 
+interface User {
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  state: string;
+  password: string;
+  role: "owner" | "agent" | "tenant" | "pg" | "employee" | "admin";
+  bio?: string;
+  twitter?: string;
+  instagram?: string;
+  website?: string;
+  linkedin?: string;
+  image?: string;
+}
+
 const UserDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "blogs" | "stats" | "settings">("overview")
   const [userBlogs, setUserBlogs] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
+
+  const defaultUser: User = {
+    username: "",
+    fullName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    password: "",
+    role: "tenant", // Default role
+    bio: "",
+    twitter: "",
+    instagram: "",
+    website: "",
+    linkedin: "",
+    image: "",
+  };
+
+  const [userDetails, setUserdetails] = useState<User>(defaultUser);
+  const [editedUser, setEditedUser] = useState<User>({ ...userDetails })
+  // console.log(userDetails, editedUser)
+
+  const getUser = async () => {
+    try {
+      const user = sessionStorage.getItem('user')
+      if (user) {
+        const userId = JSON.parse(user).id;
+        const response = await axios.get(`http://localhost:8000/api/user/${userId}`)
+        if (response.data.success) {
+          // console.log(response.data.user)
+          setUserdetails(response.data.user)
+          setEditedUser(response.data.user)
+        }
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getUser()
+  }, [])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setEditedUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    console.log(editedUser)
+
+    try {
+      const user = sessionStorage.getItem('user')
+      if (user) {
+        const userId = JSON.parse(user).id;
+        const response = await axios.put(`http://localhost:8000/api/user/${userId}/edit`, {editedUser})
+        if(response.data.success) {
+          console.log(response.data.user)
+          toast.success("Profile Updated Successfully!!")
+          getUser()
+        } else {
+          toast.error(response.data.error)
+        }
+      }
+    } catch (error) {
+      toast.error("Something went wrong")
+    }
+  }
 
   // Mock user data
   const user = {
@@ -67,7 +158,7 @@ const UserDashboard: React.FC = () => {
     try {
       setIsLoading(true)
       const user = sessionStorage.getItem('user')
-      if(!user) {
+      if (!user) {
         toast.error('Login First!!')
         navigate('/login')
         return
@@ -80,7 +171,7 @@ const UserDashboard: React.FC = () => {
 
       setIsLoading(false)
     } catch (error) {
-      
+
     }
 
     // setIsLoading(true)
@@ -104,9 +195,9 @@ const UserDashboard: React.FC = () => {
     const handleSwitchToBlogsTab = () => {
       setActiveTab("blogs");
     };
-    
+
     window.addEventListener('switchToBlogsTab', handleSwitchToBlogsTab);
-    
+
     return () => {
       window.removeEventListener('switchToBlogsTab', handleSwitchToBlogsTab);
     };
@@ -178,7 +269,7 @@ const UserDashboard: React.FC = () => {
               <>
                 {activeTab === "overview" && (
                   <div className="space-y-8">
-                    <ProfileSection user={user} />
+                    <ProfileSection user={userDetails} />
                     <StatisticsSection />
                     <RecentBlogsSection blogs={userBlogs.slice(0, 3)} />
                   </div>
@@ -316,7 +407,7 @@ const UserDashboard: React.FC = () => {
                   <div className="bg-white rounded-lg shadow-md p-6">
                     <h2 className="text-2xl font-bold mb-6">Account Settings</h2>
 
-                    <div className="space-y-8">
+                    <form className="space-y-8" onSubmit={handleSubmit}>
                       {/* Profile Settings */}
                       <div>
                         <h3 className="text-lg font-medium mb-4">Profile Information</h3>
@@ -326,8 +417,11 @@ const UserDashboard: React.FC = () => {
                             <input
                               id="user-name"
                               type="text"
+                              name="fullName"
+                              value={editedUser.fullName}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.name}
+                            // defaultValue={userDetails.fullName}
                             />
                           </div>
                           <div>
@@ -335,35 +429,71 @@ const UserDashboard: React.FC = () => {
                             <input
                               id="user-email"
                               type="email"
+                              name="email"
+                              value={editedUser.email}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.email}
+                            // defaultValue={userDetails.email}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
                             <input
-                              id="user-location"
+                              id="user-phone"
                               type="text"
+                              name="phone"
+                              value={editedUser.phone}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.location}
+                            // defaultValue={userDetails.phone}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                             <input
-                              id="user-website"
+                              id="user-address"
                               type="text"
+                              name="address"
+                              value={editedUser.address}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.website}
+                            // defaultValue={userDetails.address}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                            <input
+                              id="user-city"
+                              type="text"
+                              name="city"
+                              value={editedUser.city}
+                              onChange={handleInputChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                            // defaultValue={userDetails.city}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <input
+                              id="user-state"
+                              type="text"
+                              name="state"
+                              value={editedUser.state}
+                              onChange={handleInputChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                            // defaultValue={userDetails.state}
                             />
                           </div>
                           <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
                             <textarea
                               id="user-bio"
+                              name="bio"
+                              value={editedUser.bio}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                               rows={4}
-                              defaultValue={user.bio}
+                            // defaultValue={userDetails.bio}
                             />
                           </div>
                         </div>
@@ -374,12 +504,27 @@ const UserDashboard: React.FC = () => {
                         <h3 className="text-lg font-medium mb-4">Social Links</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                            <input
+                              id="user-website"
+                              type="text"
+                              name="website"
+                              value={editedUser.website}
+                              onChange={handleInputChange}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                            // defaultValue={userDetails.website}
+                            />
+                          </div>
+                          <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Twitter</label>
                             <input
                               id="user-twitter"
                               type="text"
+                              name="twitter"
+                              value={editedUser.twitter}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.socialLinks.twitter}
+                            // defaultValue={userDetails.twitter}
                             />
                           </div>
                           <div>
@@ -387,8 +532,11 @@ const UserDashboard: React.FC = () => {
                             <input
                               id="user-instagram"
                               type="text"
+                              name="instagram"
+                              value={editedUser.instagram}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.socialLinks.instagram}
+                            // defaultValue={userDetails.instagram}
                             />
                           </div>
                           <div>
@@ -396,15 +544,18 @@ const UserDashboard: React.FC = () => {
                             <input
                               id="user-linkedin"
                               type="text"
+                              name="linkedin"
+                              value={editedUser.linkedin}
+                              onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                              defaultValue={user.socialLinks.linkedin}
+                            // defaultValue={userDetails.linkedin}
                             />
                           </div>
                         </div>
                       </div>
 
                       {/* Password Settings */}
-                      <div>
+                      {/* <div>
                         <h3 className="text-lg font-medium mb-4">Change Password</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
@@ -435,41 +586,41 @@ const UserDashboard: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </div> */}
 
                       {/* Save Button */}
                       <div className="flex justify-end">
-                        <button 
-                          onClick={() => {
-                            // Get form values
-                            const nameInput = document.getElementById('user-name') as HTMLInputElement;
-                            const emailInput = document.getElementById('user-email') as HTMLInputElement;
-                            const locationInput = document.getElementById('user-location') as HTMLInputElement;
-                            const websiteInput = document.getElementById('user-website') as HTMLInputElement;
-                            const bioInput = document.getElementById('user-bio') as HTMLTextAreaElement;
-                            const twitterInput = document.getElementById('user-twitter') as HTMLInputElement;
-                            const instagramInput = document.getElementById('user-instagram') as HTMLInputElement;
-                            const linkedinInput = document.getElementById('user-linkedin') as HTMLInputElement;
-                            
-                            // Update user object
-                            user.name = nameInput.value;
-                            user.email = emailInput.value;
-                            user.location = locationInput.value;
-                            user.website = websiteInput.value;
-                            user.bio = bioInput.value;
-                            user.socialLinks.twitter = twitterInput.value;
-                            user.socialLinks.instagram = instagramInput.value;
-                            user.socialLinks.linkedin = linkedinInput.value;
-                            
-                            // Show success message
-                            alert('Profile updated successfully!');
-                          }}
+                        <button
+                          // onClick={() => {
+                          //   // Get form values
+                          //   const nameInput = document.getElementById('user-name') as HTMLInputElement;
+                          //   const emailInput = document.getElementById('user-email') as HTMLInputElement;
+                          //   const locationInput = document.getElementById('user-location') as HTMLInputElement;
+                          //   const websiteInput = document.getElementById('user-website') as HTMLInputElement;
+                          //   const bioInput = document.getElementById('user-bio') as HTMLTextAreaElement;
+                          //   const twitterInput = document.getElementById('user-twitter') as HTMLInputElement;
+                          //   const instagramInput = document.getElementById('user-instagram') as HTMLInputElement;
+                          //   const linkedinInput = document.getElementById('user-linkedin') as HTMLInputElement;
+
+                          //   // Update user object
+                          //   user.name = nameInput.value;
+                          //   user.email = emailInput.value;
+                          //   user.location = locationInput.value;
+                          //   user.website = websiteInput.value;
+                          //   user.bio = bioInput.value;
+                          //   user.socialLinks.twitter = twitterInput.value;
+                          //   user.socialLinks.instagram = instagramInput.value;
+                          //   user.socialLinks.linkedin = linkedinInput.value;
+
+                          //   // Show success message
+                          //   alert('Profile updated successfully!');
+                          // }}
                           className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
                         >
                           Save Changes
                         </button>
                       </div>
-                    </div>
+                    </form>
                   </div>
                 )}
               </>
