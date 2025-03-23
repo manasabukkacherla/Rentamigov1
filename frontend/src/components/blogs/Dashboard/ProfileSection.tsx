@@ -41,12 +41,11 @@ interface ProfileSectionProps {
 }
 
 const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
-  // const [isEditing, setIsEditing] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const [editedUser, setEditedUser] = useState<UserProfile>({ ...user })
   const [theme, setTheme] = useState<"light" | "dark">("light")
   const [animateAvatar, setAnimateAvatar] = useState(false)
 
-  // Initialize theme based on user's preference or system setting
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme") as "light" | "dark" | null
     if (storedTheme) {
@@ -70,16 +69,6 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
       [name]: value,
     }))
   }
-
-  // const handleSave = () => {
-  //   setIsEditing(false)
-  //   // Here you might want to update the profile in the backend
-  // }
-
-  // const handleCancel = () => {
-  //   setIsEditing(false)
-  //   setEditedUser({ ...user })
-  // }
 
   const getRoleColor = (role: UserProfile["role"]) => {
     const colors = {
@@ -109,23 +98,21 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
     <div className={`${theme === "light" ? "light" : ""}`}>
       <div className="relative min-h-[600px] overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200 transition-all duration-500">
         {/* Theme Toggle */}
-        {/* <button
+        <button
           onClick={toggleTheme}
           className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-gray-800 transition-all hover:scale-110"
           aria-label="Toggle theme"
         >
           {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
-        </button> */}
+        </button>
 
         {/* Edit Toggle */}
         <button
-          // onClick={() => setIsEditing(!isEditing)}
+          onClick={() => setIsEditing(!isEditing)}
           className="absolute top-4 right-16 z-10 p-2 rounded-full bg-white/20 backdrop-blur-md text-gray-800 transition-all hover:scale-110"
-          // aria-label={isEditing ? "Cancel editing" : "Edit profile"}
-          aria-label="Edit profile"
+          aria-label={isEditing ? "Cancel editing" : "Edit profile"}
         >
-          {/* {isEditing ? <X size={18} /> : <Edit2 size={18} />} */}
-          <Edit2 size={18} />
+          {isEditing ? <X size={18} /> : <Edit2 size={18} />}
         </button>
 
         {/* Left Panel - Avatar and Role */}
@@ -141,7 +128,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-white shadow-xl">
                 <img
                   src={user.image || "/placeholder.svg?height=200&width=200"}
-                  // alt={(userDetails)?userDetails.fullName: ""}
+                  alt={user.fullName}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -168,27 +155,24 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               </div>
             </div>
 
-            {/* Join Date */}
-            {/* <div className="text-sm text-gray-500 mt-2">Member since {user.joinDate}</div> */}
-
             {/* Bio */}
             <div className="mt-6 w-full px-4">
               <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-2 flex items-center gap-1">
                 <Sparkles size={14} />
                 <span>Bio</span>
               </h3>
-              {/* {isEditing ? ( */}
-                {/* <textarea
+              {isEditing ? (
+                <textarea
                   name="bio"
                   value={editedUser.bio}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 bg-white/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-black transition-all text-sm"
                   rows={3}
                   placeholder="Tell us about yourself..."
-                /> */}
-              {/* ) : ( */}
+                />
+              ) : (
                 <p className="text-black text-sm italic">{user.bio || "No bio provided yet."}</p>
-              {/* )} */}
+              )}
             </div>
           </div>
         </div>
@@ -202,7 +186,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Username</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       name="username"
@@ -210,14 +194,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">@{user.username}</p>
-                  {/* )} */}
+                  )}
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Full Name</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       name="fullName"
@@ -225,9 +209,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">{user.fullName}</p>
-                  {/* )} */}
+                  )}
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
@@ -243,7 +227,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Email</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="email"
                       name="email"
@@ -251,14 +235,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">{user.email}</p>
-                  {/* )} */}
+                  )}
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Phone Number</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="tel"
                       name="phone"
@@ -266,9 +250,9 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-pink-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">{user.phone}</p>
-                  {/* )} */}
+                  )}
                 </div>
               </div>
             </div>
@@ -279,7 +263,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Address</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       name="address"
@@ -287,14 +271,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">{user.address}</p>
-                  {/* )} */}
+                  )}
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">City</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       name="city"
@@ -302,14 +286,14 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-amber-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">{user.city}</p>
-                  {/* )} */}
+                  )}
                 </div>
 
                 <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                   <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">State</h3>
-                  {/* {isEditing ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       name="state"
@@ -317,15 +301,15 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                       onChange={handleInputChange}
                       className="w-full px-2 py-1 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-green-500 text-black text-sm"
                     />
-                  ) : ( */}
+                  ) : (
                     <p className="text-black font-medium">{user.state}</p>
-                  {/* )} */}
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Save Button (Only visible in edit mode) */}
-            {/* {isEditing && (
+            {isEditing && (
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleSave}
@@ -335,7 +319,7 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                   Save Changes
                 </button>
               </div>
-            )} */}
+            )}
           </div>
         </div>
       </div>
