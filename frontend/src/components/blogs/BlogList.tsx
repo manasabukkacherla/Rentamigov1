@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Blogpost } from '../Blogs/types';
 import BlogCardS from './BlogCardS';
 
 interface Blog {
@@ -16,13 +15,13 @@ interface Blog {
   readTime: number;
   author: User;
   likes: number;
-  views: number; // New: View count
-  shares: 0,
-  comments: Comment[]
-  reviews: Review[]
+  views: number;
+  shares: 0;
+  comments: Comment[];
+  reviews: Review[];
   createdAt: Date;
   updatedAt: Date;
-  userHasLiked: boolean
+  userHasLiked: boolean;
 }
 
 interface Comment {
@@ -30,65 +29,67 @@ interface Comment {
   author: User;
   comment: string;
   createdAt: string;
-  likes: string[]
+  likes: string[];
 }
 
 interface User {
   _id: string;
-  fullName: string
+  fullName: string;
 }
 
 interface Review {
-  _id: string,
-  author: User,
-  comment: string,
-  rating: number,
-  createdAt: string,
-  likes: string[]
+  _id: string;
+  author: User;
+  comment: string;
+  rating: number;
+  createdAt: string;
+  likes: string[];
 }
 
 interface BlogListProps {
-    blogs: Blog[];
-  }
+  blogs: Blog[];
+}
 
 const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const [autoSlide, setAutoSlide] = useState(true);
-    const sliderRef = useRef<HTMLDivElement>(null);
-  
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [autoSlide, setAutoSlide] = useState(true);
+  const sliderRef = useRef<HTMLDivElement>(null);
+
   // Auto-slide functionality
   useEffect(() => {
     if (!autoSlide || blogs.length <= 3) return;
-    
+
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => {
         const nextIndex = prevIndex + 1;
-        return nextIndex >= blogs.length - 2 ? 0 : nextIndex;
+        return nextIndex >= blogs.length - 2 ? 0 : nextIndex; // Ensure the slider wraps around
       });
     }, 5000);
-    
+
     return () => clearInterval(interval);
   }, [autoSlide, blogs.length]);
-  
+
+  console.log(blogs)
+
   // Pause auto-slide on hover
   const handleMouseEnter = () => setAutoSlide(false);
   const handleMouseLeave = () => setAutoSlide(true);
-  
+
   // Manual navigation
   const handlePrev = () => {
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex - 1;
-      return nextIndex < 0 ? 0 : nextIndex;
+      return nextIndex < 0 ? 0 : nextIndex; // Prevent going below 0
     });
   };
-  
+
   const handleNext = () => {
     setCurrentIndex((prevIndex) => {
       const nextIndex = prevIndex + 1;
-      return nextIndex >= blogs.length - 2 ? blogs.length - 3 : nextIndex;
+      return nextIndex >= blogs.length - 2 ? blogs.length - 3 : nextIndex; // Prevent going beyond the last slide
     });
   };
-  
+
   // Update slider position
   useEffect(() => {
     if (sliderRef.current && blogs.length > 3) {
@@ -118,12 +119,12 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
   }
 
   return (
-    <div 
+    <div
       className="relative overflow-hidden"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <div 
+      <div
         ref={sliderRef}
         className="flex transition-transform duration-500 ease-in-out"
         style={{ width: `${blogs.length * 33.33}%` }}
@@ -134,10 +135,10 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
           </div>
         ))}
       </div>
-      
+
       {/* Navigation buttons */}
       {currentIndex > 0 && (
-        <button 
+        <button
           onClick={handlePrev}
           className="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 p-3 rounded-full shadow-md z-10 hover:bg-opacity-100 transition"
         >
@@ -146,9 +147,9 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
           </svg>
         </button>
       )}
-      
+
       {currentIndex < blogs.length - 3 && (
-        <button 
+        <button
           onClick={handleNext}
           className="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white bg-opacity-80 p-3 rounded-full shadow-md z-10 hover:bg-opacity-100 transition"
         >
@@ -157,23 +158,8 @@ const BlogList: React.FC<BlogListProps> = ({ blogs }) => {
           </svg>
         </button>
       )}
-      
-      {/* Pagination dots */}
-      <div className="flex justify-center mt-6 space-x-2">
-        {Array.from({ length: Math.ceil(blogs.length / 3) }).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index * 3)}
-            className={`h-2 rounded-full transition-all ${
-              index === Math.floor(currentIndex / 3) 
-                ? 'w-6 bg-black' 
-                : 'w-2 bg-gray-300'
-            }`}
-          />
-        ))}
-      </div>
     </div>
-  )
-}
+  );
+};
 
-export default BlogList
+export default BlogList;

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import User from "../models/signup"; // Import User model
 import transporter from "../utils/emailservice"; // Import email transporter
 import Employee from "../models/employee";
+import BlogStatistics from "../models/blogs/BlogStatisticsModel";
 
 const signupRouter = express.Router();
 
@@ -186,6 +187,15 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
 
     await newUser.save();
     console.log("✅ User Saved Successfully");
+
+    const stats = await BlogStatistics.findOne({userId: newUser._id})
+    if(!stats) {
+      console.log("No stat found")
+      const newStat = new BlogStatistics({
+        userId: newUser._id
+      })
+      await newStat.save()
+    }
 
     // ✅ Remove email from verified list after successful registration
     verifiedEmails.delete(email);
