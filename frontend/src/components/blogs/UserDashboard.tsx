@@ -251,13 +251,7 @@ const UserDashboard: React.FC = () => {
                   Refresh
                 </button>
 
-                <Link
-                  to="/blogs/Create"
-                  className="flex items-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-                >
-                  <PenSquare className="h-4 w-4 mr-2" />
-                  Create New Blog
-                </Link>
+                
               </div>
             </div>
 

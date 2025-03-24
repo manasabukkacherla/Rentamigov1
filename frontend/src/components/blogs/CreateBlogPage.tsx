@@ -12,7 +12,7 @@ import TipTapImage from "@tiptap/extension-image"
 import Link from "@tiptap/extension-link"
 import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
-import { getBlogById, createBlog, updateBlog } from "../blogs/blogService1"
+import { getBlogById } from "../blogs/blogService1" // Adjust the path as necessary
 import TagInput from "../blogs/TagInput"
 import EditorMenuBar from "../blogs/EditorMenuBar"
 import type { Blogpost } from "../Blogs/types"
