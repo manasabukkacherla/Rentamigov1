@@ -6,7 +6,7 @@ import express, {
   ErrorRequestHandler,
 } from "express";
 import dotenv from "dotenv";
-import connectToDatabase from "./utils/connectToDb";
+import { connectToDatabase } from "./utils/connectToDb";
 import cors from "cors";
 import verifyRouter from "./routes/verify";
 
