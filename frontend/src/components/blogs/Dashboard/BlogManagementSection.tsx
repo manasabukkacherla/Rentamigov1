@@ -1,55 +1,53 @@
 "use client"
-
-import type React from "react"
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { FileText, PenSquare, Search, Edit, Trash2, Eye, Filter, ChevronDown, ChevronUp, ThumbsUp } from 'lucide-react'
+import { FileText, PenSquare, Search, Edit, Trash2, Eye, Filter, ChevronDown, ChevronUp, ThumbsUp } from "lucide-react"
 import axios from "axios"
 import { toast } from "react-toastify"
 
 interface Blog {
-  _id: string,
-  title: string;
-  excerpt: string;
-  content: string;
+  _id: string
+  title: string
+  excerpt: string
+  content: string
   media: {
-    coverImage: string;
-    images?: string[];
-  };
-  tags: string[];
-  category: string;
-  readTime: number;
-  author: User;
-  likes: number;
-  views: number;
-  shares: 0,
+    coverImage: string
+    images?: string[]
+  }
+  tags: string[]
+  category: string
+  readTime: number
+  author: User
+  likes: number
+  views: number
+  shares: 0
   comments: Comment[]
   reviews: Review[]
-  createdAt: Date;
-  updatedAt: Date;
-  status: "published" | "draft";
+  createdAt: Date
+  updatedAt: Date
+  status: "published" | "draft"
 }
 
 interface Comment {
-  _id: string;
-  author: User;
-  comment: string;
-  createdAt: string;
-  likes: string[];
+  _id: string
+  author: User
+  comment: string
+  createdAt: string
+  likes: string[]
 }
 
 interface User {
-  _id: string;
+  _id: string
   fullName: string
 }
 
 interface Review {
-  _id: string,
-  author: User,
-  comment: string,
-  rating: number,
-  createdAt: string,
-  likes: string[];
+  _id: string
+  author: User
+  comment: string
+  rating: number
+  createdAt: string
+  likes: string[]
 }
 
 const BlogManagementSection = () => {
@@ -67,15 +65,15 @@ const BlogManagementSection = () => {
 
   const loadBlogs = async () => {
     try {
-      const user = sessionStorage.getItem('user')
-      if(!user) {
-        toast.error('Login First!!')
-        navigate('/login')
+      const user = sessionStorage.getItem("user")
+      if (!user) {
+        toast.error("Login First!!")
+        navigate("/login")
         return
       }
-      const author = JSON.parse(user).id;
+      const author = JSON.parse(user).id
 
-      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
+      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`)
       console.log(response.data)
       setBlogs(response.data.blogs)
     } catch (error) {
@@ -101,9 +99,7 @@ const BlogManagementSection = () => {
       } else if (sortBy === "likes") {
         return sortOrder === "asc" ? a.likes - b.likes : b.likes - a.likes
       } else {
-        return sortOrder === "asc" 
-          ? a.comments.length - b.comments.length 
-          : b.comments.length - a.comments.length
+        return sortOrder === "asc" ? a.comments.length - b.comments.length : b.comments.length - a.comments.length
       }
     })
 
@@ -113,15 +109,15 @@ const BlogManagementSection = () => {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this blog post?")) {
-      return;
+      return
     }
 
     try {
       const response = await axios.delete(`http://localhost:8000/api/blog/delete/${id}`)
-      if(response.data.success) {
+      if (response.data.success) {
         toast.success("Blog deleted successfully!")
         // Refresh the blog list
-        loadBlogs();
+        loadBlogs()
       } else {
         toast.error("Failed to delete blog")
       }
@@ -132,19 +128,19 @@ const BlogManagementSection = () => {
   }
 
   const handleEdit = (blogId: string) => {
-    navigate(`/blogs/edit/${blogId}`);
+    navigate(`/blogs/edit/${blogId}`)
   }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center">
           <FileText className="h-6 w-6 text-gray-700 mr-2" />
-          <h2 className="text-2xl font-bold">Manage Blogs</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">Manage Blogs</h2>
         </div>
         <Link
           to="/blogs/Create"
-          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition flex items-center"
+          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition flex items-center justify-center sm:justify-start"
         >
           <PenSquare className="h-4 w-4 mr-2" />
           Create New Blog
@@ -152,7 +148,7 @@ const BlogManagementSection = () => {
       </div>
 
       <div className="mb-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="flex flex-col gap-4 mb-4 sm:flex-row">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -168,7 +164,7 @@ const BlogManagementSection = () => {
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center justify-center sm:justify-start"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -178,7 +174,7 @@ const BlogManagementSection = () => {
 
         {showFilters && (
           <div className="bg-gray-50 p-4 rounded-md mb-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
@@ -221,91 +217,103 @@ const BlogManagementSection = () => {
         )}
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blog</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Engagement
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Last Edited
-              </th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredBlogs.map((blog) => (
-              <tr key={blog._id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <img
-                      src={blog.media.coverImage || "/placeholder.svg"}
-                      alt={blog.title}
-                      className="h-10 w-10 rounded-md object-cover mr-3"
-                    />
-                    <div className="text-sm font-medium text-gray-900">{blog.title}</div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      blog.status === "published" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {blog.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {blog.views?.toLocaleString() || 0}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">
-                    <div className="flex items-center space-x-2">
-                      <span className="flex items-center">
-                        <ThumbsUp className="h-4 w-4 mr-1" />
-                        {blog.likes}
+      <div className="overflow-x-auto -mx-6">
+        <div className="inline-block min-w-full align-middle px-6">
+          <div className="overflow-hidden md:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">
+                    Blog
+                  </th>
+                  <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">
+                    Status
+                  </th>
+                  <th className="hidden px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:table-cell sm:px-6">
+                    Views
+                  </th>
+                  <th className="hidden px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sm:table-cell sm:px-6">
+                    Engagement
+                  </th>
+                  <th className="hidden px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider md:table-cell sm:px-6">
+                    Last Edited
+                  </th>
+                  <th className="px-3 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider sm:px-6">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredBlogs.map((blog) => (
+                  <tr key={blog._id}>
+                    <td className="px-3 py-4 whitespace-nowrap sm:px-6">
+                      <div className="flex items-center">
+                        <img
+                          src={blog.media.coverImage || "/placeholder.svg"}
+                          alt={blog.title}
+                          className="h-10 w-10 rounded-md object-cover mr-3 flex-shrink-0"
+                        />
+                        <div className="text-sm font-medium text-gray-900 truncate max-w-[120px] sm:max-w-xs">
+                          {blog.title}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap sm:px-6">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          blog.status === "published" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {blog.status}
                       </span>
-                      <span className="flex items-center">
-                        <Eye className="h-4 w-4 mr-1" />
-                        {blog.comments.length}
-                      </span>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(blog.updatedAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <div className="flex justify-end space-x-2">
-                    <Link to={`/blogs/${blog._id}`} className="text-gray-600 hover:text-gray-900" title="View">
-                      <Eye className="h-5 w-5" />
-                    </Link>
-                    <button
-                      onClick={() => handleEdit(blog._id)}
-                      className="text-blue-600 hover:text-blue-900"
-                      title="Edit"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(blog._id)}
-                      className="text-red-600 hover:text-red-900"
-                      title="Delete"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    </td>
+                    <td className="hidden px-3 py-4 whitespace-nowrap text-sm text-gray-500 sm:table-cell sm:px-6">
+                      {blog.views?.toLocaleString() || 0}
+                    </td>
+                    <td className="hidden px-3 py-4 whitespace-nowrap sm:table-cell sm:px-6">
+                      <div className="text-sm text-gray-500">
+                        <div className="flex items-center space-x-2">
+                          <span className="flex items-center">
+                            <ThumbsUp className="h-4 w-4 mr-1" />
+                            {blog.likes}
+                          </span>
+                          <span className="flex items-center">
+                            <Eye className="h-4 w-4 mr-1" />
+                            {blog.comments.length}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="hidden px-3 py-4 whitespace-nowrap text-sm text-gray-500 md:table-cell sm:px-6">
+                      {new Date(blog.updatedAt).toLocaleDateString()}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium sm:px-6">
+                      <div className="flex justify-end space-x-2">
+                        <Link to={`/blogs/${blog._id}`} className="text-gray-600 hover:text-gray-900" title="View">
+                          <Eye className="h-5 w-5" />
+                        </Link>
+                        <button
+                          onClick={() => handleEdit(blog._id)}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="Edit"
+                        >
+                          <Edit className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(blog._id)}
+                          className="text-red-600 hover:text-red-900"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       {filteredBlogs.length === 0 && (
@@ -318,3 +326,4 @@ const BlogManagementSection = () => {
 }
 
 export default BlogManagementSection
+
