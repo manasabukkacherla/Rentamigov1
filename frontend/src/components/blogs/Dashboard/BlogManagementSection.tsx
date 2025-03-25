@@ -154,14 +154,14 @@ const BlogManagementSection = () => {
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div className="flex items-center">
           <FileText className="h-6 w-6 text-gray-700 mr-2" />
-          <h2 className="text-2xl font-bold">Manage Blogs</h2>
+          <h2 className="text-xl sm:text-2xl font-bold">Manage Blogs</h2>
         </div>
         <Link
           to="/blogs/Create"
-          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition flex items-center"
+          className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition flex items-center justify-center sm:justify-start"
         >
           <PenSquare className="h-4 w-4 mr-2" />
           Create New Blog
@@ -169,7 +169,7 @@ const BlogManagementSection = () => {
       </div>
 
       <div className="mb-6">
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <div className="flex flex-col gap-4 mb-4 sm:flex-row">
           <div className="relative flex-grow">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -185,7 +185,7 @@ const BlogManagementSection = () => {
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center justify-center sm:justify-start"
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
@@ -199,7 +199,7 @@ const BlogManagementSection = () => {
 
         {showFilters && (
           <div className="bg-gray-50 p-4 rounded-md mb-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
