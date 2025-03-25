@@ -111,7 +111,7 @@ function Plans() {
         return;
       }
 
-      const amount = selectedItem.price * 100; // Convert to paise for Razorpay
+      const amount = selectedItem.price; // Convert to paise for Razorpay
 
       const userName = sessionStorage.getItem("username");
       const userId = sessionStorage.getItem("userId");
