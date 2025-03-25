@@ -32,6 +32,8 @@ import Revenue from "./components/dashadmin/components/Revenue"
 
 import { ToastContainer } from "react-toastify"
 import ErrorBoundary from "./components/blogs/ErrorBoundary"
+import TenantProperties from "./components/tenantProperties"
+import { AuthProvider } from "./context/AuthContext"
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -47,6 +49,7 @@ const App = () => {
     <GoogleOAuthProvider clientId={client_id}>
       <ToastContainer />
       <BrowserRouter>
+      <AuthProvider>
         <Routes>
           <Route
             path="/"
@@ -68,6 +71,7 @@ const App = () => {
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
           <Route path="/propertydetails" element={<Propertydetail />} />
+          <Route path="/tenantProperties" element={<TenantProperties/>} />
 
           <Route path="/updatePropertyform" element={<Propertmain />} />
 
@@ -134,6 +138,7 @@ const App = () => {
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />
         </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>
   )
