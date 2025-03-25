@@ -1,5 +1,11 @@
 import axios from "axios";
-import { BarChart2, Eye, TrendingUp, ThumbsUp, MessageCircle } from "lucide-react";
+import {
+  BarChart2,
+  Eye,
+  TrendingUp,
+  ThumbsUp,
+  MessageCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface StatisticsData {
@@ -31,11 +37,11 @@ const StatisticsSection: React.FC = () => {
     // Replace the URL with your actual backend API endpoint
     const fetchStats = async () => {
       try {
-        const user = sessionStorage.getItem('user');
+        const user = sessionStorage.getItem("user");
 
         if (user) {
           const author = JSON.parse(user).id;
-          const response = await axios.get(`http://localhost:8000/api/stats/${author}`);
+          const response = await axios.get(`/api/stats/${author}`);
 
           setStats(response.data); // Store the fetched data
           // console.log(stats)
@@ -66,9 +72,12 @@ const StatisticsSection: React.FC = () => {
             <Eye className="h-5 w-5 text-gray-700 mr-2" />
             <h3 className="text-lg font-medium">Views</h3>
           </div>
-          <p className="text-3xl font-bold mb-1">{stats.totalViews.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">
+            {stats.totalViews.toLocaleString()}
+          </p>
           <p className="text-sm text-green-600 flex items-center">
-            <TrendingUp className="h-4 w-4 mr-1" />+{stats.viewsThisMonth.toLocaleString()} this month
+            <TrendingUp className="h-4 w-4 mr-1" />+
+            {stats.viewsThisMonth.toLocaleString()} this month
           </p>
         </div>
 
@@ -77,9 +86,12 @@ const StatisticsSection: React.FC = () => {
             <ThumbsUp className="h-5 w-5 text-gray-700 mr-2" />
             <h3 className="text-lg font-medium">Likes</h3>
           </div>
-          <p className="text-3xl font-bold mb-1">{stats.totalLikes.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">
+            {stats.totalLikes.toLocaleString()}
+          </p>
           <p className="text-sm text-green-600 flex items-center">
-            <TrendingUp className="h-4 w-4 mr-1" />+{stats.likesThisMonth.toLocaleString()} this month
+            <TrendingUp className="h-4 w-4 mr-1" />+
+            {stats.likesThisMonth.toLocaleString()} this month
           </p>
         </div>
 
@@ -88,9 +100,12 @@ const StatisticsSection: React.FC = () => {
             <MessageCircle className="h-5 w-5 text-gray-700 mr-2" />
             <h3 className="text-lg font-medium">Comments</h3>
           </div>
-          <p className="text-3xl font-bold mb-1">{stats.totalComments.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">
+            {stats.totalComments.toLocaleString()}
+          </p>
           <p className="text-sm text-green-600 flex items-center">
-            <TrendingUp className="h-4 w-4 mr-1" />+{stats.commentsThisMonth.toLocaleString()} this month
+            <TrendingUp className="h-4 w-4 mr-1" />+
+            {stats.commentsThisMonth.toLocaleString()} this month
           </p>
         </div>
       </div>

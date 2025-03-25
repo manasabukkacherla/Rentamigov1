@@ -1,14 +1,25 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { FileText, PenSquare, Search, Edit, Trash2, Eye, Filter, ChevronDown, ChevronUp, ThumbsUp } from 'lucide-react'
-import axios from "axios"
-import { toast } from "react-toastify"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FileText,
+  PenSquare,
+  Search,
+  Edit,
+  Trash2,
+  Eye,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  ThumbsUp,
+} from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 interface Blog {
-  _id: string,
+  _id: string;
   title: string;
   excerpt: string;
   content: string;
@@ -22,9 +33,9 @@ interface Blog {
   author: User;
   likes: number;
   views: number;
-  shares: 0,
-  comments: Comment[]
-  reviews: Review[]
+  shares: 0;
+  comments: Comment[];
+  reviews: Review[];
   createdAt: Date;
   updatedAt: Date;
   status: "published" | "draft";
@@ -40,76 +51,82 @@ interface Comment {
 
 interface User {
   _id: string;
-  fullName: string
+  fullName: string;
 }
 
 interface Review {
-  _id: string,
-  author: User,
-  comment: string,
-  rating: number,
-  createdAt: string,
+  _id: string;
+  author: User;
+  comment: string;
+  rating: number;
+  createdAt: string;
   likes: string[];
 }
 
 const BlogManagementSection = () => {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"all" | "published" | "draft">("all")
-  const [sortBy, setSortBy] = useState<"date" | "views" | "likes" | "comments">("date")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [showFilters, setShowFilters] = useState(false)
-  const [blogs, setBlogs] = useState<Blog[]>([])
-  const navigate = useNavigate()
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "published" | "draft"
+  >("all");
+  const [sortBy, setSortBy] = useState<"date" | "views" | "likes" | "comments">(
+    "date"
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [showFilters, setShowFilters] = useState(false);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    loadBlogs()
-  }, [])
+    loadBlogs();
+  }, []);
 
   const loadBlogs = async () => {
     try {
-      const user = sessionStorage.getItem('user')
-      if(!user) {
-        toast.error('Login First!!')
-        navigate('/login')
-        return
+      const user = sessionStorage.getItem("user");
+      if (!user) {
+        toast.error("Login First!!");
+        navigate("/login");
+        return;
       }
       const author = JSON.parse(user).id;
 
-      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
-      console.log(response.data)
-      setBlogs(response.data.blogs)
+      const response = await axios.get(`/api/blog/myBlogs/${author}`);
+      console.log(response.data);
+      setBlogs(response.data.blogs);
     } catch (error) {
-      toast.error("Failed to load blogs")
-      console.error("Error loading blogs:", error)
+      toast.error("Failed to load blogs");
+      console.error("Error loading blogs:", error);
     }
-  }
+  };
 
   // Filter and sort blogs
   const filteredBlogs = blogs
     .filter(
       (blog) =>
         (statusFilter === "all" || blog.status === statusFilter) &&
-        blog.title.toLowerCase().includes(searchQuery.toLowerCase()),
+        blog.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (sortBy === "date") {
         return sortOrder === "asc"
           ? new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime()
-          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+          : new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       } else if (sortBy === "views") {
-        return sortOrder === "asc" ? (a.views || 0) - (b.views || 0) : (b.views || 0) - (a.views || 0)
+        return sortOrder === "asc"
+          ? (a.views || 0) - (b.views || 0)
+          : (b.views || 0) - (a.views || 0);
       } else if (sortBy === "likes") {
-        return sortOrder === "asc" ? a.likes - b.likes : b.likes - a.likes
+        return sortOrder === "asc" ? a.likes - b.likes : b.likes - a.likes;
       } else {
-        return sortOrder === "asc" 
-          ? a.comments.length - b.comments.length 
-          : b.comments.length - a.comments.length
+        return sortOrder === "asc"
+          ? a.comments.length - b.comments.length
+          : b.comments.length - a.comments.length;
       }
-    })
+    });
 
   const toggleSortOrder = () => {
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-  }
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+  };
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this blog post?")) {
@@ -117,23 +134,23 @@ const BlogManagementSection = () => {
     }
 
     try {
-      const response = await axios.delete(`http://localhost:8000/api/blog/delete/${id}`)
-      if(response.data.success) {
-        toast.success("Blog deleted successfully!")
+      const response = await axios.delete(`/api/blog/delete/${id}`);
+      if (response.data.success) {
+        toast.success("Blog deleted successfully!");
         // Refresh the blog list
         loadBlogs();
       } else {
-        toast.error("Failed to delete blog")
+        toast.error("Failed to delete blog");
       }
     } catch (error) {
-      toast.error("Error deleting blog")
-      console.error("Error deleting blog:", error)
+      toast.error("Error deleting blog");
+      console.error("Error deleting blog:", error);
     }
-  }
+  };
 
   const handleEdit = (blogId: string) => {
     navigate(`/blogs/edit/${blogId}`);
-  }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -172,7 +189,11 @@ const BlogManagementSection = () => {
           >
             <Filter className="h-4 w-4 mr-2" />
             Filters
-            {showFilters ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
+            {showFilters ? (
+              <ChevronUp className="h-4 w-4 ml-2" />
+            ) : (
+              <ChevronDown className="h-4 w-4 ml-2" />
+            )}
           </button>
         </div>
 
@@ -180,11 +201,17 @@ const BlogManagementSection = () => {
           <div className="bg-gray-50 p-4 rounded-md mb-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
                 <select
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as "all" | "published" | "draft")}
+                  onChange={(e) =>
+                    setStatusFilter(
+                      e.target.value as "all" | "published" | "draft"
+                    )
+                  }
                 >
                   <option value="all">All</option>
                   <option value="published">Published</option>
@@ -193,11 +220,17 @@ const BlogManagementSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sort By
+                </label>
                 <select
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as "date" | "views" | "likes" | "comments")}
+                  onChange={(e) =>
+                    setSortBy(
+                      e.target.value as "date" | "views" | "likes" | "comments"
+                    )
+                  }
                 >
                   <option value="date">Date</option>
                   <option value="views">Views</option>
@@ -207,13 +240,21 @@ const BlogManagementSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Order</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Order
+                </label>
                 <button
                   onClick={toggleSortOrder}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black flex items-center justify-between"
                 >
-                  <span>{sortOrder === "asc" ? "Ascending" : "Descending"}</span>
-                  {sortOrder === "asc" ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  <span>
+                    {sortOrder === "asc" ? "Ascending" : "Descending"}
+                  </span>
+                  {sortOrder === "asc" ? (
+                    <ChevronUp className="h-4 w-4" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>
@@ -225,9 +266,15 @@ const BlogManagementSection = () => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Blog</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Views</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Blog
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Views
+              </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Engagement
               </th>
@@ -249,13 +296,17 @@ const BlogManagementSection = () => {
                       alt={blog.title}
                       className="h-10 w-10 rounded-md object-cover mr-3"
                     />
-                    <div className="text-sm font-medium text-gray-900">{blog.title}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {blog.title}
+                    </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      blog.status === "published" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                      blog.status === "published"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
                     }`}
                   >
                     {blog.status}
@@ -283,7 +334,11 @@ const BlogManagementSection = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <div className="flex justify-end space-x-2">
-                    <Link to={`/blogs/${blog._id}`} className="text-gray-600 hover:text-gray-900" title="View">
+                    <Link
+                      to={`/blogs/${blog._id}`}
+                      className="text-gray-600 hover:text-gray-900"
+                      title="View"
+                    >
                       <Eye className="h-5 w-5" />
                     </Link>
                     <button
@@ -310,11 +365,13 @@ const BlogManagementSection = () => {
 
       {filteredBlogs.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500">No blogs found matching your criteria.</p>
+          <p className="text-gray-500">
+            No blogs found matching your criteria.
+          </p>
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default BlogManagementSection
+export default BlogManagementSection;

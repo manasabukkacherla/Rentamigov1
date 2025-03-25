@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import ProfileSection from "../blogs/Dashboard/ProfileSection"
-import StatisticsSection from "../blogs/Dashboard/StatisticsSection"
-import RecentBlogsSection from "../blogs/Dashboard/RecentBlogsSection"
-import BlogManagementSection from "../blogs/Dashboard/BlogManagementSection"
-import DashboardNavigation from "../blogs/Dashboard/DashboardNavigation"
-import { getAllBlogs } from "../blogs/blogService1"
-import { Link, useNavigate } from "react-router-dom"
-import { PenSquare, RefreshCw } from 'lucide-react'
-import axios from "axios"
-import { toast } from "react-toastify"
+import type React from "react";
+import { useState, useEffect } from "react";
+import ProfileSection from "../blogs/Dashboard/ProfileSection";
+import StatisticsSection from "../blogs/Dashboard/StatisticsSection";
+import RecentBlogsSection from "../blogs/Dashboard/RecentBlogsSection";
+import BlogManagementSection from "../blogs/Dashboard/BlogManagementSection";
+import DashboardNavigation from "../blogs/Dashboard/DashboardNavigation";
+import { getAllBlogs } from "../blogs/blogService1";
+import { Link, useNavigate } from "react-router-dom";
+import { PenSquare, RefreshCw } from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 interface StatisticsData {
   totalBlogs: number;
@@ -54,10 +54,12 @@ interface User {
 }
 
 const UserDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"overview" | "blogs" | "stats" | "settings">("overview")
-  const [userBlogs, setUserBlogs] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "blogs" | "stats" | "settings"
+  >("overview");
+  const [userBlogs, setUserBlogs] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const defaultUser: User = {
     username: "",
@@ -78,59 +80,63 @@ const UserDashboard: React.FC = () => {
   };
 
   const [userDetails, setUserdetails] = useState<User>(defaultUser);
-  const [editedUser, setEditedUser] = useState<User>({ ...userDetails })
+  const [editedUser, setEditedUser] = useState<User>({ ...userDetails });
   // console.log(userDetails, editedUser)
 
   const getUser = async () => {
     try {
-      const user = sessionStorage.getItem('user')
+      const user = sessionStorage.getItem("user");
       if (user) {
         const userId = JSON.parse(user).id;
-        const response = await axios.get(`http://localhost:8000/api/user/${userId}`)
+        const response = await axios.get(`/api/user/${userId}`);
         if (response.data.success) {
           // console.log(response.data.user)
-          setUserdetails(response.data.user)
-          setEditedUser(response.data.user)
+          setUserdetails(response.data.user);
+          setEditedUser(response.data.user);
         }
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
-    getUser()
-  }, [])
+    getUser();
+  }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
     setEditedUser((prev) => ({
       ...prev,
       [name]: value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log(editedUser)
+    e.preventDefault();
+    console.log(editedUser);
 
     try {
-      const user = sessionStorage.getItem('user')
+      const user = sessionStorage.getItem("user");
       if (user) {
         const userId = JSON.parse(user).id;
-        const response = await axios.put(`http://localhost:8000/api/user/${userId}/edit`, {editedUser})
-        if(response.data.success) {
-          console.log(response.data.user)
-          toast.success("Profile Updated Successfully!!")
-          getUser()
+        const response = await axios.put(`/api/user/${userId}/edit`, {
+          editedUser,
+        });
+        if (response.data.success) {
+          console.log(response.data.user);
+          toast.success("Profile Updated Successfully!!");
+          getUser();
         } else {
-          toast.error(response.data.error)
+          toast.error(response.data.error);
         }
       }
     } catch (error) {
-      toast.error("Something went wrong")
+      toast.error("Something went wrong");
     }
-  }
+  };
 
   // Mock user data
   const user = {
@@ -147,32 +153,29 @@ const UserDashboard: React.FC = () => {
       instagram: "@alex.writes",
       linkedin: "alexjohnson",
     },
-  }
+  };
 
- 
   useEffect(() => {
-    loadBlogs()
-  }, [])
+    loadBlogs();
+  }, []);
 
   const loadBlogs = async () => {
     try {
-      setIsLoading(true)
-      const user = sessionStorage.getItem('user')
+      setIsLoading(true);
+      const user = sessionStorage.getItem("user");
       if (!user) {
-        toast.error('Login First!!')
-        navigate('/login')
-        return
+        toast.error("Login First!!");
+        navigate("/login");
+        return;
       }
       const author = JSON.parse(user).id;
 
-      const response = await axios.get(`http://localhost:8000/api/blog/myBlogs/${author}`);
+      const response = await axios.get(`/api/blog/myBlogs/${author}`);
       // console.log(response.data)
-      setUserBlogs(response.data.blogs)
+      setUserBlogs(response.data.blogs);
 
-      setIsLoading(false)
-    } catch (error) {
-
-    }
+      setIsLoading(false);
+    } catch (error) {}
 
     // setIsLoading(true)
     // // Get blogs from service
@@ -188,7 +191,7 @@ const UserDashboard: React.FC = () => {
 
     // setUserBlogs(transformedBlogs)
     // setIsLoading(false)
-  }
+  };
 
   // Add event listener to handle the custom event for switching tabs
   useEffect(() => {
@@ -196,10 +199,10 @@ const UserDashboard: React.FC = () => {
       setActiveTab("blogs");
     };
 
-    window.addEventListener('switchToBlogsTab', handleSwitchToBlogsTab);
+    window.addEventListener("switchToBlogsTab", handleSwitchToBlogsTab);
 
     return () => {
-      window.removeEventListener('switchToBlogsTab', handleSwitchToBlogsTab);
+      window.removeEventListener("switchToBlogsTab", handleSwitchToBlogsTab);
     };
   }, []);
 
@@ -209,11 +212,11 @@ const UserDashboard: React.FC = () => {
     // Replace the URL with your actual backend API endpoint
     const fetchStats = async () => {
       try {
-        const user = sessionStorage.getItem('user');
+        const user = sessionStorage.getItem("user");
 
         if (user) {
           const author = JSON.parse(user).id;
-          const response = await axios.get(`http://localhost:8000/api/stats/${author}`);
+          const response = await axios.get(`/api/stats/${author}`);
 
           setStats(response.data); // Store the fetched data
           // console.log(stats)
@@ -235,7 +238,10 @@ const UserDashboard: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Navigation */}
-          <DashboardNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+          <DashboardNavigation
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
 
           {/* Main Content */}
           <div className="flex-1">
@@ -279,16 +285,22 @@ const UserDashboard: React.FC = () => {
 
                 {activeTab === "stats" && (
                   <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-2xl font-bold mb-6">Detailed Statistics</h2>
+                    <h2 className="text-2xl font-bold mb-6">
+                      Detailed Statistics
+                    </h2>
 
                     {/* Expanded statistics view */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-lg font-medium mb-2">Content Overview</h3>
+                        <h3 className="text-lg font-medium mb-2">
+                          Content Overview
+                        </h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Blogs:</span>
-                            <span className="font-bold">{stats.totalBlogs}</span>
+                            <span className="font-bold">
+                              {stats.totalBlogs}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Published:</span>
@@ -301,7 +313,9 @@ const UserDashboard: React.FC = () => {
                             <span className="font-bold">{stats.drafts}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Avg. Word Count:</span>
+                            <span className="text-gray-600">
+                              Avg. Word Count:
+                            </span>
                             <span className="font-bold">1,245</span>
                           </div>
                         </div>
@@ -312,48 +326,70 @@ const UserDashboard: React.FC = () => {
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Views:</span>
-                            <span className="font-bold">{stats.totalViews}</span>
+                            <span className="font-bold">
+                              {stats.totalViews}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Total Likes:</span>
-                            <span className="font-bold">{stats.totalLikes}</span>
+                            <span className="font-bold">
+                              {stats.totalLikes}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Total Comments:</span>
-                            <span className="font-bold">{stats.totalComments}</span>
+                            <span className="text-gray-600">
+                              Total Comments:
+                            </span>
+                            <span className="font-bold">
+                              {stats.totalComments}
+                            </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Avg. Engagement Rate:</span>
+                            <span className="text-gray-600">
+                              Avg. Engagement Rate:
+                            </span>
                             <span className="font-bold">6.5%</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="bg-gray-50 p-4 rounded-lg">
-                        <h3 className="text-lg font-medium mb-2">Growth (This Month)</h3>
+                        <h3 className="text-lg font-medium mb-2">
+                          Growth (This Month)
+                        </h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
                             <span className="text-gray-600">New Views:</span>
-                            <span className="font-bold text-green-600">+{stats.viewsThisMonth}</span>
+                            <span className="font-bold text-green-600">
+                              +{stats.viewsThisMonth}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">New Likes:</span>
-                            <span className="font-bold text-green-600">+{stats.likesThisMonth}</span>
+                            <span className="font-bold text-green-600">
+                              +{stats.likesThisMonth}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">New Comments:</span>
-                            <span className="font-bold text-green-600">+{stats.commentsThisMonth}</span>
+                            <span className="font-bold text-green-600">
+                              +{stats.commentsThisMonth}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600">Growth Rate:</span>
-                            <span className="font-bold text-green-600">+12.3%</span>
+                            <span className="font-bold text-green-600">
+                              +12.3%
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     {/* Top performing content */}
-                    <h3 className="text-xl font-bold mb-4">Top Performing Content</h3>
+                    <h3 className="text-xl font-bold mb-4">
+                      Top Performing Content
+                    </h3>
                     <div className="overflow-x-auto">
                       <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
@@ -379,20 +415,34 @@ const UserDashboard: React.FC = () => {
                           {userBlogs.slice(0, 5).map((blog) => (
                             <tr key={blog._id}>
                               <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-medium text-gray-900">{blog.title}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{blog.views?.toLocaleString()}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{blog.likes.length}</div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm text-gray-500">{blog.comments.length}</div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {blog.title}
+                                </div>
                               </td>
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <div className="text-sm text-gray-500">
-                                  {(((blog.likes.length + blog.comments.length) / (blog.views || 1)) * 100).toFixed(1)}%
+                                  {blog.views?.toLocaleString()}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {blog.likes.length}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {blog.comments.length}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="text-sm text-gray-500">
+                                  {(
+                                    ((blog.likes.length +
+                                      blog.comments.length) /
+                                      (blog.views || 1)) *
+                                    100
+                                  ).toFixed(1)}
+                                  %
                                 </div>
                               </td>
                             </tr>
@@ -405,15 +455,21 @@ const UserDashboard: React.FC = () => {
 
                 {activeTab === "settings" && (
                   <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-2xl font-bold mb-6">Account Settings</h2>
+                    <h2 className="text-2xl font-bold mb-6">
+                      Account Settings
+                    </h2>
 
                     <form className="space-y-8" onSubmit={handleSubmit}>
                       {/* Profile Settings */}
                       <div>
-                        <h3 className="text-lg font-medium mb-4">Profile Information</h3>
+                        <h3 className="text-lg font-medium mb-4">
+                          Profile Information
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Full Name
+                            </label>
                             <input
                               id="user-name"
                               type="text"
@@ -421,11 +477,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.fullName}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.fullName}
+                              // defaultValue={userDetails.fullName}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Email
+                            </label>
                             <input
                               id="user-email"
                               type="email"
@@ -433,11 +491,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.email}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.email}
+                              // defaultValue={userDetails.email}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Phone
+                            </label>
                             <input
                               id="user-phone"
                               type="text"
@@ -445,11 +505,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.phone}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.phone}
+                              // defaultValue={userDetails.phone}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Address
+                            </label>
                             <input
                               id="user-address"
                               type="text"
@@ -457,11 +519,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.address}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.address}
+                              // defaultValue={userDetails.address}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              City
+                            </label>
                             <input
                               id="user-city"
                               type="text"
@@ -469,11 +533,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.city}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.city}
+                              // defaultValue={userDetails.city}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              State
+                            </label>
                             <input
                               id="user-state"
                               type="text"
@@ -481,11 +547,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.state}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.state}
+                              // defaultValue={userDetails.state}
                             />
                           </div>
                           <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Bio
+                            </label>
                             <textarea
                               id="user-bio"
                               name="bio"
@@ -493,7 +561,7 @@ const UserDashboard: React.FC = () => {
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
                               rows={4}
-                            // defaultValue={userDetails.bio}
+                              // defaultValue={userDetails.bio}
                             />
                           </div>
                         </div>
@@ -501,10 +569,14 @@ const UserDashboard: React.FC = () => {
 
                       {/* Social Links */}
                       <div>
-                        <h3 className="text-lg font-medium mb-4">Social Links</h3>
+                        <h3 className="text-lg font-medium mb-4">
+                          Social Links
+                        </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Website
+                            </label>
                             <input
                               id="user-website"
                               type="text"
@@ -512,11 +584,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.website}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.website}
+                              // defaultValue={userDetails.website}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Twitter</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Twitter
+                            </label>
                             <input
                               id="user-twitter"
                               type="text"
@@ -524,11 +598,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.twitter}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.twitter}
+                              // defaultValue={userDetails.twitter}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Instagram
+                            </label>
                             <input
                               id="user-instagram"
                               type="text"
@@ -536,11 +612,13 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.instagram}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.instagram}
+                              // defaultValue={userDetails.instagram}
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              LinkedIn
+                            </label>
                             <input
                               id="user-linkedin"
                               type="text"
@@ -548,7 +626,7 @@ const UserDashboard: React.FC = () => {
                               value={editedUser.linkedin}
                               onChange={handleInputChange}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-                            // defaultValue={userDetails.linkedin}
+                              // defaultValue={userDetails.linkedin}
                             />
                           </div>
                         </div>
@@ -629,7 +707,7 @@ const UserDashboard: React.FC = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default UserDashboard
+export default UserDashboard;

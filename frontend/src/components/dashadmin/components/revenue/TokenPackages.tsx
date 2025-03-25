@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Coins, Edit, Trash2 } from 'lucide-react';
-import { showToast } from '../../components/Toast';
-import { Toaster } from 'react-hot-toast';
-import TokenForm from './TokenForm'; // Import the TokenForm component
+import React, { useEffect, useState } from "react";
+import { Coins, Edit, Trash2 } from "lucide-react";
+import { showToast } from "../../components/Toast";
+import { Toaster } from "react-hot-toast";
+import TokenForm from "./TokenForm"; // Import the TokenForm component
 
 interface TokenFormData {
   name: string;
@@ -14,9 +14,8 @@ interface TokenFormData {
   validityDays: number;
   features: string[];
   description: string;
-  status: "active" | "inactive";  // Ensure status is required
+  status: "active" | "inactive"; // Ensure status is required
 }
-
 
 interface TokenPackage {
   _id: string;
@@ -35,20 +34,22 @@ interface TokenPackage {
 const TokenPackages: React.FC = () => {
   const [packages, setPackages] = useState<TokenPackage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [editingPackage, setEditingPackage] = useState<TokenPackage | null>(null);
+  const [editingPackage, setEditingPackage] = useState<TokenPackage | null>(
+    null
+  );
 
   // Fetch all token packages
   const fetchTokenPackages = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/tokens');
-      if (!response.ok) throw new Error('Failed to fetch token packages');
+      const response = await fetch("/api/tokens");
+      if (!response.ok) throw new Error("Failed to fetch token packages");
 
       const data = await response.json();
       setPackages(data);
     } catch (error) {
-      console.error('Error fetching token packages:', error);
-      showToast.error('Error fetching token packages');
+      console.error("Error fetching token packages:", error);
+      showToast.error("Error fetching token packages");
     }
     setLoading(false);
   };
@@ -60,53 +61,58 @@ const TokenPackages: React.FC = () => {
   // Open Edit Modal with Token Data
   const handleEdit = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tokens/${id}`);
-      if (!response.ok) throw new Error('Failed to fetch package details');
+      const response = await fetch(`/api/tokens/${id}`);
+      if (!response.ok) throw new Error("Failed to fetch package details");
 
       const packageData = await response.json();
       setEditingPackage(packageData);
     } catch (error) {
-      console.error('Error fetching package:', error);
-      showToast.error('Error fetching package details');
+      console.error("Error fetching package:", error);
+      showToast.error("Error fetching package details");
     }
   };
 
   // Handle Delete Token Package
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this package?')) return;
+    if (!window.confirm("Are you sure you want to delete this package?"))
+      return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/tokens/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`/api/tokens/${id}`, {
+        method: "DELETE",
       });
 
-      if (!response.ok) throw new Error('Failed to delete package');
+      if (!response.ok) throw new Error("Failed to delete package");
 
-      showToast.success('Token package deleted successfully');
+      showToast.success("Token package deleted successfully");
       fetchTokenPackages(); // Refresh the list
     } catch (error) {
-      console.error('Error deleting package:', error);
-      showToast.error('Error deleting package');
+      console.error("Error deleting package:", error);
+      showToast.error("Error deleting package");
     }
   };
 
   // Handle Save (PUT API Call)
-  const handleSave = async (data: TokenFormData & { status: "active" | "inactive" }, _isEdit: boolean, _id?: string) => {
+  const handleSave = async (
+    data: TokenFormData & { status: "active" | "inactive" },
+    _isEdit: boolean,
+    _id?: string
+  ) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/tokens/${_id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch(`/api/tokens/${_id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error('Failed to update package');
+      if (!response.ok) throw new Error("Failed to update package");
 
-      showToast.success('Token package updated successfully');
+      showToast.success("Token package updated successfully");
       setEditingPackage(null); // Close modal
       fetchTokenPackages(); // Refresh data
     } catch (error) {
-      console.error('Error updating package:', error);
-      showToast.error('Error updating package');
+      console.error("Error updating package:", error);
+      showToast.error("Error updating package");
     }
   };
 
@@ -122,11 +128,17 @@ const TokenPackages: React.FC = () => {
               <div>
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900">{token.name}</h4>
+                    <h4 className="text-lg font-semibold text-gray-900">
+                      {token.name}
+                    </h4>
                     <div className="mt-1 space-x-4">
-                      <span className="text-2xl font-bold text-gray-900">${token.price}</span>
+                      <span className="text-2xl font-bold text-gray-900">
+                        ${token.price}
+                      </span>
                       <span className="text-lg text-gray-600">
-                        {token.tokens} tokens {token.bonusTokens > 0 && `+ ${token.bonusTokens} bonus`}
+                        {token.tokens} tokens{" "}
+                        {token.bonusTokens > 0 &&
+                          `+ ${token.bonusTokens} bonus`}
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mt-1">
@@ -157,11 +169,13 @@ const TokenPackages: React.FC = () => {
                   ))}
                 </ul>
                 <div className="mt-4 pt-4 border-t">
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    token.status === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm ${
+                      token.status === "active"
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
                     {token.status}
                   </span>
                 </div>

@@ -55,12 +55,9 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     try {
       console.log("Google Credential Response:", credentialResponse);
 
-      const response = await axios.post(
-        "http://localhost:8000/api/loginuser/google",
-        {
-          credential: credentialResponse.credential,
-        }
-      );
+      const response = await axios.post("/api/loginuser/google", {
+        credential: credentialResponse.credential,
+      });
 
       const userData = response.data;
       console.log("✅ Google Login Successful:", userData);
@@ -111,10 +108,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
     setError(null);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8000/api/loginuser/login",
-        formData
-      );
+      const response = await axios.post("/api/loginuser/login", formData);
       const userData = response.data;
 
       // ✅ Store full user details in sessionStorage

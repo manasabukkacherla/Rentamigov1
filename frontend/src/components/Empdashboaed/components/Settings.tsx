@@ -81,9 +81,7 @@ const Settings: React.FC = () => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/sign/employee/${userId}`
-        );
+        const response = await fetch(`/api/sign/employee/${userId}`);
         const data = await response.json();
 
         if (response.ok) {
@@ -149,16 +147,13 @@ const Settings: React.FC = () => {
     }
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/sign/employee/update/${userId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedUserData),
-        }
-      );
+      const response = await fetch(`/api/sign/employee/update/${userId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedUserData),
+      });
 
       const data = await response.json();
 
@@ -228,7 +223,7 @@ const Settings: React.FC = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/sign/employee/update-password/${userId}`,
+        `/api/sign/employee/update-password/${userId}`,
         {
           method: "PUT",
           headers: {
