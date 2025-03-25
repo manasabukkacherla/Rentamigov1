@@ -29,9 +29,11 @@ import BlogDetail from "./components/blogs/BlogDetail"
 import EditorMenuBar from "./components/editor/EditorMenuBar"
 import EmployeeLogin from "./components/Logins/EmployeeLogin"
 import Revenue from "./components/dashadmin/components/Revenue"
+import BugReportPage from "./components/bug-report/BugReportPage"
 
 import { ToastContainer } from "react-toastify"
 import ErrorBoundary from "./components/blogs/ErrorBoundary"
+import BugDashboard from "./components/bug-dashboard/BugDashboard"
 
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
@@ -68,6 +70,8 @@ const App = () => {
           <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
           <Route path="/Tenancypolicy" element={<TenancyPolicy />} />
           <Route path="/propertydetails" element={<Propertydetail />} />
+          <Route path="/report-bug" element={<BugReportPage />} />
+          <Route path="/bug-dashboard" element={<BugDashboard />} />
 
           <Route path="/updatePropertyform" element={<Propertmain />} />
 
@@ -94,6 +98,7 @@ const App = () => {
           <Route path="/admindash/employees" element={<Admindash defaultSection="employees" />} />
           <Route path="/admindash/analytics" element={<Admindash defaultSection="analytics" />} />
           <Route path="/admindash/users" element={<Admindash defaultSection="users" />} />
+          <Route path="/admindash/bug-reports" element={<Admindash defaultSection="bug-reports" />} />
           <Route path="/admindash/notifications" element={<Admindash defaultSection="notifications" />} />
           <Route path="/admindash/settings" element={<Admindash defaultSection="settings" />} />
 
@@ -115,8 +120,8 @@ const App = () => {
             }
           />
           <Route path="/blogs" element={<HomePage />} />
-          <Route path="/blogs/Create" element={<CreateBlogPage/>} />
-          <Route path="/blogs/edit/:id" element={<CreateBlogPage />}/>
+          <Route path="/blogs/Create" element={<CreateBlogPage />} />
+          <Route path="/blogs/edit/:id" element={<CreateBlogPage />} />
           {/* Dashboard Layout */}
           <Route path="/blogs/Dashboard" element={<UserDashboard />} />
           <Route path="/blogs/edit/:id" element={<EditorMenuBar editor={null} />} />
