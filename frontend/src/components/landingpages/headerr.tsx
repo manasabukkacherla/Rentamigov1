@@ -4,12 +4,6 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-"use client"
-
-import type React from "react"
-import { useState, useEffect } from "react"
-import { useNavigate, Link } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
 
 const Headerr: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -58,18 +52,6 @@ const Headerr: React.FC = () => {
   ]
 
   return (
-    <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
-      }`}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center cursor-pointer" onClick={() => navigate("/Homepage")}>
-            <img src="./images/rentamigologou.png" alt="Rentamigo Logo" className="h-10 w-10 object-contain" />
-            <span className={`text-2xl font-bold ml-1 ${scrolled ? "text-black" : "text-white"}`}>entamigo</span>
-          </div>
     <header
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
@@ -262,9 +244,6 @@ const Headerr: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
-  )
-}
 
       {/* Mobile Menu */}
       <AnimatePresence>
