@@ -1,24 +1,41 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useRef, useEffect } from "react"
-import { useNavigate, useParams } from "react-router-dom"
-import { LucideImage, X, Upload, Check, AlertCircle, ChevronRight, ChevronLeft, Eye, Save, Layout, Type, FileText, TagIcon, ImageIcon, Settings, ArrowLeft } from 'lucide-react'
-import { useEditor, EditorContent } from "@tiptap/react"
-import StarterKit from "@tiptap/starter-kit"
-import Placeholder from "@tiptap/extension-placeholder"
-import TipTapImage from "@tiptap/extension-image"
-import Link from "@tiptap/extension-link"
-import TextAlign from "@tiptap/extension-text-align"
-import Underline from "@tiptap/extension-underline"
-import { getBlogById } from "../blogs/blogService1" // Adjust the path as necessary
-import TagInput from "../blogs/TagInput"
-import EditorMenuBar from "../blogs/EditorMenuBar"
-import type { Blogpost } from "../Blogs/types"
-import { motion, AnimatePresence } from "framer-motion"
-import axios from "axios"
-import { toast } from "react-toastify"
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  LucideImage,
+  X,
+  Upload,
+  Check,
+  AlertCircle,
+  ChevronRight,
+  ChevronLeft,
+  Eye,
+  Save,
+  Layout,
+  Type,
+  FileText,
+  TagIcon,
+  ImageIcon,
+  Settings,
+  ArrowLeft,
+} from "lucide-react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import TipTapImage from "@tiptap/extension-image";
+import Link from "@tiptap/extension-link";
+import TextAlign from "@tiptap/extension-text-align";
+import Underline from "@tiptap/extension-underline";
+import { getBlogById, createBlog, updateBlog } from "../blogs/blogService1";
+import TagInput from "../blogs/TagInput";
+import EditorMenuBar from "../blogs/EditorMenuBar";
+import type { Blogpost } from "../Blogs/types";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 // interface CreateBlog {
 //   isEditing: boolean
@@ -26,20 +43,20 @@ import { toast } from "react-toastify"
 
 // const CreateBlogPage: React.FC<CreateBlog> = ({ isEditing }) => {
 const CreateBlogPage = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [excerpt, setExcerpt] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [excerpt, setExcerpt] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [coverImage, setCoverImage] = useState('');
-  const [category, setCategory] = useState('');
+  const [coverImage, setCoverImage] = useState("");
+  const [category, setCategory] = useState("");
   const [readTime, setReadTime] = useState(5);
   // const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<("published" | "draft")>('draft');
+  const [status, setStatus] = useState<"published" | "draft">("draft");
 
   const navigate = useNavigate();
-  const isEditing = window.location.pathname.includes('edit');
-  const id = isEditing ? window.location.pathname.split('/').pop() : null;
+  const isEditing = window.location.pathname.includes("edit");
+  const id = isEditing ? window.location.pathname.split("/").pop() : null;
 
   // const validateForm = () => {
   //   const newErrors = {};
@@ -56,30 +73,38 @@ const CreateBlogPage = () => {
   // const [content, setContent] = useState("")
   // const [excerpt, setExcerpt] = useState("")
   // const [tags, setTags] = useState<string[]>([])
-  const [currentTag, setCurrentTag] = useState("")
+  const [currentTag, setCurrentTag] = useState("");
   // const [coverImage, setCoverImage] = useState<string | null>(null)
   // const [category, setCategory] = useState("Lifestyle")
   // const [readTime, setReadTime] = useState(5)
   // const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
   // const [successMessage, setSuccessMessage] = useState("")
 
   // UI state
-  const [activeStep, setActiveStep] = useState(0)
-  const [showPreview, setShowPreview] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
-  const [autoSaveMessage, setAutoSaveMessage] = useState("")
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const previewRef = useRef<HTMLDivElement>(null)
+  const [activeStep, setActiveStep] = useState(0);
+  const [showPreview, setShowPreview] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [autoSaveMessage, setAutoSaveMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   // Steps for the creation process
   const steps = [
     { id: "basics", title: "Basic Info", icon: <Layout className="h-5 w-5" /> },
     { id: "content", title: "Content", icon: <FileText className="h-5 w-5" /> },
     { id: "media", title: "Media", icon: <ImageIcon className="h-5 w-5" /> },
-    { id: "metadata", title: "Metadata", icon: <TagIcon className="h-5 w-5" /> },
-    { id: "settings", title: "Settings", icon: <Settings className="h-5 w-5" /> },
-  ]
+    {
+      id: "metadata",
+      title: "Metadata",
+      icon: <TagIcon className="h-5 w-5" />,
+    },
+    {
+      id: "settings",
+      title: "Settings",
+      icon: <Settings className="h-5 w-5" />,
+    },
+  ];
 
   // Initialize editor
   const editor = useEditor({
@@ -101,27 +126,27 @@ const CreateBlogPage = () => {
     ],
     content: content,
     onUpdate: ({ editor }) => {
-      setContent(editor.getHTML())
+      setContent(editor.getHTML());
 
       // Clear error when content is edited
       if (errors.content) {
         setErrors((prev) => {
-          const newErrors = { ...prev }
-          delete newErrors.content
-          return newErrors
-        })
+          const newErrors = { ...prev };
+          delete newErrors.content;
+          return newErrors;
+        });
       }
 
       // Trigger auto-save
       // handleAutoSave()
     },
-  })
+  });
 
   useEffect(() => {
     const loadData = async () => {
       if (isEditing && id) {
         try {
-          const response = await axios.get(`http://localhost:8000/api/blog/${id}`);
+          const response = await axios.get(`/api/blog/${id}`);
           if (response.data.success) {
             let blog = response.data.blog;
             if (blog) {
@@ -134,7 +159,7 @@ const CreateBlogPage = () => {
 
               setTitle(blog.title);
               setContent(blog.content);
-              setExcerpt(blog.excerpt || '');
+              setExcerpt(blog.excerpt || "");
               setTags(blog.tags);
               setCoverImage(blog.coverImage);
               setCategory(blog.category);
@@ -148,8 +173,8 @@ const CreateBlogPage = () => {
             }
           }
         } catch (error) {
-          toast.error('Blog not found!');
-          navigate('/blogs/Dashboard');
+          toast.error("Blog not found!");
+          navigate("/blogs/Dashboard");
         }
       }
     };
@@ -160,87 +185,91 @@ const CreateBlogPage = () => {
   // Scroll to preview when toggled
   useEffect(() => {
     if (showPreview && previewRef.current) {
-      previewRef.current.scrollIntoView({ behavior: "smooth" })
+      previewRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [showPreview])
+  }, [showPreview]);
 
   const handleAddTag = () => {
     if (currentTag.trim() && !tags.includes(currentTag.trim())) {
-      setTags([...tags, currentTag.trim()])
-      setCurrentTag("")
+      setTags([...tags, currentTag.trim()]);
+      setCurrentTag("");
 
       // Clear error when tags are added
       if (errors.tags) {
         setErrors((prev) => {
-          const newErrors = { ...prev }
-          delete newErrors.tags
-          return newErrors
-        })
+          const newErrors = { ...prev };
+          delete newErrors.tags;
+          return newErrors;
+        });
       }
 
       // Trigger auto-save
       // handleAutoSave()
     }
-  }
+  };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
+    setTags(tags.filter((tag) => tag !== tagToRemove));
     // Trigger auto-save
     // handleAutoSave()
-  }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        setCoverImage(reader.result as string)
+        setCoverImage(reader.result as string);
 
         // Clear error when image is uploaded
         if (errors.coverImage) {
           setErrors((prev) => {
-            const newErrors = { ...prev }
-            delete newErrors.coverImage
-            return newErrors
-          })
+            const newErrors = { ...prev };
+            delete newErrors.coverImage;
+            return newErrors;
+          });
         }
 
         // Trigger auto-save
         // handleAutoSave()
-      }
-      reader.readAsDataURL(file)
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const triggerImageUpload = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {}
+    const newErrors: Record<string, string> = {};
 
     if (activeStep === 0) {
-      if (!title.trim()) newErrors.title = "Title is required"
-      if (!excerpt.trim()) newErrors.excerpt = "Excerpt is required"
+      if (!title.trim()) newErrors.title = "Title is required";
+      if (!excerpt.trim()) newErrors.excerpt = "Excerpt is required";
     }
 
     if (activeStep === 1) {
-      if (!content.trim() || content === "<p></p>") newErrors.content = "Content is required"
+      if (!content.trim() || content === "<p></p>")
+        newErrors.content = "Content is required";
     }
 
     if (activeStep === 2) {
-      if (!coverImage) newErrors.coverImage = "Cover image is required"
+      if (!coverImage) newErrors.coverImage = "Cover image is required";
     }
 
     if (activeStep === 3) {
-      if (tags.length === 0) newErrors.tags = "At least one tag is required"
+      if (tags.length === 0) newErrors.tags = "At least one tag is required";
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  const handleSubmit = async (e: React.FormEvent, submitStatus: "draft" | "published") => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+    submitStatus: "draft" | "published"
+  ) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -255,8 +284,8 @@ const CreateBlogPage = () => {
     setIsSubmitting(true);
 
     try {
-      const user = sessionStorage.getItem('user');
-      console.log(sessionStorage.getItem('user'));
+      const user = sessionStorage.getItem("user");
+      console.log(sessionStorage.getItem("user"));
 
       if (user) {
         const author = JSON.parse(user).id;
@@ -273,21 +302,21 @@ const CreateBlogPage = () => {
           category,
           readTime,
           author,
-          status: submitStatus
+          status: submitStatus,
         };
 
         // console.log(blogData)
         // console.log(status)
 
         if (isEditing && id) {
-          const response = await axios.put(`http://localhost:8000/api/blog/edit/${id}`, blogData);
+          const response = await axios.put(`/api/blog/edit/${id}`, blogData);
           if (response.data.success) {
             toast.success("Blog updated successfully");
           } else {
             toast.error("Failed to update the blog");
           }
         } else {
-          const response = await axios.post('http://localhost:8000/api/blog/add', blogData);
+          const response = await axios.post("/api/blog/add", blogData);
           if (response.data.success) {
             toast.success(response.data.message);
           } else {
@@ -295,10 +324,10 @@ const CreateBlogPage = () => {
           }
         }
 
-        navigate('/blogs/Dashboard');
+        navigate("/blogs/Dashboard");
       } else {
         toast.error("You must be logged in!");
-        navigate('/login');
+        navigate("/login");
       }
     } catch (error) {
       console.error("Error saving blog:", error);
@@ -310,40 +339,40 @@ const CreateBlogPage = () => {
 
   const addImageToEditor = (url: string) => {
     if (editor) {
-      editor.chain().focus().setImage({ src: url }).run()
+      editor.chain().focus().setImage({ src: url }).run();
     }
-  }
+  };
 
   const handleEditorImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader()
+      const reader = new FileReader();
       reader.onloadend = () => {
-        addImageToEditor(reader.result as string)
-      }
-      reader.readAsDataURL(file)
+        addImageToEditor(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
   const nextStep = () => {
     if (validateForm()) {
       if (activeStep < steps.length - 1) {
-        setActiveStep(activeStep + 1)
+        setActiveStep(activeStep + 1);
       }
     }
-  }
+  };
 
   const prevStep = () => {
     if (activeStep > 0) {
-      setActiveStep(activeStep - 1)
+      setActiveStep(activeStep - 1);
     }
-  }
+  };
 
   const goToStep = (index: number) => {
     if (validateForm()) {
-      setActiveStep(index)
+      setActiveStep(index);
     }
-  }
+  };
 
   // Calculate estimated read time based on content length
   // useEffect(() => {
@@ -362,7 +391,7 @@ const CreateBlogPage = () => {
     month: "long",
     day: "numeric",
     year: "numeric",
-  })
+  });
 
   return (
     <div className="bg-gray-50 min-h-screen pb-10">
@@ -376,7 +405,9 @@ const CreateBlogPage = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="text-3xl font-bold">{isEditing ? "Edit Blog Post" : "Create New Blog Post"}</h1>
+          <h1 className="text-3xl font-bold">
+            {isEditing ? "Edit Blog Post" : "Create New Blog Post"}
+          </h1>
 
           {/* Auto-save indicator */}
           <div className="ml-auto flex items-center">
@@ -388,7 +419,14 @@ const CreateBlogPage = () => {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -435,20 +473,28 @@ const CreateBlogPage = () => {
               <button
                 key={step.id}
                 onClick={() => goToStep(index)}
-                className={`flex flex-col items-center ${index <= activeStep ? "text-black" : "text-gray-400"
-                  } transition-colors duration-300`}
+                className={`flex flex-col items-center ${
+                  index <= activeStep ? "text-black" : "text-gray-400"
+                } transition-colors duration-300`}
               >
                 <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${index < activeStep
-                    ? "bg-green-100 text-green-600"
-                    : index === activeStep
+                  className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${
+                    index < activeStep
+                      ? "bg-green-100 text-green-600"
+                      : index === activeStep
                       ? "bg-black text-white"
                       : "bg-gray-100 text-gray-400"
-                    }`}
+                  }`}
                 >
-                  {index < activeStep ? <Check className="h-5 w-5" /> : step.icon}
+                  {index < activeStep ? (
+                    <Check className="h-5 w-5" />
+                  ) : (
+                    step.icon
+                  )}
                 </div>
-                <span className="text-xs font-medium hidden sm:block">{step.title}</span>
+                <span className="text-xs font-medium hidden sm:block">
+                  {step.title}
+                </span>
               </button>
             ))}
           </div>
@@ -483,7 +529,10 @@ const CreateBlogPage = () => {
 
                     {/* Title */}
                     <div className="mb-6">
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="title"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Title <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -491,48 +540,61 @@ const CreateBlogPage = () => {
                         id="title"
                         value={title}
                         onChange={(e) => {
-                          setTitle(e.target.value)
+                          setTitle(e.target.value);
                           if (errors.title) {
                             setErrors((prev) => {
-                              const newErrors = { ...prev }
-                              delete newErrors.title
-                              return newErrors
-                            })
+                              const newErrors = { ...prev };
+                              delete newErrors.title;
+                              return newErrors;
+                            });
                           }
                           // handleAutoSave()
                         }}
-                        className={`w-full px-4 py-3 border ${errors.title ? "border-red-500" : "border-gray-300"
-                          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
+                        className={`w-full px-4 py-3 border ${
+                          errors.title ? "border-red-500" : "border-gray-300"
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg`}
                         placeholder="Enter a catchy title..."
                       />
-                      {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                      {errors.title && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.title}
+                        </p>
+                      )}
                     </div>
 
                     {/* Excerpt */}
                     <div>
-                      <label htmlFor="excerpt" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="excerpt"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Excerpt <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         id="excerpt"
                         value={excerpt}
                         onChange={(e) => {
-                          setExcerpt(e.target.value)
+                          setExcerpt(e.target.value);
                           if (errors.excerpt) {
                             setErrors((prev) => {
-                              const newErrors = { ...prev }
-                              delete newErrors.excerpt
-                              return newErrors
-                            })
+                              const newErrors = { ...prev };
+                              delete newErrors.excerpt;
+                              return newErrors;
+                            });
                           }
                           // handleAutoSave()
                         }}
                         rows={3}
-                        className={`w-full px-4 py-3 border ${errors.excerpt ? "border-red-500" : "border-gray-300"
-                          } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
+                        className={`w-full px-4 py-3 border ${
+                          errors.excerpt ? "border-red-500" : "border-gray-300"
+                        } rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent`}
                         placeholder="Write a brief summary of your blog post..."
                       />
-                      {errors.excerpt && <p className="mt-1 text-sm text-red-600">{errors.excerpt}</p>}
+                      {errors.excerpt && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.excerpt}
+                        </p>
+                      )}
                       <p className="mt-1 text-sm text-gray-500">
                         This will be displayed in blog cards and search results.
                       </p>
@@ -557,10 +619,17 @@ const CreateBlogPage = () => {
                     </div>
 
                     {/* Rich Text Editor */}
-                    <div className={`border-t ${errors.content ? "border-red-500" : "border-gray-200"}`}>
+                    <div
+                      className={`border-t ${
+                        errors.content ? "border-red-500" : "border-gray-200"
+                      }`}
+                    >
                       <EditorMenuBar editor={editor} />
                       <div className="p-6 min-h-[400px]">
-                        <EditorContent editor={editor} className="prose max-w-none min-h-[400px]" />
+                        <EditorContent
+                          editor={editor}
+                          className="prose max-w-none min-h-[400px]"
+                        />
                       </div>
                       <div className="border-t border-gray-200 p-4 bg-gray-50 flex justify-between items-center">
                         <div>
@@ -573,7 +642,11 @@ const CreateBlogPage = () => {
                           />
                           <button
                             type="button"
-                            onClick={() => document.getElementById("editor-image-upload")?.click()}
+                            onClick={() =>
+                              document
+                                .getElementById("editor-image-upload")
+                                ?.click()
+                            }
                             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 transition-colors"
                           >
                             <Upload size={16} className="mr-1" />
@@ -582,16 +655,21 @@ const CreateBlogPage = () => {
                         </div>
                         <div className="text-sm text-gray-500">
                           {content.length > 0
-                            ? `${content
-                              .replace(/<[^>]*>/g, "")
-                              .split(/\s+/)
-                              .filter(Boolean).length
-                            } words`
+                            ? `${
+                                content
+                                  .replace(/<[^>]*>/g, "")
+                                  .split(/\s+/)
+                                  .filter(Boolean).length
+                              } words`
                             : "Start writing..."}
                         </div>
                       </div>
                     </div>
-                    {errors.content && <p className="px-6 py-2 text-sm text-red-600">{errors.content}</p>}
+                    {errors.content && (
+                      <p className="px-6 py-2 text-sm text-red-600">
+                        {errors.content}
+                      </p>
+                    )}
                   </motion.div>
                 )}
 
@@ -650,17 +728,39 @@ const CreateBlogPage = () => {
                       ) : (
                         <div
                           onClick={triggerImageUpload}
-                          className={`w-full h-80 border-2 border-dashed ${errors.coverImage ? "border-red-500" : "border-gray-300"
-                            } rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors`}
+                          className={`w-full h-80 border-2 border-dashed ${
+                            errors.coverImage
+                              ? "border-red-500"
+                              : "border-gray-300"
+                          } rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-gray-400 transition-colors`}
                         >
-                          <LucideImage size={48} className={errors.coverImage ? "text-red-400" : "text-gray-400"} />
-                          <p className={`mt-2 text-sm ${errors.coverImage ? "text-red-500" : "text-gray-500"}`}>
+                          <LucideImage
+                            size={48}
+                            className={
+                              errors.coverImage
+                                ? "text-red-400"
+                                : "text-gray-400"
+                            }
+                          />
+                          <p
+                            className={`mt-2 text-sm ${
+                              errors.coverImage
+                                ? "text-red-500"
+                                : "text-gray-500"
+                            }`}
+                          >
                             Click to upload cover image
                           </p>
-                          <p className="mt-1 text-xs text-gray-400">Recommended size: 1200 x 630 pixels</p>
+                          <p className="mt-1 text-xs text-gray-400">
+                            Recommended size: 1200 x 630 pixels
+                          </p>
                         </div>
                       )}
-                      {errors.coverImage && <p className="mt-1 text-sm text-red-600">{errors.coverImage}</p>}
+                      {errors.coverImage && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.coverImage}
+                        </p>
+                      )}
                     </div>
                   </motion.div>
                 )}
@@ -685,7 +785,7 @@ const CreateBlogPage = () => {
                         tags={tags}
                         currentTag={currentTag}
                         onTagChange={(value) => {
-                          setCurrentTag(value)
+                          setCurrentTag(value);
                           // handleAutoSave()
                         }}
                         onAddTag={handleAddTag}
@@ -696,7 +796,10 @@ const CreateBlogPage = () => {
 
                     {/* Category */}
                     <div>
-                      <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="category"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Category
                       </label>
                       <input
@@ -730,7 +833,10 @@ const CreateBlogPage = () => {
 
                     {/* Read Time */}
                     <div className="mb-6">
-                      <label htmlFor="readTime" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="readTime"
+                        className="block text-sm font-medium text-gray-700 mb-1"
+                      >
                         Estimated Read Time (minutes)
                       </label>
                       <div className="flex items-center">
@@ -739,7 +845,7 @@ const CreateBlogPage = () => {
                           id="readTime"
                           value={readTime}
                           onChange={(e) => {
-                            setReadTime(Number.parseInt(e.target.value) || 5)
+                            setReadTime(Number.parseInt(e.target.value) || 5);
                             // handleAutoSave()
                           }}
                           min="1"
@@ -749,13 +855,16 @@ const CreateBlogPage = () => {
                         <span className="ml-2 text-gray-600">minutes</span>
                       </div>
                       <p className="mt-1 text-sm text-gray-500">
-                        Automatically calculated based on content length, but you can adjust if needed.
+                        Automatically calculated based on content length, but
+                        you can adjust if needed.
                       </p>
                     </div>
 
                     {/* Publishing options */}
                     <div className="mb-6">
-                      <h3 className="text-md font-medium mb-2">Publishing Options</h3>
+                      <h3 className="text-md font-medium mb-2">
+                        Publishing Options
+                      </h3>
                       <div className="bg-gray-50 p-4 rounded-md">
                         <div className="flex items-center mb-4">
                           <input
@@ -765,7 +874,10 @@ const CreateBlogPage = () => {
                             checked={true}
                             className="h-4 w-4 text-black focus:ring-black border-gray-300"
                           />
-                          <label htmlFor="publish-now" className="ml-2 block text-sm text-gray-700">
+                          <label
+                            htmlFor="publish-now"
+                            className="ml-2 block text-sm text-gray-700"
+                          >
                             Publish immediately
                           </label>
                         </div>
@@ -777,7 +889,10 @@ const CreateBlogPage = () => {
                             disabled
                             className="h-4 w-4 text-black focus:ring-black border-gray-300"
                           />
-                          <label htmlFor="publish-later" className="ml-2 block text-sm text-gray-500">
+                          <label
+                            htmlFor="publish-later"
+                            className="ml-2 block text-sm text-gray-500"
+                          >
                             Schedule for later (Coming soon)
                           </label>
                         </div>
@@ -792,26 +907,49 @@ const CreateBlogPage = () => {
                       </h3>
                       <ul className="space-y-2 text-sm text-gray-700">
                         <li className="flex items-center">
-                          <Check className={`h-4 w-4 mr-2 ${title ? "text-green-500" : "text-gray-300"}`} />
+                          <Check
+                            className={`h-4 w-4 mr-2 ${
+                              title ? "text-green-500" : "text-gray-300"
+                            }`}
+                          />
                           Title is compelling and clear
                         </li>
                         <li className="flex items-center">
-                          <Check className={`h-4 w-4 mr-2 ${excerpt ? "text-green-500" : "text-gray-300"}`} />
+                          <Check
+                            className={`h-4 w-4 mr-2 ${
+                              excerpt ? "text-green-500" : "text-gray-300"
+                            }`}
+                          />
                           Excerpt summarizes the content effectively
                         </li>
                         <li className="flex items-center">
                           <Check
-                            className={`h-4 w-4 mr-2 ${content.length > 100 ? "text-green-500" : "text-gray-300"}`}
+                            className={`h-4 w-4 mr-2 ${
+                              content.length > 100
+                                ? "text-green-500"
+                                : "text-gray-300"
+                            }`}
                           />
                           Content is well-written and formatted
                         </li>
                         <li className="flex items-center">
-                          <Check className={`h-4 w-4 mr-2 ${coverImage ? "text-green-500" : "text-gray-300"}`} />
+                          <Check
+                            className={`h-4 w-4 mr-2 ${
+                              coverImage ? "text-green-500" : "text-gray-300"
+                            }`}
+                          />
                           Cover image is attractive and relevant
                         </li>
                         <li className="flex items-center">
-                          <Check className={`h-4 w-4 mr-2 ${tags.length > 0 ? "text-green-500" : "text-gray-300"}`} />
-                          Tags are appropriate and will help with discoverability
+                          <Check
+                            className={`h-4 w-4 mr-2 ${
+                              tags.length > 0
+                                ? "text-green-500"
+                                : "text-gray-300"
+                            }`}
+                          />
+                          Tags are appropriate and will help with
+                          discoverability
                         </li>
                       </ul>
                     </div>
@@ -862,14 +1000,15 @@ const CreateBlogPage = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setStatus('draft');
-                          handleSubmit(new Event('submit') as any, "draft")
+                          setStatus("draft");
+                          handleSubmit(new Event("submit") as any, "draft");
                           // handleSubmit(new Event('submit') as any);
                         }}
                         // onClick={handleDraft}
                         disabled={isSubmitting}
-                        className={`inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                          }`}
+                        className={`inline-flex items-center px-6 py-3 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors ${
+                          isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                        }`}
                       >
                         <Save className="mr-2 h-5 w-5" />
                         Save as Draft
@@ -878,12 +1017,13 @@ const CreateBlogPage = () => {
                       <button
                         type="button"
                         onClick={() => {
-                          setStatus('published');
-                          handleSubmit(new Event('submit') as any, "published");
+                          setStatus("published");
+                          handleSubmit(new Event("submit") as any, "published");
                         }}
                         disabled={isSubmitting}
-                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                          }`}
+                        className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors ${
+                          isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                        }`}
                       >
                         {isSubmitting ? (
                           <>
@@ -926,8 +1066,9 @@ const CreateBlogPage = () => {
                 <button
                   type="button"
                   onClick={prevStep}
-                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${activeStep === 0 ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                  className={`inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black ${
+                    activeStep === 0 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                   disabled={activeStep === 0}
                 >
                   <ChevronLeft className="mr-2 h-4 w-4" />
@@ -965,7 +1106,10 @@ const CreateBlogPage = () => {
                 </div>
 
                 {showPreview ? (
-                  <div ref={previewRef} className="overflow-hidden transition-all duration-500 ease-in-out">
+                  <div
+                    ref={previewRef}
+                    className="overflow-hidden transition-all duration-500 ease-in-out"
+                  >
                     <div className="rounded-lg overflow-hidden border border-gray-200">
                       {coverImage ? (
                         <img
@@ -981,12 +1125,17 @@ const CreateBlogPage = () => {
                       <div className="p-4">
                         <div className="flex flex-wrap gap-2 mb-2">
                           {tags.map((tag, index) => (
-                            <span key={index} className="text-xs px-2 py-1 bg-gray-100 rounded-full">
+                            <span
+                              key={index}
+                              className="text-xs px-2 py-1 bg-gray-100 rounded-full"
+                            >
                               {tag}
                             </span>
                           ))}
                         </div>
-                        <h3 className="font-bold text-lg mb-1 line-clamp-2">{title || "Your Title Here"}</h3>
+                        <h3 className="font-bold text-lg mb-1 line-clamp-2">
+                          {title || "Your Title Here"}
+                        </h3>
                         <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                           {excerpt || "Your excerpt will appear here..."}
                         </p>
@@ -998,10 +1147,16 @@ const CreateBlogPage = () => {
                     </div>
 
                     <div className="mt-4 border-t border-gray-200 pt-4">
-                      <h4 className="font-medium text-sm mb-2">Content Preview:</h4>
+                      <h4 className="font-medium text-sm mb-2">
+                        Content Preview:
+                      </h4>
                       <div
                         className="prose prose-sm max-h-60 overflow-y-auto p-3 bg-gray-50 rounded-md"
-                        dangerouslySetInnerHTML={{ __html: content || "<p>Your content will appear here...</p>" }}
+                        dangerouslySetInnerHTML={{
+                          __html:
+                            content ||
+                            "<p>Your content will appear here...</p>",
+                        }}
                       />
                     </div>
                   </div>
@@ -1015,7 +1170,9 @@ const CreateBlogPage = () => {
 
               {/* Blog creation tips */}
               <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                <h3 className="font-medium text-sm mb-2">Tips for Great Blog Posts:</h3>
+                <h3 className="font-medium text-sm mb-2">
+                  Tips for Great Blog Posts:
+                </h3>
                 <ul className="text-xs text-gray-600 space-y-2">
                   <li className="flex items-start">
                     <Check className="h-3 w-3 text-green-500 mr-1 mt-0.5" />
@@ -1044,7 +1201,7 @@ const CreateBlogPage = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CreateBlogPage
+export default CreateBlogPage;

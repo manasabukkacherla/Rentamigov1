@@ -23,7 +23,11 @@ interface SubscriptionPlansProps {
   refreshTrigger: number; // Declare refreshTrigger prop here
 }
 
-const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit, onDelete, refreshTrigger }) => {
+const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
+  onEdit,
+  onDelete,
+  refreshTrigger,
+}) => {
   const [plans, setPlans] = useState<Plan[]>([]); // State to store plans
   const [loading, setLoading] = useState<boolean>(false); // State for loading indicator
 
@@ -31,7 +35,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit, onDelete,
   const fetchPlans = useCallback(async () => {
     setLoading(true); // Set loading to true when fetching starts
     try {
-      const response = await fetch("http://localhost:8000/api/subscription");
+      const response = await fetch("/api/subscription");
       if (!response.ok) throw new Error("Failed to fetch plans");
 
       const data = await response.json();
@@ -70,19 +74,29 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit, onDelete,
   return (
     <div className="space-y-6">
       {loading ? (
-        <p className="text-center text-gray-500">Loading subscription plans...</p>
+        <p className="text-center text-gray-500">
+          Loading subscription plans...
+        </p>
       ) : plans.length === 0 ? (
-        <p className="text-center text-gray-500">No subscription plans found. Create your first plan!</p>
+        <p className="text-center text-gray-500">
+          No subscription plans found. Create your first plan!
+        </p>
       ) : (
         plans.map((plan) => (
           <div key={plan.id} className="bg-gray-50 rounded-lg p-6">
             <div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-lg font-semibold text-gray-900">{plan.name}</h4>
+                  <h4 className="text-lg font-semibold text-gray-900">
+                    {plan.name}
+                  </h4>
                   <div className="mt-1 space-x-4">
-                    <span className="text-2xl font-bold text-gray-900">${plan.price}/month</span>
-                    <span className="text-sm text-gray-600">{plan.tokensPerLead} tokens per lead</span>
+                    <span className="text-2xl font-bold text-gray-900">
+                      ${plan.price}/month
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      {plan.tokensPerLead} tokens per lead
+                    </span>
                   </div>
                 </div>
                 <div className="flex space-x-2">
@@ -93,7 +107,7 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit, onDelete,
                   >
                     <Edit className="w-5 h-5" />
                   </button>
-{/*  */}
+                  {/*  */}
                   {/* ✅ Delete Button */}
                   <button
                     onClick={() => handleDelete(plan.id)}
@@ -106,11 +120,19 @@ const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({ onEdit, onDelete,
               <div className="mt-4 grid grid-cols-2 gap-4">
                 <div className="flex items-center text-gray-600">
                   <Users className="w-5 h-5 text-gray-400 mr-2" />
-                  <span>Max Properties: {plan.maxProperties === -1 ? "Unlimited" : plan.maxProperties}</span>
+                  <span>
+                    Max Properties:{" "}
+                    {plan.maxProperties === -1
+                      ? "Unlimited"
+                      : plan.maxProperties}
+                  </span>
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Users className="w-5 h-5 text-gray-400 mr-2" />
-                  <span>Max Leads: {plan.maxLeads === -1 ? "Unlimited" : plan.maxLeads}</span>
+                  <span>
+                    Max Leads:{" "}
+                    {plan.maxLeads === -1 ? "Unlimited" : plan.maxLeads}
+                  </span>
                 </div>
               </div>
               <ul className="mt-4 space-y-2">
