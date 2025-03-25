@@ -6,7 +6,7 @@ import express, {
   ErrorRequestHandler,
 } from "express";
 import dotenv from "dotenv";
-import connectToDatabase from "./utils/connectToDb";
+import { connectToDatabase } from "./utils/connectToDb";
 import cors from "cors";
 import verifyRouter from "./routes/verify";
 
@@ -41,6 +41,7 @@ import likesRouter from "./routes/blogs/likesRoutes";
 import paymentRoutes from "./routes/paymentRoutes";
 import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
+import path from "path";
 
 dotenv.config();
 
@@ -62,6 +63,9 @@ connectToDatabase()
     process.exit(1); // Terminate the process if the database connection fails
   });
 // Middleware
+// Serve static files from "build"
+app.use(express.static(path.join(__dirname, "build")));
+// cors
 app.use(cors());
 app.use(express.json({ limit: "50mb" })); // Set JSON payload size limit
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encoded payload size limit
@@ -94,19 +98,22 @@ app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes);
 //app.use("/api/leads", leadsRouter);
 
-app.use("/api/user", userRouter)
+app.use("/api/user", userRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/comments", commentsRouter);
-app.use("/api/likes", likesRouter)
-app.use("/api/stats", BlogStats)
-app.use('/api/payment', paymentRoutes); 
+app.use("/api/likes", likesRouter);
+app.use("/api/stats", BlogStats);
+app.use("/api/payment", paymentRoutes);
 
-// Basic route
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Welcome to the API" });
+// // Basic route
+// app.get("/", (req: Request, res: Response) => {
+//   res.json({ message: "Welcome to the API" });
+// });
+// Handle React Router (if using React Router)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);

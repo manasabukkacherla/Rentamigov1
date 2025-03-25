@@ -131,23 +131,17 @@ const Employees = () => {
       return;
     }
 
-    console.log(
-      "🔄 PUT Request to:",
-      `http://localhost:8000/api/employees/${editingEmployee.id}`
-    );
+    console.log("🔄 PUT Request to:", `/api/employees/${editingEmployee.id}`);
     console.log("🔄 Payload Data:", updatedFields);
 
     try {
-      const response = await fetch(
-        `http://localhost:8000/api/employees/${editingEmployee.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedFields),
-        }
-      );
+      const response = await fetch(`/api/employees/${editingEmployee.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedFields),
+      });
 
       const data = await response.json();
       console.log("🔄 Server Response:", data); // ✅ Log response from server
@@ -169,36 +163,34 @@ const Employees = () => {
     }
   };
 
-const handleDeleteEmployee = async (id: string) => {
-  if (!id) {
-    console.error("❌ Error: Employee ID is missing.");
-    showToast.error("Error: Employee ID is missing.");
-    return;
-  }
-
-  console.log("🗑 Deleting Employee ID:", id); // ✅ Debugging log
-
-  try {
-    const response = await fetch(`http://localhost:8000/api/employees/${id}`, {
-      method: "DELETE",
-    });
-
-    const data = await response.json();
-    console.log("🗑 Server Response:", data); // ✅ Debugging log
-
-    if (data.success) {
-      setEmployees((prev) => prev.filter((emp) => emp.id !== id));
-      showToast.success("Employee deleted successfully");
-    } else {
-      showToast.error(data.message || "Error deleting employee");
+  const handleDeleteEmployee = async (id: string) => {
+    if (!id) {
+      console.error("❌ Error: Employee ID is missing.");
+      showToast.error("Error: Employee ID is missing.");
+      return;
     }
-  } catch (error) {
-    console.error("❌ Error deleting employee:", error);
-    showToast.error("Failed to delete employee. Please try again.");
-  }
-};
 
+    console.log("🗑 Deleting Employee ID:", id); // ✅ Debugging log
 
+    try {
+      const response = await fetch(`/api/employees/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+      console.log("🗑 Server Response:", data); // ✅ Debugging log
+
+      if (data.success) {
+        setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+        showToast.success("Employee deleted successfully");
+      } else {
+        showToast.error(data.message || "Error deleting employee");
+      }
+    } catch (error) {
+      console.error("❌ Error deleting employee:", error);
+      showToast.error("Failed to delete employee. Please try again.");
+    }
+  };
 
   const handleSubmit = async () => {
     const missingFields = [];
@@ -229,7 +221,7 @@ const handleDeleteEmployee = async (id: string) => {
     console.log("Submitting Payload:", payload); // Debugging log
 
     try {
-      const response = await fetch("http://localhost:8000/api/employees", {
+      const response = await fetch("/api/employees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -252,37 +244,36 @@ const handleDeleteEmployee = async (id: string) => {
     }
   };
 
-useEffect(() => {
-  const fetchEmployees = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/api/employees");
-      const data = await response.json();
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await fetch("/api/employees");
+        const data = await response.json();
 
-      if (data.success) {
-        console.log("✅ Fetched Employees:", data.data); // ✅ Debugging log
+        if (data.success) {
+          console.log("✅ Fetched Employees:", data.data); // ✅ Debugging log
 
-        const formattedEmployees = data.data.map((employee: any) => ({
-          id: employee._id, // ✅ Convert `_id` from MongoDB to `id` in frontend
-          name: employee.name,
-          email: employee.email,
-          role: employee.role,
-          phone: employee.phone,
-          status: employee.status,
-        }));
+          const formattedEmployees = data.data.map((employee: any) => ({
+            id: employee._id, // ✅ Convert `_id` from MongoDB to `id` in frontend
+            name: employee.name,
+            email: employee.email,
+            role: employee.role,
+            phone: employee.phone,
+            status: employee.status,
+          }));
 
-        setEmployees(formattedEmployees);
-      } else {
-        showToast.error("Error fetching employees");
+          setEmployees(formattedEmployees);
+        } else {
+          showToast.error("Error fetching employees");
+        }
+      } catch (error) {
+        console.error("❌ Error:", error);
+        showToast.error("Failed to fetch employees");
       }
-    } catch (error) {
-      console.error("❌ Error:", error);
-      showToast.error("Failed to fetch employees");
-    }
-  };
+    };
 
-  fetchEmployees();
-}, []);
-
+    fetchEmployees();
+  }, []);
 
   return (
     <div className="space-y-8">

@@ -76,15 +76,12 @@ export function Settings() {
     try {
       console.log("Fetching user details for ID:", userId); // ✅ Debug log
 
-      const response = await fetch(
-        `http://localhost:8000/api/sign/user/${userId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(`/api/sign/user/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
       console.log("API Response Status:", response.status); // ✅ Debug log
 
@@ -136,10 +133,10 @@ export function Settings() {
   };
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     const storedUser = sessionStorage.getItem("user");
     let userId = "";
-  
+
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -156,17 +153,17 @@ export function Settings() {
       toast.error("No user data found. Please log in again.");
       return;
     }
-  
+
     console.log("🔄 Using User ID from sessionStorage:", userId);
-  
+
     if (!userId) {
       console.error("❌ Error: User ID is missing. Cannot update profile.");
       setError("User ID not found. Please try again.");
       toast.error("User ID not found. Please try again.");
       return;
     }
-  
-    fetch(`http://localhost:8000/api/sign/user/update/${userId}`, {
+
+    fetch(`/api/sign/user/update/${userId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -176,7 +173,7 @@ export function Settings() {
       .then((res) => res.json())
       .then((data) => {
         console.log("✅ Profile update response:", data);
-  
+
         if (data.success || data.message === "User updated successfully") {
           toast.success("✅ Profile updated successfully!");
         } else {
@@ -191,29 +188,24 @@ export function Settings() {
         toast.error("Network error while updating profile.");
       });
   };
-  
-  
-  
-  
-  
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!passwords.current || !passwords.new || !passwords.confirm) {
       alert("All password fields are required.");
       return;
     }
-  
+
     if (passwords.new !== passwords.confirm) {
       alert("New passwords do not match!");
       return;
     }
-  
+
     // Retrieve user ID from session storage
     const storedUser = sessionStorage.getItem("user");
     let userId = "";
-  
+
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -228,11 +220,11 @@ export function Settings() {
       setError("No user data found. Please log in again.");
       return;
     }
-  
+
     console.log("🔄 Changing password for User ID:", userId);
-  
+
     try {
-      const response = await fetch(`http://localhost:8000/api/sign/user/update-password/${userId}`, {
+      const response = await fetch(`/api/sign/user/update-password/${userId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -242,10 +234,10 @@ export function Settings() {
           newPassword: passwords.new,
         }),
       });
-  
+
       const data = await response.json();
       console.log("✅ Password change response:", data);
-  
+
       if (data.success) {
         alert("✅ Password changed successfully!");
         setShowPasswordModal(false);
@@ -258,7 +250,6 @@ export function Settings() {
       alert("❌ Network error while updating password.");
     }
   };
-  
 
   type PlanType = "free" | "basic" | "premium" | "enterprise";
 
@@ -423,7 +414,6 @@ export function Settings() {
         </div>
 
         {/* Subscription & Tokens */}
-        
 
         {/* Notification Preferences */}
         <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-black/10">
@@ -447,7 +437,7 @@ export function Settings() {
             <div className="flex items-center">
               <input
                 type="checkbox"
-                checked={user.notifications?.smsNotifications|| false}
+                checked={user.notifications?.smsNotifications || false}
                 onChange={() => handleNotificationChange("smsNotifications")}
                 className="w-4 h-4 sm:w-5 sm:h-5 rounded border-black/20 text-black focus:ring-red-500"
               />

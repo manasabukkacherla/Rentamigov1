@@ -1,13 +1,21 @@
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Clock, ThumbsUp, MessageCircle, Share2, ArrowLeft, Star, Send } from "lucide-react"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import {
+  Clock,
+  ThumbsUp,
+  MessageCircle,
+  Share2,
+  ArrowLeft,
+  Star,
+  Send,
+} from "lucide-react";
 import Navbar from "./Navbar";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 interface Blog {
-  _id: string,
+  _id: string;
   title: string;
   excerpt: string;
   content: string;
@@ -21,12 +29,12 @@ interface Blog {
   author: User;
   likes: number;
   views: number;
-  shares: 0,
-  comments: Comment[]
-  reviews: Review[]
+  shares: 0;
+  comments: Comment[];
+  reviews: Review[];
   createdAt: Date;
   updatedAt: Date;
-  userHasLiked: boolean
+  userHasLiked: boolean;
 }
 
 interface Comment {
@@ -40,67 +48,77 @@ interface Comment {
 
 interface User {
   _id: string;
-  fullName: string
+  fullName: string;
 }
 
 interface Review {
-  _id: string,
-  author: User,
-  comment: string,
-  rating: number,
-  createdAt: string,
+  _id: string;
+  author: User;
+  comment: string;
+  rating: number;
+  createdAt: string;
   likes: string[];
   userHasLiked?: boolean;
 }
 
 const BlogDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
-  const [post, setPost] = useState<Blog | null>(null)
+  const { id } = useParams<{ id: string }>();
+  const [post, setPost] = useState<Blog | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([])
-  const [newComment, setNewComment] = useState("")
-  const [newReview, setNewReview] = useState("")
-  const [rating, setRating] = useState(5)
-  const [activeTab, setActiveTab] = useState<"comments" | "reviews">("comments")
-  const [isLoading, setIsloading] = useState(false)
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [newReview, setNewReview] = useState("");
+  const [rating, setRating] = useState(5);
+  const [activeTab, setActiveTab] = useState<"comments" | "reviews">(
+    "comments"
+  );
+  const [isLoading, setIsloading] = useState(false);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBlog = async () => {
       if (id) {
         try {
-          setIsloading(true)
-          const response = await axios.get(`http://localhost:8000/api/blog/${id}`);
+          setIsloading(true);
+          const response = await axios.get(`/api/blog/${id}`);
           if (response.data.success) {
-            const blog = response.data.blog
-            let userHasLiked = false
+            const blog = response.data.blog;
+            let userHasLiked = false;
 
-            const user = sessionStorage.getItem('user');
+            const user = sessionStorage.getItem("user");
             if (user) {
               const owner = JSON.parse(user).id;
-              const res = await axios.get(`http://localhost:8000/api/likes/${id}/liked/${owner}`)
+              const res = await axios.get(`/api/likes/${id}/liked/${owner}`);
 
               if (res.data.success) {
-                userHasLiked = res.data.liked
+                userHasLiked = res.data.liked;
               }
 
               // Check likes for comments and reviews
-              const commentsWithLikes = await Promise.all(blog.comments.map(async (comment: Comment) => {
-                const likeRes = await axios.get(`http://localhost:8000/api/comments/${comment._id}/liked/${owner}`);
-                return {
-                  ...comment,
-                  userHasLiked: likeRes.data.liked
-                };
-              }));
+              const commentsWithLikes = await Promise.all(
+                blog.comments.map(async (comment: Comment) => {
+                  const likeRes = await axios.get(
+                    `/api/comments/${comment._id}/liked/${owner}`
+                  );
+                  return {
+                    ...comment,
+                    userHasLiked: likeRes.data.liked,
+                  };
+                })
+              );
 
-              const reviewsWithLikes = await Promise.all(blog.reviews.map(async (review: Review) => {
-                const likeRes = await axios.get(`http://localhost:8000/api/reviews/${review._id}/liked/${owner}`);
-                return {
-                  ...review,
-                  userHasLiked: likeRes.data.liked
-                };
-              }));
+              const reviewsWithLikes = await Promise.all(
+                blog.reviews.map(async (review: Review) => {
+                  const likeRes = await axios.get(
+                    `/api/reviews/${review._id}/liked/${owner}`
+                  );
+                  return {
+                    ...review,
+                    userHasLiked: likeRes.data.liked,
+                  };
+                })
+              );
 
               setComments(commentsWithLikes);
               setReviews(reviewsWithLikes);
@@ -115,209 +133,241 @@ const BlogDetail: React.FC = () => {
           }
         } catch (error) {
           console.error("Error fetching blog:", error);
-          toast.error('Something went wrong')
+          toast.error("Something went wrong");
           setPost(null);
         } finally {
-          setIsloading(false)
+          setIsloading(false);
         }
       }
     };
 
     fetchBlog();
-  }, [id])
+  }, [id]);
 
   const handleLike = async () => {
     if (id) {
       try {
-        const user = sessionStorage.getItem('user')
+        const user = sessionStorage.getItem("user");
         if (user) {
           const owner = JSON.parse(user).id;
-          const response = await axios.post(`http://localhost:8000/api/likes/${id}`, { userId: owner })
+          const response = await axios.post(`/api/likes/${id}`, {
+            userId: owner,
+          });
           if (response.data.success) {
             if (post) {
               setPost({
                 ...post,
                 likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
                 userHasLiked: !post.userHasLiked,
-              })
+              });
             }
           }
         }
       } catch (error) {
-        toast.error('Something went wrong')
+        toast.error("Something went wrong");
       }
     }
-  }
+  };
 
   const handleDislike = async () => {
     if (id) {
       try {
-        const user = sessionStorage.getItem('user')
+        const user = sessionStorage.getItem("user");
         if (user) {
           const owner = JSON.parse(user).id;
-          const response = await axios.delete(`http://localhost:8000/api/likes/${id}/${owner}`)
+          const response = await axios.delete(`/api/likes/${id}/${owner}`);
           if (response.data.success) {
             if (post) {
               setPost({
                 ...post,
                 likes: post.userHasLiked ? post.likes - 1 : post.likes + 1,
                 userHasLiked: !post.userHasLiked,
-              })
+              });
             }
           }
         }
       } catch (error) {
-        toast.error('Something went wrong')
+        toast.error("Something went wrong");
       }
     }
-  }
+  };
 
   const handleCommentLike = async (commentId: string) => {
     try {
-      const user = sessionStorage.getItem('user');
+      const user = sessionStorage.getItem("user");
       if (!user) {
-        toast.error('Please login first');
+        toast.error("Please login first");
         return;
       }
 
       const owner = JSON.parse(user).id;
-      const comment = comments.find(c => c._id === commentId);
+      const comment = comments.find((c) => c._id === commentId);
 
       if (comment?.userHasLiked) {
-        const response = await axios.delete(`http://localhost:8000/api/comments/${commentId}/likes/${owner}`);
+        const response = await axios.delete(
+          `/api/comments/${commentId}/likes/${owner}`
+        );
         if (response.data.success) {
-          setComments(comments.map(c =>
-            c._id === commentId
-              ? { ...c, likes: c.likes.filter(id => id !== owner), userHasLiked: false }
-              : c
-          ));
+          setComments(
+            comments.map((c) =>
+              c._id === commentId
+                ? {
+                    ...c,
+                    likes: c.likes.filter((id) => id !== owner),
+                    userHasLiked: false,
+                  }
+                : c
+            )
+          );
         }
       } else {
-        const response = await axios.post(`http://localhost:8000/api/comments/${commentId}/likes`, { userId: owner });
+        const response = await axios.post(`/api/comments/${commentId}/likes`, {
+          userId: owner,
+        });
         if (response.data.success) {
-          setComments(comments.map(c =>
-            c._id === commentId
-              ? { ...c, likes: [...c.likes, owner], userHasLiked: true }
-              : c
-          ));
+          setComments(
+            comments.map((c) =>
+              c._id === commentId
+                ? { ...c, likes: [...c.likes, owner], userHasLiked: true }
+                : c
+            )
+          );
         }
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error("Something went wrong");
     }
-  }
+  };
 
   const handleReviewLike = async (reviewId: string) => {
     try {
-      const user = sessionStorage.getItem('user');
+      const user = sessionStorage.getItem("user");
       if (!user) {
-        toast.error('Please login first');
+        toast.error("Please login first");
         return;
       }
 
       const owner = JSON.parse(user).id;
-      const review = reviews.find(r => r._id === reviewId);
+      const review = reviews.find((r) => r._id === reviewId);
 
       if (review?.userHasLiked) {
-        const response = await axios.delete(`http://localhost:8000/api/reviews/${reviewId}/likes/${owner}`);
+        const response = await axios.delete(
+          `/api/reviews/${reviewId}/likes/${owner}`
+        );
         if (response.data.success) {
-          setReviews(reviews.map(r =>
-            r._id === reviewId
-              ? { ...r, likes: r.likes.filter(id => id !== owner), userHasLiked: false }
-              : r
-          ));
+          setReviews(
+            reviews.map((r) =>
+              r._id === reviewId
+                ? {
+                    ...r,
+                    likes: r.likes.filter((id) => id !== owner),
+                    userHasLiked: false,
+                  }
+                : r
+            )
+          );
         }
       } else {
-        const response = await axios.post(`http://localhost:8000/api/reviews/${reviewId}/likes`, { userId: owner });
+        const response = await axios.post(`/api/reviews/${reviewId}/likes`, {
+          userId: owner,
+        });
         if (response.data.success) {
-          setReviews(reviews.map(r =>
-            r._id === reviewId
-              ? { ...r, likes: [...r.likes, owner], userHasLiked: true }
-              : r
-          ));
+          setReviews(
+            reviews.map((r) =>
+              r._id === reviewId
+                ? { ...r, likes: [...r.likes, owner], userHasLiked: true }
+                : r
+            )
+          );
         }
       }
     } catch (error) {
-      toast.error('Something went wrong');
+      toast.error("Something went wrong");
     }
-  }
+  };
 
   const handleAddComment = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const user = sessionStorage.getItem('user');
+      const user = sessionStorage.getItem("user");
 
       if (user) {
         const owner = JSON.parse(user).id;
         const Comment = {
           author: owner,
-          comment: newComment
-        }
+          comment: newComment,
+        };
 
-        const response = await axios.post(`http://localhost:8000/api/comments/${id}`, Comment)
+        const response = await axios.post(`/api/comments/${id}`, Comment);
         if (response.data.success) {
-          setNewComment("")
-          setComments([...comments, { ...response.data.comment, likes: [], userHasLiked: false }]);
+          setNewComment("");
+          setComments([
+            ...comments,
+            { ...response.data.comment, likes: [], userHasLiked: false },
+          ]);
           if (post) {
             setPost({
               ...post,
-              comments: comments
-            })
+              comments: comments,
+            });
           }
-          toast.success('Comment added successfully!')
-          navigate(`/blogs/${id}`)
+          toast.success("Comment added successfully!");
+          navigate(`/blogs/${id}`);
         } else {
           setNewComment("");
         }
       } else {
-        toast.error('Login first')
-        navigate('/Login')
+        toast.error("Login first");
+        navigate("/Login");
       }
     } catch (error) {
       console.error("Error adding comment:", error);
-      toast.error('Something went wrong')
-      setNewComment("")
+      toast.error("Something went wrong");
+      setNewComment("");
     }
-  }
+  };
 
   const handleAddReview = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const user = sessionStorage.getItem('user');
+      const user = sessionStorage.getItem("user");
 
       if (user) {
         const owner = JSON.parse(user).id;
         const Review = {
           author: owner,
           comment: newReview,
-          rating: rating
-        }
+          rating: rating,
+        };
 
-        const response = await axios.post(`http://localhost:8000/api/reviews/${id}`, Review)
+        const response = await axios.post(`/api/reviews/${id}`, Review);
         if (response.data.success) {
-          setNewReview("")
-          setReviews([...reviews, { ...response.data.review, likes: [], userHasLiked: false }]);
+          setNewReview("");
+          setReviews([
+            ...reviews,
+            { ...response.data.review, likes: [], userHasLiked: false },
+          ]);
           if (post) {
             setPost({
               ...post,
-              reviews: reviews
-            })
+              reviews: reviews,
+            });
           }
-          toast.success('Review added successfully!')
-          navigate(`/blogs/${id}`)
+          toast.success("Review added successfully!");
+          navigate(`/blogs/${id}`);
         } else {
           setNewReview("");
         }
       } else {
-        toast.error('Login first')
-        navigate('/Login')
+        toast.error("Login first");
+        navigate("/Login");
       }
     } catch (error) {
       console.error("Error adding review:", error);
-      toast.error('Something went wrong')
-      setNewReview("")
+      toast.error("Something went wrong");
+      setNewReview("");
     }
-  }
+  };
 
   const handleDeleteComment = async (commentId: string) => {
     try {
@@ -329,7 +379,7 @@ const BlogDetail: React.FC = () => {
 
       const author = JSON.parse(user).id; // Get the logged-in user ID
 
-      const response = await axios.delete(`http://localhost:8000/api/comments/${commentId}`, {
+      const response = await axios.delete(`/api/comments/${commentId}`, {
         data: { author }, // Send author ID in request body
         headers: {
           "Content-Type": "application/json",
@@ -362,7 +412,7 @@ const BlogDetail: React.FC = () => {
 
       const author = JSON.parse(user).id; // Get the logged-in user ID
 
-      const response = await axios.delete(`http://localhost:8000/api/reviews/${reviewId}`, {
+      const response = await axios.delete(`/api/reviews/${reviewId}`, {
         data: { author }, // Send author ID in request body
         headers: {
           "Content-Type": "application/json",
@@ -388,20 +438,31 @@ const BlogDetail: React.FC = () => {
   if (!post) {
     return (
       <div className="flex flex-col items-center justify-center py-12 w-full max-w-7xl mx-auto px-4">
-        {isLoading ? (<>
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Loading Blog</h2>
-        </>) : (<>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Blog post not found</h2>
-          <Link to="/blogs" className="text-black hover:text-grey-900 flex items-center">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to home
-          </Link>
-        </>)}
+        {isLoading ? (
+          <>
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Loading Blog
+            </h2>
+          </>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Blog post not found
+            </h2>
+            <Link
+              to="/blogs"
+              className="text-black hover:text-grey-900 flex items-center"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to home
+            </Link>
+          </>
+        )}
       </div>
-    )
+    );
   }
 
   const plainText = post.content.replace(/<\/?[^>]+(>|$)/g, "");
@@ -409,14 +470,22 @@ const BlogDetail: React.FC = () => {
   return (
     <div className="max-w-7xl w-full mx-auto px-4 sm:px-6">
       <Navbar />
-      <br /><br />
-      <Link to="/blogs" className="inline-flex items-center text-black hover:text-grey-900 mb-6">
+      <br />
+      <br />
+      <Link
+        to="/blogs"
+        className="inline-flex items-center text-black hover:text-grey-900 mb-6"
+      >
         <ArrowLeft className="h-4 w-4 mr-2" />
         Back to all posts
       </Link>
 
       <article className="bg-white rounded-lg shadow-lg overflow-hidden w-full">
-        <img src={post.media.coverImage || "/placeholder.svg"} alt={post.title} className="w-full h-96 object-cover" />
+        <img
+          src={post.media.coverImage || "/placeholder.svg"}
+          alt={post.title}
+          className="w-full h-96 object-cover"
+        />
 
         <div className="p-8">
           <div className="flex items-center mb-4">
@@ -427,17 +496,21 @@ const BlogDetail: React.FC = () => {
               <Clock className="h-4 w-4 mr-1" />
               <span>{post.readTime} min read</span>
             </div>
-            <span className="text-gray-500 text-sm ml-4">{new Date(post.createdAt).toLocaleDateString()}</span>
+            <span className="text-gray-500 text-sm ml-4">
+              {new Date(post.createdAt).toLocaleDateString()}
+            </span>
           </div>
 
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">{post.title}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            {post.title}
+          </h1>
 
           <div className="flex items-center mb-8">
-            <img
-              className="h-12 w-12 rounded-full mr-4"
-            />
+            <img className="h-12 w-12 rounded-full mr-4" />
             <div>
-              <p className="font-medium text-gray-900">{post.author.fullName}</p>
+              <p className="font-medium text-gray-900">
+                {post.author.fullName}
+              </p>
               <p className="text-sm text-gray-500">Author</p>
             </div>
           </div>
@@ -449,10 +522,18 @@ const BlogDetail: React.FC = () => {
           <div className="border-t border-gray-200 pt-6 flex items-center justify-between">
             <div className="flex space-x-4">
               <button
-                className={`flex items-center ${post.userHasLiked ? "text-black" : "text-gray-500 hover:text-black"}`}
+                className={`flex items-center ${
+                  post.userHasLiked
+                    ? "text-black"
+                    : "text-gray-500 hover:text-black"
+                }`}
                 onClick={!post.userHasLiked ? handleLike : handleDislike}
               >
-                <ThumbsUp className={`h-5 w-5 mr-2 ${post.userHasLiked ? "fill-black" : ""}`} />
+                <ThumbsUp
+                  className={`h-5 w-5 mr-2 ${
+                    post.userHasLiked ? "fill-black" : ""
+                  }`}
+                />
                 <span>{post.likes} Likes</span>
               </button>
               <button
@@ -471,16 +552,27 @@ const BlogDetail: React.FC = () => {
         </div>
       </article>
 
-      <div className="mt-8 bg-white rounded-lg shadow-md p-6 w-full" id="comments">
+      <div
+        className="mt-8 bg-white rounded-lg shadow-md p-6 w-full"
+        id="comments"
+      >
         <div className="flex border-b border-gray-200 mb-6">
           <button
-            className={`pb-3 px-4 font-medium ${activeTab === "comments" ? "text-black border-b-2 border-black" : "text-gray-500 hover:text-gray-700"}`}
+            className={`pb-3 px-4 font-medium ${
+              activeTab === "comments"
+                ? "text-black border-b-2 border-black"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
             onClick={() => setActiveTab("comments")}
           >
             Comments ({post.comments.length})
           </button>
           <button
-            className={`pb-3 px-4 font-medium ${activeTab === "reviews" ? "text-black border-b-2 border-black" : "text-gray-500 hover:text-gray-700"}`}
+            className={`pb-3 px-4 font-medium ${
+              activeTab === "reviews"
+                ? "text-black border-b-2 border-black"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
             onClick={() => setActiveTab("reviews")}
           >
             Reviews ({post.reviews.length})
@@ -517,34 +609,42 @@ const BlogDetail: React.FC = () => {
                 </div>
               </div>
             </form>
-            <main className="max-w-full mx-auto py-8">
-
-            </main>
+            <main className="max-w-full mx-auto py-8"></main>
             <div className="space-y-6">
               {comments.map((comment) => (
                 <div key={comment._id} className="flex space-x-4">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                  />
+                  <img className="h-10 w-10 rounded-full" />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <span className="font-medium text-gray-900">{comment.author.fullName}</span>
-                          <span className="text-gray-500 text-sm ml-2">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                          <span className="font-medium text-gray-900">
+                            {comment.author.fullName}
+                          </span>
+                          <span className="text-gray-500 text-sm ml-2">
+                            {new Date(comment.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                       <p className="text-gray-700">{comment.comment}</p>
                     </div>
                     <div className="flex items-center mt-2 text-sm text-gray-500">
                       <button
-                        className={`flex items-center hover:text-black ${comment.userHasLiked ? "text-black" : ""}`}
+                        className={`flex items-center hover:text-black ${
+                          comment.userHasLiked ? "text-black" : ""
+                        }`}
                         onClick={() => handleCommentLike(comment._id)}
                       >
-                        <ThumbsUp className={`h-4 w-4 mr-1 ${comment.userHasLiked ? "fill-black" : ""}`} />
+                        <ThumbsUp
+                          className={`h-4 w-4 mr-1 ${
+                            comment.userHasLiked ? "fill-black" : ""
+                          }`}
+                        />
                         <span>{comment.likes.length} Likes</span>
                       </button>
-                      {comment.author._id === JSON.parse(sessionStorage.getItem("user") || "{}").id && (
+                      {comment.author._id ===
+                        JSON.parse(sessionStorage.getItem("user") || "{}")
+                          .id && (
                         <button
                           className="ml-4 px-3 py-1 text-sm font-medium text-black-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition duration-200"
                           onClick={() => handleDeleteComment(comment._id)}
@@ -570,13 +670,24 @@ const BlogDetail: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center mb-3">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <button key={star} type="button" onClick={() => setRating(star)} className="focus:outline-none">
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        className="focus:outline-none"
+                      >
                         <Star
-                          className={`h-6 w-6 ${star <= rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                          className={`h-6 w-6 ${
+                            star <= rating
+                              ? "text-yellow-400 fill-yellow-400"
+                              : "text-gray-300"
+                          }`}
                         />
                       </button>
                     ))}
-                    <span className="ml-2 text-gray-700">{rating} out of 5 stars</span>
+                    <span className="ml-2 text-gray-700">
+                      {rating} out of 5 stars
+                    </span>
                   </div>
                   <textarea
                     value={newReview}
@@ -602,22 +713,28 @@ const BlogDetail: React.FC = () => {
             <div className="space-y-6">
               {reviews.map((review) => (
                 <div key={review._id} className="flex space-x-4">
-                  <img
-                    className="h-10 w-10 rounded-full"
-                  />
+                  <img className="h-10 w-10 rounded-full" />
                   <div className="flex-1">
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div>
-                          <span className="font-medium text-gray-900">{review.author.fullName}</span>
-                          <span className="text-gray-500 text-sm ml-2">{new Date(review.createdAt).toLocaleDateString()}</span>
+                          <span className="font-medium text-gray-900">
+                            {review.author.fullName}
+                          </span>
+                          <span className="text-gray-500 text-sm ml-2">
+                            {new Date(review.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center mb-2">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`h-4 w-4 ${star <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
+                            className={`h-4 w-4 ${
+                              star <= review.rating
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-gray-300"
+                            }`}
                           />
                         ))}
                       </div>
@@ -625,13 +742,21 @@ const BlogDetail: React.FC = () => {
                     </div>
                     <div className="flex items-center mt-2 text-sm text-gray-500">
                       <button
-                        className={`flex items-center hover:text-black ${review.userHasLiked ? "text-black" : ""}`}
+                        className={`flex items-center hover:text-black ${
+                          review.userHasLiked ? "text-black" : ""
+                        }`}
                         onClick={() => handleReviewLike(review._id)}
                       >
-                        <ThumbsUp className={`h-4 w-4 mr-1 ${review.userHasLiked ? "fill-black" : ""}`} />
+                        <ThumbsUp
+                          className={`h-4 w-4 mr-1 ${
+                            review.userHasLiked ? "fill-black" : ""
+                          }`}
+                        />
                         <span>{review.likes.length} Likes</span>
                       </button>
-                      {review.author._id === JSON.parse(sessionStorage.getItem("user") || "{}").id && (
+                      {review.author._id ===
+                        JSON.parse(sessionStorage.getItem("user") || "{}")
+                          .id && (
                         <button
                           className="ml-4 px-3 py-1 text-sm font-medium text-black-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition duration-200"
                           onClick={() => handleDeleteReview(review._id)}
@@ -647,9 +772,11 @@ const BlogDetail: React.FC = () => {
           </>
         )}
       </div>
-      <br /><br /><br />
+      <br />
+      <br />
+      <br />
     </div>
-  )
-}
+  );
+};
 
-export default BlogDetail
+export default BlogDetail;

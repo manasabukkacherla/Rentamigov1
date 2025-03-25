@@ -56,9 +56,7 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
       }
 
       try {
-        const response = await fetch(
-          `http://localhost:8000/api/sign/employee/${userId}`
-        );
+        const response = await fetch(`/api/sign/employee/${userId}`);
         const data = await response.json();
 
         if (response.ok) {

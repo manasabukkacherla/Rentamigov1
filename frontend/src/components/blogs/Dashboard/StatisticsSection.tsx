@@ -1,5 +1,11 @@
 import axios from "axios";
-import { BarChart2, Eye, TrendingUp, ThumbsUp, MessageCircle } from "lucide-react";
+import {
+  BarChart2,
+  Eye,
+  TrendingUp,
+  ThumbsUp,
+  MessageCircle,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface StatisticsData {
@@ -31,11 +37,11 @@ const StatisticsSection: React.FC = () => {
     // Replace the URL with your actual backend API endpoint
     const fetchStats = async () => {
       try {
-        const user = sessionStorage.getItem('user');
+        const user = sessionStorage.getItem("user");
 
         if (user) {
           const author = JSON.parse(user).id;
-          const response = await axios.get(`http://localhost:8000/api/stats/${author}`);
+          const response = await axios.get(`/api/stats/${author}`);
 
           setStats(response.data); // Store the fetched data
           // console.log(stats)
@@ -53,62 +59,81 @@ const StatisticsSection: React.FC = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="flex items-center mb-6">
-        <BarChart2 className="h-6 w-6 text-gray-700 mr-2" />
-        <h2 className="text-2xl font-bold">Statistics Overview</h2>
+    <div className="bg-white rounded-lg shadow-md p-3 sm:p-4 lg:p-5">
+      <div className="flex items-center mb-4 sm:mb-5">
+        <BarChart2 className="h-5 w-5 text-gray-700 mr-2" />
+        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">
+          Statistics Overview
+        </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5 mb-4 sm:mb-5">
         {/* Views, Likes, Comments */}
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex items-center mb-2">
-            <Eye className="h-5 w-5 text-gray-700 mr-2" />
-            <h3 className="text-lg font-medium">Views</h3>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="flex items-center mb-1.5">
+            <Eye className="h-4 w-4 text-gray-700 mr-2" />
+            <h3 className="text-base font-medium">Views</h3>
           </div>
-          <p className="text-3xl font-bold mb-1">{stats.totalViews.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">
+            {stats.totalViews.toLocaleString()}
+          </p>
           <p className="text-sm text-green-600 flex items-center">
-            <TrendingUp className="h-4 w-4 mr-1" />+{stats.viewsThisMonth.toLocaleString()} this month
+            <TrendingUp className="h-4 w-4 mr-1" />+
+            {stats.viewsThisMonth.toLocaleString()} this month
           </p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex items-center mb-2">
-            <ThumbsUp className="h-5 w-5 text-gray-700 mr-2" />
-            <h3 className="text-lg font-medium">Likes</h3>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="flex items-center mb-1.5">
+            <ThumbsUp className="h-4 w-4 text-gray-700 mr-2" />
+            <h3 className="text-base font-medium">Likes</h3>
           </div>
-          <p className="text-3xl font-bold mb-1">{stats.totalLikes.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">
+            {stats.totalLikes.toLocaleString()}
+          </p>
           <p className="text-sm text-green-600 flex items-center">
-            <TrendingUp className="h-4 w-4 mr-1" />+{stats.likesThisMonth.toLocaleString()} this month
+            <TrendingUp className="h-4 w-4 mr-1" />+
+            {stats.likesThisMonth.toLocaleString()} this month
           </p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <div className="flex items-center mb-2">
-            <MessageCircle className="h-5 w-5 text-gray-700 mr-2" />
-            <h3 className="text-lg font-medium">Comments</h3>
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="flex items-center mb-1.5">
+            <MessageCircle className="h-4 w-4 text-gray-700 mr-2" />
+            <h3 className="text-base font-medium">Comments</h3>
           </div>
-          <p className="text-3xl font-bold mb-1">{stats.totalComments.toLocaleString()}</p>
+          <p className="text-3xl font-bold mb-1">
+            {stats.totalComments.toLocaleString()}
+          </p>
           <p className="text-sm text-green-600 flex items-center">
-            <TrendingUp className="h-4 w-4 mr-1" />+{stats.commentsThisMonth.toLocaleString()} this month
+            <TrendingUp className="h-4 w-4 mr-1" />+
+            {stats.commentsThisMonth.toLocaleString()} this month
           </p>
         </div>
       </div>
 
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <h3 className="text-lg font-medium mb-3">Top Performing Content</h3>
-        <div className="space-y-3">
+      <div className="bg-gray-50 p-3 rounded-lg">
+        <h3 className="text-base font-medium mb-2">Top Performing Content</h3>
+        <div className="space-y-2">
           <div>
-            <p className="text-sm text-gray-600">Most Viewed Blog</p>
-            <p className="font-medium">{stats.mostViewedBlog}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Most Viewed Blog</p>
+            <p className="font-medium text-sm truncate">
+              {stats.mostViewedBlog}
+            </p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Most Liked Blog</p>
-            <p className="font-medium">{stats.mostLikedBlog}</p>
+            <p className="text-xs sm:text-sm text-gray-600">Most Liked Blog</p>
+            <p className="font-medium text-sm truncate">
+              {stats.mostLikedBlog}
+            </p>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Most Commented Blog</p>
-            <p className="font-medium">{stats.mostCommentedBlog}</p>
+            <p className="text-xs sm:text-sm text-gray-600">
+              Most Commented Blog
+            </p>
+            <p className="font-medium text-sm truncate">
+              {stats.mostCommentedBlog}
+            </p>
           </div>
         </div>
       </div>
