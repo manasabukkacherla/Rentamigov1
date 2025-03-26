@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { Search, MapPin, Sliders, X, Home, Building, CheckSquare } from "lucide-react"
 // import { useAuth } from "../context/AuthContext"
-import Navbar from "./Navbar"
 // import Pagination from "./Pagination"
 import Headerr from "./landingpages/headerr"
 
