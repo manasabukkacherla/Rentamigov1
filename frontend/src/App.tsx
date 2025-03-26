@@ -30,11 +30,11 @@ import EditorMenuBar from "./components/editor/EditorMenuBar"
 import EmployeeLogin from "./components/Logins/EmployeeLogin"
 import Revenue from "./components/dashadmin/components/Revenue"
 import BugReportPage from "./components/bug-report/BugReportPage"
-
+import BugDashboard from "./components/bug-dashboard/BugDashboard"
+import TenantProperties from "./components/tenantProperties"
+// import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify"
 import ErrorBoundary from "./components/blogs/ErrorBoundary"
-import BugDashboard from "./components/bug-dashboard/BugDashboard"
-
 const App = () => {
   if (!import.meta.env.VITE_GOOGLE_CLIENT_ID) {
     throw new Error("VITE_GOOGLE_CLIENT_ID is not defined")
@@ -49,6 +49,7 @@ const App = () => {
     <GoogleOAuthProvider clientId={client_id}>
       <ToastContainer />
       <BrowserRouter>
+      {/* <AuthProvider> */}
         <Routes>
           <Route
             path="/"
@@ -72,7 +73,7 @@ const App = () => {
           <Route path="/propertydetails" element={<Propertydetail />} />
           <Route path="/report-bug" element={<BugReportPage />} />
           <Route path="/bug-dashboard" element={<BugDashboard />} />
-
+          <Route path="/tenantProperties" element={<TenantProperties/>} />
           <Route path="/updatePropertyform" element={<Propertmain />} />
 
           {/* Owner and Tenant Routes */}
@@ -139,6 +140,7 @@ const App = () => {
           {/* Catch-All Route */}
           <Route path="*" element={<div>404 - Page Not Found</div>} />
         </Routes>
+        {/* </AuthProvider> */}
       </BrowserRouter>
     </GoogleOAuthProvider>
   )
