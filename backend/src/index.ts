@@ -114,7 +114,7 @@ app.use("/api/payment", paymentRoutes);
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-console.log("checking cd-pipeline");
+console.log("cd pipeline check");
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);
