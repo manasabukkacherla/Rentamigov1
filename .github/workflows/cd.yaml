@@ -94,7 +94,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd /Rentamigov1/backend
+            cd /home/ubuntu/Rentamigov1/backend
             echo "Installing production dependencies..."
             npm install --production
             echo "Restarting server..."
