@@ -3,7 +3,7 @@ name: CD Pipeline
 on:
   push:
     branches:
-      - master # Change this if your main branch is different
+      - main # Change this if your main branch is different
 
 jobs:
   deploy:
