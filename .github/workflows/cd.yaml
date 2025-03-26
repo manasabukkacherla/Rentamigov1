@@ -83,7 +83,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }} # Your private SSH key (set as a GitHub secret)
           port: 22
           source: "./backend/"
-          target: "/rentamigo/backend" # Update this path as needed for your server
+          target: "/home/${{ secrets.EC2_USER }}/rentamigo/backend" # Update this path as needed for your server
 
       # Step 11: Run deployment commands on your EC2 via SSH
       - name: Run Deployment Script on EC2 via SSH
