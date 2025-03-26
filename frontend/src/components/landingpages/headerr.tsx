@@ -1,6 +1,5 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
@@ -42,6 +41,7 @@ const Headerr: React.FC = () => {
     { name: "Blogs", path: "/Blogs" },
     { name: "About", path: "/Aboutus" },
     { name: "Contact", path: "/Contactus" },
+    { name: "Report Bug", path: "/report-bug"}
   ]
 
   const legalLinks = [
@@ -187,5 +187,3 @@ const Headerr: React.FC = () => {
 }
 
 export default Headerr
-
-

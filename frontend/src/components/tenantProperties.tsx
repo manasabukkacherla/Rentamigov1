@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Search, MapPin, Sliders, X, Home, Building, CheckSquare } from "lucide-react"
-import { useAuth } from "../context/AuthContext"
+// import { useAuth } from "../context/AuthContext"
 import Navbar from "./Navbar"
-import Pagination from "./Pagination"
+// import Pagination from "./Pagination"
 import Headerr from "./landingpages/headerr"
 
 // Mock data for properties
@@ -156,7 +156,7 @@ const mockProperties = [
 ]
 
 const TenantProperties = () => {
-  const { isAuthenticated, user } = useAuth()
+//   const { isAuthenticated, user } = useAuth()
   const [location, setLocation] = useState("New York, NY")
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
@@ -281,12 +281,12 @@ const TenantProperties = () => {
                 </button>
               </div>
             </div>
-            {isAuthenticated && (
-              <div className="mt-4 md:mt-0 bg-gray-800 p-4 rounded-lg">
+            {/* {isAuthenticated && ( */}
+              {/* <div className="mt-4 md:mt-0 bg-gray-800 p-4 rounded-lg">
                 <p className="font-medium">Welcome, {user?.username || "Tenant"}</p>
                 <p className="text-sm text-gray-300">Looking for a new place?</p>
-              </div>
-            )}
+              </div> */}
+            {/* )} */}
           </div>
         </div>
       </div>
@@ -481,10 +481,10 @@ const TenantProperties = () => {
           </div>
         )}
 
-        {/* Pagination */}
+        {/* Pagination
         {filteredProperties.length > 0 && (
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-        )}
+        )} */}
       </div>
     </div>
   )
