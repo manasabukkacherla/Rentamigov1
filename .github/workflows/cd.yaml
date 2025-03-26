@@ -94,6 +94,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
+            export PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/bin:$PATH
             cd /home/ubuntu/Rentamigov1/backend
             echo "Installing production dependencies..."
             npm install --production
