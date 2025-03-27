@@ -205,4 +205,3 @@ const BugReportDetails = ({
 }
 
 export default BugReportDetails
-

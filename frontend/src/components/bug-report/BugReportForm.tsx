@@ -26,6 +26,7 @@ const BugReportForm = () => {
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorcode, setErrorcode] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -174,7 +175,7 @@ const BugReportForm = () => {
             </select>
           </div>
 
-          <div>
+          {/* <div>
             <label htmlFor="severity" className="block text-sm font-medium text-gray-700 mb-1">
               Severity
             </label>
@@ -189,6 +190,21 @@ const BugReportForm = () => {
               <option value="high">High - Severely impacts usage</option>
               <option value="critical">Critical - Complete blocker</option>
             </select>
+          </div> */}
+
+          <div>
+            <label htmlFor="error-code" className="block text-sm font-medium text-gray-700 mb-1">
+              Error Code
+            </label>
+            <input
+            type="text"
+            id="errorcode"
+            value={errorcode}
+            onChange={(e) => setErrorcode(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="Enter Error Code"
+            required
+          />
           </div>
         </div>
 
