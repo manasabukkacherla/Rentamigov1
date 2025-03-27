@@ -7,7 +7,7 @@ const Buttons: React.FC = () => {
       className: "section-1",
       buttonText: "List with us",
       link: "/owner-page",
-      description: "From vacancies to value - we've got it covered !!",
+      description: "From vacancies manasa mmmmmmmmmmto value - we've got it covered !!",
     },
     {
       id: 2,
