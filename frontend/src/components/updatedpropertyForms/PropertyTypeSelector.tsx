@@ -30,7 +30,7 @@ const PropertyTypeSelector = ({ onPropertyTypeSelect }: PropertyTypeSelectorProp
                 }`}
               >
                 <span className="text-lg font-medium">Residential</span>
-                <p className="text-sm mt-1 opacity-70">Find your perfect home</p>
+                <p className="text-sm mt-1 opacity-70">Find your perfect wife</p>
               </button>
 
               <button
