@@ -262,8 +262,8 @@ const TenantProperties = () => {
   }
 
   // Function to handle navigation to property details
-  const handleViewDetails = (propertyId: number) => {
-    navigate(`/property-details/${propertyId}`)
+  const handleViewDetails = () => {
+    navigate(`/propertypage`)
   }
 
   return (
@@ -473,7 +473,7 @@ const TenantProperties = () => {
                   </div>
                   <button
                     className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
-                    onClick={() => handleViewDetails(property.id)}
+                    onClick={() => handleViewDetails()}
                   >
                     View Details
                   </button>
