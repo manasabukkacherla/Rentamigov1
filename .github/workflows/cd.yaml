@@ -85,6 +85,7 @@ jobs:
           source: "./backend/"
           target: "/home/ubuntu/Rentamigov1/backend" # Update this path as needed for your server
           overwrite: true
+          strip_components: 1 # Remove the extra top-level folder
 
       # Step 11: Run deployment commands on your EC2 via SSH
       - name: Run Deployment Script on EC2 via SSH
