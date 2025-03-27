@@ -6,26 +6,44 @@ import express, {
   ErrorRequestHandler,
 } from "express";
 import dotenv from "dotenv";
-import connectToDatabase from "./utils/connectToDb";
+import { connectToDatabase } from "./utils/connectToDb";
 import cors from "cors";
 import verifyRouter from "./routes/verify";
-import userRouter from "./routes/user";
+
 import googleAuthRouter from "./routes/googleAuth";
 import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
-import propertyRouter from "./routes/Propertydetails";
+
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
-import photosRouter from "./routes/Propertyphoto";
-import propertyEnquiryRoutes from "./routes/propertyEnquiryRoutes";
+
 import enquiryRoutes from "./routes/enquiryRoutes";
-import signupRouter from "./routes/signupform";// Replace with the correct file path for User
+import signupRouter from "./routes/signupform"; // Replace with the correct file path for User
 import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
-import leadsRouter from "./routes/leads";
+//import leadsRouter from "./routes/leads";
 import Reportrouter from "./routes/Reportleads";
+import Propertyrouter from "./routes/PropertySelection";
+import BasicDetails from "./models/Basicdetails";
+import BasicDetailsrouter from "./routes/Basicdetails";
+import PropertyDetailsrouter from "./routes/Propertydetails";
+import Employeerouter from "./routes/employee";
+
+import Subscriptionrouter from "./routes/Subscriptionmodel";
+import TokenRouter from "./routes/Tokenform";
+
+import blogRouter from "./routes/blogs/blogRoutes";
+import commentsRouter from "./routes/blogs/commentsRouter";
+import reviewRouter from "./routes/blogs/reviewRoutes";
+import likesRouter from "./routes/blogs/likesRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
+import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
+import userRouter from "./routes/userRouter";
+import path from "path";
+import bugRouter from "./routes/BugRouter";
+
 dotenv.config();
 
 // Validate required environment variables
@@ -46,35 +64,59 @@ connectToDatabase()
     process.exit(1); // Terminate the process if the database connection fails
   });
 // Middleware
+// Serve static files from "build"
+app.use(express.static(path.join(__dirname, "build")));
+// cors
 app.use(cors());
 app.use(express.json({ limit: "50mb" })); // Set JSON payload size limit
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encoded payload size limit
 
-
 // Routes
 app.use("/api/verify", verifyRouter);
-app.use("/api/Report", Reportrouter); // Report routers 
+app.use("/api/Report", Reportrouter); // Report routers
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
-app.use("/api/employees", employeeRouter); // Employee routes
+app.use("/api/employees", Employeerouter); // Employee routes
 app.use("/api", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
-app.use("/api/properties", propertyRouter); // Property routes
-app.use("/api/forms",subscriptionRouter);
-app.use("/api/owner-interest", ownerInterestRouter)
-app.use("/api/Photos",photosRouter);
-app.use("/api/property",propertyEnquiryRoutes)
+
+app.use("/api/forms", subscriptionRouter);
+app.use("/api/owner-interest", ownerInterestRouter);
+
+//Property listing apis
+app.use("/api/property-selection", Propertyrouter);
+app.use("/api/basicdetails", BasicDetailsrouter);
+app.use("/api/properties", PropertyDetailsrouter);
+
+//Subscription pllan routes
+app.use("/api/subscription", Subscriptionrouter);
+//Token plan routes
+app.use("/api/tokens", TokenRouter);
+
 app.use("/api/service", enquiryRoutes);
-app.use("/api/sign",signupRouter);
+app.use("/api/sign", signupRouter);
 app.use("/api/loginuser", loginRouter);
-app.use("/api", forgotPasswordRoutes); 
-app.use("/api/leads", leadsRouter);
+app.use("/api", forgotPasswordRoutes);
+//app.use("/api/leads", leadsRouter);
 
-// Basic route
-app.get("/", (req: Request, res: Response) => {
-  res.json({ message: "Welcome to the API" });
+app.use("/api/user", userRouter);
+app.use("/api/blog", blogRouter);
+app.use("/api/reviews", reviewRouter);
+app.use("/api/comments", commentsRouter);
+app.use("/api/likes", likesRouter);
+app.use("/api/stats", BlogStats);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/bug", bugRouter)
+
+// // Basic route
+// app.get("/", (req: Request, res: Response) => {
+//   res.json({ message: "Welcome to the API" });
+// });
+// Handle React Router (if using React Router)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-
+console.log("cd pipeline check - 2nd time....");
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);
