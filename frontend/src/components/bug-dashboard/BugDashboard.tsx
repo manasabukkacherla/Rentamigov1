@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react"
 import { BugIcon, X, BarChart2, ChevronLeft, Download, RefreshCw } from "lucide-react"
 import { toast } from "react-toastify"
-import { Link } from "react-router-dom"
-import BugReportFilters from "./BugReportFilters"
-import BugReportDetails from "./BugReportDetails"
-import BugReportList from "./BugReportList"
 import BugReportStats from "./BugReportStats"
+import BugReportFilters from "./BugReportFilters"
+import BugReportList from "./BugReportList"
+import { Link } from "react-router-dom"
+import BugReportDetails from "./BugReportDetails"
+import axios from "axios"
 
 export interface BugReport {
   id?: string
@@ -29,6 +30,244 @@ export interface BugReport {
   }>
 }
 
+export interface Bugs {
+  title: string
+  description: string
+  // email: string
+  errorcode: string
+  category: string
+  imageUrl?: string
+  status: "pending" | "in-progress" | "resolved"
+  createdAt: Date
+  author: User
+}
+
+interface User {
+  _id: string;
+  email: string;
+}
+
+// Sample data generator for demonstration purposes
+const generateSampleBugReports = (): BugReport[] => {
+  const categories = ["ui", "functionality", "performance", "security", "other"]
+  const severities = ["critical", "high", "medium", "low"]
+  const statuses: ("pending" | "in-progress" | "resolved")[] = ["pending", "in-progress", "resolved"]
+
+  const sampleReports: BugReport[] = [
+    {
+      id: "bug-1",
+      title: "Login button not working on mobile devices",
+      description:
+        "When attempting to log in using the mobile app, the login button becomes unresponsive after tapping it once. This happens consistently on iOS devices.",
+      stepsToReproduce:
+        "1. Open the mobile app\n2. Enter valid credentials\n3. Tap the login button\n4. Observe that nothing happens",
+      email: "sarah.johnson@example.com",
+      severity: "high",
+      category: "functionality",
+      status: "in-progress",
+      createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
+      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+      assignedTo: "dev.team@rentamigo.com",
+      comments: [
+        {
+          author: "Tech Support",
+          text: "Reproduced on iPhone 12. Sending to development team.",
+          timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+          author: "Developer",
+          text: "Found the issue. It's related to a recent update to our authentication service. Working on a fix.",
+          timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ],
+    },
+    {
+      id: "bug-2",
+      title: "Property images not loading in search results",
+      description:
+        "Property images are showing as broken links in the search results page. This is happening for approximately 30% of listings.",
+      email: "mark.wilson@example.com",
+      severity: "medium",
+      category: "ui",
+      status: "pending",
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      imageUrl: "/placeholder.svg?height=300&width=400",
+    },
+    {
+      id: "bug-3",
+      title: "Security vulnerability in payment processing",
+      description:
+        "Discovered a potential security vulnerability in the payment processing flow. The credit card information is visible in the network requests.",
+      stepsToReproduce:
+        "1. Add property to cart\n2. Proceed to checkout\n3. Enter payment details\n4. Open browser developer tools and monitor network tab\n5. Observe that card details are sent in plaintext",
+      email: "security.team@example.com",
+      severity: "critical",
+      category: "security",
+      status: "in-progress",
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      comments: [
+        {
+          author: "Security Team",
+          text: "This is a critical issue. We need to implement proper encryption for all payment data immediately.",
+          timestamp: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ],
+    },
+    {
+      id: "bug-4",
+      title: "Slow loading times on property details page",
+      description:
+        "The property details page takes more than 10 seconds to load, especially when there are many high-resolution images.",
+      email: "performance.analyst@example.com",
+      severity: "medium",
+      category: "performance",
+      status: "resolved",
+      createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(), // 10 days ago
+      updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+      comments: [
+        {
+          author: "Developer",
+          text: "Implemented image lazy loading and compression to improve page load times.",
+          timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+          author: "QA Team",
+          text: "Verified fix. Page load time reduced to under 3 seconds.",
+          timestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ],
+    },
+    {
+      id: "bug-5",
+      title: "Incorrect pricing calculation for long-term rentals",
+      description:
+        "When booking a property for more than 30 days, the system is not applying the monthly discount correctly.",
+      stepsToReproduce:
+        "1. Search for a property\n2. Select a property with monthly discount\n3. Book for 45 days\n4. Observe that the total price does not reflect the discount",
+      email: "finance@example.com",
+      severity: "high",
+      category: "functionality",
+      status: "resolved",
+      createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(), // 15 days ago
+      updatedAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(), // 12 days ago
+    },
+    {
+      id: "bug-6",
+      title: "Filter options not working on mobile",
+      description:
+        "The property filter options (price range, amenities, etc.) are not working correctly on mobile devices. Selections are not being applied to the search results.",
+      email: "ui.designer@example.com",
+      severity: "medium",
+      category: "ui",
+      status: "pending",
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+      imageUrl: "/placeholder.svg?height=500&width=300",
+    },
+    {
+      id: "bug-7",
+      title: "Email notifications not being sent for new messages",
+      description:
+        "Users are not receiving email notifications when they get new messages from property owners or other users.",
+      email: "communication@example.com",
+      severity: "high",
+      category: "functionality",
+      status: "in-progress",
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    },
+    {
+      id: "bug-8",
+      title: "Map view crashes on certain property locations",
+      description:
+        "The map view in property details crashes when viewing properties in certain remote locations with limited map data.",
+      stepsToReproduce:
+        "1. Search for properties in remote areas\n2. Select a property\n3. Navigate to the map view\n4. Observe that the app crashes",
+      email: "map.specialist@example.com",
+      severity: "low",
+      category: "functionality",
+      status: "pending",
+      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
+    },
+    {
+      id: "bug-9",
+      title: "Accessibility issues with color contrast",
+      description:
+        "The text color on the booking confirmation page has poor contrast with the background, making it difficult to read for users with visual impairments.",
+      email: "accessibility@example.com",
+      severity: "medium",
+      category: "ui",
+      status: "resolved",
+      createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(), // 20 days ago
+      updatedAt: new Date(Date.now() - 18 * 24 * 60 * 60 * 1000).toISOString(), // 18 days ago
+      imageUrl: "/placeholder.svg?height=400&width=600",
+    },
+    {
+      id: "bug-10",
+      title: "Search results pagination not working",
+      description:
+        "When searching for properties and navigating to page 2 or beyond, the same results from page 1 are shown again.",
+      email: "search.team@example.com",
+      severity: "high",
+      category: "functionality",
+      status: "in-progress",
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
+    },
+    {
+      id: "bug-11",
+      title: "App crashes when uploading large property images",
+      description:
+        "When property owners try to upload images larger than 5MB, the app crashes without any error message.",
+      stepsToReproduce:
+        "1. Log in as property owner\n2. Go to add property\n3. Try to upload a high-resolution image (>5MB)\n4. App crashes",
+      email: "owner.support@example.com",
+      severity: "high",
+      category: "functionality",
+      status: "pending",
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+    },
+    {
+      id: "bug-12",
+      title: "Date picker showing incorrect available dates",
+      description: "The availability calendar is showing some dates as available even though they are already booked.",
+      email: "calendar.team@example.com",
+      severity: "critical",
+      category: "functionality",
+      status: "in-progress",
+      createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
+      comments: [
+        {
+          author: "Product Manager",
+          text: "This is causing double bookings and needs to be fixed immediately.",
+          timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ],
+    },
+  ]
+
+  // Generate additional random reports to have more data for statistics
+  for (let i = 0; i < 15; i++) {
+    const randomDate = new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000)
+    const randomCategory = categories[Math.floor(Math.random() * categories.length)]
+    const randomSeverity = severities[Math.floor(Math.random() * severities.length)]
+    const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
+
+    sampleReports.push({
+      id: `bug-random-${i}`,
+      title: `Random bug report #${i + 1}`,
+      description: `This is a randomly generated bug report for testing the dashboard with more data.`,
+      email: `user${i}@example.com`,
+      severity: randomSeverity,
+      category: randomCategory,
+      status: randomStatus,
+      createdAt: randomDate.toISOString(),
+    })
+  }
+
+  return sampleReports
+}
+
 const BugDashboard = () => {
   const [bugReports, setBugReports] = useState<BugReport[]>([])
   const [filteredReports, setFilteredReports] = useState<BugReport[]>([])
@@ -43,17 +282,42 @@ const BugDashboard = () => {
   const [viewMode, setViewMode] = useState<"list" | "stats">("list")
   const [isRefreshing, setIsRefreshing] = useState(false)
 
+  const [bugs, setBugs] = useState<Bugs[]>([]);
+  
+  const loadBugs = async () => {
+    try {
+      const response = await axios.get(`/api/bug/list`);
+      if(response.data.success) {
+        console.log(response.data.data)
+        setBugs(response.data.data)
+      }
+    } catch (error) {
+      toast.error("Failed to load bugs");
+      console.error("Error loading bugs:", error);
+    }
+  }
+
+  useEffect(() => {
+    loadBugs()
+  }, [])
+
   useEffect(() => {
     fetchBugReports()
   }, [])
 
+  // Modify the fetchBugReports function to use the sample data if localStorage is empty
   const fetchBugReports = () => {
     setIsRefreshing(true)
 
-    // In a real application, you would fetch this data from your backend
     setTimeout(() => {
       try {
-        const storedReports = JSON.parse(localStorage.getItem("bugReports") || "[]")
+        let storedReports = JSON.parse(localStorage.getItem("bugReports") || "[]")
+
+        // If no reports exist, use sample data
+        if (storedReports.length === 0) {
+          storedReports = generateSampleBugReports()
+          localStorage.setItem("bugReports", JSON.stringify(storedReports))
+        }
 
         // Add unique IDs if they don't exist
         const reportsWithIds = storedReports.map((report: BugReport, index: number) => ({
@@ -240,15 +504,15 @@ const BugDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-center py-4 sm:h-16">
+            <div className="flex items-center mb-4 sm:mb-0">
               {/* <Link to="/" className="flex items-center text-gray-700 hover:text-black">
                 <ChevronLeft className="w-5 h-5 mr-1" />
                 <span>Back to Home</span>
               </Link> */}
-              <h1 className="ml-8 text-xl font-bold text-gray-900 flex items-center">
+              <h1 className="ml-4 sm:ml-8 text-xl font-bold text-gray-900 flex items-center">
                 <BugIcon className="w-6 h-6 mr-2 text-red-500" />
-                Bug Management Dashboard
+                Bug Dashboard
               </h1>
             </div>
             <div className="flex items-center space-x-4">

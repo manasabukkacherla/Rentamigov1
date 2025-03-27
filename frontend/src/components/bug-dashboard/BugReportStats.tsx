@@ -122,7 +122,7 @@ const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
         <h2 className="text-xl font-bold text-gray-900">Bug Report Statistics</h2>
         <select
           value={timeRange}
@@ -252,7 +252,7 @@ const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={reportsOverTimeData()} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" angle={-45} textAnchor="end" height={70} interval={0} />
+                <XAxis dataKey="date" angle={-45} textAnchor="end" height={70} interval={0} tick={{ fontSize: 12 }} />
                 <YAxis />
                 <Tooltip />
                 <Legend />
