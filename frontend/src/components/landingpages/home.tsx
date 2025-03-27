@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import Header from "./headerr"
-import Footer from "./Footer"
-import { Link, useNavigate } from "react-router-dom"
-import BlogList from "../blogs/BlogList"
-import { motion } from "framer-motion"
+import type React from "react";
+import { useEffect, useState } from "react";
+import Header from "./headerr";
+import Footer from "./Footer";
+import { Link, useNavigate } from "react-router-dom";
+import BlogList from "../blogs/BlogList";
+import { motion } from "framer-motion";
 
 // Update the LocationModal component to include a close button at the bottom
 const LocationModal = ({
@@ -14,9 +14,9 @@ const LocationModal = ({
   onClose,
   onSelectLocation,
 }: {
-  isOpen: boolean
-  onClose: () => void
-  onSelectLocation: (location: string) => void
+  isOpen: boolean;
+  onClose: () => void;
+  onSelectLocation: (location: string) => void;
 }) => {
   const locations = [
     "Bangalore",
@@ -30,7 +30,7 @@ const LocationModal = ({
     "Jaipur"
   ]
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -38,9 +38,22 @@ const LocationModal = ({
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-2xl font-bold">Select Your Location</h3>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
               </svg>
             </button>
           </div>
@@ -55,7 +68,12 @@ const LocationModal = ({
                 onClick={() => onSelectLocation(location)}
               >
                 <div className="flex items-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-5 h-5 mr-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -87,12 +105,12 @@ const LocationModal = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Property Slider Component
 const PropertySlider = () => {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const properties = [
     {
@@ -127,22 +145,24 @@ const PropertySlider = () => {
       image:
         "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
     },
-  ]
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % properties.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [properties.length])
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % properties.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [properties.length]);
 
   const nextSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % properties.length)
-  }
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % properties.length);
+  };
 
   const prevSlide = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + properties.length) % properties.length)
-  }
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + properties.length) % properties.length
+    );
+  };
 
   return (
     <div className="relative h-[600px] overflow-hidden rounded-xl">
@@ -152,7 +172,9 @@ const PropertySlider = () => {
           <div
             key={property.id}
             className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentIndex ? "opacity-100" : "opacity-0 pointer-events-none"
+              index === currentIndex
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none"
             }`}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-70"></div>
@@ -212,7 +234,12 @@ const PropertySlider = () => {
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
         </svg>
       </button>
       <button
@@ -226,7 +253,12 @@ const PropertySlider = () => {
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 5l7 7-7 7"
+          ></path>
         </svg>
       </button>
 
@@ -243,8 +275,8 @@ const PropertySlider = () => {
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Stats Counter Component
 const StatsCounter = ({ value, label }: { value: string; label: string }) => {
@@ -253,8 +285,8 @@ const StatsCounter = ({ value, label }: { value: string; label: string }) => {
       <h3 className="text-4xl font-bold mb-2">{value}</h3>
       <p className="text-gray-600">{label}</p>
     </div>
-  )
-}
+  );
+};
 
 // Testimonial Component
 const Testimonial = ({
@@ -262,11 +294,20 @@ const Testimonial = ({
   author,
   role,
   image,
-}: { quote: string; author: string; role: string; image: string }) => {
+}: {
+  quote: string;
+  author: string;
+  role: string;
+  image: string;
+}) => {
   return (
     <div className="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
       <div className="flex items-center mb-6">
-        <img src={image || "/placeholder.svg"} alt={author} className="w-16 h-16 rounded-full object-cover mr-4" />
+        <img
+          src={image || "/placeholder.svg"}
+          alt={author}
+          className="w-16 h-16 rounded-full object-cover mr-4"
+        />
         <div>
           <h4 className="font-bold text-lg">{author}</h4>
           <p className="text-gray-600">{role}</p>
@@ -287,8 +328,8 @@ const Testimonial = ({
         ))}
       </div>
     </div>
-  )
-}
+  );
+};
 
 // Update the Homepage component to show the location modal on page load
 const Homepage: React.FC = () => {
@@ -326,7 +367,7 @@ const Homepage: React.FC = () => {
   const fadeInUp = {
     hidden: { opacity: 0, y: 60 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -342,18 +383,29 @@ const Homepage: React.FC = () => {
       {/* Hero Section with Property Slider */}
       <section className="pt-20 bg-gradient-to-b from-black to-gray-900">
         <div className="container mx-auto px-4 py-10">
-          <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="text-center mb-10">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            className="text-center mb-10"
+          >
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
               Find Your <span className="text-gray-300">Perfect</span> Home
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Discover thousands of properties that match your preferences and budget
+              Discover thousands and hundreds and lakhs of properties that match
+              your preferences and budget
             </p>
             <button
               onClick={() => setIsLocationModalOpen(true)}
               className="bg-white text-black px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition duration-300 flex items-center mx-auto"
             >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="w-5 h-5 mr-2"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -377,7 +429,9 @@ const Homepage: React.FC = () => {
           <div className="bg-white p-6 rounded-xl shadow-lg -mt-10 relative z-10 max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Location
+                </label>
                 <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black">
                   <option>Any Location</option>
                   <option>Downtown</option>
@@ -386,7 +440,9 @@ const Homepage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Property Type</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Property Type
+                </label>
                 <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black">
                   <option>Any Type</option>
                   <option>Apartment</option>
@@ -395,7 +451,9 @@ const Homepage: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Price Range</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Price Range
+                </label>
                 <select className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black">
                   <option>Any Price</option>
                   <option>$500 - $1000</option>
@@ -445,7 +503,8 @@ const Homepage: React.FC = () => {
           >
             <h2 className="text-4xl font-bold mb-4">Why Choose Rentamigo?</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              We provide the best rental experience with our comprehensive services and dedicated support.
+              We provide the best rental experience with our comprehensive
+              services and dedicated support.
             </p>
           </motion.div>
 
@@ -473,9 +532,12 @@ const Homepage: React.FC = () => {
                   ></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-4 text-center">Smart Search</h3>
+              <h3 className="text-xl font-bold mb-4 text-center">
+                Smart Search
+              </h3>
               <p className="text-gray-600 text-center">
-                Find your ideal property with our powerful search tools and filters.
+                Find your ideal property with our powerful search tools and
+                filters.
               </p>
             </motion.div>
 
@@ -502,7 +564,9 @@ const Homepage: React.FC = () => {
                   ></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-4 text-center">Secure Transactions</h3>
+              <h3 className="text-xl font-bold mb-4 text-center">
+                Secure Transactions
+              </h3>
               <p className="text-gray-600 text-center">
                 Our platform ensures safe and transparent rental transactions.
               </p>
@@ -531,9 +595,12 @@ const Homepage: React.FC = () => {
                   ></path>
                 </svg>
               </div>
-              <h3 className="text-xl font-bold mb-4 text-center">24/7 Support</h3>
+              <h3 className="text-xl font-bold mb-4 text-center">
+                24/7 Support
+              </h3>
               <p className="text-gray-600 text-center">
-                Our dedicated team is always available to assist you with any issues.
+                Our dedicated team is always available to assist you with any
+                issues.
               </p>
             </motion.div>
           </div>
@@ -552,7 +619,8 @@ const Homepage: React.FC = () => {
           >
             <h2 className="text-4xl font-bold mb-4">What Our Customers Say</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              Hear from our satisfied customers about their experience with Rentamigo.
+              Hear from our satisfied customers about their experience with
+              Rentamigo.
             </p>
           </motion.div>
 
@@ -614,9 +682,14 @@ const Homepage: React.FC = () => {
           >
             <div>
               <h2 className="text-4xl font-bold text-black">Latest Insights</h2>
-              <p className="text-gray-600 mt-2">Stay updated with the latest trends and tips in real estate</p>
+              <p className="text-gray-600 mt-2">
+                Stay updated with the latest trends and tips in real estate
+              </p>
             </div>
-            <Link to="/Blogs" className="text-black hover:text-gray-700 font-medium flex items-center group">
+            <Link
+              to="/Blogs"
+              className="text-black hover:text-gray-700 font-medium flex items-center group"
+            >
               View All Articles
               <svg
                 className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform"
@@ -625,7 +698,12 @@ const Homepage: React.FC = () => {
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M14 5l7 7m0 0l-7 7m7-7H3"
+                ></path>
               </svg>
             </Link>
           </motion.div>
@@ -665,9 +743,12 @@ const Homepage: React.FC = () => {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Find Your Dream Home?</h2>
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Find Your Dream Home?
+            </h2>
             <p className="text-xl mb-10 text-gray-300">
-              Join thousands of satisfied customers who found their perfect property with Rentamigo.
+              Join thousands of satisfied customers who found their perfect
+              property with Rentamigo.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -689,8 +770,8 @@ const Homepage: React.FC = () => {
 
       <Footer />
     </div>
-  )
-}
+  );
+};
 
 export default Homepage
 

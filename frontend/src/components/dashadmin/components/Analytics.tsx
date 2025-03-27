@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios'; // Import axios for making API calls
 import { BarChart3, TrendingUp, Users, Clock } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -30,6 +31,12 @@ const Analytics = () => {
   const [revenueFilter, setRevenueFilter] = useState('monthly');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
+  
+  // State variables for chart data
+  const [revenueData, setRevenueData] = useState<any>(null);
+  const [trafficData, setTrafficData] = useState<any>(null);
+  const [locationData, setLocationData] = useState<any>(null);
+  const [deviceData, setDeviceData] = useState<any>(null);
 
   const metrics = [
     {
@@ -62,83 +69,104 @@ const Analytics = () => {
     }
   ];
 
-  const getRevenueData = () => {
-    // Sample data - in a real app, this would be fetched based on the filter
-    const data = {
-      monthly: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        data: [65000, 59000, 80000, 81000, 56000, 85000, 90000, 91000, 95000, 94000, 88000, 92000]
-      },
-      quarterly: {
-        labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-        data: [204000, 222000, 276000, 274000]
-      },
-      halfYearly: {
-        labels: ['H1', 'H2'],
-        data: [426000, 550000]
-      },
-      yearly: {
-        labels: ['2020', '2021', '2022', '2023', '2024'],
-        data: [780000, 850000, 920000, 976000, 976000]
+  // Function to fetch the revenue data based on the selected filter
+  const fetchRevenueData = async () => {
+    try {
+      console.log("Fetching data with filter:", revenueFilter); // Debugging log
+      const response = await axios.get(`/api/payment/revenue-by-date?filter=${revenueFilter}`);
+      const data = response.data;
+
+      console.log("API Response:", data); // Check the response data
+  
+      // Filter out invalid data with "null-null" as date
+      const filteredData = data.filter((item: any) => item.date !== 'null-null');
+      
+      if (filteredData.length === 0) {
+        console.log("No valid data available after filtering.");
       }
-    };
 
-    return data[revenueFilter as keyof typeof data];
-  };
-
-  const revenueData = getRevenueData();
-
-  const trafficData = {
-    labels: revenueData.labels,
-    datasets: [
-      {
-        label: 'Revenue',
-        data: revenueData.data,
-        borderColor: 'rgb(0, 0, 0)',
-        backgroundColor: 'rgba(0, 0, 0, 0.1)',
-        tension: 0.4
-      }
-    ]
-  };
-
-  const locationData = {
-    labels: ['New York', 'Los Angeles', 'Chicago', 'Miami', 'Houston'],
-    datasets: [
-      {
-        data: [24, 18, 15, 12, 10],
-        backgroundColor: [
-          'rgba(0, 0, 0, 0.8)',
-          'rgba(0, 0, 0, 0.6)',
-          'rgba(0, 0, 0, 0.4)',
-          'rgba(0, 0, 0, 0.3)',
-          'rgba(0, 0, 0, 0.2)',
+      const labels = filteredData.map((item: any) => item.date); // Valid dates
+      const dataPoints = filteredData.map((item: any) => item.revenue); // Corresponding revenue values
+  
+      console.log("Filtered Data:", filteredData);
+  
+      // Set the revenueData state
+      setRevenueData({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Revenue',
+            data: dataPoints,
+            borderColor: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            tension: 0.4
+          }
+        ]
+      });
+  
+      // Set the traffic data (for now using revenue data)
+      setTrafficData({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Revenue',
+            data: dataPoints,
+            borderColor: 'rgb(0, 0, 0)',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            tension: 0.4
+          }
+        ]
+      });
+  
+      // Sample location data (this can be modified as needed)
+      setLocationData({
+        labels: ['New York', 'Los Angeles', 'Chicago', 'Miami', 'Houston'],
+        datasets: [
+          {
+            data: [24, 18, 15, 12, 10],
+            backgroundColor: [
+              'rgba(0, 0, 0, 0.8)',
+              'rgba(0, 0, 0, 0.6)',
+              'rgba(0, 0, 0, 0.4)',
+              'rgba(0, 0, 0, 0.3)',
+              'rgba(0, 0, 0, 0.2)',
+            ],
+            borderColor: Array(5).fill('rgb(255, 255, 255)'),
+            borderWidth: 1,
+          },
         ],
-        borderColor: Array(5).fill('rgb(255, 255, 255)'),
-        borderWidth: 1,
-      },
-    ],
+      });
+  
+      // Sample device data (this can be modified as needed)
+      setDeviceData({
+        labels: labels,
+        datasets: [
+          {
+            label: 'Desktop',
+            data: dataPoints.map((val: number) => val * 0.6),
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          },
+          {
+            label: 'Mobile',
+            data: dataPoints.map((val: number) => val * 0.3),
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          },
+          {
+            label: 'Tablet',
+            data: dataPoints.map((val: number) => val * 0.1),
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          },
+        ],
+      });
+    } catch (error) {
+      console.error('Error fetching revenue data:', error);
+    }
   };
-
-  const deviceData = {
-    labels: revenueData.labels,
-    datasets: [
-      {
-        label: 'Desktop',
-        data: revenueData.data.map(val => val * 0.6),
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      },
-      {
-        label: 'Mobile',
-        data: revenueData.data.map(val => val * 0.3),
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      },
-      {
-        label: 'Tablet',
-        data: revenueData.data.map(val => val * 0.1),
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-      },
-    ],
-  };
+  
+  // Fetch revenue data whenever revenueFilter changes
+  useEffect(() => {
+    fetchRevenueData();
+  }, [revenueFilter]);
 
   const options = {
     responsive: true,
@@ -179,9 +207,7 @@ const Analytics = () => {
             </div>
             <p className="text-xl md:text-2xl font-semibold text-gray-900">{metric.value}</p>
             <div className="flex items-center mt-2">
-              <span className={`text-sm ${
-                metric.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span className={`text-sm ${metric.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
                 {metric.change}
               </span>
               <span className="text-sm text-gray-500 ml-2">{metric.period}</span>
@@ -206,30 +232,14 @@ const Analytics = () => {
                 <option value="yearly">Yearly</option>
               </select>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                <input
-                  type="date"
-                  value={customStartDate}
-                  onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                <input
-                  type="date"
-                  value={customEndDate}
-                  onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                />
-              </div>
+          </div>
+          {revenueData ? (
+            <div className="h-[300px] md:h-[400px]">
+              <Line options={options} data={revenueData} />
             </div>
-          </div>
-          <div className="h-[300px] md:h-[400px]">
-            <Line options={options} data={trafficData} />
-          </div>
+          ) : (
+            <p>Loading...</p>
+          )}
         </div>
 
         <div className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
