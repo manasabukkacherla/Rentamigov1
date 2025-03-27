@@ -82,7 +82,7 @@ jobs:
           username: ${{ secrets.EC2_USER }} # Your EC2 SSH username (like ubuntu or ec2-user)
           key: ${{ secrets.EC2_SSH_KEY }} # Your private SSH key (set as a GitHub secret)
           port: 22
-          source: "./backend/"
+          source: "./backend/*"
           target: "/home/ubuntu/Rentamigov1/backend" # Update this path as needed for your server
           overwrite: true
           strip_components: 1 # Remove the extra top-level folder
