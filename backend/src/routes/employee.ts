@@ -95,13 +95,6 @@ Employeerouter.post('/', async (req: Request, res: Response) => {
     });
   }
 });
-
-
-
-
-
-
-
 /**
  * 🔹 GET: Fetch all employees
  */
@@ -112,6 +105,49 @@ Employeerouter.get('/', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('❌ Error fetching employees:', error);
     res.status(500).json({ success: false, message: 'Error fetching employees' });
+  }
+});
+Employeerouter.get('/active-count', async (req, res) => {
+  try {
+    const employees = await Employee.find({}, { status: 1 });
+    const activeCount = employees.filter(emp =>
+      emp.status?.trim().toLowerCase() === 'active'
+    ).length;
+
+    return res.status(200).json({ success: true, count: activeCount });
+  } catch (error) {
+    console.error("❌ Error fetching active employee count:", error);
+    return res.status(500).json({ success: false, message: 'Failed to fetch count' });
+  }
+});
+
+// Route: GET /api/employees/active-change
+Employeerouter.get('/active-change', async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const current = await Employee.countDocuments({
+      status: { $regex: /^active$/i },
+      createdAt: { $gte: startOfThisMonth }
+    });
+
+    const previous = await Employee.countDocuments({
+      status: { $regex: /^active$/i },
+      createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth }
+    });
+
+    const change = previous === 0 ? 100 : ((current - previous) / previous) * 100;
+
+    res.status(200).json({
+      success: true,
+      current,
+      previous,
+      change: Number(change.toFixed(2))
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to calculate employee change' });
   }
 });
 

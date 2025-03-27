@@ -64,5 +64,96 @@ router.post('/create-order', async (req, res) => {
     res.status(500).send('Error creating Razorpay order');
   }
 });
+// Route to get total revenue
+router.get('/total-revenue', async (req, res) => {
+  try {
+    const result = await Payment.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: "$amount" }
+        }
+      }
+    ]);
+
+    const totalRevenue = result[0]?.totalAmount || 0;
+
+    res.status(200).json({ totalRevenue });
+  } catch (error) {
+    console.error("Error fetching total revenue:", error);
+    res.status(500).json({ message: "Error fetching total revenue" });
+  }
+});
+// GET /api/payment/revenue-by-date
+router.get('/revenue-by-date', async (req, res) => {
+  try {
+    const result = await Payment.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$dateOfPayment" },
+            month: { $month: "$dateOfPayment" }
+          },
+          totalRevenue: { $sum: "$amount" }
+        }
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1
+        }
+      }
+    ]);
+
+    const formatted = result.map(item => ({
+      date: `${item._id.year}-${String(item._id.month).padStart(2, '0')}`,
+      revenue: item.totalRevenue
+    }));
+
+    res.status(200).json(formatted);
+  } catch (error) {
+    console.error("Error getting revenue by date:", error);
+    res.status(500).json({ message: "Failed to fetch revenue data" });
+  }
+});
+// Route: GET /api/payment/revenue-change
+router.get('/revenue-change', async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const thisMonthRevenue = await Payment.aggregate([
+      { $match: { createdAt: { $gte: startOfThisMonth } } },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+
+    const lastMonthRevenue = await Payment.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfLastMonth,
+            $lt: startOfThisMonth
+          }
+        }
+      },
+      { $group: { _id: null, total: { $sum: "$amount" } } }
+    ]);
+
+    const current = thisMonthRevenue[0]?.total || 0;
+    const previous = lastMonthRevenue[0]?.total || 0;
+
+    const change = previous === 0 ? 100 : ((current - previous) / previous) * 100;
+
+    res.status(200).json({
+      success: true,
+      current,
+      previous,
+      change: Number(change.toFixed(2))
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: "Revenue comparison failed" });
+  }
+});
 
 export default router;
