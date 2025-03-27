@@ -5,6 +5,7 @@ import { Search, MapPin, Sliders, X, Home, Building, CheckSquare } from "lucide-
 // import { useAuth } from "../context/AuthContext"
 // import Pagination from "./Pagination"
 import Headerr from "./landingpages/headerr"
+import { useNavigate } from "react-router-dom"
 
 // Mock data for properties
 const mockProperties = [
@@ -18,7 +19,7 @@ const mockProperties = [
     bathrooms: 1,
     area: 850,
     amenities: ["parking", "gym", "pool", "furnished"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "https://th.bing.com/th/id/OIP.0iDclZaB1rPeNjmC-hpg7wHaEj?rs=1&pid=ImgDetMain.svg?height=200&width=300",
   },
   {
     id: 2,
@@ -30,7 +31,8 @@ const mockProperties = [
     bathrooms: 2,
     area: 1500,
     amenities: ["parking", "garden", "pet-friendly"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl:
+      "https://th.bing.com/th/id/OIP.O9nIGE4tMlRXgNs7GmFFLgHaE8?w=306&h=204&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2.svg?height=200&width=300",
   },
   {
     id: 3,
@@ -42,7 +44,8 @@ const mockProperties = [
     bathrooms: 2,
     area: 1100,
     amenities: ["parking", "gym", "security", "furnished"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl:
+      "https://th.bing.com/th/id/OIP.xyhbDUfNyJecmSZvJxzYDAHaHI?w=254&h=245&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2.svg?height=200&width=300",
   },
   {
     id: 4,
@@ -54,7 +57,7 @@ const mockProperties = [
     bathrooms: 1,
     area: 500,
     amenities: ["furnished", "utilities-included"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl: "https://th.bing.com/th/id/OIP.1I2zYo5S_GDAeNuxp0qX7gHaFj?rs=1&pid=ImgDetMain.svg?height=200&width=300",
   },
   {
     id: 5,
@@ -66,7 +69,8 @@ const mockProperties = [
     bathrooms: 2.5,
     area: 1300,
     amenities: ["parking", "garden", "pet-friendly"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl:
+      "https://luxuryproperties.in/wp-content/uploads/2019/07/Prestige-Golfshire-Villa-1.jpg?height=200&width=300",
   },
   {
     id: 6,
@@ -78,7 +82,8 @@ const mockProperties = [
     bathrooms: 1,
     area: 750,
     amenities: ["furnished", "utilities-included"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl:
+      "https://th.bing.com/th/id/OIP.vkh96gUiS6bRIwcgd-4fNwHaEa?w=316&h=187&c=7&r=0&o=5&dpr=1.3&pid=1.7.svg?height=200&width=300",
   },
   {
     id: 7,
@@ -90,7 +95,8 @@ const mockProperties = [
     bathrooms: 1,
     area: 900,
     amenities: ["parking", "gym", "furnished"],
-    imageUrl: "/placeholder.svg?height=200&width=300",
+    imageUrl:
+      "https://luxuryproperties.in/wp-content/uploads/2019/07/Prestige-Golfshire-Villa-1.jpg.svg?height=200&width=300",
   },
   {
     id: 8,
@@ -155,7 +161,8 @@ const mockProperties = [
 ]
 
 const TenantProperties = () => {
-//   const { isAuthenticated, user } = useAuth()
+  const navigate = useNavigate()
+  //   const { isAuthenticated, user } = useAuth()
   const [location, setLocation] = useState("New York, NY")
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
@@ -254,12 +261,17 @@ const TenantProperties = () => {
     return `$${price.toLocaleString()}`
   }
 
+  // Function to handle navigation to property details
+  const handleViewDetails = (propertyId: number) => {
+    navigate(`/property-details/${propertyId}`)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Headerr />
-    <br></br>
-    <br></br>
-    <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
       {/* Hero Section with Location */}
       <div className="bg-black text-white py-10">
         <div className="container mx-auto px-4">
@@ -281,7 +293,7 @@ const TenantProperties = () => {
               </div>
             </div>
             {/* {isAuthenticated && ( */}
-              {/* <div className="mt-4 md:mt-0 bg-gray-800 p-4 rounded-lg">
+            {/* <div className="mt-4 md:mt-0 bg-gray-800 p-4 rounded-lg">
                 <p className="font-medium">Welcome, {user?.username || "Tenant"}</p>
                 <p className="text-sm text-gray-300">Looking for a new place?</p>
               </div> */}
@@ -459,7 +471,10 @@ const TenantProperties = () => {
                       </span>
                     )}
                   </div>
-                  <button className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition">
+                  <button
+                    className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
+                    onClick={() => handleViewDetails(property.id)}
+                  >
                     View Details
                   </button>
                 </div>
