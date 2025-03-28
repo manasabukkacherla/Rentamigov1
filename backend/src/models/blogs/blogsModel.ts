@@ -20,7 +20,7 @@ interface IBlog extends Document {
     reviews: mongoose.Types.ObjectId[];
     createdAt: Date;
     updatedAt: Date;
-    status: "published" | "draft";
+    status: string;
     incrementViews: () => Promise<void>; // Method to increase views
 }
 
