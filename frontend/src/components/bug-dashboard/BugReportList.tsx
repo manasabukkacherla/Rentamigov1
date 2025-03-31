@@ -1,25 +1,28 @@
 "use client"
 
 import { BugIcon, ArrowUpDown } from "lucide-react"
-import type { BugReport, Bugs } from "./BugDashboard"
+import type { Bugs } from "./BugDashboard"
 
 interface BugReportListProps {
-  filteredReports: BugReport[]
-  selectedReport: BugReport | null
-  setSelectedReport: (report: BugReport) => void
-  toggleSort: (field: "createdAt" | "severity") => void
+  // filteredReports: BugReport[]
+  filteredBugs: Bugs[]
+  selectedReport: Bugs | null
+  setSelectedReport: (report: Bugs) => void
+  toggleSort: (field: "createdAt" | "status") => void
 }
 
-const BugReportList = ({ filteredReports, selectedReport, setSelectedReport, toggleSort }: BugReportListProps) => {
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "critical":
+const BugReportList = ({ filteredBugs, selectedReport, setSelectedReport, toggleSort }: BugReportListProps) => {
+  console.log(filteredBugs)
+  // console.log(selectedReport)
+  const getErrorcodeColor = (errorcode: string) => {
+    switch (errorcode) {
+      case "ERR123":
         return "bg-red-100 text-red-800"
-      case "high":
+      case "ERR124":
         return "bg-orange-100 text-orange-800"
-      case "medium":
+      case "ERR125":
         return "bg-yellow-100 text-yellow-800"
-      case "low":
+      case "ERR126":
         return "bg-green-100 text-green-800"
       default:
         return "bg-gray-100 text-gray-800"
@@ -61,30 +64,30 @@ const BugReportList = ({ filteredReports, selectedReport, setSelectedReport, tog
             <ArrowUpDown className="ml-1 h-3 w-3" />
           </button>
           <button
-            onClick={() => toggleSort("severity")}
+            onClick={() => toggleSort("status")}
             className="flex items-center text-sm text-gray-500 hover:text-gray-700 ml-2"
           >
-            Severity
+            Status
             <ArrowUpDown className="ml-1 h-3 w-3" />
           </button>
         </div>
       </div>
 
       <div className="divide-y divide-gray-200 max-h-[calc(100vh-250px)] overflow-y-auto">
-        {filteredReports.length > 0 ? (
-          filteredReports.map((report) => (
+        {filteredBugs.length > 0 ? (
+          filteredBugs.map((report) => (
             <div
-              key={report.id}
+              key={report._id}
               onClick={() => setSelectedReport(report)}
               className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                selectedReport && selectedReport.id === report.id ? "bg-gray-50 border-l-4 border-black" : ""
+                selectedReport && selectedReport._id === report._id ? "bg-gray-50 border-l-4 border-black" : ""
               }`}
             >
               <div className="flex justify-between items-start mb-2">
                 <h4 className="font-medium text-gray-900 line-clamp-1">{report.title}</h4>
-                <span className={`text-xs px-2 py-1 rounded-full ${getSeverityColor(report.severity)}`}>
-                  {report.severity.charAt(0).toUpperCase() + report.severity.slice(1)}
-                </span>
+                {/* <span className={`text-xs px-2 py-1 rounded-full ${getErrorcodeColor(selectedReport?.errorcode || "")}`}>
+                {selectedReport?.errorcode}
+              </span> */}
               </div>
               <div className="text-sm text-gray-500 mb-2 line-clamp-2">{report.description}</div>
               <div className="flex justify-between items-center text-xs text-gray-500">
@@ -92,7 +95,7 @@ const BugReportList = ({ filteredReports, selectedReport, setSelectedReport, tog
                   {getStatusIcon(report.status)}
                   <span className="capitalize">{report.status.replace("-", " ")}</span>
                 </div>
-                <span>{formatDate(report.createdAt)}</span>
+                <span>{new Date(report.createdAt).toLocaleDateString()}</span>
               </div>
             </div>
           ))

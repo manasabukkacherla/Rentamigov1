@@ -15,18 +15,18 @@ bugRouter.post('/create', async (
         title: string;
         description: string;
         // email: string;
-        errorcode: string;
-        category: string;
-        imageUrl?: string;
+        errorcode?: string;
+        category?: string;
+        imageUrl: string;
         status: string;
         author: string;
     }>,
     res: Response
 ): Promise<void> => {
     try {
-        const { title, description, errorcode, category, imageUrl, author, status } = req.body;
+        const { title, description, imageUrl, author, status } = req.body;
 
-        if (!title || !description || !errorcode || !category || !status) {
+        if (!title || !description || !status || !imageUrl) {
             res.status(400).json({ error: 'All required fields must be filled.' });
             return;
         }
@@ -35,8 +35,8 @@ bugRouter.post('/create', async (
             title,
             description,
             // email,
-            errorcode,
-            category,
+            // errorcode,
+            // category,
             imageUrl,
             status,
             author,
@@ -45,7 +45,7 @@ bugRouter.post('/create', async (
 
         await newBug.save();
 
-        res.status(201).json(newBug);
+        res.status(201).json({success: true, newBug});
 
     } catch (error) {
         console.error('Error creating bug:', error);
@@ -82,6 +82,28 @@ bugRouter.get('/:id', async (req: CustomRequest, res: Response): Promise<void> =
             res.status(404).json({ message: "Bug not found" });
             return;
         }
+
+        res.status(200).json({ success: true, bug });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
+bugRouter.put('/:id/edit', async (req: CustomRequest, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const bug = await Bug.findById(id)
+        .populate("author");
+
+        if (!bug) {
+            res.status(404).json({ message: "Bug not found" });
+            return;
+        }
+
+        bug.status = status;
+        await bug.save()
 
         res.status(200).json({ success: true, bug });
     } catch (error) {

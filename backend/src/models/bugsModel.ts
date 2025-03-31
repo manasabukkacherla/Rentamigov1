@@ -4,11 +4,12 @@ interface Bugs extends Document {
   title: string
   description: string
   // email: string
-  errorcode: string
-  category: string
-  imageUrl?: string
+  errorcode?: string
+  category?: string
+  imageUrl: string
   status: "pending" | "in-progress" | "resolved"
   createdAt: Date
+  updatedAt: Date
   author: mongoose.Types.ObjectId
 }
 
@@ -16,11 +17,12 @@ const BugsSchema = new Schema<Bugs>({
     title: { type: String, required: true },
   description: { type: String, required: true },
   // email: { type: String, required: true },
-  errorcode: { type: String, required: true },
-  category: { type: String, required: true },
-  imageUrl: { type: String },
+  errorcode: { type: String, required: false, default: "ERR123" },
+  category: { type: String, required: false, default: "funtionality" },
+  imageUrl: { type: String, required: true },
   status: { type: String, enum: ['pending', 'in-progress', 'resolved'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
   author: { type: Schema.Types.ObjectId, ref: "User", required: true },
 })
 
