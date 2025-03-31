@@ -32,7 +32,7 @@ import Revenue from "./components/dashadmin/components/Revenue"
 import BugReportPage from "./components/bug-report/BugReportPage"
 import BugDashboard from "./components/bug-dashboard/BugDashboard"
 import TenantProperties from "./components/tenantProperties"
-import PropertyDetailPage from "./components/PropertyDetailPage"
+// import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify"
 import ErrorBoundary from "./components/blogs/ErrorBoundary"
@@ -78,7 +78,7 @@ const App = () => {
           <Route path="/updatePropertyform" element={<Propertmain />} />
 
           {/* New route for property details with ID parameter */}
-          <Route path="/property-details/:id" element={<PropertyDetailPage />} />
+          {/* <Route path="/property-details/:id" element={<PropertyDetailPage />} /> */}
 
           {/* Owner and Tenant Routes */}
           <Route path="/owner-page" element={<OwnerPage />} />

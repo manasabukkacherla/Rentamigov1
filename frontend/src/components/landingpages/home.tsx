@@ -426,7 +426,7 @@ const Homepage: React.FC = () => {
           <PropertySlider />
 
           {/* Search Bar */}
-          <div className="bg-white p-6 rounded-xl shadow-lg -mt-10 relative z-10 max-w-4xl mx-auto">
+          {/* <div className="bg-white p-6 rounded-xl shadow-lg -mt-10 relative z-10 max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -465,7 +465,7 @@ const Homepage: React.FC = () => {
             <button className="w-full mt-4 bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">
               Search Properties
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
 
