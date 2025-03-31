@@ -7,11 +7,11 @@ interface BugReportFiltersProps {
   setSearchQuery: (query: string) => void
   statusFilter: string
   setStatusFilter: (status: string) => void
-  severityFilter: string
-  setSeverityFilter: (severity: string) => void
   dateFilter: { start?: string; end?: string }
   setDateFilter: (filter: { start?: string; end?: string }) => void
   clearFilters: () => void
+  errorcodefilter: string
+  setErrorcodefilter: (errorcodefilter: string) => void
 }
 
 const BugReportFilters = ({
@@ -19,14 +19,14 @@ const BugReportFilters = ({
   setSearchQuery,
   statusFilter,
   setStatusFilter,
-  severityFilter,
-  setSeverityFilter,
   dateFilter,
   setDateFilter,
   clearFilters,
+  errorcodefilter,
+  setErrorcodefilter
 }: BugReportFiltersProps) => {
   const hasActiveFilters =
-    searchQuery || statusFilter !== "all" || severityFilter !== "all" || dateFilter.start || dateFilter.end
+    searchQuery || statusFilter !== "all" || errorcodefilter !== "all" || dateFilter.start || dateFilter.end
 
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm">
@@ -83,15 +83,15 @@ const BugReportFilters = ({
               <AlertCircle className="h-4 w-4 text-gray-400" />
             </div>
             <select
-              value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value)}
+              value={errorcodefilter}
+              onChange={(e) => setErrorcodefilter(e.target.value)}
               className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             >
-              <option value="all">All Severities</option>
-              <option value="critical">Critical</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+              <option value="all">All Errorcodes</option>
+              <option value="ERR123">ERR123</option>
+              <option value="ERR124">ERR124</option>
+              <option value="ERR125">ERR125</option>
+              <option value="ERR126">ERR126</option>
             </select>
           </div>
 

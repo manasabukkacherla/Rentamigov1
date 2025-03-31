@@ -2,10 +2,10 @@
 
 import { useState } from "react"
 import { Download, X } from "lucide-react"
-import type { BugReport } from "./BugDashboard"
+import type { Bugs } from "./BugDashboard"
 
 interface BugReportExportProps {
-  bugReports: BugReport[]
+  bugReports: Bugs[]
   onClose: () => void
 }
 
@@ -39,7 +39,7 @@ const BugReportExport = ({ bugReports, onClose }: BugReportExportProps) => {
 
         Object.keys(includeFields).forEach((key) => {
           if (includeFields[key as keyof typeof includeFields] && key in report) {
-            result[key] = report[key as keyof BugReport]
+            result[key] = report[key as keyof Bugs]
           }
         })
 

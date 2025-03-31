@@ -85,8 +85,8 @@ const BlogDetail: React.FC = () => {
         try {
           const response = await axios.get(`http://localhost:8000/api/blog/${id}`)
           if (response.data.success) {
-            const blog = response.data.blog
-            let userHasLiked = false
+            const blog = response.data.blog;
+            let userHasLiked = false;
 
             const user = sessionStorage.getItem("user")
             if (user) {

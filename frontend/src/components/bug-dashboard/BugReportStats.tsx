@@ -14,10 +14,10 @@ import {
   Pie,
   Cell,
 } from "recharts"
-import type { BugReport } from "./BugDashboard"
+import type { BugReport, Bugs } from "./BugDashboard"
 
 interface BugReportStatsProps {
-  bugReports: BugReport[]
+  bugReports: Bugs[]
 }
 
 const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
@@ -57,27 +57,35 @@ const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
   ]
 
   // Severity distribution data
-  const severityData = [
-    { name: "Critical", value: filteredReports.filter((r) => r.severity === "critical").length },
-    { name: "High", value: filteredReports.filter((r) => r.severity === "high").length },
-    { name: "Medium", value: filteredReports.filter((r) => r.severity === "medium").length },
-    { name: "Low", value: filteredReports.filter((r) => r.severity === "low").length },
+  // const severityData = [
+  //   { name: "Critical", value: filteredReports.filter((r) => r.severity === "critical").length },
+  //   { name: "High", value: filteredReports.filter((r) => r.severity === "high").length },
+  //   { name: "Medium", value: filteredReports.filter((r) => r.severity === "medium").length },
+  //   { name: "Low", value: filteredReports.filter((r) => r.severity === "low").length },
+  // ]
+
+  const errorCodeData = [
+    { name: "ERR123", value: filteredReports.filter((r) => r.errorcode === "ERR123").length },
+    { name: "ERR124", value: filteredReports.filter((r) => r.errorcode === "ERR124").length },
+    { name: "ERR125", value: filteredReports.filter((r) => r.errorcode === "ERR125").length },
+    { name: "ERR126", value: filteredReports.filter((r) => r.errorcode === "ERR126").length },
   ]
 
   // Category distribution data
   const categoryData = () => {
-    const categories: Record<string, number> = {}
-
+    const categories: Record<string, number> = {};
+  
     filteredReports.forEach((report) => {
-      const category = report.category
-      categories[category] = (categories[category] || 0) + 1
-    })
-
+      const category = report.category || "Uncategorized"; // Default to "Uncategorized" if category is undefined or missing
+      categories[category] = (categories[category] || 0) + 1;
+    });
+  
     return Object.entries(categories).map(([name, value]) => ({
-      name: name.charAt(0).toUpperCase() + name.slice(1),
+      name: name.charAt(0).toUpperCase() + name.slice(1), // Capitalize the first letter
       value,
-    }))
-  }
+    }));
+  };
+  
 
   // Reports over time data
   const reportsOverTimeData = () => {
@@ -113,11 +121,11 @@ const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
     "In Progress": "#0088FE",
     Resolved: "#00C49F",
   }
-  const SEVERITY_COLORS = {
-    Critical: "#FF0000",
-    High: "#FF8042",
-    Medium: "#FFBB28",
-    Low: "#00C49F",
+  const ERROR_COLORS = {
+    ERR123: "#FF0000",
+    ERR124: "#FF8042",
+    ERR125: "#FFBB28",
+    ERR126: "#00C49F",
   }
 
   return (
@@ -198,12 +206,12 @@ const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
 
         {/* Severity Distribution */}
         <div className="bg-white p-6 rounded-xl shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Severity Distribution</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Error Code Distribution</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={severityData}
+                  data={errorCodeData}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -212,11 +220,11 @@ const BugReportStats = ({ bugReports }: BugReportStatsProps) => {
                   dataKey="value"
                   label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                 >
-                  {severityData.map((entry, index) => (
+                  {errorCodeData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={
-                        SEVERITY_COLORS[entry.name as keyof typeof SEVERITY_COLORS] || COLORS[index % COLORS.length]
+                        ERROR_COLORS[entry.name as keyof typeof ERROR_COLORS] || COLORS[index % COLORS.length]
                       }
                     />
                   ))}
