@@ -3,30 +3,37 @@
 import { useState, useRef, type ChangeEvent, type FormEvent } from "react"
 import { BugIcon, Upload, X, AlertCircle } from "lucide-react"
 import { toast } from "react-toastify"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
-interface BugReport {
+export interface Bugs {
   title: string
   description: string
-  stepsToReproduce: string
-  email: string
-  severity: string
+  // email: string
+  errorcode: string
   category: string
   imageUrl?: string
   status: "pending" | "in-progress" | "resolved"
-  createdAt: string
+  createdAt: Date
+  author: User
+}
+
+interface User {
+  _id: string;
+  email: string;
 }
 
 const BugReportForm = () => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [stepsToReproduce, setStepsToReproduce] = useState("")
-  const [email, setEmail] = useState("")
-  const [severity, setSeverity] = useState("medium")
   const [category, setCategory] = useState("ui")
   const [image, setImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [errorcode, setErrorcode] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const navigate = useNavigate()
 
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -57,8 +64,9 @@ const BugReportForm = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
+    console.log("submitted")
 
-    if (!title || !description || !email) {
+    if (!title || !description ) {
       toast.error("Please fill all required fields")
       return
     }
@@ -74,39 +82,53 @@ const BugReportForm = () => {
         imageUrl = imagePreview || ""
       }
 
-      const bugReport: BugReport = {
-        title,
-        description,
-        stepsToReproduce,
-        email,
-        severity,
-        category,
-        imageUrl,
-        status: "pending",
-        createdAt: new Date().toISOString(),
+      const user = sessionStorage.getItem("user")
+      if(user) {
+        const userId = JSON.parse(user).id;
+        const bugReport = {
+          title,
+          description,
+          // email,
+          errorcode,
+          category,
+          imageUrl,
+          status: "pending",
+          createdAt: new Date().toISOString(),
+          author: userId
+        }
+
+        console.log(bugReport)
+        const response = await axios.post(`api/bug/create`, bugReport)
+        console.log(response)
+        if(response.data.success) {
+          toast.success("Bug reported successfully!")
+        } else {
+          toast.error("Something went wrong!!")
+        }
+  
+        // In a real application, you would send this data to your backend
+        // console.log("Bug report submitted:", bugReport)
+  
+        // // For demo purposes, store in localStorage
+        // const existingReports = JSON.parse(localStorage.getItem("bugReports") || "[]")
+        // existingReports.push(bugReport)
+        // localStorage.setItem("bugReports", JSON.stringify(existingReports))
+  
+        // toast.success("Bug report submitted successfully!")
+  
+        // Reset form
+        setTitle("")
+        setDescription("")
+        setErrorcode("")
+        setCategory("ui")
+        removeImage()
+      } else {
+        toast.error("Login first!!")
+        navigate("/login")
       }
-
-      // In a real application, you would send this data to your backend
-      console.log("Bug report submitted:", bugReport)
-
-      // For demo purposes, store in localStorage
-      const existingReports = JSON.parse(localStorage.getItem("bugReports") || "[]")
-      existingReports.push(bugReport)
-      localStorage.setItem("bugReports", JSON.stringify(existingReports))
-
-      toast.success("Bug report submitted successfully!")
-
-      // Reset form
-      setTitle("")
-      setDescription("")
-      setStepsToReproduce("")
-      setEmail("")
-      setSeverity("medium")
-      setCategory("ui")
-      removeImage()
     } catch (error) {
       console.error("Error submitting bug report:", error)
-      toast.error("Failed to submit bug report. Please try again.")
+      toast.error("All fields must be filled!")
     } finally {
       setIsSubmitting(false)
     }
@@ -155,7 +177,7 @@ const BugReportForm = () => {
           />
         </div> */}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
               Category
@@ -190,7 +212,22 @@ const BugReportForm = () => {
               <option value="critical">Critical - Complete blocker</option>
             </select>
           </div>
-        </div>
+
+          <div>
+            <label htmlFor="error-code" className="block text-sm font-medium text-gray-700 mb-1">
+              Error Code
+            </label>
+            <input
+            type="text"
+            id="errorcode"
+            value={errorcode}
+            onChange={(e) => setErrorcode(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            placeholder="Enter Error Code"
+            required
+          />
+          </div>
+        </div> */}
 
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
@@ -222,7 +259,7 @@ const BugReportForm = () => {
         </div> */}
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Screenshot (Optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Screenshot</label>
 
           {!imagePreview ? (
             <div

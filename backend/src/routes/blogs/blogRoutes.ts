@@ -25,7 +25,7 @@ export const createBlog = async (
 ): Promise<void> => {
   try {
     const { title, excerpt, content, media, tags, category, readTime, author, status } = req.body;
-    console.log(author)
+    // console.log(author)
 
     if (!title || !excerpt || !content || !media?.coverImage || !tags?.length || !category || !readTime || !status) {
       res.status(400).json({ error: 'All required fields must be filled.' });

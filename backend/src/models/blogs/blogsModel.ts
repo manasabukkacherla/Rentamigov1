@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// Define TypeScript interface for Blog
 interface IBlog extends Document {
     title: string;
     excerpt: string;

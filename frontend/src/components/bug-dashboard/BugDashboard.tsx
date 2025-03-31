@@ -3,77 +3,103 @@
 import { useState, useEffect } from "react"
 import { BugIcon, X, BarChart2, ChevronLeft, Download, RefreshCw } from "lucide-react"
 import { toast } from "react-toastify"
-import { Link } from "react-router-dom"
-import BugReportFilters from "./BugReportFilters"
-import BugReportDetails from "./BugReportDetails"
-import BugReportList from "./BugReportList"
 import BugReportStats from "./BugReportStats"
+import BugReportFilters from "./BugReportFilters"
+import BugReportList from "./BugReportList"
+import { Link } from "react-router-dom"
+import BugReportDetails from "./BugReportDetails"
+import axios from "axios"
 
-export interface BugReport {
-  id?: string
+export interface Bugs {
+  _id: string,
   title: string
   description: string
-  stepsToReproduce?: string
-  email: string
-  severity: string
-  category: string
-  imageUrl?: string
+  // email: string
+  errorcode?: string
+  category?: string
+  imageUrl: string
   status: "pending" | "in-progress" | "resolved"
-  createdAt: string
-  updatedAt?: string
-  assignedTo?: string
-  comments?: Array<{
-    author: string
-    text: string
-    timestamp: string
-  }>
+  createdAt: Date
+  updatedAt: Date
+  author: User
 }
 
+interface User {
+  _id: string;
+  email: string;
+}
+
+// Sample data generator for demonstration purposes
+// const generateSampleBugReports = (): BugReport[] => {
+//   const categories = ["ui", "functionality", "performance", "security", "other"]
+//   const severities = ["critical", "high", "medium", "low"]
+//   const statuses: ("pending" | "in-progress" | "resolved")[] = ["pending", "in-progress", "resolved"]
+
+//   // Generate additional random reports to have more data for statistics
+//   for (let i = 0; i < 15; i++) {
+//     const randomDate = new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000)
+//     const randomCategory = categories[Math.floor(Math.random() * categories.length)]
+//     const randomSeverity = severities[Math.floor(Math.random() * severities.length)]
+//     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)]
+
+//     sampleReports.push({
+//       id: `bug-random-${i}`,
+//       title: `Random bug report #${i + 1}`,
+//       description: `This is a randomly generated bug report for testing the dashboard with more data.`,
+//       email: `user${i}@example.com`,
+//       severity: randomSeverity,
+//       category: randomCategory,
+//       status: randomStatus,
+//       createdAt: randomDate.toISOString(),
+//     })
+//   }
+
+//   return sampleReports
+// }
+
 const BugDashboard = () => {
-  const [bugReports, setBugReports] = useState<BugReport[]>([])
-  const [filteredReports, setFilteredReports] = useState<BugReport[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [severityFilter, setSeverityFilter] = useState("all")
+  const [errorcodefilter, setErrorcodefilter] = useState("all")
   const [dateFilter, setDateFilter] = useState<{ start?: string; end?: string }>({})
-  const [selectedReport, setSelectedReport] = useState<BugReport | null>(null)
-  const [sortField, setSortField] = useState<"createdAt" | "severity">("createdAt")
+  const [selectedReport, setSelectedReport] = useState<Bugs | null>(null)
+  const [sortField, setSortField] = useState<"createdAt" | "status">("createdAt")
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc")
   const [imageModalOpen, setImageModalOpen] = useState(false)
   const [viewMode, setViewMode] = useState<"list" | "stats">("list")
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  useEffect(() => {
-    fetchBugReports()
-  }, [])
-
-  const fetchBugReports = () => {
+  const [bugs, setBugs] = useState<Bugs[]>([]);
+  const [filteredBugs, setFilteredbugs] = useState<Bugs[]>([])
+  
+  const loadBugs = async () => {
     setIsRefreshing(true)
+    try {
+      const response = await axios.get(`/api/bug/list`);
+      if(response.data.success) {
+        // console.log(response.data.data)
+        setBugs(response.data.data)
 
-    // In a real application, you would fetch this data from your backend
-    setTimeout(() => {
-      try {
-        const storedReports = JSON.parse(localStorage.getItem("bugReports") || "[]")
-
-        // Add unique IDs if they don't exist
-        const reportsWithIds = storedReports.map((report: BugReport, index: number) => ({
-          ...report,
-          id: report.id || `bug-${index}-${Date.now()}`,
+        const reportsWithIds = bugs.map((bug: Bugs, index: number) => ({
+          ...bug,
+          id: bug._id || `bug-${index}-${Date.now()}`,
         }))
 
-        setBugReports(reportsWithIds)
-        setFilteredReports(reportsWithIds)
-        setIsRefreshing(false)
-      } catch (error) {
-        console.error("Error fetching bug reports:", error)
-        toast.error("Failed to load bug reports")
+        setFilteredbugs(reportsWithIds)
         setIsRefreshing(false)
       }
-    }, 600) // Simulate network delay
+    } catch (error) {
+      toast.error("Failed to load bugs");
+      console.error("Error loading bugs:", error);
+    }
   }
 
   useEffect(() => {
-    let result = [...bugReports]
+    loadBugs()
+  }, [])
+
+  useEffect(() => {
+    let result = [...bugs]
 
     // Apply search filter
     if (searchQuery) {
@@ -81,7 +107,7 @@ const BugDashboard = () => {
         (report) =>
           report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          report.email.toLowerCase().includes(searchQuery.toLowerCase()),
+          report.author.email.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     }
 
@@ -90,9 +116,9 @@ const BugDashboard = () => {
       result = result.filter((report) => report.status === statusFilter)
     }
 
-    // Apply severity filter
-    if (severityFilter !== "all") {
-      result = result.filter((report) => report.severity === severityFilter)
+    // Apply errorcode filter
+    if (errorcodefilter !== "all") {
+      result = result.filter((report) => report.errorcode === errorcodefilter)
     }
 
     // Apply date filter
@@ -113,80 +139,94 @@ const BugDashboard = () => {
           ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
           : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       } else {
-        const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 }
-        const aValue = severityOrder[a.severity as keyof typeof severityOrder] || 0
-        const bValue = severityOrder[b.severity as keyof typeof severityOrder] || 0
+        const errorcodeOrder = { ERR123: 4, ERR125: 3, ERR126: 2, ERR124: 1 }
+        const aValue = errorcodeOrder[a.errorcode as keyof typeof errorcodeOrder] || 0
+        const bValue = errorcodeOrder[b.errorcode as keyof typeof errorcodeOrder] || 0
 
         return sortDirection === "asc" ? aValue - bValue : bValue - aValue
       }
     })
 
-    setFilteredReports(result)
-  }, [bugReports, searchQuery, statusFilter, severityFilter, dateFilter, sortField, sortDirection])
+    setFilteredbugs(result)
+  }, [searchQuery, statusFilter, errorcodefilter, dateFilter, sortField, sortDirection, bugs])
 
-  const handleStatusChange = (report: BugReport, newStatus: "pending" | "in-progress" | "resolved") => {
-    const updatedReports = bugReports.map((r) => {
-      if (r.id === report.id) {
+  const handleStatusChange = async (report: Bugs, newStatus: "pending" | "in-progress" | "resolved") => {
+    const updatedbugs = bugs.map((r) => {
+      if (r._id === report._id) {
         return {
           ...r,
           status: newStatus,
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date(),
         }
       }
       return r
     })
 
-    setBugReports(updatedReports)
-    localStorage.setItem("bugReports", JSON.stringify(updatedReports))
+    setBugs(updatedbugs)
+    console.log(bugs)
+    // localStorage.setItem("bugReports", JSON.stringify(updatedReports))
 
-    if (selectedReport && selectedReport.id === report.id) {
-      setSelectedReport({ ...selectedReport, status: newStatus, updatedAt: new Date().toISOString() })
+    if (selectedReport && selectedReport._id === report._id) {
+      setSelectedReport({ ...selectedReport, status: newStatus, updatedAt: new Date() })
     }
+    console.log(selectedReport)
 
+    try {
+      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus });
+  
+      if (response.data.success) {
+        toast.success(response.data.message);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error updating bug status');
+    }
     toast.success(`Bug status updated to ${newStatus.replace("-", " ")}`)
   }
 
-  const handleAddComment = (reportId: string | undefined, comment: string) => {
-    if (!reportId) return
+  // const handleAddComment = (reportId: string | undefined, comment: string) => {
+  //   if (!reportId) return
 
-    const updatedReports = bugReports.map((r) => {
-      if (r.id === reportId) {
-        const newComment = {
-          author: "Admin",
-          text: comment,
-          timestamp: new Date().toISOString(),
-        }
+  //   const updatedReports = bugReports.map((r) => {
+  //     if (r.id === reportId) {
+  //       const newComment = {
+  //         author: "Admin",
+  //         text: comment,
+  //         timestamp: new Date().toISOString(),
+  //       }
 
-        return {
-          ...r,
-          comments: [...(r.comments || []), newComment],
-          updatedAt: new Date().toISOString(),
-        }
-      }
-      return r
-    })
+  //       return {
+  //         ...r,
+  //         comments: [...(r.comments || []), newComment],
+  //         updatedAt: new Date().toISOString(),
+  //       }
+  //     }
+  //     return r
+  //   })
 
-    setBugReports(updatedReports)
-    localStorage.setItem("bugReports", JSON.stringify(updatedReports))
+  //   setBugReports(updatedReports)
+  //   localStorage.setItem("bugReports", JSON.stringify(updatedReports))
 
-    if (selectedReport && selectedReport.id === reportId) {
-      const newComment = {
-        author: "Admin",
-        text: comment,
-        timestamp: new Date().toISOString(),
-      }
+  //   if (selectedReport && selectedReport._id === reportId) {
+  //     const newComment = {
+  //       author: "Admin",
+  //       text: comment,
+  //       timestamp: new Date().toISOString(),
+  //     }
 
-      setSelectedReport({
-        ...selectedReport,
-        comments: [...(selectedReport.comments || []), newComment],
-        updatedAt: new Date().toISOString(),
-      })
-    }
+  //     setSelectedReport({
+  //       ...selectedReport,
+  //       // comments: [...(selectedReport.comments || []), newComment],
+  //       updatedAt: new Date(),
+  //     })
+  //   }
 
-    toast.success("Comment added successfully")
-  }
+  //   toast.success("Comment added successfully")
+  // }
 
-  const toggleSort = (field: "createdAt" | "severity") => {
+  const toggleSort = (field: "createdAt" | "status") => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -197,14 +237,14 @@ const BugDashboard = () => {
 
   const handleExportReports = () => {
     try {
-      const dataToExport = filteredReports.map((report) => ({
-        ID: report.id,
+      const dataToExport = filteredBugs.map((report) => ({
+        ID: report._id,
         Title: report.title,
         Description: report.description,
         Status: report.status,
-        Severity: report.severity,
+        Errorcode: report.errorcode,
         Category: report.category,
-        ReportedBy: report.email,
+        ReportedBy: report.author.email,
         ReportedOn: new Date(report.createdAt).toLocaleString(),
         LastUpdated: report.updatedAt ? new Date(report.updatedAt).toLocaleString() : "N/A",
       }))
@@ -231,7 +271,7 @@ const BugDashboard = () => {
   const clearFilters = () => {
     setSearchQuery("")
     setStatusFilter("all")
-    setSeverityFilter("all")
+    setErrorcodefilter("all")
     setDateFilter({})
     toast.info("Filters cleared")
   }
@@ -240,15 +280,11 @@ const BugDashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              {/* <Link to="/" className="flex items-center text-gray-700 hover:text-black">
-                <ChevronLeft className="w-5 h-5 mr-1" />
-                <span>Back to Home</span>
-              </Link> */}
-              <h1 className="ml-8 text-xl font-bold text-gray-900 flex items-center">
+          <div className="flex flex-col sm:flex-row justify-between items-center py-4 sm:h-16">
+            <div className="flex items-center mb-4 sm:mb-0">
+              <h1 className="ml-4 sm:ml-8 text-xl font-bold text-gray-900 flex items-center">
                 <BugIcon className="w-6 h-6 mr-2 text-red-500" />
-                Bug Management Dashboard
+                Bug Dashboard
               </h1>
             </div>
             <div className="flex items-center space-x-4">
@@ -267,7 +303,7 @@ const BugDashboard = () => {
                 <Download className="w-5 h-5" />
               </button>
               <button
-                onClick={fetchBugReports}
+                onClick={loadBugs}
                 className={`p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md ${isRefreshing ? "animate-spin" : ""}`}
                 title="Refresh"
                 disabled={isRefreshing}
@@ -287,16 +323,16 @@ const BugDashboard = () => {
               setSearchQuery={setSearchQuery}
               statusFilter={statusFilter}
               setStatusFilter={setStatusFilter}
-              severityFilter={severityFilter}
-              setSeverityFilter={setSeverityFilter}
               dateFilter={dateFilter}
               setDateFilter={setDateFilter}
               clearFilters={clearFilters}
+              errorcodefilter={errorcodefilter}
+              setErrorcodefilter={setErrorcodefilter}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <BugReportList
-                filteredReports={filteredReports}
+                filteredBugs={filteredBugs}
                 selectedReport={selectedReport}
                 setSelectedReport={setSelectedReport}
                 toggleSort={toggleSort}
@@ -305,7 +341,7 @@ const BugDashboard = () => {
               <BugReportDetails
                 selectedReport={selectedReport}
                 handleStatusChange={handleStatusChange}
-                handleAddComment={handleAddComment}
+                // handleAddComment={handleAddComment}
                 setImageModalOpen={setImageModalOpen}
               />
             </div>
@@ -333,7 +369,7 @@ const BugDashboard = () => {
             )}
           </div>
         ) : (
-          <BugReportStats bugReports={bugReports} />
+          <BugReportStats bugReports={bugs} />
         )}
       </main>
     </div>
