@@ -41,13 +41,6 @@ jobs:
           npm run build
         # This creates a production-ready build folder in the frontend directory
 
-      # New Step: Rename 'dist' to 'build' to avoid confusion
-      - name: Rename Vite Output from dist to build
-          if:steps.filter.outputs.frontend == 'true'
-          working-directory:./frontend
-          run:|
-          mv dist build
-
       # Step 5: Copy the Frontend build into the backend's src folder
       - name: Copy Frontend Build to Backend Src
         if: steps.filter.outputs.frontend == 'true'
