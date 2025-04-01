@@ -8,7 +8,7 @@ import { Link, useNavigate } from "react-router-dom";
 import BlogList from "../blogs/BlogList";
 import { motion } from "framer-motion";
 
-// Location Selection Modal Component
+// Update the LocationModal component to include a close button at the bottom
 const LocationModal = ({
   isOpen,
   onClose,
@@ -27,7 +27,8 @@ const LocationModal = ({
     "Kolkata",
     "Pune",
     "Ahmedabad",
-  ];
+    "Jaipur"
+  ]
 
   if (!isOpen) return null;
 
@@ -57,11 +58,13 @@ const LocationModal = ({
             </button>
           </div>
 
+          <p className="text-gray-600 mb-4">Choose your city to find properties in your area</p>
+
           <div className="grid grid-cols-2 gap-4">
             {locations.map((location) => (
               <button
                 key={location}
-                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-left hover:border-black"
                 onClick={() => onSelectLocation(location)}
               >
                 <div className="flex items-center">
@@ -88,6 +91,16 @@ const LocationModal = ({
                 </div>
               </button>
             ))}
+          </div>
+
+          {/* Add a prominent close button at the bottom */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={onClose}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              Skip for now
+            </button>
           </div>
         </div>
       </div>
@@ -318,95 +331,37 @@ const Testimonial = ({
   );
 };
 
+// Update the Homepage component to show the location modal on page load
 const Homepage: React.FC = () => {
-  const [allBlogs, setAllBlogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-  const navigate = useNavigate();
+  const [allBlogs, setAllBlogs] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
+  const navigate = useNavigate()
 
+  // Show location modal on page load
   useEffect(() => {
-    // Use mock data with proper image URLs
-    const mockBlogs = [
-      {
-        _id: "1",
-        title: "Finding Your Perfect Rental Property",
-        excerpt:
-          "Tips and tricks for finding the ideal rental home that fits your needs and budget.",
-        content: "Lorem ipsum dolor sit amet...",
-        media: {
-          coverImage:
-            "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-        },
-        tags: ["Rental", "Property Search"],
-        category: "Rental Tips",
-        readTime: 5,
-        author: "John Doe",
-        likes: 24,
-        views: 2156,
-        shares: 12,
-        comments: [],
-        reviews: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        _id: "2",
-        title: "Understanding Rental Agreements",
-        excerpt:
-          "Everything you need to know about rental contracts and what to look for before signing.",
-        content: "Lorem ipsum dolor sit amet...",
-        media: {
-          coverImage:
-            "https://images.unsplash.com/photo-1554469384-e58fac16e23a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80",
-        },
-        tags: ["Legal", "Contracts"],
-        category: "Legal Advice",
-        readTime: 7,
-        author: "Jane Smith",
-        likes: 32,
-        views: 3203,
-        shares: 18,
-        comments: [],
-        reviews: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        _id: "3",
-        title: "Decorating Your Rental Home",
-        excerpt:
-          "Creative ways to personalize your rental space without breaking lease agreements.",
-        content: "Lorem ipsum dolor sit amet...",
-        media: {
-          coverImage:
-            "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2158&q=80",
-        },
-        tags: ["Decor", "DIY"],
-        category: "Home Improvement",
-        readTime: 4,
-        author: "Alex Johnson",
-        likes: 45,
-        views: 2778,
-        shares: 24,
-        comments: [],
-        reviews: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ];
-
-    setAllBlogs(mockBlogs);
-    setLoading(false);
-  }, []);
+    // Check if location is already selected in session storage
+    const savedLocation = sessionStorage.getItem("selectedLocation")
+    if (!savedLocation) {
+      // Show modal after a short delay for better UX
+      const timer = setTimeout(() => {
+        setIsLocationModalOpen(true)
+      }, 1000)
+      return () => clearTimeout(timer)
+    } else {
+      setSelectedLocation(savedLocation)
+    }
+  }, [])
 
   const handleLocationSelect = (location: string) => {
-    setSelectedLocation(location);
-    setIsLocationModalOpen(false);
+    setSelectedLocation(location)
+    setIsLocationModalOpen(false)
+    // Save selected location to session storage
+    sessionStorage.setItem("selectedLocation", location)
     // Redirect to properties page with location parameter
-    // navigate(`/Tenanthome?location=${location}`)
-    navigate(`/tenantProperties`);
-  };
+    navigate(`/tenantproperties`)
+  }
 
   // Animation variants for scroll animations
   const fadeInUp = {
@@ -471,7 +426,7 @@ const Homepage: React.FC = () => {
           <PropertySlider />
 
           {/* Search Bar */}
-          <div className="bg-white p-6 rounded-xl shadow-lg -mt-10 relative z-10 max-w-4xl mx-auto">
+          {/* <div className="bg-white p-6 rounded-xl shadow-lg -mt-10 relative z-10 max-w-4xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -510,7 +465,7 @@ const Homepage: React.FC = () => {
             <button className="w-full mt-4 bg-black text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition duration-300">
               Search Properties
             </button>
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -818,4 +773,5 @@ const Homepage: React.FC = () => {
   );
 };
 
-export default Homepage;
+export default Homepage
+
