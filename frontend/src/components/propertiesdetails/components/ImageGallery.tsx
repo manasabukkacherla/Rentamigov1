@@ -64,11 +64,11 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onClose }) =
               ))}
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredImages.map((image, index) => (
+            <div className="grid grid-cols-2 gap-2">
+              {filteredImages.slice(0, 8).map((image, index) => (
                 <div
                   key={image.id}
-                  className="aspect-square cursor-pointer rounded-lg overflow-hidden group relative"
+                  className="aspect-[4/3] cursor-pointer rounded-lg overflow-hidden group relative"
                   onClick={() => {
                     setCurrentImageIndex(index)
                     setViewMode("fullscreen")

@@ -110,19 +110,19 @@ export const NearbyPlaces: React.FC = () => {
         {filteredCategories.map((category) => {
           const Icon = category.icon
           return (
-            <div key={category.title} className="bg-gray-50 rounded-xl p-5 border border-gray-100">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <Icon className="w-5 h-5 text-gray-700" />
+            <div key={category.title} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
+                  <Icon className="w-4 h-4 text-gray-700" />
                 </div>
-                <h3 className="font-semibold text-gray-900">{category.title}</h3>
+                <h3 className="font-medium text-gray-900 text-sm">{category.title}</h3>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {category.places.map((place, index) => (
-                  <div key={index} className="flex justify-between items-center p-3 bg-white rounded-lg">
-                    <span className="text-gray-800">{place.name}</span>
-                    <span className="text-sm font-medium px-2 py-1 bg-gray-100 rounded-md">{place.distance}</span>
+                  <div key={index} className="flex justify-between items-center p-2 bg-white rounded-md">
+                    <span className="text-gray-800 text-sm">{place.name}</span>
+                    <span className="text-xs font-medium px-2 py-0.5 bg-gray-100 rounded-md">{place.distance}</span>
                   </div>
                 ))}
               </div>

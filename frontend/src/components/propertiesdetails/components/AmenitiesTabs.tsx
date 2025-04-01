@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { PropertyDetails } from "../types"
 import {
   AirVent,
@@ -79,6 +79,26 @@ type TabType = (typeof tabs)[number]["id"]
 
 export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
   const [activeTab, setActiveTab] = useState<TabType>("flat")
+  const [isManual, setIsManual] = useState(false);
+
+  useEffect(() => {
+    if (isManual) return;
+
+    const interval = setInterval(() => {
+      setActiveTab((prevTab) => {
+        const currentIndex = tabs.findIndex((tab) => tab.id === prevTab);
+        const nextIndex = (currentIndex + 1) % tabs.length;
+        return tabs[nextIndex].id;
+      });
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isManual]);
+
+  const handleTabClick = (tabId: TabType) => {
+    setActiveTab(tabId);
+    setIsManual(true);
+  };
 
   const AmenityCard = ({ icon: Icon, label }: { icon: React.FC<React.SVGProps<SVGSVGElement>>; label: string }) => (
     <div className="flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 border border-gray-100">
@@ -141,7 +161,7 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabClick(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
                 activeTab === tab.id ? "bg-gray-900 text-white shadow-sm" : "bg-gray-50 text-gray-700 hover:bg-gray-100"
               }`}

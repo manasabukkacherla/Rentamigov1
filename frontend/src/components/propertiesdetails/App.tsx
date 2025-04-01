@@ -78,7 +78,7 @@ function Propertydetail() {
         {/* Image Gallery */}
         <div className="relative">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 rounded-xl overflow-hidden">
-            <div className="md:col-span-2 aspect-video relative group">
+            <div className="md:col-span-2 aspect-[4/3] relative group">
               {allMedia[currentIndex].includes("vimeo.com") ? (
                 <iframe
                   src={allMedia[currentIndex]}
@@ -109,11 +109,11 @@ function Propertydetail() {
               </button>
             </div>
 
-            <div className="hidden md:grid grid-cols-2 gap-4">
-              {propertyData.images.slice(0, 4).map((image, index) => (
+            <div className="hidden md:grid grid-cols-2 gap-2">
+              {propertyData.images.slice(0, 8).map((image, index) => (
                 <div
                   key={image.id}
-                  className="aspect-square cursor-pointer overflow-hidden rounded-xl"
+                  className="aspect-[4/3] cursor-pointer overflow-hidden rounded-lg"
                   onClick={() => setCurrentIndex(allMedia.indexOf(image.url))}
                 >
                   <img
