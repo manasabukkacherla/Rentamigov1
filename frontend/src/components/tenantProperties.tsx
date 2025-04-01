@@ -7,6 +7,25 @@ import { Search, MapPin, Sliders, X, Home, Building, CheckSquare } from "lucide-
 import Headerr from "./landingpages/headerr"
 import { useNavigate } from "react-router-dom"
 
+// Popular locations for dropdown
+const popularLocations = [
+  "Bangalore, Karnataka",
+  "Mumbai, Maharashtra",
+  "Delhi, NCR",
+  "Hyderabad, Telangana",
+  "Chennai, Tamil Nadu",
+  "Pune, Maharashtra",
+  "Kolkata, West Bengal",
+  "Ahmedabad, Gujarat",
+  "Jaipur, Rajasthan",
+  "Kochi, Kerala",
+  "Goa",
+  "Chandigarh",
+  "Lucknow, Uttar Pradesh",
+  "Bhubaneswar, Odisha",
+  "Indore, Madhya Pradesh",
+]
+
 // Mock data for properties
 const mockProperties = [
   {
@@ -163,7 +182,7 @@ const mockProperties = [
 const TenantProperties = () => {
   const navigate = useNavigate()
   //   const { isAuthenticated, user } = useAuth()
-  const [location, setLocation] = useState("New York, NY")
+  const [location, setLocation] = useState("Bangalore, Karnataka")
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [priceRange, setPriceRange] = useState([0, 5000])
@@ -171,6 +190,9 @@ const TenantProperties = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [filteredProperties, setFilteredProperties] = useState(mockProperties)
+  const [showLocationModal, setShowLocationModal] = useState(false)
+  const [locationSearch, setLocationSearch] = useState("")
+  const [recentLocations, setRecentLocations] = useState<string[]>([])
   const propertiesPerPage = 6
 
   const propertyTypes = ["apartment", "house", "condo", "townhouse", "loft", "penthouse"]
@@ -184,6 +206,19 @@ const TenantProperties = () => {
     "security",
     "utilities-included",
   ]
+
+  // Load recent locations from localStorage on component mount
+  useEffect(() => {
+    const savedLocations = localStorage.getItem("recentLocations")
+    if (savedLocations) {
+      setRecentLocations(JSON.parse(savedLocations))
+    }
+  }, [])
+
+  // Save recent locations to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("recentLocations", JSON.stringify(recentLocations))
+  }, [recentLocations])
 
   // Apply filters to properties
   useEffect(() => {
@@ -266,6 +301,22 @@ const TenantProperties = () => {
     navigate(`/propertypage`)
   }
 
+  // Function to handle location change
+  const handleLocationChange = (newLocation: string) => {
+    setLocation(newLocation)
+
+    // Add to recent locations if not already there
+    if (!recentLocations.includes(newLocation)) {
+      const updatedLocations = [newLocation, ...recentLocations.slice(0, 4)]
+      setRecentLocations(updatedLocations)
+    }
+
+    setShowLocationModal(false)
+  }
+
+  // Filter locations based on search
+  const filteredLocations = popularLocations.filter((loc) => loc.toLowerCase().includes(locationSearch.toLowerCase()))
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Headerr />
@@ -273,38 +324,132 @@ const TenantProperties = () => {
       <br></br>
       <br></br>
       {/* Hero Section with Location */}
-      <div className="bg-black text-white py-10">
+      <div className="bg-gray-900 text-white py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Find Your Perfect Rental</h1>
-              <div className="flex items-center">
-                <MapPin className="h-5 w-5 mr-2" />
-                <span>{location}</span>
+              <h1 className="text-3xl md:text-4xl font-bold mb-4">Find Your Perfect Rental</h1>
+              <div className="flex items-center bg-white/10 backdrop-blur-sm px-4 py-3 rounded-lg">
+                <MapPin className="h-5 w-5 mr-2 text-gray-300" />
+                <span className="font-medium">{location}</span>
                 <button
-                  className="ml-3 px-3 py-1 text-xs bg-white text-black rounded-full hover:bg-gray-200 transition"
-                  onClick={() => {
-                    const newLocation = prompt("Enter your location:", location)
-                    if (newLocation) setLocation(newLocation)
-                  }}
+                  className="ml-3 px-3 py-1 text-xs bg-white text-gray-900 rounded-full hover:bg-gray-100 transition"
+                  onClick={() => setShowLocationModal(true)}
                 >
                   Change Location
                 </button>
               </div>
             </div>
-            {/* {isAuthenticated && ( */}
-            {/* <div className="mt-4 md:mt-0 bg-gray-800 p-4 rounded-lg">
-                <p className="font-medium">Welcome, {user?.username || "Tenant"}</p>
-                <p className="text-sm text-gray-300">Looking for a new place?</p>
-              </div> */}
-            {/* )} */}
+            <div className="mt-6 md:mt-0 bg-white/10 backdrop-blur-sm p-5 rounded-lg max-w-md">
+              <h2 className="text-xl font-semibold mb-2">Looking for a new place?</h2>
+              <p className="text-gray-300 mb-4">
+                Browse our curated selection of properties in {location} and find your perfect home.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  className="bg-white text-gray-900 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                  onClick={() =>
+                    window.scrollTo({
+                      top: document.getElementById("properties-section")?.offsetTop || 0,
+                      behavior: "smooth",
+                    })
+                  }
+                >
+                  Browse Properties
+                </button>
+                <button className="bg-transparent border border-white text-white px-4 py-2 rounded-lg font-medium hover:bg-white/10 transition-colors">
+                  Get Assistance
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Location Selection Modal */}
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Select Location</h2>
+              <button
+                onClick={() => setShowLocationModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search for a city..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+              />
+            </div>
+
+            {recentLocations.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-sm font-medium text-gray-500 mb-2">Recent Locations</h3>
+                <div className="space-y-2">
+                  {recentLocations.map((loc, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleLocationChange(loc)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                    >
+                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <span>{loc}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Popular Locations</h3>
+              <div className="max-h-60 overflow-y-auto space-y-2">
+                {filteredLocations.map((loc, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleLocationChange(loc)}
+                    className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-lg flex items-center gap-2 transition-colors"
+                  >
+                    <MapPin className="w-4 h-4 text-gray-500" />
+                    <span>{loc}</span>
+                  </button>
+                ))}
+                {filteredLocations.length === 0 && (
+                  <p className="text-center text-gray-500 py-4">No locations found. Try a different search.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  const customLocation = locationSearch.trim()
+                  if (customLocation) {
+                    handleLocationChange(customLocation)
+                  }
+                }}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                Use Custom Location
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Search and Filters */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+      <div id="properties-section" className="container mx-auto px-4 py-8">
+        <div className="bg-white rounded-xl shadow-md p-6 mb-8">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-grow relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -313,13 +458,13 @@ const TenantProperties = () => {
               <input
                 type="text"
                 placeholder="Search by property name or address..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
             <button
-              className="flex items-center justify-center px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
+              className="flex items-center justify-center px-5 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               onClick={() => setShowFilters(!showFilters)}
             >
               <Sliders className="h-5 w-5 mr-2" />
@@ -328,85 +473,87 @@ const TenantProperties = () => {
           </div>
 
           {showFilters && (
-            <div className="mt-4 border-t pt-4">
+            <div className="mt-6 border-t pt-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Price Range Filter */}
-                <div>
-                  <h3 className="font-medium mb-2">Price Range</h3>
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h3 className="font-medium text-gray-900 mb-4">Price Range</h3>
                   <div className="flex items-center justify-between mb-2">
-                    <span>${priceRange[0]}</span>
-                    <span>${priceRange[1]}</span>
+                    <span className="bg-white px-3 py-1 rounded-md shadow-sm text-gray-700">${priceRange[0]}</span>
+                    <span className="bg-white px-3 py-1 rounded-md shadow-sm text-gray-700">${priceRange[1]}</span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="5000"
-                    step="100"
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([Number.parseInt(e.target.value), priceRange[1]])}
-                    className="w-full"
-                  />
-                  <input
-                    type="range"
-                    min="0"
-                    max="5000"
-                    step="100"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
-                    className="w-full"
-                  />
+                  <div className="space-y-4">
+                    <input
+                      type="range"
+                      min="0"
+                      max="5000"
+                      step="100"
+                      value={priceRange[0]}
+                      onChange={(e) => setPriceRange([Number.parseInt(e.target.value), priceRange[1]])}
+                      className="w-full accent-gray-900"
+                    />
+                    <input
+                      type="range"
+                      min="0"
+                      max="5000"
+                      step="100"
+                      value={priceRange[1]}
+                      onChange={(e) => setPriceRange([priceRange[0], Number.parseInt(e.target.value)])}
+                      className="w-full accent-gray-900"
+                    />
+                  </div>
                 </div>
 
                 {/* Property Type Filter */}
-                <div>
-                  <h3 className="font-medium mb-2">Property Type</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h3 className="font-medium text-gray-900 mb-4">Property Type</h3>
+                  <div className="grid grid-cols-2 gap-3">
                     {propertyTypes.map((type) => (
                       <button
                         key={type}
-                        className={`px-3 py-2 text-sm rounded-md flex items-center ${
+                        className={`px-3 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                           selectedTypes.includes(type)
-                            ? "bg-black text-white"
-                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            ? "bg-gray-900 text-white"
+                            : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
                         }`}
                         onClick={() => togglePropertyType(type)}
                       >
-                        {type === "apartment" && <Building className="h-4 w-4 mr-1" />}
-                        {type === "house" && <Home className="h-4 w-4 mr-1" />}
-                        {type !== "apartment" && type !== "house" && <CheckSquare className="h-4 w-4 mr-1" />}
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                        {type === "apartment" && <Building className="h-4 w-4" />}
+                        {type === "house" && <Home className="h-4 w-4" />}
+                        {type !== "apartment" && type !== "house" && <CheckSquare className="h-4 w-4" />}
+                        <span className="capitalize">{type}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Amenities Filter */}
-                <div>
-                  <h3 className="font-medium mb-2">Amenities</h3>
-                  <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gray-50 p-4 rounded-xl">
+                  <h3 className="font-medium text-gray-900 mb-4">Amenities</h3>
+                  <div className="grid grid-cols-2 gap-3">
                     {amenitiesOptions.map((amenity) => (
                       <button
                         key={amenity}
-                        className={`px-3 py-2 text-sm rounded-md flex items-center ${
+                        className={`px-3 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                           selectedAmenities.includes(amenity)
-                            ? "bg-black text-white"
-                            : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            ? "bg-gray-900 text-white"
+                            : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
                         }`}
                         onClick={() => toggleAmenity(amenity)}
                       >
-                        <CheckSquare className="h-4 w-4 mr-1" />
-                        {amenity
-                          .split("-")
-                          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                          .join(" ")}
+                        <CheckSquare className="h-4 w-4" />
+                        <span className="capitalize">{amenity.split("-").join(" ")}</span>
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 flex justify-end">
-                <button className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800" onClick={resetFilters}>
+              <div className="mt-6 flex justify-end">
+                <button
+                  className="px-5 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={resetFilters}
+                >
                   Reset Filters
                 </button>
               </div>
@@ -415,9 +562,9 @@ const TenantProperties = () => {
         </div>
 
         {/* Results Count */}
-        <div className="mb-4 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            {filteredProperties.length} {filteredProperties.length === 1 ? "Property" : "Properties"} Found
+        <div className="mb-6 flex justify-between items-center">
+          <h2 className="text-2xl font-bold text-gray-900">
+            {filteredProperties.length} {filteredProperties.length === 1 ? "Property" : "Properties"} in {location}
           </h2>
           <div className="text-sm text-gray-500">
             Showing {indexOfFirstProperty + 1}-
@@ -432,47 +579,59 @@ const TenantProperties = () => {
             {currentProperties.map((property) => (
               <div
                 key={property.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition"
+                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow border border-gray-100"
               >
-                <img
-                  src={property.imageUrl || "/placeholder.svg"}
-                  alt={property.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-1">{property.title}</h3>
-                  <div className="flex items-center text-gray-500 mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
+                <div className="relative">
+                  <img
+                    src={property.imageUrl || "/placeholder.svg"}
+                    alt={property.title}
+                    className="w-full h-56 object-cover"
+                  />
+                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-gray-900 font-medium text-sm">
+                    {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
+                  </div>
+                </div>
+                <div className="p-5">
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{property.title}</h3>
+                  <div className="flex items-center text-gray-500 mb-3">
+                    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                     <span className="text-sm">{property.address}</span>
                   </div>
-                  <div className="text-2xl font-bold mb-2 text-black">
+                  <div className="text-2xl font-bold mb-4 text-gray-900">
                     {formatPrice(property.price)}
                     <span className="text-sm font-normal text-gray-500">/month</span>
                   </div>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    <span className="px-2 py-1 bg-gray-100 text-xs rounded-md">
-                      {property.bedrooms} {property.bedrooms === 1 ? "Bedroom" : "Bedrooms"}
-                    </span>
-                    <span className="px-2 py-1 bg-gray-100 text-xs rounded-md">
-                      {property.bathrooms} {property.bathrooms === 1 ? "Bathroom" : "Bathrooms"}
-                    </span>
-                    <span className="px-2 py-1 bg-gray-100 text-xs rounded-md">{property.area} sq ft</span>
-                    <span className="px-2 py-1 bg-gray-100 text-xs rounded-md capitalize">{property.type}</span>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="bg-gray-50 p-2 rounded-lg text-center">
+                      <span className="block text-sm text-gray-500">Beds</span>
+                      <span className="font-medium text-gray-900">{property.bedrooms}</span>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg text-center">
+                      <span className="block text-sm text-gray-500">Baths</span>
+                      <span className="font-medium text-gray-900">{property.bathrooms}</span>
+                    </div>
+                    <div className="bg-gray-50 p-2 rounded-lg text-center">
+                      <span className="block text-sm text-gray-500">Area</span>
+                      <span className="font-medium text-gray-900">{property.area} ft²</span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-1 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     {property.amenities.slice(0, 3).map((amenity) => (
-                      <span key={amenity} className="px-2 py-1 bg-black text-white text-xs rounded-full capitalize">
+                      <span
+                        key={amenity}
+                        className="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full capitalize"
+                      >
                         {amenity.split("-").join(" ")}
                       </span>
                     ))}
                     {property.amenities.length > 3 && (
-                      <span className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-full">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
                         +{property.amenities.length - 3} more
                       </span>
                     )}
                   </div>
                   <button
-                    className="w-full py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
+                    className="w-full py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                     onClick={() => handleViewDetails()}
                   >
                     View Details
@@ -482,12 +641,12 @@ const TenantProperties = () => {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-md p-8 text-center">
+          <div className="bg-white rounded-xl shadow-md p-8 text-center">
             <X className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-semibold mb-2">No properties found</h3>
             <p className="text-gray-500 mb-4">Try adjusting your search filters to find more properties.</p>
             <button
-              className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition"
+              className="px-5 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
               onClick={resetFilters}
             >
               Reset Filters
@@ -495,10 +654,50 @@ const TenantProperties = () => {
           </div>
         )}
 
-        {/* Pagination
-        {filteredProperties.length > 0 && (
-          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-        )} */}
+        {/* Pagination */}
+        {filteredProperties.length > propertiesPerPage && (
+          <div className="mt-8 flex justify-center">
+            <div className="flex gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg ${
+                  currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
+                }`}
+              >
+                Previous
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`w-10 h-10 rounded-lg ${
+                    currentPage === page
+                      ? "bg-gray-900 text-white"
+                      : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-lg ${
+                  currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-800 hover:bg-gray-100 border border-gray-200"
+                }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

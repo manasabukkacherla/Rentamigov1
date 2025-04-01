@@ -98,11 +98,11 @@ const properties = [
   },
 ]
 
-const propertyTypeIcons: Record<string, React.FC> = {
-  Apartment: Building2,
-  Villa: Home,
-  Condo: Building,
-  Penthouse: Castle,
+const propertyTypeIcons: Record<string, React.FC<{ className?: string }>> = {
+  Apartment: (props) => <Building2 {...props} />,
+  Villa: (props) => <Home {...props} />,
+  Condo: (props) => <Building {...props} />,
+  Penthouse: (props) => <Castle {...props} />,
 }
 
 export const SimilarProperties: React.FC = () => {

@@ -372,9 +372,7 @@ export const LatestInsights: React.FC = () => {
 
             <div className="p-4 flex flex-col flex-grow">
               <div className="flex items-center gap-2 mb-3">
-                <span className="px-2 py-1 bg-gray-100 text-gray-900 text-xs rounded-full">
-                  {article.category}
-                </span>
+                <span className="px-2 py-1 bg-gray-100 text-gray-900 text-xs rounded-full">{article.category}</span>
                 <div className="flex items-center text-gray-500 text-xs">
                   <Clock className="w-3 h-3 mr-1" />
                   {article.readTime}
