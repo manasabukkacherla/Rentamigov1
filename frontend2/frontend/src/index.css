@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer base {
+  :root {
+    --radius: 0.5rem
+  }
+}
+[data-radix-toast-viewport] {
+  z-index: 9999; /* Ensure the toast appears above all other UI elements */
+}
+
+
+/* React DatePicker Custom Styles */
+.react-datepicker {
+  @apply !bg-black !border-white/20 !text-white;
+}
+
+.react-datepicker__header {
+  @apply !bg-black !border-white/20;
+}
+
+.react-datepicker__current-month,
+.react-datepicker__day-name {
+  @apply !text-white;
+}
+
+.react-datepicker__day {
+  @apply !text-white hover:!bg-white/20;
+}
+
+.react-datepicker__day--selected {
+  @apply !bg-white !text-black;
+}
+
+.react-datepicker__day--disabled {
+  @apply !text-white/20;
+}
+
+.react-datepicker__navigation-icon::before {
+  @apply !border-white/60;
+}
+
+.react-datepicker__day--keyboard-selected {
+  @apply !bg-white/20 !text-white;
+}
+
+.react-datepicker__triangle {
+  @apply !hidden;
+}
+@keyframes progress {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.animate-progress {
+  animation: progress 5s linear;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Add smooth scrolling behavior to the document */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add touch action manipulation for better mobile scrolling */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
+}
+
+.pricing-card {
+  position: sticky;
+  top: 2rem;
+}
+.clip-path-pentagon {
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  padding: 8px 16px;
+}
+
