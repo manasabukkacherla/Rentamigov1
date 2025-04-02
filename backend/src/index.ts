@@ -106,7 +106,7 @@ app.use("/api/comments", commentsRouter);
 app.use("/api/likes", likesRouter);
 app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
-app.use("/api/bug", bugRouter)
+app.use("/api/bug", bugRouter);
 
 // // Basic route
 // app.get("/", (req: Request, res: Response) => {
@@ -116,7 +116,7 @@ app.use("/api/bug", bugRouter)
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-console.log("cd pipeline check - 2nd time....");
+console.log("cd pipeline check - 3rd time....");
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);

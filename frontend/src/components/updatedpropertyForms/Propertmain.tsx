@@ -1,10 +1,7 @@
 import React from 'react';
 import PropertyTypeSelector from './PropertyTypeSelector';
 
-
 function Propertmain() {
- 
-
   const handlePropertyTypeSelect = (type: string) => {
     // Handle property type selection
   };
@@ -134,14 +131,8 @@ function Propertmain() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-12">
-          
-          
-          <PropertyTypeSelector onPropertyTypeSelect={handlePropertyTypeSelect} />
-        </div>
-      </div>
+    <div className="min-h-screen w-full bg-white">
+      <PropertyTypeSelector onPropertyTypeSelect={handlePropertyTypeSelect} />
     </div>
   );
 }
