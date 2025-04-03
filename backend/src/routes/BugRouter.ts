@@ -1,9 +1,7 @@
 import express, { Response } from "express";
+import Bug from "../models/bugsModel";
 import { ParamsDictionary } from "express-serve-static-core";
-import nodemailer from "nodemailer";
-import dotenv from "dotenv";
-
-dotenv.config();
+const nodemailer = require("nodemailer");
 
 interface CustomRequest<T = ParamsDictionary, U = any, V = any>
   extends express.Request<T, U, V> {
@@ -12,20 +10,7 @@ interface CustomRequest<T = ParamsDictionary, U = any, V = any>
   };
 }
 
-interface Bug {
-  id: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  status: string;
-  author: string;
-  createdAt: Date;
-}
-
 const bugRouter = express.Router();
-
-// In-memory storage
-const bugs: Bug[] = [];
 
 const transporter = nodemailer.createTransport({
   secure: true,
@@ -46,6 +31,9 @@ bugRouter.post(
       {
         title: string;
         description: string;
+        // email: string;
+        errorcode?: string;
+        category?: string;
         imageUrl: string;
         status: string;
         author: string;
@@ -61,17 +49,19 @@ bugRouter.post(
         return;
       }
 
-      const newBug: Bug = {
-        id: Date.now().toString(),
+      const newBug = new Bug({
         title,
         description,
+        // email,
+        // errorcode,
+        // category,
         imageUrl,
         status,
         author,
-        createdAt: new Date(),
-      };
+        createdAt: Date.now(),
+      });
 
-      bugs.push(newBug);
+      await newBug.save();
 
       const mailOptions = {
         from: "deepthiduddupudi3108@gmail.com",
@@ -81,7 +71,6 @@ bugRouter.post(
       };
 
       await transporter.sendMail(mailOptions);
-
       res.status(201).json({ success: true, newBug });
     } catch (error) {
       console.error("Error creating bug:", error);
@@ -94,14 +83,16 @@ bugRouter.get(
   "/list",
   async (req: CustomRequest, res: Response): Promise<void> => {
     try {
+      const bugs = await Bug.find({}).populate("author");
+
       res.json({
         success: true,
         message: "Data fetched successfully",
         data: bugs,
       });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({
+      console.log(error);
+      res.json({
         success: false,
         message: "Error",
       });
@@ -114,7 +105,7 @@ bugRouter.get(
   async (req: CustomRequest, res: Response): Promise<void> => {
     try {
       const { id } = req.params;
-      const bug = bugs.find((b) => b.id === id);
+      const bug = await Bug.findById(id).populate("author");
 
       if (!bug) {
         res.status(404).json({ message: "Bug not found" });
@@ -135,20 +126,17 @@ bugRouter.put(
     try {
       const { id } = req.params;
       const { status } = req.body;
+      const bug = await Bug.findById(id).populate("author");
 
-      const bugIndex = bugs.findIndex((b) => b.id === id);
-
-      if (bugIndex === -1) {
+      if (!bug) {
         res.status(404).json({ message: "Bug not found" });
         return;
       }
 
-      bugs[bugIndex] = {
-        ...bugs[bugIndex],
-        status,
-      };
+      bug.status = status;
+      await bug.save();
 
-      res.status(200).json({ success: true, bug: bugs[bugIndex] });
+      res.status(200).json({ success: true, bug });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });

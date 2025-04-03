@@ -1,4 +1,4 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 @layer base {
@@ -7,10 +7,9 @@
   }
 }
 [data-radix-toast-viewport] {
-  z-index: 9999; /* Ensure the toast appears above all other UI elements */
+  z-index: 9999; 
 }
 
-/* Update DatePicker styles for light theme */
 .react-datepicker {
   @apply !bg-white !border-gray-300 !text-black;
 }
@@ -66,12 +65,10 @@
   scrollbar-width: none;
 }
 
-/* Add smooth scrolling behavior to the document */
 html {
   scroll-behavior: smooth;
 }
 
-/* Add touch action manipulation for better mobile scrolling */
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -86,4 +83,5 @@ html {
   clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
   padding: 8px 16px;
 }
-
+ 
+*/

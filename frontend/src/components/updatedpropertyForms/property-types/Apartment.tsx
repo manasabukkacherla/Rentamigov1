@@ -329,3 +329,10 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
 };
 
 export default Apartment;
+
+
+
+
+
+
+
