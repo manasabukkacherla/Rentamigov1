@@ -1,6 +1,6 @@
 import type React from "react"
 import type { PropertyDetails } from "../types"
-import { Calendar, Ruler, Home, CheckCircle2 } from "lucide-react"
+import { Calendar, Ruler, Home, CheckCircle, Clock, Users, Wifi, Shield } from "lucide-react"
 
 interface BasicInfoProps {
   details: PropertyDetails
@@ -8,55 +8,77 @@ interface BasicInfoProps {
 
 export const BasicInfo: React.FC<BasicInfoProps> = ({ details }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Property Overview</h2>
+    <div className="bg-white rounded-xl shadow-sm p-6 basic-info">
+      <h2 className="text-xl font-bold text-gray-900 mb-4">Property Overview</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div className="flex flex-col items-center p-4 bg-gray-50 rounded-xl">
-          <Home className="w-6 h-6 text-gray-700 mb-2" />
-          <span className="text-sm text-gray-500 mb-1">Configuration</span>
-          <span className="font-semibold text-gray-900">{details.configuration}</span>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="bg-gray-50 px-4 py-4 rounded-xl flex flex-col items-center text-center transition-all hover:shadow-sm">
+          <div className="bg-gray-100 p-2.5 rounded-full mb-2">
+            <Home className="w-5 h-5 text-gray-700" />
+          </div>
+          <h3 className="text-xs text-gray-500 mb-1">Configuration</h3>
+          <p className="font-semibold text-gray-900 text-sm">{details.configuration}</p>
         </div>
 
-        <div className="flex flex-col items-center p-4 bg-gray-50 rounded-xl">
-          <CheckCircle2 className="w-6 h-6 text-gray-700 mb-2" />
-          <span className="text-sm text-gray-500 mb-1">Furnishing</span>
-          <span className="font-semibold text-gray-900">{details.furnishingStatus}</span>
+        <div className="bg-gray-50 px-4 py-4 rounded-xl flex flex-col items-center text-center transition-all hover:shadow-sm">
+          <div className="bg-gray-100 p-2.5 rounded-full mb-2">
+            <CheckCircle className="w-5 h-5 text-gray-700" />
+          </div>
+          <h3 className="text-xs text-gray-500 mb-1">Furnishing</h3>
+          <p className="font-semibold text-gray-900 text-sm">{details.furnishingStatus}</p>
         </div>
 
-        <div className="flex flex-col items-center p-4 bg-gray-50 rounded-xl">
-          <Ruler className="w-6 h-6 text-gray-700 mb-2" />
-          <span className="text-sm text-gray-500 mb-1">Size</span>
-          <span className="font-semibold text-gray-900">{details.size}</span>
+        <div className="bg-gray-50 px-4 py-4 rounded-xl flex flex-col items-center text-center transition-all hover:shadow-sm">
+          <div className="bg-gray-100 p-2.5 rounded-full mb-2">
+            <Ruler className="w-5 h-5 text-gray-700" />
+          </div>
+          <h3 className="text-xs text-gray-500 mb-1">Size</h3>
+          <p className="font-semibold text-gray-900 text-sm">{details.size}</p>
         </div>
 
-        <div className="flex flex-col items-center p-4 bg-gray-50 rounded-xl">
-          <Calendar className="w-6 h-6 text-gray-700 mb-2" />
-          <span className="text-sm text-gray-500 mb-1">Available From</span>
-          <span className="font-semibold text-gray-900">
+        <div className="bg-gray-50 px-4 py-4 rounded-xl flex flex-col items-center text-center transition-all hover:shadow-sm">
+          <div className="bg-gray-100 p-2.5 rounded-full mb-2">
+            <Calendar className="w-5 h-5 text-gray-700" />
+          </div>
+          <h3 className="text-xs text-gray-500 mb-1">Available From</h3>
+          <p className="font-semibold text-gray-900 text-sm">
             {new Date(details.availabilityDate).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
               year: "numeric",
             })}
-          </span>
+          </p>
         </div>
       </div>
 
-      <div className="mt-8">
-        <h3 className="font-semibold text-gray-900 mb-3">Description</h3>
-        <p className="text-gray-600 leading-relaxed">
-          Prestige Lake Ridge is a premium residential project offering spacious and well-designed apartments. Located
-          in the heart of Electronic City Phase 1, this property provides easy access to major IT parks, educational
-          institutions, healthcare facilities, and entertainment options.
+      {/* Property Description - Enhanced UI with black color scheme */}
+      <div className="mt-6 p-5 bg-gray-900 rounded-xl text-white">
+        <h3 className="font-medium text-white mb-3 flex items-center gap-2">
+          <Clock className="w-4 h-4" />
+          Property Description
+        </h3>
+        <p className="text-gray-200 text-sm leading-relaxed">
+          Prestige Lake Ridge is a premium residential project offering spacious apartments with modern amenities.
+          Located in Electronic City Phase 1, it provides excellent connectivity to major IT hubs and commercial
+          centers. The property features high-quality construction, contemporary design, and a range of lifestyle
+          facilities.
         </p>
-        <p className="text-gray-600 leading-relaxed mt-3">
-          The apartment features modern amenities, quality fittings, and excellent ventilation. The society offers a
-          range of facilities including a swimming pool, gym, children's play area, and 24/7 security to ensure a
-          comfortable and secure living experience.
-        </p>
+
+        <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-gray-300" />
+            <span className="text-sm text-gray-300">Family-friendly</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Wifi className="w-4 h-4 text-gray-300" />
+            <span className="text-sm text-gray-300">High-speed internet</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Shield className="w-4 h-4 text-gray-300" />
+            <span className="text-sm text-gray-300">24/7 Security</span>
+          </div>
+        </div>
       </div>
     </div>
   )
 }
-
