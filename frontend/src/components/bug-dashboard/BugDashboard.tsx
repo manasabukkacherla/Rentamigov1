@@ -1,17 +1,16 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BugIcon, X, BarChart2, ChevronLeft, Download, RefreshCw } from "lucide-react"
+import { BugIcon, X, BarChart2, Download, RefreshCw, Bell } from "lucide-react"
 import { toast } from "react-toastify"
 import BugReportStats from "./BugReportStats"
 import BugReportFilters from "./BugReportFilters"
 import BugReportList from "./BugReportList"
-import { Link } from "react-router-dom"
 import BugReportDetails from "./BugReportDetails"
 import axios from "axios"
 
 export interface Bugs {
-  _id: string,
+  _id: string
   title: string
   description: string
   // email: string
@@ -25,8 +24,18 @@ export interface Bugs {
 }
 
 interface User {
-  _id: string;
-  email: string;
+  _id: string
+  email: string
+}
+
+interface BugNotification {
+  id: string
+  title: string
+  message: string
+  timestamp: string
+  read: boolean
+  type: "info" | "success" | "warning" | "error"
+  bugId?: string
 }
 
 // Sample data generator for demonstration purposes
@@ -68,15 +77,46 @@ const BugDashboard = () => {
   const [imageModalOpen, setImageModalOpen] = useState(false)
   const [viewMode, setViewMode] = useState<"list" | "stats">("list")
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const [notifications, setNotifications] = useState<BugNotification[]>([
+    {
+      id: "notif-1",
+      title: "New Bug Report",
+      message: "A critical bug has been reported in the authentication system.",
+      timestamp: "10 minutes ago",
+      read: false,
+      type: "error",
+      bugId: "bug-1",
+    },
+    {
+      id: "notif-2",
+      title: "Bug Status Updated",
+      message: "The payment processing bug has been marked as resolved.",
+      timestamp: "1 hour ago",
+      read: false,
+      type: "success",
+      bugId: "bug-2",
+    },
+    {
+      id: "notif-3",
+      title: "Comment Added",
+      message: "A team member added a comment to the UI rendering bug.",
+      timestamp: "3 hours ago",
+      read: true,
+      type: "info",
+      bugId: "bug-3",
+    },
+  ])
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(2)
 
-  const [bugs, setBugs] = useState<Bugs[]>([]);
+  const [bugs, setBugs] = useState<Bugs[]>([])
   const [filteredBugs, setFilteredbugs] = useState<Bugs[]>([])
-  
+
   const loadBugs = async () => {
     setIsRefreshing(true)
     try {
-      const response = await axios.get(`/api/bug/list`);
-      if(response.data.success) {
+      const response = await axios.get(`/api/bug/list`)
+      if (response.data.success) {
         // console.log(response.data.data)
         setBugs(response.data.data)
 
@@ -89,8 +129,8 @@ const BugDashboard = () => {
         setIsRefreshing(false)
       }
     } catch (error) {
-      toast.error("Failed to load bugs");
-      console.error("Error loading bugs:", error);
+      toast.error("Failed to load bugs")
+      console.error("Error loading bugs:", error)
     }
   }
 
@@ -172,16 +212,16 @@ const BugDashboard = () => {
     console.log(selectedReport)
 
     try {
-      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus });
-  
+      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus })
+
       if (response.data.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message)
       } else {
-        toast.error(response.data.message);
+        toast.error(response.data.message)
       }
     } catch (err) {
-      console.error(err);
-      toast.error('Error updating bug status');
+      console.error(err)
+      toast.error("Error updating bug status")
     }
     toast.success(`Bug status updated to ${newStatus.replace("-", " ")}`)
   }
@@ -276,6 +316,26 @@ const BugDashboard = () => {
     toast.info("Filters cleared")
   }
 
+  const handleMarkAsRead = (notificationId: string) => {
+    const updatedNotifications = notifications.map((notification) => {
+      if (notification.id === notificationId) {
+        return { ...notification, read: true }
+      }
+      return notification
+    })
+    setNotifications(updatedNotifications)
+    setUnreadCount(updatedNotifications.filter((n) => !n.read).length)
+  }
+
+  const handleMarkAllAsRead = () => {
+    const updatedNotifications = notifications.map((notification) => ({
+      ...notification,
+      read: true,
+    }))
+    setNotifications(updatedNotifications)
+    setUnreadCount(0)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -288,6 +348,67 @@ const BugDashboard = () => {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
+              <div className="relative">
+                <button
+                  onClick={() => setNotificationOpen(!notificationOpen)}
+                  className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
+                  title="Notifications"
+                >
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                {notificationOpen && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg z-50 overflow-hidden border border-gray-200">
+                    <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+                      <h3 className="font-medium">Notifications</h3>
+                      <button onClick={handleMarkAllAsRead} className="text-xs text-gray-500 hover:text-gray-700">
+                        Mark all as read
+                      </button>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-gray-500">No notifications</div>
+                      ) : (
+                        <div>
+                          {notifications.map((notification) => (
+                            <div
+                              key={notification.id}
+                              className={`p-3 border-b border-gray-100 hover:bg-gray-50 ${!notification.read ? "bg-blue-50" : ""}`}
+                            >
+                              <div className="flex justify-between">
+                                <h4 className="font-medium text-sm">{notification.title}</h4>
+                                <span className="text-xs text-gray-500">{notification.timestamp}</span>
+                              </div>
+                              <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                              {!notification.read && (
+                                <button
+                                  onClick={() => handleMarkAsRead(notification.id)}
+                                  className="text-xs text-blue-600 hover:text-blue-800 mt-2"
+                                >
+                                  Mark as read
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3 border-t border-gray-200 text-center">
+                      <button
+                        onClick={() => setNotificationOpen(false)}
+                        className="text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => setViewMode(viewMode === "list" ? "stats" : "list")}
                 className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md"
