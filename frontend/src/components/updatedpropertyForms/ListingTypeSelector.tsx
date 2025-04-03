@@ -14,8 +14,8 @@ const ListingTypeSelector = ({ propertyType, onPropertyTypeSelect }: ListingType
   const listingTypes = propertyType === "Residential" 
     ? [
         { type: "Rent", icon: Key },
-        { type: "Sell", icon: Home },
         { type: "PG/Co-living", icon: Users },
+        { type: "Sell", icon: Home },
         { type: "Lease", icon: Building2 }
       ]
     : [
@@ -35,14 +35,14 @@ const ListingTypeSelector = ({ propertyType, onPropertyTypeSelect }: ListingType
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 bg-white">
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <h2 className="text-2xl font-semibold">
+          <h2 className="text-2xl font-semibold text-black">
             {propertyType} Property Listings
           </h2>
-          <ArrowRight className="opacity-40" size={20} />
-          <span className="text-sm opacity-70">Select Purpose</span>
+          <ArrowRight className="text-black" size={20} />
+          <span className="text-sm text-black">Select Purpose</span>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -52,11 +52,11 @@ const ListingTypeSelector = ({ propertyType, onPropertyTypeSelect }: ListingType
               onClick={() => handleSelect(type)}
               className={`group flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-200 ${
                 selectedListingType === type
-                  ? "bg-white text-black border-white"
-                  : "border-white/20 hover:border-white"
+                  ? "bg-black text-white border-black"
+                  : "border-black/20 hover:border-black text-black"
               }`}
             >
-              <Icon size={20} />
+              <Icon size={20} className={selectedListingType === type ? "text-white" : "text-black"} />
               <span className="font-medium">{type}</span>
             </button>
           ))}

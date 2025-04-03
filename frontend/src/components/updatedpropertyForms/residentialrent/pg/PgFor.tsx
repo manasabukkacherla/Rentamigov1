@@ -12,7 +12,7 @@ const PgFor = () => {
   ];
 
   return (
-    <div className="p-6 bg-black text-white">
+    <div className="p-6 bg-white text-black">
       <h1 className="text-2xl font-bold mb-6">PG Accommodation Type</h1>
       
       <div className="flex flex-col sm:flex-row gap-6">
@@ -25,7 +25,7 @@ const PgFor = () => {
               value={option.id}
               checked={selectedType === option.id}
               onChange={(e) => setSelectedType(e.target.value as AccommodationType)}
-              className="h-5 w-5 border-white bg-black checked:bg-white focus:ring-white focus:ring-2"
+              className="h-5 w-5 border-black bg-white checked:bg-black focus:ring-black focus:ring-2"
             />
             <label htmlFor={option.id} className="ml-3 text-lg">
               {option.label}
@@ -34,7 +34,7 @@ const PgFor = () => {
         ))}
       </div>
 
-      <div className="mt-6 pt-4 border-t border-white">
+      <div className="mt-6 pt-4 border-t border-black">
         <p className="text-sm">
           Selected accommodation type: <span className="font-semibold">{options.find(opt => opt.id === selectedType)?.label}</span>
         </p>

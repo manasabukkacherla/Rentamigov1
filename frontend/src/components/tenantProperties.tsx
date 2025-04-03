@@ -1461,4 +1461,3 @@ const TenantProperties = () => {
 }
 
 export default TenantProperties
-
