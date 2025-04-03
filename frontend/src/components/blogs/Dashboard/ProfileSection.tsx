@@ -197,12 +197,12 @@ const ProfileSection: React.FC<ProfileSectionProps> = ({ user }) => {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                     <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Email</h3>
-                      <p className="text-black font-medium">{user.email}</p>
+                    <p className="text-black font-medium truncate break-all">{user.email}</p>
                   </div>
 
                   <div className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-all">
                     <h3 className="text-xs uppercase tracking-wider text-gray-500 mb-1">Phone Number</h3>
-                      <p className="text-black font-medium">{user.phone}</p>
+                    <p className="text-black font-medium">{user.phone}</p>
                   </div>
                 </div>
               </div>
