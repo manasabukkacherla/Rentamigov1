@@ -3,13 +3,12 @@
 @tailwind utilities;
 @layer base {
   :root {
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
 }
 [data-radix-toast-viewport] {
   z-index: 9999; /* Ensure the toast appears above all other UI elements */
 }
-
 
 /* React DatePicker Custom Styles */
 .react-datepicker {
@@ -91,3 +90,12 @@ html {
   padding: 8px 16px;
 }
 
+/* Custom scrollbar for notification panel */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}

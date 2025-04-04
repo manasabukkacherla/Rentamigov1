@@ -16,11 +16,6 @@ export default defineConfig({
         target: "http://localhost:8000",
         changeOrigin: true,
       },
-      "/socket.io": {
-        target: "ws://localhost:5003",
-        ws: true,
-        changeOrigin: true,
-      },
     },
   },
 });

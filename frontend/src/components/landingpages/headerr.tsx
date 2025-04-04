@@ -181,75 +181,61 @@ const Headerr: React.FC = () => {
               ))}
             </ul>
           </nav>
-          {/* Notification Icon with Count Badge */}
-          <div>
+          {/* Notification Icon and Panel */}
+          <div className="relative ml-4">
             <button
-              id="notificationIcon"
               onClick={toggleNotificationList}
-              style={{
-                position: "relative",
-                cursor: "pointer",
-                display: "inline-block",
-                fontSize: "30px",
-              }}
+              className="relative text-2xl focus:outline-none text-gray-800"
             >
-              <span role="img" aria-label="notifications">
-                🔔
-              </span>
-              <span
-                id="notificationCount"
-                style={{
-                  position: "absolute",
-                  top: "-5px",
-                  right: "-5px",
-                  background: "red",
-                  color: "white",
-                  borderRadius: "50%",
-                  padding: "2px 6px",
-                  fontSize: "12px",
-                }}
-              >
-                {notifications.length}
-              </span>
+              🔔
+              {notifications.length > 0 && (
+                <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full px-1.5">
+                  {notifications.length}
+                </span>
+              )}
             </button>
-            {/* Notification List (shown when showList is true) */}
             {showList && (
-              <div
-                id="notificationList"
-                style={{
-                  border: "1px solid #ccc",
-                  padding: "10px",
-                  maxWidth: "300px",
-                  marginTop: "10px",
-                }}
-              >
-                {notifications.length === 0 ? (
-                  <p>No notifications.</p>
-                ) : (
-                  notifications.map((n, index) => (
-                    <div
-                      key={index}
-                      className="notificationItem"
-                      style={{
-                        borderBottom: "1px solid #eee",
-                        padding: "5px 0",
-                      }}
-                    >
-                      <p>{n.message}</p>
-                      {/* Button to mark as read */}
-                      {!n.read && (
-                        <button
-                          onClick={() => markNotificationAsRead(n.resourceId!)}
-                        >
-                          Mark as Read
-                        </button>
-                      )}
+              <div className="absolute right-0 md:left-1/2 md:transform md:-translate-x-1/2 mt-2 w-80 max-h-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
+                <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                  <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      Notifications
+                    </h3>
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-gray-500">
+                      No new notifications.
                     </div>
-                  ))
-                )}
+                  ) : (
+                    notifications.map((n, index) => (
+                      <div
+                        key={index}
+                        className={`px-4 py-3 border-b last:border-none ${
+                          n.read ? "bg-white" : "bg-gray-100"
+                        }`}
+                      >
+                        <p className="text-sm text-gray-800">{n.message}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(n.createdAt).toLocaleString()}
+                        </p>
+                        {!n.read && (
+                          <button
+                            className="mt-2 inline-block text-xs text-white bg-blue-600 hover:bg-blue-700 transition-colors px-3 py-1 rounded-md"
+                            onClick={() =>
+                              markNotificationAsRead(n.resourceId!)
+                            }
+                          >
+                            Mark as Read
+                          </button>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             )}
           </div>
+
           {/* Auth Buttons - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             <Link
@@ -343,56 +329,7 @@ const Headerr: React.FC = () => {
                     </Link>
                   ))}
                 </div>
-                {/* Notification Icon with Count Badge */}
-                <div>
-                  <button
-                    id="notificationIcon"
-                    onClick={toggleNotificationList}
-                    style={{
-                      position: "relative",
-                      cursor: "pointer",
-                      display: "inline-block",
-                      fontSize: "30px",
-                    }}
-                  >
-                    <span role="img" aria-label="notifications">
-                      🔔
-                    </span>
-                    <span
-                      id="notificationCount"
-                      style={{
-                        position: "absolute",
-                        top: "-5px",
-                        right: "-5px",
-                        background: "red",
-                        color: "white",
-                        borderRadius: "50%",
-                        padding: "2px 6px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      {notifications.length}
-                    </span>
-                  </button>
-                  {showList && (
-                    <ul>
-                      {notifications &&
-                        notifications.map((notification) => (
-                          <li key={notification.resourceId}>
-                            {/* Here you can display more details about each notification */}
-                            {notification.read ? "Read" : "Unread"}
-                            <button
-                              onClick={() =>
-                                markNotificationAsRead(notification.resourceId!)
-                              }
-                            >
-                              Mark as Read
-                            </button>
-                          </li>
-                        ))}
-                    </ul>
-                  )}
-                </div>
+
                 <div className="pt-2 border-t border-gray-200">
                   <Link
                     to="/Login"

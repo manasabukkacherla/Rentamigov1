@@ -46,7 +46,7 @@ import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
 import path from "path";
 import bugRouter from "./routes/BugRouter";
-import { Server as SocketIOServer, Socket } from "socket.io";
+import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
@@ -71,12 +71,13 @@ const server = http.createServer(app);
 // Initialize Socket.IO with correct CORS settings on the HTTP server
 
 // Initialize Socket.IO on the HTTP server with CORS settings (adjust for production)
-export const io = new SocketIOServer(server, {
+export const io: Server = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins for testing; secure this in production.
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
+
 connectToDatabase()
   .then(() => console.log("Successfully connected to MongoDB"))
   .catch((error) => {
@@ -159,7 +160,7 @@ app.use(errorHandler);
 
 // Start server
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log("Environment variables loaded:", {
     VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "****" : undefined,
