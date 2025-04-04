@@ -2,19 +2,19 @@
 
 import { useState } from "react"
 import { AlertCircle, CheckCircle, Clock, ExternalLink, Send } from "lucide-react"
-import type { BugReport } from "./BugDashboard"
+import type { Bugs } from "./BugDashboard"
 
 interface BugReportDetailsProps {
-  selectedReport: BugReport | null
-  handleStatusChange: (report: BugReport, newStatus: "pending" | "in-progress" | "resolved") => void
-  handleAddComment: (reportId: string | undefined, comment: string) => void
+  selectedReport: Bugs | null
+  handleStatusChange: (report: Bugs, newStatus: "pending" | "in-progress" | "resolved") => void
+  // handleAddComment: (reportId: string | undefined, comment: string) => void
   setImageModalOpen: (isOpen: boolean) => void
 }
 
 const BugReportDetails = ({
   selectedReport,
   handleStatusChange,
-  handleAddComment,
+  // handleAddComment,
   setImageModalOpen,
 }: BugReportDetailsProps) => {
   const [comment, setComment] = useState("")
@@ -30,15 +30,15 @@ const BugReportDetails = ({
     })
   }
 
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "critical":
+  const getErrorcodeColor = (errorcode: string) => {
+    switch (errorcode) {
+      case "ERR123":
         return "bg-red-100 text-red-800"
-      case "high":
+      case "ERR124":
         return "bg-orange-100 text-orange-800"
-      case "medium":
+      case "ERR125":
         return "bg-yellow-100 text-yellow-800"
-      case "low":
+      case "ERR126":
         return "bg-green-100 text-green-800"
       default:
         return "bg-gray-100 text-gray-800"
@@ -47,7 +47,7 @@ const BugReportDetails = ({
 
   const submitComment = () => {
     if (!comment.trim()) return
-    handleAddComment(selectedReport?.id, comment)
+    // handleAddComment(selectedReport?._id, comment)
     setComment("")
   }
 
@@ -58,15 +58,16 @@ const BugReportDetails = ({
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-start">
               <h3 className="text-xl font-semibold text-gray-900">{selectedReport.title}</h3>
-              <span className={`text-xs px-2 py-1 rounded-full ${getSeverityColor(selectedReport.severity)}`}>
-                {selectedReport.severity.charAt(0).toUpperCase() + selectedReport.severity.slice(1)}
+              <span className={`text-xs px-2 py-1 rounded-full ${getErrorcodeColor(selectedReport?.errorcode || "")}`}>
+                {selectedReport.errorcode || "Unknown"}
               </span>
+
             </div>
             <div className="mt-2 text-sm text-gray-500">
-              Reported by: {selectedReport.email} • {formatDate(selectedReport.createdAt)}
+              Reported by: {selectedReport.author.email} • {formatDate(new Date(selectedReport.createdAt).toDateString())}
             </div>
             {selectedReport.updatedAt && selectedReport.updatedAt !== selectedReport.createdAt && (
-              <div className="mt-1 text-xs text-gray-400">Last updated: {formatDate(selectedReport.updatedAt)}</div>
+              <div className="mt-1 text-xs text-gray-400">Last updated: {formatDate(new Date(selectedReport.updatedAt).toDateString())}</div>
             )}
           </div>
 
@@ -75,13 +76,6 @@ const BugReportDetails = ({
               <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
               <div className="text-gray-800 whitespace-pre-wrap">{selectedReport.description}</div>
             </div>
-
-            {/* {selectedReport.stepsToReproduce && (
-              <div className="mb-6">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Steps to Reproduce</h4>
-                <div className="text-gray-800 whitespace-pre-wrap">{selectedReport.stepsToReproduce}</div>
-              </div>
-            )} */}
 
             <div className="mb-6">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Category</h4>
@@ -109,7 +103,7 @@ const BugReportDetails = ({
             )}
 
             {/* Comments Section */}
-            {selectedReport.comments && selectedReport.comments.length > 0 && (
+            {/* {selectedReport.comments && selectedReport.comments.length > 0 && (
               <div className="mb-6">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Comments</h4>
                 <div className="space-y-3">
@@ -124,11 +118,11 @@ const BugReportDetails = ({
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Comment Input */}
-          <div className="p-4 border-t border-gray-200">
+          {/* <div className="p-4 border-t border-gray-200">
             <div className="flex space-x-2">
               <input
                 type="text"
@@ -150,40 +144,37 @@ const BugReportDetails = ({
                 <Send className="w-5 h-5" />
               </button>
             </div>
-          </div>
+          </div> */}
 
           <div className="p-6 border-t border-gray-200 bg-gray-50">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Status</h4>
             <div className="flex space-x-2">
               <button
                 onClick={() => handleStatusChange(selectedReport, "pending")}
-                className={`px-3 py-2 text-sm rounded-md flex items-center ${
-                  selectedReport.status === "pending"
-                    ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
-                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-2 text-sm rounded-md flex items-center ${selectedReport.status === "pending"
+                  ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <AlertCircle className="w-4 h-4 mr-1" />
                 Pending
               </button>
               <button
                 onClick={() => handleStatusChange(selectedReport, "in-progress")}
-                className={`px-3 py-2 text-sm rounded-md flex items-center ${
-                  selectedReport.status === "in-progress"
-                    ? "bg-blue-100 text-blue-800 border border-blue-300"
-                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-2 text-sm rounded-md flex items-center ${selectedReport.status === "in-progress"
+                  ? "bg-blue-100 text-blue-800 border border-blue-300"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <Clock className="w-4 h-4 mr-1" />
                 In Progress
               </button>
               <button
                 onClick={() => handleStatusChange(selectedReport, "resolved")}
-                className={`px-3 py-2 text-sm rounded-md flex items-center ${
-                  selectedReport.status === "resolved"
-                    ? "bg-green-100 text-green-800 border border-green-300"
-                    : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-2 text-sm rounded-md flex items-center ${selectedReport.status === "resolved"
+                  ? "bg-green-100 text-green-800 border border-green-300"
+                  : "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
               >
                 <CheckCircle className="w-4 h-4 mr-1" />
                 Resolved
@@ -205,4 +196,3 @@ const BugReportDetails = ({
 }
 
 export default BugReportDetails
-

@@ -1,53 +1,48 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
 @tailwind utilities;
 @layer base {
   :root {
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
 }
 [data-radix-toast-viewport] {
-  z-index: 9999; /* Ensure the toast appears above all other UI elements */
+  z-index: 9999; 
 }
 
-
-/* React DatePicker Custom Styles */
 .react-datepicker {
-  @apply !bg-black !border-white/20 !text-white;
+  @apply !bg-white !border-gray-300 !text-black;
 }
 
 .react-datepicker__header {
-  @apply !bg-black !border-white/20;
+  @apply !bg-gray-100 !border-gray-300;
 }
 
 .react-datepicker__current-month,
 .react-datepicker__day-name {
-  @apply !text-white;
+  @apply !text-black;
 }
 
 .react-datepicker__day {
-  @apply !text-white hover:!bg-white/20;
+  @apply !text-black hover:!bg-gray-200;
 }
 
 .react-datepicker__day--selected {
-  @apply !bg-white !text-black;
+  @apply !bg-blue-600 !text-white;
 }
 
 .react-datepicker__day--disabled {
-  @apply !text-white/20;
+  @apply !text-gray-400;
 }
 
 .react-datepicker__navigation-icon::before {
-  @apply !border-white/60;
+  @apply !border-gray-600;
 }
 
 .react-datepicker__day--keyboard-selected {
-  @apply !bg-white/20 !text-white;
+  @apply !bg-blue-100 !text-black;
 }
 
-.react-datepicker__triangle {
-  @apply !hidden;
-}
 @keyframes progress {
   from {
     width: 0;
@@ -70,12 +65,10 @@
   scrollbar-width: none;
 }
 
-/* Add smooth scrolling behavior to the document */
 html {
   scroll-behavior: smooth;
 }
 
-/* Add touch action manipulation for better mobile scrolling */
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -90,3 +83,5 @@ html {
   clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
   padding: 8px 16px;
 }
+ 
+*/

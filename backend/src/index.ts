@@ -42,6 +42,7 @@ import paymentRoutes from "./routes/paymentRoutes";
 import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
 import path from "path";
+import bugRouter from "./routes/BugRouter";
 
 dotenv.config();
 
@@ -105,6 +106,7 @@ app.use("/api/comments", commentsRouter);
 app.use("/api/likes", likesRouter);
 app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
+app.use("/api/bug", bugRouter);
 
 // // Basic route
 // app.get("/", (req: Request, res: Response) => {
@@ -114,7 +116,7 @@ app.use("/api/payment", paymentRoutes);
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-console.log("cd pipeline check - 2nd time....");
+console.log("cd pipeline check - 3rd time....");
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);

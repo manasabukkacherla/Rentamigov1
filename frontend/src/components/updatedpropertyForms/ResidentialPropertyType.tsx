@@ -24,6 +24,7 @@ import SellApartment from "./property-types/SellApartment";
 import SellIndependentHouse from "./property-types/SellIndependentHouse";
 import SellBuilderFloor from "./property-types/SellBuilderFloor";
 import SellPlot from "./property-types/SellPlot";
+import Pgmain from "./residentialrent/pg/Pgmain";
 import LeaseAgricultureMain from "./commercialpropertytypes/LeaseAgricultureMain";
 import LeaseCoveredSpaceMain from "./commercialpropertytypes/LeaseCoveredSpaceMain";
 import LeaseOfficeSpaceMain from "./commercialpropertytypes/LeaseOfficeSpaceMain";
@@ -138,6 +139,69 @@ const ResidentialPropertyType = ({
           icon: Building2,
           description: "Other commercial spaces",
         },
+      ];
+    } else if (listingType === "PG/Co-living") {
+      return [
+        {
+          id: "shop",
+          name: "Shop",
+          icon: Store,
+          description: "Small retail spaces for businesses",
+        },
+        {
+          id: "retail-store-space",
+          name: "Retail Store Space",
+          icon: Building2,
+          description: "Large retail spaces for stores",
+        },
+        {
+          id: "showroom",
+          name: "Showroom",
+          icon: Store,
+          description: "Display spaces for products",
+        },
+        {
+          id: "office-space",
+          name: "Office Space",
+          icon: Building2,
+          description: "Professional workspace",
+        },
+        {
+          id: "warehouse",
+          name: "Warehouse",
+          icon: Warehouse,
+          description: "Storage facilities",
+        },
+        {
+          id: "shed",
+          name: "Shed",
+          icon: Factory,
+          description: "Industrial sheds",
+        },
+        {
+          id: "covered-open-space",
+          name: "Covered/Open Space",
+          icon: Building,
+          description: "Versatile spaces",
+        },
+        {
+          id: "plot",
+          name: "Plot",
+          icon: Map,
+          description: "Commercial plots",
+        },
+        {
+          id: "agricultural-land",
+          name: "Agricultural Land",
+          icon: TreePine,
+          description: "Farming and agriculture",
+        },
+        {
+          id: "others",
+          name: "Others",
+          icon: Building2,
+          description: "Other commercial spaces",
+        }
       ];
     } else if (listingType === "Rent") {
       return [
@@ -300,7 +364,23 @@ const ResidentialPropertyType = ({
         }
       }
     } else if (propertyType === "Residential") {
-      if (listingType === "Rent") {
+      if (listingType === "PG/Co-living") {
+        switch (selectedType) {
+          case "shop":
+          case "retail-store-space":
+          case "showroom":
+          case "office-space":
+          case "warehouse":
+          case "shed":
+          case "covered-open-space":
+          case "plot":
+          case "agricultural-land":
+          case "others":
+            return <Pgmain />;
+          default:
+            return null;
+        }
+      } else if (listingType === "Rent") {
         switch (selectedType) {
           case "apartment":
             return <Apartment propertyId={""} />;
@@ -377,39 +457,39 @@ const ResidentialPropertyType = ({
   };
   if (showForm && selectedType) {
     return (
-      <div>
+      <div className="bg-white">
         {/* Stepper */}
         <div className="mb-8">
           <div className="flex items-center">
             <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
                 <CheckCircle2 size={20} />
               </div>
               <div className="ml-2">
-                <p className="text-sm font-medium">{propertyType}</p>
-                <p className="text-xs text-white/60">Property Category</p>
+                <p className="text-sm font-medium text-black">{propertyType}</p>
+                <p className="text-xs text-black">Property Category</p>
               </div>
             </div>
-            <div className="flex-1 mx-4 h-px bg-white/20" />
+            <div className="flex-1 mx-4 h-px bg-black/20" />
             <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
                 <CheckCircle2 size={20} />
               </div>
               <div className="ml-2">
-                <p className="text-sm font-medium">{listingType}</p>
-                <p className="text-xs text-white/60">Listing Type</p>
+                <p className="text-sm font-medium text-black">{listingType}</p>
+                <p className="text-xs text-black">Listing Type</p>
               </div>
             </div>
-            <div className="flex-1 mx-4 h-px bg-white/20" />
+            <div className="flex-1 mx-4 h-px bg-black/20" />
             <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+              <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
                 <CheckCircle2 size={20} />
               </div>
               <div className="ml-2">
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium text-black">
                   {getSelectedPropertyName()}
                 </p>
-                <p className="text-xs text-white/60">Property Type</p>
+                <p className="text-xs text-black">Property Type</p>
               </div>
             </div>
           </div>
@@ -421,37 +501,37 @@ const ResidentialPropertyType = ({
   }
 
   return (
-    <div>
+    <div className="bg-white">
       {/* Stepper */}
       <div className="mb-8">
         <div className="flex items-center">
           <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
               <CheckCircle2 size={20} />
             </div>
             <div className="ml-2">
-              <p className="text-sm font-medium">{propertyType}</p>
-              <p className="text-xs text-white/60">Property Category</p>
+              <p className="text-sm font-medium text-black">{propertyType}</p>
+              <p className="text-xs text-black">Property Category</p>
             </div>
           </div>
-          <div className="flex-1 mx-4 h-px bg-white/20" />
+          <div className="flex-1 mx-4 h-px bg-black/20" />
           <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white text-black">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-white">
               <CheckCircle2 size={20} />
             </div>
             <div className="ml-2">
-              <p className="text-sm font-medium">{listingType}</p>
-              <p className="text-xs text-white/60">Listing Type</p>
+              <p className="text-sm font-medium text-black">{listingType}</p>
+              <p className="text-xs text-black">Listing Type</p>
             </div>
           </div>
-          <div className="flex-1 mx-4 h-px bg-white/20" />
+          <div className="flex-1 mx-4 h-px bg-black/20" />
           <div className="flex items-center">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black/20 text-black">
               <span>3</span>
             </div>
             <div className="ml-2">
-              <p className="text-sm font-medium">Property Type</p>
-              <p className="text-xs text-white/60">Select Category</p>
+              <p className="text-sm font-medium text-black">Property Type</p>
+              <p className="text-xs text-black">Select Category</p>
             </div>
           </div>
         </div>
@@ -465,22 +545,22 @@ const ResidentialPropertyType = ({
               onClick={() => onSelect(id)}
               className={`flex flex-col p-4 rounded-lg border transition-all duration-200 ${
                 selectedType === id
-                  ? "bg-white text-black border-white"
-                  : "border-white/20 hover:border-white"
+                  ? "bg-black text-white border-black"
+                  : "border-black/20 hover:border-black text-black"
               }`}
             >
               <div className="flex items-center gap-2 mb-2">
                 <Icon
                   size={20}
                   className={
-                    selectedType === id ? "text-black" : "text-white/80"
+                    selectedType === id ? "text-white" : "text-black"
                   }
                 />
                 <h4 className="font-medium">{name}</h4>
               </div>
               <p
                 className={`text-sm ${
-                  selectedType === id ? "text-black/70" : "text-white/60"
+                  selectedType === id ? "text-white/90" : "text-black"
                 }`}
               >
                 {description}
@@ -506,7 +586,7 @@ const ResidentialPropertyType = ({
             <button
               onClick={handleNextClick}
               disabled={loading}
-              className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
+              className="px-6 py-3 rounded-lg bg-black text-white hover:bg-black/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Saving..." : "Next"}
             </button>

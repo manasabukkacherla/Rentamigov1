@@ -40,10 +40,15 @@ const updateStatistics = async (author: string): Promise<void> => {
     ]);
 
     // Find the existing statistics document
-    const stats = await BlogStatistics.findOne({ userId: author });
+    let stats = await BlogStatistics.findOne({ userId: author });
 
     if (!stats) {
-      throw new Error('Statistics not found');
+      // throw new Error('Statistics not found');
+      stats = new BlogStatistics({
+        userId: author
+      })
+      await stats.save()
+      
     }
 
     // Calculate growth based on current and previous values
