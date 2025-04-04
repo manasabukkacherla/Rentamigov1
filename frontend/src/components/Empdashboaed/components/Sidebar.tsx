@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Building2,
@@ -11,9 +11,13 @@ import {
   X,
   LogOut,
   Waves as Wave,
+  MessageCircle,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import LogoutAnimation from "./Logoutanimation";
+import { Chatbot } from "@/components/chatbott/components/Chatbot";
+import EmployeeDashboard from "@/components/chatbott/components/EmployeeDashboard";
+import { ChatNotification } from "@/components/chatbott/types/chat";
 
 interface SidebarProps {
   darkMode: boolean;
@@ -34,6 +38,51 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const navigate = useNavigate();
   const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [chatNotifications, setChatNotifications] = useState<ChatNotification[]>([]);
+  const [totalRequests, setTotalRequests] = useState(0);
+
+  // Update total requests whenever chat notifications change
+  useEffect(() => {
+    const activeAndPendingChats = chatNotifications.filter(
+      chat => chat.status === 'active' || chat.status === 'pending'
+    ).length;
+    setTotalRequests(activeAndPendingChats);
+  }, [chatNotifications]);
+
+  const handleNewChatNotification = (notification: ChatNotification) => {
+    setChatNotifications(prev => {
+      const existingIndex = prev.findIndex(n => n.id === notification.id);
+      if (existingIndex >= 0) {
+        const newNotifications = [...prev];
+        newNotifications[existingIndex] = notification;
+        return newNotifications;
+      }
+      return [...prev, notification];
+    });
+  };
+
+  const handleRespondToChat = (notification: ChatNotification, response: string) => {
+    const isResolved = response === '--- Chat marked as resolved ---';
+    
+    const updatedNotification = {
+      ...notification,
+      messages: [
+        ...notification.messages,
+        ...(isResolved ? [] : [{
+          id: Date.now().toString(),
+          content: response,
+          type: 'employee' as const,
+          timestamp: new Date(),
+        }]),
+      ],
+      status: isResolved ? 'resolved' as const : 'active' as const,
+    };
+
+    setChatNotifications(prev =>
+      prev.map(n => (n.id === notification.id ? updatedNotification : n))
+    );
+  };
 
   const menuItems = [
     { id: "dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -45,17 +94,18 @@ const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   const handleLogout = () => {
-    onClose(); // Close the sidebar first
+    onClose();
     setShowLogoutAnimation(true);
   };
 
   const completeLogout = () => {
-    // Clear all session storage
     sessionStorage.clear();
-    // Clear all local storage
     localStorage.clear();
-    // Redirect to login page
     navigate("/login");
+  };
+
+  const toggleChatbot = () => {
+    setShowChatbot(!showChatbot);
   };
 
   if (showLogoutAnimation) {
@@ -141,6 +191,17 @@ const Sidebar: React.FC<SidebarProps> = ({
               </button>
             );
           })}
+
+          {/* Chat Support Button */}
+          <button
+            onClick={toggleChatbot}
+            className={`w-full flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 transition-colors ${
+              showChatbot ? "bg-gray-100 text-black" : ""
+            }`}
+          >
+            <MessageCircle className="w-5 h-5 mr-3" />
+            <span>Chat Support</span>
+          </button>
         </nav>
 
         {/* Desktop Logout Button */}
@@ -154,6 +215,25 @@ const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Chat Support View */}
+      {showChatbot && (
+        <div className="fixed inset-0 z-50 bg-white overflow-hidden">
+          <div className="relative h-full">
+            <button
+              onClick={toggleChatbot}
+              className="absolute top-4 right-4 z-10 p-2 hover:bg-gray-100 rounded-full"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <EmployeeDashboard
+              chatNotifications={chatNotifications}
+              onRespondToChat={handleRespondToChat}
+              totalRequests={totalRequests}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };
