@@ -33,6 +33,7 @@ import Revenue from "./components/dashadmin/components/Revenue"
 import BugReportPage from "./components/bug-report/BugReportPage"
 import BugDashboard from "./components/bug-dashboard/BugDashboard"
 import TenantProperties from "./components/tenantProperties"
+import Chatbottt from './components/chatbott/App';
 // import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify"
@@ -82,7 +83,7 @@ const App = () => {
               <Route path="/bug-dashboard" element={<BugDashboard />} />
               <Route path="/tenantProperties" element={<TenantProperties />} />
               <Route path="/updatePropertyform" element={<Propertmain />} />
-
+              <Route path="/chat" element={<Chatbottt />} />
               {/* New route for property details with ID parameter */}
               {/* <Route path="/property-details/:id" element={<PropertyDetailPage />} /> */}
 
