@@ -1,38 +1,65 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import { useNavigate, Link } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
+import { useState, useEffect, useContext } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, X } from "lucide-react";
+import { Chatbot } from "../chatbott/components/Chatbot";
+import { ChatNotification } from "../chatbott/types/chat";
+import { ChatContext } from "../chatbott/App";
 
 const Headerr: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const [activeLink, setActiveLink] = useState("/Homepage")
-  const navigate = useNavigate()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeLink, setActiveLink] = useState("/Homepage");
+  const [showChatbot, setShowChatbot] = useState(false);
+  const { chatNotifications, setChatNotifications, setCurrentChatId } = useContext(ChatContext);
+  const [totalRequests, setTotalRequests] = useState(0);
+  const navigate = useNavigate();
 
-  // Handle scroll effect for navbar
+  useEffect(() => {
+    const activeAndPendingChats = chatNotifications.filter(
+      chat => chat.status === 'active' || chat.status === 'pending'
+    ).length;
+    setTotalRequests(activeAndPendingChats);
+  }, [chatNotifications]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
-        setScrolled(true)
+        setScrolled(true);
       } else {
-        setScrolled(false)
+        setScrolled(false);
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // Set active link based on current path
   useEffect(() => {
-    const path = window.location.pathname
-    setActiveLink(path)
-  }, [])
+    const path = window.location.pathname;
+    setActiveLink(path);
+  }, []);
 
   const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
-  }
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const toggleChatbot = () => {
+    setShowChatbot(!showChatbot);
+  };
+
+  const handleNewChatNotification = (notification: ChatNotification) => {
+    setChatNotifications(prev => {
+      const existingIndex = prev.findIndex(n => n.id === notification.id);
+      if (existingIndex >= 0) {
+        const newNotifications = [...prev];
+        newNotifications[existingIndex] = notification;
+        return newNotifications;
+      }
+      setCurrentChatId(notification.id);
+      return [...prev, notification];
+    });
+  };
 
   const navLinks = [
     { name: "Home", path: "/Homepage" },
@@ -42,148 +69,169 @@ const Headerr: React.FC = () => {
     { name: "About", path: "/Aboutus" },
     { name: "Contact", path: "/Contactus" },
     { name: "Report Bug", path: "/report-bug"}
-  ]
+  ];
 
   const legalLinks = [
     { name: "Privacy Policy", path: "/Privacypolicy" },
     { name: "Terms & Conditions", path: "/Termsandconditions" },
     { name: "Tenancy Policy", path: "/Tenancypolicy" },
-  ]
+  ];
 
   return (
-    <header
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
-      }`}
-    >
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center">
-          {/* Logo */}
-          <div className="flex items-center cursor-pointer" onClick={() => navigate("/Homepage")}>
-            <img src="./images/rentamigologou.png" alt="Rentamigo Logo" className="h-10 w-10 object-contain" />
-            <span className={`text-2xl font-bold ml-1 ${scrolled ? "text-black" : "text-white"}`}>entamigo</span>
-          </div>
+    <>
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
+        }`}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center cursor-pointer" onClick={() => navigate("/Homepage")}>
+              <img src="./images/rentamigologou.png" alt="Rentamigo Logo" className="h-10 w-10 object-contain" />
+              <span className={`text-2xl font-bold ml-1 ${scrolled ? "text-black" : "text-white"}`}>entamigo</span>
+            </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center">
-            <ul className="flex space-x-6">
-              {navLinks.map((link, index) => (
-                <li key={index}>
-                  <Link
-                    to={link.path}
-                    className={`font-medium transition-colors relative no-underline px-3 py-2 rounded-md ${
-                      activeLink === link.path
-                        ? scrolled
-                          ? "text-white bg-black"
-                          : "text-black bg-white"
-                        : scrolled
-                          ? "text-gray-800 hover:bg-gray-100"
-                          : "text-white hover:bg-gray-800"
-                    }`}
-                    onClick={() => setActiveLink(link.path)}
-                  >
-                    {link.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link
-              to="/Login"
-              className={`font-medium transition-colors no-underline px-4 py-2 rounded-md ${
-                scrolled ? "text-white bg-black hover:bg-gray-800" : "text-black bg-white hover:bg-gray-200"
-              }`}
-            >
-              Sign In
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button className="md:hidden focus:outline-none" onClick={toggleMenu}>
-            {isMenuOpen ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden bg-white shadow-lg absolute top-full left-0 w-full"
-          >
-            <div className="container mx-auto px-4 py-3">
-              <nav className="flex flex-col space-y-3">
+            <nav className="hidden md:flex items-center">
+              <ul className="flex space-x-6">
                 {navLinks.map((link, index) => (
-                  <Link
-                    key={index}
-                    to={link.path}
-                    className={`font-medium py-2 px-3 block transition-colors no-underline rounded-md ${
-                      activeLink === link.path ? "bg-black text-white" : "text-gray-800 hover:bg-gray-100"
-                    }`}
-                    onClick={() => {
-                      setActiveLink(link.path)
-                      setIsMenuOpen(false)
-                    }}
-                  >
-                    {link.name}
-                  </Link>
+                  <li key={index}>
+                    <Link
+                      to={link.path}
+                      className={`font-medium transition-colors relative no-underline px-3 py-2 rounded-md ${
+                        activeLink === link.path
+                          ? scrolled
+                            ? "text-white bg-black"
+                            : "text-black bg-white"
+                          : scrolled
+                            ? "text-gray-800 hover:bg-gray-100"
+                            : "text-white hover:bg-gray-800"
+                      }`}
+                      onClick={() => setActiveLink(link.path)}
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
                 ))}
-                <div className="border-t border-gray-200 my-2 pt-2">
-                  <p className="text-sm text-gray-500 mb-2 px-3">Legal</p>
-                  {legalLinks.map((link, index) => (
+              </ul>
+            </nav>
+
+            <div className="hidden md:flex items-center space-x-4">
+              <button
+                onClick={toggleChatbot}
+                className={`p-2 rounded-full transition-colors relative ${
+                  scrolled ? "text-black hover:bg-gray-100" : "text-white hover:bg-gray-800"
+                }`}
+              >
+                <MessageCircle className="w-6 h-6" />
+                {totalRequests > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {totalRequests}
+                  </span>
+                )}
+              </button>
+              <Link
+                to="/Login"
+                className={`font-medium transition-colors no-underline px-4 py-2 rounded-md ${
+                  scrolled ? "text-white bg-black hover:bg-gray-800" : "text-black bg-white hover:bg-gray-200"
+                }`}
+              >
+                Sign In
+              </Link>
+            </div>
+
+            <button className="md:hidden focus:outline-none" onClick={toggleMenu}>
+              {isMenuOpen ? (
+                <X className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`} />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden bg-white shadow-lg absolute top-full left-0 w-full"
+            >
+              <div className="container mx-auto px-4 py-3">
+                <nav className="flex flex-col space-y-3">
+                  {navLinks.map((link, index) => (
                     <Link
                       key={index}
                       to={link.path}
-                      className="font-medium text-gray-800 hover:bg-gray-100 py-2 px-3 block transition-colors no-underline rounded-md"
-                      onClick={() => setIsMenuOpen(false)}
+                      className={`font-medium py-2 px-3 block transition-colors no-underline rounded-md ${
+                        activeLink === link.path ? "bg-black text-white" : "text-gray-800 hover:bg-gray-100"
+                      }`}
+                      onClick={() => {
+                        setActiveLink(link.path);
+                        setIsMenuOpen(false);
+                      }}
                     >
                       {link.name}
                     </Link>
                   ))}
-                </div>
-                <div className="pt-2 border-t border-gray-200">
-                  <Link
-                    to="/Login"
-                    className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-2 px-3 block rounded-md"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                </div>
-              </nav>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </header>
-  )
-}
+                  <div className="border-t border-gray-200 my-2 pt-2">
+                    <p className="text-sm text-gray-500 mb-2 px-3">Legal</p>
+                    {legalLinks.map((link, index) => (
+                      <Link
+                        key={index}
+                        to={link.path}
+                        className="font-medium text-gray-800 hover:bg-gray-100 py-2 px-3 block transition-colors no-underline rounded-md"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="pt-2 border-t border-gray-200">
+                    <Link
+                      to="/Login"
+                      className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-2 px-3 block rounded-md"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                  </div>
+                </nav>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
 
-export default Headerr
+      {showChatbot && (
+        <div className="fixed inset-0 z-[60] bg-white">
+          <div className="h-full flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-xl font-semibold">Chat Support</h2>
+              <button
+                onClick={toggleChatbot}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1">
+              <Chatbot onNewChatNotification={handleNewChatNotification} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default Headerr;

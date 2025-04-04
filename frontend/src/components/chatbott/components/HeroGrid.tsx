@@ -1,5 +1,5 @@
 import React from "react";
-
+import { ChatbotButton } from "./ChatbotButton";
 
 interface Image {
   url: string;
@@ -99,7 +99,7 @@ const HeroGrid: React.FC<HeroGridProps> = ({ images }) => {
       </div>
 
       {/* Chatbot Button */}
-      
+      <ChatbotButton />
     </section>
   );
 };
