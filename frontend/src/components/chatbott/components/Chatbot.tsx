@@ -121,6 +121,7 @@ export const Chatbot: React.FC<ChatbotProps> = ({
       }
       return;
     }
+    
 
     const response = findResponse(message);
     if (response) {
