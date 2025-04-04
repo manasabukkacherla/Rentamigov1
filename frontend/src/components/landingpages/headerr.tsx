@@ -1,22 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X } from "lucide-react";
-import { Chatbot } from "@/components/chatbott/components/Chatbot";
-import EmployeeDashboard from "@/components/chatbott/components/EmployeeDashboard";
-import { ChatNotification } from "@/components/chatbott/types/chat";
-
+import { Chatbot } from "../chatbott/components/Chatbot";
+import { ChatNotification } from "../chatbott/types/chat";
+import { ChatContext } from "../chatbott/App";
 
 const Headerr: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeLink, setActiveLink] = useState("/Homepage");
   const [showChatbot, setShowChatbot] = useState(false);
-  const [chatNotifications, setChatNotifications] = useState<ChatNotification[]>([]);
+  const { chatNotifications, setChatNotifications, setCurrentChatId } = useContext(ChatContext);
   const [totalRequests, setTotalRequests] = useState(0);
   const navigate = useNavigate();
 
-  // Update total requests whenever chat notifications change
   useEffect(() => {
     const activeAndPendingChats = chatNotifications.filter(
       chat => chat.status === 'active' || chat.status === 'pending'
@@ -24,7 +22,6 @@ const Headerr: React.FC = () => {
     setTotalRequests(activeAndPendingChats);
   }, [chatNotifications]);
 
-  // Handle scroll effect for navbar
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 10) {
@@ -38,7 +35,6 @@ const Headerr: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Set active link based on current path
   useEffect(() => {
     const path = window.location.pathname;
     setActiveLink(path);
@@ -60,6 +56,7 @@ const Headerr: React.FC = () => {
         newNotifications[existingIndex] = notification;
         return newNotifications;
       }
+      setCurrentChatId(notification.id);
       return [...prev, notification];
     });
   };
@@ -89,13 +86,11 @@ const Headerr: React.FC = () => {
       >
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center">
-            {/* Logo */}
             <div className="flex items-center cursor-pointer" onClick={() => navigate("/Homepage")}>
               <img src="./images/rentamigologou.png" alt="Rentamigo Logo" className="h-10 w-10 object-contain" />
               <span className={`text-2xl font-bold ml-1 ${scrolled ? "text-black" : "text-white"}`}>entamigo</span>
             </div>
 
-            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center">
               <ul className="flex space-x-6">
                 {navLinks.map((link, index) => (
@@ -120,11 +115,10 @@ const Headerr: React.FC = () => {
               </ul>
             </nav>
 
-            {/* Auth Buttons and Chat - Desktop */}
             <div className="hidden md:flex items-center space-x-4">
               <button
                 onClick={toggleChatbot}
-                className={`p-2 rounded-full transition-colors ${
+                className={`p-2 rounded-full transition-colors relative ${
                   scrolled ? "text-black hover:bg-gray-100" : "text-white hover:bg-gray-800"
                 }`}
               >
@@ -145,18 +139,9 @@ const Headerr: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
             <button className="md:hidden focus:outline-none" onClick={toggleMenu}>
               {isMenuOpen ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`} />
               ) : (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +157,6 @@ const Headerr: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -228,10 +212,9 @@ const Headerr: React.FC = () => {
         </AnimatePresence>
       </header>
 
-      {/* Chatbot Modal */}
       {showChatbot && (
         <div className="fixed inset-0 z-[60] bg-white">
-          <div className="relative h-full">
+          <div className="h-full flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-xl font-semibold">Chat Support</h2>
               <button
@@ -241,12 +224,8 @@ const Headerr: React.FC = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="h-[calc(100vh-4rem)]">
-              <Chatbot
-                onNewChatNotification={handleNewChatNotification}
-                chatNotifications={chatNotifications}
-                currentChat={null}
-              />
+            <div className="flex-1">
+              <Chatbot onNewChatNotification={handleNewChatNotification} />
             </div>
           </div>
         </div>
