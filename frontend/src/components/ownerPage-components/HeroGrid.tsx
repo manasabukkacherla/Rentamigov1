@@ -1,5 +1,6 @@
 import React from "react";
 
+
 interface Image {
   url: string;
   alt: string;
@@ -96,6 +97,9 @@ const HeroGrid: React.FC<HeroGridProps> = ({ images }) => {
           List your property
         </button>
       </div>
+
+      {/* Chatbot Button */}
+      
     </section>
   );
 };
