@@ -395,8 +395,8 @@ const Homepage: React.FC = () => {
               Find Your <span className="text-gray-300">Perfect</span> Home
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Discover hundreds and thousands and lakhs of properties that match
-              your preferences and budget
+              Discover and thousands and lakhs of properties that match your
+              preferences and budget
             </p>
             <button
               onClick={() => setIsLocationModalOpen(true)}
