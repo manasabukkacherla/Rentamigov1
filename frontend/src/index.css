@@ -1,4 +1,4 @@
-/* @tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 @layer base {
@@ -8,11 +8,10 @@
   }
 }
 [data-radix-toast-viewport] {
-  z-index: 9999; 
+  z-index: 9999; /* Ensure the toast appears above all other UI elements */
 }
 
-/* React DatePicker Custom Styles */
-
+/* Update DatePicker styles for light theme */
 .react-datepicker {
   @apply !bg-white !border-gray-300 !text-black;
 }
@@ -31,7 +30,7 @@
 }
 
 .react-datepicker__day--selected {
-  @apply !bg-blue-600 !text-white;
+  @apply !bg-black !text-white;
 }
 
 .react-datepicker__day--disabled {
@@ -43,7 +42,40 @@
 }
 
 .react-datepicker__day--keyboard-selected {
-  @apply !bg-blue-100 !text-black;
+  @apply !bg-gray-200 !text-black;
+}
+
+/* Form element hover effects */
+input:hover,
+textarea:hover,
+select:hover {
+  @apply border-gray-400;
+}
+
+/* Button hover effects */
+button:hover:not(:disabled) {
+  @apply transform transition-transform duration-200;
+}
+
+/* Checkbox custom styling */
+input[type="checkbox"] {
+  @apply cursor-pointer;
+}
+
+input[type="checkbox"]:checked {
+  @apply bg-black border-black;
+}
+
+/* Select dropdown styling */
+select {
+  @apply appearance-none bg-no-repeat;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+}
+
+select:hover {
+  @apply cursor-pointer;
 }
 
 @keyframes progress {
@@ -68,10 +100,12 @@
   scrollbar-width: none;
 }
 
+/* Add smooth scrolling behavior to the document */
 html {
   scroll-behavior: smooth;
 }
 
+/* Add touch action manipulation for better mobile scrolling */
 * {
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
@@ -87,12 +121,55 @@ html {
   padding: 8px 16px;
 }
 
-/* Custom scrollbar for notification panel */
+/* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
 
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Map styles */
+.map-container {
+  width: 100%;
+  height: 400px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.map-search-box {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   border-radius: 4px;
 }
+
+.map-control-button {
+  background-color: white;
+  border: none;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  margin: 10px;
+  padding: 0 0.5em;
+  height: 40px;
+  font-size: 18px;
+  line-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-control-button:hover {
+  background-color: #f1f1f1;
+}
+

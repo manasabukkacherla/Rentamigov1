@@ -1,17 +1,22 @@
 import { useState } from 'react';
 import { ArrowRight, IndianRupee } from 'lucide-react';
 
+interface PriceData {
+  amount: string;
+  type: 'fixed' | 'negotiable';
+}
+
 interface PriceProps {
-  onPriceChange?: (price: Record<string, any>) => void;
+  onPriceChange?: (price: PriceData) => void;
 }
 
 const Price = ({ onPriceChange }: PriceProps) => {
-  const [price, setPrice] = useState({
+  const [price, setPrice] = useState<PriceData>({
     amount: '',
     type: 'fixed',
   });
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (field: keyof PriceData, value: any) => {
     const updatedPrice = { ...price, [field]: value };
     setPrice(updatedPrice);
     onPriceChange?.(updatedPrice);
@@ -48,7 +53,7 @@ const Price = ({ onPriceChange }: PriceProps) => {
                 name="priceType"
                 value="fixed"
                 checked={price.type === 'fixed'}
-                onChange={(e) => handleChange('type', e.target.value)}
+                onChange={(e) => handleChange('type', e.target.value as 'fixed' | 'negotiable')}
                 className="text-white border-white/20 bg-transparent focus:ring-white"
               />
               <span className="text-white/80">Fixed</span>
@@ -59,7 +64,7 @@ const Price = ({ onPriceChange }: PriceProps) => {
                 name="priceType"
                 value="negotiable"
                 checked={price.type === 'negotiable'}
-                onChange={(e) => handleChange('type', e.target.value)}
+                onChange={(e) => handleChange('type', e.target.value as 'fixed' | 'negotiable')}
                 className="text-white border-white/20 bg-transparent focus:ring-white"
               />
               <span className="text-white/80">Negotiable</span>

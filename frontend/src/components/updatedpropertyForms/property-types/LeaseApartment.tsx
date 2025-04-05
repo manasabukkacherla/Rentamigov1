@@ -16,7 +16,7 @@ import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
 
 interface LeaseApartmentProps {
-  propertyId: string; // Property ID passed as a prop
+  propertyId: string;
   onSubmit?: (formData: any) => void;
 }
 
@@ -54,7 +54,6 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Function to update property address details
   const handleAddressChange = useCallback((addressData: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -62,46 +61,34 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     }));
   }, []);
 
-  // Function to save data at each step
   const saveStepData = async () => {
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
 
+    const endpoint = step === 0 ? "basicdetails" : "properties";
+
     try {
-      const payload = {
-        propertyId,
-        propertyName: formData.propertyName,
-        propertyAddress: formData.propertyAddress, // ✅ Ensure this is included
-        coordinates: formData.coordinates,
-        size: formData.size,
-        restrictions: formData.restrictions,
-        features: formData.features,
-        leaseAmount: formData.leaseAmount,
-        leaseTenure: formData.leaseTenure,
-        maintenanceAmount: formData.maintenanceAmount,
-        brokerage: formData.brokerage,
-        availability: formData.availability,
-        media: formData.media,
-        otherCharges: formData.otherCharges,
-        flatAmenities: formData.flatAmenities,
-        societyAmenities: formData.societyAmenities,
-      };
-
-      console.log("🔹 API Payload:", JSON.stringify(payload, null, 2)); // ✅ Debug log
-
-      const response = await fetch("/api/basicdetails", {
+      const response = await fetch(`/api/${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload), // ✅ Send correctly formatted payload
+        body: JSON.stringify({
+          ...formData,
+          propertyId: propertyId || formData.propertyId,
+        }),
       });
 
       const result = await response.json();
 
       if (response.ok) {
         setSuccessMessage("Step saved successfully! ✅");
+        if (step === 0 && result.data?.propertyId) {
+          const newPropertyId = propertyId || result.data.propertyId;
+          localStorage.setItem("propertyId", newPropertyId);
+          setFormData((prev) => ({ ...prev, propertyId: newPropertyId }));
+        }
       } else {
         setErrorMessage(`Error saving step: ${result.message}`);
       }
@@ -117,7 +104,7 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     {
       title: "Basic Information",
       component: (
-        <>
+        <div className="space-y-6">
           <PropertyName
             propertyName={formData.propertyName}
             onPropertyNameChange={(name) =>
@@ -166,13 +153,13 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
               setFormData((prev) => ({ ...prev, size }))
             }
           />
-        </>
+        </div>
       ),
     },
     {
       title: "Property Details",
       component: (
-        <>
+        <div className="space-y-6">
           <Restrictions
             onRestrictionsChange={(restrictions) =>
               setFormData((prev) => ({ ...prev, restrictions }))
@@ -193,34 +180,26 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
               setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
             }
           />
-        </>
+        </div>
       ),
     },
     {
       title: "Lease Terms",
       component: (
-        <>
+        <div className="space-y-6">
           <LeaseAmount
-            onLeaseAmountChange={(leaseAmount) =>
-              setFormData((prev) => ({ ...prev, leaseAmount }))
+            onLeaseAmountChange={(amount) =>
+              setFormData((prev) => ({ ...prev, leaseAmount: amount }))
             }
           />
           <LeaseTenure
-            onLeaseTenureChange={(leaseTenure) =>
-              setFormData((prev) => ({ ...prev, leaseTenure }))
+            onLeaseTenureChange={(tenure) =>
+              setFormData((prev) => ({ ...prev, leaseTenure: tenure }))
             }
           />
           <MaintenanceAmount
-            onMaintenanceAmountChange={(maintenance) =>
-              setFormData((prev) => ({
-                ...prev,
-                maintenanceAmount: maintenance,
-              }))
-            }
-          />
-          <OtherCharges
-            onOtherChargesChange={(charges) =>
-              setFormData((prev) => ({ ...prev, otherCharges: charges }))
+            onMaintenanceAmountChange={(amount) =>
+              setFormData((prev) => ({ ...prev, maintenanceAmount: amount }))
             }
           />
           <Brokerage
@@ -228,25 +207,43 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
               setFormData((prev) => ({ ...prev, brokerage }))
             }
           />
-        </>
+          <OtherCharges
+            onOtherChargesChange={(charges) =>
+              setFormData((prev) => ({ ...prev, otherCharges: charges }))
+            }
+          />
+        </div>
       ),
     },
     {
       title: "Availability",
       component: (
-        <AvailabilityDate
-          onAvailabilityChange={(availability) =>
-            setFormData((prev) => ({ ...prev, availability }))
-          }
-        />
+        <div className="space-y-6">
+          <AvailabilityDate
+            onAvailabilityChange={(availability) =>
+              setFormData((prev) => ({ ...prev, availability }))
+            }
+          />
+        </div>
       ),
     },
     {
       title: "Property Media",
       component: (
-        <MediaUpload
-          onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))}
-        />
+        <div className="space-y-6">
+          <MediaUpload
+            onMediaChange={(media: MediaState) => 
+              setFormData((prev) => ({ 
+                ...prev, 
+                media: {
+                  categories: media.categories || [],
+                  video: media.video || null,
+                  documents: media.documents || []
+                }
+              }))
+            }
+          />
+        </div>
       ),
     },
   ];
@@ -256,24 +253,78 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     setStep((prev) => prev + 1);
   };
 
-  return (
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-12">
-      <h2 className="text-3xl font-bold mb-8">{steps[step].title}</h2>
-      {steps[step].component}
+  const handlePrevious = () => {
+    setStep((prev) => prev - 1);
+  };
 
-      <button
-        type="button"
-        onClick={handleNext}
-        disabled={loading}
-        className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-      >
-        {loading
-          ? "Saving..."
-          : step < steps.length - 1
-          ? "Next"
-          : "List Property"}
-      </button>
-    </form>
+  return (
+    <div className="min-h-screen bg-white text-black">
+      <div className="max-w-4xl mx-auto p-8">
+        <h1 className="text-2xl font-bold mb-8">Lease Apartment</h1>
+        
+        {/* Progress Steps */}
+        <div className="flex items-center justify-between mb-8">
+          {steps.map((s, index) => (
+            <div key={index} className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  index <= step ? "bg-black text-white" : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {index + 1}
+              </div>
+              <div className="ml-2 text-sm font-medium">{s.title}</div>
+              {index < steps.length - 1 && (
+                <div className="w-16 h-0.5 bg-gray-200 mx-2"></div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Form Content */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          {steps[step].component}
+        </div>
+
+        {/* Messages */}
+        {errorMessage && (
+          <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div className="mt-4 p-4 bg-green-50 text-green-600 rounded-lg">
+            {successMessage}
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-8">
+          <button
+            onClick={handlePrevious}
+            disabled={step === 0}
+            className={`px-4 py-2 rounded-lg ${
+              step === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={loading || step === steps.length - 1}
+            className={`px-4 py-2 rounded-lg ${
+              loading || step === steps.length - 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-black text-white hover:bg-gray-800"
+            }`}
+          >
+            {loading ? "Saving..." : "Next"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 
