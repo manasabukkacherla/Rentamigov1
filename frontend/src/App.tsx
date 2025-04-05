@@ -1,27 +1,27 @@
 import React, { useState } from "react";
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import { ToastContainer } from "react-toastify";
-import Notifications from "./components/Empdashboaed/components/Notifications";
-import { useContext } from "react";
-import { SocketContext } from "./socketContext";
-import { Toaster } from "react-hot-toast";
-// Import all your components
 import AccessManagementTable from "./components/access-management-table";
 import Services from "./components/Service-page-components/Services";
 import Homepage from "./components/landingpages/home";
+
 import OwnerPage from "./components/ownerPage-components/OwnerPage";
 import Fullpage from "./components/fullpages/Fullpage";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import MapComponent from "./components/MapComponent";
 import AboutUs from "./components/landingpages/Aboutus";
 import ContactUs from "./components/landingpages/Contactus";
 import PrivacyPolicy from "./components/landingpages/PrivacyPolicy";
 import TenancyPolicy from "./components/landingpages/TenancyPolicy";
 import HomePage from "./components/blogs/HomePage";
+
 import Loginhome from "./components/Logins/Loginhome";
 import Propertmain from "./components/updatedpropertyForms/Propertmain";
 import CreateBlogPage from "./components/blogs/CreateBlogPage";
+
 import UsrDashboard from "./components/UsrDasboard/UsrDashboard";
+
 import Admindash from "./components/dashadmin/admdashboard";
 import Empapp from "./components/Empdashboaed/Empdasboard";
 import Propertydetail from "./components/propertiesdetails/App";
@@ -33,13 +33,15 @@ import Revenue from "./components/dashadmin/components/Revenue";
 import BugReportPage from "./components/bug-report/BugReportPage";
 import BugDashboard from "./components/bug-dashboard/BugDashboard";
 import TenantProperties from "./components/tenantProperties";
-import ErrorBoundary from "./components/blogs/ErrorBoundary";
 import Chatbottt from "./components/chatbott/App";
 // import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
-// Import Bootstrap CSS
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { ToastContainer } from "react-toastify";
+import ErrorBoundary from "./components/blogs/ErrorBoundary";
+import { Toaster } from "react-hot-toast";
+import Notifications from "./components/Empdashboaed/components/Notifications";
+import { useContext } from "react";
+import { SocketContext } from "./socketContext";
 
 const App = () => {
   const [isEmployee, setIsEmployee] = useState(false);
@@ -50,8 +52,9 @@ const App = () => {
   }
 
   const client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
   const storedUser = sessionStorage.getItem("user");
-  const toggleView = () => setIsEmployee(!isEmployee);
+  // console.log(storedUser);
 
   return (
     <>
@@ -77,7 +80,6 @@ const App = () => {
                 <Route path="/" element={<Navigate to="/Homepage" replace />} />
                 {/* Public Routes */}
                 <Route path="/Homepage" element={<Homepage />} />
-
                 <Route path="/Aboutus" element={<AboutUs />} />
                 <Route path="/Contactus" element={<ContactUs />} />
                 <Route path="/Privacypolicy" element={<PrivacyPolicy />} />
@@ -208,6 +210,34 @@ const App = () => {
                   element={<Admindash defaultSection="settings" />}
                 />
 
+                <Route path="/empdash" element={<Empapp />} />
+                <Route path="/propertypage" element={<Propertydetail />} />
+                {/* Logins Layout */}
+                <Route path="/Login" element={<Loginhome />} />
+                <Route path="/chat" element={<Chatbottt />} />
+                <Route
+                  path="/emp-login"
+                  element={
+                    <EmployeeLogin
+                      onSwitchToSignup={(): void => {
+                        throw new Error("Function not implemented.");
+                      }}
+                      onLoginSuccess={(_email: string): void => {
+                        throw new Error("Function not implemented.");
+                      }}
+                    />
+                  }
+                />
+                <Route path="/blogs" element={<HomePage />} />
+                <Route path="/blogs/Create" element={<CreateBlogPage />} />
+                <Route path="/blogs/edit/:id" element={<CreateBlogPage />} />
+                {/* Dashboard Layout */}
+                <Route path="/blogs/Dashboard" element={<UserDashboard />} />
+                <Route
+                  path="/blogs/edit/:id"
+                  element={<EditorMenuBar editor={null} />}
+                />
+                <Route path="revenue" element={<Revenue />} />
                 <Route path="/empdash" element={<Empapp />} />
                 <Route path="/propertypage" element={<Propertydetail />} />
                 {/* Logins Layout */}
