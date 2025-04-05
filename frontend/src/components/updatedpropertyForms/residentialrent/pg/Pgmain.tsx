@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from 'react';
 import PgName from './PgName';
 import Configuration from './Configuration';
@@ -9,23 +11,133 @@ import FoodServices from './FoodServices';
 import Restrictions from './Restrictions';
 import Pricing from './Pricing';
 import PgMedia from './PgMedia';
-import { Save, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Save, ArrowRight, ArrowLeft, Building2 } from 'lucide-react';
 
 function Pgmain() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const steps = [
-    { title: "PG Details", component: <PgName /> },
-    { title: "PG Type", component: <PgFor /> },
-    { title: "Room Configuration", component: <Configuration /> },
-    { title: "Common Area Amenities", component: <CommonAreaAmenities /> },
-    { title: "Additional Services", component: <AdditionalServices /> },
-    { title: "Other Features", component: <OtherFeatures /> },
-    { title: "Food Services", component: <FoodServices /> },
-    { title: "Restrictions & Rules", component: <Restrictions /> },
-    { title: "Pricing & Terms", component: <Pricing /> },
-    { title: "Photos & Videos", component: <PgMedia /> }
+    { 
+      title: "PG Details", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">PG Details</h3>
+          </div>
+          <PgName />
+        </div>
+      )
+    },
+    { 
+      title: "PG Type", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">PG Type</h3>
+          </div>
+          <PgFor />
+        </div>
+      )
+    },
+    { 
+      title: "Room Configuration", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Room Configuration</h3>
+          </div>
+          <Configuration />
+        </div>
+      )
+    },
+    { 
+      title: "Common Area Amenities", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Common Area Amenities</h3>
+          </div>
+          <CommonAreaAmenities />
+        </div>
+      )
+    },
+    { 
+      title: "Additional Services", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Additional Services</h3>
+          </div>
+          <AdditionalServices />
+        </div>
+      )
+    },
+    { 
+      title: "Other Features", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Other Features</h3>
+          </div>
+          <OtherFeatures />
+        </div>
+      )
+    },
+    { 
+      title: "Food Services", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Food Services</h3>
+          </div>
+          <FoodServices />
+        </div>
+      )
+    },
+    { 
+      title: "Restrictions & Rules", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Restrictions & Rules</h3>
+          </div>
+          <Restrictions />
+        </div>
+      )
+    },
+    { 
+      title: "Pricing & Terms", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Pricing & Terms</h3>
+          </div>
+          <Pricing />
+        </div>
+      )
+    },
+    { 
+      title: "Photos & Videos", 
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg [&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_select]:text-black [&_select]:border-black/20 [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_textarea]:text-black [&_textarea]:border-black/20 [&_label]:text-black [&_p]:text-black [&_span]:text-black [&_svg]:text-black">
+          <div className="flex items-center mb-8">
+            <Building2 className="text-black mr-3" size={28} />
+            <h3 className="text-2xl font-semibold text-black">Photos & Videos</h3>
+          </div>
+          <PgMedia />
+        </div>
+      )
+    }
   ];
 
   const handleNext = () => {
@@ -57,24 +169,24 @@ function Pgmain() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <Building2 className="w-8 h-8 text-black" />
+          <div>
+            <h1 className="text-2xl font-bold text-black">List Your PG/Co-living Space</h1>
+            <p className="text-sm text-black/70">Step {currentStep + 1} of {steps.length}</p>
+          </div>
+        </div>
+
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h1 className="text-2xl font-bold text-black">PG Registration</h1>
-            <span className="text-black">Step {currentStep + 1} of {steps.length}</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
+          <div className="w-full bg-gray-100 rounded-full h-2">
             <div 
-              className="bg-black h-2.5 rounded-full transition-all duration-300 ease-in-out" 
+              className="bg-black h-2 rounded-full transition-all duration-300 ease-in-out" 
               style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
             ></div>
           </div>
         </div>
-
-        {/* Step Title */}
-        <h2 className="text-xl font-semibold text-black mb-6 border-b border-gray-200 pb-2">
-          {steps[currentStep].title}
-        </h2>
 
         {/* Current Step Component */}
         <div className="space-y-8">
@@ -82,18 +194,16 @@ function Pgmain() {
         </div>
           
         {/* Navigation Buttons */}
-        <div className="flex justify-between mt-8">
+        <div className="flex items-center justify-between mt-8">
           <button
             onClick={handlePrevious}
             disabled={currentStep === 0}
             className={`
-              flex items-center space-x-2 px-6 py-3 
-              ${currentStep === 0 ? 'bg-gray-200 text-gray-500' : 'bg-gray-200 text-black hover:bg-gray-300'}
-              border-2 border-gray-300
-              font-semibold rounded-lg
-              transform transition-all duration-200
-              focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 focus:ring-offset-white
-              disabled:opacity-50 disabled:cursor-not-allowed
+              flex items-center gap-2 px-6 py-3 rounded-lg transition-colors duration-200
+              ${currentStep === 0 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white text-black border-2 border-black hover:bg-black hover:text-white'
+              }
             `}
           >
             <ArrowLeft className="w-5 h-5" />
@@ -103,15 +213,7 @@ function Pgmain() {
           {currentStep < steps.length - 1 ? (
             <button
               onClick={handleNext}
-              className={`
-                flex items-center space-x-2 px-6 py-3 
-                bg-black text-white
-                border-2 border-black
-                font-semibold rounded-lg
-                transform transition-all duration-200
-                hover:bg-white hover:text-black
-                focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 focus:ring-offset-white
-              `}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-black text-white hover:bg-black/90 transition-colors duration-200"
             >
               <span>Next</span>
               <ArrowRight className="w-5 h-5" />
@@ -120,27 +222,17 @@ function Pgmain() {
             <button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className={`
-                flex items-center space-x-2 px-8 py-3 
-                bg-black text-white
-                border-2 border-black
-                font-semibold rounded-lg
-                transform transition-all duration-200
-                hover:bg-white hover:text-black
-                focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 focus:ring-offset-white
-                disabled:opacity-50 disabled:cursor-not-allowed
-                disabled:hover:bg-black disabled:hover:text-white
-              `}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-black text-white hover:bg-black/90 transition-colors duration-200 disabled:bg-gray-200 disabled:text-gray-400"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   <span>Submitting...</span>
                 </>
               ) : (
                 <>
                   <Save className="w-5 h-5" />
-                  <span>Submit PG Details</span>
+                  <span>Submit</span>
                 </>
               )}
             </button>
