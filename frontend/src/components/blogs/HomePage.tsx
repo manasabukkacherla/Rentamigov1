@@ -7,6 +7,7 @@ import {
   Key,
   ReactElement,
   ReactNode,
+  useContext,
   useEffect,
   useState,
 } from "react";
@@ -144,6 +145,7 @@ const HomePage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <Navbar />
+
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8">
         <section>
           <ImageSlider blogs={allBlogs.slice(0, 5)} />

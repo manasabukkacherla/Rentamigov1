@@ -4,7 +4,10 @@ import express, {
   Response,
   NextFunction,
   ErrorRequestHandler,
+  Application,
 } from "express";
+import http from "http"; // For creating an HTTP server
+
 import dotenv from "dotenv";
 import { connectToDatabase } from "./utils/connectToDb";
 import cors from "cors";
@@ -43,6 +46,10 @@ import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
 import path from "path";
 import bugRouter from "./routes/BugRouter";
+import { Server as SocketIOServer, Socket, Server } from "socket.io";
+import Notification from "./models/Notification";
+import { Document } from "mongoose";
+import socketHandler from "./socketHandler";
 
 dotenv.config();
 
@@ -56,7 +63,21 @@ if (missingEnvVars.length > 0) {
   );
 }
 
-const app: Express = express();
+const app: Application = express();
+
+// Create an HTTP server using the Express app
+const server = http.createServer(app);
+
+// Initialize Socket.IO with correct CORS settings on the HTTP server
+
+// Initialize Socket.IO on the HTTP server with CORS settings (adjust for production)
+export const io: Server = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
 connectToDatabase()
   .then(() => console.log("Successfully connected to MongoDB"))
   .catch((error) => {
@@ -71,6 +92,8 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" })); // Set JSON payload size limit
 app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encoded payload size limit
 
+// Initialize all Socket.IO event handlers
+socketHandler(io);
 // Routes
 app.use("/api/verify", verifyRouter);
 app.use("/api/Report", Reportrouter); // Report routers
@@ -107,7 +130,10 @@ app.use("/api/likes", likesRouter);
 app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
-
+app.get("/testing", (req: Request, res: Response) => {
+  io.emit("newNotification", "hjh");
+  res.json({ message: "hjhjh" });
+});
 // // Basic route
 // app.get("/", (req: Request, res: Response) => {
 //   res.json({ message: "Welcome to the API" });
@@ -134,7 +160,7 @@ app.use(errorHandler);
 
 // Start server
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log("Environment variables loaded:", {
     VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "****" : undefined,

@@ -27,8 +27,8 @@ const LocationModal = ({
     "Kolkata",
     "Pune",
     "Ahmedabad",
-    "Jaipur"
-  ]
+    "Jaipur",
+  ];
 
   if (!isOpen) return null;
 
@@ -58,7 +58,9 @@ const LocationModal = ({
             </button>
           </div>
 
-          <p className="text-gray-600 mb-4">Choose your city to find properties in your area</p>
+          <p className="text-gray-600 mb-4">
+            Choose your city to find properties in your area
+          </p>
 
           <div className="grid grid-cols-2 gap-4">
             {locations.map((location) => (
@@ -333,35 +335,35 @@ const Testimonial = ({
 
 // Update the Homepage component to show the location modal on page load
 const Homepage: React.FC = () => {
-  const [allBlogs, setAllBlogs] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState<string | null>(null)
-  const navigate = useNavigate()
+  const [allBlogs, setAllBlogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   // Show location modal on page load
   useEffect(() => {
     // Check if location is already selected in session storage
-    const savedLocation = sessionStorage.getItem("selectedLocation")
+    const savedLocation = sessionStorage.getItem("selectedLocation");
     if (!savedLocation) {
       // Show modal after a short delay for better UX
       const timer = setTimeout(() => {
-        setIsLocationModalOpen(true)
-      }, 1000)
-      return () => clearTimeout(timer)
+        setIsLocationModalOpen(true);
+      }, 1000);
+      return () => clearTimeout(timer);
     } else {
-      setSelectedLocation(savedLocation)
+      setSelectedLocation(savedLocation);
     }
-  }, [])
+  }, []);
 
   const handleLocationSelect = (location: string) => {
-    setSelectedLocation(location)
-    setIsLocationModalOpen(false)
+    setSelectedLocation(location);
+    setIsLocationModalOpen(false);
     // Save selected location to session storage
-    sessionStorage.setItem("selectedLocation", location)
+    sessionStorage.setItem("selectedLocation", location);
     // Redirect to properties page with location parameter
-    navigate(`/tenantproperties`)
-  }
+    navigate(`/tenantproperties`);
+  };
 
   // Animation variants for scroll animations
   const fadeInUp = {
@@ -393,8 +395,8 @@ const Homepage: React.FC = () => {
               Find Your <span className="text-gray-300">Perfect</span> Home
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-              Discover thousands and lakhs of properties that match your
-              preferences and budget
+              Discover hundreds and thousands and lakhs of properties that match
+              your preferences and budget
             </p>
             <button
               onClick={() => setIsLocationModalOpen(true)}
@@ -773,5 +775,4 @@ const Homepage: React.FC = () => {
   );
 };
 
-export default Homepage
-
+export default Homepage;

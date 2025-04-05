@@ -95,40 +95,40 @@ const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Flat Amenities</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Select Available Items</span>
+        <h3 className="text-2xl font-semibold text-black">Flat Amenities</h3>
+        <ArrowRight className="text-black/60" size={20} />
+        <span className="text-sm text-black/70">Select Available Items</span>
       </div>
 
       <div className="space-y-8 max-w-6xl">
         <div>
-          <h4 className="text-lg font-medium mb-4">Quantity Items</h4>
+          <h4 className="text-lg font-medium mb-4 text-black">Quantity Items</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {numberInputs.map(({ key, label }) => (
-              <div key={key} className="flex items-center gap-3 bg-white/5 p-3 rounded-lg">
+              <div key={key} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-black/30 hover:border-black/50 transition-colors duration-200">
                 <input
                   type="number"
                   min="0"
-                  value={amenities[key] || ''}
+                  value={typeof amenities[key] === 'number' ? amenities[key] : ''}
                   onChange={(e) => handleNumberChange(key, e.target.value)}
-                  className="w-16 px-3 py-2 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
+                  className="w-16 px-3 py-2 rounded-lg bg-white border border-black/30 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
                 />
-                <label className="text-white/80 flex-1">{label}</label>
+                <label className="text-black flex-1">{label}</label>
               </div>
             ))}
           </div>
         </div>
 
         <div>
-          <h4 className="text-lg font-medium mb-4">Available Items</h4>
+          <h4 className="text-lg font-medium mb-4 text-black">Available Items</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {booleanInputs.map(({ key, label }) => (
-              <label key={key} className="flex items-center gap-2 p-3 bg-white/5 rounded-lg text-white/80">
+              <label key={key} className="flex items-center gap-2 p-3 bg-white rounded-lg text-black border border-black/30 hover:border-black/50 transition-colors duration-200">
                 <input
                   type="checkbox"
                   checked={!!amenities[key]}
                   onChange={(e) => handleBooleanChange(key, e.target.checked)}
-                  className="rounded border-white/20 bg-transparent focus:ring-white text-white"
+                  className="rounded border-black/30 bg-white focus:ring-black text-black"
                 />
                 {label}
               </label>
