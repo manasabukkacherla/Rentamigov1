@@ -4,11 +4,14 @@
 @layer base {
   :root {
     --radius: 0.5rem;
+    --radius: 0.5rem;
   }
 }
 [data-radix-toast-viewport] {
   z-index: 9999; 
 }
+
+/* React DatePicker Custom Styles */
 
 .react-datepicker {
   @apply !bg-white !border-gray-300 !text-black;
@@ -82,6 +85,16 @@ html {
 .clip-path-pentagon {
   clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
   padding: 8px 16px;
+}
+
+/* Custom scrollbar for notification panel */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
  
 */
