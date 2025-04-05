@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Edit2, Trash2, ToggleRight, Home, Clock, CheckCircle } from 'lucide-react';
-import { Property } from './types';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Edit2,
+  Trash2,
+  ToggleRight,
+  Home,
+  Clock,
+  CheckCircle,
+} from "lucide-react";
+import { Property } from "./types";
 
 interface PropertyCardProps {
   property: Property;
@@ -10,8 +17,15 @@ interface PropertyCardProps {
   onStatusUpdate: (id: string) => void;
 }
 
-export function PropertyCard({ property, onEdit, onDelete, onStatusUpdate }: PropertyCardProps) {
-  const [coverImageUrl, setCoverImageUrl] = useState<string>('https://via.placeholder.com/300'); // Default placeholder
+export function PropertyCard({
+  property,
+  onEdit,
+  onDelete,
+  onStatusUpdate,
+}: PropertyCardProps) {
+  const [coverImageUrl, setCoverImageUrl] = useState<string>(
+    "https://via.placeholder.com/300"
+  ); // Default placeholder
   const [monthlyRent, setMonthlyRent] = useState<number>(property.rent); // Default to provided rent
 
   useEffect(() => {
@@ -27,25 +41,31 @@ export function PropertyCard({ property, onEdit, onDelete, onStatusUpdate }: Pro
         const userId = userData.id;
 
         // Fetch property images
-        const imagesResponse = await axios.get("http://localhost:8000/api/photos/upload-photos", {
-          params: { userId }
+        const imagesResponse = await axios.get("/api/photos/upload-photos", {
+          params: { userId },
         });
 
-        const image = imagesResponse.data.find((img: any) => img.property._id === property.id);
+        const image = imagesResponse.data.find(
+          (img: any) => img.property._id === property.id
+        );
         if (image?.photos?.coverImage) {
           setCoverImageUrl(image.photos.coverImage);
         }
 
         // Fetch property commercials (Rent)
-        const commercialsResponse = await axios.get("http://localhost:8000/api/properties/property-commercials/user", {
-          params: { userId }
-        });
+        const commercialsResponse = await axios.get(
+          "/api/properties/property-commercials/user",
+          {
+            params: { userId },
+          }
+        );
 
-        const commercial = commercialsResponse.data.find((com: any) => com.property._id === property.id);
+        const commercial = commercialsResponse.data.find(
+          (com: any) => com.property._id === property.id
+        );
         if (commercial?.monthlyRent) {
           setMonthlyRent(commercial.monthlyRent);
         }
-
       } catch (error) {
         console.error("Error fetching property details:", error);
       }
@@ -56,20 +76,20 @@ export function PropertyCard({ property, onEdit, onDelete, onStatusUpdate }: Pro
 
   const statusConfig = {
     Available: {
-      color: 'bg-green-100 text-green-800',
+      color: "bg-green-100 text-green-800",
       icon: Home,
-      description: 'Ready to rent'
+      description: "Ready to rent",
     },
     Rented: {
-      color: 'bg-blue-100 text-blue-800',
+      color: "bg-blue-100 text-blue-800",
       icon: CheckCircle,
-      description: 'Currently occupied'
+      description: "Currently occupied",
     },
     Pending: {
-      color: 'bg-yellow-100 text-yellow-800',
+      color: "bg-yellow-100 text-yellow-800",
       icon: Clock,
-      description: 'Under process'
-    }
+      description: "Under process",
+    },
   };
 
   const StatusIcon = statusConfig[property.status]?.icon || Home;
@@ -83,22 +103,31 @@ export function PropertyCard({ property, onEdit, onDelete, onStatusUpdate }: Pro
           alt={property.name}
           className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
           loading="lazy"
-          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300'; }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).src =
+              "https://via.placeholder.com/300";
+          }}
         />
       </div>
 
       <div className="p-2 sm:p-3 md:p-4 space-y-1.5 sm:space-y-2">
-        <h3 className="text-sm sm:text-base font-semibold text-black line-clamp-1">{property.name}</h3>
+        <h3 className="text-sm sm:text-base font-semibold text-black line-clamp-1">
+          {property.name}
+        </h3>
         <p className="text-xs sm:text-sm text-black/60">
-          ₹{monthlyRent ? monthlyRent.toLocaleString() : 'N/A'}/month
+          ₹{monthlyRent ? monthlyRent.toLocaleString() : "N/A"}/month
         </p>
 
         {/* Status Badge with Icon and Description */}
-        <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${statusConfig[property.status]?.color || 'bg-gray-100 text-gray-800'}`}>
+        <div
+          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs ${
+            statusConfig[property.status]?.color || "bg-gray-100 text-gray-800"
+          }`}
+        >
           <StatusIcon className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
           <span>{property.status}</span>
           <span className="hidden sm:inline text-[10px] opacity-75">
-            • {statusConfig[property.status]?.description || 'Unknown Status'}
+            • {statusConfig[property.status]?.description || "Unknown Status"}
           </span>
         </div>
 
