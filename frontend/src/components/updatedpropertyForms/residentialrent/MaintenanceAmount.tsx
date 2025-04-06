@@ -96,4 +96,3 @@ const MaintenanceAmount = ({ onMaintenanceAmountChange }: MaintenanceAmountProps
 }
 
 export default MaintenanceAmount
-

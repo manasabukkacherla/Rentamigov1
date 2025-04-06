@@ -82,9 +82,9 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
     <div className="space-y-8">
       <div>
         <div className="flex items-center gap-3 mb-6">
-          <h3 className="text-2xl font-semibold">Room Configuration</h3>
-          <ArrowRight className="opacity-40" size={20} />
-          <span className="text-sm opacity-70">Select Room Type</span>
+          <h3 className="text-2xl font-semibold text-black">Room Configuration</h3>
+          <ArrowRight className="opacity-40 text-black" size={20} />
+          <span className="text-sm opacity-70 text-black">Select Room Type</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl">
@@ -94,19 +94,19 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
               onClick={() => handleTypeSelect(id)}
               className={`flex flex-col p-6 rounded-lg border transition-all duration-200 ${
                 selectedType === id
-                  ? 'bg-white text-black border-white'
-                  : 'border-white/20 hover:border-white'
+                  ? 'bg-white text-black border-black'
+                  : 'border-black/20 hover:border-black bg-white'
               }`}
             >
               <div className="flex items-center gap-3 mb-3">
                 <Icon
                   size={24}
-                  className={selectedType === id ? 'text-black' : 'text-white/60'}
+                  className={selectedType === id ? 'text-black' : 'text-black/60'}
                 />
-                <h4 className="font-medium text-lg">{name}</h4>
+                <h4 className="font-medium text-lg text-black">{name}</h4>
               </div>
               <p className={`text-sm ${
-                selectedType === id ? 'text-black/70' : 'text-white/60'
+                selectedType === id ? 'text-black/70' : 'text-black/60'
               }`}>
                 {description}
               </p>
@@ -118,35 +118,35 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
       {selectedType === 'single-room-shared' && (
         <div>
           <div className="flex items-center gap-3 mb-6">
-            <h3 className="text-2xl font-semibold">Sharing Details</h3>
-            <ArrowRight className="opacity-40" size={20} />
-            <span className="text-sm opacity-70">Enter Bed Information</span>
+            <h3 className="text-2xl font-semibold text-black">Sharing Details</h3>
+            <ArrowRight className="opacity-40 text-black" size={20} />
+            <span className="text-sm opacity-70 text-black">Enter Bed Information</span>
           </div>
 
           <div className="space-y-6 max-w-4xl">
             {/* Total and Occupied Beds */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-white/80 text-sm">Total Beds</label>
+                <label className="text-black/80 text-sm">Total Beds</label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                    <Bed size={20} className="text-white/40" />
+                    <Bed size={20} className="text-black/40" />
                   </div>
                   <input
                     type="number"
                     min="1"
                     value={sharingDetails.totalBeds}
                     onChange={(e) => handleSharingDetailsChange('totalBeds', parseInt(e.target.value) || 0)}
-                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-white/80 text-sm">Occupied Beds</label>
+                <label className="text-black/80 text-sm">Occupied Beds</label>
                 <div className="relative">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                    <User size={20} className="text-white/40" />
+                    <User size={20} className="text-black/40" />
                   </div>
                   <input
                     type="number"
@@ -154,7 +154,7 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
                     max={sharingDetails.totalBeds}
                     value={sharingDetails.occupiedBeds}
                     onChange={(e) => handleSharingDetailsChange('occupiedBeds', parseInt(e.target.value) || 0)}
-                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white"
+                    className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black"
                   />
                 </div>
               </div>
@@ -162,7 +162,7 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
 
             {/* Available For */}
             <div className="space-y-2">
-              <label className="text-white/80 text-sm">Available For</label>
+              <label className="text-black/80 text-sm">Available For</label>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2">
                   <input
@@ -171,9 +171,9 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
                     value="male"
                     checked={sharingDetails.availableFor === 'male'}
                     onChange={(e) => handleSharingDetailsChange('availableFor', e.target.value)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
+                    className="text-black border-black/20 bg-transparent focus:ring-black"
                   />
-                  <span className="text-white/80">Male</span>
+                  <span className="text-black/80">Male</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -182,9 +182,9 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
                     value="female"
                     checked={sharingDetails.availableFor === 'female'}
                     onChange={(e) => handleSharingDetailsChange('availableFor', e.target.value)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
+                    className="text-black border-black/20 bg-transparent focus:ring-black"
                   />
-                  <span className="text-white/80">Female</span>
+                  <span className="text-black/80">Female</span>
                 </label>
                 <label className="flex items-center gap-2">
                   <input
@@ -193,18 +193,18 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
                     value="any"
                     checked={sharingDetails.availableFor === 'any'}
                     onChange={(e) => handleSharingDetailsChange('availableFor', e.target.value)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
+                    className="text-black border-black/20 bg-transparent focus:ring-black"
                   />
-                  <span className="text-white/80">Any</span>
+                  <span className="text-black/80">Any</span>
                 </label>
               </div>
             </div>
 
             {/* Available Beds */}
-            <div className="bg-white/5 p-4 rounded-lg">
+            <div className="bg-white/5 p-4 rounded-lg border border-black/20">
               <div className="flex items-center justify-between">
-                <span className="text-white/80">Available Beds</span>
-                <span className="text-2xl font-semibold">{sharingDetails.availableBeds}</span>
+                <span className="text-black/80">Available Beds</span>
+                <span className="text-2xl font-semibold text-black">{sharingDetails.availableBeds}</span>
               </div>
             </div>
           </div>
@@ -212,18 +212,18 @@ const SharingMembers = ({ onSharingTypeChange, onSharingDetailsChange }: Sharing
       )}
 
       {selectedType && selectedType !== 'single-room-shared' && (
-        <div className="mt-8 p-4 bg-white/5 rounded-lg">
-          <h4 className="text-lg font-medium mb-2">Selected Configuration</h4>
-          <p className="text-white/80">
+        <div className="mt-8 p-4 bg-white/5 rounded-lg border border-black/20">
+          <h4 className="text-lg font-medium mb-2 text-black">Selected Configuration</h4>
+          <p className="text-black/80">
             {roomTypes.find(type => type.id === selectedType)?.description}
           </p>
           {selectedType === 'studio' && (
-            <p className="mt-2 text-sm text-white/60">
+            <p className="mt-2 text-sm text-black/60">
               Ideal for individuals or couples seeking a compact, self-contained living space
             </p>
           )}
           {['1bhk', '2bhk', '3bhk', '3plus-bhk'].includes(selectedType) && (
-            <p className="mt-2 text-sm text-white/60">
+            <p className="mt-2 text-sm text-black/60">
               Suitable for families or professionals requiring more space and privacy
             </p>
           )}
