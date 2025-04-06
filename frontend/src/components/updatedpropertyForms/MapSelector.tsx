@@ -38,7 +38,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, onLocati
       if (!window.google || !window.google.maps) {
         // Load Google Maps API if not already loaded
         const script = document.createElement("script")
-        script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places,geocoding`
+        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places,geocoding`
         script.async = true
         script.defer = true
         script.onload = () => createMap()
@@ -116,7 +116,7 @@ const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, onLocati
           })
 
           // Listen for the event fired when the user selects a prediction
-          searchBoxRef.current.addListener("places_changed", () => {
+          searchBoxRef.current?.addListener("places_changed", () => {
             const places = searchBoxRef.current?.getPlaces()
 
             if (!places || places.length === 0) {

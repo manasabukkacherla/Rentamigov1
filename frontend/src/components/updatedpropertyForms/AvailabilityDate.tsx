@@ -50,7 +50,11 @@ const AvailabilityDate = ({ onAvailabilityChange }: AvailabilityDateProps) => {
           <div className="flex flex-col sm:flex-row gap-6">
             <button
               onClick={() => handleTypeChange("immediate")}
-              className={`flex-1 px-6 py-5 rounded-xl border border-black/20 bg-[#f5f5f5] text-black`}
+              className={`flex-1 px-6 py-5 rounded-xl border ${
+                availabilityType === "immediate" 
+                  ? "border-black" 
+                  : "border-black/20"
+              } bg-[#f5f5f5] text-black hover:scale-105 hover:shadow-md transition-all duration-300`}
             >
               <div className="flex items-center justify-center gap-3">
                 <Calendar size={22} className="text-black" />
@@ -63,7 +67,11 @@ const AvailabilityDate = ({ onAvailabilityChange }: AvailabilityDateProps) => {
 
             <button
               onClick={() => handleTypeChange("specific")}
-              className={`flex-1 px-6 py-5 rounded-xl border border-black/20 bg-[#f5f5f5] text-black`}
+              className={`flex-1 px-6 py-5 rounded-xl border ${
+                availabilityType === "specific" 
+                  ? "border-black" 
+                  : "border-black/20"
+              } bg-[#f5f5f5] text-black hover:scale-105 hover:shadow-md transition-all duration-300`}
             >
               <div className="flex items-center justify-center gap-3">
                 <Calendar size={22} className="text-black" />
