@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Ruler, Store, Shield, Fence, Cloud, Zap, Lightbulb } from 'lucide-react';
+import { Building, Ruler } from 'lucide-react';
 
 interface CoveredOpenSpaceDetailsProps {
   onDetailsChange?: (details: Record<string, any>) => void;
@@ -8,12 +8,14 @@ interface CoveredOpenSpaceDetailsProps {
 const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsProps) => {
   const [details, setDetails] = useState({
     totalArea: '',
-    usageType: '',
-    security: false,
-    perimeter: false,
-    rainShelter: false,
-    powerBackup: false,
-    lighting: false
+    areaUnit: 'sq.ft',
+    coveredArea: '',
+    openArea: '',
+    roadWidth: '',
+    roadWidthUnit: 'ft',
+    ceilingHeight: '',
+    ceilingHeightUnit: 'ft',
+    openSides: '1',
   });
 
   const handleChange = (field: string, value: any) => {
@@ -23,196 +25,152 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Covered/Open Space Details</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Enter Space Specifications</span>
-      </div>
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <div className="space-y-8">
+        <div className="flex items-center mb-8">
+          <Building className="text-black mr-3" size={28} />
+          <h3 className="text-2xl font-semibold text-black">Space Details</h3>
+        </div>
 
-      <div className="space-y-8 max-w-4xl">
-        {/* Area and Usage */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {/* Total Area */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Ruler size={20} className="text-white/60" />
-                Total Area
-              </h4>
-              <input
-                type="number"
-                min="0"
-                value={details.totalArea}
-                onChange={(e) => handleChange('totalArea', e.target.value)}
-                placeholder="Area in sq.ft"
-                className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
-              />
-            </div>
-
-            {/* Usage Type */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Store size={20} className="text-white/60" />
-                Usage Type
-              </h4>
+        <div className="bg-white p-6 rounded-lg space-y-6">
+          {/* Total Area */}
+          <div>
+            <label htmlFor="totalArea" className="block text-gray-800 font-medium mb-2">
+              Total Area
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  id="totalArea"
+                  value={details.totalArea}
+                  onChange={(e) => handleChange('totalArea', e.target.value)}
+                  placeholder="Enter total area"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                />
+                <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              </div>
               <select
-                value={details.usageType}
-                onChange={(e) => handleChange('usageType', e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white"
+                value={details.areaUnit}
+                onChange={(e) => handleChange('areaUnit', e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
-                <option value="" disabled className="bg-black">Select Usage Type</option>
-                <option value="parking" className="bg-black">Parking</option>
-                <option value="storage" className="bg-black">Storage</option>
-                <option value="events" className="bg-black">Events</option>
-                <option value="multipurpose" className="bg-black">Multipurpose</option>
+                <option value="sq.ft">Square Feet</option>
+                <option value="sq.m">Square Meters</option>
+                <option value="acres">Acres</option>
+                <option value="hectares">Hectares</option>
               </select>
             </div>
           </div>
-        </div>
 
-        {/* Security and Infrastructure */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Security */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Shield size={20} className="text-white/60" />
-                Security Arrangements
-              </h4>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={details.security}
-                    onChange={() => handleChange('security', true)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Available</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!details.security}
-                    onChange={() => handleChange('security', false)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Not Available</span>
-                </label>
-              </div>
+          {/* Covered Area */}
+          <div>
+            <label htmlFor="coveredArea" className="block text-gray-800 font-medium mb-2">
+              Covered Area
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="coveredArea"
+                value={details.coveredArea}
+                onChange={(e) => handleChange('coveredArea', e.target.value)}
+                placeholder="Enter covered area"
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              />
+              <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
+          </div>
 
-            {/* Perimeter Fencing */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Fence size={20} className="text-white/60" />
-                Perimeter Fencing
-              </h4>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={details.perimeter}
-                    onChange={() => handleChange('perimeter', true)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Available</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!details.perimeter}
-                    onChange={() => handleChange('perimeter', false)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Not Available</span>
-                </label>
-              </div>
+          {/* Open Area */}
+          <div>
+            <label htmlFor="openArea" className="block text-gray-800 font-medium mb-2">
+              Open Area
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                id="openArea"
+                value={details.openArea}
+                onChange={(e) => handleChange('openArea', e.target.value)}
+                placeholder="Enter open area"
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              />
+              <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
+          </div>
 
-            {/* Rain Shelter */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Cloud size={20} className="text-white/60" />
-                Rain Shelter
-              </h4>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={details.rainShelter}
-                    onChange={() => handleChange('rainShelter', true)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Available</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!details.rainShelter}
-                    onChange={() => handleChange('rainShelter', false)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Not Available</span>
-                </label>
+          {/* Road Width */}
+          <div>
+            <label htmlFor="roadWidth" className="block text-gray-800 font-medium mb-2">
+              Road Width
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  id="roadWidth"
+                  value={details.roadWidth}
+                  onChange={(e) => handleChange('roadWidth', e.target.value)}
+                  placeholder="Enter road width"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                />
+                <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
+              <select
+                value={details.roadWidthUnit}
+                onChange={(e) => handleChange('roadWidthUnit', e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
+              >
+                <option value="ft">Feet</option>
+                <option value="m">Meters</option>
+              </select>
             </div>
+          </div>
 
-            {/* Power Backup */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Zap size={20} className="text-white/60" />
-                Power Backup
-              </h4>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={details.powerBackup}
-                    onChange={() => handleChange('powerBackup', true)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Available</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!details.powerBackup}
-                    onChange={() => handleChange('powerBackup', false)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Not Available</span>
-                </label>
+          {/* Ceiling Height */}
+          <div>
+            <label htmlFor="ceilingHeight" className="block text-gray-800 font-medium mb-2">
+              Ceiling Height
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  id="ceilingHeight"
+                  value={details.ceilingHeight}
+                  onChange={(e) => handleChange('ceilingHeight', e.target.value)}
+                  placeholder="Enter ceiling height"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                />
+                <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
+              <select
+                value={details.ceilingHeightUnit}
+                onChange={(e) => handleChange('ceilingHeightUnit', e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
+              >
+                <option value="ft">Feet</option>
+                <option value="m">Meters</option>
+              </select>
             </div>
+          </div>
 
-            {/* Lighting Setup */}
-            <div className="space-y-4">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Lightbulb size={20} className="text-white/60" />
-                Lighting Setup
-              </h4>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={details.lighting}
-                    onChange={() => handleChange('lighting', true)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Available</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!details.lighting}
-                    onChange={() => handleChange('lighting', false)}
-                    className="text-white border-white/20 bg-transparent focus:ring-white"
-                  />
-                  <span className="text-white/80">Not Available</span>
-                </label>
-              </div>
-            </div>
+          {/* Open Sides */}
+          <div>
+            <label htmlFor="openSides" className="block text-gray-800 font-medium mb-2">
+              Number of Open Sides
+            </label>
+            <select
+              id="openSides"
+              value={details.openSides}
+              onChange={(e) => handleChange('openSides', e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
+            >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+            </select>
           </div>
         </div>
       </div>

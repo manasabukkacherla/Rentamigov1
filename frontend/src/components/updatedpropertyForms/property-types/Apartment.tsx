@@ -1,338 +1,445 @@
-import React, { useState, useCallback } from "react";
-import PropertyName from "../PropertyName";
-import PropertyAddress from "../PropertyAddress";
-import MapCoordinates from "../MapCoordinates";
-import PropertySize from "../PropertySize";
-import PropertyFeatures from "../PropertyFeatures";
-import Rent from "../residentialrent/Rent";
-import Restrictions from "../Restrictions";
-import SecurityDeposit from "../residentialrent/SecurityDeposit";
-import MaintenanceAmount from "../residentialrent/MaintenanceAmount";
-import Brokerage from "../residentialrent/Brokerage";
-import AvailabilityDate from "../AvailabilityDate";
-import OtherCharges from "../residentialrent/OtherCharges";
-import MediaUpload from "../MediaUpload";
-import FlatAmenities from "../FlatAmenities";
-import SocietyAmenities from "../SocietyAmenities";
+"use client"
+
+import { useState, useCallback } from "react"
+import { Building2, MapPin, IndianRupee, Calendar, Image } from "lucide-react"
+import PropertyName from "../PropertyName"
+import PropertyAddress from "../PropertyAddress"
+import MapSelector from "../MapSelector"
+import PropertySize from "../PropertySize"
+import PropertyFeatures from "../PropertyFeatures"
+import FlatAmenities from "../FlatAmenities"
+import SocietyAmenities from "../SocietyAmenities"
+import MediaUpload from "../MediaUpload"
+import AvailabilityDate from "../AvailabilityDate"
+import Restrictions from "../Restrictions"
+import FinalSteps from "../FinalSteps"
 
 interface ApartmentProps {
-  propertyId: string; // Property ID passed as a prop
-  onSubmit?: (formData: any) => void;
+  propertyId: string
+  onSubmit?: () => void
+}
+
+interface Address {
+  street: string
+  city: string
+  state: string
+  country: string
+  pincode: string
+  flatNo: string
+}
+
+interface Coordinates {
+  lat: number
+  lng: number
+}
+
+interface Size {
+  builtUpArea: string
+  carpetArea: string
+  superBuiltUpArea: string
+  unit: string
+}
+
+interface Features {
+  bedrooms: string
+  bathrooms: string
+  balconies: string
+  parking: string
+  furnishing: string
+  floor: string
+  totalFloors: string
+  facing: string
+  age: string
+  rent: string
+  securityDeposit: string
+  maintenanceCharges: string
+  maintenancePeriod: string
+  availableFrom: Date
+  preferredTenants: string[]
+  amenities: string[]
+  propertyFeatures: string[]
+  societyFeatures: string[]
+  restrictions: string[]
+  images: string[]
+  videos: string[]
+}
+
+interface FormData {
+  propertyName: string
+  address: Address
+  coordinates: Coordinates
+  size: Size
+  features: Features
+}
+
+interface PropertyNameProps {
+  propertyName: string
+  onPropertyNameChange: (name: string) => void
+}
+
+interface MapSelectorProps {
+  latitude: string
+  longitude: string
+  onLocationSelect: (lat: string, lng: string, address?: any) => void
+  initialShowMap?: boolean
+}
+
+interface PropertySizeProps {
+  onPropertySizeChange: (size: string) => void
+}
+
+interface PropertyFeaturesProps {
+  onFeaturesChange?: (features: Record<string, any>) => void
+}
+
+interface FlatAmenitiesProps {
+  amenities: string[]
+  onChange: (amenities: string[]) => void
+}
+
+interface SocietyAmenitiesProps {
+  amenities: string[]
+  onChange: (amenities: string[]) => void
 }
 
 const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
-  const [formData, setFormData] = useState({
-    propertyId: propertyId || localStorage.getItem("propertyId") || "", // ✅ Always prioritize prop value
+  const [currentStep, setCurrentStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
-    propertyAddress: {
-      flatNo: "",
-      floor: "",
-      houseName: "",
-      address: "",
-      pinCode: "",
-      city: "",
+    address: {
       street: "",
+      city: "",
       state: "",
-      zipCode: "",
+      country: "",
+      pincode: "",
+      flatNo: ""
     },
-    coordinates: { latitude: "", longitude: "" },
-    size: "",
-    features: {},
-    rent: { expectedRent: "", isNegotiable: false, rentType: "" },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    brokerage: {},
-    availability: {},
-    otherCharges: {},
-    media: { photos: [], video: null },
-    flatAmenities: {},
-    societyAmenities: {},
-    restrictions: {
-      foodPreference: "",
-      petsAllowed: "",
-      tenantType: "",
+    coordinates: {
+      lat: 0,
+      lng: 0
     },
-    propertyConfiguration: {
-      furnishingStatus: "",
-      flooringType: "",
-    },
-    areaDetails: {
-      superBuiltUpArea: "",
+    size: {
       builtUpArea: "",
       carpetArea: "",
+      superBuiltUpArea: "",
+      unit: "sq-ft"
     },
-    waterAvailability: "",
-    electricityAvailability: "",
-    propertyFacing: "",
-    propertyAge: "",
-    utilityArea: "",
-  });
+    features: {
+      bedrooms: "",
+      bathrooms: "",
+      balconies: "",
+      parking: "",
+      furnishing: "unfurnished",
+      floor: "",
+      totalFloors: "",
+      facing: "",
+      age: "",
+      rent: "",
+      securityDeposit: "",
+      maintenanceCharges: "",
+      maintenancePeriod: "monthly",
+      availableFrom: new Date(),
+      preferredTenants: [],
+      amenities: [],
+      propertyFeatures: [],
+      societyFeatures: [],
+      restrictions: [],
+      images: [],
+      videos: []
+    }
+  })
 
-  const [step, setStep] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // Function to update property address details
-  const handleAddressChange = useCallback((addressData: any) => {
-    setFormData((prev) => ({
+  const handleAddressChange = useCallback((newAddress: Address) => {
+    setFormData(prev => ({
       ...prev,
-      propertyAddress: { ...prev.propertyAddress, ...addressData },
-    }));
-  }, []);
+      address: newAddress
+    }))
+  }, [])
 
-  const steps = [
-    {
-      title: "Basic Information",
-      component: (
-        <>
-          <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) =>
-              setFormData((prev) => ({ ...prev, propertyName: name }))
-            }
-          />
-          <PropertyAddress
-            onLatitudeChange={(lat) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, latitude: lat },
-              }))
-            }
-            onLongitudeChange={(lng) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, longitude: lng },
-              }))
-            }
-            onPropertyNameChange={(name) =>
-              setFormData((prev) => ({ ...prev, propertyName: name }))
-            }
-            onPropertyTypeSelect={(type) =>
-              setFormData((prev) => ({ ...prev, propertyType: type }))
-            }
-            onAddressChange={handleAddressChange}
-          />
-          <MapCoordinates
-            latitude={formData.coordinates.latitude}
-            longitude={formData.coordinates.longitude}
-            onLatitudeChange={(lat) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, latitude: lat },
-              }))
-            }
-            onLongitudeChange={(lng) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, longitude: lng },
-              }))
-            }
-          />
-          <PropertySize
-            onPropertySizeChange={(size) =>
-              setFormData((prev) => ({ ...prev, size }))
-            }
-          />
-        </>
-      ),
-    },
+  const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
+    setFormData(prev => ({
+      ...prev,
+      coordinates: {
+        lat: parseFloat(lat),
+        lng: parseFloat(lng)
+      },
+      address: {
+        ...prev.address,
+        street: address?.address || prev.address.street,
+        city: address?.city || prev.address.city,
+        state: address?.state || prev.address.state,
+        country: address?.country || prev.address.country,
+        pincode: address?.pinCode || prev.address.pincode
+      }
+    }))
+  }, [])
 
-    {
-      title: "Property Details",
-      component: (
-        <>
-          <PropertyFeatures
-            onFeaturesChange={(features) =>
-              setFormData((prev) => ({ ...prev, features }))
-            }
-          />
-          <FlatAmenities
-            onAmenitiesChange={(amenities) =>
-              setFormData((prev) => ({ ...prev, flatAmenities: amenities }))
-            }
-          />
-          <SocietyAmenities
-            onAmenitiesChange={(amenities) =>
-              setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
-            }
-          />
-          <Restrictions
-            onRestrictionsChange={(restrictions) =>
-              setFormData((prev) => ({ ...prev, restrictions }))
-            }
-          />
-        </>
-      ),
-    },
-    {
-      title: "Rental Terms",
-      component: (
-        <>
-          <Rent
-            onRentChange={(rent) => setFormData((prev) => ({ ...prev, rent }))}
-          />
-          {formData.rent.rentType === "exclusive" && (
-            <MaintenanceAmount
-              onMaintenanceAmountChange={(maintenance) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  maintenanceAmount: maintenance,
-                }))
-              }
-            />
-          )}
-          <SecurityDeposit
-            onSecurityDepositChange={(deposit) =>
-              setFormData((prev) => ({ ...prev, securityDeposit: deposit }))
-            }
-          />
-          <OtherCharges
-            onOtherChargesChange={(charges) =>
-              setFormData((prev) => ({ ...prev, otherCharges: charges }))
-            }
-          />
-          <Brokerage
-            onBrokerageChange={(brokerage) =>
-              setFormData((prev) => ({ ...prev, brokerage }))
-            }
-          />
-        </>
-      ),
-    },
-    {
-      title: "Availability",
-      component: (
-        <AvailabilityDate
-          onAvailabilityChange={(availability) =>
-            setFormData((prev) => ({ ...prev, availability }))
-          }
-        />
-      ),
-    },
-    {
-      title: "Property Media",
-      component: (
-        <MediaUpload
-          onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))}
-        />
-      ),
-    },
-  ];
-
-  // Function to save data at each step
-  const saveStepData = async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
-
-    const endpoint = step === 0 ? "basicdetails" : "properties";
+  const handleSaveStep = async (step: number) => {
+    setLoading(true)
+    setError(null)
+    setSuccess(null)
 
     try {
-      const response = await fetch(`/api/${endpoint}`, {
+      const response = await fetch("/api/basicdetails", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          ...formData,
-          propertyId: propertyId || formData.propertyId, // ✅ Ensure propertyId is used correctly
-        }),
-      });
+          propertyId,
+          step,
+          data: formData
+        })
+      })
 
-      const result = await response.json();
+      const data = await response.json()
 
-      if (response.ok) {
-        setSuccessMessage("Step saved successfully! ✅");
-
-        // ✅ Persist propertyId correctly
-        if (step === 0 && result.data?.propertyId) {
-          const newPropertyId = propertyId || result.data.propertyId;
-          setFormData((prev) => ({
-            ...prev,
-            propertyId: newPropertyId, // ✅ Update propertyId
-          }));
-
-          localStorage.setItem("propertyId", newPropertyId);
-        }
-
-        return propertyId || result.data?.propertyId || formData.propertyId;
+      if (data.success) {
+        setSuccess("Step saved successfully!")
+        setCurrentStep(prev => prev + 1)
       } else {
-        setErrorMessage(`Error saving step: ${result.message}`);
-        return null;
+        setError(data.error || "Failed to save step")
       }
     } catch (error) {
-      console.error("Error saving step:", error);
-      setErrorMessage("Failed to save step. Check your connection.");
-      return null;
+      setError("Failed to connect to the server")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  // Function to handle Next button click
-  const handleNext = async () => {
-    const savedPropertyId = await saveStepData();
-
-    if (!savedPropertyId) {
-      setErrorMessage("Property ID is missing. Please try again.");
-      return; // Prevent moving forward if propertyId is missing
+  const renderStep = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Details</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                <PropertyName
+                  propertyName={formData.propertyName}
+                  onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, propertyName: name }))}
+                />
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_button]:border-black/20 [&_button]:text-black [&_button]:hover:bg-black [&_button]:hover:text-white [&_svg]:text-black">
+                <div className="space-y-6">
+                  <div className="h-[450px] relative rounded-lg overflow-hidden border border-black/20 [&_.mapboxgl-ctrl-geocoder]:!bg-white [&_.mapboxgl-ctrl-geocoder--input]:!text-black [&_.mapboxgl-ctrl-geocoder--suggestion]:!text-black [&_.mapboxgl-ctrl-geocoder--suggestion-title]:!text-black [&_.mapboxgl-ctrl-geocoder--suggestion-address]:!text-black">
+                    <MapSelector
+                      latitude={formData.coordinates.lat.toString()}
+                      longitude={formData.coordinates.lng.toString()}
+                      onLocationSelect={(lat, lng, address) => {
+                        handleLocationSelect(lat, lng, address);
+                      }}
+                      initialShowMap={true}
+                    />
+                  </div>
+                  <PropertyAddress
+                    address={formData.address}
+                    onAddressChange={handleAddressChange}
+                    showFlatNo={true}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      case 2:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Size</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                <PropertySize
+                  onPropertySizeChange={(size: string) => setFormData(prev => ({
+                    ...prev,
+                    size: {
+                      ...prev.size,
+                      builtUpArea: size
+                    }
+                  }))}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      case 3:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Features</h3>
+              </div>
+              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_input[type=number]]:text-black [&_input[type=number]]:placeholder:text-black [&_input[type=number]]:bg-white [&_input[type=number]]:border-black/20 [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
+                <PropertyFeatures
+                  onFeaturesChange={(features: Record<string, any>) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      features: {
+                        ...prev.features,
+                        ...features
+                      }
+                    }))
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      case 4:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Amenities</h3>
+              </div>
+              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
+                <FlatAmenities
+                  amenities={formData.features.amenities}
+                  onChange={(amenities: string[]) => setFormData(prev => ({ ...prev, features: { ...prev.features, amenities } }))}
+                />
+              </div>
+              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
+                <SocietyAmenities
+                  amenities={formData.features.societyFeatures}
+                  onChange={(amenities: string[]) => setFormData(prev => ({ ...prev, features: { ...prev.features, societyFeatures: amenities } }))}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      case 5:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Image className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Media Upload</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                <MediaUpload
+                  images={formData.features.images}
+                  videos={formData.features.videos}
+                  onImagesChange={(images) => setFormData(prev => ({ ...prev, features: { ...prev.features, images } }))}
+                  onVideosChange={(videos) => setFormData(prev => ({ ...prev, features: { ...prev.features, videos } }))}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      case 6:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Calendar className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Availability & Restrictions</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                <AvailabilityDate
+                  date={formData.features.availableFrom}
+                  onChange={(date) => setFormData(prev => ({ ...prev, features: { ...prev.features, availableFrom: date } }))}
+                />
+              </div>
+              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
+                <Restrictions
+                  restrictions={formData.features.restrictions}
+                  onChange={(restrictions) => setFormData(prev => ({ ...prev, features: { ...prev.features, restrictions } }))}
+                />
+              </div>
+            </div>
+          </div>
+        )
+      case 7:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Final Review</h3>
+              </div>
+              <FinalSteps
+                formData={formData}
+                onSubmit={onSubmit}
+              />
+            </div>
+          </div>
+        )
+      default:
+        return null
     }
-
-    setStep((prev) => prev + 1);
-  };
+  }
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-12">
-      <h2 className="text-3xl font-bold mb-8">{steps[step].title}</h2>
-      {steps[step].component}
-
-      {/* Success & Error Messages */}
-      {successMessage && (
-        <div className="p-4 bg-green-500 text-white rounded-lg text-center">
-          {successMessage}
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Building2 className="h-6 w-6 text-black" />
+          <h1 className="text-2xl font-semibold text-black">List Your Apartment</h1>
         </div>
-      )}
-      {errorMessage && (
-        <div className="p-4 bg-red-500 text-white rounded-lg text-center">
-          {errorMessage}
+        <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
+          <div
+            className="bg-black h-2 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / 7) * 100}%` }}
+          />
         </div>
-      )}
+        <p className="text-sm text-black/60 mt-2">Step {currentStep} of 7</p>
+      </div>
 
-      <div className="sticky bottom-0 bg-black/80 backdrop-blur-sm p-4 -mx-4 sm:-mx-6 lg:-mx-8">
-        <div className="max-w-7xl mx-auto flex justify-between gap-4">
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={() => setStep((prev) => prev - 1)}
-              className="px-6 py-3 rounded-lg border border-white/20 hover:border-white text-white transition-colors duration-200"
-            >
-              Previous
-            </button>
-          )}
+      {/* Form Content */}
+      <div className="space-y-6">
+        {renderStep()}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between items-center mt-8">
           <button
-            type="button"
-            onClick={handleNext}
-            disabled={loading}
-            className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
+            onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
+            disabled={currentStep === 1 || loading}
+            className="px-6 py-2 bg-white text-black border border-black/20 rounded-lg hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading
-              ? "Saving..."
-              : step < steps.length - 1
-              ? "Next"
-              : "List Property"}
+            Previous
+          </button>
+          <button
+            onClick={() => {
+              if (currentStep === 7) {
+                onSubmit?.()
+              } else {
+                handleSaveStep(currentStep)
+              }
+            }}
+            disabled={loading}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Saving..." : currentStep === 7 ? "Submit" : "Next"}
           </button>
         </div>
+
+        {/* Messages */}
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+            {success}
+          </div>
+        )}
       </div>
-    </form>
-  );
-};
+    </div>
+  )
+}
 
-export default Apartment;
-
-
-
-
-
-
+export default Apartment
 

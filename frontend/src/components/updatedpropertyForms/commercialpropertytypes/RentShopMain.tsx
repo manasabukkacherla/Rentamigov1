@@ -13,30 +13,64 @@ import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { Store, MapPin, ChevronRight, ChevronLeft } from "lucide-react"
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon } from "lucide-react"
+
+interface FormData {
+  propertyName: string
+  shopType: string
+  address: Record<string, string>
+  landmark: string
+  coordinates: {
+    latitude: string
+    longitude: string
+  }
+  isCornerProperty: boolean
+  shopDetails: Record<string, any>
+  propertyDetails: {
+    expectedRent: string
+    isNegotiable: boolean
+    rentType: string
+  }
+  securityDeposit: Record<string, any>
+  maintenanceAmount: Record<string, any>
+  otherCharges: Record<string, any>
+  brokerage: Record<string, any>
+  availabilityDate: Record<string, any>
+  contactDetails: Record<string, string>
+  media: {
+    images: { category: string; files: { url: string; file: File }[] }[]
+    video?: { url: string; file: File }
+    documents: { type: string; file: File }[]
+  }
+}
 
 const RentShopMain = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
     shopType: "",
     address: {},
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    coordinates: {
+      latitude: "",
+      longitude: ""
+    },
     isCornerProperty: false,
     shopDetails: {},
-    propertyDetails: {},
-    rent: {
+    propertyDetails: {
       expectedRent: "",
       isNegotiable: false,
-      rentType: "",
+      rentType: ""
     },
     securityDeposit: {},
     maintenanceAmount: {},
     otherCharges: {},
     brokerage: {},
-    availability: {},
+    availabilityDate: {},
     contactDetails: {},
-    media: { photos: [], video: null },
+    media: {
+      images: [],
+      documents: []
+    }
   })
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -61,7 +95,7 @@ const RentShopMain = () => {
 
           <div className="space-y-6">
             <div>
-              <label htmlFor="propertyName" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="propertyName" className="block text-black font-medium mb-2">
                 Property Name
               </label>
               <div className="relative">
@@ -71,40 +105,40 @@ const RentShopMain = () => {
                   placeholder="Enter shop name"
                   value={formData.propertyName}
                   onChange={(e) => setFormData({ ...formData, propertyName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all duration-200"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 text-black placeholder:text-black bg-white"
                 />
-                <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
               </div>
             </div>
 
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Shop Type</label>
+              <label className="block text-black font-medium mb-2">Shop Type</label>
               <select
                 value={formData.shopType}
                 onChange={(e) => setFormData({ ...formData, shopType: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all duration-200 bg-white"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 bg-white text-black [&_option]:text-black [&_option]:bg-white"
               >
-                <option value="">Select shop type</option>
-                <option value="retail">Retail Shop</option>
-                <option value="commercial">Commercial Shop</option>
-                <option value="food">Food & Beverage</option>
-                <option value="service">Service Shop</option>
+                <option value="" className="text-black bg-white">Select shop type</option>
+                <option value="retail" className="text-black bg-white">Retail Shop</option>
+                <option value="commercial" className="text-black bg-white">Commercial Shop</option>
+                <option value="food" className="text-black bg-white">Food & Beverage</option>
+                <option value="service" className="text-black bg-white">Service Shop</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="address" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="address" className="block text-black font-medium mb-2">
                 Address
               </label>
               <textarea
                 id="address"
                 placeholder="Enter complete address"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all duration-200 min-h-[100px]"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 min-h-[100px] text-black placeholder:text-black bg-white"
               />
             </div>
 
             <div>
-              <label htmlFor="landmark" className="block text-gray-700 font-medium mb-2">
+              <label htmlFor="landmark" className="block text-black font-medium mb-2">
                 Landmark
               </label>
               <div className="relative">
@@ -114,9 +148,9 @@ const RentShopMain = () => {
                   placeholder="Enter nearby landmark"
                   value={formData.landmark}
                   onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all duration-200"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 text-black placeholder:text-black bg-white"
                 />
-                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
               </div>
             </div>
 
@@ -134,7 +168,7 @@ const RentShopMain = () => {
                   onChange={(e) => setFormData({ ...formData, isCornerProperty: e.target.checked })}
                   className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
                 />
-                <span className="text-gray-700">This is a corner property</span>
+                <span className="text-black">This is a corner property</span>
               </label>
             </div>
           </div>
@@ -144,55 +178,110 @@ const RentShopMain = () => {
     {
       title: "Property Details",
       content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <ShopDetails onDetailsChange={(details) => setFormData({ ...formData, shopDetails: details })} />
-          <CommercialPropertyDetails
-            onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
-          />
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+            <div className="flex items-center mb-8">
+              <Building2 className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Shop Details</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <ShopDetails onDetailsChange={(details) => setFormData({ ...formData, shopDetails: details })} />
+            </div>
+          </div>
         </div>
       ),
     },
     {
       title: "Rental Terms",
       content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <Rent onRentChange={(rent) => setFormData({ ...formData, rent })} />
-          {formData.rent.rentType === "exclusive" && (
-            <MaintenanceAmount
-              onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, maintenanceAmount: maintenance })}
-            />
-          )}
-          <SecurityDeposit
-            onSecurityDepositChange={(deposit) => setFormData({ ...formData, securityDeposit: deposit })}
-          />
-          <OtherCharges onOtherChargesChange={(charges) => setFormData({ ...formData, otherCharges: charges })} />
-          <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+            <div className="flex items-center mb-8">
+              <Building2 className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Rental Terms</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <Rent onRentChange={(rent) => setFormData({ ...formData, propertyDetails: { ...formData.propertyDetails, ...rent } })} />
+              <SecurityDeposit onSecurityDepositChange={(deposit) => setFormData({ ...formData, securityDeposit: deposit })} />
+              <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, maintenanceAmount: maintenance })} />
+              <OtherCharges onOtherChargesChange={(charges) => setFormData({ ...formData, otherCharges: charges })} />
+              <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage: brokerage })} />
+            </div>
+          </div>
         </div>
       ),
     },
     {
       title: "Availability",
       content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <AvailabilityDate onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+            <div className="flex items-center mb-8">
+              <Building2 className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Availability</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <AvailabilityDate onAvailabilityChange={(date) => setFormData({ ...formData, availabilityDate: date })} />
+            </div>
+          </div>
         </div>
       ),
     },
     {
-      title: "Contact Information",
+      title: "Location Details",
       content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <CommercialContactDetails
-            onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
-          />
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+            <div className="flex items-center mb-8">
+              <MapPin className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Location Details</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <MapSelector 
+                latitude={formData.coordinates.latitude}
+                longitude={formData.coordinates.longitude}
+                onLocationSelect={(lat, lng, address) => {
+                  setFormData({
+                    ...formData,
+                    coordinates: { latitude: lat, longitude: lng },
+                    address: address || {}
+                  })
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Contact Details",
+      content: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+            <div className="flex items-center mb-8">
+              <UserCircle className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Contact Details</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <CommercialContactDetails onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })} />
+            </div>
+          </div>
         </div>
       ),
     },
     {
       title: "Property Media",
       content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+            <div className="flex items-center mb-8">
+              <ImageIcon className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />
+            </div>
+          </div>
         </div>
       ),
     },

@@ -1,178 +1,190 @@
 "use client"
 
-import type React from "react"
-import { useState, useCallback } from "react"
-import { ArrowRight, Building, MapPin } from "lucide-react"
+import React from "react"
+import { Building, MapPin } from "lucide-react"
 
 interface PropertyAddressProps {
-  onAddressChange: (addressData: any) => void
-  onLatitudeChange?: (lat: string) => void
-  onLongitudeChange?: (lng: string) => void
-  onPropertyNameChange?: (name: string) => void
-  onPropertyTypeSelect?: (type: string) => void
+  address: {
+    flatNo?: string;
+    floor?: string;
+    apartmentName?: string;
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  onAddressChange: (address: any) => void;
+  showFlatNo?: boolean;
 }
 
 const PropertyAddress: React.FC<PropertyAddressProps> = ({
+  address,
   onAddressChange,
-  onLatitudeChange,
-  onLongitudeChange,
-  onPropertyNameChange,
-  onPropertyTypeSelect,
+  showFlatNo = true,
 }) => {
-  const [addressData, setAddressData] = useState({
-    flatNo: "",
-    floor: "",
-    houseName: "",
-    address: "",
-    pinCode: "",
-    city: "",
-    street: "",
-    state: "",
-    zipCode: ""
-  })
+  const handleChange = (field: string, value: any) => {
+    onAddressChange({
+      ...address,
+      [field]: value,
+    })
+  }
 
-  const [showFlatNo, setShowFlatNo] = useState(true)
-
-  const handleAddressChange = useCallback(
-    (field: string, value: string) => {
-      const updatedAddress = {
-        ...addressData,
-        [field]: value,
-      }
-
-      // If pinCode is updated, also update zipCode
-      if (field === 'pinCode') {
-        updatedAddress.zipCode = value
-      }
-      // If zipCode is updated, also update pinCode
-      if (field === 'zipCode') {
-        updatedAddress.pinCode = value
-      }
-
-      setAddressData(updatedAddress)
-      onAddressChange(updatedAddress)
-    },
-    [addressData, onAddressChange]
-  )
+  const inputClasses = "w-full h-12 px-4 rounded-lg border border-black/10 bg-white text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black shadow-sm transition-all duration-200"
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold text-black">Property Address</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Enter Location Details</span>
-      </div>
+    <div className="bg-white rounded-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-black/5 mb-8">
+      <div className="space-y-8">
+        {/* Header */}
+        <div className="flex items-center gap-3 border-b border-black/5 pb-6">
+          <Building className="h-6 w-6 text-black/70" />
+          <h2 className="text-xl font-medium text-black/80">Property Address</h2>
+        </div>
 
-      <div className="space-y-6 max-w-2xl">
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-2 text-black/80">
+        {/* Show Flat No Toggle */}
+        {showFlatNo && (
+          <label className="flex items-center gap-2.5 text-sm text-black/70 bg-black/5 px-4 py-3 rounded-lg w-fit">
             <input
               type="checkbox"
-              checked={showFlatNo}
-              onChange={(e) => setShowFlatNo(e.target.checked)}
-              className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+              checked={!!address.flatNo}
+              onChange={(e) => handleChange("showFlatNo", e.target.checked ? "true" : "")}
+              className="rounded border-black/10 text-black focus:ring-black/5"
             />
             Show Flat No. in the Listing
           </label>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {showFlatNo && (
-            <div className="relative">
-              <div className="absolute left-3 top-1/2 -translate-y-1/2">
-                <Building size={20} className="text-black/40" />
-              </div>
+        {/* Address Fields in Three Lines */}
+        <div className="space-y-6">
+          {/* Line 1: Apartment Name, Flat No, Floor */}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                Apartment / House Name
+              </label>
               <input
                 type="text"
-                value={addressData.flatNo}
-                onChange={(e) => handleAddressChange("flatNo", e.target.value)}
-                placeholder="Flat No / Block No"
-                className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                value={address.apartmentName || ""}
+                onChange={(e) => handleChange("apartmentName", e.target.value)}
+                placeholder="Enter apartment/house name"
+                className={inputClasses}
               />
             </div>
-          )}
-
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <Building size={20} className="text-black/40" />
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                Flat No / Block No
+              </label>
+              <input
+                type="text"
+                value={address.flatNo || ""}
+                onChange={(e) => handleChange("flatNo", e.target.value)}
+                placeholder="Enter flat/block number"
+                className={inputClasses}
+              />
             </div>
-            <input
-              type="text"
-              value={addressData.floor}
-              onChange={(e) => handleAddressChange("floor", e.target.value)}
-              placeholder="Floor"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-            />
-          </div>
-
-          <div className="relative sm:col-span-2">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <Building size={20} className="text-black/40" />
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                Floor
+              </label>
+              <input
+                type="text"
+                value={address.floor || ""}
+                onChange={(e) => handleChange("floor", e.target.value)}
+                placeholder="Enter floor"
+                className={inputClasses}
+              />
             </div>
-            <input
-              type="text"
-              value={addressData.houseName}
-              onChange={(e) => handleAddressChange("houseName", e.target.value)}
-              placeholder="Apartment / House Name"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-            />
           </div>
 
-          <div className="relative sm:col-span-2">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2">
-              <MapPin size={20} className="text-black/40" />
+          {/* Line 2: City, State, ZIP Code */}
+          <div className="grid grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                City
+              </label>
+              <input
+                type="text"
+                value={address.city || ""}
+                onChange={(e) => handleChange("city", e.target.value)}
+                placeholder="Enter city"
+                className={inputClasses}
+              />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                State
+              </label>
+              <input
+                type="text"
+                value={address.state || ""}
+                onChange={(e) => handleChange("state", e.target.value)}
+                placeholder="Enter state"
+                className={inputClasses}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                ZIP Code
+              </label>
+              <input
+                type="text"
+                value={address.zipCode || ""}
+                onChange={(e) => handleChange("zipCode", e.target.value)}
+                placeholder="Enter ZIP code"
+                className={inputClasses}
+              />
+            </div>
+          </div>
+
+          {/* Line 3: Street Address */}
+          <div>
+            <label className="block text-sm font-medium text-black/70 mb-2.5">
+              Street Address
+            </label>
             <input
               type="text"
-              value={addressData.address}
-              onChange={(e) => handleAddressChange("address", e.target.value)}
-              placeholder="Address"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              required
+              value={address.street || ""}
+              onChange={(e) => handleChange("street", e.target.value)}
+              placeholder="Enter street address"
+              className={inputClasses}
             />
           </div>
 
-          <div className="relative">
-            <input
-              type="text"
-              value={addressData.zipCode}
-              onChange={(e) => handleAddressChange("zipCode", e.target.value)}
-              placeholder="Zip Code"
-              className="w-full pl-4 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              required
-            />
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              value={addressData.city}
-              onChange={(e) => handleAddressChange("city", e.target.value)}
-              placeholder="City"
-              className="w-full pl-4 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              required
-            />
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              value={addressData.street}
-              onChange={(e) => handleAddressChange("street", e.target.value)}
-              placeholder="Street"
-              className="w-full pl-4 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-            />
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              value={addressData.state}
-              onChange={(e) => handleAddressChange("state", e.target.value)}
-              placeholder="State"
-              className="w-full pl-4 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              required
-            />
+          {/* Line 4: Latitude and Longitude */}
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4" />
+                  Latitude
+                </span>
+              </label>
+              <input
+                type="text"
+                value={address.coordinates?.lat || ""}
+                onChange={(e) => handleChange("coordinates", { ...address.coordinates, lat: Number(e.target.value) })}
+                placeholder="Property latitude"
+                className={inputClasses}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4" />
+                  Longitude
+                </span>
+              </label>
+              <input
+                type="text"
+                value={address.coordinates?.lng || ""}
+                onChange={(e) => handleChange("coordinates", { ...address.coordinates, lng: Number(e.target.value) })}
+                placeholder="Property longitude"
+                className={inputClasses}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -1,190 +1,201 @@
-import React, { useState } from 'react';
-import PropertyName from '../PropertyName';
-import PlotType from '../CommercialComponents/PlotType';
-import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
-import Landmark from '../CommercialComponents/Landmark';
-import MapCoordinates from '../MapCoordinates';
-import CornerProperty from '../CommercialComponents/CornerProperty';
-import PlotDetails from '../CommercialComponents/PlotDetails';
-import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
-import Price from '../sell/Price';
-import PricePerSqft from '../sell/PricePerSqft';
-import RegistrationCharges from '../sell/RegistrationCharges';
-import Brokerage from '../residentialrent/Brokerage';
-import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
-import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import MediaUpload from '../MediaUpload';
+"use client"
+
+import type React from "react"
+import { useState } from "react"
+import PropertyName from "../PropertyName"
+import PlotType from "../CommercialComponents/PlotType"
+import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
+import Landmark from "../CommercialComponents/Landmark"
+import MapCoordinates from "../MapCoordinates"
+import CornerProperty from "../CommercialComponents/CornerProperty"
+import PlotDetails from "../CommercialComponents/PlotDetails"
+import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
+import Price from "../sell/Price"
+import PricePerSqft from "../sell/PricePerSqft"
+import RegistrationCharges from "../sell/RegistrationCharges"
+import Brokerage from "../residentialrent/Brokerage"
+import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
+import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
+import MediaUpload from "../MediaUpload"
+
 const SellPlotMain = () => {
   const [formData, setFormData] = useState({
-    propertyName: '',
-    plotType: '',
+    propertyName: "",
+    plotType: "",
     address: {},
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
+    landmark: "",
+    coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
     plotDetails: {},
     propertyDetails: {},
-    price: '',
+    price: "",
     area: {
-      superBuiltUpAreaSqft: '',
-      builtUpAreaSqft: '',
-      carpetAreaSqft: ''
+      superBuiltUpAreaSqft: "",
+      builtUpAreaSqft: "",
+      carpetAreaSqft: "",
     },
     registrationCharges: {},
     brokerage: {},
     availability: {},
     contactDetails: {},
-    media: { photos: [], video: null }
-  });
+    media: { photos: [], video: null },
+  })
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(0)
 
   // Define form steps
   const steps = [
     {
-      title: 'Basic Information',
+      title: "Basic Information",
       content: (
         <>
           <PropertyName
             propertyName={formData.propertyName}
             onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
           />
-          <PlotType
-            onPlotTypeChange={(type) => setFormData({ ...formData, plotType: type })}
-          />
-          <CommercialPropertyAddress
-            onAddressChange={(address) => setFormData({ ...formData, address })}
-          />
-          <Landmark
-            onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
-          />
+          <PlotType onPlotTypeChange={(type) => setFormData({ ...formData, plotType: type })} />
+          <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, address })} />
+          <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
           <MapCoordinates
             latitude={formData.coordinates.latitude}
             longitude={formData.coordinates.longitude}
-            onLatitudeChange={(lat) => setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })}
-            onLongitudeChange={(lng) => setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })}
+            onLatitudeChange={(lat) =>
+              setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })
+            }
+            onLongitudeChange={(lng) =>
+              setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })
+            }
           />
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
           />
         </>
-      )
+      ),
     },
     {
-      title: 'Property Details',
+      title: "Property Details",
       content: (
         <>
-          <PlotDetails
-            onDetailsChange={(details) => setFormData({ ...formData, plotDetails: details })}
-          />
+          <PlotDetails onDetailsChange={(details) => setFormData({ ...formData, plotDetails: details })} />
           <CommercialPropertyDetails
             onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
           />
         </>
-      )
+      ),
     },
     {
-      title: 'Pricing Details',
+      title: "Pricing Details",
       content: (
         <>
-          <Price
-            onPriceChange={(price) => setFormData({ ...formData, price: price.amount })}
-          />
-          <PricePerSqft
-            price={formData.price}
-            area={formData.area}
-          />
+          <Price onPriceChange={(price) => setFormData({ ...formData, price: price.amount })} />
+          <PricePerSqft price={formData.price} area={formData.area} />
           <RegistrationCharges
             onRegistrationChargesChange={(charges) => setFormData({ ...formData, registrationCharges: charges })}
           />
-          <Brokerage
-            onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })}
-          />
+          <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
         </>
-      )
+      ),
     },
     {
-      title: 'Availability',
+      title: "Availability",
       content: (
-        <CommercialAvailability
-          onAvailabilityChange={(availability) => setFormData({ ...formData, availability })}
-        />
-      )
+        <CommercialAvailability onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+      ),
     },
     {
-      title: 'Contact Information',
+      title: "Contact Information",
       content: (
         <CommercialContactDetails
           onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
         />
-      )
+      ),
     },
     {
-      title: 'Property Media',
-      content: (
-        <MediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-        
-      )
-    }
-  ];
+      title: "Property Media",
+      content: <MediaUpload onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))} />,
+    },
+  ]
 
   // Navigation handlers
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(currentStep + 1)
     }
-  };
+  }
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+      setCurrentStep(currentStep - 1)
     }
-  };
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form Data:', formData);
-  };
+    e.preventDefault()
+    console.log("Form Data:", formData)
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-12">
-      <div className="space-y-12">
-        <h2 className="text-3xl font-bold mb-8">{steps[currentStep].title}</h2>
-        <div className="space-y-8">{steps[currentStep].content}</div>
-      </div>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-6 sm:p-10">
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sell Commercial Plot</h1>
+            <div className="mt-2 flex items-center">
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div
+                  className="bg-blue-600 h-2.5 rounded-full"
+                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+                ></div>
+              </div>
+              <span className="ml-4 text-sm font-medium text-gray-500">
+                Step {currentStep + 1} of {steps.length}
+              </span>
+            </div>
+          </div>
 
-      <div className="sticky bottom-0 bg-black/80 backdrop-blur-sm p-4 -mx-4 sm:-mx-6 lg:-mx-8">
-        <div className="max-w-7xl mx-auto flex justify-between gap-4">
-          <button
-            type="button"
-            className="px-6 py-3 rounded-lg border border-white/20 hover:border-white text-white transition-colors duration-200"
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-          >
-            Previous
-          </button>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="bg-gray-50 p-6 rounded-lg">
+              <h2 className="text-xl font-semibold mb-6 text-gray-800">{steps[currentStep].title}</h2>
+              <div className="space-y-6">{steps[currentStep].content}</div>
+            </div>
 
-          {currentStep < steps.length - 1 ? (
-            <button
-              type="button"
-              className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-              onClick={handleNext}
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-            >
-              List Property
-            </button>
-          )}
+            <div className="flex justify-between pt-4">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`px-6 py-2.5 rounded-lg border ${
+                  currentStep === 0
+                    ? "border-gray-200 text-gray-400 cursor-not-allowed"
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                } transition-colors duration-200`}
+              >
+                Previous
+              </button>
+
+              {currentStep < steps.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Continue
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200"
+                >
+                  List Property
+                </button>
+              )}
+            </div>
+          </form>
         </div>
       </div>
-    </form>
-  );
-};
+    </div>
+  )
+}
 
-export default SellPlotMain;
+export default SellPlotMain
+
