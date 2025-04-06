@@ -94,10 +94,8 @@ const Headerr: React.FC = () => {
       }
     );
   };
-
   const [showChatbot, setShowChatbot] = useState(false);
-  const { chatNotifications, setChatNotifications, setCurrentChatId } =
-    useContext(ChatContext);
+  const { chatNotifications, setChatNotifications } = useContext(ChatContext);
   const [totalRequests, setTotalRequests] = useState(0);
 
   useEffect(() => {
@@ -169,9 +167,9 @@ const Headerr: React.FC = () => {
           scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
         }`}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            {/* Logo */}
+            {/* Logo - Made more responsive */}
             <div
               className="flex items-center cursor-pointer"
               onClick={() => navigate("/Homepage")}
@@ -179,10 +177,10 @@ const Headerr: React.FC = () => {
               <img
                 src="./images/rentamigologou.png"
                 alt="Rentamigo Logo"
-                className="h-10 w-10 object-contain"
+                className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
               />
               <span
-                className={`text-2xl font-bold ml-1 ${
+                className={`text-xl sm:text-2xl font-bold ml-1 ${
                   scrolled ? "text-black" : "text-white"
                 }`}
               >
@@ -190,14 +188,14 @@ const Headerr: React.FC = () => {
               </span>
             </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center">
-              <ul className="flex space-x-6">
+            {/* Desktop Navigation - Enhanced spacing */}
+            <nav className="hidden xl:flex items-center">
+              <ul className="flex space-x-2 lg:space-x-6">
                 {navLinks.map((link, index) => (
                   <li key={index}>
                     <Link
                       to={link.path}
-                      className={`font-medium transition-colors relative no-underline px-3 py-2 rounded-md ${
+                      className={`font-medium transition-colors relative no-underline px-2 py-2 lg:px-3 rounded-md text-sm lg:text-base ${
                         activeLink === link.path
                           ? scrolled
                             ? "text-white bg-black"
@@ -214,63 +212,10 @@ const Headerr: React.FC = () => {
                 ))}
               </ul>
             </nav>
-            {/* Notification Icon and Panel */}
-            <div className="relative ml-4">
-              <button
-                onClick={toggleNotificationList}
-                className="relative text-2xl focus:outline-none text-gray-800"
-              >
-                🔔
-                {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-semibold rounded-full px-1.5">
-                    {notifications.length}
-                  </span>
-                )}
-              </button>
-              {showList && (
-                <div className="absolute right-0 md:left-1/2 md:transform md:-translate-x-1/2 mt-2 w-80 max-h-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden">
-                  <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-                      <h3 className="text-lg font-semibold text-gray-800">
-                        Notifications
-                      </h3>
-                    </div>
-                    {notifications.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-gray-500">
-                        No new notifications.
-                      </div>
-                    ) : (
-                      notifications.map((n, index) => (
-                        <div
-                          key={index}
-                          className={`px-4 py-3 border-b last:border-none ${
-                            n.read ? "bg-white" : "bg-gray-100"
-                          }`}
-                        >
-                          <p className="text-sm text-gray-800">{n.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {new Date(n.createdAt).toLocaleString()}
-                          </p>
-                          {!n.read && (
-                            <button
-                              className="mt-2 inline-block text-xs text-white bg-blue-600 hover:bg-blue-700 transition-colors px-3 py-1 rounded-md"
-                              onClick={() =>
-                                markNotificationAsRead(n.resourceId!)
-                              }
-                            >
-                              Mark as Read
-                            </button>
-                          )}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
 
-            {/* Auth Buttons - Desktop */}
-            <div className="hidden md:flex items-center space-x-4">
+            {/* Right Section: Notifications, Chat, Auth */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Chat Button - Always visible */}
               <button
                 onClick={toggleChatbot}
                 className={`p-2 rounded-full transition-colors relative ${
@@ -279,70 +224,129 @@ const Headerr: React.FC = () => {
                     : "text-white hover:bg-gray-800"
                 }`}
               >
-                <MessageCircle className="w-6 h-6" />
+                <MessageCircle className="w-5 h-5 lg:w-6 lg:h-6" />
                 {totalRequests > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {totalRequests}
                   </span>
                 )}
               </button>
-              <Link
-                to="/Login"
-                className={`font-medium transition-colors no-underline px-4 py-2 rounded-md ${
-                  scrolled
-                    ? "text-white bg-black hover:bg-gray-800"
-                    : "text-black bg-white hover:bg-gray-200"
-                }`}
-              >
-                Sign In
-              </Link>
-            </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden focus:outline-none"
-              onClick={toggleMenu}
-            >
-              {isMenuOpen ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-6 w-6 ${
-                    scrolled ? "text-black" : "text-white"
-                  }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              {/* Notification Panel */}
+              <div className="relative">
+                <button
+                  onClick={toggleNotificationList}
+                  className="relative text-xl sm:text-2xl focus:outline-none text-gray-800 p-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-6 w-6 ${
-                    scrolled ? "text-black" : "text-white"
+                  🔔
+                  {notifications.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                      {notifications.length}
+                    </span>
+                  )}
+                </button>
+                {showList && (
+                  <div className="absolute right-0 mt-2 w-screen sm:w-80 max-h-[80vh] sm:max-h-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden transform -translate-x-1/2 sm:translate-x-0 left-1/2 sm:left-auto">
+                    <div className="max-h-[80vh] sm:max-h-96 overflow-y-auto custom-scrollbar">
+                      <div className="sticky top-0 px-4 py-3 border-b border-gray-100 bg-gray-50">
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          Notifications
+                        </h3>
+                      </div>
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-gray-500">
+                          No new notifications.
+                        </div>
+                      ) : (
+                        notifications.map((n, index) => (
+                          <div
+                            key={index}
+                            className={`px-4 py-3 border-b last:border-none ${
+                              n.read ? "bg-white" : "bg-gray-100"
+                            }`}
+                          >
+                            <p className="text-sm text-gray-800">{n.message}</p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {new Date(n.createdAt).toLocaleString()}
+                            </p>
+                            {!n.read && (
+                              <button
+                                className="mt-2 inline-block text-xs text-white bg-blue-600 hover:bg-blue-700 transition-colors px-3 py-1 rounded-md"
+                                onClick={() =>
+                                  markNotificationAsRead(n.resourceId!)
+                                }
+                              >
+                                Mark as Read
+                              </button>
+                            )}
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Auth Button - Desktop */}
+              <div className="hidden xl:block">
+                <Link
+                  to="/Login"
+                  className={`font-medium transition-colors no-underline px-3 py-2 lg:px-4 text-sm lg:text-base rounded-md ${
+                    scrolled
+                      ? "text-white bg-black hover:bg-gray-800"
+                      : "text-black bg-white hover:bg-gray-200"
                   }`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-              )}
-            </button>
+                  Sign In
+                </Link>
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                className="xl:hidden focus:outline-none p-2"
+                onClick={toggleMenu}
+              >
+                {isMenuOpen ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-6 w-6 ${
+                      scrolled ? "text-black" : "text-white"
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-6 w-6 ${
+                      scrolled ? "text-black" : "text-white"
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu - Enhanced animation and spacing */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -350,15 +354,15 @@ const Headerr: React.FC = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="md:hidden bg-white shadow-lg absolute top-full left-0 w-full"
+              className="xl:hidden bg-white shadow-lg absolute top-full left-0 w-full overflow-hidden"
             >
-              <div className="container mx-auto px-4 py-3">
-                <nav className="flex flex-col space-y-3">
+              <div className="container mx-auto px-4 py-2">
+                <nav className="flex flex-col space-y-2">
                   {navLinks.map((link, index) => (
                     <Link
                       key={index}
                       to={link.path}
-                      className={`font-medium py-2 px-3 block transition-colors no-underline rounded-md ${
+                      className={`font-medium py-3 px-4 block transition-colors no-underline rounded-md text-sm ${
                         activeLink === link.path
                           ? "bg-black text-white"
                           : "text-gray-800 hover:bg-gray-100"
@@ -372,12 +376,12 @@ const Headerr: React.FC = () => {
                     </Link>
                   ))}
                   <div className="border-t border-gray-200 my-2 pt-2">
-                    <p className="text-sm text-gray-500 mb-2 px-3">Legal</p>
+                    <p className="text-sm text-gray-500 mb-2 px-4">Legal</p>
                     {legalLinks.map((link, index) => (
                       <Link
                         key={index}
                         to={link.path}
-                        className="font-medium text-gray-800 hover:bg-gray-100 py-2 px-3 block transition-colors no-underline rounded-md"
+                        className="font-medium text-gray-800 hover:bg-gray-100 py-3 px-4 block transition-colors no-underline rounded-md text-sm"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {link.name}
@@ -388,7 +392,7 @@ const Headerr: React.FC = () => {
                   <div className="pt-2 border-t border-gray-200">
                     <Link
                       to="/Login"
-                      className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-2 px-3 block rounded-md"
+                      className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-3 px-4 block rounded-md text-sm"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Sign In
@@ -401,11 +405,12 @@ const Headerr: React.FC = () => {
         </AnimatePresence>
       </header>
 
+      {/* Chatbot - Made fullscreen on mobile */}
       {showChatbot && (
         <div className="fixed inset-0 z-[60] bg-white">
           <div className="h-full flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-xl font-semibold">Chat Support</h2>
+            <div className="flex items-center justify-between p-4 border-b sticky top-0 bg-white">
+              <h2 className="text-lg sm:text-xl font-semibold">Chat Support</h2>
               <button
                 onClick={toggleChatbot}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -413,7 +418,7 @@ const Headerr: React.FC = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 overflow-y-auto">
               <Chatbot onNewChatNotification={handleNewChatNotification} />
             </div>
           </div>
