@@ -33,7 +33,11 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       state: "",
       zipCode: "",
     },
-    coordinates: { latitude: "", longitude: "" },
+    coordinates: { 
+      latitude: "", 
+      longitude: "",
+      locationLabel: ""
+    },
     size: "",
     features: {},
     price: "",
@@ -61,6 +65,18 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
     setFormData((prev) => ({
       ...prev,
       propertyAddress: { ...prev.propertyAddress, ...addressData },
+    }));
+  }, []);
+
+  // Function to handle location changes
+  const handleLocationChange = useCallback((location: { latitude: string; longitude: string, label: string }) => {
+    setFormData((prev) => ({
+      ...prev,
+      coordinates: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+        locationLabel: location.label
+      },
     }));
   }, []);
 
@@ -126,29 +142,20 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
             }
           />
           <PropertyAddress
-            onPropertyNameChange={(name) =>
-              setFormData((prev) => ({ ...prev, propertyName: name }))
-            }
-            onPropertyTypeSelect={(type) =>
-              setFormData((prev) => ({ ...prev, propertyType: type }))
-            }
-            onLatitudeChange={(lat) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, latitude: lat },
-              }))
-            }
-            onLongitudeChange={(lng) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, longitude: lng },
-              }))
-            }
+            address={{
+              ...formData.propertyAddress,
+              coordinates: {
+                lat: formData.coordinates.latitude ? Number(formData.coordinates.latitude) : 0,
+                lng: formData.coordinates.longitude ? Number(formData.coordinates.longitude) : 0,
+              },
+              locationLabel: formData.coordinates.locationLabel
+            }}
             onAddressChange={handleAddressChange}
           />
           <MapCoordinates
             latitude={formData.coordinates.latitude}
             longitude={formData.coordinates.longitude}
+            locationLabel={formData.coordinates.locationLabel}
             onLatitudeChange={(lat) =>
               setFormData((prev) => ({
                 ...prev,
@@ -161,6 +168,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 coordinates: { ...prev.coordinates, longitude: lng },
               }))
             }
+            onLocationChange={handleLocationChange}
           />
           <PropertySize
             onPropertySizeChange={(size) =>
