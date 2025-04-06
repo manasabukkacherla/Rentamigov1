@@ -1,21 +1,20 @@
 import { useState } from 'react';
-import { Building, Ruler } from 'lucide-react';
+import { ArrowRight, Ruler, Building } from 'lucide-react';
 
-interface CoveredOpenSpaceDetailsProps {
+interface AgricultureLandDetailsProps {
   onDetailsChange?: (details: Record<string, any>) => void;
 }
 
-const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsProps) => {
+const AgricultureLandDetails = ({ onDetailsChange }: AgricultureLandDetailsProps) => {
   const [details, setDetails] = useState({
-    totalArea: '',
-    areaUnit: 'sq.ft',
-    coveredArea: '',
-    openArea: '',
+    plotArea: '',
+    plotAreaUnit: 'sq.ft',
+    plotLength: '',
+    plotWidth: '',
     roadWidth: '',
     roadWidthUnit: 'ft',
-    ceilingHeight: '',
-    ceilingHeightUnit: 'ft',
     openSides: '1',
+    cornerPlot: false,
   });
 
   const handleChange = (field: string, value: any) => {
@@ -29,30 +28,30 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
       <div className="space-y-8">
         <div className="flex items-center mb-8">
           <Building className="text-black mr-3" size={28} />
-          <h3 className="text-2xl font-semibold text-black">Space Details</h3>
+          <h3 className="text-2xl font-semibold text-black">Agriculture Land Details</h3>
         </div>
 
         <div className="bg-white p-6 rounded-lg space-y-6">
-          {/* Total Area */}
+          {/* Plot Area */}
           <div>
-            <label htmlFor="totalArea" className="block text-gray-800 font-medium mb-2">
-              Total Area
+            <label htmlFor="plotArea" className="block text-gray-800 font-medium mb-2">
+              Plot Area
             </label>
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
                 <input
                   type="text"
-                  id="totalArea"
-                  value={details.totalArea}
-                  onChange={(e) => handleChange('totalArea', e.target.value)}
-                  placeholder="Enter total area"
+                  id="plotArea"
+                  value={details.plotArea}
+                  onChange={(e) => handleChange('plotArea', e.target.value)}
+                  placeholder="Enter plot area"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
               <select
-                value={details.areaUnit}
-                onChange={(e) => handleChange('areaUnit', e.target.value)}
+                value={details.plotAreaUnit}
+                onChange={(e) => handleChange('plotAreaUnit', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
                 <option value="sq.ft">Square Feet</option>
@@ -63,39 +62,39 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             </div>
           </div>
 
-          {/* Covered Area */}
-          <div>
-            <label htmlFor="coveredArea" className="block text-gray-800 font-medium mb-2">
-              Covered Area
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                id="coveredArea"
-                value={details.coveredArea}
-                onChange={(e) => handleChange('coveredArea', e.target.value)}
-                placeholder="Enter covered area"
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              />
-              <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          {/* Plot Dimensions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="plotLength" className="block text-gray-800 font-medium mb-2">
+                Plot Length
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="plotLength"
+                  value={details.plotLength}
+                  onChange={(e) => handleChange('plotLength', e.target.value)}
+                  placeholder="Enter length"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                />
+                <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              </div>
             </div>
-          </div>
-
-          {/* Open Area */}
-          <div>
-            <label htmlFor="openArea" className="block text-gray-800 font-medium mb-2">
-              Open Area
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                id="openArea"
-                value={details.openArea}
-                onChange={(e) => handleChange('openArea', e.target.value)}
-                placeholder="Enter open area"
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              />
-              <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <div>
+              <label htmlFor="plotWidth" className="block text-gray-800 font-medium mb-2">
+                Plot Width
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  id="plotWidth"
+                  value={details.plotWidth}
+                  onChange={(e) => handleChange('plotWidth', e.target.value)}
+                  placeholder="Enter width"
+                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                />
+                <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              </div>
             </div>
           </div>
 
@@ -127,34 +126,6 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             </div>
           </div>
 
-          {/* Ceiling Height */}
-          <div>
-            <label htmlFor="ceilingHeight" className="block text-gray-800 font-medium mb-2">
-              Ceiling Height
-            </label>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  id="ceilingHeight"
-                  value={details.ceilingHeight}
-                  onChange={(e) => handleChange('ceilingHeight', e.target.value)}
-                  placeholder="Enter ceiling height"
-                  className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                />
-                <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              </div>
-              <select
-                value={details.ceilingHeightUnit}
-                onChange={(e) => handleChange('ceilingHeightUnit', e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
-              >
-                <option value="ft">Feet</option>
-                <option value="m">Meters</option>
-              </select>
-            </div>
-          </div>
-
           {/* Open Sides */}
           <div>
             <label htmlFor="openSides" className="block text-gray-800 font-medium mb-2">
@@ -172,10 +143,23 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
               <option value="4">4</option>
             </select>
           </div>
+
+          {/* Corner Plot */}
+          <div>
+            <label className="flex items-center space-x-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={details.cornerPlot}
+                onChange={(e) => handleChange('cornerPlot', e.target.checked)}
+                className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
+              />
+              <span className="text-black">This is a corner plot</span>
+            </label>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default CoveredOpenSpaceDetails;
+export default AgricultureLandDetails; 

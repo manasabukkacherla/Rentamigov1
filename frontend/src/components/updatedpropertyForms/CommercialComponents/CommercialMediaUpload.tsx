@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { ArrowRight, Image, Video, FileText, Upload, X, AlertCircle } from 'lucide-react';
+import { Upload, Camera, Video, FileText, Clock, X } from 'lucide-react';
 
 interface CommercialMediaUploadProps {
   onMediaChange?: (media: {
@@ -184,201 +184,221 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Media Upload</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Upload Property Media</span>
-      </div>
-
-      <div className="space-y-8 max-w-4xl">
-        {/* Property Images */}
-        {media.images.map(({ category, files }) => (
-          <div key={category} className="bg-white/5 p-6 rounded-lg space-y-6">
-            <div className="flex items-center justify-between">
-              <h4 className="text-lg font-medium flex items-center gap-2">
-                <Image size={20} className="text-white/60" />
+    <div className="min-h-screen bg-gray-50 text-black">
+      <div className="max-w-4xl mx-auto p-8">
+        <h1 className="text-2xl font-bold mb-8">Media Upload</h1>
+        <div className="space-y-8">
+          {/* Property Images */}
+          {media.images.map(({ category, files }) => (
+            <section key={category}>
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Upload className="w-5 h-5" />
                 {imageCategoryLabels[category]}
-              </h4>
-              <span className="text-sm text-white/60">
-                {files.length}/5 photos uploaded
-              </span>
+                <span className="text-sm font-normal text-gray-500">{files.length}/5 photos uploaded</span>
+              </h2>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
+                <div className="flex flex-col items-center justify-center text-center">
+                  <Upload className="w-12 h-12 text-gray-400 mb-4" />
+                  <p className="text-lg mb-4">Add your {imageCategoryLabels[category].toLowerCase()} in any way you prefer</p>
+                  <div className="flex gap-4 mb-4">
+                    <button 
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      onClick={() => handleImageClick(category)}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Choose Files
+                    </button>
+                    {category !== 'floorPlan' && (
+                      <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                        <Camera className="w-4 h-4" />
+                        Take Photo
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
+                  </p>
+                  <input
+                    type="file"
+                    ref={el => { imageInputRefs.current[category] = el }}
+                    onChange={(e) => handleImagesChange(e, category)}
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              {/* Image Preview Grid */}
+              {files.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square rounded-lg overflow-hidden group"
+                    >
+                      <img
+                        src={file.url}
+                        alt={`${category} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeImage(category, index);
+                        }}
+                        className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          ))}
+
+          {/* Property Video Tour */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Video className="w-5 h-5" />
+              Property Video Tour (Optional)
+              <span className="text-sm font-normal text-gray-500">{media.video ? '1/1 video uploaded' : '0/1 video uploaded'}</span>
+            </h2>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
+              {!media.video ? (
+                <div className="flex flex-col items-center justify-center text-center">
+                  <Video className="w-12 h-12 text-gray-400 mb-4" />
+                  <p className="text-lg mb-4">Click to upload a video tour</p>
+                  <div className="flex gap-4 mb-4">
+                    <button 
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                      onClick={handleVideoClick}
+                    >
+                      <Upload className="w-4 h-4" />
+                      Choose Video
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    Supported formats: MP4, WEBM (Max 100MB)
+                  </p>
+                  <input
+                    type="file"
+                    ref={videoInputRef}
+                    onChange={handleVideoChange}
+                    accept="video/*"
+                    className="hidden"
+                  />
+                </div>
+              ) : (
+                <div className="relative rounded-lg overflow-hidden">
+                  <video
+                    src={media.video.url}
+                    controls
+                    className="w-full aspect-video bg-black"
+                  />
+                  <button
+                    onClick={removeVideo}
+                    className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors duration-200"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Legal Documents */}
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Legal Documents
+            </h2>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
+              <div className="flex flex-col items-center justify-center text-center">
+                <FileText className="w-12 h-12 text-gray-400 mb-4" />
+                <p className="text-lg mb-4">Click to upload legal documents</p>
+                <div className="flex gap-4 mb-4">
+                  <button 
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    onClick={handleDocumentClick}
+                  >
+                    <Upload className="w-4 h-4" />
+                    Choose Files
+                  </button>
+                </div>
+                <div className="text-sm text-gray-500 space-y-2">
+                  <p>Upload ownership proof, property tax documents, etc.</p>
+                  <p>Supported formats: PDF, DOC, DOCX</p>
+                </div>
+                <input
+                  type="file"
+                  ref={documentInputRef}
+                  onChange={handleDocumentChange}
+                  accept=".pdf,.doc,.docx"
+                  multiple
+                  className="hidden"
+                />
+              </div>
             </div>
 
-            {/* Drag & Drop Area */}
-            <div
-              className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200 ${
-                dragActive
-                  ? 'border-white bg-white/10'
-                  : 'border-white/20 hover:border-white/40'
-              }`}
-              onDragEnter={(e) => handleDrag(e)}
-              onDragLeave={(e) => handleDrag(e)}
-              onDragOver={(e) => handleDrag(e)}
-              onDrop={(e) => handleImageDrop(e, category)}
-              onClick={() => handleImageClick(category)}
-            >
-              <input
-                type="file"
-                ref={el => imageInputRefs.current[category] = el}
-                onChange={(e) => handleImagesChange(e, category)}
-                accept="image/*"
-                multiple
-                className="hidden"
-              />
-              <Upload size={32} className="mx-auto mb-4 text-white/40" />
-              <p className="text-white/80">
-                Drag and drop your {category} photos here, or{' '}
-                <span className="text-white underline cursor-pointer">browse</span>
-              </p>
-              <p className="text-sm text-white/60 mt-2">
-                Supported formats: JPG, PNG, WEBP (Max 5 photos)
-              </p>
-            </div>
-
-            {/* Image Preview Grid */}
-            {files.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                {files.map((file, index) => (
+            {/* Document List */}
+            {media.documents.length > 0 && (
+              <div className="space-y-3 mt-4">
+                {media.documents.map((doc, index) => (
                   <div
                     key={index}
-                    className="relative aspect-square rounded-lg overflow-hidden group"
+                    className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200"
                   >
-                    <img
-                      src={file.url}
-                      alt={`${category} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    <div className="flex items-center gap-3">
+                      <FileText size={20} className="text-gray-600" />
+                      <span className="text-gray-800">{doc.file.name}</span>
+                    </div>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeImage(category, index);
-                      }}
-                      className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      onClick={() => removeDocument(index)}
+                      className="p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
                     >
-                      <X size={16} />
+                      <X size={16} className="text-gray-600" />
                     </button>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        ))}
+          </section>
 
-        {/* Video Upload */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-6">
-          <div className="flex items-center justify-between">
-            <h4 className="text-lg font-medium flex items-center gap-2">
-              <Video size={20} className="text-white/60" />
-              Property Video Tour (Optional)
-            </h4>
-          </div>
-
-          {!media.video ? (
-            <button
-              onClick={handleVideoClick}
-              className="w-full border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-white/40 transition-colors duration-200"
-            >
-              <input
-                type="file"
-                ref={videoInputRef}
-                onChange={handleVideoChange}
-                accept="video/*"
-                className="hidden"
-              />
-              <Upload size={32} className="mx-auto mb-4 text-white/40" />
-              <p className="text-white/80">Click to upload a video tour</p>
-              <p className="text-sm text-white/60 mt-2">
-                Supported formats: MP4, WEBM (Max 100MB)
-              </p>
-            </button>
-          ) : (
-            <div className="relative rounded-lg overflow-hidden">
-              <video
-                src={media.video.url}
-                controls
-                className="w-full aspect-video bg-black"
-              />
-              <button
-                onClick={removeVideo}
-                className="absolute top-4 right-4 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors duration-200"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Legal Documents */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-6">
-          <div className="flex items-center justify-between">
-            <h4 className="text-lg font-medium flex items-center gap-2">
-              <FileText size={20} className="text-white/60" />
-              Legal Documents
-            </h4>
-          </div>
-
-          <button
-            onClick={handleDocumentClick}
-            className="w-full border-2 border-dashed border-white/20 rounded-lg p-8 text-center hover:border-white/40 transition-colors duration-200"
-          >
-            <input
-              type="file"
-              ref={documentInputRef}
-              onChange={handleDocumentChange}
-              accept=".pdf,.doc,.docx"
-              multiple
-              className="hidden"
-            />
-            <Upload size={32} className="mx-auto mb-4 text-white/40" />
-            <p className="text-white/80">Click to upload legal documents</p>
-            <p className="text-sm text-white/60 mt-2">
-              Upload ownership proof, property tax documents, etc.
-              <br />
-              Supported formats: PDF, DOC, DOCX
-            </p>
-          </button>
-
-          {/* Document List */}
-          {media.documents.length > 0 && (
-            <div className="space-y-3">
-              {media.documents.map((doc, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-4 bg-white/5 rounded-lg"
-                >
-                  <div className="flex items-center gap-3">
-                    <FileText size={20} className="text-white/60" />
-                    <span className="text-white/80">{doc.file.name}</span>
-                  </div>
-                  <button
-                    onClick={() => removeDocument(index)}
-                    className="p-1 rounded-full hover:bg-white/10 transition-colors duration-200"
-                  >
-                    <X size={16} className="text-white/60" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Guidelines */}
-        <div className="bg-white/5 p-4 rounded-lg">
-          <div className="flex items-start gap-3">
-            <AlertCircle size={20} className="text-white/60 mt-0.5" />
-            <div className="text-sm text-white/60">
-              <p className="font-medium text-white/80 mb-1">Upload Guidelines:</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Upload clear, high-resolution images for each category</li>
-                <li>Ensure proper lighting and angles in all photos</li>
-                <li>Video tour should showcase the property comprehensively</li>
-                <li>Maximum video size: 100MB</li>
-                <li>Legal documents should be clear and complete</li>
-                <li>Supported document formats: PDF, DOC, DOCX</li>
-              </ul>
-            </div>
-          </div>
+          {/* Upload Guidelines */}
+          <section className="bg-gray-50 rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              Upload Guidelines:
+            </h2>
+            <ul className="space-y-3 text-gray-700">
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+                <span>Upload clear, high-resolution images for each category</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+                <span>Ensure proper lighting and angles in all photos</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+                <span>Video tour should showcase the property comprehensively</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+                <span>Maximum video size: 100MB</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+                <span>Legal documents should be clear and complete</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+                <span>Supported document formats: PDF, DOC, DOCX</span>
+              </li>
+            </ul>
+          </section>
         </div>
       </div>
     </div>

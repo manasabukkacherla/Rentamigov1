@@ -104,34 +104,32 @@ const LeaseShowroomMain = () => {
         {steps[currentStep]}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="sticky bottom-0 bg-black/80 backdrop-blur-sm p-4 -mx-4 sm:-mx-6 lg:-mx-8">
-        <div className="max-w-7xl mx-auto flex justify-between gap-4">
+      <div className="mt-8 flex justify-between items-center">
+        {currentStep > 0 && (
           <button
             type="button"
-            className="px-6 py-3 rounded-lg border border-white/20 hover:border-white text-white transition-colors duration-200"
             onClick={handlePrevious}
-            disabled={currentStep === 0}
+            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
           >
             Previous
           </button>
-          {currentStep === steps.length - 1 ? (
-            <button
-              type="submit"
-              className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-            >
-              List Property
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-              onClick={handleNext}
-            >
-              Next
-            </button>
-          )}
-        </div>
+        )}
+        {currentStep < steps.length - 1 ? (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+          >
+            Next
+          </button>
+        ) : (
+          <button
+            type="submit"
+            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+          >
+            List Property
+          </button>
+        )}
       </div>
     </form>
   );

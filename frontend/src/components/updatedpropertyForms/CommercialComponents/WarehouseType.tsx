@@ -30,51 +30,53 @@ const WarehouseType = ({ onWarehouseTypeChange }: WarehouseTypeProps) => {
   const getIcon = (type: string) => {
     switch (type) {
       case 'cold-storage':
-        return <Snowflake size={20} className="text-white/60" />;
+        return <Snowflake size={20} className="text-black/60" />;
       case 'distribution':
-        return <Truck size={20} className="text-white/60" />;
+        return <Truck size={20} className="text-black/60" />;
       case 'industrial':
-        return <Factory size={20} className="text-white/60" />;
+        return <Factory size={20} className="text-black/60" />;
       case 'ecommerce':
-        return <ShoppingBag size={20} className="text-white/60" />;
+        return <ShoppingBag size={20} className="text-black/60" />;
       case 'bonded':
-        return <FileCheck size={20} className="text-white/60" />;
+        return <FileCheck size={20} className="text-black/60" />;
       default:
-        return <Warehouse size={20} className="text-white/60" />;
+        return <Warehouse size={20} className="text-black/60" />;
     }
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Warehouse Type</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Select Warehouse Category</span>
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <div className="flex items-center mb-8">
+        <Warehouse className="text-black mr-3" size={28} />
+        <h3 className="text-2xl font-semibold text-black">Warehouse Type</h3>
       </div>
 
       <div className="space-y-8 max-w-4xl">
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4">
           <div className="flex items-center gap-2 mb-4">
-            <Warehouse size={20} className="text-white/60" />
-            <h4 className="text-lg font-medium">Select Warehouse Type</h4>
+            <Warehouse size={20} className="text-black/60" />
+            <h4 className="text-lg font-medium text-black">Select Warehouse Type</h4>
           </div>
           
           <div className="space-y-2">
             {warehouseTypes.map(({ value, label }) => (
-              <label key={value} className="flex items-center gap-3 cursor-pointer">
+              <label 
+                key={value} 
+                className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200 cursor-pointer"
+              >
                 <input
                   type="checkbox"
-                  value={value}
                   checked={selectedTypes.includes(value)}
                   onChange={() => handleTypeChange(value)}
-                  className="w-4 h-4 text-blue-500 bg-transparent border border-white/20 rounded focus:ring-2 focus:ring-white transition"
+                  className="w-4 h-4 text-black bg-white border-2 border-gray-300 rounded focus:ring-black transition"
                 />
-                <span className="text-white">{label}</span>
+                <div className="flex items-center gap-2">
+                  {getIcon(value)}
+                  <span className="text-black">{label}</span>
+                </div>
               </label>
             ))}
           </div>
-
-          
         </div>
       </div>
     </div>

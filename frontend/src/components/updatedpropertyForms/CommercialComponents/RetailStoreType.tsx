@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Store } from 'lucide-react';
+import { Store } from 'lucide-react';
 
 interface RetailStoreTypeProps {
   onRetailTypeChange?: (types: string[]) => void;
@@ -27,31 +27,30 @@ const RetailStoreType = ({ onRetailTypeChange }: RetailStoreTypeProps) => {
   ];
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Retail Store Type</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Select Retail Category</span>
-      </div>
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <div className="space-y-8">
+        <div className="flex items-center mb-8">
+          <Store className="text-black mr-3" size={28} />
+          <h3 className="text-2xl font-semibold text-black">Retail Store Type</h3>
+        </div>
 
-      <div className="space-y-8 max-w-4xl">
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4">
           <div className="flex items-center gap-2 mb-4">
-            <Store size={20} className="text-white/60" />
-            <h4 className="text-lg font-medium">Select Retail Store Type</h4>
+            <Store size={20} className="text-black/60" />
+            <h4 className="text-lg font-medium text-black">Select Store Type</h4>
           </div>
           
           <div className="space-y-2">
             {retailTypes.map(({ value, label }) => (
-              <label key={value} className="flex items-center gap-3 cursor-pointer">
+              <label key={value} className="flex items-center gap-3 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200">
                 <input
                   type="checkbox"
                   value={value}
                   checked={selectedTypes.includes(value)}
                   onChange={() => handleTypeChange(value)}
-                  className="w-4 h-4 text-blue-500 bg-transparent border border-white/20 rounded focus:ring-2 focus:ring-white transition"
+                  className="w-4 h-4 text-black bg-white border-2 border-gray-300 rounded focus:ring-black transition"
                 />
-                <span className="text-white">{label}</span>
+                <span className="text-black">{label}</span>
               </label>
             ))}
           </div>

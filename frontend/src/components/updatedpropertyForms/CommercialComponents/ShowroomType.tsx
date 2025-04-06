@@ -1,77 +1,64 @@
 import { useState } from 'react';
-import { ArrowRight, Store, Car, Tv, Crown } from 'lucide-react';
+import { Store } from 'lucide-react';
+import NextButton from './NextButton';
 
 interface ShowroomTypeProps {
-  onShowroomTypeChange?: (types: string[]) => void;
+  onTypeChange?: (type: string) => void;
+  onNext?: () => void;
 }
 
-const ShowroomType = ({ onShowroomTypeChange }: ShowroomTypeProps) => {
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+const showroomTypes = [
+  'Mall',
+  'High Street',
+  'Commercial Complex',
+  'Shopping Center',
+  'Standalone Building',
+  'Other'
+];
+
+const ShowroomType = ({ onTypeChange, onNext = () => {} }: ShowroomTypeProps) => {
+  const [selectedType, setSelectedType] = useState('');
 
   const handleTypeChange = (type: string) => {
-    setSelectedTypes((prev) => {
-      const updatedTypes = prev.includes(type) 
-        ? prev.filter((t) => t !== type) 
-        : [...prev, type];
-      onShowroomTypeChange?.(updatedTypes);
-      return updatedTypes;
-    });
-  };
-
-  const showroomTypes = [
-    { value: 'ground-floor', label: 'Ground Floor Showroom' },
-    { value: 'upper-floor', label: 'Upper Floor Showroom' },
-    { value: 'car', label: 'Car Showroom' },
-    { value: 'electronic', label: 'Electronic Goods Showroom' },
-    { value: 'luxury', label: 'Luxury Showroom' }
-  ];
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'car':
-        return <Car size={20} className="text-white/60" />;
-      case 'electronic':
-        return <Tv size={20} className="text-white/60" />;
-      case 'luxury':
-        return <Crown size={20} className="text-white/60" />;
-      default:
-        return <Store size={20} className="text-white/60" />;
-    }
+    setSelectedType(type);
+    onTypeChange?.(type);
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Showroom Type</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Select Showroom Category</span>
-      </div>
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <div className="space-y-8">
+        <div className="flex items-center mb-8">
+          <Store className="text-black mr-3" size={28} />
+          <h3 className="text-2xl font-semibold text-black">Showroom Type</h3>
+        </div>
 
-      <div className="space-y-8 max-w-4xl">
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-6">
           <div className="flex items-center gap-2 mb-4">
-            <Store size={20} className="text-white/60" />
-            <h4 className="text-lg font-medium">Select Showroom Type</h4>
+            <Store size={20} className="text-black/60" />
+            <h4 className="text-lg font-medium text-black">Select Showroom Type</h4>
           </div>
-          
-          <div className="space-y-2">
-            {showroomTypes.map(({ value, label }) => (
-              <label key={value} className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  value={value}
-                  checked={selectedTypes.includes(value)}
-                  onChange={() => handleTypeChange(value)}
-                  className="w-4 h-4 text-blue-500 bg-transparent border border-white/20 rounded focus:ring-2 focus:ring-white transition"
-                />
-                <span className="text-white">{label}</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {showroomTypes.map((type) => (
+              <label key={type} className="relative flex items-center justify-between p-4 rounded-lg border-2 border-gray-300 cursor-pointer hover:border-black transition-colors">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    name="showroomType"
+                    value={type}
+                    checked={selectedType === type}
+                    onChange={(e) => handleTypeChange(e.target.value)}
+                    className="w-5 h-5 text-black border-gray-300 focus:ring-black"
+                  />
+                  <span className="ml-3 text-black">{type}</span>
+                </div>
               </label>
             ))}
           </div>
-
-         
         </div>
       </div>
+
+      <NextButton onClick={onNext} disabled={!selectedType} />
     </div>
   );
 };
