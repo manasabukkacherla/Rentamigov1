@@ -1,5 +1,6 @@
 import React, { useState, useRef, DragEvent } from 'react';
 import { Upload, Camera, Video, FileText, Clock, X } from 'lucide-react';
+import CameraCaptureModal from './CameraCaptureModal';
 
 interface MediaUploadProps {
   onMediaChange?: (media: {
@@ -25,6 +26,9 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
     videoTour: undefined as File | undefined,
     legalDocuments: [] as File[],
   });
+
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<keyof typeof media | null>(null);
 
   const fileInputRefs = {
     exteriorViews: useRef<HTMLInputElement>(null),
@@ -104,6 +108,17 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
     });
   };
 
+  const handleCameraCapture = (image: File) => {
+    if (currentCategory) {
+      const updatedFiles = [...media[currentCategory], image].slice(0, 5);
+      setMedia(prev => ({ ...prev, [currentCategory]: updatedFiles }));
+      onMediaChange?.({
+        ...media,
+        [currentCategory]: updatedFiles,
+      });
+    }
+  };
+
   const renderUploadSection = (
     title: string,
     category: keyof typeof media,
@@ -118,7 +133,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
         {title}
         <span className="text-sm font-normal text-gray-500">
           {media[category].length}/{maxFiles} {category === 'videoTour' ? 'video' : 'photos'} uploaded
-            </span>
+        </span>
       </h2>
       <div
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white"
@@ -129,24 +144,30 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
           <Upload className="w-12 h-12 text-gray-400 mb-4" />
           <p className="text-lg mb-4">{description}</p>
           <div className="flex gap-4 mb-4">
-                  <button
+            <button
               className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
               onClick={() => fileInputRefs[category].current?.click()}
             >
               <Upload className="w-4 h-4" />
-                    Choose Files
-                  </button>
+              Choose Files
+            </button>
             {category !== 'floorPlan' && category !== 'legalDocuments' && (
-              <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+              <button 
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                onClick={() => {
+                  setCurrentCategory(category);
+                  setCameraModalOpen(true);
+                }}
+              >
                 <Camera className="w-4 h-4" />
                 Take Photo
-                    </button>
+              </button>
             )}
           </div>
-              <input
-                type="file"
+          <input
+            type="file"
             ref={fileInputRefs[category]}
-                className="hidden"
+            className="hidden"
             accept={accept}
             multiple={category !== 'videoTour'}
             onChange={(e) => handleFileSelect(category, e.target.files)}
@@ -258,6 +279,12 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
         </ul>
         </section>
       </div>
+
+      <CameraCaptureModal
+        isOpen={cameraModalOpen}
+        onClose={() => setCameraModalOpen(false)}
+        onCapture={handleCameraCapture}
+      />
     </div>
   );
 };

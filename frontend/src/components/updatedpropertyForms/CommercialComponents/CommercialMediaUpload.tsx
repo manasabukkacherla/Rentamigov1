@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { Upload, Camera, Video, FileText, Clock, X } from 'lucide-react';
+import CameraCaptureModal from '../CameraCaptureModal';
 
 interface CommercialMediaUploadProps {
   onMediaChange?: (media: {
@@ -31,6 +32,9 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
   const imageInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const videoInputRef = useRef<HTMLInputElement>(null);
   const documentInputRef = useRef<HTMLInputElement>(null);
+
+  const [cameraModalOpen, setCameraModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<string | null>(null);
 
   const handleImageClick = (category: string) => {
     imageInputRefs.current[category]?.click();
@@ -183,6 +187,28 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
     emergencyExits: 'Emergency Exits'
   };
 
+  const handleCameraCapture = (image: File) => {
+    if (currentCategory) {
+      const updatedImages = media.images.map(img => {
+        if (img.category === currentCategory) {
+          return {
+            ...img,
+            files: [...img.files, { url: URL.createObjectURL(image), file: image }].slice(0, 5)
+          };
+        }
+        return img;
+      });
+
+      const updatedMedia = { ...media, images: updatedImages };
+      setMedia(updatedMedia);
+      onMediaChange?.({
+        images: updatedMedia.images,
+        video: updatedMedia.video || undefined,
+        documents: updatedMedia.documents
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 text-black">
       <div className="max-w-4xl mx-auto p-8">
@@ -209,7 +235,13 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
                       Choose Files
                     </button>
                     {category !== 'floorPlan' && (
-                      <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                      <button 
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        onClick={() => {
+                          setCurrentCategory(category);
+                          setCameraModalOpen(true);
+                        }}
+                      >
                         <Camera className="w-4 h-4" />
                         Take Photo
                       </button>
@@ -401,6 +433,12 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
           </section>
         </div>
       </div>
+
+      <CameraCaptureModal
+        isOpen={cameraModalOpen}
+        onClose={() => setCameraModalOpen(false)}
+        onCapture={handleCameraCapture}
+      />
     </div>
   );
 };
