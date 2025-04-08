@@ -145,8 +145,6 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
             }
           />
           <PropertyAddress
-address={formData.propertyAddress}
-=======
             address={{
               ...formData.propertyAddress,
               coordinates: {
