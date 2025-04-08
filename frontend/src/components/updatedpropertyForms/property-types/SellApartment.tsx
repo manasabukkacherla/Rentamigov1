@@ -184,7 +184,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       icon: <Home className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
                 <Home className="text-black mr-3" size={28} />
@@ -197,16 +197,11 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                     setFormData((prev) => ({ ...prev, propertyName: name }))
                   }
                 />
-                <PropertySize
-                  onPropertySizeChange={(size) =>
-                    setFormData((prev) => ({ ...prev, size }))
-                  }
-                />
               </div>
             </div>
           </div>
 
-          <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
                 <MapPin className="text-black mr-3" size={28} />
@@ -245,28 +240,57 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       title: "Property Details",
       icon: <Building2 className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Details</h3>
+        <div className="space-y-8">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Size</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <PropertySize
+                  onPropertySizeChange={(size) =>
+                    setFormData((prev) => ({ ...prev, size }))
+                  }
+                />
+              </div>
             </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertyFeatures
-                onFeaturesChange={(features) =>
-                  setFormData((prev) => ({ ...prev, features }))
-                }
-              />
-              <FlatAmenities
-                onAmenitiesChange={(amenities) =>
-                  setFormData((prev) => ({ ...prev, flatAmenities: amenities }))
-                }
-              />
-              <SocietyAmenities
-                onAmenitiesChange={(amenities) =>
-                  setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
-                }
-              />
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Features</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <PropertyFeatures
+                  onFeaturesChange={(features) =>
+                    setFormData((prev) => ({ ...prev, features }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Amenities</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <FlatAmenities
+                  onAmenitiesChange={(amenities) =>
+                    setFormData((prev) => ({ ...prev, flatAmenities: amenities }))
+                  }
+                />
+                <SocietyAmenities
+                  onAmenitiesChange={(amenities) =>
+                    setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -276,34 +300,47 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       title: "Pricing Details",
       icon: <DollarSign className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <DollarSign className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Pricing Details</h3>
+        <div className="space-y-8">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <DollarSign className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Price Details</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <Price
+                  onPriceChange={(price) =>
+                    setFormData((prev) => ({ ...prev, price: price.amount }))
+                  }
+                />
+                <PricePerSqft price={formData.price} area={formData.area} />
+              </div>
             </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <Price
-                onPriceChange={(price) =>
-                  setFormData((prev) => ({ ...prev, price: price.amount }))
-                }
-              />
-              <PricePerSqft price={formData.price} area={formData.area} />
-              <RegistrationCharges
-                onRegistrationChargesChange={(charges) =>
-                  setFormData((prev) => ({ ...prev, registrationCharges: charges }))
-                }
-              />
-              <OtherCharges
-                onOtherChargesChange={(charges) =>
-                  setFormData((prev) => ({ ...prev, otherCharges: charges }))
-                }
-              />
-              <Brokerage
-                onBrokerageChange={(brokerage) =>
-                  setFormData((prev) => ({ ...prev, brokerage }))
-                }
-              />
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <DollarSign className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Additional Charges</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <RegistrationCharges
+                  onRegistrationChargesChange={(charges) =>
+                    setFormData((prev) => ({ ...prev, registrationCharges: charges }))
+                  }
+                />
+                <OtherCharges
+                  onOtherChargesChange={(charges) =>
+                    setFormData((prev) => ({ ...prev, otherCharges: charges }))
+                  }
+                />
+                <Brokerage
+                  onBrokerageChange={(brokerage) =>
+                    setFormData((prev) => ({ ...prev, brokerage }))
+                  }
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -313,46 +350,50 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       title: "Availability",
       icon: <Calendar className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <AvailabilityDate
-                onAvailabilityChange={(availability) =>
-                  setFormData((prev) => ({ ...prev, availability }))
-                }
-              />
+        <>
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Calendar className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Availability</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <AvailabilityDate
+                  onAvailabilityChange={(availability) =>
+                    setFormData((prev) => ({ ...prev, availability }))
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </>
       ),
     },
     {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <ImageIcon className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <MediaUpload
-                onMediaChange={(media) => setFormData((prev) => ({ 
-                  ...prev, 
-                  media: {
-                    ...media,
-                    videoTour: media.videoTour || null
-                  }
-                }))}
-              />
+        <>
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <ImageIcon className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Media</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <MediaUpload
+                  onMediaChange={(media) => setFormData((prev) => ({ 
+                    ...prev, 
+                    media: {
+                      ...media,
+                      videoTour: media.videoTour || null
+                    }
+                  }))}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        </>
       ),
     },
   ];
