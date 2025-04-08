@@ -1,6 +1,6 @@
 import express from 'express';
 // import { auth } from '../middleware/auth';
-import upload, { convertToBase64 } from '../middleware/fileUpload';
+import upload, { convertToBase64 } from '../../middleware/fileUpload';
 import {
   createCommercialShop,
   // getAllCommercialShops,
@@ -8,7 +8,7 @@ import {
   // updateCommercialShop,
   // deleteCommercialShop,
   // changeListingStatus
-} from '../controllers/commercialShopController';
+} from '../../controllers/commercialShopController';
 
 const router = express.Router();
 
