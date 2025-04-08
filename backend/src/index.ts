@@ -50,7 +50,7 @@ import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
-import commercialShopRoutes from "./routes/commercialShopRoutes";
+import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 
 dotenv.config();
 

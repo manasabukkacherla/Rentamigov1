@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import CommercialShop from '../models/CommercialsellShop';
+import CommercialShop from '../models/commercial/CommercialsellShop';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
 import { request } from 'http';
 
