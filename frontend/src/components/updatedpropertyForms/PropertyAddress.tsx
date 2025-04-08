@@ -231,4 +231,3 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
 }
 
 export default PropertyAddress
-
