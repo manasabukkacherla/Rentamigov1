@@ -1,261 +1,265 @@
-import React from 'react';
-import { Upload, Camera, Video, FileText, Clock } from 'lucide-react';
+import React, { useState, useRef, DragEvent } from 'react';
+import { Upload, Camera, Video, FileText, Clock, X } from 'lucide-react';
 
-function App() {
-  return (
-    <div className="min-h-screen bg-gray-50 text-black">
-      <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-8">Media Upload</h1>
-    <div className="space-y-8">
-          {/* Exterior Views */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Exterior Views
-              <span className="text-sm font-normal text-gray-500">0/5 photos uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Add your exterior photos in any way you prefer</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
+interface MediaUploadProps {
+  onMediaChange?: (media: {
+    exteriorViews: File[];
+    interiorViews: File[];
+    floorPlan: File[];
+    washrooms: File[];
+    lifts: File[];
+    emergencyExits: File[];
+    videoTour?: File;
+    legalDocuments: File[];
+  }) => void;
+}
+
+const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
+  const [media, setMedia] = useState({
+    exteriorViews: [] as File[],
+    interiorViews: [] as File[],
+    floorPlan: [] as File[],
+    washrooms: [] as File[],
+    lifts: [] as File[],
+    emergencyExits: [] as File[],
+    videoTour: undefined as File | undefined,
+    legalDocuments: [] as File[],
+  });
+
+  const fileInputRefs = {
+    exteriorViews: useRef<HTMLInputElement>(null),
+    interiorViews: useRef<HTMLInputElement>(null),
+    floorPlan: useRef<HTMLInputElement>(null),
+    washrooms: useRef<HTMLInputElement>(null),
+    lifts: useRef<HTMLInputElement>(null),
+    emergencyExits: useRef<HTMLInputElement>(null),
+    videoTour: useRef<HTMLInputElement>(null),
+    legalDocuments: useRef<HTMLInputElement>(null),
+  };
+
+  const handleFileSelect = (category: keyof typeof media, files: FileList | null) => {
+    if (!files) return;
+
+    const newFiles = Array.from(files);
+    let updatedFiles: File[] = [];
+
+    if (category === 'videoTour') {
+      if (files[0].size > 100 * 1024 * 1024) { // 100MB limit
+        alert('Video file size must be less than 100MB');
+        return;
+      }
+      if (!files[0].type.startsWith('video/')) {
+        alert('Please upload a valid video file');
+        return;
+      }
+      setMedia(prev => ({ ...prev, videoTour: files[0] }));
+    } else if (category === 'legalDocuments') {
+      const validFiles = newFiles.filter(file => 
+        file.type === 'application/pdf' || 
+        file.type === 'application/msword' || 
+        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+      );
+      if (validFiles.length !== newFiles.length) {
+        alert('Please upload valid document files (PDF, DOC, DOCX)');
+        return;
+      }
+      updatedFiles = [...media[category], ...validFiles];
+    } else {
+      const validFiles = newFiles.filter(file => 
+        file.type.startsWith('image/') && 
+        file.size <= 5 * 1024 * 1024 // 5MB limit
+      );
+      if (validFiles.length !== newFiles.length) {
+        alert('Please upload valid image files (JPG, PNG, WEBP) under 5MB');
+        return;
+      }
+      updatedFiles = [...media[category], ...validFiles].slice(0, 5); // Max 5 photos
+    }
+
+    setMedia(prev => ({ ...prev, [category]: updatedFiles }));
+    onMediaChange?.({
+      ...media,
+      [category]: updatedFiles,
+    });
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e: DragEvent<HTMLDivElement>, category: keyof typeof media) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleFileSelect(category, e.dataTransfer.files);
+  };
+
+  const removeFile = (category: keyof typeof media, index: number) => {
+    const updatedFiles = [...media[category]];
+    updatedFiles.splice(index, 1);
+    setMedia(prev => ({ ...prev, [category]: updatedFiles }));
+    onMediaChange?.({
+      ...media,
+      [category]: updatedFiles,
+    });
+  };
+
+  const renderUploadSection = (
+    title: string,
+    category: keyof typeof media,
+    icon: React.ReactNode,
+    maxFiles: number = 5,
+    accept: string = "image/*",
+    description: string = "Add your photos in any way you prefer"
+  ) => (
+    <section>
+      <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+        {icon}
+        {title}
+        <span className="text-sm font-normal text-gray-500">
+          {media[category].length}/{maxFiles} {category === 'videoTour' ? 'video' : 'photos'} uploaded
+            </span>
+      </h2>
+      <div
+        className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white"
+        onDragOver={handleDragOver}
+        onDrop={(e) => handleDrop(e, category)}
+      >
+        <div className="flex flex-col items-center justify-center text-center">
+          <Upload className="w-12 h-12 text-gray-400 mb-4" />
+          <p className="text-lg mb-4">{description}</p>
+          <div className="flex gap-4 mb-4">
+                  <button
+              className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              onClick={() => fileInputRefs[category].current?.click()}
+            >
+              <Upload className="w-4 h-4" />
                     Choose Files
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Camera className="w-4 h-4" />
-                    Take Photo
-                  </button>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
-                </p>
-      </div>
-            </div>
-          </section>
-
-          {/* Interior Views */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Interior Views
-              <span className="text-sm font-normal text-gray-500">0/5 photos uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Add your interior photos in any way you prefer</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Files
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Camera className="w-4 h-4" />
-                    Take Photo
-                  </button>
-          </div>
-                  <p className="text-sm text-gray-500">
-                  Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Floor Plan */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Floor Plan
-              <span className="text-sm font-normal text-gray-500">0/5 photos uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Add your floor plan photos in any way you prefer</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Files
-                  </button>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
-                </p>
-              </div>
-                          </div>
-          </section>
-
-          {/* Washrooms */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Washrooms
-              <span className="text-sm font-normal text-gray-500">0/5 photos uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Add your washrooms photos in any way you prefer</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Files
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Camera className="w-4 h-4" />
-                    Take Photo
+            {category !== 'floorPlan' && category !== 'legalDocuments' && (
+              <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                <Camera className="w-4 h-4" />
+                Take Photo
                     </button>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
-                </p>
-              </div>
+            )}
           </div>
-          </section>
-
-          {/* Lifts */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Lifts
-              <span className="text-sm font-normal text-gray-500">0/5 photos uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Add your lifts photos in any way you prefer</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Files
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Camera className="w-4 h-4" />
-                    Take Photo
-                  </button>
-          </div>
-                <p className="text-sm text-gray-500">
-                  Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Emergency Exits */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Upload className="w-5 h-5" />
-              Emergency Exits
-              <span className="text-sm font-normal text-gray-500">0/5 photos uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Add your emergency exits photos in any way you prefer</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Files
-                  </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Camera className="w-4 h-4" />
-                    Take Photo
-              </button>
-                </div>
-                <p className="text-sm text-gray-500">
-                  Or drag and drop your files here • Supported formats: JPG, PNG, WEBP (Max 5 photos)
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Property Video Tour */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Video className="w-5 h-5" />
-              Property Video Tour (Optional)
-              <span className="text-sm font-normal text-gray-500">0/1 video uploaded</span>
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <Video className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Click to upload a video tour</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Video
-                  </button>
+              <input
+                type="file"
+            ref={fileInputRefs[category]}
+                className="hidden"
+            accept={accept}
+            multiple={category !== 'videoTour'}
+            onChange={(e) => handleFileSelect(category, e.target.files)}
+          />
+          <p className="text-sm text-gray-500">
+            Or drag and drop your files here • Supported formats: {accept}
+          </p>
         </div>
-              <p className="text-sm text-gray-500">
-                  Supported formats: MP4, WEBM (Max 100MB)
-              </p>
-            </div>
-          </div>
-          </section>
-
-          {/* Legal Documents */}
-          <section>
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Legal Documents
-            </h2>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              <div className="flex flex-col items-center justify-center text-center">
-                <FileText className="w-12 h-12 text-gray-400 mb-4" />
-                <p className="text-lg mb-4">Click to upload legal documents</p>
-                <div className="flex gap-4 mb-4">
-                  <button className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <Upload className="w-4 h-4" />
-                    Choose Files
+      </div>
+      {media[category].length > 0 && (
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {Array.isArray(media[category]) ? (
+            media[category].map((file, index) => (
+              <div key={index} className="relative group">
+                {file.type.startsWith('image/') ? (
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`${title} ${index + 1}`}
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                ) : (
+                  <div className="w-full h-32 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <FileText className="w-8 h-8 text-gray-400" />
+                  </div>
+                )}
+                  <button
+                  onClick={() => removeFile(category, index)}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                  <X className="w-4 h-4" />
                   </button>
                     </div>
-                <div className="text-sm text-gray-500 space-y-2">
-                  <p>Upload ownership proof, property tax documents, etc.</p>
-                  <p>Supported formats: PDF, DOC, DOCX</p>
+            ))
+          ) : (
+            media[category] && (
+              <div className="relative group">
+                <video
+                  src={URL.createObjectURL(media[category] as File)}
+                  className="w-full h-32 object-cover rounded-lg"
+                />
+                <button
+                  onClick={() => setMedia(prev => ({ ...prev, videoTour: undefined }))}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-4 h-4" />
+                </button>
                 </div>
-              </div>
-            </div>
-          </section>
+            )
+          )}
+        </div>
+      )}
+    </section>
+  );
+
+  return (
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <h2 className="text-xl font-semibold mb-6 text-black">Property Media</h2>
+      <div className="space-y-8">
+        {renderUploadSection('Exterior Views', 'exteriorViews', <Upload className="w-5 h-5" />)}
+        {renderUploadSection('Interior Views', 'interiorViews', <Upload className="w-5 h-5" />)}
+        {renderUploadSection('Floor Plan', 'floorPlan', <Upload className="w-5 h-5" />)}
+        {renderUploadSection('Washrooms', 'washrooms', <Upload className="w-5 h-5" />)}
+        {renderUploadSection('Lifts', 'lifts', <Upload className="w-5 h-5" />)}
+        {renderUploadSection('Emergency Exits', 'emergencyExits', <Upload className="w-5 h-5" />)}
+        {renderUploadSection(
+          'Property Video Tour (Optional)',
+          'videoTour',
+          <Video className="w-5 h-5" />,
+          1,
+          'video/*',
+          'Click to upload a video tour'
+        )}
+        {renderUploadSection(
+          'Legal Documents',
+          'legalDocuments',
+          <FileText className="w-5 h-5" />,
+          10,
+          '.pdf,.doc,.docx',
+          'Click to upload legal documents'
+        )}
 
       {/* Upload Guidelines */}
-          <section className="bg-gray-50 rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Upload Guidelines:
-            </h2>
-            <ul className="space-y-3 text-gray-700">
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
-                <span>Upload clear, high-resolution images for each category</span>
+        <section className="bg-white rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Clock className="w-5 h-5" />
+            Upload Guidelines:
+          </h2>
+          <ul className="space-y-3 text-gray-700">
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+              <span>Upload clear, high-resolution images for each category</span>
           </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
-                <span>Ensure proper lighting and angles in all photos</span>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+              <span>Ensure proper lighting and angles in all photos</span>
           </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
-                <span>Video tour should showcase the property comprehensively</span>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+              <span>Video tour should showcase the property comprehensively</span>
           </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
-                <span>Maximum video size: 100MB</span>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+              <span>Maximum video size: 100MB</span>
           </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
-                <span>Legal documents should be clear and complete</span>
-          </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
-                <span>Supported document formats: PDF, DOC, DOCX</span>
+            <li className="flex items-start gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-2"></div>
+              <span>Legal documents should be clear and complete</span>
           </li>
         </ul>
-          </section>
-        </div>
+        </section>
       </div>
     </div>
   );
-}
+};
 
-export default App;
+export default MediaUpload;

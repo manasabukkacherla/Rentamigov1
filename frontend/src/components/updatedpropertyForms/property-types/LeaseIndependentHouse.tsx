@@ -16,7 +16,7 @@ import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
 
 interface LeaseIndependentHouseProps {
-  propertyId: string; // Property ID passed as a prop
+  propertyId: string;
   onSubmit?: (formData: any) => void;
 }
 
@@ -55,7 +55,6 @@ const LeaseIndependentHouse = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Function to update property address details
   const handleAddressChange = useCallback((addressData: any) => {
     setFormData((prev) => ({
       ...prev,
@@ -63,7 +62,6 @@ const LeaseIndependentHouse = ({
     }));
   }, []);
 
-  // Function to save data at each step
   const saveStepData = async () => {
     setLoading(true);
     setErrorMessage(null);
@@ -72,31 +70,15 @@ const LeaseIndependentHouse = ({
     try {
       const payload = {
         propertyId,
-        propertyName: formData.propertyName,
-        propertyAddress: formData.propertyAddress, // ✅ Ensure this is included
-        coordinates: formData.coordinates,
-        size: formData.size,
-        restrictions: formData.restrictions,
-        features: formData.features,
-        leaseAmount: formData.leaseAmount,
-        leaseTenure: formData.leaseTenure,
-        maintenanceAmount: formData.maintenanceAmount,
-        brokerage: formData.brokerage,
-        availability: formData.availability,
-        media: formData.media,
-        otherCharges: formData.otherCharges,
-        flatAmenities: formData.flatAmenities,
-        societyAmenities: formData.societyAmenities,
+        ...formData,
       };
-
-      console.log("🔹 API Payload:", JSON.stringify(payload, null, 2)); // ✅ Debug log
 
       const response = await fetch("/api/basicdetails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload), // ✅ Send correctly formatted payload
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
@@ -114,11 +96,26 @@ const LeaseIndependentHouse = ({
     setLoading(false);
   };
 
+  const handleNext = async () => {
+    await saveStepData();
+    if (step < steps.length - 1) {
+      setStep((prev) => prev + 1);
+    } else {
+      onSubmit?.(formData);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (step > 0) {
+      setStep((prev) => prev - 1);
+    }
+  };
+
   const steps = [
     {
       title: "Basic Information",
       component: (
-        <>
+        <div className="space-y-6">
           <PropertyName
             propertyName={formData.propertyName}
             onPropertyNameChange={(name) =>
@@ -126,12 +123,7 @@ const LeaseIndependentHouse = ({
             }
           />
           <IndependentPropertyAddress
-            onPropertyNameChange={(name) =>
-              setFormData((prev) => ({ ...prev, propertyName: name }))
-            }
-            onPropertyTypeSelect={(type) =>
-              setFormData((prev) => ({ ...prev, propertyType: type }))
-            }
+            onAddressChange={handleAddressChange}
             onLatitudeChange={(lat) =>
               setFormData((prev) => ({
                 ...prev,
@@ -144,7 +136,6 @@ const LeaseIndependentHouse = ({
                 coordinates: { ...prev.coordinates, longitude: lng },
               }))
             }
-            onAddressChange={handleAddressChange}
           />
           <MapCoordinates
             latitude={formData.coordinates.latitude}
@@ -167,13 +158,13 @@ const LeaseIndependentHouse = ({
               setFormData((prev) => ({ ...prev, size }))
             }
           />
-        </>
+        </div>
       ),
     },
     {
       title: "Property Details",
       component: (
-        <>
+        <div className="space-y-6">
           <Restrictions
             onRestrictionsChange={(restrictions) =>
               setFormData((prev) => ({ ...prev, restrictions }))
@@ -194,34 +185,26 @@ const LeaseIndependentHouse = ({
               setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
             }
           />
-        </>
+        </div>
       ),
     },
     {
       title: "Lease Terms",
       component: (
-        <>
+        <div className="space-y-6">
           <LeaseAmount
-            onLeaseAmountChange={(leaseAmount) =>
-              setFormData((prev) => ({ ...prev, leaseAmount }))
+            onLeaseAmountChange={(amount) =>
+              setFormData((prev) => ({ ...prev, leaseAmount: amount }))
             }
           />
           <LeaseTenure
-            onLeaseTenureChange={(leaseTenure) =>
-              setFormData((prev) => ({ ...prev, leaseTenure }))
+            onLeaseTenureChange={(tenure) =>
+              setFormData((prev) => ({ ...prev, leaseTenure: tenure }))
             }
           />
           <MaintenanceAmount
-            onMaintenanceAmountChange={(maintenance) =>
-              setFormData((prev) => ({
-                ...prev,
-                maintenanceAmount: maintenance,
-              }))
-            }
-          />
-          <OtherCharges
-            onOtherChargesChange={(charges) =>
-              setFormData((prev) => ({ ...prev, otherCharges: charges }))
+            onMaintenanceAmountChange={(amount) =>
+              setFormData((prev) => ({ ...prev, maintenanceAmount: amount }))
             }
           />
           <Brokerage
@@ -229,7 +212,12 @@ const LeaseIndependentHouse = ({
               setFormData((prev) => ({ ...prev, brokerage }))
             }
           />
-        </>
+          <OtherCharges
+            onOtherChargesChange={(charges) =>
+              setFormData((prev) => ({ ...prev, otherCharges: charges }))
+            }
+          />
+        </div>
       ),
     },
     {
@@ -252,29 +240,74 @@ const LeaseIndependentHouse = ({
     },
   ];
 
-  const handleNext = async () => {
-    await saveStepData();
-    setStep((prev) => prev + 1);
-  };
-
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-12">
-      <h2 className="text-3xl font-bold mb-8">{steps[step].title}</h2>
-      {steps[step].component}
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-4xl mx-auto p-8">
+        <h1 className="text-2xl font-bold mb-8 text-black">Lease Independent House</h1>
+        
+        {/* Progress Steps */}
+        <div className="flex items-center justify-between mb-8">
+          {steps.map((s, index) => (
+            <div key={index} className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  index <= step ? "bg-black text-white" : "bg-gray-200 text-gray-600"
+                }`}
+              >
+                {index + 1}
+              </div>
+              <div className="ml-2 text-sm font-medium text-black">{s.title}</div>
+              {index < steps.length - 1 && (
+                <div className="w-16 h-0.5 bg-gray-200 mx-2"></div>
+              )}
+            </div>
+          ))}
+        </div>
 
-      <button
-        type="button"
-        onClick={handleNext}
-        disabled={loading}
-        className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-      >
-        {loading
-          ? "Saving..."
-          : step < steps.length - 1
-          ? "Next"
-          : "List Property"}
-      </button>
-    </form>
+        {/* Form Content */}
+        <div className="bg-white rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          {steps[step].component}
+        </div>
+
+        {/* Messages */}
+        {errorMessage && (
+          <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div className="mt-4 p-4 bg-green-50 text-green-600 rounded-lg">
+            {successMessage}
+          </div>
+        )}
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-8">
+          <button
+            onClick={handlePrevious}
+            disabled={step === 0}
+            className={`px-6 py-3 rounded-lg ${
+              step === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-gray-100 text-black hover:bg-gray-200"
+            }`}
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNext}
+            disabled={loading}
+            className={`px-6 py-3 rounded-lg ${
+              loading
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-black text-white hover:bg-gray-800"
+            }`}
+          >
+            {loading ? "Saving..." : step < steps.length - 1 ? "Next" : "List Property"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

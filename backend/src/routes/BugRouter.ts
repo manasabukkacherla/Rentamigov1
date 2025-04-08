@@ -1,7 +1,9 @@
 import express, { Response } from "express";
 import Bug from "../models/bugsModel";
 import { ParamsDictionary } from "express-serve-static-core";
+import User from "../models/signup";
 const nodemailer = require("nodemailer");
+import transporter from "../utils/emailservice";
 
 interface CustomRequest<T = ParamsDictionary, U = any, V = any>
   extends express.Request<T, U, V> {
@@ -11,16 +13,6 @@ interface CustomRequest<T = ParamsDictionary, U = any, V = any>
 }
 
 const bugRouter = express.Router();
-
-const transporter = nodemailer.createTransport({
-  secure: true,
-  host: "smtp.gmail.com",
-  port: 465,
-  auth: {
-    user: process.env.BUG_EMAIL,
-    pass: process.env.pass,
-  },
-});
 
 bugRouter.post(
   "/create",
@@ -62,10 +54,12 @@ bugRouter.post(
       });
 
       await newBug.save();
+      const user = await User.findById(author);
+      const email = user.email;
 
       const mailOptions = {
-        from: "deepthiduddupudi3108@gmail.com",
-        to: "deepthiduddupudi31@gmail.com",
+        from: process.env.EMAIL_USER,
+        to: email,
         subject: "New Bug Created",
         text: `A new bug has been created with the following details:\n\nTitle: ${title}\nDescription: ${description}\nStatus: ${status}\nAuthor: ${author}`,
       };
@@ -132,9 +126,21 @@ bugRouter.put(
         res.status(404).json({ message: "Bug not found" });
         return;
       }
+      const author = bug.author;
 
       bug.status = status;
       await bug.save();
+      const user = await User.findById(author);
+      const email = user.email;
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "New Bug Created",
+        text: `A new bug has been processing and status is ${status}`,
+      };
+
+      await transporter.sendMail(mailOptions);
 
       res.status(200).json({ success: true, bug });
     } catch (error) {

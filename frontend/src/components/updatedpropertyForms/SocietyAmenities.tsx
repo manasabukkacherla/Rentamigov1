@@ -145,17 +145,17 @@ const SocietyAmenities = ({ onAmenitiesChange }: SocietyAmenitiesProps) => {
   return (
     <div>
       <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold">Society Amenities</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Select Available Features</span>
+        <h3 className="text-2xl font-semibold text-black">Society Amenities</h3>
+        <ArrowRight className="opacity-40 text-black" size={20} />
+        <span className="text-sm opacity-70 text-black">Select Available Features</span>
       </div>
 
       <div className="space-y-8">
         {amenitiesCategories.map(({ title, icon: Icon, items }) => (
           <div key={title} className="bg-white/5 p-6 rounded-lg">
             <div className="flex items-center gap-3 mb-4">
-              <Icon size={24} className="text-white/60" />
-              <h4 className="text-lg font-medium">{title}</h4>
+              <Icon size={24} className="text-black/60" />
+              <h4 className="text-lg font-medium text-black">{title}</h4>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {items.map((amenity) => (
@@ -164,9 +164,9 @@ const SocietyAmenities = ({ onAmenitiesChange }: SocietyAmenitiesProps) => {
                     type="checkbox"
                     checked={selectedAmenities[amenity] || false}
                     onChange={(e) => handleAmenityChange(amenity, e.target.checked)}
-                    className="rounded border-white/20 bg-transparent focus:ring-white text-white"
+                    className="rounded border-black/20 bg-transparent focus:ring-black text-black"
                   />
-                  <span className="text-white/80 text-sm">{amenity}</span>
+                  <span className="text-black/80 text-sm">{amenity}</span>
                 </label>
               ))}
             </div>

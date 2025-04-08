@@ -22,6 +22,7 @@ interface LeaseApartmentProps {
 
 const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
   const [formData, setFormData] = useState({
+    propertyId,
     propertyName: "",
     propertyAddress: {
       flatNo: "",
@@ -43,7 +44,16 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     maintenanceAmount: {},
     brokerage: {},
     availability: {},
-    media: { photos: [], video: null },
+    media: {
+      exteriorViews: [],
+      interiorViews: [],
+      floorPlan: [],
+      washrooms: [],
+      lifts: [],
+      emergencyExits: [],
+      videoTour: null,
+      legalDocuments: []
+    },
     otherCharges: {},
     flatAmenities: {},
     societyAmenities: {},
@@ -66,29 +76,19 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const endpoint = step === 0 ? "basicdetails" : "properties";
-
     try {
-      const response = await fetch(`/api/${endpoint}`, {
+      const response = await fetch("/api/basicdetails", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...formData,
-          propertyId: propertyId || formData.propertyId,
-        }),
+        body: JSON.stringify(formData),
       });
 
       const result = await response.json();
 
       if (response.ok) {
         setSuccessMessage("Step saved successfully! ✅");
-        if (step === 0 && result.data?.propertyId) {
-          const newPropertyId = propertyId || result.data.propertyId;
-          localStorage.setItem("propertyId", newPropertyId);
-          setFormData((prev) => ({ ...prev, propertyId: newPropertyId }));
-        }
       } else {
         setErrorMessage(`Error saving step: ${result.message}`);
       }
@@ -98,6 +98,21 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     }
 
     setLoading(false);
+  };
+
+  const handleNext = async () => {
+    await saveStepData();
+    if (step < steps.length - 1) {
+      setStep((prev) => prev + 1);
+    } else {
+      onSubmit?.(formData);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (step > 0) {
+      setStep((prev) => prev - 1);
+    }
   };
 
   const steps = [
@@ -112,24 +127,7 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
             }
           />
           <PropertyAddress
-            onPropertyNameChange={(name) =>
-              setFormData((prev) => ({ ...prev, propertyName: name }))
-            }
-            onPropertyTypeSelect={(type) =>
-              setFormData((prev) => ({ ...prev, propertyType: type }))
-            }
-            onLatitudeChange={(lat) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, latitude: lat },
-              }))
-            }
-            onLongitudeChange={(lng) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, longitude: lng },
-              }))
-            }
+            address={formData.propertyAddress}
             onAddressChange={handleAddressChange}
           />
           <MapCoordinates
@@ -232,35 +230,17 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
       component: (
         <div className="space-y-6">
           <MediaUpload
-            onMediaChange={(media: MediaState) => 
-              setFormData((prev) => ({ 
-                ...prev, 
-                media: {
-                  categories: media.categories || [],
-                  video: media.video || null,
-                  documents: media.documents || []
-                }
-              }))
-            }
+            onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))}
           />
         </div>
       ),
     },
   ];
 
-  const handleNext = async () => {
-    await saveStepData();
-    setStep((prev) => prev + 1);
-  };
-
-  const handlePrevious = () => {
-    setStep((prev) => prev - 1);
-  };
-
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen bg-gray-100">
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-8">Lease Apartment</h1>
+        <h1 className="text-2xl font-bold mb-8 text-black">Lease Apartment</h1>
         
         {/* Progress Steps */}
         <div className="flex items-center justify-between mb-8">
@@ -273,7 +253,7 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
               >
                 {index + 1}
               </div>
-              <div className="ml-2 text-sm font-medium">{s.title}</div>
+              <div className="ml-2 text-sm font-medium text-black">{s.title}</div>
               {index < steps.length - 1 && (
                 <div className="w-16 h-0.5 bg-gray-200 mx-2"></div>
               )}
@@ -282,7 +262,7 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
         </div>
 
         {/* Form Content */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="bg-white rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           {steps[step].component}
         </div>
 
@@ -303,24 +283,24 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
           <button
             onClick={handlePrevious}
             disabled={step === 0}
-            className={`px-4 py-2 rounded-lg ${
+            className={`px-6 py-3 rounded-lg ${
               step === 0
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                : "bg-gray-100 text-black hover:bg-gray-200"
             }`}
           >
             Previous
           </button>
           <button
             onClick={handleNext}
-            disabled={loading || step === steps.length - 1}
-            className={`px-4 py-2 rounded-lg ${
-              loading || step === steps.length - 1
+            disabled={loading}
+            className={`px-6 py-3 rounded-lg ${
+              loading
                 ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                 : "bg-black text-white hover:bg-gray-800"
             }`}
           >
-            {loading ? "Saving..." : "Next"}
+            {loading ? "Saving..." : step < steps.length - 1 ? "Next" : "List Property"}
           </button>
         </div>
       </div>

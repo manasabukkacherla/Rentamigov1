@@ -7,6 +7,7 @@ import Footer from "./Footer";
 import { Link, useNavigate } from "react-router-dom";
 import BlogList from "../blogs/BlogList";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 // Update the LocationModal component to include a close button at the bottom
 const LocationModal = ({
@@ -354,6 +355,25 @@ const Homepage: React.FC = () => {
     } else {
       setSelectedLocation(savedLocation);
     }
+  }, []);
+
+  // Fetch blogs data
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get("/api/blog/");
+        if (response.data.success) {
+          setAllBlogs(response.data.data);
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching blogs:", error);
+        setLoading(false);
+      }
+    };
+    
+    fetchBlogs();
   }, []);
 
   const handleLocationSelect = (location: string) => {
