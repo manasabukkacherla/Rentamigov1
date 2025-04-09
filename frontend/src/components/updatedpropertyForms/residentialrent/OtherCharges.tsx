@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, Droplets, Zap, Flame, Plus } from "lucide-react"
+import { ArrowRight, Droplets, Zap, Flame, Plus, IndianRupee } from "lucide-react"
 
 interface OtherChargesProps {
   onOtherChargesChange?: (charges: Record<string, any>) => void
@@ -40,65 +40,63 @@ const OtherCharges = ({ onOtherChargesChange }: OtherChargesProps) => {
   }
 
   const utilities = [
-    { key: "water", label: "Water", icon: Droplets },
-    { key: "electricity", label: "Electricity", icon: Zap },
-    { key: "gas", label: "Gas", icon: Flame },
-    { key: "others", label: "Others", icon: Plus },
+    { key: "water", label: "Water", icon: Droplets, color: "text-blue-500" },
+    { key: "electricity", label: "Electricity", icon: Zap, color: "text-yellow-500" },
+    { key: "gas", label: "Gas", icon: Flame, color: "text-orange-500" },
+    { key: "others", label: "Others", icon: Plus, color: "text-purple-500" },
   ]
 
   return (
-    <div>
+    <div className="bg-gray-100 p-6 rounded-2xl">
       <div className="flex items-center gap-3 mb-6">
         <h3 className="text-2xl font-semibold text-black">Other Charges</h3>
-        <ArrowRight className="opacity-40" size={20} />
-        <span className="text-sm opacity-70">Enter Utility Charges</span>
+        <ArrowRight className="text-blue-600" size={20} />
+        <span className="text-sm text-gray-500">Enter Utility Charges</span>
       </div>
 
-      <div className="space-y-8 max-w-4xl">
-        {utilities.map(({ key, label, icon: Icon }) => (
+      <div className="space-y-6 max-w-4xl">
+        {utilities.map(({ key, label, icon: Icon, color }) => (
           <div
             key={key}
-            className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-4 transition-all duration-300 hover:shadow-md"
+            className="bg-white p-6 rounded-2xl shadow-lg space-y-6"
           >
-            <h4 className="text-lg font-medium flex items-center gap-2 text-gray-800">
-              <Icon size={20} className="text-gray-600" />
-              {label}
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name={`${key}Type`}
-                    value="inclusive"
-                    checked={charges[key as keyof typeof charges].type === "inclusive"}
-                    onChange={(e) => handleChange(key, "type", e.target.value)}
-                    className="text-black border-gray-300 bg-white focus:ring-black"
-                  />
-                  <span className="text-gray-700">Inclusive</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name={`${key}Type`}
-                    value="exclusive"
-                    checked={charges[key as keyof typeof charges].type === "exclusive"}
-                    onChange={(e) => handleChange(key, "type", e.target.value)}
-                    className="text-black border-gray-300 bg-white focus:ring-black"
-                  />
-                  <span className="text-gray-700">Exclusive</span>
-                </label>
+            <div className="flex items-center gap-2">
+              <Icon size={24} className={color} />
+              <h4 className="text-lg font-medium text-gray-800">{label}</h4>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                {["inclusive", "exclusive"].map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => handleChange(key, "type", type)}
+                    className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
+                      charges[key as keyof typeof charges].type === type
+                        ? "bg-blue-50 border-blue-500 text-blue-700"
+                        : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    <span className="capitalize">{type}</span>
+                  </button>
+                ))}
               </div>
 
               {charges[key as keyof typeof charges].type === "exclusive" && (
-                <input
-                  type="number"
-                  min="0"
-                  value={charges[key as keyof typeof charges].amount}
-                  onChange={(e) => handleChange(key, "amount", e.target.value)}
-                  placeholder={`Enter ${label.toLowerCase()} charges`}
-                  className="w-full px-4 py-3 rounded-lg bg-white border border-gray-300 focus:border-black outline-none transition-colors duration-200 text-gray-800 placeholder:text-gray-400"
-                />
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                    <IndianRupee size={20} className="text-gray-400" />
+                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    value={charges[key as keyof typeof charges].amount}
+                    onChange={(e) => handleChange(key, "amount", e.target.value)}
+                    placeholder={`Enter ${label.toLowerCase()} charges`}
+                    className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none transition-colors duration-200 text-gray-800 placeholder:text-gray-400 hover:border-gray-300"
+                  />
+                </div>
               )}
             </div>
           </div>

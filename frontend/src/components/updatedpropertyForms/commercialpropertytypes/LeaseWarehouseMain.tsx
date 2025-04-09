@@ -80,12 +80,7 @@ const LeaseWarehouseMain = () => {
                 <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
                 <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
               </div>
-              <MapCoordinates
-                latitude={formData.coordinates.latitude}
-                longitude={formData.coordinates.longitude}
-                onLatitudeChange={(lat) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude: lat } }))}
-                onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))}
-              />
+              
               <div className="flex items-center space-x-2 cursor-pointer">
                 <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
                 <span className="text-black">This is a corner property</span>

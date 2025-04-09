@@ -46,12 +46,6 @@ const LeaseShowroomMain = () => {
       <ShowroomType onShowroomTypeChange={(type) => setFormData(prev => ({ ...prev, showroomType: type }))} />
       <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
       <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
-      <MapCoordinates
-        latitude={formData.coordinates.latitude}
-        longitude={formData.coordinates.longitude}
-        onLatitudeChange={(lat) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude: lat } }))}
-        onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))}
-      />
       <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
     </div>,
     <div key="details">
