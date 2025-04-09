@@ -93,7 +93,7 @@ const Restrictions = () => {
   };
 
   return (
-    <div className="p-6 bg-black text-white">
+    <div className="p-6 bg-white text-black">
       <div className="flex items-center space-x-2 mb-6">
         <AlertTriangle className="w-8 h-8 text-yellow-500" />
         <h1 className="text-2xl font-bold">PG Restrictions & Rules</h1>
@@ -101,7 +101,7 @@ const Restrictions = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Fingerprint Access Card */}
-        <div className="bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition-colors">
+        <div className="bg-white rounded-lg p-4 hover:bg-gray-800 transition-colors">
           <div className="flex items-start space-x-4">
             <div className="flex-shrink-0 mt-1">
               <Fingerprint className="w-6 h-6 text-blue-400" />
@@ -130,7 +130,7 @@ const Restrictions = () => {
         {restrictions.map((restriction) => (
           <div 
             key={restriction.id}
-            className="bg-gray-900 rounded-lg p-4 hover:bg-gray-800 transition-colors"
+            className="bg-white rounded-lg p-4 hover:bg-gray-800 transition-colors"
           >
             <div className="flex items-start space-x-4">
               <div className="flex-shrink-0 mt-1">
@@ -233,7 +233,7 @@ const Restrictions = () => {
           <h2 className="text-lg font-semibold mb-4">Active Restrictions:</h2>
           <div className="space-y-4">
             {has24HourAccess && (
-              <div className="bg-gray-900 p-4 rounded-lg">
+              <div className="bg-white p-4 rounded-lg">
                 <div className="flex items-center space-x-2 mb-2">
                   <Fingerprint className="w-6 h-6 text-blue-400" />
                   <span className="font-medium">24/7 Fingerprint Access</span>

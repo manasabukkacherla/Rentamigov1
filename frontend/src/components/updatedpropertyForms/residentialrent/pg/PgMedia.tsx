@@ -113,14 +113,14 @@ const PgMedia = () => {
   }, []);
 
   return (
-    <div className="p-4 bg-black text-white">
+    <div className="p-4 bg-white text-black">
       <div className="flex items-center space-x-2 mb-4">
         <Camera className="w-6 h-6 text-blue-400" />
         <h1 className="text-xl font-bold">PG Photos & Videos</h1>
       </div>
 
       {/* File Upload Form */}
-      <div className="bg-gray-900 rounded-lg p-4 mb-6">
+      <div className="bg-white rounded-lg p-4 mb-6">
         <div className="flex items-center space-x-2 mb-4">
           <Upload className="w-5 h-5 text-green-400" />
           <h2 className="font-semibold">Upload Media</h2>
@@ -134,7 +134,7 @@ const PgMedia = () => {
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
                 selectedType === 'photo'
                   ? 'bg-white text-black'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-black text-white hover:bg-gray-700'
               }`}
             >
               <ImageIcon className="w-4 h-4" />
@@ -145,7 +145,7 @@ const PgMedia = () => {
               className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
                 selectedType === 'video'
                   ? 'bg-white text-black'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-black text-white hover:bg-gray-700'
               }`}
             >
               <Video className="w-4 h-4" />
@@ -158,14 +158,14 @@ const PgMedia = () => {
             <label className="block text-sm font-medium mb-1">
               {selectedType === 'photo' ? 'Photo' : 'Video'} Title
               {' '}
-              <span className="text-gray-400">(will be numbered for multiple files)</span>
+              <span className="text-black">(will be numbered for multiple files)</span>
             </label>
             <input
               type="text"
               value={batchTitle}
               onChange={(e) => setBatchTitle(e.target.value)}
               placeholder={`Enter ${selectedType} title`}
-              className="w-full px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+              className="w-full px-3 py-2 text-sm bg-white border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
             />
           </div>
 
@@ -221,7 +221,7 @@ const PgMedia = () => {
                 {/* Remove Button */}
                 <button
                   onClick={() => handleRemoveMedia(item.id)}
-                  className="absolute top-2 right-2 p-2 bg-black bg-opacity-75 rounded-full text-white hover:bg-red-500 transition-colors duration-200"
+                  className="absolute top-2 right-2 p-2 bg-white bg-opacity-75 rounded-full text-black hover:bg-red-500 transition-colors duration-200"
                   title="Remove"
                 >
                   <X className="w-4 h-4" />
