@@ -258,14 +258,14 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
               <span className="text-black/80">Store Room</span>
             </label>
             <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
+                <input
+                  type="checkbox"
                 checked={features.extraRooms.others}
                 onChange={(e) => handleExtraRoomChange('others', e.target.checked)}
                 className="rounded border-black/20 bg-transparent focus:ring-black text-black"
               />
               <span className="text-black/80">Others</span>
-            </label>
+              </label>
           </div>
         </div>
 
@@ -336,7 +336,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 name="furnishingStatus"
                 value="fullyfurnished"
                 checked={features.furnishingStatus === 'fullyfurnished'}
-                onChange={(e) => handleChange('furnishingStatus', e.target.value)}
+              onChange={(e) => handleChange('furnishingStatus', e.target.value)}
                 className="text-black border-black/20 bg-transparent focus:ring-black"
               />
               <span className="text-black/80">Fully Furnished</span>

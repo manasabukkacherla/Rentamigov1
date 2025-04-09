@@ -64,12 +64,7 @@ const RentPlot = () => {
               <Landmark onLandmarkChange={handleLandmarkChange} />
               <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <MapCoordinates
-              latitude={formData.coordinates.latitude}
-              longitude={formData.coordinates.longitude}
-              onLatitudeChange={handleLatitudeChange}
-              onLongitudeChange={handleLongitudeChange}
-            />
+            
             <div className="flex items-center space-x-2 cursor-pointer">
               <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
               <span className="text-black">This is a corner property</span>

@@ -51,12 +51,7 @@ const RentAgriculture = () => {
           <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
           <CommercialPropertyAddress onAddressChange={handleAddressChange} />
           <Landmark onLandmarkChange={handleLandmarkChange} />
-          <MapCoordinates
-            latitude={formData.coordinates.latitude}
-            longitude={formData.coordinates.longitude}
-            onLatitudeChange={handleLatitudeChange}
-            onLongitudeChange={handleLongitudeChange}
-          />
+          
           <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
         </>
       )
