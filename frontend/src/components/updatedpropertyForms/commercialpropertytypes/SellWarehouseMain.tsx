@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon } from "lucide-react"
 import PropertyName from "../PropertyName"
 import WarehouseType from "../CommercialComponents/WarehouseType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -17,10 +18,39 @@ import CommercialAvailability from "../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 
+interface FormData {
+  propertyName: string;
+  warehouseType: string[];
+  address: Record<string, any>;
+  landmark: string;
+  coordinates: { latitude: string; longitude: string };
+  isCornerProperty: boolean;
+  warehouseDetails: Record<string, any>;
+  propertyDetails: Record<string, any>;
+  price: string;
+  area: {
+    superBuiltUpAreaSqft: string;
+    builtUpAreaSqft: string;
+    carpetAreaSqft: string;
+  };
+  registrationCharges: Record<string, any>;
+  brokerage: Record<string, any>;
+  availability: Record<string, any>;
+  contactDetails: Record<string, any>;
+  media: {
+    images: Array<{
+      category: string;
+      files: Array<{ url: string; file: File }>;
+    }>;
+    video?: { url: string; file: File };
+    documents: Array<{ type: string; file: File }>;
+  };
+}
+
 const SellWarehouseMain = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
-    warehouseType: "",
+    warehouseType: [],
     address: {},
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
@@ -37,20 +67,26 @@ const SellWarehouseMain = () => {
     brokerage: {},
     availability: {},
     contactDetails: {},
-    media: { photos: [], video: null },
+    media: {
+      images: [],
+      documents: [],
+    },
   })
 
   const [currentStep, setCurrentStep] = useState(0)
   const steps = [
     {
       title: "Basic Information",
+      icon: <Store className="w-5 h-5" />,
       content: (
         <>
           <PropertyName
             propertyName={formData.propertyName}
             onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
           />
-          <WarehouseType onWarehouseTypeChange={(type) => setFormData((prev) => ({ ...prev, warehouseType: type }))} />
+          <WarehouseType 
+            onWarehouseTypeChange={(types: string[]) => setFormData((prev) => ({ ...prev, warehouseType: types }))} 
+          />
           <CommercialPropertyAddress onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
           <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
           <MapCoordinates
@@ -71,6 +107,7 @@ const SellWarehouseMain = () => {
     },
     {
       title: "Property Details",
+      icon: <Building2 className="w-5 h-5" />,
       content: (
         <>
           <WarehouseDetails
@@ -84,6 +121,7 @@ const SellWarehouseMain = () => {
     },
     {
       title: "Pricing Details",
+      icon: <DollarSign className="w-5 h-5" />,
       content: (
         <>
           <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
@@ -99,6 +137,7 @@ const SellWarehouseMain = () => {
     },
     {
       title: "Availability",
+      icon: <Calendar className="w-5 h-5" />,
       content: (
         <CommercialAvailability
           onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
@@ -107,6 +146,7 @@ const SellWarehouseMain = () => {
     },
     {
       title: "Contact Information",
+      icon: <UserCircle className="w-5 h-5" />,
       content: (
         <CommercialContactDetails
           onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
@@ -115,6 +155,7 @@ const SellWarehouseMain = () => {
     },
     {
       title: "Property Media",
+      icon: <ImageIcon className="w-5 h-5" />,
       content: <CommercialMediaUpload onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))} />,
     },
   ]
@@ -127,33 +168,57 @@ const SellWarehouseMain = () => {
     if (currentStep > 0) setCurrentStep((prev) => prev - 1)
   }
 
+  const handleStepClick = (index: number) => {
+    setCurrentStep(index)
+  }
+
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault()
     console.log("Form Data:", formData)
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6 sm:p-10">
           <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sell Commercial Warehouse</h1>
-            <div className="mt-2 flex items-center">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                ></div>
-              </div>
-              <span className="ml-4 text-sm font-medium text-gray-500">
-                Step {currentStep + 1} of {steps.length}
-              </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Sell Commercial Warehouse</h1>
+            <div className="mt-6 flex items-center space-x-6">
+              {steps.map((step, index) => (
+                <div key={index} className="flex items-center">
+                  <button
+                    onClick={() => handleStepClick(index)}
+                    className="flex items-center focus:outline-none"
+                  >
+                    <div 
+                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                        index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
+                      }`}
+                    >
+                      {step.icon}
+                    </div>
+                    <span className={`ml-3 text-sm font-medium ${
+                      index <= currentStep ? 'text-black' : 'text-black/70'
+                    }`}>
+                      {step.title}
+                    </span>
+                  </button>
+                  {index < steps.length - 1 && (
+                    <div className={`w-16 h-1 mx-3 ${
+                      index < currentStep ? 'bg-black' : 'bg-gray-200'
+                    }`} />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">{steps[currentStep].title}</h2>
+            <div className="bg-white border border-black/10 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h2 className="text-xl font-semibold mb-6 text-black flex items-center gap-2">
+                {steps[currentStep].icon}
+                {steps[currentStep].title}
+              </h2>
               <div className="space-y-6">{steps[currentStep].content}</div>
             </div>
 
@@ -162,11 +227,11 @@ const SellWarehouseMain = () => {
                 type="button"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`px-6 py-2.5 rounded-lg border ${
+                className={`px-6 py-2.5 rounded-lg border transition-all duration-200 ${
                   currentStep === 0
-                    ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                } transition-colors duration-200`}
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "border-black/20 text-black hover:bg-black hover:text-white"
+                }`}
               >
                 Previous
               </button>
@@ -175,14 +240,14 @@ const SellWarehouseMain = () => {
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                  className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
-                  Continue
+                  Next
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200"
+                  className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
                   List Property
                 </button>

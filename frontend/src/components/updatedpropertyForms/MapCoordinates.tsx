@@ -48,13 +48,13 @@ const MapCoordinates: React.FC<MapCoordinatesProps> = ({
             placeholder="Select location on map"
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all duration-200"
           />
-          <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+          <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white" size={18} />
         </div>
-        {latitude && longitude && (
+        {/* {latitude && longitude && (
           <p className="mt-2 text-xs text-gray-500">
             Coordinates: {latitude}, {longitude}
           </p>
-        )}
+        )} */}
       </div>
       
       {/* Hidden fields for compatibility with existing code */}
@@ -88,7 +88,7 @@ const MapCoordinates: React.FC<MapCoordinatesProps> = ({
               placeholder="Enter longitude"
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all duration-200"
             />
-            <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            {/* <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} /> */}
           </div>
         </div>
       </div>
