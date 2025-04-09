@@ -50,6 +50,7 @@ import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
+import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 
 dotenv.config();
 
@@ -130,6 +131,9 @@ app.use("/api/likes", likesRouter);
 app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
+
+app.use("/api/commercial-shops", commercialShopRoutes);
+
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
   res.json({ message: "hjhjh" });
