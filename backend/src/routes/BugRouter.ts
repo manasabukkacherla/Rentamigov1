@@ -14,6 +14,16 @@ interface CustomRequest<T = ParamsDictionary, U = any, V = any>
 
 const bugRouter = express.Router();
 
+const transporter1 = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BUG_EMAIL,
+    pass: process.env.PASS,
+  },
+});
+
 bugRouter.post(
   "/create",
   async (
@@ -55,16 +65,25 @@ bugRouter.post(
 
       await newBug.save();
       const user = await User.findById(author);
-      const email = user.email;
+      const authorEmail = user.email;
 
-      const mailOptions = {
+      // First email: From process.env.EMAIL_USER to bug
+      const techMailOptions = {
         from: process.env.EMAIL_USER,
-        to: email,
-        subject: "New Bug Created",
-        text: `A new bug has been created with the following details:\n\nTitle: ${title}\nDescription: ${description}\nStatus: ${status}\nAuthor: ${author}`,
+        to: process.env.BUG_EMAIL,
+        subject: "New Bug Request",
+        text: `A new bug has been reported with the following details:\n\nTitle: ${title}\nDescription: ${description}\nStatus: ${status}\nAuthor: ${authorEmail}`,
+      };
+      await transporter.sendMail(techMailOptions);
+
+      const authorMailOptions = {
+        from: process.env.EMAIL_USER,
+        to: authorEmail,
+        subject: "Bug Report Received",
+        text: `Your bug report has been received with the following details:\n\nTitle: ${title}\nDescription: ${description}\nStatus: ${status}`,
       };
 
-      await transporter.sendMail(mailOptions);
+      await transporter.sendMail(authorMailOptions);
       res.status(201).json({ success: true, newBug });
     } catch (error) {
       console.error("Error creating bug:", error);
@@ -134,13 +153,48 @@ bugRouter.put(
       const email = user.email;
 
       const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.BUG_EMAIL,
         to: email,
         subject: "New Bug Created",
         text: `A new bug has been processing and status is ${status}`,
       };
 
       await transporter.sendMail(mailOptions);
+
+      res.status(200).json({ success: true, bug });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+);
+
+bugRouter.put(
+  "/:id/accept",
+  async (req: CustomRequest, res: Response): Promise<void> => {
+    try {
+      const { id } = req.params;
+      const { isaccepted } = req.body;
+      const bug = await Bug.findById(id).populate("author");
+
+      if (!bug) {
+        res.status(404).json({ message: "Bug not found" });
+        return;
+      }
+      const author = bug.author;
+
+      bug.isaccepted = isaccepted;
+      await bug.save();
+      const user = await User.findById(author);
+      const authorEmail = user.email;
+
+      const authorMailOptions = {
+        from: process.env.BUG_EMAIL,
+        to: authorEmail,
+        subject: "Bug Report accept",
+        text: `Your bug report has accepted`,
+      };
+      await transporter1.sendMail(authorMailOptions);
 
       res.status(200).json({ success: true, bug });
     } catch (error) {
