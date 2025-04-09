@@ -16,7 +16,7 @@ export interface Bugs {
   description: string
   // email: string
   errorcode?: string
-  category?: string
+  category: "UI/UX" | "Functionality" | "Performance" | "Security" | "Data" | "Integration" | "Other"
   imageUrl: string
   status: "pending" | "in-progress" | "resolved"
   createdAt: Date
@@ -60,6 +60,7 @@ interface User {
 const BugDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [categoryFilter, setCategoryFilter] = useState("all")
   const [errorcodefilter, setErrorcodefilter] = useState("all")
   const [dateFilter, setDateFilter] = useState<{ start?: string; end?: string }>({})
   const [selectedReport, setSelectedReport] = useState<Bugs | null>(null)
@@ -116,6 +117,11 @@ const BugDashboard = () => {
       result = result.filter((report) => report.status === statusFilter)
     }
 
+    // Apply category filter
+    if (categoryFilter !== "all") {
+      result = result.filter((report) => report.category === categoryFilter)
+    }
+
     // Apply errorcode filter
     if (errorcodefilter !== "all") {
       result = result.filter((report) => report.errorcode === errorcodefilter)
@@ -148,7 +154,7 @@ const BugDashboard = () => {
     })
 
     setFilteredbugs(result)
-  }, [searchQuery, statusFilter, errorcodefilter, dateFilter, sortField, sortDirection, bugs])
+  }, [searchQuery, statusFilter, categoryFilter, errorcodefilter, dateFilter, sortField, sortDirection, bugs])
 
   const handleStatusChange = async (report: Bugs, newStatus: "pending" | "in-progress" | "resolved") => {
     const updatedbugs = bugs.map((r) => {
@@ -271,6 +277,7 @@ const BugDashboard = () => {
   const clearFilters = () => {
     setSearchQuery("")
     setStatusFilter("all")
+    setCategoryFilter("all")
     setErrorcodefilter("all")
     setDateFilter({})
     toast.info("Filters cleared")
@@ -328,6 +335,8 @@ const BugDashboard = () => {
               clearFilters={clearFilters}
               errorcodefilter={errorcodefilter}
               setErrorcodefilter={setErrorcodefilter}
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
