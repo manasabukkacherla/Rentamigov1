@@ -40,7 +40,7 @@ const Pricing = () => {
   };
 
   return (
-    <div className="p-4 bg-black text-white">
+    <div className="p-4 bg-white text-black">
       <div className="flex items-center space-x-2 mb-4">
         <IndianRupee className="w-6 h-6 text-green-500" />
         <h1 className="text-xl font-bold">Pricing & Terms</h1>
@@ -50,7 +50,7 @@ const Pricing = () => {
         {/* Pricing Form */}
         <div className="space-y-4">
           {/* Monthly Charges */}
-          <div className="bg-gray-900 rounded-lg p-4">
+          <div className="bg- rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-3">
               <Building2 className="w-5 h-5 text-blue-400" />
               <h2 className="text-lg font-semibold">Monthly Charges</h2>
@@ -66,7 +66,7 @@ const Pricing = () => {
                     value={pricing.monthlyRent}
                     onChange={(e) => handlePricingChange('monthlyRent', e.target.value)}
                     placeholder="Enter amount"
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-gray-700 rounded-md text-black placeholder-gray-400 focus:outline-none focus:border-white"
                   />
                 </div>
               </div>
@@ -80,7 +80,7 @@ const Pricing = () => {
                     value={pricing.amenitiesCharge}
                     onChange={(e) => handlePricingChange('amenitiesCharge', e.target.value)}
                     placeholder="Enter amount"
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
                   />
                 </div>
               </div>
@@ -97,7 +97,7 @@ const Pricing = () => {
           </div>
 
           {/* One-time Charges */}
-          <div className="bg-gray-900 rounded-lg p-4">
+          <div className="bg-white rounded-lg p-4">
             <h2 className="text-lg font-semibold mb-3">One-time Charges</h2>
             <div className="space-y-3">
               <div>
@@ -109,7 +109,7 @@ const Pricing = () => {
                     value={pricing.securityDeposit}
                     onChange={(e) => handlePricingChange('securityDeposit', e.target.value)}
                     placeholder="Enter amount"
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
                   />
                 </div>
               </div>
@@ -123,7 +123,7 @@ const Pricing = () => {
                     value={pricing.maintenanceCharge}
                     onChange={(e) => handlePricingChange('maintenanceCharge', e.target.value)}
                     placeholder="Enter amount"
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
                   />
                 </div>
               </div>
@@ -131,7 +131,7 @@ const Pricing = () => {
           </div>
 
           {/* Contract Terms */}
-          <div className="bg-gray-900 rounded-lg p-4">
+          <div className="bg-white rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-3">
               <Lock className="w-5 h-5 text-yellow-400" />
               <h2 className="text-lg font-semibold">Contract Terms</h2>
@@ -145,7 +145,7 @@ const Pricing = () => {
                   <select
                     value={periods.noticePeriod}
                     onChange={(e) => setPeriods(prev => ({ ...prev, noticePeriod: e.target.value }))}
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-black focus:outline-none focus:border-white"
                   >
                     <option value="0.5">15 Days</option>
                     <option value="1">1 Month</option>
@@ -162,7 +162,7 @@ const Pricing = () => {
                   <select
                     value={periods.lockInPeriod}
                     onChange={(e) => setPeriods(prev => ({ ...prev, lockInPeriod: e.target.value }))}
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-black focus:outline-none focus:border-white"
                   >
                     <option value="3">3 Months</option>
                     <option value="6">6 Months</option>
@@ -177,7 +177,7 @@ const Pricing = () => {
 
         {/* Advance Payment Terms */}
         <div className="space-y-4">
-          <div className="bg-gray-900 rounded-lg p-4">
+          <div className="bg-white rounded-lg p-4">
             <div className="flex items-center space-x-2 mb-3">
               <Calendar className="w-5 h-5 text-purple-400" />
               <h2 className="text-lg font-semibold">Advance Payment Terms</h2>
@@ -189,7 +189,7 @@ const Pricing = () => {
                 <select
                   value={advancePayment.months}
                   onChange={(e) => setAdvancePayment({ ...advancePayment, months: e.target.value })}
-                  className="w-full px-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                  className="w-full px-2 py-1.5 text-sm bg-white border border-gray-700 rounded-md text-black focus:outline-none focus:border-white"
                 >
                   <option value="1">1 Month</option>
                   <option value="2">2 Months</option>
@@ -209,7 +209,7 @@ const Pricing = () => {
                     onChange={(e) => setAdvancePayment({ ...advancePayment, percentage: e.target.value })}
                     min="0"
                     max="100"
-                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                    className="w-full pl-8 pr-2 py-1.5 text-sm bg-white border border-gray-700 rounded-md text-black focus:outline-none focus:border-white"
                   />
                 </div>
               </div>

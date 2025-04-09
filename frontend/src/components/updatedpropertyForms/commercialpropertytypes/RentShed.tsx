@@ -20,59 +20,164 @@ import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle,
 
 interface FormData {
   propertyName: string;
-  shedType: string[];
   address: Record<string, string>;
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
+  size: {
+    totalArea: string;
+    builtUpArea: string;
+    carpetArea: string;
   };
-  isCornerProperty: boolean;
-  shedDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  rent: {
+  features: {
+    propertyType: string;
+    propertyAge: string;
+    propertyCondition: string;
+    propertyDescription: string;
+  };
+  rentalTerms: {
     expectedRent: string;
     isNegotiable: boolean;
     rentType: string;
+    maintenanceAmount?: string;
+    securityDeposit: string;
+    otherCharges: string;
+    brokerage: string;
   };
-  securityDeposit: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
-  otherCharges: Record<string, any>;
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, string>;
+  availabilityDate: string;
+  contactInfo: {
+    name: string;
+    email: string;
+    phone: string;
+    whatsapp: string;
+  };
   media: {
-    images: Array<{ category: string; files: Array<{ url: string; file: File }> }>;
-    video?: { url: string; file: File };
-    documents: Array<{ type: string; file: File }>;
+    images: File[];
+    videoTour: File | null;
   };
+}
+
+interface PropertyNameProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+interface CommercialPropertyAddressProps {
+  value: Record<string, string>;
+  onChange: (value: Record<string, string>) => void;
+}
+
+interface PropertySizeProps {
+  value: {
+    totalArea: string;
+    builtUpArea: string;
+    carpetArea: string;
+  };
+  onChange: (value: {
+    totalArea: string;
+    builtUpArea: string;
+    carpetArea: string;
+  }) => void;
+}
+
+interface PropertyFeaturesProps {
+  value: {
+    propertyType: string;
+    propertyAge: string;
+    propertyCondition: string;
+    propertyDescription: string;
+  };
+  onChange: (value: {
+    propertyType: string;
+    propertyAge: string;
+    propertyCondition: string;
+    propertyDescription: string;
+  }) => void;
+}
+
+interface RentalTermsProps {
+  value: {
+    expectedRent: string;
+    isNegotiable: boolean;
+    rentType: string;
+    maintenanceAmount?: string;
+    securityDeposit: string;
+    otherCharges: string;
+    brokerage: string;
+  };
+  onChange: (value: {
+    expectedRent: string;
+    isNegotiable: boolean;
+    rentType: string;
+    maintenanceAmount?: string;
+    securityDeposit: string;
+    otherCharges: string;
+    brokerage: string;
+  }) => void;
+}
+
+interface AvailabilityDateProps {
+  value: string;
+  onChange: (value: string) => void;
+}
+
+interface ContactInformationProps {
+  value: {
+    name: string;
+    email: string;
+    phone: string;
+    whatsapp: string;
+  };
+  onChange: (value: {
+    name: string;
+    email: string;
+    phone: string;
+    whatsapp: string;
+  }) => void;
+}
+
+interface MediaUploadProps {
+  value: {
+    images: File[];
+    videoTour: File | null;
+  };
+  onChange: (value: {
+    images: File[];
+    videoTour: File | null;
+  }) => void;
 }
 
 const RentShed = () => {
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
-    shedType: [],
     address: {},
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
-    shedDetails: {},
-    propertyDetails: {},
-    rent: {
+    size: {
+      totalArea: '',
+      builtUpArea: '',
+      carpetArea: ''
+    },
+    features: {
+      propertyType: '',
+      propertyAge: '',
+      propertyCondition: '',
+      propertyDescription: ''
+    },
+    rentalTerms: {
       expectedRent: '',
       isNegotiable: false,
-      rentType: ''
+      rentType: '',
+      maintenanceAmount: undefined,
+      securityDeposit: '',
+      otherCharges: '',
+      brokerage: ''
     },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    availabilityDate: '',
+    contactInfo: {
+      name: '',
+      email: '',
+      phone: '',
+      whatsapp: ''
+    },
     media: {
       images: [],
-      video: undefined,
-      documents: []
+      videoTour: null
     }
   });
 
@@ -81,153 +186,107 @@ const RentShed = () => {
   const formSections = [
     {
       title: 'Basic Information',
+      icon: <Store className="w-5 h-5" />,
       content: (
         <div className="space-y-8">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Store className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyName
-                  propertyName={formData.propertyName}
-                  onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
-                />
-                <ShedType
-                  onShedTypeChange={(type) => setFormData({ ...formData, shedType: type })}
-                />
-              </div>
+            <div className="flex items-center gap-3 mb-6">
+              <Store className="w-6 h-6 text-black" />
+              <h3 className="text-xl font-semibold text-black">Property Details</h3>
             </div>
-          </div>
-
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <MapPin className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Location Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <CommercialPropertyAddress
-                  onAddressChange={(address) => setFormData({ ...formData, address })}
-                />
-                <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
-                <MapCoordinates
-                  latitude={formData.coordinates.latitude}
-                  longitude={formData.coordinates.longitude}
-                  onLatitudeChange={(lat) => setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })}
-                  onLongitudeChange={(lng) => setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })}
-                />
-                <CornerProperty
-                  onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
-                />
-              </div>
-            </div>
+            <PropertyName
+              value={formData.propertyName}
+              onChange={(value) => setFormData({ ...formData, propertyName: value })}
+            />
+            <CommercialPropertyAddress
+              value={formData.address}
+              onChange={(value) => setFormData({ ...formData, address: value })}
+            />
           </div>
         </div>
       )
     },
     {
       title: 'Property Details',
+      icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <ShedDetails
-                onDetailsChange={(details) => setFormData({ ...formData, shedDetails: details })}
-              />
-              <CommercialPropertyDetails
-                onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
-              />
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
+          <PropertySize
+            value={formData.size}
+            onChange={(value) => setFormData({ ...formData, size: value })}
+          />
+          <PropertyFeatures
+            value={formData.features}
+            onChange={(value) => setFormData({ ...formData, features: value })}
+          />
         </div>
       )
     },
     {
       title: 'Rental Terms',
+      icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Rental Terms</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <Rent onRentChange={(rent) => {
-                setFormData({ 
-                  ...formData, 
-                  rent: {
-                    expectedRent: rent.expectedRent || "",
-                    isNegotiable: rent.isNegotiable || false,
-                    rentType: rent.rentType || ""
-                  }
-                })
-              }} />
-              {formData.rent.rentType === 'exclusive' && (
-                <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, maintenanceAmount: maintenance })} />
-              )}
-              <SecurityDeposit onSecurityDepositChange={(deposit) => setFormData({ ...formData, securityDeposit: deposit })} />
-              <OtherCharges onOtherChargesChange={(charges) => setFormData({ ...formData, otherCharges: charges })} />
-              <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
           </div>
+          <RentalTerms
+            value={formData.rentalTerms}
+            onChange={(value) => setFormData({ ...formData, rentalTerms: value })}
+          />
         </div>
       )
     },
     {
       title: 'Availability',
+      icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <AvailabilityDate onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Availability</h3>
           </div>
+          <AvailabilityDate
+            value={formData.availabilityDate}
+            onChange={(value) => setFormData({ ...formData, availabilityDate: value })}
+          />
         </div>
       )
     },
     {
       title: 'Contact Information',
+      icon: <UserCircle className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <UserCircle className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Contact Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialContactDetails
-                onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
-              />
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <UserCircle className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
           </div>
+          <ContactInformation
+            value={formData.contactInfo}
+            onChange={(value) => setFormData({ ...formData, contactInfo: value })}
+          />
         </div>
       )
     },
     {
       title: 'Property Media',
+      icon: <ImageIcon className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <ImageIcon className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialMediaUpload
-                onMediaChange={(media) => setFormData({ ...formData, media })}
-              />
-            </div>
+          <div className="flex items-center gap-3 mb-6">
+            <ImageIcon className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
+          <MediaUpload
+            value={formData.media}
+            onChange={(value) => setFormData({ ...formData, media: value })}
+          />
         </div>
       )
     }
@@ -251,45 +310,66 @@ const RentShed = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-black">{formSections[currentStep].title}</h2>
-        <div className="h-1 w-20 bg-black mt-2 rounded-full"></div>
+    <div className="min-h-screen bg-white">
+      {/* Progress Bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              {formSections.map((section, index) => (
+                <div key={index} className="flex items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                  }`}>
+                    {section.icon}
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className={`w-16 h-1 mx-2 ${
+                      index < currentStep ? 'bg-black' : 'bg-gray-200'
+                    }`} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-8">{formSections[currentStep].content}</div>
-
-      <div className="flex justify-between mt-8">
-        <button
-          type="button"
-          className="px-6 py-2 border border-black/20 rounded-lg text-black hover:bg-black hover:text-white transition-all duration-200 flex items-center"
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-        >
-          <ChevronLeft className="mr-1" size={18} />
-          Previous
-        </button>
-
-        {currentStep < formSections.length - 1 ? (
-          <button
-            type="button"
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center"
-            onClick={handleNext}
-          >
-            Next
-            <ChevronRight className="ml-1" size={18} />
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200 flex items-center"
-          >
-            List Property
-            <ChevronRight className="ml-1" size={18} />
-          </button>
-        )}
+      {/* Form Content */}
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+        
+        {formSections[currentStep].content}
       </div>
-    </form>
+
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
+              currentStep === 0 
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                : 'bg-white text-black hover:bg-black hover:text-white'
+            }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+            <ChevronRight className="w-5 h-5 ml-2" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

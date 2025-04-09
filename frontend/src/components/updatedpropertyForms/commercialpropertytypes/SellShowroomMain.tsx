@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon } from "lucide-react"
 import PropertyName from "../PropertyName"
 import ShowroomType from "../CommercialComponents/ShowroomType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -17,8 +18,37 @@ import CommercialAvailability from "../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 
+interface FormData {
+  propertyName: string;
+  showroomType: string;
+  address: Record<string, any>;
+  landmark: string;
+  coordinates: { latitude: string; longitude: string };
+  isCornerProperty: boolean;
+  showroomDetails: Record<string, any>;
+  propertyDetails: Record<string, any>;
+  price: string;
+  area: {
+    superBuiltUpAreaSqft: string;
+    builtUpAreaSqft: string;
+    carpetAreaSqft: string;
+  };
+  registrationCharges: Record<string, any>;
+  brokerage: Record<string, any>;
+  availability: Record<string, any>;
+  contactDetails: Record<string, any>;
+  media: {
+    images: Array<{
+      category: string;
+      files: Array<{ url: string; file: File }>;
+    }>;
+    video?: { url: string; file: File };
+    documents: Array<{ type: string; file: File }>;
+  };
+}
+
 const SellShowroomMain = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
     showroomType: "",
     address: {},
@@ -37,7 +67,10 @@ const SellShowroomMain = () => {
     brokerage: {},
     availability: {},
     contactDetails: {},
-    media: { photos: [], video: null },
+    media: {
+      images: [],
+      documents: [],
+    },
   })
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -45,72 +78,79 @@ const SellShowroomMain = () => {
   const steps = [
     {
       title: "Basic Information",
+      icon: <Store className="w-5 h-5" />,
       content: (
-        <>
+        <div className="space-y-6">
           <PropertyName
             propertyName={formData.propertyName}
             onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
           />
-          <ShowroomType onShowroomTypeChange={(type) => setFormData({ ...formData, showroomType: type })} />
+          <ShowroomType
+            onTypeChange={(type) => setFormData({ ...formData, showroomType: type })}
+          />
           <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, address })} />
           <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
-          <MapCoordinates
-            latitude={formData.coordinates.latitude}
-            longitude={formData.coordinates.longitude}
-            onLatitudeChange={(lat) =>
-              setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })
-            }
-            onLongitudeChange={(lng) =>
-              setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })
-            }
-          />
+          
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
           />
-        </>
+        </div>
       ),
     },
     {
       title: "Property Details",
+      icon: <Building2 className="w-5 h-5" />,
       content: (
-        <>
+        <div className="space-y-6">
           <ShowroomDetails onDetailsChange={(details) => setFormData({ ...formData, showroomDetails: details })} />
           <CommercialPropertyDetails
             onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
           />
-        </>
+        </div>
       ),
     },
     {
       title: "Pricing Details",
+      icon: <DollarSign className="w-5 h-5" />,
       content: (
-        <>
+        <div className="space-y-6">
           <Price onPriceChange={(price) => setFormData({ ...formData, price: price.amount })} />
           <PricePerSqft price={formData.price} area={formData.area} />
           <RegistrationCharges
             onRegistrationChargesChange={(charges) => setFormData({ ...formData, registrationCharges: charges })}
           />
           <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
-        </>
+        </div>
       ),
     },
     {
       title: "Availability",
+      icon: <Calendar className="w-5 h-5" />,
       content: (
-        <CommercialAvailability onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+        <div className="space-y-6">
+          <CommercialAvailability onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+        </div>
       ),
     },
     {
       title: "Contact Information",
+      icon: <UserCircle className="w-5 h-5" />,
       content: (
-        <CommercialContactDetails
-          onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
-        />
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
+          />
+        </div>
       ),
     },
     {
       title: "Property Media",
-      content: <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />,
+      icon: <ImageIcon className="w-5 h-5" />,
+      content: (
+        <div className="space-y-6">
+          <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />
+        </div>
+      ),
     },
   ]
 
@@ -128,27 +168,42 @@ const SellShowroomMain = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="p-6 sm:p-10">
           <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sell Commercial Showroom</h1>
-            <div className="mt-2 flex items-center">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                ></div>
-              </div>
-              <span className="ml-4 text-sm font-medium text-gray-500">
-                Step {currentStep + 1} of {steps.length}
-              </span>
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Sell Commercial Showroom</h1>
+            <div className="mt-6 flex items-center space-x-6">
+              {steps.map((step, index) => (
+                <div key={index} className="flex items-center">
+                  <div 
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
+                    }`}
+                  >
+                    {step.icon}
+                  </div>
+                  <span className={`ml-3 text-sm font-medium ${
+                    index <= currentStep ? 'text-black' : 'text-black/70'
+                  }`}>
+                    {step.title}
+                  </span>
+                  {index < steps.length - 1 && (
+                    <div className={`w-16 h-1 mx-3 ${
+                      index < currentStep ? 'bg-black' : 'bg-gray-200'
+                    }`} />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">{steps[currentStep].title}</h2>
+            <div className="bg-white border border-black/10 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+              <h2 className="text-xl font-semibold mb-6 text-black flex items-center gap-2">
+                {steps[currentStep].icon}
+                {steps[currentStep].title}
+              </h2>
               <div className="space-y-6">{steps[currentStep].content}</div>
             </div>
 
@@ -157,11 +212,11 @@ const SellShowroomMain = () => {
                 type="button"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`px-6 py-2.5 rounded-lg border ${
+                className={`px-6 py-2.5 rounded-lg border transition-all duration-200 ${
                   currentStep === 0
-                    ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                } transition-colors duration-200`}
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "border-black/20 text-black hover:bg-black hover:text-white"
+                }`}
               >
                 Previous
               </button>
@@ -170,14 +225,14 @@ const SellShowroomMain = () => {
                 <button
                   type="button"
                   onClick={nextStep}
-                  className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                  className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
-                  Continue
+                  Next
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200"
+                  className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
                   List Property
                 </button>

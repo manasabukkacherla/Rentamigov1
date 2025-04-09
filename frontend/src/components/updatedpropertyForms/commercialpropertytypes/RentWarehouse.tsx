@@ -73,12 +73,7 @@ const RentWarehouse = () => {
               />
               <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <MapCoordinates
-              latitude={formData.coordinates.latitude}
-              longitude={formData.coordinates.longitude}
-              onLatitudeChange={(lat) => setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })}
-              onLongitudeChange={(lng) => setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })}
-            />
+            
             <div className="flex items-center space-x-2 cursor-pointer">
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
