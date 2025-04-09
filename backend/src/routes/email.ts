@@ -14,6 +14,16 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+const transporter1 = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.BUG_EMAIL,
+    pass: process.env.PASS,
+  },
+});
+
 emailRouter.post("/send-email", async (req: Request, res: Response) => {
   const { content, toEmailAddress } = req.body;
 
