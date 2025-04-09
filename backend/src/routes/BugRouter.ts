@@ -4,6 +4,7 @@ import { ParamsDictionary } from "express-serve-static-core";
 import User from "../models/signup";
 const nodemailer = require("nodemailer");
 import transporter from "../utils/emailservice";
+import transporter1 from "../utils/emailservice";
 
 interface CustomRequest<T = ParamsDictionary, U = any, V = any>
   extends express.Request<T, U, V> {
@@ -13,16 +14,6 @@ interface CustomRequest<T = ParamsDictionary, U = any, V = any>
 }
 
 const bugRouter = express.Router();
-
-const transporter1 = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.BUG_EMAIL,
-    pass: process.env.PASS,
-  },
-});
 
 bugRouter.post(
   "/create",
