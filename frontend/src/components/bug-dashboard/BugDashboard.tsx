@@ -1,32 +1,34 @@
+
+
 "use client"
 
 import { useState, useEffect } from "react"
-import { BugIcon, X, BarChart2, ChevronLeft, Download, RefreshCw } from "lucide-react"
+import { BugIcon, X, BarChart2, Download, RefreshCw } from "lucide-react"
 import { toast } from "react-toastify"
 import BugReportStats from "./BugReportStats"
 import BugReportFilters from "./BugReportFilters"
 import BugReportList from "./BugReportList"
-import { Link } from "react-router-dom"
 import BugReportDetails from "./BugReportDetails"
 import axios from "axios"
 
 export interface Bugs {
-  _id: string,
+  _id: string
   title: string
   description: string
   // email: string
   errorcode?: string
   category: "UI/UX" | "Functionality" | "Performance" | "Security" | "Data" | "Integration" | "Other"
   imageUrl: string
-  status: "pending" | "in-progress" | "resolved"
+  status: string
   createdAt: Date
   updatedAt: Date
   author: User
+  isAccepted?: boolean
 }
 
 interface User {
-  _id: string;
-  email: string;
+  _id: string
+  email: string
 }
 
 // Sample data generator for demonstration purposes
@@ -70,37 +72,93 @@ const BugDashboard = () => {
   const [viewMode, setViewMode] = useState<"list" | "stats">("list")
   const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const [bugs, setBugs] = useState<Bugs[]>([]);
+  const [bugs, setBugs] = useState<Bugs[]>([])
   const [filteredBugs, setFilteredbugs] = useState<Bugs[]>([])
-  
+
+  // Add a new state for tracking whether a bug is a request or accepted
+  const [bugRequests, setBugRequests] = useState<Bugs[]>([])
+  const [acceptedBugs, setAcceptedBugs] = useState<Bugs[]>([])
+  const [activeSection, setActiveSection] = useState<"requests" | "management">("requests")
+
+  // Update the loadBugs function to separate bugs into requests and accepted
   const loadBugs = async () => {
     setIsRefreshing(true)
     try {
-      const response = await axios.get(`/api/bug/list`);
-      if(response.data.success) {
+      const response = await axios.get(`/api/bug/list`)
+      if (response.data.success) {
         // console.log(response.data.data)
-        setBugs(response.data.data)
+        const allBugs = response.data.data
+        setBugs(allBugs)
+
+        // Separate bugs into requests and accepted
+        const requests = allBugs.filter((bug: Bugs) => bug.status === "pending" && !bug.isAccepted)
+        const accepted = allBugs.filter((bug: Bugs) => bug.isAccepted || bug.status !== "pending")
+
+        setBugRequests(requests)
+        setAcceptedBugs(accepted)
 
         const reportsWithIds = bugs.map((bug: Bugs, index: number) => ({
           ...bug,
           id: bug._id || `bug-${index}-${Date.now()}`,
         }))
 
-        setFilteredbugs(reportsWithIds)
+        setFilteredbugs(activeSection === "requests" ? requests : accepted)
         setIsRefreshing(false)
       }
     } catch (error) {
-      toast.error("Failed to load bugs");
-      console.error("Error loading bugs:", error);
+      toast.error("Failed to load bugs")
+      console.error("Error loading bugs:", error)
     }
   }
 
-  useEffect(() => {
-    loadBugs()
-  }, [])
+  // Add a function to handle accepting a bug
+  const handleAcceptBug = async (bug: Bugs) => {
+    try {
+      // Update the bug status to "in-progress" and mark as accepted
+      const response = await axios.put(`/api/bug/${bug._id}/edit`, {
+        status: "in-progress",
+        isAccepted: true,
+      })
 
+      if (response.data.success) {
+        // Update local state
+        const updatedBugs = bugs.map((b) => {
+          if (b._id === bug._id) {
+            return { ...b, status: "in-progress", isAccepted: true }
+          }
+          return b
+        })
+
+        setBugs(updatedBugs)
+
+        // Move the bug from requests to accepted
+        const updatedRequests = bugRequests.filter((b) => b._id !== bug._id)
+        const updatedAccepted = [...acceptedBugs, { ...bug, status: "in-progress" as const, isAccepted: true }]
+
+        setBugRequests(updatedRequests)
+        setAcceptedBugs(updatedAccepted)
+
+        // Update filtered bugs based on active section
+        setFilteredbugs(activeSection === "requests" ? updatedRequests : updatedAccepted)
+
+        // If the bug was selected, update the selected bug
+        if (selectedReport && selectedReport._id === bug._id) {
+          setSelectedReport({ ...selectedReport, status: "in-progress", isAccepted: true })
+        }
+
+        toast.success("Bug accepted and moved to in-progress")
+      } else {
+        toast.error(response.data.message)
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error("Error accepting bug")
+    }
+  }
+
+  // Update the useEffect to filter bugs based on the active section
   useEffect(() => {
-    let result = [...bugs]
+    let result = activeSection === "requests" ? [...bugRequests] : [...acceptedBugs]
 
     // Apply search filter
     if (searchQuery) {
@@ -154,7 +212,29 @@ const BugDashboard = () => {
     })
 
     setFilteredbugs(result)
-  }, [searchQuery, statusFilter, categoryFilter, errorcodefilter, dateFilter, sortField, sortDirection, bugs])
+  }, [
+    searchQuery,
+    statusFilter,
+    errorcodefilter,
+    dateFilter,
+    sortField,
+    sortDirection,
+    bugRequests,
+    acceptedBugs,
+    activeSection,
+  ])
+
+  // Update the useEffect to load bugs when the component mounts
+  useEffect(() => {
+    loadBugs()
+  }, [])
+
+  // Update the useEffect to update filtered bugs when the active section changes
+  useEffect(() => {
+    setFilteredbugs(activeSection === "requests" ? bugRequests : acceptedBugs)
+    // Clear selected report when switching sections
+    setSelectedReport(null)
+  }, [activeSection, bugRequests, acceptedBugs])
 
   const handleStatusChange = async (report: Bugs, newStatus: "pending" | "in-progress" | "resolved") => {
     const updatedbugs = bugs.map((r) => {
@@ -178,16 +258,16 @@ const BugDashboard = () => {
     console.log(selectedReport)
 
     try {
-      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus });
-  
+      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus })
+
       if (response.data.success) {
-        toast.success(response.data.message);
+        toast.success(response.data.message)
       } else {
-        toast.error(response.data.message);
+        toast.error(response.data.message)
       }
     } catch (err) {
-      console.error(err);
-      toast.error('Error updating bug status');
+      console.error(err)
+      toast.error("Error updating bug status")
     }
     toast.success(`Bug status updated to ${newStatus.replace("-", " ")}`)
   }
@@ -283,6 +363,7 @@ const BugDashboard = () => {
     toast.info("Filters cleared")
   }
 
+  // Update the return statement to include section tabs
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -325,6 +406,42 @@ const BugDashboard = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {viewMode === "list" ? (
           <div className="space-y-6">
+            {/* Section Tabs */}
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <div className="flex border-b">
+                <button
+                  onClick={() => setActiveSection("requests")}
+                  className={`flex-1 py-4 px-6 text-center font-medium ${
+                    activeSection === "requests"
+                      ? "text-black border-b-2 border-black"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Bug Requests
+                  {bugRequests.length > 0 && (
+                    <span className="ml-2 bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                      {bugRequests.length}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => setActiveSection("management")}
+                  className={`flex-1 py-4 px-6 text-center font-medium ${
+                    activeSection === "management"
+                      ? "text-black border-b-2 border-black"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Bug Management
+                  {acceptedBugs.length > 0 && (
+                    <span className="ml-2 bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                      {acceptedBugs.length}
+                    </span>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <BugReportFilters
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -345,6 +462,8 @@ const BugDashboard = () => {
                 selectedReport={selectedReport}
                 setSelectedReport={setSelectedReport}
                 toggleSort={toggleSort}
+                activeSection={activeSection}
+                handleAcceptBug={handleAcceptBug}
               />
 
               <BugReportDetails
@@ -352,6 +471,8 @@ const BugDashboard = () => {
                 handleStatusChange={handleStatusChange}
                 // handleAddComment={handleAddComment}
                 setImageModalOpen={setImageModalOpen}
+                activeSection={activeSection}
+                handleAcceptBug={handleAcceptBug}
               />
             </div>
 
@@ -386,4 +507,3 @@ const BugDashboard = () => {
 }
 
 export default BugDashboard
-
