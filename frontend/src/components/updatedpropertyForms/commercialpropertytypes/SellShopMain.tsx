@@ -86,12 +86,7 @@ const SellShopMain = () => {
             <ShopType onShopTypeChange={(type) => handleChange('shopType', type)} />
             <CommercialPropertyAddress onAddressChange={(address) => handleChange('address', address)} />
             <Landmark onLandmarkChange={(landmark) => handleChange('landmark', landmark)} />
-            <MapCoordinates
-              latitude={formData.coordinates.latitude}
-              longitude={formData.coordinates.longitude}
-              onLatitudeChange={(lat) => handleChange('coordinates', { ...formData.coordinates, latitude: lat })}
-              onLongitudeChange={(lng) => handleChange('coordinates', { ...formData.coordinates, longitude: lng })}
-            />
+            
             <CornerProperty onCornerPropertyChange={(isCorner) => handleChange('isCornerProperty', isCorner)} />
           </div>
         </div>

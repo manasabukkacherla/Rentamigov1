@@ -111,12 +111,7 @@ const RentRetailStoreMain = () => {
                   onAddressChange={(address) => setFormData({ ...formData, address })}
                 />
                 <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
-                <MapCoordinates
-                  latitude={formData.coordinates.latitude}
-                  longitude={formData.coordinates.longitude}
-                  onLatitudeChange={(lat) => setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })}
-                  onLongitudeChange={(lng) => setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })}
-                />
+                
                 <CornerProperty
                   onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
                 />
