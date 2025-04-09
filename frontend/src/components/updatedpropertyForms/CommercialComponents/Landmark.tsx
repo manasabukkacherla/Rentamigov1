@@ -11,7 +11,8 @@ interface LandmarkProps {
 
 const Landmark = ({ onLandmarkChange, onLocationSelect, latitude, longitude }: LandmarkProps) => {
   const [landmark, setLandmark] = useState('');
-  const [locationLabel, setLocationLabel] = useState('');
+  const [lat, setLat] = useState(latitude || '');
+  const [lng, setLng] = useState(longitude || '');
 
   const handleChange = (value: string) => {
     setLandmark(value);
@@ -19,18 +20,24 @@ const Landmark = ({ onLandmarkChange, onLocationSelect, latitude, longitude }: L
   };
 
   const handleLocationSelect = (lat: string, lng: string, addressData?: any) => {
+    setLat(lat);
+    setLng(lng);
     onLocationSelect?.({ latitude: lat, longitude: lng });
-    
-    // Create a readable location label from coordinates or address data
-    if (addressData) {
-      const components = [];
-      if (addressData.route) components.push(addressData.route);
-      if (addressData.sublocality_level_1) components.push(addressData.sublocality_level_1);
-      if (addressData.locality) components.push(addressData.locality);
-      
-      setLocationLabel(components.length > 0 ? components.join(', ') : `${lat}, ${lng}`);
-    } else {
-      setLocationLabel(`${lat}, ${lng}`);
+  };
+  
+  const handleLatitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (!isNaN(Number(value)) || value === '-' || value === '') {
+      setLat(value);
+      onLocationSelect?.({ latitude: value, longitude: lng });
+    }
+  };
+
+  const handleLongitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (!isNaN(Number(value)) || value === '-' || value === '') {
+      setLng(value);
+      onLocationSelect?.({ latitude: lat, longitude: value });
     }
   };
 
@@ -49,8 +56,8 @@ const Landmark = ({ onLandmarkChange, onLocationSelect, latitude, longitude }: L
               Use the map below to set your property's location. Click on the map or search for an address.
             </p>
             <MapSelector
-              latitude={latitude || ''}
-              longitude={longitude || ''}
+              latitude={lat}
+              longitude={lng}
               onLocationSelect={handleLocationSelect}
             />
           </div>
@@ -70,25 +77,44 @@ const Landmark = ({ onLandmarkChange, onLocationSelect, latitude, longitude }: L
           </div>
 
           <div>
-            <label htmlFor="location" className="block text-gray-800 font-medium mb-2">
-              Location
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                id="location"
-                value={locationLabel}
-                readOnly
-                placeholder="Select location on map"
-                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              />
-              <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
+                  Latitude
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="latitude"
+                    value={lat}
+                    onChange={handleLatitudeChange}
+                    placeholder="Enter latitude (e.g., 17.683301)"
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  />
+                  <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
+                  Longitude
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="longitude"
+                    value={lng}
+                    onChange={handleLongitudeChange}
+                    placeholder="Enter longitude (e.g., 83.019301)"
+                    className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  />
+                  <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+              </div>
             </div>
-            {latitude && longitude && (
-              <p className="mt-2 text-xs text-gray-500">
-                Coordinates: {latitude}, {longitude}
-              </p>
-            )}
+            <p className="mt-2 text-xs text-gray-500">
+              Enter coordinates manually or use the map above to set the location.
+            </p>
           </div>
         </div>
       </div>
