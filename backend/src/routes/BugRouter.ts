@@ -167,7 +167,6 @@ bugRouter.put(
         text: ` Dear User,
                 Your bug report has been successfully processed.  
                 The current status is: ${status}
-                We will keep you informed of any updates.
                 Best regards,  
                 Support Team`,
       };
