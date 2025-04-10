@@ -143,7 +143,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
               {/* Pets Allowed */}
               <div className="space-y-4">
                 <h4 className="text-lg font-medium flex items-center gap-2">
-                  <Dog size={20} className="text-white/60" />
+                  <Dog size={20} className="text-black/60" />
                   Pets Allowed
                 </h4>
                 <div className="flex gap-4">
@@ -154,7 +154,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                       onChange={() => handleChange('petsAllowed', true)}
                       className="text-white border-white/20 bg-transparent focus:ring-white"
                     />
-                    <span className="text-white/80">Yes</span>
+                    <span className="text-black/80">Yes</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
@@ -163,7 +163,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                       onChange={() => handleChange('petsAllowed', false)}
                       className="text-white border-white/20 bg-transparent focus:ring-white"
                     />
-                    <span className="text-white/80">No</span>
+                    <span className="text-black/80">No</span>
                   </label>
                 </div>
               </div>
@@ -171,7 +171,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
               {/* Operating Hours */}
               <div className="space-y-4">
                 <h4 className="text-lg font-medium flex items-center gap-2">
-                  <Clock4 size={20} className="text-white/60" />
+                  <Clock4 size={20} className="text-black/60" />
                   Operating Hours Restrictions
                 </h4>
                 <div className="space-y-4">
@@ -183,7 +183,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                         onChange={() => handleOperatingHoursChange('restricted', true)}
                         className="text-white border-white/20 bg-transparent focus:ring-white"
                       />
-                      <span className="text-white/80">Yes</span>
+                      <span className="text-black/80">Yes</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
@@ -192,7 +192,7 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                         onChange={() => handleOperatingHoursChange('restricted', false)}
                         className="text-white border-white/20 bg-transparent focus:ring-white"
                       />
-                      <span className="text-white/80">No</span>
+                      <span className="text-black/80">No</span>
                     </label>
                   </div>
                   {availability.operatingHours.restricted && (
