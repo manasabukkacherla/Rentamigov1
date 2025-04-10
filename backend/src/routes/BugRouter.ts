@@ -63,15 +63,32 @@ bugRouter.post(
         from: process.env.EMAIL_USER,
         to: process.env.BUG_EMAIL,
         subject: "New Bug Request",
-        text: `A new bug has been reported with the following details:\n\nTitle: ${title}\nDescription: ${description}\nStatus: ${status}\nAuthor: ${authorEmail}`,
+        text: ` Dear Technical Team,
+                A new bug has been reported with the following details:
+                Title: ${title}
+                Description: ${description}
+                Status: ${status}
+                Reported By: ${authorEmail}
+                Please review the issue at your earliest convenience.
+                Best regards,
+                Bug Tracking System`,
       };
+
       await transporter.sendMail(techMailOptions);
 
       const authorMailOptions = {
         from: process.env.EMAIL_USER,
         to: authorEmail,
         subject: "Bug Report Received",
-        text: `Your bug report has been received with the following details:\n\nTitle: ${title}\nDescription: ${description}\nStatus: ${status}`,
+        text: `  Dear User,
+                Thank you for submitting your bug report. We have received the following details:
+                 Title: ${title}
+                 Description: ${description}
+                 Current Status: ${status}
+                Our technical team will review the issue and take appropriate action as soon as possible. We appreciate your contribution to improving our system.
+
+                Best regards,  
+                Support Team`,
       };
 
       await transporter.sendMail(authorMailOptions);
@@ -147,10 +164,15 @@ bugRouter.put(
         from: process.env.BUG_EMAIL,
         to: email,
         subject: "New Bug Created",
-        text: `A new bug has been processing and status is ${status}`,
+        text: ` Dear User,
+                Your bug report has been successfully processed.  
+                The current status is: ${status}
+                We will keep you informed of any updates.
+                Best regards,  
+                Support Team`,
       };
 
-      await transporter.sendMail(mailOptions);
+      await transporter1.sendMail(mailOptions);
 
       res.status(200).json({ success: true, bug });
     } catch (error) {
@@ -183,7 +205,11 @@ bugRouter.put(
         from: process.env.BUG_EMAIL,
         to: authorEmail,
         subject: "Bug Report accept",
-        text: `Your bug report has accepted`,
+        text: `Dear User,
+              We would like to inform you that your bug report has been reviewed and accepted for further processing.
+              Thank you for helping us improve our system.
+              Best regards,  
+              Support Team`,
       };
       await transporter1.sendMail(authorMailOptions);
 

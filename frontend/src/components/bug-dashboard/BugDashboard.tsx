@@ -252,7 +252,7 @@ const BugDashboard = () => {
     console.log(selectedReport)
 
     try {
-      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus })
+      const response = await axios.put(`/api/bug/${report._id}/edit`, { status: newStatus})
 
       if (response.data.success) {
         toast.success(response.data.message)
@@ -498,3 +498,4 @@ const BugDashboard = () => {
 }
 
 export default BugDashboard
+
