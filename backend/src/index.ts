@@ -51,6 +51,7 @@ import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
+import commercialPlotRoutes from './routes/commercial/commericalPlotRoutes';
 
 dotenv.config();
 
@@ -133,6 +134,7 @@ app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
 
 app.use("/api/commercial-shops", commercialShopRoutes);
+app.use('/api/plots', commercialPlotRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
