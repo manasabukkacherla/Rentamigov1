@@ -51,11 +51,8 @@ import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
-<<<<<<< HEAD
 import commercialShedRoutes from './routes/commercial/commercialShedRoutes';
 import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRoutes';
-=======
->>>>>>> 89a27482d2e037c866b1264b5edc34199343901f
 
 dotenv.config();
 
@@ -171,12 +168,9 @@ app.use("/api/bug", bugRouter);
 
 app.use("/api/commercial-shops", commercialShopRoutes);
 app.use("/api/commercial-showrooms", commercialShowroomRoutes);
-<<<<<<< HEAD
 app.use('/api/commercial-sheds', commercialShedRoutes);
 app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
 
-=======
->>>>>>> 89a27482d2e037c866b1264b5edc34199343901f
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
   res.json({ message: "hjhjh" });
