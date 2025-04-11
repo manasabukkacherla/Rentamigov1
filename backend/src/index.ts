@@ -53,6 +53,7 @@ import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
 import commercialShedRoutes from './routes/commercial/commercialShedRoutes';
 import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRoutes';
+import commercialPlotRoutes from './routes/commercial/commericalPlotRoutes';
 
 dotenv.config();
 
@@ -95,31 +96,31 @@ app.use(express.static(path.join(__dirname, "build")));
 app.use(cors());
 
 // Configure express with proper types
-app.use(express.json({ 
+app.use(express.json({
   limit: '50mb',
   verify: (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
     try {
       JSON.parse(buf.toString());
-    } catch(e) {
-      res.status(400).json({ 
-        success: false, 
-        error: 'Invalid JSON' 
+    } catch (e) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid JSON'
       });
       throw new Error('Invalid JSON');
     }
   }
 }));
-app.use(express.urlencoded({ 
-  extended: true, 
+app.use(express.urlencoded({
+  extended: true,
   limit: '50mb'
 }));
 
 // Add timeout middleware with proper types
 const timeout = (req: express.Request, res: express.Response, next: express.NextFunction) => {
   res.setTimeout(120000, () => {
-    res.status(408).json({ 
-      success: false, 
-      error: 'Request timeout' 
+    res.status(408).json({
+      success: false,
+      error: 'Request timeout'
     });
   });
   next();
@@ -170,6 +171,7 @@ app.use("/api/commercial-shops", commercialShopRoutes);
 app.use("/api/commercial-showrooms", commercialShowroomRoutes);
 app.use('/api/commercial-sheds', commercialShedRoutes);
 app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
+app.use('/api/commercial/plots', commercialPlotRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
