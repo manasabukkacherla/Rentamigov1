@@ -66,55 +66,7 @@ const LeaseBuilderFloor = ({
   }, []);
 
   // Function to save data at each step
-  const saveStepData = async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
-    try {
-      const payload = {
-        propertyId,
-        propertyName: formData.propertyName,
-        propertyAddress: formData.propertyAddress, // ✅ Ensure this is included
-        coordinates: formData.coordinates,
-        size: formData.size,
-        restrictions: formData.restrictions,
-        features: formData.features,
-        leaseAmount: formData.leaseAmount,
-        leaseTenure: formData.leaseTenure,
-        maintenanceAmount: formData.maintenanceAmount,
-        brokerage: formData.brokerage,
-        availability: formData.availability,
-        media: formData.media,
-        otherCharges: formData.otherCharges,
-        flatAmenities: formData.flatAmenities,
-        societyAmenities: formData.societyAmenities,
-      };
-
-      console.log("🔹 API Payload:", JSON.stringify(payload, null, 2)); // ✅ Debug log
-
-      const response = await fetch("/api/basicdetails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload), // ✅ Send correctly formatted payload
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccessMessage("Step saved successfully! ✅");
-      } else {
-        setErrorMessage(`Error saving step: ${result.message}`);
-      }
-    } catch (error) {
-      console.error("Error saving step:", error);
-      setErrorMessage("Failed to save step. Check your connection.");
-    }
-
-    setLoading(false);
-  };
 
   const steps = [
     {
