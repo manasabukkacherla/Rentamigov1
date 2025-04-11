@@ -77,162 +77,162 @@ export const createShowroom = async (req: Request, res: Response) => {
 };
 
 // Get all commercial showroom listings
-export const getAllShowrooms = async (req: Request, res: Response) => {
-  try {
-    const showrooms = await CommercialShowroom.find()
-      .sort({ 'metadata.createdAt': -1 });
+// export const getAllShowrooms = async (req: Request, res: Response) => {
+//   try {
+//     const showrooms = await CommercialShowroom.find()
+//       .sort({ 'metadata.createdAt': -1 });
 
-    res.status(200).json({
-      success: true,
-      count: showrooms.length,
-      data: showrooms
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching commercial showroom listings',
-      error: error.message
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       count: showrooms.length,
+//       data: showrooms
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error fetching commercial showroom listings',
+//       error: error.message
+//     });
+//   }
+// };
 
 // Get single commercial showroom listing
-export const getShowroom = async (req: Request, res: Response) => {
-  try {
-    const showroom = await CommercialShowroom.findById(req.params.id);
+// export const getShowroom = async (req: Request, res: Response) => {
+//   try {
+//     const showroom = await CommercialShowroom.findById(req.params.id);
 
-    if (!showroom) {
-      return res.status(404).json({
-        success: false,
-        message: 'Commercial showroom listing not found'
-      });
-    }
+//     if (!showroom) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Commercial showroom listing not found'
+//       });
+//     }
 
-    res.status(200).json({
-      success: true,
-      data: showroom
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: 'Error fetching commercial showroom listing',
-      error: error.message
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       data: showroom
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error fetching commercial showroom listing',
+//       error: error.message
+//     });
+//   }
+// };
 
-// Update commercial showroom listing
-export const updateShowroom = async (req: Request, res: Response) => {
-  try {
-    const showroom = await CommercialShowroom.findById(req.params.id);
+// // Update commercial showroom listing
+// export const updateShowroom = async (req: Request, res: Response) => {
+//   try {
+//     const showroom = await CommercialShowroom.findById(req.params.id);
 
-    if (!showroom) {
-      return res.status(404).json({
-        success: false,
-        message: 'Commercial showroom listing not found'
-      });
-    }
+//     if (!showroom) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Commercial showroom listing not found'
+//       });
+//     }
 
-    // Update metadata
-    req.body.metadata = {
-      ...showroom.metadata,
-      updatedAt: new Date()
-    };
+//     // Update metadata
+//     req.body.metadata = {
+//       ...showroom.metadata,
+//       updatedAt: new Date()
+//     };
 
-    const updatedShowroom = await CommercialShowroom.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
-    );
+//     const updatedShowroom = await CommercialShowroom.findByIdAndUpdate(
+//       req.params.id,
+//       req.body,
+//       {
+//         new: true,
+//         runValidators: true
+//       }
+//     );
 
-    res.status(200).json({
-      success: true,
-      message: 'Commercial showroom listing updated successfully',
-      data: updatedShowroom
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: 'Error updating commercial showroom listing',
-      error: error.message
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: 'Commercial showroom listing updated successfully',
+//       data: updatedShowroom
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error updating commercial showroom listing',
+//       error: error.message
+//     });
+//   }
+// };
 
-// Delete commercial showroom listing
-export const deleteShowroom = async (req: Request, res: Response) => {
-  try {
-    const showroom = await CommercialShowroom.findById(req.params.id);
+// // Delete commercial showroom listing
+// export const deleteShowroom = async (req: Request, res: Response) => {
+//   try {
+//     const showroom = await CommercialShowroom.findById(req.params.id);
 
-    if (!showroom) {
-      return res.status(404).json({
-        success: false,
-        message: 'Commercial showroom listing not found'
-      });
-    }
+//     if (!showroom) {
+//       return res.status(404).json({
+//         success: false,
+//         message: 'Commercial showroom listing not found'
+//       });
+//     }
 
-    await showroom.deleteOne();
+//     await showroom.deleteOne();
 
-    res.status(200).json({
-      success: true,
-      message: 'Commercial showroom listing deleted successfully'
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: 'Error deleting commercial showroom listing',
-      error: error.message
-    });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: 'Commercial showroom listing deleted successfully'
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error deleting commercial showroom listing',
+//       error: error.message
+//     });
+//   }
+// };
 
-// Search commercial showroom listings
-export const searchShowrooms = async (req: Request, res: Response) => {
-  try {
-    const {
-      city,
-      minPrice,
-      maxPrice,
-      minArea,
-      maxArea,
-      showroomType,
-      furnishingStatus
-    } = req.query;
+// // Search commercial showroom listings
+// export const searchShowrooms = async (req: Request, res: Response) => {
+//   try {
+//     const {
+//       city,
+//       minPrice,
+//       maxPrice,
+//       minArea,
+//       maxArea,
+//       showroomType,
+//       furnishingStatus
+//     } = req.query;
 
-    const query: any = {};
+//     const query: any = {};
 
-    if (city) query['basicInformation.address.city'] = city;
-    if (showroomType) query['basicInformation.showroomType'] = showroomType;
-    if (furnishingStatus) query['propertyDetails.furnishingStatus'] = furnishingStatus;
+//     if (city) query['basicInformation.address.city'] = city;
+//     if (showroomType) query['basicInformation.showroomType'] = showroomType;
+//     if (furnishingStatus) query['propertyDetails.furnishingStatus'] = furnishingStatus;
 
-    if (minPrice || maxPrice) {
-      query['pricingDetails.price'] = {};
-      if (minPrice) query['pricingDetails.price'].$gte = Number(minPrice);
-      if (maxPrice) query['pricingDetails.price'].$lte = Number(maxPrice);
-    }
+//     if (minPrice || maxPrice) {
+//       query['pricingDetails.price'] = {};
+//       if (minPrice) query['pricingDetails.price'].$gte = Number(minPrice);
+//       if (maxPrice) query['pricingDetails.price'].$lte = Number(maxPrice);
+//     }
 
-    if (minArea || maxArea) {
-      query['propertyDetails.area.superBuiltUpArea'] = {};
-      if (minArea) query['propertyDetails.area.superBuiltUpArea'].$gte = Number(minArea);
-      if (maxArea) query['propertyDetails.area.superBuiltUpArea'].$lte = Number(maxArea);
-    }
+//     if (minArea || maxArea) {
+//       query['propertyDetails.area.superBuiltUpArea'] = {};
+//       if (minArea) query['propertyDetails.area.superBuiltUpArea'].$gte = Number(minArea);
+//       if (maxArea) query['propertyDetails.area.superBuiltUpArea'].$lte = Number(maxArea);
+//     }
 
-    const showrooms = await CommercialShowroom.find(query)
-      .sort({ 'metadata.createdAt': -1 });
+//     const showrooms = await CommercialShowroom.find(query)
+//       .sort({ 'metadata.createdAt': -1 });
 
-    res.status(200).json({
-      success: true,
-      count: showrooms.length,
-      data: showrooms
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: 'Error searching commercial showroom listings',
-      error: error.message
-    });
-  }
-}; 
+//     res.status(200).json({
+//       success: true,
+//       count: showrooms.length,
+//       data: showrooms
+//     });
+//   } catch (error: any) {
+//     res.status(500).json({
+//       success: false,
+//       message: 'Error searching commercial showroom listings',
+//       error: error.message
+//     });
+//   }
+// }; 
