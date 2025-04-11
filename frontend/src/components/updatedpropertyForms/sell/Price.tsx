@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { IndianRupee } from 'lucide-react';
 
 interface PriceData {
-  amount: string;
-  type: 'fixed' | 'negotiable';
+  propertyPrice: number;
+  pricetype: 'fixed' | 'negotiable';
+  area: number;
+  totalprice: number;
 }
 
 interface PriceProps {
@@ -12,8 +14,10 @@ interface PriceProps {
 
 const Price = ({ onPriceChange }: PriceProps) => {
   const [price, setPrice] = useState<PriceData>({
-    amount: '',
-    type: 'fixed',
+    propertyPrice: 0,
+      pricetype: "fixed",
+      area: 0,
+      totalprice: 0,
   });
 
   const handleChange = (field: keyof PriceData, value: any) => {
@@ -43,8 +47,8 @@ const Price = ({ onPriceChange }: PriceProps) => {
               <input
                 type="number"
                 min="0"
-                value={price.amount}
-                onChange={(e) => handleChange('amount', e.target.value)}
+                value={price.propertyPrice || ''}
+                onChange={(e) => handleChange('propertyPrice', parseFloat(e.target.value))}
                 placeholder="Enter property price"
                 className="w-full pl-10 pr-4 py-3.5 rounded-lg bg-gray-50 border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -63,8 +67,8 @@ const Price = ({ onPriceChange }: PriceProps) => {
                     type="radio"
                     name="priceType"
                     value="fixed"
-                    checked={price.type === 'fixed'}
-                    onChange={(e) => handleChange('type', e.target.value as 'fixed' | 'negotiable')}
+                    checked={price.pricetype === 'fixed'}
+                    onChange={(e) => handleChange('pricetype', e.target.value as 'fixed' | 'negotiable')}
                     className="w-5 h-5 text-black border-gray-300 focus:ring-black"
                   />
                   <span className="ml-3 text-black">Fixed</span>
@@ -76,8 +80,8 @@ const Price = ({ onPriceChange }: PriceProps) => {
                     type="radio"
                     name="priceType"
                     value="negotiable"
-                    checked={price.type === 'negotiable'}
-                    onChange={(e) => handleChange('type', e.target.value as 'fixed' | 'negotiable')}
+                    checked={price.pricetype === 'negotiable'}
+                    onChange={(e) => handleChange('pricetype', e.target.value as 'fixed' | 'negotiable')}
                     className="w-5 h-5 text-black border-gray-300 focus:ring-black"
                   />
                   <span className="ml-3 text-black">Negotiable</span>

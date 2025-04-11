@@ -10,13 +10,13 @@ interface BrokerageProps {
 const Brokerage = ({ onBrokerageChange }: BrokerageProps) => {
   const [brokerage, setBrokerage] = useState({
     required: "no",
-    amount: "",
+    amount: 0
   })
 
   const handleChange = (field: string, value: any) => {
     const updatedBrokerage = { ...brokerage, [field]: value }
     if (field === "required" && value === "no") {
-      updatedBrokerage.amount = ""
+      updatedBrokerage.amount = 0
     }
     setBrokerage(updatedBrokerage)
     onBrokerageChange?.(updatedBrokerage)
@@ -79,8 +79,8 @@ const Brokerage = ({ onBrokerageChange }: BrokerageProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={brokerage.amount}
-                  onChange={(e) => handleChange("amount", e.target.value)}
+                  value={brokerage.amount || ''}
+                  onChange={(e) => handleChange("amount", parseFloat(e.target.value))}
                   placeholder="Enter brokerage amount"
                   className="w-full pl-10 pr-4 py-3.5 rounded-lg bg-gray-50 border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />

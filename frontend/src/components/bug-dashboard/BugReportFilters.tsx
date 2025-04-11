@@ -1,12 +1,14 @@
 "use client"
 
-import { Search, Filter, AlertCircle, Calendar, X } from "lucide-react"
+import { Search, Filter, AlertCircle, Calendar, X, Bug } from "lucide-react"
 
 interface BugReportFiltersProps {
   searchQuery: string
   setSearchQuery: (query: string) => void
   statusFilter: string
   setStatusFilter: (status: string) => void
+  categoryFilter: string
+  setCategoryFilter: (category: string) => void
   dateFilter: { start?: string; end?: string }
   setDateFilter: (filter: { start?: string; end?: string }) => void
   clearFilters: () => void
@@ -19,6 +21,8 @@ const BugReportFilters = ({
   setSearchQuery,
   statusFilter,
   setStatusFilter,
+  categoryFilter,
+  setCategoryFilter,
   dateFilter,
   setDateFilter,
   clearFilters,
@@ -26,7 +30,12 @@ const BugReportFilters = ({
   setErrorcodefilter
 }: BugReportFiltersProps) => {
   const hasActiveFilters =
-    searchQuery || statusFilter !== "all" || errorcodefilter !== "all" || dateFilter.start || dateFilter.end
+    searchQuery || 
+    statusFilter !== "all" || 
+    categoryFilter !== "all" || 
+    errorcodefilter !== "all" || 
+    dateFilter.start || 
+    dateFilter.end
 
   return (
     <div className="bg-white p-4 rounded-xl shadow-sm">
@@ -45,7 +54,7 @@ const BugReportFilters = ({
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Search */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -77,7 +86,28 @@ const BugReportFilters = ({
             </select>
           </div>
 
-          {/* Severity Filter */}
+          {/* Category Filter */}
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Bug className="h-4 w-4 text-gray-400" />
+            </div>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="pl-9 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            >
+              <option value="all">All Categories</option>
+              <option value="UI/UX">UI/UX</option>
+              <option value="Functionality">Functionality</option>
+              <option value="Performance">Performance</option>
+              <option value="Security">Security</option>
+              <option value="Data">Data</option>
+              <option value="Integration">Integration</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          {/* Error Code Filter */}
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <AlertCircle className="h-4 w-4 text-gray-400" />

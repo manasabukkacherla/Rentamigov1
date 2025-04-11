@@ -8,7 +8,7 @@ import {
   // updateCommercialShop,
   // deleteCommercialShop,
   // changeListingStatus
-} from '../../controllers/commercialShopController';
+} from '../../controllers/commercial/commercialShopController';
 
 const router = express.Router();
 
@@ -30,8 +30,8 @@ const uploadFields = upload.fields([
 router.post(
   '/',
   // auth,
-  uploadFields,
-  convertToBase64,
+  // uploadFields,
+  // convertToBase64,
   createCommercialShop
 );
 
