@@ -184,7 +184,7 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     timestamps: true
 });
 
-// Indexes
+
 CommercialPlotSchema.index({ propertyId: 1 }, { unique: true });
 CommercialPlotSchema.index({ 'basicInformation.city': 1 });
 CommercialPlotSchema.index({ 'basicInformation.state': 1 });
@@ -192,6 +192,7 @@ CommercialPlotSchema.index({ 'pricingDetails.propertyPrice': 1 });
 CommercialPlotSchema.index({ 'plotDetails.totalArea': 1 });
 CommercialPlotSchema.index({ 'metadata.createdAt': -1 });
 
+
 // Export model and interfaces
 export { ICommercialPlot, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata, IPlotDetails };
-export default model<ICommercialPlot>('CommercialPlot', CommercialPlotSchema);
+export default model<ICommercialPlot>('CommercialSellPlot', CommercialPlotSchema);
