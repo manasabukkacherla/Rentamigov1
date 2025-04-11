@@ -61,36 +61,40 @@ const generatePropertyId = async (): Promise<string> => {
 // Create a new commercial shop listing
 export const createCommercialShop = async (req: Request, res: Response) => {
   try {
-    const shopData = req.body;
+    const formData = req.body;
+    console.log(formData)
     
-
     // Generate property ID
     const propertyId = await generatePropertyId();
 
-    // Add metadata and property ID
-    shopData.metadata = {
-      // createdBy: req.user._id,
-      createdBy: shopData.metadata.createdBy,
-      status: 'draft',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      isVerified: false
+    // // Create the shop data object
+    const shopData = {
+      propertyId,
+      ...formData,
+      metadata: {
+        ...formData.metadata,
+        // status: 'draft',
+        // createdAt: new Date(),
+        // updatedAt: new Date(),
+        // isVerified: false
+      }
     };
-    
-    // Add property ID to the shop data
-    shopData.propertyId = propertyId;
 
-    // Create new shop listing
+    // // Create new shop listing
     const shop = new CommercialShop(shopData);
     await shop.save();
 
     res.status(201).json({
+      success: true,
       message: 'Commercial shop listing created successfully',
       data: shop
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating commercial shop:', error);
-    res.status(500).json({ error: 'Failed to create commercial shop listing' });
+    res.status(500).json({ 
+      error: 'Failed to create commercial shop listing',
+      details: error.message 
+    });
   }
 };
 

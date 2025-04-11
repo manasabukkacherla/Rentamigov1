@@ -2,43 +2,36 @@ import { useState } from 'react';
 import { Calculator, IndianRupee, ArrowRight } from 'lucide-react';
 
 interface PricePerSqftProps {
-  price: string;
-  area: {
-    superBuiltUpAreaSqft: string;
-    builtUpAreaSqft: string;
-    carpetAreaSqft: string;
+  propertyPrice: number;
+  Area: {
+    totalArea: number;
+    builtUpArea: number;
+    carpetArea: number;
   };
+  onPricePerSqftChange?: (data: Record<string, any>) => void;
 }
 
-const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
+const PricePerSqft = ({ propertyPrice, Area, onPricePerSqftChange }: PricePerSqftProps) => {
   const [manualCalculation, setManualCalculation] = useState({
-    squareFeet: '',
-    price: '',
-    pricePerSqft: '0'
+    area: 0,
+    totalprice: 0,
+    pricePerSqft: 0
   });
 
   const calculatePricePerSqft = (areaValue: string) => {
-    if (!price || !areaValue || parseFloat(areaValue) === 0) return '0';
-    return (parseFloat(price) / parseFloat(areaValue)).toFixed(2);
+    if (!propertyPrice || !areaValue || parseFloat(areaValue) === 0) return '0';
+    return ((propertyPrice) / parseFloat(areaValue)).toFixed(2);
   };
 
   const handleManualCalculation = (field: string, value: string) => {
-    const updatedCalculation = { ...manualCalculation, [field]: value };
-    
-    if (updatedCalculation.squareFeet && updatedCalculation.price) {
-      const sqft = parseFloat(updatedCalculation.squareFeet);
-      const totalPrice = parseFloat(updatedCalculation.price);
-      
-      if (sqft > 0) {
-        updatedCalculation.pricePerSqft = (totalPrice / sqft).toFixed(2);
-      } else {
-        updatedCalculation.pricePerSqft = '0';
-      }
-    } else {
-      updatedCalculation.pricePerSqft = '0';
-    }
-
+    const numValue = parseFloat(value) || 0;
+    const updatedCalculation = { ...manualCalculation, [field]: numValue };
+  
+    const { area, totalprice } = updatedCalculation;
+    updatedCalculation.pricePerSqft = area > 0 ? totalprice / area : 0;
+  
     setManualCalculation(updatedCalculation);
+    onPricePerSqftChange?.(updatedCalculation);
   };
 
   return (
@@ -64,8 +57,8 @@ const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
                   <input
                     type="number"
                     min="0"
-                    value={manualCalculation.squareFeet}
-                    onChange={(e) => handleManualCalculation('squareFeet', e.target.value)}
+                    value={manualCalculation.area || ''}
+                    onChange={(e) => handleManualCalculation('area', e.target.value)}
                     placeholder="Enter area in sq.ft"
                     className="w-full px-4 py-3.5 rounded-lg bg-gray-50 border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                   />
@@ -84,8 +77,8 @@ const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
                   <input
                     type="number"
                     min="0"
-                    value={manualCalculation.price}
-                    onChange={(e) => handleManualCalculation('price', e.target.value)}
+                    value={manualCalculation.totalprice || ''}
+                    onChange={(e) => handleManualCalculation('totalprice', e.target.value)}
                     placeholder="Enter total price"
                     className="w-full pl-10 pr-4 py-3.5 rounded-lg bg-gray-50 border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                   />
@@ -98,7 +91,9 @@ const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
                 <span className="text-black/80 font-medium">Price per sq.ft</span>
                 <div className="flex items-center gap-2">
                   <IndianRupee size={20} className="text-black" />
-                  <span className="text-2xl font-semibold text-black">{manualCalculation.pricePerSqft}</span>
+                  <span className="text-2xl font-semibold text-black">
+                    {manualCalculation.pricePerSqft || '0'}
+                  </span>
                   <span className="text-sm text-black/60">/sq.ft</span>
                 </div>
               </div>
@@ -114,18 +109,18 @@ const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
 
             <div className="space-y-4">
               {/* Super Built-up Area Price */}
-              {area.superBuiltUpAreaSqft && (
+              {Area.totalArea > 0 && (
                 <div className="p-6 bg-gray-50 rounded-lg border-2 border-gray-300 hover:border-black transition-colors duration-200">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
                       <h4 className="text-lg font-medium text-black">Super Built-up Area Price</h4>
                       <p className="text-sm text-black/60">
-                        Based on {area.superBuiltUpAreaSqft} sq.ft
+                        Based on {Area.totalArea} sq.ft
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <IndianRupee size={20} className="text-black" />
-                      <span className="text-2xl font-semibold text-black">{calculatePricePerSqft(area.superBuiltUpAreaSqft)}</span>
+                      <span className="text-2xl font-semibold text-black">{calculatePricePerSqft(Area.totalArea.toString())}</span>
                       <span className="text-sm text-black/60">/sq.ft</span>
                     </div>
                   </div>
@@ -133,18 +128,18 @@ const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
               )}
 
               {/* Built-up Area Price */}
-              {area.builtUpAreaSqft && (
+              {Area.builtUpArea > 0 && (
                 <div className="p-6 bg-gray-50 rounded-lg border-2 border-gray-300 hover:border-black transition-colors duration-200">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
                       <h4 className="text-lg font-medium text-black">Built-up Area Price</h4>
                       <p className="text-sm text-black/60">
-                        Based on {area.builtUpAreaSqft} sq.ft
+                        Based on {Area.builtUpArea} sq.ft
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <IndianRupee size={20} className="text-black" />
-                      <span className="text-2xl font-semibold text-black">{calculatePricePerSqft(area.builtUpAreaSqft)}</span>
+                      <span className="text-2xl font-semibold text-black">{calculatePricePerSqft(Area.builtUpArea.toString())}</span>
                       <span className="text-sm text-black/60">/sq.ft</span>
                     </div>
                   </div>
@@ -152,25 +147,25 @@ const PricePerSqft = ({ price, area }: PricePerSqftProps) => {
               )}
 
               {/* Carpet Area Price */}
-              {area.carpetAreaSqft && (
+              {Area.carpetArea > 0 && (
                 <div className="p-6 bg-gray-50 rounded-lg border-2 border-gray-300 hover:border-black transition-colors duration-200">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="space-y-1">
                       <h4 className="text-lg font-medium text-black">Carpet Area Price</h4>
                       <p className="text-sm text-black/60">
-                        Based on {area.carpetAreaSqft} sq.ft
+                        Based on {Area.carpetArea} sq.ft
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
                       <IndianRupee size={20} className="text-black" />
-                      <span className="text-2xl font-semibold text-black">{calculatePricePerSqft(area.carpetAreaSqft)}</span>
+                      <span className="text-2xl font-semibold text-black">{calculatePricePerSqft(Area.carpetArea.toString())}</span>
                       <span className="text-sm text-black/60">/sq.ft</span>
                     </div>
                   </div>
                 </div>
               )}
 
-              {!area.superBuiltUpAreaSqft && !area.builtUpAreaSqft && !area.carpetAreaSqft && (
+              {!Area.totalArea && !Area.builtUpArea && !Area.carpetArea && (
                 <div className="p-6 bg-gray-50 rounded-lg border-2 border-gray-300 hover:border-black transition-colors duration-200">
                   <div className="text-center space-y-2">
                     <Calculator size={24} className="mx-auto text-black/40" />

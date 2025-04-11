@@ -7,81 +7,107 @@ interface CommercialPropertyDetailsProps {
 
 const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetailsProps) => {
   const [details, setDetails] = useState({
-    totalArea: '',
-    builtUpArea: '',
-    carpetArea: '',
-    floorNumber: '',
-    totalFloors: '',
+    area: {
+      totalArea: 0,
+      builtUpArea: 0,
+      carpetArea: 0,
+    },
+    floor: {
+      floorNumber: 0,
+      totalFloors: 0,
+    },
     facingDirection: '',
     furnishingStatus: '',
-    propertyAmenities: {
-      privateWashrooms: false,
-      commonWashrooms: false,
-      pantryCafeteria: false,
-      passengerLift: false,
-      freightLift: false,
-      generator: false,
-      inverter: false,
-      solar: false,
-      cctv: false,
-      securityGuards: false,
-      gatedAccess: false,
-      fireExtinguishers: false,
-      sprinklerSystem: false,
-      emergencyExits: false,
-      coveredParking: false,
-      openParking: false,
-      parkingSlots: '',
-      receptionArea: false,
-      conferenceRooms: false,
-      centralizedAC: false,
-      splitAC: false,
-      wifi: false,
-      serverRoom: false,
-      naturalLighting: false
-    },
-    wholeSpaceAmenities: {
-      commonAreaMaintenance: false,
-      landscaping: false,
-      waterSupply: false,
-      wasteManagement: false,
-      businessLounge: false,
-      fitnessArea: false,
-      visitorParking: false,
-      emergencyServices: false,
-      wheelchairRamps: false,
-      elevators: false,
-      handrails: false,
-      signageBranding: false,
-      cafeteriaAccess: false
-    },
+    propertyAmenities: [] as string[],
+    wholeSpaceAmenities: [] as string[],
     electricitySupply: {
-      powerLoad: '',
+      powerLoad: 0,
       backup: false
     },
     waterAvailability: '',
     fireExit: false,
-    propertyAge: '',
+    propertyAge: 0,
     propertyCondition: ''
   });
 
   const handleChange = (field: string, value: any) => {
-    const updatedDetails = { ...details, [field]: value };
+    const keys = field.split(".");
+    const updatedDetails = { ...details };
+  
+    let current: any = updatedDetails;
+    for (let i = 0; i < keys.length - 1; i++) {
+      current[keys[i]] = { ...current[keys[i]] }; 
+      current = current[keys[i]];
+    }
+  
+    current[keys[keys.length - 1]] = value;
+  
+    setDetails(updatedDetails);
+    onDetailsChange?.(updatedDetails);
+  };
+  
+
+  const handleAmenityChange = (category: 'propertyAmenities' | 'wholeSpaceAmenities', amenity: string, isChecked: boolean) => {
+    const currentAmenities = details[category];
+    let updatedAmenities: string[];
+
+    if (isChecked) {
+      updatedAmenities = [...currentAmenities, amenity];
+    } else {
+      updatedAmenities = currentAmenities.filter(item => item !== amenity);
+    }
+
+    const updatedDetails = {
+      ...details,
+      [category]: updatedAmenities
+    };
+    
     setDetails(updatedDetails);
     onDetailsChange?.(updatedDetails);
   };
 
-  const handleAmenityChange = (category: 'propertyAmenities' | 'wholeSpaceAmenities', amenity: string, value: boolean) => {
-    const updatedDetails = {
-      ...details,
-      [category]: {
-        ...details[category],
-        [amenity]: value
-      }
-    };
-    setDetails(updatedDetails);
-    onDetailsChange?.(updatedDetails);
-  };
+  const allPropertyAmenities = [
+    'privateWashrooms',
+    'commonWashrooms',
+    'pantryCafeteria',
+    'passengerLift',
+    'freightLift',
+    'generator',
+    'inverter',
+    'solar',
+    'cctv',
+    'securityGuards',
+    'gatedAccess',
+    'fireExtinguishers',
+    'sprinklerSystem',
+    'emergencyExits',
+    'coveredParking',
+    'openParking',
+    'parkingSlots',
+    'receptionArea',
+    'conferenceRooms',
+    'centralizedAC',
+    'splitAC',
+    'wifi',
+    'serverRoom',
+    'naturalLighting'
+  ];
+
+  const allWholeSpaceAmenities = [
+    'commonAreaMaintenance',
+    'landscaping',
+    'waterSupply',
+    'wasteManagement',
+    'businessLounge',
+    'fitnessArea',
+    'visitorParking',
+    'emergencyServices',
+    'wheelchairRamps',
+    'elevators',
+    'handrails',
+    'signageBranding',
+    'cafeteriaAccess'
+  ];
 
   return (
     <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
@@ -101,8 +127,8 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <div className="relative">
               <input
                 type="number"
-                value={details.totalArea}
-                onChange={(e) => handleChange('totalArea', e.target.value)}
+                value={details.area.totalArea || ''}
+                onChange={(e) => handleChange('area.totalArea', parseFloat(e.target.value) || 0)}
                 placeholder="Total Area (Sq Ft)"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -110,8 +136,8 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <div className="relative">
               <input
                 type="number"
-                value={details.builtUpArea}
-                onChange={(e) => handleChange('builtUpArea', e.target.value)}
+                value={details.area.builtUpArea || ''}
+                onChange={(e) => handleChange('area.builtUpArea', parseFloat(e.target.value) || 0)}
                 placeholder="Built-up Area (Sq Ft)"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -119,8 +145,8 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <div className="relative">
               <input
                 type="number"
-                value={details.carpetArea}
-                onChange={(e) => handleChange('carpetArea', e.target.value)}
+                value={details.area.carpetArea || ''}
+                onChange={(e) => handleChange('area.carpetArea', parseFloat(e.target.value) || 0)}
                 placeholder="Carpet Area (Sq Ft)"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -138,8 +164,8 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <div className="relative">
               <input
                 type="number"
-                value={details.floorNumber}
-                onChange={(e) => handleChange('floorNumber', e.target.value)}
+                value={details.floor.floorNumber || ''}
+                onChange={(e) => handleChange('floor.floorNumber', parseFloat(e.target.value) || 0)}
                 placeholder="Floor Number"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -147,8 +173,8 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <div className="relative">
               <input
                 type="number"
-                value={details.totalFloors}
-                onChange={(e) => handleChange('totalFloors', e.target.value)}
+                value={details.floor.totalFloors || ''}
+                onChange={(e) => handleChange('floor.totalFloors', parseFloat(e.target.value) || 0)}
                 placeholder="Total Floors in Building"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -207,15 +233,15 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             Property Amenities
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(details.propertyAmenities).map(([key, value]) => (
-              <label key={key} className="flex items-center space-x-2 cursor-pointer">
+            {allPropertyAmenities.map((amenity) => (
+              <label key={amenity} className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={value}
-                  onChange={(e) => handleAmenityChange('propertyAmenities', key, e.target.checked)}
+                  checked={details.propertyAmenities.includes(amenity)}
+                  onChange={(e) => handleAmenityChange('propertyAmenities', amenity, e.target.checked)}
                   className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
                 />
-                <span className="text-black">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                <span className="text-black">{amenity.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
               </label>
             ))}
           </div>
@@ -228,15 +254,15 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             Whole Space Amenities
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {Object.entries(details.wholeSpaceAmenities).map(([key, value]) => (
-              <label key={key} className="flex items-center space-x-2 cursor-pointer">
+            {allWholeSpaceAmenities.map((amenity) => (
+              <label key={amenity} className="flex items-center space-x-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={value}
-                  onChange={(e) => handleAmenityChange('wholeSpaceAmenities', key, e.target.checked)}
+                  checked={details.wholeSpaceAmenities.includes(amenity)}
+                  onChange={(e) => handleAmenityChange('wholeSpaceAmenities', amenity, e.target.checked)}
                   className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
                 />
-                <span className="text-black">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+                <span className="text-black">{amenity.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
               </label>
             ))}
           </div>
@@ -251,9 +277,9 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="relative">
               <input
-                type="text"
-                value={details.electricitySupply.powerLoad}
-                onChange={(e) => handleChange('electricitySupply', { ...details.electricitySupply, powerLoad: e.target.value })}
+                type="number"
+                value={details.electricitySupply.powerLoad || ''}
+                onChange={(e) => handleChange('electricitySupply.powerLoad', parseFloat(e.target.value) || 0)}
                 placeholder="Power Load (kW)"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -262,7 +288,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
               <input
                 type="checkbox"
                 checked={details.electricitySupply.backup}
-                onChange={(e) => handleChange('electricitySupply', { ...details.electricitySupply, backup: e.target.checked })}
+                onChange={(e) => handleChange('electricitySupply.backup', e.target.checked)}
                 className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
               />
               <span className="text-black">Backup Power Available</span>
@@ -298,8 +324,8 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <div className="relative">
               <input
                 type="number"
-                value={details.propertyAge}
-                onChange={(e) => handleChange('propertyAge', e.target.value)}
+                value={details.propertyAge || ''}
+                onChange={(e) => handleChange('propertyAge', parseFloat(e.target.value) || 0)}
                 placeholder="Property Age (Years)"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />

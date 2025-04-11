@@ -7,11 +7,11 @@ interface ShopDetailsProps {
 
 const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
   const [details, setDetails] = useState({
-    frontageWidth: '',
-    height: '',
+    frontageWidth: 0,
+    heightOfShop: 0,
     displayWindow: false,
-    storageRoom: false,
-    footTraffic: '',
+    attachedStorageRoom: false,
+    averageFootTraffic: '',
     customerParking: false,
     previousBusiness: ''
   });
@@ -42,8 +42,8 @@ const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={details.frontageWidth}
-                  onChange={(e) => handleChange('frontageWidth', e.target.value)}
+                  value={details.frontageWidth || ''}
+                  onChange={(e) => handleChange('frontageWidth', parseFloat(e.target.value) || 0)}
                   placeholder="Frontage Width (Feet)"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -52,8 +52,8 @@ const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={details.height}
-                  onChange={(e) => handleChange('height', e.target.value)}
+                  value={details.heightOfShop || ''}
+                  onChange={(e) => handleChange('heightOfShop', parseFloat(e.target.value) || 0)}
                   placeholder="Height of Shop (Feet)"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -98,8 +98,8 @@ const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      checked={details.storageRoom}
-                      onChange={() => handleChange('storageRoom', true)}
+                      checked={details.attachedStorageRoom}
+                      onChange={() => handleChange('attachedStorageRoom', true)}
                       className="text-black border-gray-300 focus:ring-black"
                     />
                     <span className="text-black/80">Yes</span>
@@ -107,8 +107,8 @@ const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      checked={!details.storageRoom}
-                      onChange={() => handleChange('storageRoom', false)}
+                      checked={!details.attachedStorageRoom}
+                      onChange={() => handleChange('attachedStorageRoom', false)}
                       className="text-black border-gray-300 focus:ring-black"
                     />
                     <span className="text-black/80">No</span>
@@ -128,8 +128,8 @@ const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
               <div className="space-y-4">
                 <h5 className="text-black/80">Average Foot Traffic</h5>
                 <select
-                  value={details.footTraffic}
-                  onChange={(e) => handleChange('footTraffic', e.target.value)}
+                  value={details.averageFootTraffic}
+                  onChange={(e) => handleChange('averageFootTraffic', e.target.value)}
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
                 >
                   <option value="" disabled>Select foot traffic</option>

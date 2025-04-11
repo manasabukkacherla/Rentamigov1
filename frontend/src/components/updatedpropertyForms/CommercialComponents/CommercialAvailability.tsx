@@ -26,13 +26,13 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
     onAvailabilityChange?.(updatedAvailability);
   };
 
-  const handleTenantChange = (tenant: string, checked: boolean) => {
-    const updatedTenants = checked
-      ? [...availability.preferredTenants, tenant]
-      : availability.preferredTenants.filter(t => t !== tenant);
+  // const handleTenantChange = (tenant: string, checked: boolean) => {
+  //   const updatedTenants = checked
+  //     ? [...availability.preferredTenants, tenant]
+  //     : availability.preferredTenants.filter(t => t !== tenant);
     
-    handleChange('preferredTenants', updatedTenants);
-  };
+  //   handleChange('preferredTenants', updatedTenants);
+  // };
 
   const handleOperatingHoursChange = (field: string, value: any) => {
     const updatedHours = {
@@ -109,11 +109,11 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
               className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
             >
               <option value="">Select lease duration</option>
-              <option value="6">6 Months</option>
-              <option value="12">1 Year</option>
-              <option value="24">2 Years</option>
-              <option value="36">3 Years</option>
-              <option value="60">5 Years</option>
+              <option value="6 months">6 Months</option>
+              <option value="1 year">1 Year</option>
+              <option value="2 years">2 Years</option>
+              <option value="3 years">3 Years</option>
+              <option value="5 years">5 Years</option>
               <option value="flexible">Flexible</option>
             </select>
           </div>
@@ -130,10 +130,10 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
               className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
             >
               <option value="">Select notice period</option>
-              <option value="15">15 Days</option>
-              <option value="30">1 Month</option>
-              <option value="60">2 Months</option>
-              <option value="90">3 Months</option>
+              <option value="15 days">15 Days</option>
+              <option value="1 Month">1 Month</option>
+              <option value="2 Months">2 Months</option>
+              <option value="3 Months">3 Months</option>
             </select>
           </div>
 
