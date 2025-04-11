@@ -178,38 +178,6 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
     }))
   }, [])
 
-  const handleSaveStep = async (step: number) => {
-    setLoading(true)
-    setError(null)
-    setSuccess(null)
-
-    try {
-      const response = await fetch("/api/basicdetails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          propertyId,
-          step,
-          data: formData
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        setSuccess("Step saved successfully!")
-        setCurrentStep(prev => prev + 1)
-      } else {
-        setError(data.error || "Failed to save step")
-      }
-    } catch (error) {
-      setError("Failed to connect to the server")
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const renderStep = () => {
     switch (currentStep) {

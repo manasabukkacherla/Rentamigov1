@@ -96,7 +96,7 @@ export const createShowroom = async (req: Request, res: Response) => {
 //   }
 // };
 
-// // Get single commercial showroom listing
+// Get single commercial showroom listing
 // export const getShowroom = async (req: Request, res: Response) => {
 //   try {
 //     const showroom = await CommercialShowroom.findById(req.params.id);

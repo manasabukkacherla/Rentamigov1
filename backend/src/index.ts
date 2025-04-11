@@ -7,7 +7,6 @@ import express, {
   Application,
 } from "express";
 import http from "http"; // For creating an HTTP server
-
 import dotenv from "dotenv";
 import { connectToDatabase } from "./utils/connectToDb";
 import cors from "cors";
@@ -52,6 +51,8 @@ import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
+import commercialShedRoutes from './routes/commercial/commercialShedRoutes';
+import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRoutes';
 
 dotenv.config();
 
@@ -70,9 +71,10 @@ const app: Application = express();
 // Create an HTTP server using the Express app
 const server = http.createServer(app);
 
-// Initialize Socket.IO with correct CORS settings on the HTTP server
+// Increase timeout
+server.timeout = 120000; // 2 minutes
 
-// Initialize Socket.IO on the HTTP server with CORS settings (adjust for production)
+// Initialize Socket.IO with correct CORS settings
 export const io: Server = new Server(server, {
   cors: {
     origin: "*",
@@ -91,8 +93,39 @@ connectToDatabase()
 app.use(express.static(path.join(__dirname, "build")));
 // cors
 app.use(cors());
-app.use(express.json({ limit: "50mb" })); // Set JSON payload size limit
-app.use(express.urlencoded({ extended: true, limit: "50mb" })); // Set URL-encoded payload size limit
+
+// Configure express with proper types
+app.use(express.json({ 
+  limit: '50mb',
+  verify: (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
+    try {
+      JSON.parse(buf.toString());
+    } catch(e) {
+      res.status(400).json({ 
+        success: false, 
+        error: 'Invalid JSON' 
+      });
+      throw new Error('Invalid JSON');
+    }
+  }
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '50mb'
+}));
+
+// Add timeout middleware with proper types
+const timeout = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  res.setTimeout(120000, () => {
+    res.status(408).json({ 
+      success: false, 
+      error: 'Request timeout' 
+    });
+  });
+  next();
+};
+
+app.use(timeout);
 
 // Initialize all Socket.IO event handlers
 socketHandler(io);
@@ -110,7 +143,7 @@ app.use("/api/owner-interest", ownerInterestRouter);
 
 //Property listing apis
 app.use("/api/property-selection", Propertyrouter);
-app.use("/api/basicdetails", BasicDetailsrouter);
+// app.use("/api/basicdetails", BasicDetailsrouter);
 app.use("/api/properties", PropertyDetailsrouter);
 
 //Subscription pllan routes
@@ -135,6 +168,9 @@ app.use("/api/bug", bugRouter);
 
 app.use("/api/commercial-shops", commercialShopRoutes);
 app.use("/api/commercial-showrooms", commercialShowroomRoutes);
+app.use('/api/commercial-sheds', commercialShedRoutes);
+app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
+
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
   res.json({ message: "hjhjh" });

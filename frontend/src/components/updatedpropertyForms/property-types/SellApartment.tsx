@@ -134,34 +134,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
     }));
   }, []);
 
-  const saveStepData = async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    setSuccessMessage(null);
 
-    try {
-      const response = await fetch("/api/basicdetails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setSuccessMessage("Step saved successfully! ✅");
-      } else {
-        setErrorMessage(`Error saving step: ${result.message}`);
-      }
-    } catch (error) {
-      console.error("Error saving step:", error);
-      setErrorMessage("Failed to save step. Check your connection.");
-    }
-
-    setLoading(false);
-  };
 
   const handleNext = async () => {
     await saveStepData();

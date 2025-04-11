@@ -1,5 +1,4 @@
 import express from 'express';
-// import { auth } from '../middleware/auth';
 import upload, { convertToBase64 } from '../../middleware/fileUpload';
 import {
   createCommercialShop,
@@ -35,33 +34,6 @@ router.post(
   createCommercialShop
 );
 
-// Get all commercial shop listings with filters
-// router.get('/', getAllCommercialShops);
 
-// // Get a specific commercial shop by ID
-// router.get('/:id', getCommercialShopById);
-
-// // Update a commercial shop listing
-// router.put(
-//   '/:id',
-//   // auth,
-//   uploadFields,
-//   convertToBase64,
-//   updateCommercialShop
-// );
-
-// // Delete a commercial shop listing
-// router.delete(
-//   '/:id',
-//   // auth,
-//   deleteCommercialShop
-// );
-
-// // Change listing status
-// router.patch(
-//   '/:id/status',
-//   // auth,
-//   changeListingStatus
-// );
 
 export default router; 
