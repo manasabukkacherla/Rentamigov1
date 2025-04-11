@@ -16,8 +16,8 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import CommercialPropertyService from "../../../services/commercialPropertyService"
 import { toast } from "react-hot-toast"
+import axios from "axios"
 
 interface MediaDocument {
   type: string;
@@ -331,7 +331,15 @@ const SellWarehouseMain = () => {
       console.log("Submitting data:", transformedData)
       
       // Submit data to API
-      const response = await CommercialPropertyService.createWarehouse(transformedData)
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/commercial-warehouses`,
+        transformedData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      )
       
       // Handle success
       toast.success("Warehouse listing created successfully!")
