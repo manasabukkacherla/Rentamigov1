@@ -10,13 +10,17 @@ interface IArea {
 interface IBasicInformation {
   title: string;
   shopType: string[];
-  address: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
   landmark: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  latitude: number;
-  longitude: number;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
   isCornerProperty: boolean;
 }
 
@@ -25,16 +29,19 @@ interface IPricingDetails {
   pricetype: "fixed" | "negotiable";
   area: number;
   totalprice: number;
-  propertyareacalculations: number;
+  pricePerSqft: number;
 }
 
 interface IAvailability {
-  availableFrom?: Date;
-  availabilityStatus: string;
-  preferredleaseduration: string;
-  noticeperiod: string;
-  ispetsallowed: boolean;
-  operatinghoursrestrictions: boolean;
+  availableFrom?: string;
+  availableImmediately: boolean;
+  leaseDuration: string;
+  noticePeriod: string;
+  petsAllowed: boolean;
+  operatingHours: {
+    restricted: boolean;
+    restrictions: string;
+  };
 }
 
 interface IContactInformation {
@@ -42,7 +49,7 @@ interface IContactInformation {
   email: string;
   phone: string;
   alternatePhone?: string;
-  preferredContactTime?: string;
+  bestTimeToContact?: string;
 }
 
 interface IMedia {
@@ -79,11 +86,13 @@ interface ICommercialShop extends Document {
     furnishingStatus: string;
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
-    electricitysupply: number;
-    backuppower: boolean;
-    wateravailability: string[];
-    propertyage: number;
-    propertycondition: string;
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string[];
+    propertyAge: number;
+    propertyCondition: string;
   };
   shopDetails: {
     frontageWidth: number;
@@ -97,10 +106,13 @@ interface ICommercialShop extends Document {
   pricingDetails: IPricingDetails;
   registration: {
     chargestype: "inclusive" | "exclusive";
-    registrationcharges: number;
-    stampdutycharges: number;
-    brokeragedetails: boolean;
+    registrationAmount?: number;
+    stampDutyAmount?: number;
   }
+  brokerage: {
+    required: string;
+    amount: number;
+  };
   availability: IAvailability;
   contactInformation: IContactInformation;
   media: IMedia;
@@ -113,13 +125,17 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   basicInformation: {
     title: { type: String, required: true },
     shopType: [{ type: String, required: true }],
-    address: { type: String, required: true },
+    address: { 
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true },
+    },
     landmark: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zipCode: { type: String, required: true },
-    latitude: { type: Number, required: true },
-    longitude: { type: Number, required: true },
+    location: {
+      latitude: { type: Number, required: true },
+      longitude: { type: Number, required: true },
+    },
     isCornerProperty: { type: Boolean }
   },
   propertyDetails: {
@@ -136,11 +152,13 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     furnishingStatus: { type: String },
     propertyAmenities: [{ type: String }],
     wholeSpaceAmenities: [{ type: String }],
-    electricitysupply: { type: Number },
-    backuppower: { type: Boolean, default: false },
-    wateravailability: [{ type: String }],
-    propertyage: { type: Number },
-    propertycondition: { type: String }
+    electricitySupply: {
+      powerLoad: { type: Number },
+      backup: { type: Boolean, default: false }
+    },
+    waterAvailability: [{ type: String }],
+    propertyAge: { type: Number },
+    propertyCondition: { type: String }
   },
   shopDetails: {
     frontageWidth: { type: Number, required: true },
@@ -156,28 +174,34 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
     area: { type: Number, required: true },
     totalprice: { type: Number, required: true },
-    propertyareacalculations: { type: Number, required: true }
+    pricePerSqft: { type: Number, required: true }
   },
   registration: {
     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-    registrationcharges: { type: Number, required: true },
-    stampdutycharges: { type: Number, required: true },
-    brokeragedetails: { type: Boolean, default: false }
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number }
+  },
+  brokerage: {
+    required: { type: String, enum: ['yes', 'no'], required: true },
+    amount: { type: Number }
   },
   availability: {
-    availableFrom: { type: Date },
-    availabilityStatus: { type: String, required: true },
-    preferredleaseduration: { type: String, required: true },
-    noticeperiod: { type: String, required: true },
-    ispetsallowed: { type: Boolean, default: false },
-    operatinghoursrestrictions: { type: Boolean, default: false }
+    availableFrom: { type: String },
+    availableImmediately: { type: Boolean, required: true },
+    leaseDuration: { type: String, required: true },
+    noticePeriod: { type: String, required: true },
+    petsAllowed: { type: Boolean, default: false },
+    operatingHours: {
+      restricted: { type: Boolean, required: true },
+      restrictions: { type: String }
+    }
   },
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String, required: true },
     alternatePhone: { type: String },
-    preferredContactTime: { type: String }
+    bestTimeToContact: { type: String }
   },
   media: {
     photos: {

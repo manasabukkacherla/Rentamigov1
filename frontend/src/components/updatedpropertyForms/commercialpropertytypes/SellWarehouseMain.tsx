@@ -6,7 +6,6 @@ import PropertyName from "../PropertyName"
 import WarehouseType from "../CommercialComponents/WarehouseType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
-import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import WarehouseDetails from "../CommercialComponents/WarehouseDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
@@ -17,6 +16,14 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import CommercialPropertyService from "../../../services/commercialPropertyService"
+import { toast } from "react-hot-toast"
+
+interface MediaDocument {
+  type: string;
+  file: File;
+  url?: string;
+}
 
 interface FormData {
   propertyName: string;
@@ -43,7 +50,7 @@ interface FormData {
       files: Array<{ url: string; file: File }>;
     }>;
     video?: { url: string; file: File };
-    documents: Array<{ type: string; file: File }>;
+    documents: Array<MediaDocument>;
   };
 }
 
@@ -72,6 +79,9 @@ const SellWarehouseMain = () => {
       documents: [],
     },
   })
+  
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const [currentStep, setCurrentStep] = useState(0)
   const steps = [
@@ -89,7 +99,6 @@ const SellWarehouseMain = () => {
           />
           <CommercialPropertyAddress onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
           <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
-          
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))}
           />
@@ -147,7 +156,24 @@ const SellWarehouseMain = () => {
     {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
-      content: <CommercialMediaUpload onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))} />,
+      content: <CommercialMediaUpload 
+        onMediaChange={(mediaData) => {
+          // Create URL for documents if needed
+          const enhancedMedia = {
+            ...mediaData,
+            documents: mediaData.documents.map(doc => {
+              // Use type assertion to handle the document
+              const document = doc as unknown as { type: string; file: File; url?: string };
+              return {
+                type: document.type,
+                file: document.file,
+                url: document.url || URL.createObjectURL(document.file)
+              } as MediaDocument;
+            })
+          };
+          setFormData(prev => ({ ...prev, media: enhancedMedia }));
+        }} 
+      />,
     },
   ]
 
@@ -163,9 +189,165 @@ const SellWarehouseMain = () => {
     setCurrentStep(index)
   }
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  // Transform the form data into the format expected by the backend
+  const transformFormData = () => {
+    // Convert frontend form data to backend schema format
+    const {
+      propertyName,
+      warehouseType,
+      address,
+      landmark,
+      coordinates,
+      isCornerProperty,
+      warehouseDetails,
+      propertyDetails,
+      price,
+      registrationCharges,
+      brokerage,
+      availability,
+      contactDetails,
+      media
+    } = formData
+
+    // Map image categories to backend format
+    const photos: Record<string, string[]> = {
+      exterior: [],
+      interior: [],
+      floorPlan: [],
+      loadingArea: [],
+      storage: [],
+      officeSpace: []
+    }
+
+    // Process images
+    media.images.forEach(imageCategory => {
+      const category = imageCategory.category.toLowerCase()
+      const categoryKey = category === 'floor plan' ? 'floorPlan' :
+                         category === 'loading area' ? 'loadingArea' :
+                         category === 'office space' ? 'officeSpace' : category
+      
+      if (categoryKey in photos) {
+        photos[categoryKey] = imageCategory.files.map(file => file.url)
+      }
+    })
+
+    // Process documents
+    const documents = media.documents.map(doc => doc.url)
+
+    // Build the final payload
+    return {
+      basicInformation: {
+        propertyName,
+        warehouseType,
+        address: {
+          address: address.address || '',
+          landmark: landmark,
+          city: address.city || '',
+          state: address.state || '',
+          zipCode: address.zipCode || ''
+        },
+        coordinates: {
+          latitude: parseFloat(coordinates.latitude),
+          longitude: parseFloat(coordinates.longitude)
+        },
+        isCornerProperty
+      },
+      warehouseDetails: {
+        ceilingHeight: parseFloat(warehouseDetails.ceilingHeight || '0'),
+        totalArea: parseFloat(warehouseDetails.totalArea || '0'),
+        dockHeight: parseFloat(warehouseDetails.dockHeight || '0'),
+        numberOfDocks: parseInt(warehouseDetails.numberOfDocks || '0'),
+        floorLoadCapacity: parseFloat(warehouseDetails.floorLoadCapacity || '0'),
+        securityFeatures: warehouseDetails.securityFeatures || [],
+        additionalFeatures: warehouseDetails.additionalFeatures || []
+      },
+      propertyDetails: {
+        area: {
+          superBuiltUpArea: parseFloat(formData.area.superBuiltUpAreaSqft || '0'),
+          builtUpArea: parseFloat(formData.area.builtUpAreaSqft || '0'),
+          carpetArea: parseFloat(formData.area.carpetAreaSqft || '0')
+        },
+        floor: {
+          floorNumber: parseInt(propertyDetails.floorNumber || '0'),
+          totalFloors: parseInt(propertyDetails.totalFloors || '0')
+        },
+        facingDirection: propertyDetails.facingDirection || '',
+        furnishing: propertyDetails.furnishing || '',
+        propertyAge: parseInt(propertyDetails.propertyAge || '0'),
+        propertyCondition: propertyDetails.propertyCondition || '',
+        propertyAmenities: propertyDetails.propertyAmenities || [],
+        wholeSpaceAmenities: propertyDetails.wholeSpaceAmenities || [],
+        electricitySupply: parseInt(propertyDetails.electricitySupply || '0'),
+        backupPower: !!propertyDetails.backupPower,
+        waterAvailability: propertyDetails.waterAvailability || ''
+      },
+      pricingDetails: {
+        price: parseFloat(price || '0'),
+        priceType: 'negotiable' // Adjust based on your form data
+      },
+      registration: {
+        chargesType: registrationCharges.chargesType || 'exclusive',
+        registrationCharges: parseFloat(registrationCharges.registrationCharges || '0'),
+        stampDutyCharges: parseFloat(registrationCharges.stampDutyCharges || '0'),
+        brokerageDetails: {
+          hasBrokerage: !!brokerage.hasBrokerage,
+          amount: parseFloat(brokerage.amount || '0'),
+          percentage: parseFloat(brokerage.percentage || '0')
+        }
+      },
+      availability: {
+        availabilityStatus: availability.availabilityStatus || 'available',
+        preferredLeaseDuration: availability.preferredLeaseDuration || '',
+        noticePeriod: availability.noticePeriod || '',
+        isPetsAllowed: !!availability.isPetsAllowed,
+        operatingHoursRestrictions: !!availability.operatingHoursRestrictions
+      },
+      contactInformation: {
+        name: contactDetails.name || '',
+        email: contactDetails.email || '',
+        phone: contactDetails.phone || '',
+        alternatePhone: contactDetails.alternatePhone || '',
+        preferredContactTime: contactDetails.preferredContactTime || ''
+      },
+      media: {
+        photos,
+        videoTour: media.video?.url || '',
+        documents
+      },
+      metadata: {
+        createdBy: "65f2d6f35714c7f89c4e7537", // Replace with actual user ID from auth context
+        createdAt: new Date().toISOString()
+      }
+    }
+  }
+
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
-    console.log("Form Data:", formData)
+    setIsSubmitting(true)
+    setSubmitError(null)
+    
+    try {
+      const transformedData = transformFormData()
+      console.log("Submitting data:", transformedData)
+      
+      // Submit data to API
+      const response = await CommercialPropertyService.createWarehouse(transformedData)
+      
+      // Handle success
+      toast.success("Warehouse listing created successfully!")
+      console.log("Response:", response)
+      
+      // Optionally redirect or reset form
+      // router.push('/dashboard/properties')
+      
+    } catch (error: any) {
+      // Handle error
+      setSubmitError(error.message || 'Failed to create listing')
+      toast.error(error.message || 'Failed to create listing')
+      console.error("Error submitting form:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -174,7 +356,7 @@ const SellWarehouseMain = () => {
         <div className="p-6 sm:p-10">
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-black">Sell Commercial Warehouse</h1>
-            <div className="mt-6 flex items-center space-x-6">
+            <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
               {steps.map((step, index) => (
                 <div key={index} className="flex items-center">
                   <button
@@ -188,7 +370,7 @@ const SellWarehouseMain = () => {
                     >
                       {step.icon}
                     </div>
-                    <span className={`ml-3 text-sm font-medium ${
+                    <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
                       index <= currentStep ? 'text-black' : 'text-black/70'
                     }`}>
                       {step.title}
@@ -213,13 +395,19 @@ const SellWarehouseMain = () => {
               <div className="space-y-6">{steps[currentStep].content}</div>
             </div>
 
+            {submitError && (
+              <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-200">
+                {submitError}
+              </div>
+            )}
+
             <div className="flex justify-between pt-4">
               <button
                 type="button"
                 onClick={handlePrevious}
-                disabled={currentStep === 0}
+                disabled={currentStep === 0 || isSubmitting}
                 className={`px-6 py-2.5 rounded-lg border transition-all duration-200 ${
-                  currentStep === 0
+                  currentStep === 0 || isSubmitting
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                     : "border-black/20 text-black hover:bg-black hover:text-white"
                 }`}
@@ -238,9 +426,12 @@ const SellWarehouseMain = () => {
               ) : (
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+                  disabled={isSubmitting}
+                  className={`px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
+                    isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
                 >
-                  List Property
+                  {isSubmitting ? "Submitting..." : "List Property"}
                 </button>
               )}
             </div>

@@ -52,6 +52,7 @@ import socketHandler from "./socketHandler";
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
 import commercialShedRoutes from './routes/commercial/commercialShedRoutes';
+import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRoutes';
 
 dotenv.config();
 
@@ -168,6 +169,7 @@ app.use("/api/bug", bugRouter);
 app.use("/api/commercial-shops", commercialShopRoutes);
 app.use("/api/commercial-showrooms", commercialShowroomRoutes);
 app.use('/api/commercial-sheds', commercialShedRoutes);
+app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
