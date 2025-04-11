@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -111,13 +109,20 @@ const BugDashboard = () => {
     }
   }
 
-  // Add a function to handle accepting a bug
+  // Update the handleAcceptBug function to use the /accept endpoint instead of /edit
+  // This will ensure the email notification is sent when a bug is accepted
+
+  // Replace the existing handleAcceptBug function with this updated version:
   const handleAcceptBug = async (bug: Bugs) => {
     try {
-      // Update the bug status to "in-progress" and mark as accepted
-      const response = await axios.put(`/api/bug/${bug._id}/edit`, {
+      // Use the dedicated accept endpoint that includes email notification
+      const response = await axios.put(`/api/bug/${bug._id}/accept`, {
+        isaccepted: true,
+      })
+
+      // Also update the status to "in-progress" using the edit endpoint
+      await axios.put(`/api/bug/${bug._id}/edit`, {
         status: "in-progress",
-        isAccepted: true,
       })
 
       if (response.data.success) {
@@ -146,7 +151,7 @@ const BugDashboard = () => {
           setSelectedReport({ ...selectedReport, status: "in-progress", isAccepted: true })
         }
 
-        toast.success("Bug accepted and moved to in-progress")
+        toast.success("Bug accepted and email notification sent")
       } else {
         toast.error(response.data.message)
       }
@@ -271,7 +276,6 @@ const BugDashboard = () => {
     }
     toast.success(`Bug status updated to ${newStatus.replace("-", " ")}`)
   }
-
   // const handleAddComment = (reportId: string | undefined, comment: string) => {
   //   if (!reportId) return
 
