@@ -7,15 +7,18 @@ interface RegistrationChargesProps {
 
 const RegistrationCharges = ({ onRegistrationChargesChange }: RegistrationChargesProps) => {
   const [charges, setCharges] = useState({
-    registrationAmount: '',
-    stampDutyAmount: '',
-    type: 'exclusive'
+    registrationAmount: 0,
+    stampDutyAmount: 0,
+    chargestype: 'exclusive'
   });
 
   const handleChange = (field: string, value: any) => {
-    const updatedCharges = { ...charges, [field]: value };
-    setCharges(updatedCharges);
-    onRegistrationChargesChange?.(updatedCharges);
+    const updated = {
+      ...charges,
+      [field]: field === 'chargestype' ? value : parseFloat(value) || 0
+    };
+    setCharges(updated);
+    onRegistrationChargesChange?.(updated);
   };
 
   return (
@@ -40,8 +43,8 @@ const RegistrationCharges = ({ onRegistrationChargesChange }: RegistrationCharge
                     type="radio"
                     name="chargesType"
                     value="inclusive"
-                    checked={charges.type === 'inclusive'}
-                    onChange={(e) => handleChange('type', e.target.value)}
+                    checked={charges.chargestype === 'inclusive'}
+                    onChange={(e) => handleChange('chargestype', e.target.value)}
                     className="w-5 h-5 text-black border-gray-300 focus:ring-black"
                   />
                   <span className="ml-3 text-black">Inclusive in Price</span>
@@ -53,8 +56,8 @@ const RegistrationCharges = ({ onRegistrationChargesChange }: RegistrationCharge
                     type="radio"
                     name="chargesType"
                     value="exclusive"
-                    checked={charges.type === 'exclusive'}
-                    onChange={(e) => handleChange('type', e.target.value)}
+                    checked={charges.chargestype === 'exclusive'}
+                    onChange={(e) => handleChange('chargestype', e.target.value)}
                     className="w-5 h-5 text-black border-gray-300 focus:ring-black"
                   />
                   <span className="ml-3 text-black">Exclusive of Price</span>
@@ -63,7 +66,7 @@ const RegistrationCharges = ({ onRegistrationChargesChange }: RegistrationCharge
             </div>
           </div>
 
-          {charges.type === 'exclusive' && (
+          {charges.chargestype === 'exclusive' && (
             <div className="space-y-6 mt-6">
               {/* Registration Charges */}
               <div className="space-y-4">
@@ -78,7 +81,7 @@ const RegistrationCharges = ({ onRegistrationChargesChange }: RegistrationCharge
                   <input
                     type="number"
                     min="0"
-                    value={charges.registrationAmount}
+                    value={charges.registrationAmount || ''}
                     onChange={(e) => handleChange('registrationAmount', e.target.value)}
                     placeholder="Enter registration charges"
                     className="w-full pl-10 pr-4 py-3.5 rounded-lg bg-gray-50 border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -99,7 +102,7 @@ const RegistrationCharges = ({ onRegistrationChargesChange }: RegistrationCharge
                   <input
                     type="number"
                     min="0"
-                    value={charges.stampDutyAmount}
+                    value={charges.stampDutyAmount || ''}
                     onChange={(e) => handleChange('stampDutyAmount', e.target.value)}
                     placeholder="Enter stamp duty charges"
                     className="w-full pl-10 pr-4 py-3.5 rounded-lg bg-gray-50 border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"

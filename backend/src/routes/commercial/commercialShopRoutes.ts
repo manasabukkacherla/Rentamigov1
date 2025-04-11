@@ -1,7 +1,12 @@
 import express from 'express';
 import upload, { convertToBase64 } from '../../middleware/fileUpload';
 import {
-  createCommercialShop
+  createCommercialShop,
+  // getAllCommercialShops,
+  // getCommercialShopById,
+  // updateCommercialShop,
+  // deleteCommercialShop,
+  // changeListingStatus
 } from '../../controllers/commercial/commercialShopController';
 
 const router = express.Router();
@@ -23,8 +28,9 @@ const uploadFields = upload.fields([
 // Create a new commercial shop listing
 router.post(
   '/',
-  uploadFields,
-  convertToBase64,
+  // auth,
+  // uploadFields,
+  // convertToBase64,
   createCommercialShop
 );
 

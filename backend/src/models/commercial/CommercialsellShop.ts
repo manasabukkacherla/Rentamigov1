@@ -54,15 +54,15 @@ interface IContactInformation {
 
 interface IMedia {
   photos: {
-    exterior: string[];
-    interior: string[];
-    floorPlan: string[];
-    washrooms: string[];
-    lifts: string[];
-    emergencyExits: string[];
+    exterior: string[]; 
+    interior: string[]; 
+    floorPlan: string[]; 
+    washrooms: string[]; 
+    lifts: string[]; 
+    emergencyExits: string[]; 
   };
-  videoTour?: string;
-  documents: string[];
+  videoTour?: string; 
+  documents: string[]; 
 }
 
 interface IMetadata {
@@ -178,12 +178,14 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   },
   registration: {
     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-    registrationAmount: { type: Number },
-    stampDutyAmount: { type: Number }
+    registrationAmount: { type: Number, required: false },
+    stampDutyAmount: { type: Number, required: false },
+    brokeragedetails: { type: Boolean, default: false },
+    brokerageAmount: { type: Number, required: false }
   },
   brokerage: {
     required: { type: String, enum: ['yes', 'no'], required: true },
-    amount: { type: Number }
+    amount: { type: Number, required: false }
   },
   availability: {
     availableFrom: { type: String },
@@ -205,15 +207,15 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   },
   media: {
     photos: {
-      exterior: [{ type: String }],
-      interior: [{ type: String }],
-      floorPlan: [{ type: String }],
+      exterior: [{ type: String }], 
+      interior: [{ type: String }], 
+      floorPlan: [{ type: String }], 
       washrooms: [{ type: String }],
       lifts: [{ type: String }],
-      emergencyExits: [{ type: String }]
+      emergencyExits: [{ type: String }] 
     },
-    videoTour: { type: String },
-    documents: [{ type: String }]
+    videoTour: { type: String }, 
+    documents: [{ type: String }] 
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -233,4 +235,4 @@ CommercialShopSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
 export { ICommercialShop, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialShop>('CommercialsellShop', CommercialShopSchema); 
+export default model<ICommercialShop>('CommercialsellShop', CommercialShopSchema);
