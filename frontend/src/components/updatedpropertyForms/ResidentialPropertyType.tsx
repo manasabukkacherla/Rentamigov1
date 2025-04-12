@@ -388,42 +388,7 @@ const ResidentialPropertyType = ({
     )
   }
 
-  const handleNextClick = async () => {
-    if (!selectedType) return alert("Please select a property type.")
 
-    setLoading(true)
-    setSuccessMessage(null)
-    setErrorMessage(null)
-
-    try {
-      const response = await fetch("/api/property-selection/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category: propertyType,
-          listingType: listingType,
-          subCategory: selectedType,
-        }),
-      })
-
-      const data = await response.json()
-      if (data.success) {
-        setPropertyId(data.propertyId)
-        setSuccessMessage("Property selection saved successfully! ✅")
-
-        setTimeout(() => {
-          setShowForm(true)
-        }, 500)
-      } else {
-        setErrorMessage("Error: " + data.error)
-      }
-    } catch (error) {
-      console.error("Error:", error)
-      setErrorMessage("Failed to connect to the server.")
-    }
-
-    setLoading(false)
-  }
 
   if (showForm && selectedType) {
     return (
@@ -547,11 +512,11 @@ const ResidentialPropertyType = ({
       {selectedType && (
         <div className="flex justify-end mt-8">
           <button
-            onClick={handleNextClick}
+            onClick={() => setShowForm(true)}
             disabled={loading}
             className="px-6 py-3 rounded-lg bg-black text-white hover:bg-black/80 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Saving..." : "Next"}
+            Next
           </button>
         </div>
       )}
