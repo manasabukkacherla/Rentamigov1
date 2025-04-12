@@ -513,8 +513,11 @@ const ResidentialPropertyType = ({
         <div className="flex justify-end mt-8">
           <button
             onClick={() => setShowForm(true)}
+
             disabled={loading}
             className="px-6 py-3 rounded-lg bg-black text-white hover:bg-black/80 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+
+
           >
             Next
           </button>
