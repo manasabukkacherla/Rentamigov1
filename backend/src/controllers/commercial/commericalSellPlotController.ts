@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import SellPlot from '../models/commercial/commercialSellPlot';
+import SellPlot from '../../models/commercial/commercialsellplot';
 import mongoose from 'mongoose';
 
 interface AuthenticatedRequest extends Request {
