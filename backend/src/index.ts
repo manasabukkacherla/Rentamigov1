@@ -143,7 +143,7 @@ app.use("/api/forms", subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter);
 
 //Property listing apis
-app.use("/api/property-selection", Propertyrouter);
+//app.use("/api/property-selection", Propertyrouter);
 // app.use("/api/basicdetails", BasicDetailsrouter);
 app.use("/api/properties", PropertyDetailsrouter);
 
