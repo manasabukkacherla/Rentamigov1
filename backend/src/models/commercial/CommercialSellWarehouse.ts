@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  shopType: string[];
+  warehouseType: string[];
   address: {
     street: string;
     city: string;
@@ -54,15 +54,15 @@ interface IContactInformation {
 
 interface IMedia {
   photos: {
-    exterior: string[]; 
-    interior: string[]; 
-    floorPlan: string[]; 
-    washrooms: string[]; 
-    lifts: string[]; 
-    emergencyExits: string[]; 
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    loadingArea: string[];
+    storage: string[];
+    officeSpace: string[];
   };
-  videoTour?: string; 
-  documents: string[]; 
+  videoTour?: string;
+  documents: string[];
 }
 
 interface IMetadata {
@@ -75,10 +75,18 @@ interface IFloor {
   totalFloors: number;
 }
 
-interface ICommercialShop extends Document {
+interface ICommercialWarehouse extends Document {
   propertyId: string;
-  
   basicInformation: IBasicInformation;
+  warehouseDetails: {
+    ceilingHeight: number;
+    totalArea: number;
+    dockHeight: number;
+    numberOfDocks: number;
+    floorLoadCapacity: number;
+    securityFeatures: string[];
+    additionalFeatures: string[];
+  };
   propertyDetails: {
     area: IArea;
     floor: IFloor;
@@ -94,21 +102,12 @@ interface ICommercialShop extends Document {
     propertyAge: number;
     propertyCondition: string;
   };
-  shopDetails: {
-    frontageWidth: number;
-    heightOfShop: number;
-    displayWindow: boolean;
-    attachedStorageRoom: boolean;
-    averageFootTraffic: string;
-    customerParking: boolean;
-    previousBusiness: string;
-  };
   pricingDetails: IPricingDetails;
   registration: {
     chargestype: "inclusive" | "exclusive";
     registrationAmount?: number;
     stampDutyAmount?: number;
-  }
+  };
   brokerage: {
     required: string;
     amount: number;
@@ -120,11 +119,11 @@ interface ICommercialShop extends Document {
 }
 
 // Schema
-const CommercialShopSchema = new Schema<ICommercialShop>({
+const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    shopType: [{ type: String, required: true }],
+    warehouseType: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -137,6 +136,15 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
       longitude: { type: Number, required: true },
     },
     isCornerProperty: { type: Boolean }
+  },
+  warehouseDetails: {
+    ceilingHeight: { type: Number, required: true },
+    totalArea: { type: Number, required: true },
+    dockHeight: { type: Number, required: true },
+    numberOfDocks: { type: Number, default: 0 },
+    floorLoadCapacity: { type: Number, required: true },
+    securityFeatures: [{ type: String }],
+    additionalFeatures: [{ type: String }]
   },
   propertyDetails: {
     area: {
@@ -160,15 +168,6 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     propertyAge: { type: Number },
     propertyCondition: { type: String }
   },
-  shopDetails: {
-    frontageWidth: { type: Number, required: true },
-    heightOfShop: { type: Number, required: true },
-    displayWindow: { type: Boolean, default: false },
-    attachedStorageRoom: { type: Boolean, default: false },
-    averageFootTraffic: { type: String, enum: ['low', 'medium', 'high'] },
-    customerParking: { type: Boolean, default: false },
-    previousBusiness: { type: String }
-  },
   pricingDetails: {
     propertyPrice: { type: Number, required: true },
     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
@@ -178,14 +177,12 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   },
   registration: {
     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-    registrationAmount: { type: Number, required: false },
-    stampDutyAmount: { type: Number, required: false },
-    brokeragedetails: { type: Boolean, default: false },
-    brokerageAmount: { type: Number, required: false }
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number }
   },
   brokerage: {
     required: { type: String, enum: ['yes', 'no'], required: true },
-    amount: { type: Number, required: false }
+    amount: { type: Number }
   },
   availability: {
     availableFrom: { type: String },
@@ -207,15 +204,15 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   },
   media: {
     photos: {
-      exterior: [{ type: String }], 
-      interior: [{ type: String }], 
-      floorPlan: [{ type: String }], 
-      washrooms: [{ type: String }],
-      lifts: [{ type: String }],
-      emergencyExits: [{ type: String }] 
+      exterior: [{ type: String }],
+      interior: [{ type: String }],
+      floorPlan: [{ type: String }],
+      loadingArea: [{ type: String }],
+      storage: [{ type: String }],
+      officeSpace: [{ type: String }]
     },
-    videoTour: { type: String }, 
-    documents: [{ type: String }] 
+    videoTour: { type: String },
+    documents: [{ type: String }]
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -226,13 +223,13 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
 });
 
 // Indexes
-CommercialShopSchema.index({ propertyId: 1 }, { unique: true });
-CommercialShopSchema.index({ 'basicInformation.city': 1 });
-CommercialShopSchema.index({ 'basicInformation.state': 1 });
-CommercialShopSchema.index({ 'pricingDetails.propertyPrice': 1 });
-CommercialShopSchema.index({ 'propertyDetails.area.totalArea': 1 });
-CommercialShopSchema.index({ 'metadata.createdAt': -1 });
+CommercialWarehouseSchema.index({ propertyId: 1 }, { unique: true });
+CommercialWarehouseSchema.index({ 'basicInformation.city': 1 });
+CommercialWarehouseSchema.index({ 'basicInformation.state': 1 });
+CommercialWarehouseSchema.index({ 'pricingDetails.propertyPrice': 1 });
+CommercialWarehouseSchema.index({ 'propertyDetails.area.totalArea': 1 });
+CommercialWarehouseSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialShop, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialShop>('CommercialsellShop', CommercialShopSchema);
+export { ICommercialWarehouse, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };
+export default model<ICommercialWarehouse>('CommercialSellWarehouse', CommercialWarehouseSchema); 
