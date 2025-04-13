@@ -146,15 +146,6 @@ interface FormData {
   };
 }
 
-const convertFileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
-};
-
 // Add validation utility functions
 const validateEmail = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -669,6 +660,15 @@ const SellShopMain = () => {
     });
   };
 
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     try {
@@ -676,7 +676,6 @@ const SellShopMain = () => {
       if (user) {
         const author = JSON.parse(user).id;
 
-        // Convert all media files to base64
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -710,9 +709,7 @@ const SellShopMain = () => {
         console.log(response.data)
 
         if (response.data.success) {
-          // Show success message and redirect
           toast.success('Commercial shop listing created successfully!');
-          // navigate('/dashboard'); // Redirect to dashboard or appropriate page
         }
       } else {
         navigate('/login');
