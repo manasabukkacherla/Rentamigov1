@@ -7,15 +7,14 @@ import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
 import ShowroomDetails from '../CommercialComponents/ShowroomDetails';
 import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
-import LeaseAmount from '../../lease/LeaseAmount';
-import LeaseTenure from '../../lease/LeaseTenure';
+import LeaseAmount from '../lease/LeaseAmount';
+import LeaseTenure from '../lease/LeaseTenure';
 import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
 import OtherCharges from '../residentialrent/OtherCharges';
 import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-
 const LeaseShowroomMain = () => {
   const [formData, setFormData] = useState({
     propertyName: '',
