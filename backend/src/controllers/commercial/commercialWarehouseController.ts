@@ -52,41 +52,13 @@ export const createCommercialWarehouse = async (req: Request, res: Response) => 
   try {
     const warehouseData = req.body;
     
-    // Basic validation - ensure required fields exist
-    if (!warehouseData.basicInformation?.propertyName) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required field: property name'
-      });
-    }
-    
-    if (!warehouseData.warehouseDetails?.totalArea) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required field: total area'
-      });
-    }
-    
-    if (!warehouseData.propertyDetails?.area?.superBuiltUpArea) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required field: super built-up area'
-      });
-    }
-
     // Generate property ID
     const propertyId = await generatePropertyId();
     
     // Add metadata and property ID
     warehouseData.metadata = {
-      createdBy: warehouseData.metadata?.createdBy || "65f2d6f35714c7f89c4e7537", // Default or provided user ID
+      createdBy: warehouseData.metadata?.createdBy,
       createdAt: new Date(),
-      status: 'pending',
-      isVerified: false,
-      isActive: true,
-      views: 0,
-      inquiries: 0,
-      favoriteCount: 0
     };
     
     // Add property ID to the warehouse data

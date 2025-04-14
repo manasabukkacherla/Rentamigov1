@@ -57,9 +57,9 @@ interface IMedia {
     exterior: string[];
     interior: string[];
     floorPlan: string[];
-    loadingArea: string[];
-    storage: string[];
-    officeSpace: string[];
+    washrooms: string[];
+    lifts: string[];
+    emergencyExits: string[];
   };
   videoTour?: string;
   documents: string[];
@@ -81,11 +81,17 @@ interface ICommercialWarehouse extends Document {
   warehouseDetails: {
     ceilingHeight: number;
     totalArea: number;
+    docks: {
+      count: number;
+      height: number;
+    }
     dockHeight: number;
     numberOfDocks: number;
     floorLoadCapacity: number;
-    securityFeatures: string[];
-    additionalFeatures: string[];
+    fireSafety: boolean;
+    securityPersonnel: boolean;
+    access24x7: boolean;
+    truckParking: boolean;
   };
   propertyDetails: {
     area: IArea;
@@ -140,11 +146,15 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   warehouseDetails: {
     ceilingHeight: { type: Number, required: true },
     totalArea: { type: Number, required: true },
-    dockHeight: { type: Number, required: true },
-    numberOfDocks: { type: Number, default: 0 },
+    docks: {
+      count: { type: Number, required: true },
+      height: { type: Number, required: true },
+    },
     floorLoadCapacity: { type: Number, required: true },
-    securityFeatures: [{ type: String }],
-    additionalFeatures: [{ type: String }]
+    fireSafety: { type: Boolean, default: false },
+    securityPersonnel: { type: Boolean, default: false },
+    access24x7: { type: Boolean, default: false },
+    truckParking: { type: Boolean, default: false },
   },
   propertyDetails: {
     area: {
@@ -207,9 +217,9 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
       exterior: [{ type: String }],
       interior: [{ type: String }],
       floorPlan: [{ type: String }],
-      loadingArea: [{ type: String }],
-      storage: [{ type: String }],
-      officeSpace: [{ type: String }]
+      washrooms: [{ type: String }],
+      lifts: [{ type: String }],
+      emergencyExits: [{ type: String }]
     },
     videoTour: { type: String },
     documents: [{ type: String }]

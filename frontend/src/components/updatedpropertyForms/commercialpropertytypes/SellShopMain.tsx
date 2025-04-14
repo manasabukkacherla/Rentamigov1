@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import PropertyName from '../PropertyName';
@@ -146,13 +146,49 @@ interface FormData {
   };
 }
 
-const convertFileToBase64 = (file: File): Promise<string> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = error => reject(error);
-  });
+// Add validation utility functions
+const validateEmail = (email: string) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePhone = (phone: string) => {
+  const phoneRegex = /^[0-9]{10}$/;
+  return phoneRegex.test(phone);
+};
+
+const validateZipCode = (zipCode: string) => {
+  const zipRegex = /^[0-9]{6}$/;
+  return zipRegex.test(zipCode);
+};
+
+const validatePrice = (price: number) => {
+  return price > 0;
+};
+
+const validateArea = (area: number) => {
+  return area > 0;
+};
+
+// Add error display component
+const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
+  if (Object.keys(errors).length === 0) return null;
+  
+  return (
+    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+      <div className="flex items-center">
+        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
+      </div>
+      <ul className="mt-2 list-disc list-inside text-red-600">
+        {Object.values(errors).map((error, index) => (
+          <li key={index} className="text-sm">{error}</li>
+        ))}
+      </ul>
+    </div>
+  );
 };
 
 const SellShopMain = () => {
@@ -254,26 +290,230 @@ const SellShopMain = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Check login status on component mount
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
+
+  // Enhanced validation for current step
+  const validateCurrentStep = () => {
+    const errors: Record<string, string> = {};
+    
+    switch (currentStep) {
+      case 0: // Basic Information
+        if (!formData.basicInformation.title.trim()) {
+          errors.title = 'Title is required';
+        } else if (formData.basicInformation.title.length < 5) {
+          errors.title = 'Title must be at least 5 characters long';
+        }
+
+        if (!formData.basicInformation.shopType) {
+          errors.shopType = 'Shop type is required';
+        }
+
+        if (!formData.basicInformation.address.street.trim()) {
+          errors.street = 'Street address is required';
+        }
+
+        if (!formData.basicInformation.address.city.trim()) {
+          errors.city = 'City is required';
+        }
+
+        if (!formData.basicInformation.address.state.trim()) {
+          errors.state = 'State is required';
+        }
+
+        if (!formData.basicInformation.address.zipCode) {
+          errors.zipCode = 'ZIP code is required';
+        } else if (!validateZipCode(formData.basicInformation.address.zipCode)) {
+          errors.zipCode = 'ZIP code must be 6 digits';
+        }
+
+        if (!formData.basicInformation.landmark.trim()) {
+          errors.landmark = 'Landmark is required';
+        }
+
+        if (!formData.basicInformation.location.latitude || !formData.basicInformation.location.longitude) {
+          errors.location = 'Please select a location on the map';
+        }
+        break;
+      
+      case 1: // Property Details
+        if (!formData.propertyDetails.area.totalArea) {
+          errors.totalArea = 'Total area is required';
+        } else if (!validateArea(formData.propertyDetails.area.totalArea)) {
+          errors.totalArea = 'Total area must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.area.builtUpArea) {
+          errors.builtUpArea = 'Built-up area is required';
+        } else if (!validateArea(formData.propertyDetails.area.builtUpArea)) {
+          errors.builtUpArea = 'Built-up area must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.area.carpetArea) {
+          errors.carpetArea = 'Carpet area is required';
+        } else if (!validateArea(formData.propertyDetails.area.carpetArea)) {
+          errors.carpetArea = 'Carpet area must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.floor.floorNumber) {
+          errors.floorNumber = 'Floor number is required';
+        } else if (formData.propertyDetails.floor.floorNumber < 0) {
+          errors.floorNumber = 'Floor number cannot be negative';
+        }
+
+        if (!formData.propertyDetails.floor.totalFloors) {
+          errors.totalFloors = 'Total floors is required';
+        } else if (formData.propertyDetails.floor.totalFloors <= 0) {
+          errors.totalFloors = 'Total floors must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.facingDirection) {
+          errors.facingDirection = 'Facing direction is required';
+        }
+
+        if (!formData.propertyDetails.furnishingStatus) {
+          errors.furnishingStatus = 'Furnishing status is required';
+        }
+
+        if (!formData.propertyDetails.electricitySupply.powerLoad) {
+          errors.powerLoad = 'Power load is required';
+        } else if (formData.propertyDetails.electricitySupply.powerLoad <= 0) {
+          errors.powerLoad = 'Power load must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.waterAvailability) {
+          errors.waterAvailability = 'Water availability is required';
+        }
+
+        if (!formData.propertyDetails.propertyAge) {
+          errors.propertyAge = 'Property age is required';
+        } else if (formData.propertyDetails.propertyAge < 0) {
+          errors.propertyAge = 'Property age cannot be negative';
+        }
+
+        if (!formData.propertyDetails.propertyCondition) {
+          errors.propertyCondition = 'Property condition is required';
+        }
+        break;
+      
+      case 2: // Pricing Details
+        if (!formData.pricingDetails.propertyPrice) {
+          errors.propertyPrice = 'Property price is required';
+        } else if (!validatePrice(formData.pricingDetails.propertyPrice)) {
+          errors.propertyPrice = 'Property price must be greater than 0';
+        }
+
+        if (!formData.pricingDetails.pricetype) {
+          errors.pricetype = 'Price type is required';
+        }
+
+        if (!formData.pricingDetails.area) {
+          errors.area = 'Area is required';
+        } else if (!validateArea(formData.pricingDetails.area)) {
+          errors.area = 'Area must be greater than 0';
+        }
+
+        if (!formData.pricingDetails.totalprice) {
+          errors.totalprice = 'Total price is required';
+        } else if (!validatePrice(formData.pricingDetails.totalprice)) {
+          errors.totalprice = 'Total price must be greater than 0';
+        }
+        break;
+      
+      case 3: // Availability
+        if (!formData.availability.availableFrom) {
+          errors.availableFrom = 'Available from date is required';
+        }
+
+        if (!formData.availability.leaseDuration) {
+          errors.leaseDuration = 'Lease duration is required';
+        }
+
+        if (!formData.availability.noticePeriod) {
+          errors.noticePeriod = 'Notice period is required';
+        }
+        break;
+      
+      case 4: // Contact Information
+        if (!formData.contactInformation.name.trim()) {
+          errors.name = 'Name is required';
+        } else if (formData.contactInformation.name.length < 3) {
+          errors.name = 'Name must be at least 3 characters long';
+        }
+
+        if (!formData.contactInformation.email.trim()) {
+          errors.email = 'Email is required';
+        } else if (!validateEmail(formData.contactInformation.email)) {
+          errors.email = 'Please enter a valid email address';
+        }
+
+        if (!formData.contactInformation.phone.trim()) {
+          errors.phone = 'Phone number is required';
+        } else if (!validatePhone(formData.contactInformation.phone)) {
+          errors.phone = 'Please enter a valid 10-digit phone number';
+        }
+
+        if (formData.contactInformation.alternatePhone && !validatePhone(formData.contactInformation.alternatePhone)) {
+          errors.alternatePhone = 'Please enter a valid 10-digit phone number';
+        }
+        break;
+      
+      case 5: // Property Media
+        if (!formData.media.photos.exterior.length) {
+          errors.exteriorPhotos = 'At least one exterior photo is required';
+        }
+        break;
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const renderFormSection = (content: React.ReactNode) => (
+    <div className="space-y-4">
+      <ErrorDisplay errors={formErrors} />
+      {content}
+    </div>
+  );
+
   const formSections = [
     {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
-      content: (
-        <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Property Details</h3>
-            </div>
-            <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => handleChange('basicInformation.title', name)} />
-            <ShopType onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)} />
-            <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} />
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Store className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Details</h3>
+          </div>
+          <div className="space-y-6">
+            <PropertyName 
+              propertyName={formData.basicInformation.title} 
+              onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
+            />
+            <ShopType 
+              onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
+            />
+            <CommercialPropertyAddress 
+              onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            />
             <Landmark
               onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
               onLocationSelect={(location) => handleChange('basicInformation.location', location)}
             />
-
-            <CornerProperty onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} />
+            <CornerProperty 
+              onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} 
+            />
           </div>
         </div>
       )
@@ -281,21 +521,27 @@ const SellShopMain = () => {
     {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <Building2 className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
-          <ShopDetails onDetailsChange={(details) => handleChange('shopDetails', details)} />
-          <CommercialPropertyDetails onDetailsChange={(details) => handleChange('propertyDetails', details)} />
+          <div className="space-y-6">
+            <ShopDetails 
+              onDetailsChange={(details) => handleChange('shopDetails', details)}
+            />
+            <CommercialPropertyDetails 
+              onDetailsChange={(details) => handleChange('propertyDetails', details)}
+            />
+          </div>
         </div>
       )
     },
     {
       title: 'Pricing Details',
       icon: <DollarSign className="w-5 h-5" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <DollarSign className="w-6 h-6 text-black" />
@@ -305,27 +551,22 @@ const SellShopMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <Price onPriceChange={(price) => handleChange('pricingDetails', price)} />
-                </div>
-                <div className="text-black">
-                  <PricePerSqft
-                    propertyPrice={formData.pricingDetails.propertyPrice}
-                    Area={formData.propertyDetails.area}
-                    onPricePerSqftChange={(data) => {
-                      setFormData(prev => ({
-                        ...prev,
-                        pricingDetails: {
-                          ...prev.pricingDetails,
-                          area: data.area,
-                          totalprice: data.totalprice,
-                          pricePerSqft: data.pricePerSqft
-                        }
-                      }));
-                    }}
-                  />
-
-                </div>
+                <Price onPriceChange={(price) => handleChange('pricingDetails', price)} />
+                <PricePerSqft
+                  propertyPrice={formData.pricingDetails.propertyPrice}
+                  Area={formData.propertyDetails.area}
+                  onPricePerSqftChange={(data) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      pricingDetails: {
+                        ...prev.pricingDetails,
+                        area: data.area,
+                        totalprice: data.totalprice,
+                        pricePerSqft: data.pricePerSqft
+                      }
+                    }));
+                  }}
+                />
               </div>
             </div>
 
@@ -348,7 +589,7 @@ const SellShopMain = () => {
     {
       title: 'Availability',
       icon: <Calendar className="w-5 h-5" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-black" />
@@ -361,7 +602,7 @@ const SellShopMain = () => {
     {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <UserCircle className="w-6 h-6 text-black" />
@@ -374,7 +615,7 @@ const SellShopMain = () => {
     {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <ImageIcon className="w-6 h-6 text-black" />
@@ -398,7 +639,6 @@ const SellShopMain = () => {
               });
             }}
           />
-
         </div>
       )
     }
@@ -420,6 +660,15 @@ const SellShopMain = () => {
     });
   };
 
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     try {
@@ -427,7 +676,6 @@ const SellShopMain = () => {
       if (user) {
         const author = JSON.parse(user).id;
 
-        // Convert all media files to base64
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -461,9 +709,7 @@ const SellShopMain = () => {
         console.log(response.data)
 
         if (response.data.success) {
-          // Show success message and redirect
           toast.success('Commercial shop listing created successfully!');
-          // navigate('/dashboard'); // Redirect to dashboard or appropriate page
         }
       } else {
         navigate('/login');
@@ -475,8 +721,12 @@ const SellShopMain = () => {
   };
 
   const handleNext = () => {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (validateCurrentStep()) {
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
@@ -485,6 +735,22 @@ const SellShopMain = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
