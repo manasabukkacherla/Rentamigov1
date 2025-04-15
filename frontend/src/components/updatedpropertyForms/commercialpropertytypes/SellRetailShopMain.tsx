@@ -17,6 +17,7 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronLeft, ChevronRight } from "lucide-react"
 
 const SellRetailShopMain = () => {
   const [formData, setFormData] = useState({
@@ -47,65 +48,142 @@ const SellRetailShopMain = () => {
   const steps = [
     {
       title: "Basic Information",
-      content: (
-        <>
-          <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
-          />
-          <RetailStoreType onRetailTypeChange={(type) => setFormData({ ...formData, retailStoreType: type })} />
-          <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, address })} />
-          <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
-          
-          <CornerProperty
-            onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
-          />
-        </>
+      icon: <Store className="w-5 h-5" />,
+      component: (
+        <div className="space-y-8">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <Store className="text-black w-6 h-6" />
+              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
+            </div>
+            <div className="space-y-6">
+              <PropertyName
+                propertyName={formData.propertyName}
+                onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+              />
+              <RetailStoreType onRetailTypeChange={(type) => setFormData({ ...formData, retailStoreType: type })} />
+            </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <MapPin className="text-black w-6 h-6" />
+              <h3 className="text-xl font-semibold text-black">Location Details</h3>
+            </div>
+            <div className="space-y-6">
+              <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, address })} />
+              <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
+              
+              <CornerProperty
+                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
+              />
+            </div>
+          </div>
+        </div>
       ),
     },
     {
       title: "Property Details",
-      content: (
-        <>
-          <RetailStoreDetails
-            onDetailsChange={(details) => setFormData({ ...formData, retailStoreDetails: details })}
-          />
-          <CommercialPropertyDetails
-            onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
-          />
-        </>
+      icon: <Building2 className="w-5 h-5" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="text-black w-6 h-6" />
+            <h3 className="text-xl font-semibold text-black">Property Details</h3>
+          </div>
+          <div className="space-y-6">
+            <RetailStoreDetails
+              onDetailsChange={(details) => setFormData({ ...formData, retailStoreDetails: details })}
+            />
+            <CommercialPropertyDetails
+              onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
+            />
+          </div>
+        </div>
       ),
     },
     {
       title: "Pricing Details",
-      content: (
-        <>
-          <Price onPriceChange={(price) => setFormData({ ...formData, price: price.amount })} />
-          <PricePerSqft price={formData.price} area={formData.area} />
-          <RegistrationCharges
-            onRegistrationChargesChange={(charges) => setFormData({ ...formData, registrationCharges: charges })}
-          />
-          <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
-        </>
+      icon: <DollarSign className="w-5 h-5" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <DollarSign className="text-black w-6 h-6" />
+            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
+          </div>
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
+              <div className="space-y-4 text-black">
+                <Price onPriceChange={(price) => setFormData({ ...formData, price: price.amount })} />
+                <PricePerSqft price={formData.price} area={formData.area} />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              <div className="space-y-4 text-black">
+                <div className="text-black">
+                  <RegistrationCharges
+                    onRegistrationChargesChange={(charges) => setFormData({ ...formData, registrationCharges: charges })}
+                  />
+                </div>
+                <div className="border-t border-gray-200 my-4"></div>
+                <div className="text-black">
+                  <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       ),
     },
     {
       title: "Availability",
-      content: (
-        <CommercialAvailability onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+      icon: <Calendar className="w-5 h-5" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="text-black w-6 h-6" />
+            <h3 className="text-xl font-semibold text-black">Availability</h3>
+          </div>
+          <div className="space-y-6">
+            <CommercialAvailability onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+          </div>
+        </div>
       ),
     },
     {
       title: "Contact Information",
-      content: (
-        <CommercialContactDetails
-          onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
-        />
+      icon: <UserCircle className="w-5 h-5" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <UserCircle className="text-black w-6 h-6" />
+            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
+          </div>
+          <div className="space-y-6">
+            <CommercialContactDetails
+              onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
+            />
+          </div>
+        </div>
       ),
     },
     {
       title: "Property Media",
-      content: <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />,
+      icon: <ImageIcon className="w-5 h-5" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <ImageIcon className="text-black w-6 h-6" />
+            <h3 className="text-xl font-semibold text-black">Property Media</h3>
+          </div>
+          <div className="space-y-6">
+            <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />
+          </div>
+        </div>
+      ),
     },
   ]
 
@@ -128,63 +206,97 @@ const SellRetailShopMain = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 sm:p-10">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Sell Retail Store</h1>
-            <div className="mt-2 flex items-center">
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+    <div className="min-h-screen bg-white">
+      {/* Progress indicator */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {steps.map((s, i) => (
                 <div
-                  className="bg-blue-600 h-2.5 rounded-full"
-                  style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
-                ></div>
-              </div>
-              <span className="ml-4 text-sm font-medium text-gray-500">
-                Step {currentStep + 1} of {steps.length}
-              </span>
+                  key={i}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => setCurrentStep(i)}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                      }`}
+                    >
+                      {s.icon}
+                    </div>
+                    <span
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
+                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                      }`}
+                    >
+                      {s.title}
+                    </span>
+                  </div>
+                  {i < steps.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div
+                        className={`w-12 h-1 transition-colors duration-200 ${
+                          i < currentStep ? "bg-black" : "bg-gray-200"
+                        }`}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="bg-gray-50 p-6 rounded-lg">
-              <h2 className="text-xl font-semibold mb-6 text-gray-800">{steps[currentStep].title}</h2>
-              <div className="space-y-6">{steps[currentStep].content}</div>
-            </div>
+      {/* Form Content */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
 
-            <div className="flex justify-between pt-4">
+        <form onSubmit={handleSubmit}>
+          {steps[currentStep].component}
+          
+          {/* Navigation Buttons */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
               <button
                 type="button"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`px-6 py-2.5 rounded-lg border ${
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
                   currentStep === 0
-                    ? "border-gray-200 text-gray-400 cursor-not-allowed"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                } transition-colors duration-200`}
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-black hover:bg-black hover:text-white"
+                }`}
               >
+                <ChevronLeft className="w-5 h-5 mr-2" />
                 Previous
               </button>
-
               {currentStep < steps.length - 1 ? (
                 <button
                   type="button"
                   onClick={handleNext}
-                  className="px-6 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-200"
+                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
-                  Continue
+                  Next
+                  <ChevronRight className="w-5 h-5 ml-2" />
                 </button>
               ) : (
                 <button
                   type="submit"
-                  className="px-6 py-2.5 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors duration-200"
+                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
-                  List Property
+                  Submit
+                  <ChevronRight className="w-5 h-5 ml-2" />
                 </button>
               )}
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   )
