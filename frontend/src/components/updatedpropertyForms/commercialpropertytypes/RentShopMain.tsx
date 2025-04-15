@@ -1,7 +1,8 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import MapSelector from "../MapSelector"
 import ShopDetails from "../CommercialComponents/ShopDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
@@ -179,6 +180,7 @@ interface CommercialMediaUploadProps {
 }
 
 const RentShopMain = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -645,6 +647,7 @@ const RentShopMain = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }
