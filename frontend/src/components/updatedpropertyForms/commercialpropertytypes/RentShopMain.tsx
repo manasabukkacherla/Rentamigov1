@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import MapSelector from "../MapSelector"
 import ShopDetails from "../CommercialComponents/ShopDetails"
@@ -17,7 +16,6 @@ import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload
 import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar } from "lucide-react"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
-import { toast } from "react-toastify"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import PropertyName from "../PropertyName"
@@ -495,7 +493,7 @@ const RentShopMain = () => {
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
@@ -647,7 +645,6 @@ const RentShopMain = () => {
           </div>
         </div>
       </div>
-    </div>
     </div>
   )
 }
