@@ -7,17 +7,58 @@ interface IArea {
     builtUpArea: number;
 }
 
+interface ICoordinates {
+    latitude: number;
+    longitude: number;
+}
+
 interface IBasicInformation {
     title: string;
-    plotType: string[],
-    address: string,
-    landmark: string,
+    plotType: string;
+    address: string;
+    landmark: string;
     city: string;
     state: string;
     zipCode: string;
     latitude: number;
     longitude: number;
     isCornerProperty: boolean;
+}
+
+interface IPlotDetails {
+    totalArea: number;
+    zoningType: string;
+    plotFacing?: string;
+    roadWidth?: number;
+    landmarkProximity?: string[];
+    approvals?: string[];
+    floorAreaRatio?: number;
+    infrastructure: {
+        boundaryWall: boolean;
+        waterConnection: boolean;
+        electricityConnection: boolean;
+    };
+    security: {
+        securityRoom: boolean;
+    };
+    previousConstruction: boolean;
+}
+
+interface IPropertyDetails {
+    area: IArea;
+    zoning: string;
+    facingDirection?: string;
+    waterAvailability?: string;
+    ownershipType?: string;
+    propertyCondition?: string;
+    permissibleFAR: number;
+    permissibleHeight: number;
+    groundCoverage: number;
+    setback: {
+        front: number;
+        rear: number;
+        sides: number;
+    };
 }
 
 interface IPricingDetails {
@@ -28,10 +69,29 @@ interface IPricingDetails {
     pricePerSqFt: number;
 }
 
+interface IRegistration {
+    type: "inclusive" | "exclusive";
+    registrationCharges: number;
+    stampDutyCharges: number;
+}
+
+interface IBrokerage {
+    required: string;
+    amount: number;
+}
+
 interface IAvailability {
     availableFrom?: Date;
+    availableImmediately?: boolean;
     availabilityStatus: string;
     possessionDate: string;
+    leaseDuration?: string;
+    noticePeriod?: string;
+    petsAllowed?: boolean;
+    operatingHours?: {
+        restricted: boolean;
+        restrictions: string;
+    };
     bookingAmount: number;
 }
 
@@ -41,6 +101,7 @@ interface IContactInformation {
     phone: string;
     alternatePhone?: string;
     preferredContactTime?: string;
+    bestTimeToContact?: string;
 }
 
 interface IMedia {
@@ -57,42 +118,14 @@ interface IMetadata {
     createdAt: Date;
 }
 
-interface IPlotDetails {
-    totalArea: number;
-    zoningType: string;
-    infrastructure: {
-        boundaryWall: boolean;
-        waterConnection: boolean;
-        electricityConnection: boolean;
-    };
-    security: {
-        securityRoom: boolean;
-    };
-    previousConstruction: boolean;
-}
-
 interface ICommercialPlot extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     plotDetails: IPlotDetails;
-    propertyDetails: {
-        area: IArea;
-        zoning: string;
-        permissibleFAR: number;
-        permissibleHeight: number;
-        groundCoverage: number;
-        setback: {
-            front: number;
-            rear: number;
-            sides: number;
-        };
-    };
+    propertyDetails: IPropertyDetails;
     pricingDetails: IPricingDetails;
-    registration: {
-        type: "inclusive" | "exclusive";
-        registrationCharges: number;
-        stampDutyCharges: number;
-    };
+    registration: IRegistration;
+    brokerage?: IBrokerage;
     availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
@@ -112,11 +145,16 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         zipCode: { type: String, required: true },
         latitude: { type: Number, required: true },
         longitude: { type: Number, required: true },
-        isCornerProperty: { type: Boolean, required: true }
+        isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
         totalArea: { type: Number, required: true },
         zoningType: { type: String, required: true },
+        plotFacing: { type: String },
+        roadWidth: { type: Number },
+        landmarkProximity: [{ type: String }],
+        approvals: [{ type: String }],
+        floorAreaRatio: { type: Number },
         infrastructure: {
             boundaryWall: { type: Boolean, default: false },
             waterConnection: { type: Boolean, default: false },
@@ -134,6 +172,10 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
             builtUpArea: { type: Number, required: true }
         },
         zoning: { type: String, required: true },
+        facingDirection: { type: String },
+        waterAvailability: { type: String },
+        ownershipType: { type: String },
+        propertyCondition: { type: String },
         permissibleFAR: { type: Number, required: true },
         permissibleHeight: { type: Number, required: true },
         groundCoverage: { type: Number, required: true },
@@ -155,10 +197,22 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         registrationCharges: { type: Number, required: true },
         stampDutyCharges: { type: Number, required: true }
     },
+    brokerage: {
+        required: { type: String, enum: ['yes', 'no'] },
+        amount: { type: Number }
+    },
     availability: {
         availableFrom: { type: Date },
+        availableImmediately: { type: Boolean, default: false },
         availabilityStatus: { type: String, required: true },
         possessionDate: { type: String, required: true },
+        leaseDuration: { type: String },
+        noticePeriod: { type: String },
+        petsAllowed: { type: Boolean, default: false },
+        operatingHours: {
+            restricted: { type: Boolean, default: false },
+            restrictions: { type: String }
+        },
         bookingAmount: { type: Number, required: true }
     },
     contactInformation: {
@@ -166,7 +220,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         email: { type: String, required: true },
         phone: { type: String, required: true },
         alternatePhone: { type: String },
-        preferredContactTime: { type: String }
+        preferredContactTime: { type: String },
+        bestTimeToContact: { type: String }
     },
     media: {
         photos: {
@@ -184,7 +239,7 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     timestamps: true
 });
 
-
+// Indexes
 CommercialPlotSchema.index({ propertyId: 1 }, { unique: true });
 CommercialPlotSchema.index({ 'basicInformation.city': 1 });
 CommercialPlotSchema.index({ 'basicInformation.state': 1 });
@@ -192,7 +247,21 @@ CommercialPlotSchema.index({ 'pricingDetails.propertyPrice': 1 });
 CommercialPlotSchema.index({ 'plotDetails.totalArea': 1 });
 CommercialPlotSchema.index({ 'metadata.createdAt': -1 });
 
-
 // Export model and interfaces
-export { ICommercialPlot, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata, IPlotDetails };
+export {
+    ICommercialPlot,
+    IBasicInformation,
+    IPlotDetails,
+    IPropertyDetails,
+    IArea,
+    ICoordinates,
+    IPricingDetails,
+    IRegistration,
+    IBrokerage,
+    IAvailability,
+    IContactInformation,
+    IMedia,
+    IMetadata
+};
+
 export default model<ICommercialPlot>('CommercialSellPlot', CommercialPlotSchema);
