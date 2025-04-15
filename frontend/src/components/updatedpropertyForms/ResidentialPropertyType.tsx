@@ -19,7 +19,7 @@ import LeaseAgricultureMain from "./commercialpropertytypes/LeaseAgricultureMain
 import LeaseCoveredSpaceMain from "./commercialpropertytypes/LeaseCoveredSpaceMain"
 import LeaseOfficeSpaceMain from "./commercialpropertytypes/LeaseOfficeSpaceMain"
 import LeaseOthersMain from "./commercialpropertytypes/LeaseOthersMain"
-import LeasePropertyMain from "./commercialpropertytypes/LeasePropertyMain"
+import LeasePlotMain from "./commercialpropertytypes/LeasePlotMain"
 import LeaseRetailStoreMain from "./commercialpropertytypes/LeaseRetailStoreMain"
 import LeaseShedMain from "./commercialpropertytypes/LeaseShedMain"
 import LeaseShopMain from "./commercialpropertytypes/LeaseShopMain"
@@ -308,7 +308,7 @@ const ResidentialPropertyType = ({
           case "covered-open-space":
             return <LeaseCoveredSpaceMain />
           case "plot":
-            return <LeasePropertyMain />
+            return <LeasePlotMain />
           case "agricultural-land":
             return <LeaseAgricultureMain />
           case "others":

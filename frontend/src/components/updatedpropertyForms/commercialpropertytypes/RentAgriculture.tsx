@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
 import AgriculturalLandType from '../CommercialComponents/AgriculturalLandType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -14,11 +16,60 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { ChevronLeft } from 'lucide-react';
-import { ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Store, Building2, Calendar, MapPin, DollarSign, ImageIcon, UserCircle } from 'lucide-react';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+
+const globalStyles = `
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Make radio button and checkbox text black */
+  input[type="radio"] + label,
+  input[type="checkbox"] + label {
+    color: black;
+  }
+  
+  /* Make select placeholder text black */
+  select {
+    color: black;
+  }
+  
+  /* Make all form labels black */
+  label {
+    color: black;
+  }
+  
+  /* Make all input text black */
+  input,
+  textarea,
+  select {
+    color: black;
+  }
+`;
+
+// Error display component for validation errors
+const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
+  if (Object.keys(errors).length === 0) return null;
+  
+  return (
+    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+      <div className="flex items-center">
+        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
+      </div>
+      <ul className="mt-2 list-disc list-inside text-red-600">
+        {Object.values(errors).map((error, index) => (
+          <li key={index} className="text-sm">{error}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
 interface FormData {
   propertyName: string;
   landType: string[];
@@ -133,7 +184,9 @@ const convertFileToBase64 = (file: File): Promise<string> => {
     reader.onerror = error => reject(error);
   });
 };
+
 const RentAgriculture = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     landType: [] as string[],
@@ -242,6 +295,32 @@ const RentAgriculture = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  // Check login status on component mount
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
+
+  const validateCurrentStep = () => {
+    const errors: Record<string, string> = {};
+    // Add validation logic here if needed
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const renderFormSection = (content: React.ReactNode) => (
+    <div className="space-y-4">
+      <ErrorDisplay errors={formErrors} />
+      {content}
+    </div>
+  );
 
   // Handler functions
   const handlePropertyNameChange = (name: string) => {
@@ -372,63 +451,137 @@ const RentAgriculture = () => {
   const formSections = [
     {
       title: 'Basic Information',
-      content: (
-        <>
-          <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
-          <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
-          <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-          <Landmark onLandmarkChange={handleLandmarkChange} />
-          
-          <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
-        </>
+      icon: <Store className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="space-y-6">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <Store className="w-6 h-6 text-black" />
+              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
+            </div>
+            <div className="space-y-6">
+              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
+              <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
+            </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <MapPin className="w-6 h-6 text-black" />
+              <h3 className="text-xl font-semibold text-black">Location Details</h3>
+            </div>
+            <div className="space-y-6">
+              <CommercialPropertyAddress onAddressChange={handleAddressChange} />
+              <Landmark onLandmarkChange={handleLandmarkChange} />
+              <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
+            </div>
+          </div>
+        </div>
       )
     },
     {
       title: 'Property Details',
-      content: (
-        <>
-          <AgriculturalLandDetails onDetailsChange={handleLandDetailsChange} />
-          <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
-        </>
+      icon: <Building2 className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Details</h3>
+          </div>
+          <div className="space-y-6">
+            <AgriculturalLandDetails onDetailsChange={handleLandDetailsChange} />
+            <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
+          </div>
+        </div>
       )
     },
     {
       title: 'Rental Terms',
-      content: (
-        <>
-          <Rent onRentChange={handleRentChange} />
-          {formData.rent.maintenanceType === 'exclusive' && (
-            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-          )}
-          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
-          <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
-          <Brokerage onBrokerageChange={handleBrokerageChange} />
-        </>
+      icon: <DollarSign className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <DollarSign className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
+          </div>
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
+              <div className="space-y-4 text-black">
+                <Rent onRentChange={handleRentChange} />
+                {formData.rent.maintenanceType === 'exclusive' && (
+                  <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+                )}
+                <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              <div className="space-y-4 text-black">
+                <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
+                <div className="border-t border-gray-200 my-4"></div>
+                <Brokerage onBrokerageChange={handleBrokerageChange} />
+              </div>
+            </div>
+          </div>
+        </div>
       )
     },
     {
       title: 'Availability',
-      content: <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({
-        ...prev,
-        availability: {
-          type: availability.type,
-          date: availability.date
-        }
-      }))} />
+      icon: <Calendar className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Availability</h3>
+          </div>
+          <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({
+            ...prev,
+            availability: {
+              type: availability.type,
+              date: availability.date
+            }
+          }))} />
+        </div>
+      )
     },
     {
-      title: 'Contact Information', 
-      content: <CommercialContactDetails onContactChange={handleContactChange} />
+      title: 'Contact Information',
+      icon: <UserCircle className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <UserCircle className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
+          </div>
+          <CommercialContactDetails onContactChange={handleContactChange} />
+        </div>
+      )
     },
     {
       title: 'Property Media',
-      content: <CommercialMediaUpload onMediaChange={handleMediaChange} />
+      icon: <ImageIcon className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <ImageIcon className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Media</h3>
+          </div>
+          <CommercialMediaUpload onMediaChange={handleMediaChange} />
+        </div>
+      )
     }
   ];
 
   const handleNext = () => {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (validateCurrentStep()) {
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
@@ -438,7 +591,6 @@ const RentAgriculture = () => {
     }
   };
 
-  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form Data:', formData);
@@ -496,9 +648,66 @@ const RentAgriculture = () => {
     }
   };
 
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
-    <div className="max-w-5xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-white">
+      <style>{globalStyles}</style>
+
+      {/* Progress Bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => setCurrentStep(index)}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Content */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -523,8 +732,8 @@ const RentAgriculture = () => {
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            disabled={currentStep === formSections.length - 1 && isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            disabled={currentStep === formSections.length - 1 && isSubmitting}
           >
             {currentStep === formSections.length - 1 
               ? (isSubmitting ? 'Submitting...' : 'Submit') 

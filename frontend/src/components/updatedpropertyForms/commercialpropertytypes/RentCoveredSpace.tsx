@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
 import CoveredOpenSpaceType from '../CommercialComponents/CoveredOpenSpaceType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -553,11 +555,18 @@ const RentCoveredSpace = () => {
     },
     {
       title: 'Property Details',
-      content: (
-        <>
-          <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
-          <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
-        </>
+      icon: <Building2 className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Details</h3>
+          </div>
+          <div className="space-y-6">
+            <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
+            <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
+          </div>
+        </div>
       )
     },
     {
@@ -576,21 +585,52 @@ const RentCoveredSpace = () => {
     },
     {
       title: 'Availability',
-      content: <AvailabilityDate onAvailabilityChange={handleAvailabilityChange} />
+      icon: <Calendar className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Availability</h3>
+          </div>
+          <AvailabilityDate onAvailabilityChange={handleAvailabilityChange} />
+        </div>
+      )
     },
     {
       title: 'Contact Information',
-      content: <CommercialContactDetails onContactChange={handleContactChange} />
+      icon: <UserCircle className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <UserCircle className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
+          </div>
+          <CommercialContactDetails onContactChange={handleContactChange} />
+        </div>
+      )
     },
     {
       title: 'Property Media',
-      content: <CommercialMediaUpload onMediaChange={handleMediaChange} />
+      icon: <ImageIcon className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <ImageIcon className="w-6 h-6 text-black" />
+            <h3 className="text-xl font-semibold text-black">Property Media</h3>
+          </div>
+          <CommercialMediaUpload onMediaChange={handleMediaChange} />
+        </div>
+      )
     }
   ];
 
   const handleNext = () => {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (validateCurrentStep()) {
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
@@ -602,75 +642,106 @@ const RentCoveredSpace = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    // Add API submission logic here
     console.log('Form Data:', formData);
+    toast.success('Form submitted successfully!');
+    setIsSubmitting(false);
   };
 
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-12">
-      <div className="space-y-12">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {formSections.map((s, i) => (
-              <div
-                key={i}
-                className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-                onClick={() => i < currentStep && setCurrentStep(i)}
-                style={{ cursor: i < currentStep ? "pointer" : "default" }}
-              >
+    <div className="min-h-screen bg-white">
+      <style>{globalStyles}</style>
+
+      {/* Progress Bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                    i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                  }`}
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => setCurrentStep(index)}
                 >
-                  {i + 1}
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs font-medium">{s.title}</span>
-              </div>
-            ))}
-          </div>
-          <div className="w-full bg-gray-200 h-1 rounded-full">
-            <div
-              className="bg-black h-1 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
-            ></div>
+              ))}
+            </div>
           </div>
         </div>
-
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-black">{formSections[currentStep].title}</h2>
-        </div>
-
-        <div className="space-y-8">{formSections[currentStep].content}</div>
       </div>
 
-      <div className="mt-8 flex justify-between items-center">
-        {currentStep > 0 && (
+      {/* Form Content */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+
+        {formSections[currentStep].content}
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            type="button"
             onClick={handlePrevious}
-            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
           >
+            <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-        )}
-        {currentStep < formSections.length - 1 ? (
           <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            disabled={isSubmitting}
           >
-            Next
+            {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}
+            <ChevronRight className="w-5 h-5 ml-2" />
           </button>
-        ) : (
-          <button
-            type="submit"
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-          >
-            List Property
-          </button>
-        )}
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 
