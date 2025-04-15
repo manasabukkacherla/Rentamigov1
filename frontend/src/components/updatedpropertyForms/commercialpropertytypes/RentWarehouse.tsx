@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
 import WarehouseType from '../CommercialComponents/WarehouseType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -15,9 +17,61 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Warehouse, ImageIcon, UserCircle } from 'lucide-react';
+import { MapPin, Building2, DollarSign, Calendar, ChevronLeft, ChevronRight, Store, ImageIcon, UserCircle } from 'lucide-react';
+
+const globalStyles = `
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Make radio button and checkbox text black */
+  input[type="radio"] + label,
+  input[type="checkbox"] + label {
+    color: black;
+  }
+  
+  /* Make select placeholder text black */
+  select {
+    color: black;
+  }
+  
+  /* Make all form labels black */
+  label {
+    color: black;
+  }
+  
+  /* Make all input text black */
+  input,
+  textarea,
+  select {
+    color: black;
+  }
+`;
+
+// Error display component for validation errors
+const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
+  if (Object.keys(errors).length === 0) return null;
+  
+  return (
+    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+      <div className="flex items-center">
+        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
+      </div>
+      <ul className="mt-2 list-disc list-inside text-red-600">
+        {Object.values(errors).map((error, index) => (
+          <li key={index} className="text-sm">{error}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 const RentWarehouse = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     propertyName: '',
     warehouseType: '',
@@ -42,55 +96,72 @@ const RentWarehouse = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check login status on component mount
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
+
+  const validateCurrentStep = () => {
+    const errors: Record<string, string> = {};
+    // Add validation logic here if needed
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const renderFormSection = (content: React.ReactNode) => (
+    <div className="space-y-4">
+      <ErrorDisplay errors={formErrors} />
+      {content}
+    </div>
+  );
 
   const formSections = [
     {
       title: 'Basic Information',
-      icon: <MapPin className="w-6 h-6" />,
-      content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Warehouse className="text-black mr-2" size={24} />
+      icon: <Store className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Store className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Basic Details</h3>
           </div>
           <div className="space-y-6">
-            <div className="relative">
-              <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
-              />
-              <Warehouse className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-            </div>
+            <PropertyName
+              propertyName={formData.propertyName}
+              onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+            />
             <WarehouseType
               onWarehouseTypeChange={(type) => setFormData({ ...formData, warehouseType: type })}
             />
             <CommercialPropertyAddress
               onAddressChange={(address) => setFormData({ ...formData, address })}
             />
-            <div className="relative">
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
-              />
-              <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-            </div>
-            
-            <div className="flex items-center space-x-2 cursor-pointer">
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
-              />
-              <span className="text-black">This is a corner property</span>
-            </div>
+            <Landmark
+              onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
+            />
+            <CornerProperty
+              onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
+            />
           </div>
         </div>
       )
     },
     {
       title: 'Property Details',
-      icon: <Building2 className="w-6 h-6" />,
-      content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Building2 className="text-black mr-2" size={24} />
+      icon: <Building2 className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
@@ -106,89 +177,99 @@ const RentWarehouse = () => {
     },
     {
       title: 'Rental Terms',
-      icon: <DollarSign className="w-6 h-6" />,
-      content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <DollarSign className="text-black mr-2" size={24} />
+      icon: <DollarSign className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <DollarSign className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
           </div>
           <div className="space-y-6">
-            <Rent onRentChange={(rent) => setFormData({ ...formData, rent })} />
-            {formData.rent.rentType === 'exclusive' && (
-              <MaintenanceAmount
-                onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, maintenanceAmount: maintenance })}
-              />
-            )}
-            <SecurityDeposit
-              onSecurityDepositChange={(deposit) => setFormData({ ...formData, securityDeposit: deposit })}
-            />
-            <OtherCharges
-              onOtherChargesChange={(charges) => setFormData({ ...formData, otherCharges: charges })}
-            />
-            <Brokerage
-              onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })}
-            />
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
+              <div className="space-y-4 text-black">
+                <Rent onRentChange={(rent) => setFormData({ ...formData, rent })} />
+                {formData.rent.rentType === 'exclusive' && (
+                  <MaintenanceAmount
+                    onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, maintenanceAmount: maintenance })}
+                  />
+                )}
+                <SecurityDeposit
+                  onSecurityDepositChange={(deposit) => setFormData({ ...formData, securityDeposit: deposit })}
+                />
+              </div>
+            </div>
+            
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              <div className="space-y-4 text-black">
+                <OtherCharges
+                  onOtherChargesChange={(charges) => setFormData({ ...formData, otherCharges: charges })}
+                />
+                <div className="border-t border-gray-200 my-4"></div>
+                <Brokerage
+                  onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })}
+                />
+              </div>
+            </div>
           </div>
         </div>
       )
     },
     {
       title: 'Availability',
-      icon: <Calendar className="w-6 h-6" />,
-      content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Calendar className="text-black mr-2" size={24} />
+      icon: <Calendar className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <Calendar className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Availability</h3>
           </div>
-          <div className="space-y-6">
-            <AvailabilityDate
-              onAvailabilityChange={(availability) => setFormData({ ...formData, availability })}
-            />
-          </div>
+          <AvailabilityDate
+            onAvailabilityChange={(availability) => setFormData({ ...formData, availability })}
+          />
         </div>
       )
     },
     {
       title: 'Contact Information',
-      icon: <User className="w-6 h-6" />,
-      content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <UserCircle className="text-black mr-2" size={24} />
+      icon: <UserCircle className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <UserCircle className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Contact Details</h3>
           </div>
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
-            />
-          </div>
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
+          />
         </div>
       )
     },
     {
       title: 'Property Media',
-      icon: <Image className="w-6 h-6" />,
-      content: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <ImageIcon className="text-black mr-2" size={24} />
+      icon: <ImageIcon className="w-5 h-5" />,
+      content: renderFormSection(
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center gap-3 mb-6">
+            <ImageIcon className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(media) => setFormData({ ...formData, media })}
-            />
-          </div>
+          <CommercialMediaUpload
+            onMediaChange={(media) => setFormData({ ...formData, media })}
+          />
         </div>
       )
     }
   ];
 
   const handleNext = () => {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (validateCurrentStep()) {
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
@@ -200,73 +281,106 @@ const RentWarehouse = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    // Add API submission logic here
     console.log('Form Data:', formData);
+    toast.success('Form submitted successfully!');
+    setIsSubmitting(false);
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {formSections.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-              onClick={() => i < currentStep && setCurrentStep(i)}
-              style={{ cursor: i < currentStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                  i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                }`}
-              >
-                {s.icon}
-              </div>
-              <span className="text-xs font-medium">{s.title}</span>
-            </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
-          ></div>
-        </div>
-      </div>
-
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-black">{formSections[currentStep].title}</h2>
-      </div>
-
-      <div className="space-y-8">{formSections[currentStep].content}</div>
-
-      <div className="mt-8 flex justify-between items-center">
-        {currentStep > 0 && (
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
           <button
-            type="button"
-            onClick={handlePrevious}
-            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
           >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      <style>{globalStyles}</style>
+
+      {/* Progress Bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => setCurrentStep(index)}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Content */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+
+        {formSections[currentStep].content}
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-        )}
-        {currentStep < formSections.length - 1 ? (
           <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            disabled={isSubmitting}
           >
-            Next
+            {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}
+            <ChevronRight className="w-5 h-5 ml-2" />
           </button>
-        ) : (
-          <button
-            type="submit"
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-          >
-            List Property
-          </button>
-        )}
+        </div>
       </div>
-    </form>
+    </div>
   );
 };
 
