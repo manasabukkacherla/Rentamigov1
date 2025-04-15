@@ -18,6 +18,7 @@ import CommercialContactDetails from "../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 import { toast } from "react-hot-toast"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 const globalStyles = `
   input::placeholder,
@@ -111,9 +112,9 @@ interface IMedia {
     exterior: File[];
     interior: File[];
     floorPlan: File[];
-    loadingArea: File[];
-    storage: File[];
-    officeSpace: File[];
+    washrooms: File[];
+    lifts: File[];
+    emergencyExits: File[];
   };
   videoTour: File | null;
   documents: File[];
@@ -261,9 +262,9 @@ const SellWarehouseMain = () => {
         exterior: [],
         interior: [],
         floorPlan: [],
-        loadingArea: [],
-        storage: [],
-        officeSpace: []
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
       },
       videoTour: null,
       documents: []
@@ -461,6 +462,8 @@ const SellWarehouseMain = () => {
   const handleStepClick = (index: number) => {
     setCurrentStep(index)
   }
+  
+  const navigate = useNavigate();
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -478,54 +481,51 @@ const SellWarehouseMain = () => {
     console.log(formData)
 
     try {
-      // const user = sessionStorage.getItem('user');
-      // if (user) {
-      //   const author = JSON.parse(user).id;
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
 
-      //   // Convert all media files to base64
-      //   const convertedMedia = {
-      //     photos: {
-      //       exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-      //       interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-      //       floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-      //       washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-      //       lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-      //       emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-      //     },
-      //     videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-      //     documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      //   };
-      //   console.log(formData)
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+        console.log(formData)
 
-      //   const transformedData = {
-      //     ...formData,
-      //     media: convertedMedia,
-      //     metadata: {
-      //       createdBy: author,
-      //       createdAt: new Date()
-      //     }
-      //   };
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
 
 
-      //   console.log(transformedData);
-      //   const response = await axios.post('/api/commercial-shops', transformedData, {
-      //     headers: {
-      //       'Content-Type': 'application/json'
-      //     }
-      //   });
-      //   console.log(response.data)
+        console.log(transformedData);
+        const response = await axios.post('/api/commercial-warehouses', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data)
 
-      //   if (response.data.success) {
-      //     // Show success message and redirect
-      //     toast.success('Commercial shop listing created successfully!');
-      //     // navigate('/dashboard'); // Redirect to dashboard or appropriate page
-      //   }
-      // } else {
-      //   navigate('/login');
-      // }
+        if (response.data.success) {
+          toast.success('Commercial warehouses listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
     } catch (error) {
-      // console.error('Error submitting form:', error);
-      // toast.error('Failed to create commercial shop listing. Please try again.');
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create commercial wareshouses listing. Please try again.');
     } finally {
       // setIsSubmitting(false)
     }

@@ -7,13 +7,13 @@ interface WarehouseDetailsProps {
 
 const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
   const [details, setDetails] = useState({
-    totalArea: '',
-    ceilingHeight: '',
+    totalArea: 0,
+    ceilingHeight: 0,
     docks: {
-      count: '',
-      height: ''
+      count: 0,
+      height: 0
     },
-    floorLoadCapacity: '',
+    floorLoadCapacity: 0,
     fireSafety: false,
     securityPersonnel: false,
     access24x7: false,
@@ -26,7 +26,7 @@ const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
     onDetailsChange?.(updatedDetails);
   };
 
-  const handleDockChange = (field: string, value: string) => {
+  const handleDockChange = (field: string, value: number) => {
     const updatedDocks = { ...details.docks, [field]: value };
     handleChange('docks', updatedDocks);
   };
@@ -51,8 +51,8 @@ const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={details.totalArea}
-                  onChange={(e) => handleChange('totalArea', e.target.value)}
+                  value={details.totalArea || ''}
+                  onChange={(e) => handleChange('totalArea', parseFloat(e.target.value))}
                   placeholder="Total Area (Sq Ft)"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -61,8 +61,8 @@ const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={details.ceilingHeight}
-                  onChange={(e) => handleChange('ceilingHeight', e.target.value)}
+                  value={details.ceilingHeight || ''}
+                  onChange={(e) => handleChange('ceilingHeight', parseFloat(e.target.value))}
                   placeholder="Ceiling Height (Feet)"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -81,8 +81,8 @@ const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={details.docks.count}
-                  onChange={(e) => handleDockChange('count', e.target.value)}
+                  value={details.docks.count || ''}
+                  onChange={(e) => handleDockChange('count', parseInt(e.target.value))}
                   placeholder="Number of Docks"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -91,9 +91,9 @@ const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={details.docks.height}
-                  onChange={(e) => handleDockChange('height', e.target.value)}
-                  placeholder="Dock Height (Feet)"
+                  value={details.docks.height || ''}
+                  onChange={(e) => handleDockChange('height', parseInt(e.target.value))}
+                  placeholder="Dock Height (Feet)" 
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
               </div>
@@ -109,8 +109,8 @@ const WarehouseDetails = ({ onDetailsChange }: WarehouseDetailsProps) => {
             <input
               type="number"
               min="0"
-              value={details.floorLoadCapacity}
-              onChange={(e) => handleChange('floorLoadCapacity', e.target.value)}
+              value={details.floorLoadCapacity || ''}
+              onChange={(e) => handleChange('floorLoadCapacity', parseFloat(e.target.value))}
               placeholder="Floor Load Capacity (Tons/Sq Ft)"
               className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
             />

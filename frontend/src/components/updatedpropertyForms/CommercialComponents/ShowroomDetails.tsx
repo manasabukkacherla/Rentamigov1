@@ -7,9 +7,9 @@ interface ShowroomDetailsProps {
 
 const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
   const [details, setDetails] = useState({
-    totalSpace: '',
-    frontageWidth: '',
-    ceilingHeight: '',
+    totalSpace: 0,
+    frontageWidth: 0,
+    ceilingHeight: 0,
     glassFrontage: false,
     lightingType: '',
     acInstalled: false,
@@ -49,8 +49,8 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                 <input
                   type="text"
                   id="totalSpace"
-                  value={details.totalSpace}
-                  onChange={(e) => handleChange('totalSpace', e.target.value)}
+                  value={details.totalSpace || ''}
+                  onChange={(e) => handleChange('totalSpace', parseFloat(e.target.value))}
                   placeholder="Enter total space"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -65,8 +65,8 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                 <input
                   type="text"
                   id="frontageWidth"
-                  value={details.frontageWidth}
-                  onChange={(e) => handleChange('frontageWidth', e.target.value)}
+                  value={details.frontageWidth || ''}
+                  onChange={(e) => handleChange('frontageWidth', parseFloat(e.target.value))}
                   placeholder="Enter frontage width"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -81,8 +81,8 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                 <input
                   type="text"
                   id="ceilingHeight"
-                  value={details.ceilingHeight}
-                  onChange={(e) => handleChange('ceilingHeight', e.target.value)}
+                  value={details.ceilingHeight || ''}
+                  onChange={(e) => handleChange('ceilingHeight', parseFloat(e.target.value))}
                   placeholder="Enter ceiling height"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />

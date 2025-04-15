@@ -422,7 +422,6 @@ const SellShowroomMain = () => {
       if (user) {
         const author = JSON.parse(user).id;
 
-        // Convert all media files to base64
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -456,9 +455,7 @@ const SellShowroomMain = () => {
         console.log(response.data)
 
         if (response.data.success) {
-          // Show success message and redirect
           toast.success('Commercial showroom listing created successfully!');
-          // navigate('/dashboard'); // Redirect to dashboard or appropriate page
         }
       } else {
         navigate('/login');
