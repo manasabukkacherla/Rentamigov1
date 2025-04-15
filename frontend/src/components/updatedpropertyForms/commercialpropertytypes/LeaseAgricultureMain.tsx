@@ -7,7 +7,7 @@ import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
 import AgriculturalLandDetails from '../CommercialComponents/AgriculturalLandDetails';
 import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
-import LeaseAmount from '../lease/LeaseAmount';
+import LeaseAmount from '../lease/LeaseAmount';  
 import LeaseTenure from '../lease/LeaseTenure';
 import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
 import OtherCharges from '../residentialrent/OtherCharges';

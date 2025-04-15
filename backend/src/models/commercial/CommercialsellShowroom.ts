@@ -82,11 +82,14 @@ interface ICommercialShowroom extends Document {
   showroomDetails: {
     frontageWidth: number;
     ceilingHeight: number;
-    displayWindow: boolean;
-    attachedStorage: boolean;
-    averageFootTraffic: string;
-    customerParking: boolean;
-    previousBusiness: string;
+    glassFrontage: boolean;
+    lightingType: string;
+    acInstalled: boolean;
+    nearbyCompetitors: {
+      present: boolean;
+      brandNames: string;
+    };
+    displayRacks: boolean;
   };
   propertyDetails: {
     area: IArea;
@@ -139,13 +142,17 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
     isCornerProperty: { type: Boolean }
   },
   showroomDetails: {
+    totalSpace: { type: Number, required: true },
     frontageWidth: { type: Number, required: true },
     ceilingHeight: { type: Number, required: true },
-    displayWindow: { type: Boolean, default: false },
-    attachedStorage: { type: Boolean, default: false },
-    averageFootTraffic: { type: String, enum: ['low', 'medium', 'high'] },
-    customerParking: { type: Boolean, default: false },
-    previousBusiness: { type: String }
+    glassFrontage: { type: Boolean, default: false },
+    lightingType: { type: String, enum: ['warm', 'cool', 'natural'] },
+    acInstalled: { type: Boolean, default: false },
+    nearbyCompetitors: {
+      present: { type: Boolean, default: false },
+      brandNames: { type: String }
+    },
+    displayRacks: { type: Boolean, default: false },
   },
   propertyDetails: {
     area: {

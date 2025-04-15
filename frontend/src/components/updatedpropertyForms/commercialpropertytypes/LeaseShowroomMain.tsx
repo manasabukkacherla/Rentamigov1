@@ -15,7 +15,6 @@ import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-
 const LeaseShowroomMain = () => {
   const [formData, setFormData] = useState({
     propertyName: '',
