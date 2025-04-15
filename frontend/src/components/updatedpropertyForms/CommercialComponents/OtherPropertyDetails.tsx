@@ -31,56 +31,56 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
         {/* Property Type Description */}
         <div className="bg-white/5 p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
-            <Store size={20} className="text-white/60" />
+            <Store size={20} className="text-black/60" />
             Property Type Description
           </h4>
           <textarea
             value={details.propertyType}
             onChange={(e) => handleChange('propertyType', e.target.value)}
             placeholder="Describe the type of property in detail"
-            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40 min-h-[150px]"
+            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-black placeholder:text-black/40 min-h-[150px]"
           />
         </div>
 
         {/* Special Features */}
         <div className="bg-white/5 p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
-            <FileText size={20} className="text-white/60" />
+            <FileText size={20} className="text-black/60" />
             Special Features or Restrictions
           </h4>
           <textarea
             value={details.specialFeatures}
             onChange={(e) => handleChange('specialFeatures', e.target.value)}
             placeholder="List any special features or restrictions"
-            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40 min-h-[150px]"
+            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-black placeholder:text-black/40 min-h-[150px]"
           />
         </div>
 
         {/* Usage Recommendation */}
         <div className="bg-white/5 p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
-            <Store size={20} className="text-white/60" />
+            <Store size={20} className="text-black/60" />
             Usage Recommendation
           </h4>
           <textarea
             value={details.usageRecommendation}
             onChange={(e) => handleChange('usageRecommendation', e.target.value)}
             placeholder="Recommend suitable usage (e.g., Retail, Storage, Events, etc.)"
-            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40 min-h-[150px]"
+            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-black placeholder:text-black/40 min-h-[150px]"
           />
         </div>
 
         {/* Additional Requirements */}
         <div className="bg-white/5 p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
-            <AlertTriangle size={20} className="text-white/60" />
+            <AlertTriangle size={20} className="text-black/60" />
             Additional Requirements for Renters
           </h4>
           <textarea
             value={details.additionalRequirements}
             onChange={(e) => handleChange('additionalRequirements', e.target.value)}
             placeholder="Specify any custom terms & conditions for renters"
-            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40 min-h-[150px]"
+            className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-black placeholder:text-black/40 min-h-[150px]"
           />
         </div>
       </div>

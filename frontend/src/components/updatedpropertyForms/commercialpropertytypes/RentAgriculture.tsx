@@ -241,6 +241,7 @@ const RentAgriculture = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Handler functions
   const handlePropertyNameChange = (name: string) => {
@@ -441,6 +442,7 @@ const RentAgriculture = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form Data:', formData);
+    setIsSubmitting(true);
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -470,7 +472,6 @@ const RentAgriculture = () => {
           }
         };
 
-
         console.log(transformedData);
         const response = await axios.post('/api/commercial/agriculture', transformedData, {
           headers: {
@@ -482,7 +483,7 @@ const RentAgriculture = () => {
         if (response.data.success) {
           // Show success message and redirect
           toast.success('Commercial rent agriculture listing created successfully!');
-          // navigate('/dashboard'); // Redirect to dashboard or appropriate page
+          navigate('/dashboard'); // Redirect to dashboard or appropriate page
         }
       } else {
         navigate('/login');
@@ -490,6 +491,8 @@ const RentAgriculture = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Failed to create commercial rent agriculture listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -520,10 +523,13 @@ const RentAgriculture = () => {
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            disabled={currentStep === formSections.length - 1 && isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
           >
-            {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
+            {currentStep === formSections.length - 1 
+              ? (isSubmitting ? 'Submitting...' : 'Submit') 
+              : 'Next'}
+            {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}
           </button>
         </div>
       </div>
