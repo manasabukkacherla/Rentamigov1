@@ -59,11 +59,11 @@ const MaintenanceAmount = ({ onMaintenanceAmountChange }: MaintenanceAmountProps
                     onClick={() => handleChange("frequency", freq)}
                     className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${
                       maintenance.frequency === freq
-                        ? "bg-blue-50 border-blue-500 text-blue-700"
+                        ? "bg-black border-black text-white"
                         : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
                     }`}
                   >
-                    <span className="capitalize">{freq}</span>
+                    <span className={`capitalize ${maintenance.frequency === freq? "text-white": ""}`}>{freq}</span>
                   </button>
                 ))}
               </div>
