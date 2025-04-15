@@ -9,10 +9,10 @@ interface SecurityDepositProps {
 
 const SecurityDeposit = ({ onSecurityDepositChange }: SecurityDepositProps) => {
   const [securityDeposit, setSecurityDeposit] = useState({
-    amount: "",
+    amount: 0,
   })
 
-  const handleChange = (value: string) => {
+  const handleChange = (value: any) => {
     const updatedDeposit = { amount: value }
     setSecurityDeposit(updatedDeposit)
     onSecurityDepositChange?.(updatedDeposit)
@@ -35,8 +35,8 @@ const SecurityDeposit = ({ onSecurityDepositChange }: SecurityDepositProps) => {
             <input
               type="number"
               min="0"
-              value={securityDeposit.amount}
-              onChange={(e) => handleChange(e.target.value)}
+              value={securityDeposit.amount || ''}
+              onChange={(e) => handleChange(parseFloat(e.target.value))}
               placeholder="Enter security deposit amount"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-gray-300 focus:border-black outline-none transition-colors duration-200 text-gray-800 placeholder:text-gray-400"
             />

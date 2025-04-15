@@ -10,24 +10,24 @@ interface OtherChargesProps {
 const OtherCharges = ({ onOtherChargesChange }: OtherChargesProps) => {
   const [charges, setCharges] = useState({
     water: {
-      amount: "",
+      amount: 0,
       type: "",
     },
     electricity: {
-      amount: "",
+      amount: 0,
       type: "",
     },
     gas: {
-      amount: "",
+      amount: 0,
       type: "",
     },
     others: {
-      amount: "",
+      amount: 0,
       type: "",
     },
   })
 
-  const handleChange = (utility: string, field: string, value: string) => {
+  const handleChange = (utility: string, field: string, value: any) => {
     const updatedCharges = {
       ...charges,
       [utility]: {
@@ -40,17 +40,17 @@ const OtherCharges = ({ onOtherChargesChange }: OtherChargesProps) => {
   }
 
   const utilities = [
-    { key: "water", label: "Water", icon: Droplets, color: "text-blue-500" },
-    { key: "electricity", label: "Electricity", icon: Zap, color: "text-yellow-500" },
-    { key: "gas", label: "Gas", icon: Flame, color: "text-orange-500" },
-    { key: "others", label: "Others", icon: Plus, color: "text-purple-500" },
+    { key: "water", label: "Water", icon: Droplets, color: "text-black" },
+    { key: "electricity", label: "Electricity", icon: Zap, color: "text-black" },
+    { key: "gas", label: "Gas", icon: Flame, color: "text-black" },
+    { key: "others", label: "Others", icon: Plus, color: "text-black" },
   ]
 
   return (
     <div className="bg-gray-100 p-6 rounded-2xl">
       <div className="flex items-center gap-3 mb-6">
         <h3 className="text-2xl font-semibold text-black">Other Charges</h3>
-        <ArrowRight className="text-blue-600" size={20} />
+        <ArrowRight className="text-black" size={20} />
         <span className="text-sm text-gray-500">Enter Utility Charges</span>
       </div>
 
@@ -91,8 +91,8 @@ const OtherCharges = ({ onOtherChargesChange }: OtherChargesProps) => {
                   <input
                     type="number"
                     min="0"
-                    value={charges[key as keyof typeof charges].amount}
-                    onChange={(e) => handleChange(key, "amount", e.target.value)}
+                    value={charges[key as keyof typeof charges].amount || ''}
+                    onChange={(e) => handleChange(key, "amount", parseFloat(e.target.value))}
                     placeholder={`Enter ${label.toLowerCase()} charges`}
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none transition-colors duration-200 text-gray-800 placeholder:text-gray-400 hover:border-gray-300"
                   />

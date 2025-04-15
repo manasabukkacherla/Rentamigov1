@@ -5,7 +5,7 @@ import { ICommercialWarehouse } from '../../models/commercial/CommercialSellWare
 // Generate property ID with format RA-COMWARH-XXXX
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RACOMWARH";
+    const prefix = "RA-COMSEWH";
     
     // Find the warehouse with the highest property ID number
     const highestWarehouse = await CommercialWarehouse.findOne({

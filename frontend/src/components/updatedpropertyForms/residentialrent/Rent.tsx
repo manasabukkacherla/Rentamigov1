@@ -9,7 +9,7 @@ interface RentProps {
 
 const Rent = ({ onRentChange }: RentProps) => {
   const [rent, setRent] = useState({
-    expectedRent: "",
+    expectedRent: 0,
     isNegotiable: false,
     rentType: "",
   })
@@ -42,8 +42,8 @@ const Rent = ({ onRentChange }: RentProps) => {
               <input
                 type="number"
                 min="0"
-                value={rent.expectedRent}
-                onChange={(e) => handleChange("expectedRent", e.target.value)}
+                value={rent.expectedRent || ''}
+                onChange={(e) => handleChange("expectedRent", parseFloat(e.target.value))}
                 placeholder="Enter expected rent"
                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-gray-300 focus:border-black outline-none transition-colors duration-200 text-gray-800 placeholder:text-gray-400"
               />

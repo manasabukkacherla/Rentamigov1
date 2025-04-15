@@ -56,6 +56,7 @@ import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRo
 import commercialPlotRoutes from './routes/commercial/commericalPlotRoutes';
 import commercialrentcultureRoutes from './routes/commercial/commercialRentAgricultureRoutes';
 import commercialRentOthersRoutes from './routes/commercial/commercialRentOthersRoutes';
+import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouse";
 
 dotenv.config();
 
@@ -177,6 +178,7 @@ app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
 app.use('/api/commercial/plots', commercialPlotRoutes);
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
+app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
   res.json({ message: "hjhjh" });
