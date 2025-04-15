@@ -17,235 +17,540 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { MapPin, Building2, DollarSign, Calendar, ChevronLeft, ChevronRight, Store, ImageIcon, UserCircle } from 'lucide-react';
 
-const globalStyles = `
-  input::placeholder,
-  textarea::placeholder {
-    color: rgba(0, 0, 0, 0.6);
-  }
-  
-  /* Make radio button and checkbox text black */
-  input[type="radio"] + label,
-  input[type="checkbox"] + label {
-    color: black;
-  }
-  
-  /* Make select placeholder text black */
-  select {
-    color: black;
-  }
-  
-  /* Make all form labels black */
-  label {
-    color: black;
-  }
-  
-  /* Make all input text black */
-  input,
-  textarea,
-  select {
-    color: black;
-  }
-`;
+// Define interfaces based on backend model
+interface IArea {
+  totalArea: number;
+  builtUpArea: number;
+  carpetArea: number;
+}
 
-// Error display component for validation errors
-const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
-  if (Object.keys(errors).length === 0) return null;
-  
-  return (
-    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-      <div className="flex items-center">
-        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
-      </div>
-      <ul className="mt-2 list-disc list-inside text-red-600">
-        {Object.values(errors).map((error, index) => (
-          <li key={index} className="text-sm">{error}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+interface IBasicInformation {
+  title: string;
+  spaceType: string[];
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  landmark: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  isCornerProperty: boolean;
+}
+
+interface ISpaceDetails {
+  totalArea: number;
+  squareFeet: number;
+  coveredArea: number;
+  openArea: number;
+  roadWidth: {
+    value: number;
+    unit: "feet" | "meters";
+  };
+  ceilingHeight: {
+    value: number;
+    unit: "feet" | "meters";
+  };
+  noOfOpenSides: string;
+}
+
+interface IAvailability {
+  availableFrom?: string;
+  availableImmediately: boolean;
+}
+
+interface IContactInformation {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+}
+
+interface IMedia {
+  photos: {
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    washrooms: string[];
+    lifts: string[];
+    emergencyExits: string[];
+  };
+  videoTour?: string;
+  documents: string[];
+}
+
+interface IRentalTerms {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  };
+  securityDeposit: {
+    amount: number;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount?: number;
+      type: string;
+    };
+    electricity: {
+      amount?: number;
+      type: string;
+    };
+    gas: {
+      amount?: number;
+      type: string;
+    };
+    others: {
+      amount?: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
+  };
+}
+
+interface IFloor {
+  floorNumber: number;
+  totalFloors: number;
+}
+
+interface IFormData {
+  basicInformation: IBasicInformation;
+  spaceDetails: ISpaceDetails;
+  propertyDetails: {
+    area: IArea;
+    floor: IFloor;
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string;
+    propertyAge: number;
+    propertyCondition: string;
+  };
+  rentalTerms: IRentalTerms;
+  availability: IAvailability;
+  contactInformation: IContactInformation;
+  media: IMedia;
+}
 
 const RentCoveredSpace = () => {
-  const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    propertyName: '',
-    spaceType: '',
-    address: {},
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
-    spaceDetails: {},
-    propertyDetails: {},
-    rent: {
-      expectedRent: '',
-      isNegotiable: false,
-      rentType: ''
+  const [formData, setFormData] = useState<IFormData>({
+    basicInformation: {
+      title: '',
+      spaceType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0,
+      },
+      isCornerProperty: false,
     },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [], video: null }
+    spaceDetails: {
+      totalArea: 0,
+      squareFeet: 0,
+      coveredArea: 0,
+      openArea: 0,
+      roadWidth: {
+        value: 0,
+        unit: 'feet',
+      },
+      ceilingHeight: {
+        value: 0,
+        unit: 'feet',
+      },
+      noOfOpenSides: '',
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        builtUpArea: 0,
+        carpetArea: 0,
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0,
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false,
+      },
+      waterAvailability: '',
+      propertyAge: 0,
+      propertyCondition: '',
+    },
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: '',
+      },
+      securityDeposit: {
+        amount: 0,
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: '',
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: '',
+        },
+        electricity: {
+          amount: 0,
+          type: '',
+        },
+        gas: {
+          amount: 0,
+          type: '',
+        },
+        others: {
+          amount: 0,
+          type: '',
+        },
+      },
+      brokerage: {
+        required: '',
+        amount: 0,
+      },
+      availability: {
+        type: '',
+        date: '',
+      },
+    },
+    availability: {
+      availableFrom: '',
+      availableImmediately: true,
+    },
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: '',
+    },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+      },
+      videoTour: '',
+      documents: [],
+    },
   });
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Check login status on component mount
-  useEffect(() => {
-    const user = sessionStorage.getItem('user');
-    if (!user) {
-      navigate('/login');
-    } else {
-      setIsLoggedIn(true);
-    }
-  }, [navigate]);
-
-  const validateCurrentStep = () => {
-    const errors: Record<string, string> = {};
-    // Add validation logic here if needed
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const renderFormSection = (content: React.ReactNode) => (
-    <div className="space-y-4">
-      <ErrorDisplay errors={formErrors} />
-      {content}
-    </div>
-  );
-
-  const handleSpaceTypeChange = (types: string[]) => {
-    if (types && types.length > 0) {
-      setFormData({ ...formData, spaceType: types[0] });
-    }
-  };
-
-  const handlePropertyNameChange = (name: string) => {
-    setFormData({ ...formData, propertyName: name });
-  };
-
-  const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }) => {
-    setFormData({ ...formData, address });
-  };
-
-  const handleLandmarkChange = (landmark: string) => {
-    setFormData({ ...formData, landmark });
-  };
-
-  const handleCornerPropertyChange = (isCorner: boolean) => {
-    setFormData({ ...formData, isCornerProperty: isCorner });
-  };
-
-  const handleSpaceDetailsChange = (details: Record<string, any>) => {
-    setFormData({ ...formData, spaceDetails: details });
-  };
-
-  const handlePropertyDetailsChange = (details: Record<string, any>) => {
-    setFormData({ ...formData, propertyDetails: details });
-  };
-
-  const handleRentChange = (rent: Record<string, any>) => {
-    // Preserve the existing structure while updating with new values
-    setFormData(prev => ({ 
-      ...prev, 
-      rent: { 
-        expectedRent: rent.expectedRent || prev.rent.expectedRent,
-        isNegotiable: rent.isNegotiable !== undefined ? rent.isNegotiable : prev.rent.isNegotiable,
-        rentType: rent.rentType || prev.rent.rentType
-      } 
+  // Handler functions
+  const handlePropertyNameChange = (name: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        title: name
+      }
     }));
   };
 
-  const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
-    setFormData({ ...formData, maintenanceAmount: maintenance });
+  const handleSpaceTypeChange = (types: string[]): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        spaceType: types
+      }
+    }));
   };
 
-  const handleSecurityDepositChange = (deposit: Record<string, any>) => {
-    setFormData({ ...formData, securityDeposit: deposit });
+  const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        address: address
+      }
+    }));
   };
 
-  const handleOtherChargesChange = (charges: Record<string, any>) => {
-    setFormData({ ...formData, otherCharges: charges });
+  const handleLandmarkChange = (landmark: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        landmark: landmark
+      }
+    }));
   };
 
-  const handleBrokerageChange = (brokerage: Record<string, any>) => {
-    setFormData({ ...formData, brokerage });
+  const handleLatitudeChange = (lat: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        location: {
+          ...prev.basicInformation.location,
+          latitude: parseFloat(lat) || 0
+        }
+      }
+    }));
   };
 
-  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }) => {
-    setFormData({ ...formData, availability });
+  const handleLongitudeChange = (lng: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        location: {
+          ...prev.basicInformation.location,
+          longitude: parseFloat(lng) || 0
+        }
+      }
+    }));
   };
 
-  const handleContactChange = (contact: Record<string, any>) => {
-    setFormData({ ...formData, contactDetails: contact });
+  const handleCornerPropertyChange = (isCorner: boolean): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        isCornerProperty: isCorner
+      }
+    }));
   };
 
-  const handleMediaChange = (media: { 
-    images: { category: string; files: { url: string; file: File; }[]; }[]; 
-    video?: { url: string; file: File; } | undefined; 
-    documents: { type: string; file: File; }[]; 
-  }) => {
-    // Create a new array for photos to ensure type compatibility
-    const photos: any[] = [];
-    // Add files from each category
-    media.images.forEach(category => {
-      category.files.forEach(file => {
-        photos.push(file.file);
-      });
-    });
+  const handleSpaceDetailsChange = (details: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      spaceDetails: {
+        ...prev.spaceDetails,
+        ...details
+      }
+    }));
+  };
+
+  const handlePropertyDetailsChange = (details: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      propertyDetails: {
+        ...prev.propertyDetails,
+        ...details
+      }
+    }));
+  };
+
+  const handleRentChange = (rent: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        rentDetails: {
+          ...prev.rentalTerms.rentDetails,
+          expectedRent: rent.expectedRent || 0,
+          isNegotiable: rent.isNegotiable || false,
+          rentType: rent.rentType || ''
+        }
+      }
+    }));
+  };
+
+  const handleMaintenanceAmountChange = (maintenance: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        maintenanceAmount: {
+          amount: maintenance.amount || 0,
+          frequency: maintenance.frequency || ''
+        }
+      }
+    }));
+  };
+
+  const handleSecurityDepositChange = (deposit: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        securityDeposit: {
+          amount: deposit.amount || 0
+        }
+      }
+    }));
+  };
+
+  const handleOtherChargesChange = (charges: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        otherCharges: {
+          water: {
+            amount: charges.water?.amount || 0,
+            type: charges.water?.type || ''
+          },
+          electricity: {
+            amount: charges.electricity?.amount || 0,
+            type: charges.electricity?.type || ''
+          },
+          gas: {
+            amount: charges.gas?.amount || 0,
+            type: charges.gas?.type || ''
+          },
+          others: {
+            amount: charges.others?.amount || 0,
+            type: charges.others?.type || ''
+          }
+        }
+      }
+    }));
+  };
+
+  const handleBrokerageChange = (brokerage: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        brokerage: {
+          required: brokerage.required || '',
+          amount: brokerage.amount || 0
+        }
+      }
+    }));
+  };
+
+  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }): void => {
+    // Get today's date in ISO format for immediate availability
+    const today = new Date().toISOString().split('T')[0];
     
-    // Update the media object with photos and video
-    setFormData({
-      ...formData,
-      media: {
-        photos: photos,
-        video: media.video ? media.video.file : null
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        availability: {
+          type: availability.type || '',
+          date: availability.type === 'immediate' ? today : (availability.date || '')
+        }
+      },
+      availability: {
+        availableImmediately: availability.type === 'immediate',
+        availableFrom: availability.type === 'immediate' ? today : (availability.date || '')
+      }
+    }));
+  };
+
+  const handleContactChange = (contact: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      contactInformation: {
+        name: contact.name || '',
+        email: contact.email || '',
+        phone: contact.phone || '',
+        alternatePhone: contact.alternatePhone || '',
+        bestTimeToContact: contact.bestTimeToContact || ''
+      }
+    }));
+  };
+
+  const handleMediaChange = (media: { images: { category: string; files: { url: string; file: File; }[]; }[]; video?: { url: string; file: File; } | undefined; documents: { type: string; file: File; }[]; }): void => {
+    // Transform the media data to match the backend structure
+    const transformedMedia: IMedia = {
+      photos: {
+        exterior: [] as string[],
+        interior: [] as string[],
+        floorPlan: [] as string[],
+        washrooms: [] as string[],
+        lifts: [] as string[],
+        emergencyExits: [] as string[]
+      },
+      videoTour: media.video?.url || '',
+      documents: media.documents.map(doc => doc.file.name)
+    };
+
+    // Map the images to their respective categories
+    media.images.forEach(category => {
+      const urls = category.files.map(file => file.url);
+      switch (category.category) {
+        case 'exterior':
+          transformedMedia.photos.exterior = urls;
+          break;
+        case 'interior':
+          transformedMedia.photos.interior = urls;
+          break;
+        case 'floorPlan':
+          transformedMedia.photos.floorPlan = urls;
+          break;
+        case 'washrooms':
+          transformedMedia.photos.washrooms = urls;
+          break;
+        case 'lifts':
+          transformedMedia.photos.lifts = urls;
+          break;
+        case 'emergencyExits':
+          transformedMedia.photos.emergencyExits = urls;
+          break;
+        default:
+          break;
       }
     });
+
+    setFormData(prev => ({
+      ...prev,
+      media: transformedMedia
+    }));
   };
 
   const formSections = [
     {
       title: 'Basic Information',
-      icon: <Store className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName 
-                propertyName={formData.propertyName} 
-                onPropertyNameChange={handlePropertyNameChange} 
-              />
-              <CoveredOpenSpaceType onSpaceTypeChange={handleSpaceTypeChange} />
-            </div>
-          </div>
-
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-              <Landmark onLandmarkChange={handleLandmarkChange} />
-              <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
-            </div>
-          </div>
-        </div>
+      content: (
+        <>
+          <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={handlePropertyNameChange} />
+          <CoveredOpenSpaceType onSpaceTypeChange={handleSpaceTypeChange} />
+          <CommercialPropertyAddress onAddressChange={handleAddressChange} />
+          <Landmark onLandmarkChange={handleLandmarkChange} />
+          <MapCoordinates 
+            latitude={formData.basicInformation.location.latitude.toString()} 
+            longitude={formData.basicInformation.location.longitude.toString()} 
+            onLatitudeChange={handleLatitudeChange} 
+            onLongitudeChange={handleLongitudeChange} 
+          />
+          <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
+        </>
       )
     },
     {
@@ -266,35 +571,16 @@ const RentCoveredSpace = () => {
     },
     {
       title: 'Rental Terms',
-      icon: <DollarSign className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rent.rentType === 'exclusive' && (
-                  <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-                )}
-                <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage onBrokerageChange={handleBrokerageChange} />
-              </div>
-            </div>
-          </div>
-        </div>
+      content: (
+        <>
+          <Rent onRentChange={handleRentChange} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+          )}
+          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+          <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
+          <Brokerage onBrokerageChange={handleBrokerageChange} />
+        </>
       )
     },
     {

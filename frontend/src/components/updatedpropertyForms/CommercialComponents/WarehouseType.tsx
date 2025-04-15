@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowRight, Warehouse, Snowflake, Truck, Factory, ShoppingBag, FileCheck } from 'lucide-react';
 
 interface WarehouseTypeProps {
@@ -8,14 +8,15 @@ interface WarehouseTypeProps {
 const WarehouseType = ({ onWarehouseTypeChange }: WarehouseTypeProps) => {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
 
+  // ✅ This effect ensures updates happen after render
+  useEffect(() => {
+    onWarehouseTypeChange?.(selectedTypes);
+  }, [selectedTypes]);
+
   const handleTypeChange = (type: string) => {
-    setSelectedTypes((prev) => {
-      const updatedTypes = prev.includes(type) 
-        ? prev.filter((t) => t !== type) 
-        : [...prev, type];
-      onWarehouseTypeChange?.(updatedTypes);
-      return updatedTypes;
-    });
+    setSelectedTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
   };
 
   const warehouseTypes = [
@@ -24,7 +25,7 @@ const WarehouseType = ({ onWarehouseTypeChange }: WarehouseTypeProps) => {
     { value: 'distribution', label: 'Distribution Center' },
     { value: 'industrial', label: 'Industrial Warehouse' },
     { value: 'ecommerce', label: 'E-Commerce Fulfillment Center' },
-    { value: 'bonded', label: 'Bonded Warehouse' }
+    { value: 'bonded', label: 'Bonded Warehouse' },
   ];
 
   const getIcon = (type: string) => {
@@ -57,11 +58,11 @@ const WarehouseType = ({ onWarehouseTypeChange }: WarehouseTypeProps) => {
             <Warehouse size={20} className="text-black/60" />
             <h4 className="text-lg font-medium text-black">Select Warehouse Type</h4>
           </div>
-          
+
           <div className="space-y-2">
             {warehouseTypes.map(({ value, label }) => (
-              <label 
-                key={value} 
+              <label
+                key={value}
                 className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg transition-colors duration-200 cursor-pointer"
               >
                 <input
