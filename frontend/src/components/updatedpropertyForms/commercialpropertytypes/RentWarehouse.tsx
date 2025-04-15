@@ -180,7 +180,7 @@ const RentWarehouse = () => {
       rentDetails: {
         expectedRent: 0,
         isNegotiable: false,
-            rentType: '',
+        rentType: '',
       },
       securityDeposit: {
         amount: 0,
@@ -239,7 +239,7 @@ const RentWarehouse = () => {
         emergencyExits: [],
       },
       videoTour: null,
-      documents: [],  
+      documents: [],
     },
   });
 
@@ -298,7 +298,7 @@ const RentWarehouse = () => {
               />
               <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
             </div>
-            
+
             <div className="flex items-center space-x-2 cursor-pointer">
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
@@ -342,7 +342,7 @@ const RentWarehouse = () => {
             <h3 className="text-xl font-semibold text-gray-800">Rental Terms</h3>
           </div>
           <div className="space-y-6">
-            <Rent 
+            <Rent
               onRentChange={(rent) => setFormData(prev => ({
                 ...prev,
                 rentalTerms: {
@@ -417,13 +417,13 @@ const RentWarehouse = () => {
             <AvailabilityDate
               onAvailabilityChange={(availability) => {
                 handleChange('rentalTerms.availability.type', availability.type);
-                
-                const dateToStore = availability.type === 'immediate' 
-                  ? new Date().toISOString() 
+
+                const dateToStore = availability.type === 'immediate'
+                  ? new Date().toISOString()
                   : availability.date || '';
-                
+
                 handleChange('rentalTerms.availability.date', dateToStore);
-                
+
                 handleChange('availability.availableFrom', dateToStore);
                 handleChange('availability.availableImmediately', availability.type === 'immediate');
               }}
@@ -465,7 +465,7 @@ const RentWarehouse = () => {
                 media.images.forEach(({ category, files }) => {
                   photos[category] = files.map(f => f.file);
                 });
-  
+
                 setFormData(prev => ({
                   ...prev,
                   media: {
@@ -490,14 +490,14 @@ const RentWarehouse = () => {
     setFormData(prev => {
       const fields = field.split('.');
       const lastField = fields.pop() || '';
-      
+
       const newData = { ...prev };
       let current: any = newData;
-      
+
       for (const field of fields) {
         current = { ...current[field] };
       }
-      
+
       current[lastField] = value;
       return newData;
     });
@@ -530,13 +530,13 @@ const RentWarehouse = () => {
   };
 
   const handleNext = () => {
-    if (validateCurrentStep()) {
-      if (currentStep < formSections.length - 1) {
-        setCurrentStep(currentStep + 1);
-      }
-    } else {
-      toast.error('Please fill in all required fields');
+    // if (validateCurrentStep()) {
+    if (currentStep < formSections.length - 1) {
+      setCurrentStep(currentStep + 1);
     }
+    // } else {
+    //   toast.error('Please fill in all required fields');
+    // }
   };
 
   const handlePrevious = () => {
@@ -547,7 +547,7 @@ const RentWarehouse = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-   
+
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -607,7 +607,7 @@ const RentWarehouse = () => {
           <h2 className="text-2xl font-bold text-gray-800 [forced-colors:active]:text-[CanvasText]">List Your Warehouse for Rent</h2>
           <div className="text-sm text-gray-500 [forced-colors:active]:text-[CanvasText]">Step {currentStep + 1} of {formSections.length}</div>
         </div>
-        
+
         <div className="relative">
           <div className="absolute inset-0 flex items-center" aria-hidden="true">
             <div className="w-full border-t border-gray-200 [forced-colors:active]:border-[CanvasText]"></div>
@@ -615,12 +615,11 @@ const RentWarehouse = () => {
           <div className="relative flex justify-between">
             {formSections.map((section, index) => (
               <div key={index} className="flex flex-col items-center">
-                <div 
-                  className={`flex h-10 w-10 items-center justify-center rounded-full ${
-                    index <= currentStep 
-                      ? 'bg-black text-white [forced-colors:active]:bg-[Highlight] [forced-colors:active]:text-[HighlightText]' 
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-full ${index <= currentStep
+                      ? 'bg-black text-white [forced-colors:active]:bg-[Highlight] [forced-colors:active]:text-[HighlightText]'
                       : 'bg-gray-200 text-gray-500 [forced-colors:active]:bg-[ButtonText] [forced-colors:active]:text-[Canvas]'
-                  }`}
+                    }`}
                 >
                   {section.icon}
                 </div>
@@ -639,52 +638,32 @@ const RentWarehouse = () => {
         </div>
 
         {formSections[currentStep].content}
-      {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
-        </div>
 
-        {formSections[currentStep].content}
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-      {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-black hover:bg-black hover:text-white'
-              }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-black hover:bg-black hover:text-white'
-              }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Previous
-          </button>
-          <button
-            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-          >
-            {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </button>
+            {/* Navigation Buttons */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+              <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentStep === 0}
+                  className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-black hover:bg-black hover:text-white'
+                    }`}
+                >
+                  <ChevronLeft className="w-5 h-5 mr-2" />
+                  Previous
+                </button>
+                <button
+                  onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+                >
+                  {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        </div>
-      </div>
-</div>
-    // </form>
   );
 };
 
