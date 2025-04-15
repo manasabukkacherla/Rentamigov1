@@ -16,42 +16,537 @@ import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 
+// Define interfaces based on backend model
+interface IArea {
+  totalArea: number;
+  builtUpArea: number;
+  carpetArea: number;
+}
+
+interface IBasicInformation {
+  title: string;
+  spaceType: string[];
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  landmark: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  isCornerProperty: boolean;
+}
+
+interface ISpaceDetails {
+  totalArea: number;
+  squareFeet: number;
+  coveredArea: number;
+  openArea: number;
+  roadWidth: {
+    value: number;
+    unit: "feet" | "meters";
+  };
+  ceilingHeight: {
+    value: number;
+    unit: "feet" | "meters";
+  };
+  noOfOpenSides: string;
+}
+
+interface IAvailability {
+  availableFrom?: string;
+  availableImmediately: boolean;
+}
+
+interface IContactInformation {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+}
+
+interface IMedia {
+  photos: {
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    washrooms: string[];
+    lifts: string[];
+    emergencyExits: string[];
+  };
+  videoTour?: string;
+  documents: string[];
+}
+
+interface IRentalTerms {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  };
+  securityDeposit: {
+    amount: number;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount?: number;
+      type: string;
+    };
+    electricity: {
+      amount?: number;
+      type: string;
+    };
+    gas: {
+      amount?: number;
+      type: string;
+    };
+    others: {
+      amount?: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
+  };
+}
+
+interface IFloor {
+  floorNumber: number;
+  totalFloors: number;
+}
+
+interface IFormData {
+  basicInformation: IBasicInformation;
+  spaceDetails: ISpaceDetails;
+  propertyDetails: {
+    area: IArea;
+    floor: IFloor;
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string;
+    propertyAge: number;
+    propertyCondition: string;
+  };
+  rentalTerms: IRentalTerms;
+  availability: IAvailability;
+  contactInformation: IContactInformation;
+  media: IMedia;
+}
+
 const RentCoveredSpace = () => {
-  const [formData, setFormData] = useState({
-    propertyName: '',
-    spaceType: '',
-    address: {},
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
-    spaceDetails: {},
-    propertyDetails: {},
-    rent: {
-      expectedRent: '',
-      isNegotiable: false,
-      rentType: ''
+  const [formData, setFormData] = useState<IFormData>({
+    basicInformation: {
+      title: '',
+      spaceType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0,
+      },
+      isCornerProperty: false,
     },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [], video: null }
+    spaceDetails: {
+      totalArea: 0,
+      squareFeet: 0,
+      coveredArea: 0,
+      openArea: 0,
+      roadWidth: {
+        value: 0,
+        unit: 'feet',
+      },
+      ceilingHeight: {
+        value: 0,
+        unit: 'feet',
+      },
+      noOfOpenSides: '',
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        builtUpArea: 0,
+        carpetArea: 0,
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0,
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false,
+      },
+      waterAvailability: '',
+      propertyAge: 0,
+      propertyCondition: '',
+    },
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: '',
+      },
+      securityDeposit: {
+        amount: 0,
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: '',
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: '',
+        },
+        electricity: {
+          amount: 0,
+          type: '',
+        },
+        gas: {
+          amount: 0,
+          type: '',
+        },
+        others: {
+          amount: 0,
+          type: '',
+        },
+      },
+      brokerage: {
+        required: '',
+        amount: 0,
+      },
+      availability: {
+        type: '',
+        date: '',
+      },
+    },
+    availability: {
+      availableFrom: '',
+      availableImmediately: true,
+    },
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: '',
+    },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+      },
+      videoTour: '',
+      documents: [],
+    },
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Handler functions
+  const handlePropertyNameChange = (name: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        title: name
+      }
+    }));
+  };
+
+  const handleSpaceTypeChange = (types: string[]): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        spaceType: types
+      }
+    }));
+  };
+
+  const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        address: address
+      }
+    }));
+  };
+
+  const handleLandmarkChange = (landmark: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        landmark: landmark
+      }
+    }));
+  };
+
+  const handleLatitudeChange = (lat: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        location: {
+          ...prev.basicInformation.location,
+          latitude: parseFloat(lat) || 0
+        }
+      }
+    }));
+  };
+
+  const handleLongitudeChange = (lng: string): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        location: {
+          ...prev.basicInformation.location,
+          longitude: parseFloat(lng) || 0
+        }
+      }
+    }));
+  };
+
+  const handleCornerPropertyChange = (isCorner: boolean): void => {
+    setFormData(prev => ({
+      ...prev,
+      basicInformation: {
+        ...prev.basicInformation,
+        isCornerProperty: isCorner
+      }
+    }));
+  };
+
+  const handleSpaceDetailsChange = (details: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      spaceDetails: {
+        ...prev.spaceDetails,
+        ...details
+      }
+    }));
+  };
+
+  const handlePropertyDetailsChange = (details: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      propertyDetails: {
+        ...prev.propertyDetails,
+        ...details
+      }
+    }));
+  };
+
+  const handleRentChange = (rent: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        rentDetails: {
+          ...prev.rentalTerms.rentDetails,
+          expectedRent: rent.expectedRent || 0,
+          isNegotiable: rent.isNegotiable || false,
+          rentType: rent.rentType || ''
+        }
+      }
+    }));
+  };
+
+  const handleMaintenanceAmountChange = (maintenance: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        maintenanceAmount: {
+          amount: maintenance.amount || 0,
+          frequency: maintenance.frequency || ''
+        }
+      }
+    }));
+  };
+
+  const handleSecurityDepositChange = (deposit: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        securityDeposit: {
+          amount: deposit.amount || 0
+        }
+      }
+    }));
+  };
+
+  const handleOtherChargesChange = (charges: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        otherCharges: {
+          water: {
+            amount: charges.water?.amount || 0,
+            type: charges.water?.type || ''
+          },
+          electricity: {
+            amount: charges.electricity?.amount || 0,
+            type: charges.electricity?.type || ''
+          },
+          gas: {
+            amount: charges.gas?.amount || 0,
+            type: charges.gas?.type || ''
+          },
+          others: {
+            amount: charges.others?.amount || 0,
+            type: charges.others?.type || ''
+          }
+        }
+      }
+    }));
+  };
+
+  const handleBrokerageChange = (brokerage: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        brokerage: {
+          required: brokerage.required || '',
+          amount: brokerage.amount || 0
+        }
+      }
+    }));
+  };
+
+  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }): void => {
+    // Get today's date in ISO format for immediate availability
+    const today = new Date().toISOString().split('T')[0];
+    
+    setFormData(prev => ({
+      ...prev,
+      rentalTerms: {
+        ...prev.rentalTerms,
+        availability: {
+          type: availability.type || '',
+          date: availability.type === 'immediate' ? today : (availability.date || '')
+        }
+      },
+      availability: {
+        availableImmediately: availability.type === 'immediate',
+        availableFrom: availability.type === 'immediate' ? today : (availability.date || '')
+      }
+    }));
+  };
+
+  const handleContactChange = (contact: Record<string, any>): void => {
+    setFormData(prev => ({
+      ...prev,
+      contactInformation: {
+        name: contact.name || '',
+        email: contact.email || '',
+        phone: contact.phone || '',
+        alternatePhone: contact.alternatePhone || '',
+        bestTimeToContact: contact.bestTimeToContact || ''
+      }
+    }));
+  };
+
+  const handleMediaChange = (media: { images: { category: string; files: { url: string; file: File; }[]; }[]; video?: { url: string; file: File; } | undefined; documents: { type: string; file: File; }[]; }): void => {
+    // Transform the media data to match the backend structure
+    const transformedMedia: IMedia = {
+      photos: {
+        exterior: [] as string[],
+        interior: [] as string[],
+        floorPlan: [] as string[],
+        washrooms: [] as string[],
+        lifts: [] as string[],
+        emergencyExits: [] as string[]
+      },
+      videoTour: media.video?.url || '',
+      documents: media.documents.map(doc => doc.file.name)
+    };
+
+    // Map the images to their respective categories
+    media.images.forEach(category => {
+      const urls = category.files.map(file => file.url);
+      switch (category.category) {
+        case 'exterior':
+          transformedMedia.photos.exterior = urls;
+          break;
+        case 'interior':
+          transformedMedia.photos.interior = urls;
+          break;
+        case 'floorPlan':
+          transformedMedia.photos.floorPlan = urls;
+          break;
+        case 'washrooms':
+          transformedMedia.photos.washrooms = urls;
+          break;
+        case 'lifts':
+          transformedMedia.photos.lifts = urls;
+          break;
+        case 'emergencyExits':
+          transformedMedia.photos.emergencyExits = urls;
+          break;
+        default:
+          break;
+      }
+    });
+
+    setFormData(prev => ({
+      ...prev,
+      media: transformedMedia
+    }));
+  };
 
   const formSections = [
     {
       title: 'Basic Information',
       content: (
         <>
-          <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
+          <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={handlePropertyNameChange} />
           <CoveredOpenSpaceType onSpaceTypeChange={handleSpaceTypeChange} />
           <CommercialPropertyAddress onAddressChange={handleAddressChange} />
           <Landmark onLandmarkChange={handleLandmarkChange} />
-          
+          <MapCoordinates 
+            latitude={formData.basicInformation.location.latitude.toString()} 
+            longitude={formData.basicInformation.location.longitude.toString()} 
+            onLatitudeChange={handleLatitudeChange} 
+            onLongitudeChange={handleLongitudeChange} 
+          />
           <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
         </>
       )
@@ -70,7 +565,7 @@ const RentCoveredSpace = () => {
       content: (
         <>
           <Rent onRentChange={handleRentChange} />
-          {formData.rent.rentType === 'exclusive' && (
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
             <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
           )}
           <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
@@ -180,72 +675,4 @@ const RentCoveredSpace = () => {
 };
 
 export default RentCoveredSpace;
-
-function handlePropertyNameChange(name: string): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleSpaceTypeChange(type: string): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleAddressChange(address: { street: string; city: string; state: string; zipCode: string; }): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleLandmarkChange(landmark: string): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleLatitudeChange(lat: string): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleLongitudeChange(lng: string): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleCornerPropertyChange(isCorner: boolean): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleSpaceDetailsChange(details: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handlePropertyDetailsChange(details: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleRentChange(rent: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleMaintenanceAmountChange(maintenance: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleSecurityDepositChange(deposit: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleOtherChargesChange(charges: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleBrokerageChange(brokerage: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleAvailabilityChange(availability: { type: 'immediate' | 'specific'; date?: string | undefined; }): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleContactChange(contact: Record<string, any>): void {
-  throw new Error('Function not implemented.');
-}
-
-function handleMediaChange(media: { images: { category: string; files: { url: string; file: File; }[]; }[]; video?: { url: string; file: File; } | undefined; documents: { type: string; file: File; }[]; }): void {
-  throw new Error('Function not implemented.');
-}
 
