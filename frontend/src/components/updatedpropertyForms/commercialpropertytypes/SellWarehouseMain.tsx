@@ -527,7 +527,7 @@ const SellWarehouseMain = () => {
       console.error('Error submitting form:', error);
       toast.error('Failed to create commercial wareshouses listing. Please try again.');
     } finally {
-      setIsSubmitting(false)
+      // setIsSubmitting(false)
     }
   }
 
