@@ -193,9 +193,12 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
     },
   ];
 
-  const handleNext = async () => {
-    await saveStepData();
-    setStep((prev) => prev + 1);
+  const handleNext = () => {
+    if (step < steps.length - 1) {
+      setStep((prev) => prev + 1);
+    } else {
+      onSubmit?.(formData);
+    }
   };
 
   return (
@@ -206,15 +209,11 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
       <button
         type="button"
         onClick={handleNext}
-        disabled={loading}
         className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
       >
-        {loading
-          ? "Saving..."
-          : step < steps.length - 1
-          ? "Next"
-          : "List Property"}
+        {step < steps.length - 1 ? "Next" : "List Property"}
       </button>
+
     </form>
   );
 };

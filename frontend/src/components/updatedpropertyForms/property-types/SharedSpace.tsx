@@ -74,7 +74,6 @@ const SharedSpace = ({ propertyId, onSubmit }: SharedSpaceProps) => {
 
   // Function to save data at each step
 
-
   const steps = [
     {
       title: "Basic Information",
@@ -224,10 +223,14 @@ const SharedSpace = ({ propertyId, onSubmit }: SharedSpaceProps) => {
     },
   ];
 
-  const handleNext = async () => {
-    await saveStepData();
-    setStep((prev) => prev + 1);
+  const handleNext = () => {
+    if (step < steps.length - 1) {
+      setStep((prev) => prev + 1);
+    } else {
+      onSubmit?.(formData); // Final submit callback
+    }
   };
+
 
   return (
     <form onSubmit={(e) => e.preventDefault()} className="space-y-12">
@@ -237,15 +240,11 @@ const SharedSpace = ({ propertyId, onSubmit }: SharedSpaceProps) => {
       <button
         type="button"
         onClick={handleNext}
-        disabled={loading}
         className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
       >
-        {loading
-          ? "Saving..."
-          : step < steps.length - 1
-          ? "Next"
-          : "List Property"}
+        {step < steps.length - 1 ? "Next" : "List Property"}
       </button>
+
     </form>
   );
 };

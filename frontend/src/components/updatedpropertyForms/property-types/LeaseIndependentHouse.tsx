@@ -62,10 +62,10 @@ const LeaseIndependentHouse = ({
     }));
   }, []);
 
-
+ 
 
   const handleNext = async () => {
-    await saveStepData();
+    
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
     } else {
@@ -238,17 +238,7 @@ const LeaseIndependentHouse = ({
         </div>
 
         {/* Messages */}
-        {errorMessage && (
-          <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
-            {errorMessage}
-          </div>
-        )}
-        {successMessage && (
-          <div className="mt-4 p-4 bg-green-50 text-green-600 rounded-lg">
-            {successMessage}
-          </div>
-        )}
-
+        
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8">
           <button
