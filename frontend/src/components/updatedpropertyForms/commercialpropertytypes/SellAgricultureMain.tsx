@@ -33,9 +33,12 @@ import {
   ChevronRight,
 } from "lucide-react"
 
+// Interface that matches the backend model structure
 interface FormData {
+  propertyId?: string;
   propertyName: string;
   landType: string[];
+  powerSupply: boolean;
   address: {
     street: string;
     city: string;
@@ -48,31 +51,80 @@ interface FormData {
     longitude: string; 
   };
   isCornerProperty: boolean;
-  Agriculturelanddetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
+  Agriculturelanddetails: {
+    totalArea: number;
+    soilType: string;
+    irrigation: boolean;
+    fencing: boolean;
+    cropSuitability: string;
+    waterSource: string;
+    legalClearances: boolean;
+  };
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    waterAvailability: string;
+    propertyAge: number;
+    propertyCondition: string;
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+  };
   price: {
     expectedPrice: number;
     isNegotiable: boolean;
-    pricePerUnit: number;
   };
   registrationCharges: {
     included: boolean;
     amount?: number;
+    stampDuty?: number;
   };
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, any>;
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: 'immediate' | 'specific';
+    date?: Date;
+    preferredLeaseDuration?: string;
+    noticePeriod?: string;
+  };
+  petsAllowed: boolean;
+  operatingHoursRestrictions: boolean;
+  contactDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
   media: {
     photos: {
       exterior: File[];
       interior: File[];
       floorPlan: File[];
-      aerial: File[];
-      surroundings: File[];
-      documents: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
     };
     videoTour: File | null;
     documents: File[];
+  };
+  metaData?: {
+    createdBy: string;
+    createdAt: Date;
   };
 }
 
@@ -81,6 +133,7 @@ const SellAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
     propertyName: "",
     landType: [],
+    powerSupply: false,
     address: {
       street: "",
       city: "",
@@ -90,31 +143,74 @@ const SellAgricultureMain = () => {
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
-    Agriculturelanddetails: {},
-    propertyDetails: {},
+    Agriculturelanddetails: {
+      totalArea: 0,
+      soilType: "",
+      irrigation: false,
+      fencing: false,
+      cropSuitability: "",
+      waterSource: "",
+      legalClearances: false
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: "",
+      furnishingStatus: "",
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      waterAvailability: "",
+      propertyAge: 0,
+      propertyCondition: "",
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false
+      }
+    },
     price: {
       expectedPrice: 0,
-      isNegotiable: false,
-      pricePerUnit: 0
+      isNegotiable: false
     },
     registrationCharges: {
       included: false
     },
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    brokerage: {
+      required: "No",
+      amount: 0
+    },
+    availability: {
+      type: "immediate",
+      preferredLeaseDuration: "",
+      noticePeriod: ""
+    },
+    petsAllowed: false,
+    operatingHoursRestrictions: false,
+    contactDetails: {
+      name: "",
+      email: "",
+      phone: "",
+      alternatePhone: "",
+      bestTimeToContact: ""
+    },
     media: { 
       photos: {
         exterior: [],
         interior: [],
         floorPlan: [],
-        aerial: [],
-        surroundings: [],
-        documents: []
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
       },
       videoTour: null,
       documents: []
-    },
+    }
   })
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -182,10 +278,16 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <AgriculturalLandDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, Agriculturelanddetails: details }))}
+              onDetailsChange={(details) => setFormData((prev) => ({ 
+                ...prev, 
+                Agriculturelanddetails: details as FormData['Agriculturelanddetails']
+              }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
+              onDetailsChange={(details) => setFormData((prev) => ({ 
+                ...prev, 
+                propertyDetails: details as FormData['propertyDetails']
+              }))}
             />
           </div>
         </div>
@@ -230,7 +332,8 @@ const SellAgricultureMain = () => {
                         ...prev, 
                         registrationCharges: {
                           included: charges.included,
-                          amount: charges.amount
+                          amount: charges.amount,
+                          stampDuty: charges.stampDuty
                         }
                       }))
                     }
@@ -240,7 +343,10 @@ const SellAgricultureMain = () => {
                 <div className="text-black">
                   <Brokerage 
                     onBrokerageChange={(brokerage) => 
-                      setFormData((prev) => ({ ...prev, brokerage: brokerage }))
+                      setFormData((prev) => ({ 
+                        ...prev, 
+                        brokerage: brokerage as FormData['brokerage']
+                      }))
                     } 
                   />
                 </div>
@@ -261,7 +367,19 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialAvailability
-              onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
+              onAvailabilityChange={(availability) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  availability: {
+                    type: availability.type,
+                    date: availability.date,
+                    preferredLeaseDuration: availability.preferredLeaseDuration,
+                    noticePeriod: availability.noticePeriod
+                  },
+                  petsAllowed: availability.petsAllowed || false,
+                  operatingHoursRestrictions: availability.operatingHoursRestrictions || false
+                }))
+              }}
             />
           </div>
         </div>
@@ -278,7 +396,10 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
+              onContactChange={(contact) => setFormData((prev) => ({ 
+                ...prev, 
+                contactDetails: contact as FormData['contactDetails']
+              }))}
             />
           </div>
         </div>
@@ -305,8 +426,12 @@ const SellAgricultureMain = () => {
                   ...prev,
                   media: {
                     photos: {
-                      ...prev.media.photos,
-                      ...photos
+                      exterior: photos.exterior || [],
+                      interior: photos.interior || [],
+                      floorPlan: photos.floorPlan || [],
+                      washrooms: photos.washrooms || [],
+                      lifts: photos.lifts || [],
+                      emergencyExits: photos.emergencyExits || []
                     },
                     videoTour: media.video?.file || null,
                     documents: media.documents.map(d => d.file)
@@ -343,31 +468,43 @@ const SellAgricultureMain = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
+    console.log(formData)
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
         const author = JSON.parse(user).id;
-
-        // Calculate price per unit if area is available
-        if (formData.Agriculturelanddetails?.totalArea && formData.price.expectedPrice) {
-          formData.price.pricePerUnit = formData.price.expectedPrice / formData.Agriculturelanddetails.totalArea;
-        }
 
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
             interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
             floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            aerial: await Promise.all((formData.media?.photos?.aerial ?? []).map(convertFileToBase64)),
-            surroundings: await Promise.all((formData.media?.photos?.surroundings ?? []).map(convertFileToBase64)),
-            documents: await Promise.all((formData.media?.photos?.documents ?? []).map(convertFileToBase64))
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
           },
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+        // Create the payload matching the backend model structure
         const transformedData = {
-          ...formData,
+          propertyName: formData.propertyName,
+          landType: formData.landType,
+          powerSupply: formData.powerSupply,
+          address: formData.address,
+          landmark: formData.landmark,
+          coordinates: formData.coordinates,
+          isCornerProperty: formData.isCornerProperty,
+          Agriculturelanddetails: formData.Agriculturelanddetails,
+          propertyDetails: formData.propertyDetails,
+          price: formData.price,
+          registrationCharges: formData.registrationCharges,
+          brokerage: formData.brokerage,
+          availability: formData.availability,
+          petsAllowed: formData.petsAllowed,
+          operatingHoursRestrictions: formData.operatingHoursRestrictions,
+          contactDetails: formData.contactDetails,
           media: convertedMedia,
           metaData: {
             createdBy: author,
@@ -381,17 +518,18 @@ const SellAgricultureMain = () => {
           }
         });
 
-        if (response.data.message) {
+        if (response.data) {
           toast.success('Agricultural land listing created successfully!');
           // Navigate to dashboard or listing page
-          navigate('/dashboard');
+          // navigate('/dashboard');
         }
       } else {
+        toast.error('You must be logged in to create a listing');
         navigate('/login');
       }
-    } catch (error) {
-      console.error("Error submitting form:", error)
-      toast.error('Failed to create agricultural land listing. Please try again.');
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      toast.error(error.response?.data?.message || 'Failed to create agricultural land listing. Please try again.');
     }
   }
 

@@ -13,7 +13,7 @@ const generatePropertyId = async (): Promise<string> => {
     
     let nextNumber = 1; // Default start number
     
-    if (highestProperty) {
+    if (highestProperty && highestProperty.propertyId) {
       // Extract the numeric part from the existing highest property ID
       const match = highestProperty.propertyId.match(/(\d+)$/);
       if (match && match[1]) {

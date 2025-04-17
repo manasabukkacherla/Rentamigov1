@@ -11,11 +11,10 @@ interface IFloor {
   totalFloors: number;
 }
 
-export interface ICommercialSellAgriculture extends Document {
+export interface ICommercialSellOthers extends Document {
   propertyId?: string;
   propertyName: string;
-  landType?: string[];
-  powerSupply: boolean;
+  commercialType: string[];
   address: {
     street: string;
     city: string;
@@ -28,18 +27,16 @@ export interface ICommercialSellAgriculture extends Document {
     longitude: string;
   };
   isCornerProperty: boolean;
-  Agriculturelanddetails: {
-    totalArea: number;
-    soilType: string;
-    irrigation: boolean;
-    fencing: boolean;
-    cropSuitability: string;
-    waterSource: string;
-    legalClearances: boolean;
-  };
-  propertyDetails:{
+  
+  propertyDetails: {
     area: IArea;
     floor: IFloor;
+    otherDetails: {
+      propertyTypeDescription: string;
+      specialFeatures: string;
+      usageRecommendation: string;
+      additionalRequirements: string;
+    };
     facingDirection: string;
     furnishingStatus: string;
     propertyAmenities: string[];
@@ -88,21 +85,21 @@ export interface ICommercialSellAgriculture extends Document {
       washrooms: string[];
       lifts: string[];
       emergencyExits: string[];
+      others: string[];
     };
     videoTour?: string;
     documents: string[];
   };
-  metaData: {
+  metaData?: {
     createdBy: Types.ObjectId;
     createdAt: Date;
-  }
+  };
 }
 
-const CommercialSellAgricultureSchema: Schema = new Schema({
-  propertyId: { type: String, default: () => `CSA-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
+const CommercialSellOthersSchema: Schema = new Schema({
+  propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   propertyName: { type: String, default: "Unnamed Property" },
-  landType: { type: [String], default: ["Agricultural"] },
-  powerSupply: { type: Boolean, default: false },
+  commercialType: { type: [String], default: ["Other"] },
   address: {
     street: { type: String, default: "Not Specified" },
     city: { type: String, default: "Not Specified" },
@@ -115,15 +112,6 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
     longitude: { type: String }
   },
   isCornerProperty: { type: Boolean, default: false },
-  Agriculturelanddetails: {
-    totalArea: { type: Number, default: 0 },
-    soilType: { type: String },
-    irrigation: { type: Boolean, default: false },
-    fencing: { type: Boolean, default: false },
-    cropSuitability: { type: String },
-    waterSource: { type: String },
-    legalClearances: { type: Boolean, default: false }
-  },
   propertyDetails: {
     area: {
       totalArea: { type: Number },
@@ -134,10 +122,16 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
       floorNumber: { type: Number },
       totalFloors: { type: Number }
     },
+    otherDetails: {
+      propertyTypeDescription: { type: String },
+      specialFeatures: { type: String },
+      usageRecommendation: { type: String },
+      additionalRequirements: { type: String }
+    },
     facingDirection: { type: String },
     furnishingStatus: { type: String },
-    propertyAmenities: { type: [String] },
-    wholeSpaceAmenities: { type: [String] },
+    propertyAmenities: { type: [String], default: [] },
+    wholeSpaceAmenities: { type: [String], default: [] },
     waterAvailability: { type: String },
     propertyAge: { type: Number },
     propertyCondition: { type: String },
@@ -181,7 +175,8 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
       floorPlan: { type: [String], default: [] },
       washrooms: { type: [String], default: [] },
       lifts: { type: [String], default: [] },
-      emergencyExits: { type: [String], default: [] }
+      emergencyExits: { type: [String], default: [] },
+      others: { type: [String], default: [] }
     },
     videoTour: { type: String },
     documents: { type: [String], default: [] }
@@ -192,4 +187,4 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
   }
 });
 
-export default mongoose.model<ICommercialSellAgriculture>('CommercialSellAgriculture', CommercialSellAgricultureSchema); 
+export default mongoose.model<ICommercialSellOthers>('CommercialSellOthers', CommercialSellOthersSchema); 
