@@ -1,6 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import React, { useState } from 'react';
 import PropertyName from '../PropertyName';
 import CoveredOpenSpaceType from '../CommercialComponents/CoveredOpenSpaceType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -17,16 +15,19 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Warehouse, ImageIcon, UserCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-// Define interfaces based on backend model
-interface IArea {
-  totalArea: number;
-  builtUpArea: number;
-  carpetArea: number;
-}
 
-interface IBasicInformation {
-  title: string;
+
+
+
+interface IFormData {
+
+  basicInformation: {
+    title: string;
   spaceType: string[];
   address: {
     street: string;
@@ -40,102 +41,34 @@ interface IBasicInformation {
     longitude: number;
   };
   isCornerProperty: boolean;
-}
+  };
 
-interface ISpaceDetails {
-  totalArea: number;
-  squareFeet: number;
-  coveredArea: number;
-  openArea: number;
-  roadWidth: {
-    value: number;
-    unit: "feet" | "meters";
-  };
-  ceilingHeight: {
-    value: number;
-    unit: "feet" | "meters";
-  };
-  noOfOpenSides: string;
-}
-
-interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
-}
-
-interface IContactInformation {
-  name: string;
-  email: string;
-  phone: string;
-  alternatePhone?: string;
-  bestTimeToContact?: string;
-}
-
-interface IMedia {
-  photos: {
-    exterior: string[];
-    interior: string[];
-    floorPlan: string[];
-    washrooms: string[];
-    lifts: string[];
-    emergencyExits: string[];
-  };
-  videoTour?: string;
-  documents: string[];
-}
-
-interface IRentalTerms {
-  rentDetails: {
-    expectedRent: number;
-    isNegotiable: boolean;
-    rentType: string;
-  };
-  securityDeposit: {
-    amount: number;
-  };
-  maintenanceAmount: {
-    amount: number;
-    frequency: string;
-  };
-  otherCharges: {
-    water: {
-      amount?: number;
-      type: string;
+  spaceDetails: {
+    totalArea: number;
+    squareFeet: number;
+    coveredArea: number;
+    openArea: number;
+    roadWidth: {
+      value: number;
+      unit: "feet" | "meters";
     };
-    electricity: {
-      amount?: number;
-      type: string;
+    ceilingHeight: {
+      value: number;
+      unit: "feet" | "meters";
     };
-    gas: {
-      amount?: number;
-      type: string;
-    };
-    others: {
-      amount?: number;
-      type: string;
-    };
+    noOfOpenSides: string;
   };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
-  availability: {
-    type: string;
-    date?: string;
-  };
-}
 
-interface IFloor {
-  floorNumber: number;
-  totalFloors: number;
-}
-
-interface IFormData {
-  basicInformation: IBasicInformation;
-  spaceDetails: ISpaceDetails;
   propertyDetails: {
-    area: IArea;
-    floor: IFloor;
+    area: {
+      totalArea: number;
+  builtUpArea: number;
+  carpetArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
     facingDirection: string;
     furnishingStatus: string;
     propertyAmenities: string[];
@@ -145,12 +78,121 @@ interface IFormData {
       backup: boolean;
     };
     waterAvailability: string;
+    
     propertyAge: number;
     propertyCondition: string;
   };
-  rentalTerms: IRentalTerms;
-  availability: IAvailability;
-  contactInformation: IContactInformation;
+  rentalTerms: {
+    rentDetails: {
+      expectedRent: number;
+      isNegotiable: boolean;
+      rentType: string;
+    };
+    securityDeposit: {
+      amount: number;
+    };
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
+    };
+    otherCharges: {
+      water: {
+        amount?: number;
+        type: string;
+      };
+      electricity: {
+        amount?: number;
+        type: string;
+      };
+      gas: {
+        amount?: number;
+        type: string;
+      };
+      others: {
+        amount?: number;
+        type: string;
+      };
+    };
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
+    availability: {
+      type: string;
+      date?: string;
+    };
+  };
+  availability: {
+    availableFrom?: string;
+    availableImmediately: boolean;
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    preferredContactMethod: string;
+    responseTime: string;
+    alternatePhone: string;
+    bestTimeToContact: string;
+  };
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+
+  };
+}
+
+interface CoveredOpenSpaceDetailsProps {
+  onDetailsChange: (details: Record<string, any>) => void;
+}
+
+interface CommercialPropertyDetailsProps {
+  onDetailsChange: (details: Record<string, any>) => void;
+}
+
+interface RentProps {
+  onRentChange: (rent: Record<string, any>) => void;
+}
+
+interface MaintenanceAmountProps {
+  onMaintenanceAmountChange: (maintenance: Record<string, any>) => void;
+  maintenanceAmount: { amount: number; frequency: string };
+}
+
+interface SecurityDepositProps {
+  onSecurityDepositChange: (deposit: Record<string, any>) => void;
+  securityDeposit: { amount: number };
+}
+
+interface OtherChargesProps {
+  onOtherChargesChange: (charges: Record<string, any>) => void;
+  otherCharges: {
+    water: { amount?: number; type: string };
+    electricity: { amount?: number; type: string };
+    gas: { amount?: number; type: string };
+    others: { amount?: number; type: string };
+  };
+}
+
+interface BrokerageProps {
+  onBrokerageChange: (brokerage: Record<string, any>) => void;
+  brokerage: { required: string; amount?: number };
+}
+
+interface CommercialContactDetailsProps {
+  onContactChange: (contact: Record<string, any>) => void;
+}
+
+interface CommercialMediaUploadProps {
+  onMediaChange: (media: Record<string, any>) => void;
   media: IMedia;
 }
 
@@ -171,6 +213,18 @@ const RentCoveredSpace = () => {
         longitude: 0,
       },
       isCornerProperty: false,
+
+      
+      
+      // propertyType: '',
+      // propertySubType: '',
+      // propertyStatus: '',
+      // propertyAge: '',
+      // propertyFurnishing: '',
+      // propertyFacing: '',
+      // propertyFloor: '',
+      // totalFloors: '',
+      // propertyDescription: ''
     },
     spaceDetails: {
       totalArea: 0,
@@ -188,15 +242,16 @@ const RentCoveredSpace = () => {
       noOfOpenSides: '',
     },
     propertyDetails: {
-      area: {
+      area:{
         totalArea: 0,
         builtUpArea: 0,
         carpetArea: 0,
       },
-      floor: {
+      floor:{
         floorNumber: 0,
         totalFloors: 0,
       },
+      // propertyCondition: '',
       facingDirection: '',
       furnishingStatus: '',
       propertyAmenities: [],
@@ -204,10 +259,19 @@ const RentCoveredSpace = () => {
       electricitySupply: {
         powerLoad: 0,
         backup: false,
-      },
+      },  
       waterAvailability: '',
       propertyAge: 0,
       propertyCondition: '',
+      // propertySize: {
+      //   area: 0,
+      //   unit: ''
+      // },
+      // parking: {
+      //   type: '',
+      //   count: 0
+      // },
+      // amenities: []
     },
     rentalTerms: {
       rentDetails: {
@@ -241,11 +305,11 @@ const RentCoveredSpace = () => {
         },
       },
       brokerage: {
-        required: '',
+        required: 'no',
         amount: 0,
       },
       availability: {
-        type: '',
+        type: 'immediate',
         date: '',
       },
     },
@@ -257,6 +321,8 @@ const RentCoveredSpace = () => {
       name: '',
       email: '',
       phone: '',
+      preferredContactMethod: '',
+      responseTime: '',
       alternatePhone: '',
       bestTimeToContact: '',
     },
@@ -269,91 +335,81 @@ const RentCoveredSpace = () => {
         lifts: [],
         emergencyExits: [],
       },
-      videoTour: '',
+      videoTour: null,
       documents: [],
     },
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const navigate = useNavigate();
 
-  // Handler functions
-  const handlePropertyNameChange = (name: string): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        title: name
-      }
-    }));
-  };
+  // const handlePropertyNameChange = (name: string) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       propertyName: name
+  //     }
+  //   }));
+  // };
 
-  const handleSpaceTypeChange = (types: string[]): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        spaceType: types
-      }
-    }));
-  };
+  // const handleSpaceTypeChange = (types: string[]) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       spaceType: types
+  //     }
+  //   }));
+  // };
 
-  const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        address: address
-      }
-    }));
-  };
+  // const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string }) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       address
+  //     }
+  //   }));
+  // };
 
-  const handleLandmarkChange = (landmark: string): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        landmark: landmark
-      }
-    }));
-  };
+  // const handleLandmarkChange = (landmark: string) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       landmark
+  //     }
+  //   }));
+  // };
 
-  const handleLatitudeChange = (lat: string): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        location: {
-          ...prev.basicInformation.location,
-          latitude: parseFloat(lat) || 0
-        }
-      }
-    }));
-  };
+  // const handleLatitudeChange = (lat: string) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       latitude: lat
+  //     }
+  //   }));
+  // };
 
-  const handleLongitudeChange = (lng: string): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        location: {
-          ...prev.basicInformation.location,
-          longitude: parseFloat(lng) || 0
-        }
-      }
-    }));
-  };
+  // const handleLongitudeChange = (lng: string) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       longitude: lng
+  //     }
+  //   }));
+  // };
 
-  const handleCornerPropertyChange = (isCorner: boolean): void => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        isCornerProperty: isCorner
-      }
-    }));
-  };
+  // // const handleCornerPropertyChange = (isCorner) => setFormData(prev => ({
+  // //   ...prev,
+  // //   basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
+  // // }));
+  // // };
 
-  const handleSpaceDetailsChange = (details: Record<string, any>): void => {
+  const handleSpaceDetailsChange = (details: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
       spaceDetails: {
@@ -363,7 +419,7 @@ const RentCoveredSpace = () => {
     }));
   };
 
-  const handlePropertyDetailsChange = (details: Record<string, any>): void => {
+  const handlePropertyDetailsChange = (details: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
       propertyDetails: {
@@ -373,265 +429,347 @@ const RentCoveredSpace = () => {
     }));
   };
 
-  const handleRentChange = (rent: Record<string, any>): void => {
-    setFormData(prev => ({
-      ...prev,
-      rentalTerms: {
-        ...prev.rentalTerms,
-        rentDetails: {
-          ...prev.rentalTerms.rentDetails,
-          expectedRent: rent.expectedRent || 0,
-          isNegotiable: rent.isNegotiable || false,
-          rentType: rent.rentType || ''
-        }
-      }
-    }));
-  };
+  // const handleRentChange = (rent: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     rentalTerms: {
+  //       ...prev.rentalTerms,
+  //       rentDetails: rent
+  //     }
+  //   }));
+  // };
 
-  const handleMaintenanceAmountChange = (maintenance: Record<string, any>): void => {
-    setFormData(prev => ({
-      ...prev,
-      rentalTerms: {
-        ...prev.rentalTerms,
-        maintenanceAmount: {
-          amount: maintenance.amount || 0,
-          frequency: maintenance.frequency || ''
-        }
-      }
-    }));
-  };
+  // const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     rentalTerms: {
+  //       ...prev.rentalTerms,
+  //       maintenanceAmount: maintenance
+  //     }
+  //   }));
+  // };
 
-  const handleSecurityDepositChange = (deposit: Record<string, any>): void => {
-    setFormData(prev => ({
-      ...prev,
-      rentalTerms: {
-        ...prev.rentalTerms,
-        securityDeposit: {
-          amount: deposit.amount || 0
-        }
-      }
-    }));
-  };
+  // const handleSecurityDepositChange = (deposit: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     rentalTerms: {
+  //       ...prev.rentalTerms,
+  //       securityDeposit: deposit
+  //     }
+  //   }));
+  // };
 
-  const handleOtherChargesChange = (charges: Record<string, any>): void => {
-    setFormData(prev => ({
-      ...prev,
-      rentalTerms: {
-        ...prev.rentalTerms,
-        otherCharges: {
-          water: {
-            amount: charges.water?.amount || 0,
-            type: charges.water?.type || ''
-          },
-          electricity: {
-            amount: charges.electricity?.amount || 0,
-            type: charges.electricity?.type || ''
-          },
-          gas: {
-            amount: charges.gas?.amount || 0,
-            type: charges.gas?.type || ''
-          },
-          others: {
-            amount: charges.others?.amount || 0,
-            type: charges.others?.type || ''
-          }
-        }
-      }
-    }));
-  };
+  // const handleOtherChargesChange = (charges: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     rentalTerms: {
+  //       ...prev.rentalTerms,
+  //       otherCharges: charges
+  //     }
+  //   }));
+  // };
 
-  const handleBrokerageChange = (brokerage: Record<string, any>): void => {
-    setFormData(prev => ({
-      ...prev,
-      rentalTerms: {
-        ...prev.rentalTerms,
-        brokerage: {
-          required: brokerage.required || '',
-          amount: brokerage.amount || 0
-        }
-      }
-    }));
-  };
+  // const handleBrokerageChange = (brokerage: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     rentalTerms: {
+  //       ...prev.rentalTerms,
+  //       brokerage: brokerage
+  //     }
+  //   }));
+  // };
 
-  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }): void => {
-    // Get today's date in ISO format for immediate availability
-    const today = new Date().toISOString().split('T')[0];
-    
-    setFormData(prev => ({
-      ...prev,
-      rentalTerms: {
-        ...prev.rentalTerms,
-        availability: {
-          type: availability.type || '',
-          date: availability.type === 'immediate' ? today : (availability.date || '')
-        }
-      },
-      availability: {
-        availableImmediately: availability.type === 'immediate',
-        availableFrom: availability.type === 'immediate' ? today : (availability.date || '')
-      }
-    }));
-  };
+  // const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string }) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     rentalTerms: {
+  //       ...prev.rentalTerms,
+  //       availability
+  //     }
+  //   }));
+  // };
 
-  const handleContactChange = (contact: Record<string, any>): void => {
-    setFormData(prev => ({
-      ...prev,
-      contactInformation: {
-        name: contact.name || '',
-        email: contact.email || '',
-        phone: contact.phone || '',
-        alternatePhone: contact.alternatePhone || '',
-        bestTimeToContact: contact.bestTimeToContact || ''
-      }
-    }));
-  };
+  // const handleContactChange = (contact: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     contactInformation: contact
+  //   }));
+  // };
 
-  const handleMediaChange = (media: { images: { category: string; files: { url: string; file: File; }[]; }[]; video?: { url: string; file: File; } | undefined; documents: { type: string; file: File; }[]; }): void => {
-    // Transform the media data to match the backend structure
-    const transformedMedia: IMedia = {
-      photos: {
-        exterior: [] as string[],
-        interior: [] as string[],
-        floorPlan: [] as string[],
-        washrooms: [] as string[],
-        lifts: [] as string[],
-        emergencyExits: [] as string[]
-      },
-      videoTour: media.video?.url || '',
-      documents: media.documents.map(doc => doc.file.name)
-    };
 
-    // Map the images to their respective categories
-    media.images.forEach(category => {
-      const urls = category.files.map(file => file.url);
-      switch (category.category) {
-        case 'exterior':
-          transformedMedia.photos.exterior = urls;
-          break;
-        case 'interior':
-          transformedMedia.photos.interior = urls;
-          break;
-        case 'floorPlan':
-          transformedMedia.photos.floorPlan = urls;
-          break;
-        case 'washrooms':
-          transformedMedia.photos.washrooms = urls;
-          break;
-        case 'lifts':
-          transformedMedia.photos.lifts = urls;
-          break;
-        case 'emergencyExits':
-          transformedMedia.photos.emergencyExits = urls;
-          break;
-        default:
-          break;
+  const handleChange = (field: string, value: any) => {
+    setFormData(prev => {
+      const fields = field.split('.');
+      const lastField = fields.pop() || '';
+  
+      const newData = { ...prev };
+      let current: any = newData;
+  
+      for (const field of fields) {
+        current = { ...current[field] };
       }
+  
+      current[lastField] = value;
+      return newData;
     });
-
-    setFormData(prev => ({
-      ...prev,
-      media: transformedMedia
-    }));
   };
+
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // const handleMediaChange = (media: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     media: {
+  //       photos: media.images,
+  //       video: media.video,
+  //       documents: media.documents,
+  //       videoTour: media.videoTour
+  //     }
+  //   }));
+  // };
 
   const formSections = [
     {
       title: 'Basic Information',
       content: (
         <>
-          <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={handlePropertyNameChange} />
-          <CoveredOpenSpaceType onSpaceTypeChange={handleSpaceTypeChange} />
-          <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-          <Landmark onLandmarkChange={handleLandmarkChange} />
-          <MapCoordinates 
-            latitude={formData.basicInformation.location.latitude.toString()} 
-            longitude={formData.basicInformation.location.longitude.toString()} 
-            onLatitudeChange={handleLatitudeChange} 
-            onLongitudeChange={handleLongitudeChange} 
-          />
-          <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
+          <PropertyName propertyName={formData.basicInformation.title}
+                onPropertyNameChange={(name) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: { ...prev.basicInformation, title: name }
+                }))}/>
+          <CoveredOpenSpaceType onSpaceTypeChange={(types) => setFormData(prev => ({
+                ...prev,
+                basicInformation: { ...prev.basicInformation, spaceType: types }
+              }))} />
+          <CommercialPropertyAddress
+              onAddressChange={(address) => setFormData(prev => ({
+                ...prev,
+                basicInformation: { ...prev.basicInformation, address }
+              }))}
+            />
+            <Landmark
+                onLandmarkChange={(landmark) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: { ...prev.basicInformation, landmark }
+                }))}
+                onLocationSelect={(location) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    location: {
+                      latitude: parseFloat(location.latitude),
+                      longitude: parseFloat(location.longitude)
+                    }
+                  }
+                }))}
+              />
+          <CornerProperty
+                onCornerPropertyChange={(isCorner) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
+                }))}
+              />
         </>
       )
     },
     {
       title: 'Property Details',
-      icon: <Building2 className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
-            <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
-          </div>
-        </div>
+      content: (
+        <>
+          <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
+          <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
+        </>
       )
     },
     {
       title: 'Rental Terms',
       content: (
         <>
-          <Rent onRentChange={handleRentChange} />
-          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-          )}
-          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
-          <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
-          <Brokerage onBrokerageChange={handleBrokerageChange} />
+          
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center gap-2 mb-6">
+            <DollarSign className="text-black" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Rental Terms</h3>
+          </div>
+          <div className="space-y-6">
+            <Rent
+              onRentChange={(rent) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  rentDetails: {
+                    expectedRent: rent.expectedRent,
+                    isNegotiable: rent.isNegotiable,
+                    rentType: rent.rentType
+                  }
+                }
+              }))}
+            />
+            {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+              <MaintenanceAmount
+                onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    maintenanceAmount: {
+                      amount: maintenance.amount,
+                      frequency: maintenance.frequency
+                    }
+                  }
+                }))}
+              />
+            )}
+            <SecurityDeposit
+              onSecurityDepositChange={(deposit) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  securityDeposit: {
+                    amount: deposit.amount
+                  }
+                }
+              }))}
+            />
+            <OtherCharges
+              onOtherChargesChange={(charges) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  otherCharges: {
+                    water: { type: charges.water.type, amount: charges.water.amount },
+                    electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                    gas: { type: charges.gas.type, amount: charges.gas.amount },
+                    others: { type: charges.others.type, amount: charges.others.amount }
+                  }
+                }
+              }))}
+            />
+            <Brokerage
+              onBrokerageChange={(brokerage) => {
+                setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    brokerage: {
+                      required: brokerage.required,
+                      amount: brokerage.amount
+                    }
+                  }
+                }));
+              }}
+              />
+{/* 
+<Brokerage
+              onBrokerageChange={(brokerage) => {
+                handleChange('rentalTerms.brokerage.required', brokerage.required);
+                handleChange('rentalTerms.brokerage.amount', brokerage.amount);
+              }}
+            /> */}
+
+          </div>
+        </div>
         </>
       )
     },
     {
       title: 'Availability',
-      icon: <Calendar className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
+      icon: <Calendar className="w-6 h-6" />,
+      content: (
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center gap-2 mb-6">
+            <Calendar className="text-black" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Availability</h3>
           </div>
-          <AvailabilityDate onAvailabilityChange={handleAvailabilityChange} />
+          <div className="space-y-6">
+            <AvailabilityDate
+              onAvailabilityChange={(availability) => {
+                handleChange('rentalTerms.availability.type', availability.type);
+
+                const dateToStore = availability.type === 'immediate'
+                  ? new Date().toISOString()
+                  : availability.date || '';
+
+                handleChange('rentalTerms.availability.date', dateToStore);
+
+                handleChange('availability.availableFrom', dateToStore);
+                handleChange('availability.availableImmediately', availability.type === 'immediate');
+              }}
+            />
+          </div>
         </div>
       )
     },
     {
       title: 'Contact Information',
-      icon: <UserCircle className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
+      icon: <User className="w-6 h-6" />,
+      content: (
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center gap-2 mb-6">
+            <UserCircle className="text-black" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Contact Details</h3>
           </div>
-          <CommercialContactDetails onContactChange={handleContactChange} />
+          <div className="space-y-6">
+            <CommercialContactDetails
+              onContactChange={(contact) => handleChange('contactInformation', contact)}
+            />
+          </div>
         </div>
       )
     },
     {
       title: 'Property Media',
-      icon: <ImageIcon className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
+      icon: <Image className="w-6 h-6" />,
+      content: (
+        <div className="bg-white p-6 rounded-2xl shadow-lg">
+          <div className="flex items-center gap-2 mb-6">
+            <ImageIcon className="text-black" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Property Media</h3>
           </div>
-          <CommercialMediaUpload onMediaChange={handleMediaChange} />
+          <div className="space-y-6">
+            <CommercialMediaUpload
+              onMediaChange={(media) => {
+                const photos: Record<string, File[]> = {};
+                media.images.forEach(({ category, files }) => {
+                  photos[category] = files.map(f => f.file);
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    ...prev.media,
+                    photos: {
+                      ...prev.media.photos,
+                      ...photos
+                    },
+                    videoTour: media.video?.file || null,
+                    documents: media.documents.map(d => d.file)
+                  }
+                }));
+              }}
+            />
+          </div>
         </div>
       )
     }
   ];
 
   const handleNext = () => {
-    if (validateCurrentStep()) {
-      if (currentStep < formSections.length - 1) {
-        setCurrentStep(currentStep + 1);
-      }
-    } else {
-      toast.error('Please fill in all required fields');
+    // if (validateCurrentStep()) {
+    if (currentStep < formSections.length - 1) {
+      setCurrentStep(currentStep + 1);
     }
+    // } else {
+    //   toast.error('Please fill in all required fields');
+    // }
   };
 
   const handlePrevious = () => {
@@ -640,108 +778,125 @@ const RentCoveredSpace = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    // Add API submission logic here
-    console.log('Form Data:', formData);
-    toast.success('Form submitted successfully!');
-    setIsSubmitting(false);
+
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+        console.log(formData)
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+
+        console.log(transformedData);
+        const response = await axios.post('/api/commercial-rent-warehouses', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        console.log(response.data)
+
+        if (response.data.success) {
+          toast.success('Commercial warehouse listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create commercial shop listing. Please try again.');
+    }
+    // console.log(formData);
   };
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-white">
-      <style>{globalStyles}</style>
-
-      {/* Progress Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-2">
-              {formSections.map((section, index) => (
+    <form onSubmit={handleSubmit} className="space-y-12">
+      <div className="space-y-12">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            {formSections.map((s, i) => (
+              <div
+                key={i}
+                className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
+                onClick={() => i < currentStep && setCurrentStep(i)}
+                style={{ cursor: i < currentStep ? "pointer" : "default" }}
+              >
                 <div
-                  key={index}
-                  className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(index)}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
+                    i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
+                  }`}
                 >
-                  <div className="flex flex-col items-center group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
-                      ? 'bg-black text-white'
-                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}>
-                      {section.icon}
-                    </div>
-                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
-                      ? 'text-black'
-                      : 'text-gray-500 group-hover:text-gray-700'
-                      }`}>
-                      {section.title}
-                    </span>
-                  </div>
-                  {index < formSections.length - 1 && (
-                    <div className="flex items-center mx-1">
-                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-                        }`} />
-                    </div>
-                  )}
+                  {i + 1}
                 </div>
-              ))}
-            </div>
+                <span className="text-xs font-medium">{s.title}</span>
+              </div>
+            ))}
+          </div>
+          <div className="w-full bg-gray-200 h-1 rounded-full">
+            <div
+              className="bg-black h-1 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
+            ></div>
           </div>
         </div>
-      </div>
 
-      {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
+          <h2 className="text-2xl font-bold text-black">{formSections[currentStep].title}</h2>
         </div>
 
-        {formSections[currentStep].content}
+        <div className="space-y-8">{formSections[currentStep].content}</div>
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+      <div className="mt-8 flex justify-between items-center">
+        {currentStep > 0 && (
           <button
+            type="button"
             onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-black hover:bg-black hover:text-white'
-              }`}
+            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
           >
-            <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
+        )}
+        {currentStep < formSections.length - 1 ? (
           <button
-            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            disabled={isSubmitting}
+            type="button"
+            onClick={handleNext}
+            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
           >
-            {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
+            Next
           </button>
-        </div>
+        ) : (
+          <button
+            type="submit"
+            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+          >
+            List Property
+          </button>
+        )}
       </div>
-    </div>
+    </form>
   );
 };
 

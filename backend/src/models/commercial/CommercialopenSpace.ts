@@ -127,7 +127,7 @@ interface IFloor {
   totalFloors: number;
 }
 
-interface ICommercialWarehouse extends Document {
+interface ICommercialOpenSpace extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   warehouseDetails: {
@@ -170,7 +170,7 @@ interface ICommercialWarehouse extends Document {
 }
 
 // Schema
-const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
+const CommercialOpenSpaceSchema = new Schema<ICommercialOpenSpace>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
@@ -219,34 +219,6 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
     propertyAge: { type: Number },
     propertyCondition: { type: String }
     },
-// ,
-//   pricingDetails: {
-//     propertyPrice: { type: Number, required: true },
-//     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
-//     area: { type: Number, required: true },
-//     totalprice: { type: Number, required: true },
-//     pricePerSqft: { type: Number, required: true }
-//   },
-//   registration: {
-//     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-//     registrationAmount: { type: Number },
-//     stampDutyAmount: { type: Number }
-//   },
-//   brokerage: {
-//     required: { type: String, enum: ['yes', 'no'], required: true },
-//     amount: { type: Number }
-//   },
-//   availability: {
-//     availableFrom: { type: String },
-//     availableImmediately: { type: Boolean, required: true },
-//     leaseDuration: { type: String, required: true },
-//     noticePeriod: { type: String, required: true },
-//     petsAllowed: { type: Boolean, default: false },
-//     operatingHours: {
-//       restricted: { type: Boolean, required: true },
-//       restrictions: { type: String }
-//     }
-//   },
   rentalTerms: {
     rentDetails: {
         expectedRent: { type: Number, required: true },
@@ -316,13 +288,13 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
 });
 
 // Indexes
-CommercialWarehouseSchema.index({ propertyId: 1 }, { unique: true });
-CommercialWarehouseSchema.index({ 'basicInformation.city': 1 });
-CommercialWarehouseSchema.index({ 'basicInformation.state': 1 });
-CommercialWarehouseSchema.index({ 'pricingDetails.propertyPrice': 1 });
-CommercialWarehouseSchema.index({ 'propertyDetails.area.totalArea': 1 });
-CommercialWarehouseSchema.index({ 'metadata.createdAt': -1 });
+CommercialOpenSpaceSchema.index({ propertyId: 1 }, { unique: true });
+CommercialOpenSpaceSchema.index({ 'basicInformation.city': 1 });
+CommercialOpenSpaceSchema.index({ 'basicInformation.state': 1 });
+CommercialOpenSpaceSchema.index({ 'pricingDetails.propertyPrice': 1 });
+CommercialOpenSpaceSchema.index({ 'propertyDetails.area.totalArea': 1 });
+CommercialOpenSpaceSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialWarehouse, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialWarehouse>('CommercialSellWarehouse', CommercialWarehouseSchema); 
+export { ICommercialOpenSpace, IBasicInformation, IArea, IAvailability, IContactInformation, IMedia, IMetadata };
+export default model<ICommercialOpenSpace>('CommercialOpenSpace', CommercialOpenSpaceSchema); 
