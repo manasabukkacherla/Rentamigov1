@@ -51,15 +51,16 @@ import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
-import commercialShedRoutes from './routes/commercial/commercialShedRoutes';
-import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRoutes';
-import commercialPlotRoutes from './routes/commercial/commericalPlotRoutes';
-import commercialrentcultureRoutes from './routes/commercial/commercialRentAgricultureRoutes';
-import commercialRentOthersRoutes from './routes/commercial/commercialRentOthersRoutes';
+import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
+import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
+import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
+import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
+import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouse";
 import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
-
+import commercialSellAgricultureRoutes from './routes/commercial/commercialSellAgricultureRoutes';
+import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthersRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -183,6 +184,8 @@ app.use('/api/commercial/others', commercialRentOthersRoutes);
 app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
+app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
+app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");

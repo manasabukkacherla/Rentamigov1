@@ -4,6 +4,7 @@ import NextButton from './NextButton';
 
 interface ShowroomTypeProps {
   onTypeChange?: (type: string) => void;
+  onShowroomTypeChange?: (type: string[]) => void;
   onNext?: () => void;
 }
 
@@ -16,12 +17,13 @@ const showroomTypes = [
   'Other'
 ];
 
-const ShowroomType = ({ onTypeChange, onNext = () => {} }: ShowroomTypeProps) => {
+const ShowroomType = ({ onTypeChange, onShowroomTypeChange, onNext = () => { } }: ShowroomTypeProps) => {
   const [selectedType, setSelectedType] = useState('');
 
   const handleTypeChange = (type: string) => {
     setSelectedType(type);
     onTypeChange?.(type);
+    onShowroomTypeChange?.([type]);
   };
 
   return (

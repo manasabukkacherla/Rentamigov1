@@ -71,7 +71,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
   }, []);
 
   // Function to save data at each step
- 
+
 
   const steps = [
     {
@@ -212,7 +212,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
   ];
 
   const handleNext = async () => {
-    await saveStepData();
+   
     setStep((prev) => prev + 1);
   };
 
@@ -222,16 +222,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
       {steps[step].component}
 
       {/* Success & Error Messages */}
-      {successMessage && (
-        <div className="p-4 bg-green-500 text-white rounded-lg text-center">
-          {successMessage}
-        </div>
-      )}
-      {errorMessage && (
-        <div className="p-4 bg-red-500 text-white rounded-lg text-center">
-          {errorMessage}
-        </div>
-      )}
+      
 
       <div className="sticky bottom-0 bg-black/80 backdrop-blur-sm p-4 -mx-4 sm:-mx-6 lg:-mx-8">
         <div className="max-w-7xl mx-auto flex justify-between gap-4">
