@@ -209,7 +209,7 @@ const RentShopMain = () => {
       rentDetails: {
         expectedRent: 0,
         isNegotiable: false,
-        rentType: ''
+        rentType: 'inclusive'
       },
       securityDeposit: {
         amount: 0
@@ -240,7 +240,8 @@ const RentShopMain = () => {
         required: 'no'
       },
       availability: {
-        type: ''
+        type: 'immediate',
+        date: ''
       }
     },
     contactInformation: {
@@ -369,25 +370,27 @@ const RentShopMain = () => {
               }
             }))}
           />
-          <SecurityDeposit
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+              <MaintenanceAmount
+                onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    maintenanceAmount: {
+                      amount: maintenance.amount,
+                      frequency: maintenance.frequency
+                    }
+                  }
+                }))}
+              />
+            )}
+            <SecurityDeposit
             onSecurityDepositChange={(deposit) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
                 ...prev.rentalTerms,
                 securityDeposit: {
                   amount: deposit.amount
-                }
-              }
-            }))}
-          />
-          <MaintenanceAmount
-            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-              ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                maintenanceAmount: {
-                  amount: maintenance.amount,
-                  frequency: maintenance.frequency
                 }
               }
             }))}
@@ -516,62 +519,61 @@ const RentShopMain = () => {
     setIsSubmitting(true);
     console.log(formData)
     
-    // try {
-    //   const user = sessionStorage.getItem('user');
-    //   if (user) {
-    //     const author = JSON.parse(user).id;
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
 
-    //     // Convert media files to base64
-    //     const convertFileToBase64 = (file: File): Promise<string> => {
-    //       return new Promise((resolve, reject) => {
-    //         const reader = new FileReader();
-    //         reader.readAsDataURL(file);
-    //         reader.onload = () => resolve(reader.result as string);
-    //         reader.onerror = error => reject(error);
-    //       });
-    //     };
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
 
-    //     const convertedMedia = {
-    //       photos: {
-    //         exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-    //         interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-    //         floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-    //         washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-    //         lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-    //         emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-    //       },
-    //       videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
-    //       documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-    //     };
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
 
-    //     const transformedData = {
-    //       ...formData,
-    //       media: convertedMedia,
-    //       metadata: {
-    //         createdBy: author,
-    //         createdAt: new Date()
-    //       }
-    //     };
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
 
-    //     const response = await axios.post('/api/commercial-shops', transformedData, {
-    //       headers: {
-    //         'Content-Type': 'application/json'
-    //       }
-    //     });
+        const response = await axios.post('/api/commercial-rent-shops', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-    //     if (response.data.success) {
-    //       toast.success('Commercial shop listing created successfully!');
-    //       navigate('/dashboard');
-    //     }
-    //   } else {
-    //     navigate('/login');
-    //   }
-    // } catch (error) {
-    //   console.error('Error submitting form:', error);
-    //   toast.error('Failed to create commercial shop listing. Please try again.');
-    // } finally {
-    //   setIsSubmitting(false);
-    // }
+        if (response.data.success) {
+          toast.success('Commercial rent shop listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create commercial rent shop listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

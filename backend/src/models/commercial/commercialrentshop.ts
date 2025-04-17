@@ -17,18 +17,6 @@ interface IBasicInformation {
   isCornerProperty: boolean;
 }
 
-interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
-  leaseDuration: string;
-  noticePeriod: string;
-  petsAllowed: boolean;
-  operatingHours: {
-    restricted: boolean;
-    restrictions: string;
-  };
-}
-
 interface IContactInformation {
   name: string;
   email: string;
@@ -57,42 +45,42 @@ interface IMetadata {
 
 interface IRentalTerms {
     rentDetails: {
-        expectedRent: number;
-        isNegotiable: boolean;
-        rentType: string;
+      expectedRent: number;
+      isNegotiable: boolean;
+      rentType: string;
     }
     securityDeposit: {
-        amount: number;
+      amount: number;
     }
-    maintenanceAmount: {
-        amount: number;
-        frequency: string;
+    maintenanceAmount?: {
+      amount?: number;
+      frequency?: string;
     }
     otherCharges: {
         water: {
-            amount?: number;
-            type: string;
+          amount?: number;
+          type: string;
         }
         electricity: {
-            amount?: number;
-            type: string;
+          amount?: number;
+          type: string;
         }
         gas: {
-            amount?: number;
-            type: string;
+          amount?: number;
+          type: string;
         }
         others: {
-            amount?: number;
-            type: string;
+          amount?: number;
+          type: string;
         }
     }
     brokerage: {
-        required: string;
-        amount?: number;
+      required: string;
+      amount?: number;
     }
     availability: {
-        type: string;
-        date?: string;
+      type: string;
+      date?: string;
     }
 }
 
@@ -153,8 +141,8 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
         amount: { type: Number, required: true },
     },
     maintenanceAmount: {
-        amount: { type: Number, required: true },
-        frequency: { type: String, required: true },
+        amount: { type: Number },
+        frequency: { type: String },
     },
     otherCharges: {
         water: {
@@ -217,5 +205,5 @@ CommercialrentShopSchema.index({ 'basicInformation.state': 1 });
 CommercialrentShopSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialrentShop, IBasicInformation, IAvailability, IContactInformation, IMedia, IMetadata };
+// export { ICommercialrentShop, IBasicInformation, IAvailability, IContactInformation, IMedia, IMetadata };
 export default model<ICommercialrentShop>('CommercialrentShop', CommercialrentShopSchema);

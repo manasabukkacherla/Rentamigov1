@@ -63,7 +63,7 @@ const MaintenanceAmount = ({ onMaintenanceAmountChange }: MaintenanceAmountProps
                         : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 [forced-colors:active]:bg-[Canvas] [forced-colors:active]:border-[ButtonText] [forced-colors:active]:text-[CanvasText]"
                     }`}
                   >
-                    <span className={`capitalize ${maintenance.frequency === freq? "text-white": ""}`}>{freq}</span>
+                    <span className="capitalize">{freq}</span>
                   </button>
                 ))}
               </div>
