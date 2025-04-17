@@ -1,39 +1,22 @@
 import express from 'express';
-import upload, { convertToBase64 } from '../../middleware/fileUpload';
-import {
-  createCommercialShop,
-  // getAllCommercialShops,
-  // getCommercialShopById,
-  // updateCommercialShop,
-  // deleteCommercialShop,
-  // changeListingStatus
-} from '../../controllers/commercial/commercialShopController';
+import { createCommercialShop } from '../../controllers/commercial/commercialShopController';
+import fileUpload from '../../middleware/fileUpload';
+import { authenticateUser } from '../../middleware/auth';
 
 const router = express.Router();
 
-// Configure multer for different file types
-const uploadFields = upload.fields([
-  { name: 'photos.exterior', maxCount: 5 },
-  { name: 'photos.interior', maxCount: 5 },
-  { name: 'photos.displayArea', maxCount: 3 },
-  { name: 'photos.storageArea', maxCount: 2 },
+const uploadFields = [
+  { name: 'photos[exterior]', maxCount: 10 },
+  { name: 'photos[interior]', maxCount: 10 },
+  { name: 'photos[floorPlan]', maxCount: 5 },
+  { name: 'photos[washrooms]', maxCount: 5 },
+  { name: 'photos[lifts]', maxCount: 5 },
+  { name: 'photos[emergencyExits]', maxCount: 5 },
   { name: 'videoTour', maxCount: 1 },
-  { name: 'documents.propertyTitle', maxCount: 1 },
-  { name: 'documents.taxReceipts', maxCount: 1 },
-  { name: 'documents.buildingApproval', maxCount: 1 },
-  { name: 'documents.nocs', maxCount: 5 },
-  { name: 'documents.otherDocuments', maxCount: 5 }
-]);
+  { name: 'documents', maxCount: 5 }
+];
 
 // Create a new commercial shop listing
-router.post(
-  '/',
-  // auth,
-  // uploadFields,
-  // convertToBase64,
-  createCommercialShop
-);
-
-
+router.post('/create', authenticateUser, fileUpload.fields(uploadFields), createCommercialShop);
 
 export default router; 
