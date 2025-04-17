@@ -2,14 +2,26 @@ import { useState } from 'react';
 import { ArrowRight, Ruler, Store, Lightbulb, Wind, Building2, Warehouse } from 'lucide-react';
 
 interface ShowroomDetailsProps {
-  onDetailsChange?: (details: Record<string, any>) => void;
+  onDetailsChange: (details: {
+    totalSpace: number | null;
+    frontageWidth: number | null;
+    ceilingHeight: number | null;
+    glassFrontage: boolean;
+    lightingType: string;
+    acInstalled: boolean;
+    nearbyCompetitors: {
+      present: boolean;
+      brandNames: string;
+    };
+    displayRacks: boolean;
+  }) => void;
 }
 
 const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
   const [details, setDetails] = useState({
-    totalSpace: '',
-    frontageWidth: '',
-    ceilingHeight: '',
+    totalSpace: null as number | null,
+    frontageWidth: null as number | null,
+    ceilingHeight: null as number | null,
     glassFrontage: false,
     lightingType: '',
     acInstalled: false,
@@ -20,15 +32,29 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
     displayRacks: false
   });
 
-  const handleChange = (field: string, value: any) => {
-    const updatedDetails = { ...details, [field]: value };
-    setDetails(updatedDetails);
-    onDetailsChange?.(updatedDetails);
+  const handleChange = (field: string, value: string | boolean | { present: boolean; brandNames: string }) => {
+    setDetails(prev => {
+      const newDetails = {
+        ...prev,
+        [field]: value
+      };
+      // Call onDetailsChange with the updated state
+      onDetailsChange(newDetails);
+      return newDetails;
+    });
   };
 
-  const handleCompetitorChange = (field: string, value: any) => {
-    const updatedCompetitors = { ...details.nearbyCompetitors, [field]: value };
-    handleChange('nearbyCompetitors', updatedCompetitors);
+  const handleNumericChange = (field: string, value: string) => {
+    const numericValue = value === '' ? null : Number(value);
+    setDetails(prev => {
+      const newDetails = {
+        ...prev,
+        [field]: numericValue
+      };
+      // Call onDetailsChange with the updated state
+      onDetailsChange(newDetails);
+      return newDetails;
+    });
   };
 
   return (
@@ -47,10 +73,10 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
               </label>
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
                   id="totalSpace"
-                  value={details.totalSpace}
-                  onChange={(e) => handleChange('totalSpace', e.target.value)}
+                  value={details.totalSpace ?? ''}
+                  onChange={(e) => handleNumericChange('totalSpace', e.target.value)}
                   placeholder="Enter total space"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -63,10 +89,10 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
               </label>
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
                   id="frontageWidth"
-                  value={details.frontageWidth}
-                  onChange={(e) => handleChange('frontageWidth', e.target.value)}
+                  value={details.frontageWidth ?? ''}
+                  onChange={(e) => handleNumericChange('frontageWidth', e.target.value)}
                   placeholder="Enter frontage width"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -79,10 +105,10 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
               </label>
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
                   id="ceilingHeight"
-                  value={details.ceilingHeight}
-                  onChange={(e) => handleChange('ceilingHeight', e.target.value)}
+                  value={details.ceilingHeight ?? ''}
+                  onChange={(e) => handleNumericChange('ceilingHeight', e.target.value)}
                   placeholder="Enter ceiling height"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
@@ -166,7 +192,7 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.nearbyCompetitors.present}
-                    onChange={() => handleCompetitorChange('present', true)}
+                    onChange={() => handleChange('nearbyCompetitors', { ...details.nearbyCompetitors, present: true })}
                     className="w-5 h-5 text-black border-gray-300 focus:ring-black"
                   />
                   <span className="text-black">Yes</span>
@@ -175,7 +201,7 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.nearbyCompetitors.present}
-                    onChange={() => handleCompetitorChange('present', false)}
+                    onChange={() => handleChange('nearbyCompetitors', { ...details.nearbyCompetitors, present: false })}
                     className="w-5 h-5 text-black border-gray-300 focus:ring-black"
                   />
                   <span className="text-black">No</span>
@@ -193,7 +219,7 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                     type="text"
                     id="brandNames"
                     value={details.nearbyCompetitors.brandNames}
-                    onChange={(e) => handleCompetitorChange('brandNames', e.target.value)}
+                    onChange={(e) => handleChange('nearbyCompetitors', { ...details.nearbyCompetitors, brandNames: e.target.value })}
                     placeholder="Enter brand names"
                     className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                   />

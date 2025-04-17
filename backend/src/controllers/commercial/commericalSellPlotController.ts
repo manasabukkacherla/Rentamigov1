@@ -283,7 +283,7 @@ const transformPlotData = (formData: any) => {
 export const createPlot = async (req: Request, res: Response) => {
     try {
         const formData = req.body;
-        console.log('Received plot data:', JSON.stringify(formData, null, 2));
+        console.log('Received plot data:', formData);
 
         // Validate required fields
         if (!formData.basicInformation || !formData.basicInformation.propertyName) {
@@ -293,36 +293,11 @@ export const createPlot = async (req: Request, res: Response) => {
             });
         }
 
-        // Explicitly check for critical required fields in the request
-        const criticalFields = [
-            {
-                path: 'plotDetails.zoningType',
-                value: formData.plotDetails?.zoningType || formData.plotDetails?.landUseZoning
-            },
-            {
-                path: 'plotDetails.totalArea',
-                value: formData.plotDetails?.totalArea || formData.plotDetails?.plotArea
-            },
-            {
-                path: 'registration.type',
-                value: formData.registration?.type || formData.registration?.chargesType
-            }
-        ];
-
-        // Log which fields might be missing for debugging
-        const missingFields = criticalFields.filter(field => !field.value);
-        if (missingFields.length > 0) {
-            console.warn("Warning: Missing critical fields in request:",
-                missingFields.map(f => `${f.path} is missing`).join(', '));
-        }
-
         // Transform frontend data to match backend schema
-        console.log("Transforming data to match schema...");
         const transformedData = transformPlotData(formData);
 
         // Generate property ID
         const propertyId = await generatePropertyId();
-        console.log("Generated property ID:", propertyId);
 
         // Create the complete plot data
         const plotData = {
@@ -330,27 +305,9 @@ export const createPlot = async (req: Request, res: Response) => {
             ...transformedData
         };
 
-        // Validate the complete data against our schema before trying to save
-        console.log("Pre-validating data...");
-        const validationPlot = new SellPlot(plotData);
-
-        try {
-            await validationPlot.validate();
-            console.log("Validation passed! Saving plot...");
-        } catch (validationError: any) {
-            console.error("Validation failed:", validationError);
-            return res.status(400).json({
-                success: false,
-                error: 'Validation failed',
-                details: validationError.errors,
-                message: validationError.message
-            });
-        }
-
         // Create and save the plot
         const newPlot = new SellPlot(plotData);
         const savedPlot = await newPlot.save();
-        console.log("Plot saved successfully with ID:", savedPlot._id);
 
         // Return populated plot data with user information
         const populatedPlot = await SellPlot.findById(savedPlot._id)
@@ -362,24 +319,12 @@ export const createPlot = async (req: Request, res: Response) => {
             message: 'Commercial plot listing created successfully',
             data: populatedPlot
         });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error creating plot:', error);
-
-        // Check if this is a MongoDB validation error
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({
-                success: false,
-                error: 'Validation failed',
-                details: error.errors,
-                message: error.message
-            });
-        }
-
-        // Handle other errors
         res.status(400).json({
             success: false,
             error: 'Failed to create plot',
-            message: error.message
+            message: (error as Error).message
         });
     }
 };

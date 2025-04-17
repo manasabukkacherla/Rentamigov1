@@ -90,7 +90,7 @@ const SellShowroomMain = () => {
           />
           <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, address })} />
           <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
-          
+
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
           />
@@ -176,22 +176,19 @@ const SellShowroomMain = () => {
             <div className="mt-6 flex items-center space-x-6">
               {steps.map((step, index) => (
                 <div key={index} className="flex items-center">
-                  <div 
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                      index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
-                    }`}
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
+                      }`}
                   >
                     {step.icon}
                   </div>
-                  <span className={`ml-3 text-sm font-medium ${
-                    index <= currentStep ? 'text-black' : 'text-black/70'
-                  }`}>
+                  <span className={`ml-3 text-sm font-medium ${index <= currentStep ? 'text-black' : 'text-black/70'
+                    }`}>
                     {step.title}
                   </span>
                   {index < steps.length - 1 && (
-                    <div className={`w-16 h-1 mx-3 ${
-                      index < currentStep ? 'bg-black' : 'bg-gray-200'
-                    }`} />
+                    <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                      }`} />
                   )}
                 </div>
               ))}
@@ -212,11 +209,10 @@ const SellShowroomMain = () => {
                 type="button"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`px-6 py-2.5 rounded-lg border transition-all duration-200 ${
-                  currentStep === 0
+                className={`px-6 py-2.5 rounded-lg border transition-all duration-200 ${currentStep === 0
                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                     : "border-black/20 text-black hover:bg-black hover:text-white"
-                }`}
+                  }`}
               >
                 Previous
               </button>
