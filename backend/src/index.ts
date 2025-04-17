@@ -51,10 +51,12 @@ import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
-import commercialShedRoutes from './routes/commercial/commercialShedRoutes';
-import commercialWarehouseRoutes from './routes/commercial/commercialWarehouseRoutes';
-import commercialPlotRoutes from './routes/commercial/commericalPlotRoutes';
-import commercialRentShowroomRoutes from './routes/commercial/commericalRentShowroom';
+import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
+import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
+import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
+import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
+import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
+import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouse";
 
 dotenv.config();
 
@@ -173,8 +175,11 @@ app.use("/api/commercial-showrooms", commercialShowroomRoutes);
 app.use('/api/commercial-sheds', commercialShedRoutes);
 app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
 app.use('/api/commercial-plots', commercialPlotRoutes);
-app.use('/api/commercial/rent/showroom', commercialRentShowroomRoutes);
 
+app.use('/api/commercial/plots', commercialPlotRoutes);
+app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
+app.use('/api/commercial/others', commercialRentOthersRoutes);
+app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "hjh");
   res.json({ message: "hjhjh" });
@@ -212,4 +217,12 @@ server.listen(PORT, () => {
     ACCOUNT_SID: process.env.ACCOUNT_SID ? "****" : undefined,
     AUTH_TOKEN: process.env.AUTH_TOKEN ? "****" : undefined,
   });
+}).on('error', (error: NodeJS.ErrnoException) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Port ${PORT} is already in use. Please use a different port or terminate the process using this port.`);
+    process.exit(1);
+  } else {
+    console.error('Server error:', error);
+    process.exit(1);
+  }
 });

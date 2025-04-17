@@ -75,7 +75,7 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                 <input
                   type="number"
                   id="totalSpace"
-                  value={details.totalSpace ?? ''}
+                  value={details.totalSpace?.toString() || ''}
                   onChange={(e) => handleNumericChange('totalSpace', e.target.value)}
                   placeholder="Enter total space"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -91,7 +91,7 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                 <input
                   type="number"
                   id="frontageWidth"
-                  value={details.frontageWidth ?? ''}
+                  value={details.frontageWidth?.toString() || ''}
                   onChange={(e) => handleNumericChange('frontageWidth', e.target.value)}
                   placeholder="Enter frontage width"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -107,7 +107,7 @@ const ShowroomDetails = ({ onDetailsChange }: ShowroomDetailsProps) => {
                 <input
                   type="number"
                   id="ceilingHeight"
-                  value={details.ceilingHeight ?? ''}
+                  value={details.ceilingHeight?.toString() || ''}
                   onChange={(e) => handleNumericChange('ceilingHeight', e.target.value)}
                   placeholder="Enter ceiling height"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"

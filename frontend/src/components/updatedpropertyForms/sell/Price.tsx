@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { IndianRupee } from 'lucide-react';
 
 interface PriceData {
+  amount: string;
   propertyPrice: number;
   pricetype: 'fixed' | 'negotiable';
   area: number;

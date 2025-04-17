@@ -3,13 +3,13 @@ import { Schema, model, Document, Types } from 'mongoose';
 // Interfaces
 interface IArea {
   totalArea: number;
-  carpetArea: number;
   builtUpArea: number;
+  carpetArea: number;
 }
 
 interface IBasicInformation {
   title: string;
-  warehouseType: string[];
+  spaceType: string[];
   address: {
     street: string;
     city: string;
@@ -24,24 +24,33 @@ interface IBasicInformation {
   isCornerProperty: boolean;
 }
 
-interface IPricingDetails {
-  propertyPrice: number;
-  pricetype: "fixed" | "negotiable";
-  area: number;
-  totalprice: number;
-  pricePerSqft: number;
+interface ISpaceDetails {
+    totalArea: number;
+  squareFeet: number;
+  coveredArea: number;
+  openArea: number;
+//   propertyPrice: number;
+  roadWidth: {
+    value: number; 
+    unit: "feet" | "meters";
+  };
+  ceilingHeight: {
+    value: number; 
+    unit: "feet" | "meters";
+  };
+  noOfOpenSides: string;
 }
 
 interface IAvailability {
   availableFrom?: string;
   availableImmediately: boolean;
-  leaseDuration: string;
-  noticePeriod: string;
-  petsAllowed: boolean;
-  operatingHours: {
-    restricted: boolean;
-    restrictions: string;
-  };
+//   leaseDuration: string;
+//   noticePeriod: string;
+//   petsAllowed: boolean;
+//   operatingHours: {
+//     restricted: boolean;
+//     restrictions: string;
+//   };
 }
 
 interface IContactInformation {
@@ -70,6 +79,49 @@ interface IMetadata {
   createdAt: Date;
 }
 
+
+interface IRentalTerms {
+    rentDetails: {
+        expectedRent: number;
+        isNegotiable: boolean;
+        rentType: string;
+    }
+    securityDeposit: {
+        amount: number;
+    }
+    maintenanceAmount: {
+        amount: number;
+        frequency: string;
+    }
+    otherCharges: {
+        water: {
+            amount?: number;
+            type: string;
+        }
+        electricity: {
+            amount?: number;
+            type: string;
+        }
+        gas: {
+            amount?: number;
+            type: string;
+        }
+        others: {
+            amount?: number;
+            type: string;
+        }
+    }
+    brokerage: {
+        required: string;
+        amount?: number;
+    }
+    availability: {
+        type: string;
+        date?: string;
+    }
+}
+
+
 interface IFloor {
   floorNumber: number;
   totalFloors: number;
@@ -79,19 +131,13 @@ interface ICommercialWarehouse extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   warehouseDetails: {
-    ceilingHeight: number;
     totalArea: number;
-    docks: {
-      count: number;
-      height: number;
-    }
-    dockHeight: number;
+    ceilingHeight: number;
     numberOfDocks: number;
+    dockHeight: number;
     floorLoadCapacity: number;
-    fireSafety: boolean;
-    securityPersonnel: boolean;
-    access24x7: boolean;
-    truckParking: boolean;
+    securityFeatures: string[];
+    additionalFeatures: string[];
   };
   propertyDetails: {
     area: IArea;
@@ -104,24 +150,23 @@ interface ICommercialWarehouse extends Document {
       powerLoad: number;
       backup: boolean;
     };
-    waterAvailability: string[];
+    waterAvailability: string;
     propertyAge: number;
     propertyCondition: string;
   };
-  pricingDetails: IPricingDetails;
-  registration: {
-    chargestype: "inclusive" | "exclusive";
-    registrationAmount?: number;
-    stampDutyAmount?: number;
-  };
-  brokerage: {
-    required: string;
-    amount: number;
-  };
+//   pricingDetails: IPricingDetails;
+//   registration: {
+//     chargestype: "inclusive" | "exclusive";
+//     registrationAmount?: number;
+//     stampDutyAmount?: number;
+//   };
+ 
+  rentalTerms: IRentalTerms;
   availability: IAvailability;
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
+
 }
 
 // Schema
@@ -146,15 +191,11 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   warehouseDetails: {
     ceilingHeight: { type: Number, required: true },
     totalArea: { type: Number, required: true },
-    docks: {
-      count: { type: Number, required: true },
-      height: { type: Number, required: true },
-    },
+    dockHeight: { type: Number, required: true },
+    numberOfDocks: { type: Number, default: 0 },
     floorLoadCapacity: { type: Number, required: true },
-    fireSafety: { type: Boolean, default: false },
-    securityPersonnel: { type: Boolean, default: false },
-    access24x7: { type: Boolean, default: false },
-    truckParking: { type: Boolean, default: false },
+    securityFeatures: [{ type: String }],
+    additionalFeatures: [{ type: String }]
   },
   propertyDetails: {
     area: {
@@ -177,34 +218,76 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
     waterAvailability: [{ type: String }],
     propertyAge: { type: Number },
     propertyCondition: { type: String }
-  },
-  pricingDetails: {
-    propertyPrice: { type: Number, required: true },
-    pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
-    area: { type: Number, required: true },
-    totalprice: { type: Number, required: true },
-    pricePerSqft: { type: Number, required: true }
-  },
-  registration: {
-    chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-    registrationAmount: { type: Number },
-    stampDutyAmount: { type: Number }
-  },
-  brokerage: {
-    required: { type: String, enum: ['yes', 'no'], required: true },
-    amount: { type: Number }
-  },
-  availability: {
-    availableFrom: { type: String },
-    availableImmediately: { type: Boolean, required: true },
-    leaseDuration: { type: String, required: true },
-    noticePeriod: { type: String, required: true },
-    petsAllowed: { type: Boolean, default: false },
-    operatingHours: {
-      restricted: { type: Boolean, required: true },
-      restrictions: { type: String }
+    },
+// ,
+//   pricingDetails: {
+//     propertyPrice: { type: Number, required: true },
+//     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
+//     area: { type: Number, required: true },
+//     totalprice: { type: Number, required: true },
+//     pricePerSqft: { type: Number, required: true }
+//   },
+//   registration: {
+//     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+//     registrationAmount: { type: Number },
+//     stampDutyAmount: { type: Number }
+//   },
+//   brokerage: {
+//     required: { type: String, enum: ['yes', 'no'], required: true },
+//     amount: { type: Number }
+//   },
+//   availability: {
+//     availableFrom: { type: String },
+//     availableImmediately: { type: Boolean, required: true },
+//     leaseDuration: { type: String, required: true },
+//     noticePeriod: { type: String, required: true },
+//     petsAllowed: { type: Boolean, default: false },
+//     operatingHours: {
+//       restricted: { type: Boolean, required: true },
+//       restrictions: { type: String }
+//     }
+//   },
+  rentalTerms: {
+    rentDetails: {
+        expectedRent: { type: Number, required: true },
+        isNegotiable: { type: Boolean, default: false },
+        rentType: { type: String, required: true },
+    },
+    securityDeposit: {
+        amount: { type: Number, required: true },
+    },
+    maintenanceAmount: {
+        amount: { type: Number, required: true },
+        frequency: { type: String, required: true },
+    },
+    otherCharges: {
+        water: {
+            amount: { type: Number },
+            type: { type: String, required: true},
+        },
+        electricity: {
+            amount: { type: Number },
+            type: { type: String, required: true},
+        },
+        gas: {
+            amount: { type: Number },
+            type: { type: String, required: true},
+        },
+        others: {
+            amount: { type: Number },
+            type: { type: String, required: true},
+        }
+    },
+    brokerage: {
+        required: { type: String, required: true },
+        amount: { type: Number },
+    },
+    availability: {
+        type: { type: String, required: true },
+        date: { type: String },
     }
   },
+
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },

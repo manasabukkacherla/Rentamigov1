@@ -48,25 +48,26 @@ const generatePropertyId = async (): Promise<string> => {
 export const createShowroom = async (req: Request, res: Response) => {
   try {
     const showroomData = req.body;
+    console.log(showroomData)
     
     // Generate property ID
     const propertyId = await generatePropertyId();
 
-    // Add metadata
+    // // Add metadata
     showroomData.metadata = {
       createdBy: showroomData.metadata.createdBy,
       createdAt: new Date(),
-      updatedAt: new Date()
     };
     
-    // Add property ID
+    // // Add property ID
     showroomData.propertyId = propertyId;
 
-    // Create new showroom listing
+    // // Create new showroom listing
     const showroom = new CommercialShowroom(showroomData);
     await showroom.save();
 
     res.status(201).json({
+      success: true,
       message: 'Commercial showroom listing created successfully',
       data: showroom
     });

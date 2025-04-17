@@ -1,30 +1,30 @@
 "use client"
 
-import { useState } from "react";
+import { useState } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
-import PropertyName from '../PropertyName';
-import OtherCommercialType from '../CommercialComponents/OtherCommercialType';
-import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
-import Landmark from '../CommercialComponents/Landmark';
-import MapCoordinates from '../MapCoordinates';
-import CornerProperty from '../CommercialComponents/CornerProperty';
-import OtherPropertyDetails from '../CommercialComponents/OtherPropertyDetails';
-import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
-import LeaseAmount from '../lease/LeaseAmount';
-import LeaseTenure from '../lease/LeaseTenure';
-import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
-import OtherCharges from '../residentialrent/OtherCharges';
-import Brokerage from '../residentialrent/Brokerage';
-import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
-import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import axios from "axios";
+import PropertyName from "../PropertyName"
+import PlotType from "../CommercialComponents/PlotType"
+import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
+import Landmark from "../CommercialComponents/Landmark"
+import MapCoordinates from "../MapCoordinates"
+import CornerProperty from "../CommercialComponents/CornerProperty"
+import PlotDetails from "../CommercialComponents/PlotDetails"
+import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
+import LeaseAmount from "../lease/LeaseAmount"
+import LeaseTenure from "../lease/LeaseTenure"
+import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
+import OtherCharges from "../residentialrent/OtherCharges"
+import Brokerage from "../residentialrent/Brokerage"
+import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
+import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
+import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import axios from "axios"
 
 interface FormData {
   propertyName: string;
-  commercialType: string[];
+  plotType: string[];
   address: {
     street: string;
     city: string;
@@ -32,12 +32,12 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
-    latitude: number;
-    longitude: number;
+  coordinates: { 
+    latitude: number; 
+    longitude: number; 
   };
   isCornerProperty: boolean;
-  otherDetails: Record<string, any>;
+  plotDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
   leaseAmount: Record<string, any>;
   leaseTenure: Record<string, any>;
@@ -60,10 +60,10 @@ interface FormData {
   };
 }
 
-const LeaseOthersMain = () => {
+const LeasePlotMain = () => {
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
-    commercialType: [],
+    plotType: [],
     address: {
       street: '',
       city: '',
@@ -76,7 +76,7 @@ const LeaseOthersMain = () => {
       longitude: 0
     },
     isCornerProperty: false,
-    otherDetails: {},
+    plotDetails: {},
     propertyDetails: {},
     leaseAmount: {},
     leaseTenure: {},
@@ -99,8 +99,8 @@ const LeaseOthersMain = () => {
     }
   });
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(0)
+  const navigate = useNavigate()
 
   const steps = [
     {
@@ -121,10 +121,10 @@ const LeaseOthersMain = () => {
                   propertyName: name
                 }))}
               />
-              <OtherCommercialType
-                onCommercialTypeChange={(types) => setFormData(prev => ({
+              <PlotType
+                onPlotTypeChange={(types) => setFormData(prev => ({
                   ...prev,
-                  commercialType: types
+                  plotType: types
                 }))}
               />
             </div>
@@ -176,10 +176,10 @@ const LeaseOthersMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
-            <OtherPropertyDetails
+            <PlotDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                otherDetails: { ...prev.otherDetails, ...details }
+                plotDetails: { ...prev.plotDetails, ...details }
               }))}
             />
             <CommercialPropertyDetails
@@ -364,21 +364,21 @@ const LeaseOthersMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-other/lease', transformedData, {
+        const response = await axios.post('/api/commercial-plots/lease', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
 
         if (response.data.success) {
-          toast.success('Other commercial property lease listing created successfully!');
+          toast.success('Plot lease listing created successfully!');
         }
       } else {
         navigate('/login');
       }
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to create commercial property lease listing. Please try again.');
+      toast.error('Failed to create plot lease listing. Please try again.');
     }
   };
 
@@ -490,4 +490,4 @@ const LeaseOthersMain = () => {
   );
 };
 
-export default LeaseOthersMain;
+export default LeasePlotMain;
