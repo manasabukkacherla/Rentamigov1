@@ -142,8 +142,6 @@ const RentWarehouse = () => {
     basicInformation: {
       title: '',
       warehouseType: [],
-      // price: 0,
-      // currency: 'INR'
     },
     propertyDetails: {
       address: {
@@ -306,8 +304,7 @@ const RentWarehouse = () => {
                   basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
                 }))}
               />
-              <span className="text-gray-700">This is a corner property</span>
-            </div>
+              </div>
           </div>
         </div>
       )

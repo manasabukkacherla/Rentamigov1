@@ -71,7 +71,7 @@ const AvailabilityDate = ({ onAvailabilityChange }: AvailabilityDateProps) => {
                 availabilityType === "specific" 
                   ? "border-black" 
                   : "border-black/20"
-              } bg-[#f5f5f5] text-white hover:scale-105 hover:shadow-md transition-all duration-300`}
+              } bg-[#f5f5f5] text-black hover:scale-105 hover:shadow-md transition-all duration-300`}
             >
               <div className="flex items-center justify-center gap-3">
                 <Calendar size={22} className="text-black" />

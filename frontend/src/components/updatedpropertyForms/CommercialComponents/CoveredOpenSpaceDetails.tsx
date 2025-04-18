@@ -7,15 +7,15 @@ interface CoveredOpenSpaceDetailsProps {
 
 const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsProps) => {
   const [details, setDetails] = useState({
-    totalArea: '',
+    totalArea: 0,
     areaUnit: 'sq.ft',
-    coveredArea: '',
-    openArea: '',
-    roadWidth: '',
+    coveredArea: 0,
+    openArea: 0,
+    roadWidth: 0,
     roadWidthUnit: 'ft',
-    ceilingHeight: '',
+    ceilingHeight: 0,
     ceilingHeightUnit: 'ft',
-    openSides: '1',
+    openSides: 1,
   });
 
   const handleChange = (field: string, value: any) => {
@@ -41,17 +41,18 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
+                  min="0"
                   id="totalArea"
-                  value={details.totalArea}
-                  onChange={(e) => handleChange('totalArea', e.target.value)}
+                  value={details.totalArea || ''}
+                  onChange={(e) => handleChange('totalArea', parseFloat(e.target.value) || 0)}
                   placeholder="Enter total area"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
               <select
-                value={details.areaUnit}
+                value={details.areaUnit || ''}
                 onChange={(e) => handleChange('areaUnit', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
@@ -70,10 +71,11 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             </label>
             <div className="relative">
               <input
-                type="text"
+                type="number"
+                min="0"
                 id="coveredArea"
-                value={details.coveredArea}
-                onChange={(e) => handleChange('coveredArea', e.target.value)}
+                value={details.coveredArea || ''}
+                onChange={(e) => handleChange('coveredArea', parseFloat(e.target.value) || 0)}
                 placeholder="Enter covered area"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -88,10 +90,11 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             </label>
             <div className="relative">
               <input
-                type="text"
+                type="number"
+                min="0"
                 id="openArea"
-                value={details.openArea}
-                onChange={(e) => handleChange('openArea', e.target.value)}
+                value={details.openArea || ''}
+                onChange={(e) => handleChange('openArea', parseFloat(e.target.value) || 0)}
                 placeholder="Enter open area"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
@@ -107,17 +110,18 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
+                  min="0"
                   id="roadWidth"
-                  value={details.roadWidth}
-                  onChange={(e) => handleChange('roadWidth', e.target.value)}
+                  value={details.roadWidth || ''}
+                  onChange={(e) => handleChange('roadWidth', parseFloat(e.target.value) || 0)}
                   placeholder="Enter road width"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
               <select
-                value={details.roadWidthUnit}
+                value={details.roadWidthUnit || ''}
                 onChange={(e) => handleChange('roadWidthUnit', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
@@ -135,17 +139,18 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             <div className="grid grid-cols-2 gap-4">
               <div className="relative">
                 <input
-                  type="text"
+                  type="number"
+                  min="0"
                   id="ceilingHeight"
-                  value={details.ceilingHeight}
-                  onChange={(e) => handleChange('ceilingHeight', e.target.value)}
+                  value={details.ceilingHeight || ''}
+                  onChange={(e) => handleChange('ceilingHeight', parseFloat(e.target.value) || 0)}
                   placeholder="Enter ceiling height"
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <Ruler className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
               <select
-                value={details.ceilingHeightUnit}
+                value={details.ceilingHeightUnit || ''}
                 onChange={(e) => handleChange('ceilingHeightUnit', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
@@ -163,7 +168,7 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             <select
               id="openSides"
               value={details.openSides}
-              onChange={(e) => handleChange('openSides', e.target.value)}
+                onChange={(e) => handleChange('openSides', parseInt(e.target.value))}
               className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
             >
               <option value="1">1</option>

@@ -35,13 +35,6 @@ interface IPricingDetails {
 interface IAvailability {
   availableFrom?: string;
   availableImmediately: boolean;
-//   leaseDuration: string;
-//   noticePeriod: string;
-//   petsAllowed: boolean;
-//   operatingHours: {
-//     restricted: boolean;
-//     restrictions: string;
-//   };
 }
 
 interface IContactInformation {
@@ -149,12 +142,6 @@ interface ICommercialWarehouse extends Document {
     propertyAge: number;
     propertyCondition: string;
   };
-//   pricingDetails: IPricingDetails;
-//   registration: {
-//     chargestype: "inclusive" | "exclusive";
-//     registrationAmount?: number;
-//     stampDutyAmount?: number;
-//   };
  
   rentalTerms: IRentalTerms;
   availability: IAvailability;
@@ -218,34 +205,6 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     propertyAge: { type: Number },
     propertyCondition: { type: String }
     },
-// ,
-//   pricingDetails: {
-//     propertyPrice: { type: Number, required: true },
-//     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
-//     area: { type: Number, required: true },
-//     totalprice: { type: Number, required: true },
-//     pricePerSqft: { type: Number, required: true }
-//   },
-//   registration: {
-//     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-//     registrationAmount: { type: Number },
-//     stampDutyAmount: { type: Number }
-//   },
-//   brokerage: {
-//     required: { type: String, enum: ['yes', 'no'], required: true },
-//     amount: { type: Number }
-//   },
-//   availability: {
-//     availableFrom: { type: String },
-//     availableImmediately: { type: Boolean, required: true },
-//     leaseDuration: { type: String, required: true },
-//     noticePeriod: { type: String, required: true },
-//     petsAllowed: { type: Boolean, default: false },
-//     operatingHours: {
-//       restricted: { type: Boolean, required: true },
-//       restrictions: { type: String }
-//     }
-//   },
   rentalTerms: {
     rentDetails: {
         expectedRent: { type: Number, required: true },
