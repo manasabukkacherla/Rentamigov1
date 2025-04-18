@@ -60,7 +60,7 @@ const ShowroomType = ({ onTypeChange, onShowroomTypeChange, onNext = () => { } }
         </div>
       </div>
 
-      <NextButton onClick={onNext} disabled={!selectedType} />
+      {/* <NextButton onClick={onNext} disabled={!selectedType} /> */}
     </div>
   );
 };
