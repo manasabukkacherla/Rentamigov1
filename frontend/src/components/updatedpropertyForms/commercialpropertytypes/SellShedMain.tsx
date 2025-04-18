@@ -106,7 +106,6 @@ const SellShopMain = () => {
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
                 <Price onPriceChange={(price) => handleChange("price", price.amount)} />
-                <PricePerSqft price={formData.price} area={formData.area} />
               </div>
             </div>
             

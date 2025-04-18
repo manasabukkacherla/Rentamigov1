@@ -339,7 +339,15 @@ const SellWarehouseMain = () => {
           <CommercialPropertyDetails
             onDetailsChange={(details) => setFormData(prev => ({
               ...prev,
-              propertyDetails: { ...prev.propertyDetails, ...details }
+              propertyDetails: {
+                ...prev.propertyDetails,
+                ...details,
+                electricitySupply: {
+                  ...prev.propertyDetails.electricitySupply,
+                  powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
+                },
+                propertyAge: details.propertyAge ?? prev.propertyDetails.propertyAge
+              }
             }))}
           />
         </div>
@@ -510,7 +518,7 @@ const SellWarehouseMain = () => {
 
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial-warehouses', transformedData, {
+        const response = await axios.post('/api/commercial/sell/warehouses', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

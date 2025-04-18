@@ -63,6 +63,7 @@ import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
 import commercialSellAgricultureRoutes from './routes/commercial/commercialSellAgricultureRoutes';
 import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthersRoutes";
+import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRentCoveredSpaceRoutes";
 import commercialSellOfficeSpaceRoutes from './routes/commercial/CommercialSellOfficeSpace';
 import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
 
@@ -178,12 +179,11 @@ app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
 
-//sell routes
-app.use("/api/commercial-shops", commercialShopRoutes);
-app.use("/api/commercial-showrooms", commercialShowroomRoutes);
-app.use('/api/commercial-sheds', commercialShedRoutes);
-app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
-app.use('/api/commercial/plots', commercialPlotRoutes);
+app.use("/api/commercial/sell/shops", commercialShopRoutes);
+app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
+app.use('/api/commercial/sell/sheds', commercialShedRoutes);
+app.use('/api/commercial/sell/warehouses', commercialWarehouseRoutes);
+app.use('/api/commercial/sell/plots', commercialPlotRoutes);
 app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
 app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
 app.use('/api/commercial/sell/office-space', commercialSellOfficeSpaceRoutes);
