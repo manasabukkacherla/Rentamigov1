@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
       fontSize: "14px",
       gap: "15px", // Adjust spacing between numbers
       marginRight: "138px",
-      flexWrap: "wrap", // Enable wrapping for smaller screens
+      flexWrap: "wrap" as "wrap", // Enable wrapping for smaller screens
     },
     phoneLink: {
       color: "white",
