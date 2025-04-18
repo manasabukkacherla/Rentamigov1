@@ -1,6 +1,5 @@
 import express from 'express';
 import { createShowroom } from '../../controllers/commercial/commercialShowroomController';
-import { protect } from '../../middleware/authMiddleware';
 
 const router = express.Router();
 
