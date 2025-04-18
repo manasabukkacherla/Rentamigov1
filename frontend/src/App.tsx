@@ -37,11 +37,13 @@ import Chatbottt from "./components/chatbott/App";
 // import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import ErrorBoundary from "./components/blogs/ErrorBoundary";
 import { Toaster } from "react-hot-toast";
 import Notifications from "./components/Empdashboaed/components/Notifications";
 import { useContext } from "react";
 import { SocketContext } from "./socketContext";
+import SellShowroomMain from "./components/updatedpropertyForms/commercialpropertytypes/SellShowroomMain";
 
 const App = () => {
   const [isEmployee, setIsEmployee] = useState(false);
@@ -95,6 +97,9 @@ const App = () => {
                 <Route path="/chat" element={<Chatbottt />} />
                 {/* New route for property details with ID parameter */}
                 {/* <Route path="/property-details/:id" element={<PropertyDetailPage />} /> */}
+
+                {/* Property Forms Routes */}
+                <Route path="/sell-showroom" element={<SellShowroomMain />} />
 
                 {/* Owner and Tenant Routes */}
                 <Route path="/owner-page" element={<OwnerPage />} />
