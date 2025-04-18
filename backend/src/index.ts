@@ -58,11 +58,14 @@ import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgric
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouseRoutes";
 import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
+import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRentCoveredSpaceRoutes";
 import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
 import commercialSellAgricultureRoutes from './routes/commercial/commercialSellAgricultureRoutes';
 import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthersRoutes";
-import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRentCoveredSpaceRoutes";
+import commercialSellOfficeSpaceRoutes from './routes/commercial/CommercialSellOfficeSpace';
+import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
+
 dotenv.config();
 
 // Validate required environment variables
@@ -187,18 +190,17 @@ app.use('/api/commercial/sell/office-space', commercialSellOfficeSpaceRoutes);
 app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
 //retail,openspace
 
-
+//rent routes
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
-app.use('/api/commercial/warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
 app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
+app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
-app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
-app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
+//showroom, shed, plot
 
-app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
+
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
   res.json({ message: "Test message" });
@@ -232,9 +234,9 @@ const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log("Environment variables loaded:", {
-    VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "****" : undefined,
-    ACCOUNT_SID: process.env.ACCOUNT_SID ? "****" : undefined,
-    AUTH_TOKEN: process.env.AUTH_TOKEN ? "****" : undefined,
+    VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "" : undefined,
+    ACCOUNT_SID: process.env.ACCOUNT_SID ? "" : undefined,
+    AUTH_TOKEN: process.env.AUTH_TOKEN ? "" : undefined,
   });
 }).on('error', (error: NodeJS.ErrnoException) => {
   if (error.code === 'EADDRINUSE') {
