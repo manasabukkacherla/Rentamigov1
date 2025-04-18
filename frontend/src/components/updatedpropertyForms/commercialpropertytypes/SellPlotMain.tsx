@@ -610,7 +610,7 @@ const SellPlotMain = () => {
 
       console.log("Submitting data:", transformedData);
 
-      const response = await axios.post('/api/commercial/plots', transformedData, {
+      const response = await axios.post('/api/commercial/sell/plots', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

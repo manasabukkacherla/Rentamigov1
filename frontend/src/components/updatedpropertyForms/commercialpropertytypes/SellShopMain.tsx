@@ -701,7 +701,7 @@ const SellShopMain = () => {
 
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial-shops', transformedData, {
+        const response = await axios.post('/api/commercial/sell/shops', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
