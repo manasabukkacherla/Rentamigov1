@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropertyName from '../PropertyName';
 import CoveredOpenSpaceType from '../CommercialComponents/CoveredOpenSpaceType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
 import Landmark from '../CommercialComponents/Landmark';
-import MapCoordinates from '../MapCoordinates';
+// import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
 import CoveredOpenSpaceDetails from '../CommercialComponents/CoveredOpenSpaceDetails';
 import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
@@ -15,17 +15,12 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Warehouse, ImageIcon, UserCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import {  DollarSign, Calendar, User, Image,  ImageIcon, UserCircle } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-
-
-
-
 interface IFormData {
-
   basicInformation: {
     title: string;
   spaceType: string[];
@@ -45,16 +40,16 @@ interface IFormData {
 
   spaceDetails: {
     totalArea: number;
-    squareFeet: number;
+    areaUnit: string;
     coveredArea: number;
     openArea: number;
     roadWidth: {
-      value: number;
-      unit: "feet" | "meters";
+      value: number | null;
+      unit: string;
     };
     ceilingHeight: {
-      value: number;
-      unit: "feet" | "meters";
+      value: number | null;
+      unit: string;
     };
     noOfOpenSides: string;
   };
@@ -78,7 +73,6 @@ interface IFormData {
       backup: boolean;
     };
     waterAvailability: string;
-    
     propertyAge: number;
     propertyCondition: string;
   };
@@ -118,14 +112,12 @@ interface IFormData {
       amount?: number;
     };
     availability: {
-      type: string;
-      date?: string;
-    };
-  };
-  availability: {
+      type: 'immediate' | 'specific';
     availableFrom?: string;
     availableImmediately: boolean;
   };
+  };
+  
   contactInformation: {
     name: string;
     email: string;
@@ -146,54 +138,7 @@ interface IFormData {
     };
     videoTour: File | null;
     documents: File[];
-
   };
-}
-
-interface CoveredOpenSpaceDetailsProps {
-  onDetailsChange: (details: Record<string, any>) => void;
-}
-
-interface CommercialPropertyDetailsProps {
-  onDetailsChange: (details: Record<string, any>) => void;
-}
-
-interface RentProps {
-  onRentChange: (rent: Record<string, any>) => void;
-}
-
-interface MaintenanceAmountProps {
-  onMaintenanceAmountChange: (maintenance: Record<string, any>) => void;
-  maintenanceAmount: { amount: number; frequency: string };
-}
-
-interface SecurityDepositProps {
-  onSecurityDepositChange: (deposit: Record<string, any>) => void;
-  securityDeposit: { amount: number };
-}
-
-interface OtherChargesProps {
-  onOtherChargesChange: (charges: Record<string, any>) => void;
-  otherCharges: {
-    water: { amount?: number; type: string };
-    electricity: { amount?: number; type: string };
-    gas: { amount?: number; type: string };
-    others: { amount?: number; type: string };
-  };
-}
-
-interface BrokerageProps {
-  onBrokerageChange: (brokerage: Record<string, any>) => void;
-  brokerage: { required: string; amount?: number };
-}
-
-interface CommercialContactDetailsProps {
-  onContactChange: (contact: Record<string, any>) => void;
-}
-
-interface CommercialMediaUploadProps {
-  onMediaChange: (media: Record<string, any>) => void;
-  media: IMedia;
 }
 
 const RentCoveredSpace = () => {
@@ -213,65 +158,43 @@ const RentCoveredSpace = () => {
         longitude: 0,
       },
       isCornerProperty: false,
-
-      
-      
-      // propertyType: '',
-      // propertySubType: '',
-      // propertyStatus: '',
-      // propertyAge: '',
-      // propertyFurnishing: '',
-      // propertyFacing: '',
-      // propertyFloor: '',
-      // totalFloors: '',
-      // propertyDescription: ''
     },
     spaceDetails: {
       totalArea: 0,
-      squareFeet: 0,
+      areaUnit:'',
       coveredArea: 0,
       openArea: 0,
       roadWidth: {
         value: 0,
-        unit: 'feet',
+        unit:'',
       },
       ceilingHeight: {
         value: 0,
-        unit: 'feet',
+        unit:'',
       },
-      noOfOpenSides: '',
+      noOfOpenSides: ''
     },
     propertyDetails: {
-      area:{
+      area: {
         totalArea: 0,
         builtUpArea: 0,
-        carpetArea: 0,
+        carpetArea: 0
       },
-      floor:{
+      floor: {
         floorNumber: 0,
-        totalFloors: 0,
+        totalFloors: 0
       },
-      // propertyCondition: '',
       facingDirection: '',
       furnishingStatus: '',
-      propertyAmenities: [],
-      wholeSpaceAmenities: [],
+      propertyAmenities: [] as string[],
+      wholeSpaceAmenities: [] as string[],
       electricitySupply: {
         powerLoad: 0,
-        backup: false,
+        backup: false
       },  
       waterAvailability: '',
       propertyAge: 0,
-      propertyCondition: '',
-      // propertySize: {
-      //   area: 0,
-      //   unit: ''
-      // },
-      // parking: {
-      //   type: '',
-      //   count: 0
-      // },
-      // amenities: []
+      propertyCondition: ''
     },
     rentalTerms: {
       rentDetails: {
@@ -310,13 +233,11 @@ const RentCoveredSpace = () => {
       },
       availability: {
         type: 'immediate',
-        date: '',
-      },
-    },
-    availability: {
       availableFrom: '',
       availableImmediately: true,
     },
+    },
+    
     contactInformation: {
       name: '',
       email: '',
@@ -340,81 +261,363 @@ const RentCoveredSpace = () => {
     },
   });
 
+  // Add useEffect to log form data changes
+  useEffect(() => {
+    console.log('Form Data Updated:', formData);
+  }, [formData]);
+
+  // Add validation utility functions
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^[0-9]{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const validateZipCode = (zipCode: string) => {
+    const zipRegex = /^[0-9]{6}$/;
+    return zipRegex.test(zipCode);
+  };
+
+  const validateArea = (area: number) => {
+    return area > 0;
+  };
+
+  // Add error display component
+  const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
+    if (Object.keys(errors).length === 0) return null;
+    
+    return (
+      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+        <div className="flex items-center">
+          <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
+        </div>
+        <ul className="mt-2 list-disc list-inside text-red-600">
+          {Object.values(errors).map((error, index) => (
+            <li key={index} className="text-sm">{error}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  };
+
   const [currentStep, setCurrentStep] = useState(0);
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // const handlePropertyNameChange = (name: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     basicInformation: {
-  //       ...prev.basicInformation,
-  //       propertyName: name
-  //     }
-  //   }));
-  // };
+  // Check login status on component mount
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+  }, [navigate]);
 
-  // const handleSpaceTypeChange = (types: string[]) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     basicInformation: {
-  //       ...prev.basicInformation,
-  //       spaceType: types
-  //     }
-  //   }));
-  // };
+  // Enhanced validation for current step
+  const validateCurrentStep = () => {
+    const errors: Record<string, string> = {};
+    
+    switch (currentStep) {
+      case 0: // Basic Information
+        if (!formData.basicInformation.title.trim()) {
+          errors.title = 'Title is required';
+        } else if (formData.basicInformation.title.length < 5) {
+          errors.title = 'Title must be at least 5 characters long';
+        }
 
-  // const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string }) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     basicInformation: {
-  //       ...prev.basicInformation,
-  //       address
-  //     }
-  //   }));
-  // };
+        if (!formData.basicInformation.spaceType) {
+          errors.spaceType = 'Space type is required';
+        }
 
-  // const handleLandmarkChange = (landmark: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     basicInformation: {
-  //       ...prev.basicInformation,
-  //       landmark
-  //     }
-  //   }));
-  // };
+        if (!formData.basicInformation.address.street.trim()) {
+          errors.street = 'Street address is required';
+        }
 
-  // const handleLatitudeChange = (lat: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     basicInformation: {
-  //       ...prev.basicInformation,
-  //       latitude: lat
-  //     }
-  //   }));
-  // };
+        if (!formData.basicInformation.address.city.trim()) {
+          errors.city = 'City is required';
+        }
 
-  // const handleLongitudeChange = (lng: string) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     basicInformation: {
-  //       ...prev.basicInformation,
-  //       longitude: lng
-  //     }
-  //   }));
-  // };
+        if (!formData.basicInformation.address.state.trim()) {
+          errors.state = 'State is required';
+        }
 
-  // // const handleCornerPropertyChange = (isCorner) => setFormData(prev => ({
-  // //   ...prev,
-  // //   basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
-  // // }));
-  // // };
+        if (!formData.basicInformation.address.zipCode) {
+          errors.zipCode = 'ZIP code is required';
+        } else if (!validateZipCode(formData.basicInformation.address.zipCode)) {
+          errors.zipCode = 'ZIP code must be 6 digits';
+        }
+
+        if (!formData.basicInformation.landmark.trim()) {
+          errors.landmark = 'Landmark is required';
+        }
+
+        if (!formData.basicInformation.location.latitude || !formData.basicInformation.location.longitude) {
+          errors.location = 'Please select a location on the map';
+        }
+        break;
+      
+      case 1: // Property Details (includes both Space Details and Property Details)
+        // Validate Space Details
+        if (!formData.spaceDetails.totalArea) {
+          errors.totalArea = 'Total area is required';
+        } else if (!validateArea(formData.spaceDetails.totalArea)) {
+          errors.totalArea = 'Total area must be greater than 0';
+        }
+
+        if (!formData.spaceDetails.coveredArea) {
+          errors.coveredArea = 'Covered area is required';
+        } else if (!validateArea(formData.spaceDetails.coveredArea)) {
+          errors.coveredArea = 'Covered area must be greater than 0';
+        }
+
+        if (!formData.spaceDetails.openArea) {
+          errors.openArea = 'Open area is required';
+        } else if (!validateArea(formData.spaceDetails.openArea)) {
+          errors.openArea = 'Open area must be greater than 0';
+        }
+
+        if (formData.spaceDetails.roadWidth.value !== null && formData.spaceDetails.roadWidth.value <= 0) {
+          errors.roadWidth = 'Road width must be greater than 0';
+        }
+
+        if (formData.spaceDetails.ceilingHeight.value !== null && formData.spaceDetails.ceilingHeight.value <= 0) {
+          errors.ceilingHeight = 'Ceiling height must be greater than 0';
+        }
+
+        // Validate Property Details
+        if (!formData.propertyDetails.area.totalArea) {
+          errors.propertyTotalArea = 'Property total area is required';
+        } else if (!validateArea(formData.propertyDetails.area.totalArea)) {
+          errors.propertyTotalArea = 'Property total area must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.area.builtUpArea) {
+          errors.builtUpArea = 'Built-up area is required';
+        } else if (!validateArea(formData.propertyDetails.area.builtUpArea)) {
+          errors.builtUpArea = 'Built-up area must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.area.carpetArea) {
+          errors.carpetArea = 'Carpet area is required';
+        } else if (!validateArea(formData.propertyDetails.area.carpetArea)) {
+          errors.carpetArea = 'Carpet area must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.floor.floorNumber) {
+          errors.floorNumber = 'Floor number is required';
+        } else if (formData.propertyDetails.floor.floorNumber < 0) {
+          errors.floorNumber = 'Floor number cannot be negative';
+        }
+
+        if (!formData.propertyDetails.floor.totalFloors) {
+          errors.totalFloors = 'Total floors is required';
+        } else if (formData.propertyDetails.floor.totalFloors <= 0) {
+          errors.totalFloors = 'Total floors must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.facingDirection) {
+          errors.facingDirection = 'Facing direction is required';
+        }
+
+        if (!formData.propertyDetails.furnishingStatus) {
+          errors.furnishingStatus = 'Furnishing status is required';
+        }
+
+        if (!formData.propertyDetails.electricitySupply.powerLoad) {
+          errors.powerLoad = 'Power load is required';
+        } else if (formData.propertyDetails.electricitySupply.powerLoad <= 0) {
+          errors.powerLoad = 'Power load must be greater than 0';
+        }
+
+        if (!formData.propertyDetails.waterAvailability) {
+          errors.waterAvailability = 'Water availability is required';
+        }
+
+        if (!formData.propertyDetails.propertyAge) {
+          errors.propertyAge = 'Property age is required';
+        } else if (formData.propertyDetails.propertyAge < 0) {
+          errors.propertyAge = 'Property age cannot be negative';
+        }
+
+        if (!formData.propertyDetails.propertyCondition) {
+          errors.propertyCondition = 'Property condition is required';
+        }
+        break;
+
+      case 2: // Rental Terms
+        if (!formData.rentalTerms.rentDetails.expectedRent) {
+          errors.expectedRent = 'Expected rent is required';
+        } else if (formData.rentalTerms.rentDetails.expectedRent <= 0) {
+          errors.expectedRent = 'Expected rent must be greater than 0';
+        }
+
+        if (!formData.rentalTerms.rentDetails.rentType) {
+          errors.rentType = 'Please select rent type (inclusive/exclusive)';
+        }
+
+        if (!formData.rentalTerms.securityDeposit.amount) {
+          errors.securityDeposit = 'Security deposit is required';
+        } else if (formData.rentalTerms.securityDeposit.amount <= 0) {
+          errors.securityDeposit = 'Security deposit must be greater than 0';
+        } 
+
+        // Validate maintenance amount only if rent type is exclusive
+        if (formData.rentalTerms.rentDetails.rentType === 'exclusive') {
+          if (!formData.rentalTerms.maintenanceAmount.amount) {
+            errors.maintenanceAmount = 'Maintenance amount is required for exclusive rent';
+          } else if (formData.rentalTerms.maintenanceAmount.amount <= 0) {
+            errors.maintenanceAmount = 'Maintenance amount must be greater than 0';
+          }
+        }
+
+        // Validate water charges based on its own type
+        if (!formData.rentalTerms.otherCharges.water.type) {
+          errors.waterType = 'Please select water charges type (inclusive/exclusive)';
+        } else if (formData.rentalTerms.otherCharges.water.type === 'exclusive') {
+          if (!formData.rentalTerms.otherCharges.water.amount) {
+            errors.water = 'Water amount is required when water charges are exclusive';
+          } else if (formData.rentalTerms.otherCharges.water.amount <= 0) {
+            errors.water = 'Water amount must be greater than 0';
+          }
+        }
+
+        // Validate electricity charges based on its own type
+        if (!formData.rentalTerms.otherCharges.electricity.type) {
+          errors.electricityType = 'Please select electricity charges type (inclusive/exclusive)';
+        } else if (formData.rentalTerms.otherCharges.electricity.type === 'exclusive') {
+          if (!formData.rentalTerms.otherCharges.electricity.amount) {
+            errors.electricity = 'Electricity amount is required when electricity charges are exclusive';
+          } else if (formData.rentalTerms.otherCharges.electricity.amount <= 0) {
+            errors.electricity = 'Electricity amount must be greater than 0';
+          }
+        }
+
+        // Validate gas charges based on its own type
+        if (!formData.rentalTerms.otherCharges.gas.type) {
+          errors.gasType = 'Please select gas charges type (inclusive/exclusive)';
+        } else if (formData.rentalTerms.otherCharges.gas.type === 'exclusive') {
+          if (!formData.rentalTerms.otherCharges.gas.amount) {
+            errors.gas = 'Gas amount is required when gas charges are exclusive';
+          } else if (formData.rentalTerms.otherCharges.gas.amount <= 0) {
+            errors.gas = 'Gas amount must be greater than 0';
+          }
+        }
+
+        // Validate other charges based on its own type
+        if (!formData.rentalTerms.otherCharges.others.type) {
+          errors.othersType = 'Please select other charges type (inclusive/exclusive)';
+        } else if (formData.rentalTerms.otherCharges.others.type === 'exclusive') {
+          if (!formData.rentalTerms.otherCharges.others.amount) {
+            errors.others = 'Other charges amount is required when other charges are exclusive';
+          } else if (formData.rentalTerms.otherCharges.others.amount <= 0) {
+            errors.others = 'Other charges amount must be greater than 0';
+          }
+        }
+
+        // Validate brokerage selection first
+        if (!formData.rentalTerms.brokerage.required) {
+          errors.brokerage = 'Please select if brokerage is required';
+        }
+
+        // Only validate brokerage amount if brokerage is required (yes)
+        if (formData.rentalTerms.brokerage.required === 'yes') {
+          if (!formData.rentalTerms.brokerage.amount) {
+            errors.brokerage = 'Brokerage amount is required when brokerage is yes';
+          } else if (formData.rentalTerms.brokerage.amount <= 0) {
+            errors.brokerage = 'Brokerage amount must be greater than 0';
+          }
+        }
+        break;
+
+      case 3: // Availability
+        if (!formData.rentalTerms.availability.availableFrom) {
+          errors.availableFrom = 'Available from date is required';
+        }
+        break;
+      
+      case 4: // Contact Information
+        if (!formData.contactInformation.name.trim()) {
+          errors.name = 'Name is required';
+        } else if (formData.contactInformation.name.length < 3) {
+          errors.name = 'Name must be at least 3 characters long';
+        }
+
+        if (!formData.contactInformation.email.trim()) {
+          errors.email = 'Email is required';
+        } else if (!validateEmail(formData.contactInformation.email)) {
+          errors.email = 'Please enter a valid email address';
+        }
+
+        if (!formData.contactInformation.phone.trim()) {
+          errors.phone = 'Phone number is required';
+        } else if (!validatePhone(formData.contactInformation.phone)) {
+          errors.phone = 'Please enter a valid 10-digit phone number';
+        }
+
+        if (formData.contactInformation.alternatePhone && !validatePhone(formData.contactInformation.alternatePhone)) {
+          errors.alternatePhone = 'Please enter a valid 10-digit phone number';
+        }
+        break;
+      
+      case 5: // Property Media
+        if (!formData.media.photos.exterior.length) {
+          errors.exteriorPhotos = 'At least one exterior photo is required';
+        }
+        break;
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const renderFormSection = (content: React.ReactNode) => (
+    <div className="space-y-4">
+      <ErrorDisplay errors={formErrors} />
+      {content}
+    </div>
+  );
 
   const handleSpaceDetailsChange = (details: Record<string, any>) => {
+    // Transform the data to match the expected format
+    const transformedDetails = {
+      ...details,
+      // Convert string values to numbers
+      totalArea: details.totalArea ? parseFloat(details.totalArea) : 0,
+      areaUnit: details.areaUnit || '',
+      coveredArea: details.coveredArea ? parseFloat(details.coveredArea) : 0,
+      openArea: details.openArea ? parseFloat(details.openArea) : 0,
+      // Transform road width to object format
+      roadWidth: {
+        value: details.roadWidth ? parseFloat(details.roadWidth) : 0,
+        unit: details.roadWidthUnit || ''
+      },
+      // Transform ceiling height to object format
+      ceilingHeight: {
+        value: details.ceilingHeight ? parseFloat(details.ceilingHeight) : 0,
+        unit: details.ceilingHeightUnit || ''
+      },
+      // Convert open sides to string
+      noOfOpenSides: details.openSides || ''
+    };
+
+    console.log('Input Details:', details);
+    console.log('Transformed Details:', transformedDetails);
+
     setFormData(prev => ({
       ...prev,
       spaceDetails: {
         ...prev.spaceDetails,
-        ...details
+        ...transformedDetails
       }
     }));
   };
@@ -424,78 +627,29 @@ const RentCoveredSpace = () => {
       ...prev,
       propertyDetails: {
         ...prev.propertyDetails,
-        ...details
+        area: {
+          totalArea: details.totalArea ? parseFloat(details.totalArea) : 0,
+          builtUpArea: details.builtUpArea ? parseFloat(details.builtUpArea) : 0,
+          carpetArea: details.carpetArea ? parseFloat(details.carpetArea) : 0
+        },
+        floor: {
+          floorNumber: details.floorNumber ? parseInt(details.floorNumber) : 0,
+          totalFloors: details.totalFloors ? parseInt(details.totalFloors) : 0
+        },
+        facingDirection: details.facingDirection || '',
+        furnishingStatus: details.furnishingStatus || '',
+        propertyAmenities: details.propertyAmenities || [],
+        wholeSpaceAmenities: details.wholeSpaceAmenities || [],
+        electricitySupply: {
+          powerLoad: details.powerLoad ? parseFloat(details.powerLoad) : 0,
+          backup: details.backup || false
+        },
+        waterAvailability: details.waterAvailability || '',
+        propertyAge: details.propertyAge ? parseInt(details.propertyAge) : 0,
+        propertyCondition: details.propertyCondition || ''
       }
     }));
   };
-
-  // const handleRentChange = (rent: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     rentalTerms: {
-  //       ...prev.rentalTerms,
-  //       rentDetails: rent
-  //     }
-  //   }));
-  // };
-
-  // const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     rentalTerms: {
-  //       ...prev.rentalTerms,
-  //       maintenanceAmount: maintenance
-  //     }
-  //   }));
-  // };
-
-  // const handleSecurityDepositChange = (deposit: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     rentalTerms: {
-  //       ...prev.rentalTerms,
-  //       securityDeposit: deposit
-  //     }
-  //   }));
-  // };
-
-  // const handleOtherChargesChange = (charges: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     rentalTerms: {
-  //       ...prev.rentalTerms,
-  //       otherCharges: charges
-  //     }
-  //   }));
-  // };
-
-  // const handleBrokerageChange = (brokerage: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     rentalTerms: {
-  //       ...prev.rentalTerms,
-  //       brokerage: brokerage
-  //     }
-  //   }));
-  // };
-
-  // const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string }) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     rentalTerms: {
-  //       ...prev.rentalTerms,
-  //       availability
-  //     }
-  //   }));
-  // };
-
-  // const handleContactChange = (contact: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     contactInformation: contact
-  //   }));
-  // };
-
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
@@ -514,7 +668,6 @@ const RentCoveredSpace = () => {
     });
   };
 
-
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -524,22 +677,10 @@ const RentCoveredSpace = () => {
     });
   };
 
-  // const handleMediaChange = (media: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     media: {
-  //       photos: media.images,
-  //       video: media.video,
-  //       documents: media.documents,
-  //       videoTour: media.videoTour
-  //     }
-  //   }));
-  // };
-
   const formSections = [
     {
       title: 'Basic Information',
-      content: (
+      content: renderFormSection(
         <>
           <PropertyName propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
@@ -583,16 +724,18 @@ const RentCoveredSpace = () => {
     },
     {
       title: 'Property Details',
-      content: (
+      content: renderFormSection(
         <>
           <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
-          <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
+          <CommercialPropertyDetails 
+              onDetailsChange={(details) => handleChange('propertyDetails', details)}
+            />
         </>
       )
     },
     {
       title: 'Rental Terms',
-      content: (
+      content: renderFormSection(
         <>
           
         <div className="bg-white p-6 rounded-2xl shadow-lg">
@@ -667,14 +810,6 @@ const RentCoveredSpace = () => {
                 }));
               }}
               />
-{/* 
-<Brokerage
-              onBrokerageChange={(brokerage) => {
-                handleChange('rentalTerms.brokerage.required', brokerage.required);
-                handleChange('rentalTerms.brokerage.amount', brokerage.amount);
-              }}
-            /> */}
-
           </div>
         </div>
         </>
@@ -683,7 +818,7 @@ const RentCoveredSpace = () => {
     {
       title: 'Availability',
       icon: <Calendar className="w-6 h-6" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-white p-6 rounded-2xl shadow-lg">
           <div className="flex items-center gap-2 mb-6">
             <Calendar className="text-black" size={24} />
@@ -692,16 +827,38 @@ const RentCoveredSpace = () => {
           <div className="space-y-6">
             <AvailabilityDate
               onAvailabilityChange={(availability) => {
-                handleChange('rentalTerms.availability.type', availability.type);
-
-                const dateToStore = availability.type === 'immediate'
-                  ? new Date().toISOString()
-                  : availability.date || '';
-
-                handleChange('rentalTerms.availability.date', dateToStore);
-
-                handleChange('availability.availableFrom', dateToStore);
-                handleChange('availability.availableImmediately', availability.type === 'immediate');
+                // For immediate availability, set availableImmediately to true and availableFrom to current date
+                if (availability.type === 'immediate') {
+                  const currentDate = new Date().toISOString();
+                  // Update the rentalTerms.availability object
+                  setFormData(prev => ({
+                    ...prev,
+                    rentalTerms: {
+                      ...prev.rentalTerms,
+                      availability: {
+                        type: 'immediate',
+                        availableFrom: currentDate,
+                        availableImmediately: true
+                      }
+                    }
+                  }));
+                } 
+                // For specific date, set availableImmediately to false and availableFrom to user's selected date
+                else {
+                  const userDate = availability.date || '';
+                  // Update the rentalTerms.availability object
+                  setFormData(prev => ({
+                    ...prev,
+                    rentalTerms: {
+                      ...prev.rentalTerms,
+                      availability: {
+                        type: 'specific',
+                        availableFrom: userDate,
+                        availableImmediately: false
+                      }
+                    }
+                  }));
+                }
               }}
             />
           </div>
@@ -711,7 +868,7 @@ const RentCoveredSpace = () => {
     {
       title: 'Contact Information',
       icon: <User className="w-6 h-6" />,
-      content: (
+      content: renderFormSection(
         <div className="bg-white p-6 rounded-2xl shadow-lg">
           <div className="flex items-center gap-2 mb-6">
             <UserCircle className="text-black" size={24} />
@@ -728,7 +885,7 @@ const RentCoveredSpace = () => {
     {
       title: 'Property Media',
       icon: <Image className="w-6 h-6" />,
-      content: (
+      content: renderFormSection    (
         <div className="bg-white p-6 rounded-2xl shadow-lg">
           <div className="flex items-center gap-2 mb-6">
             <ImageIcon className="text-black" size={24} />
@@ -763,13 +920,13 @@ const RentCoveredSpace = () => {
   ];
 
   const handleNext = () => {
-    // if (validateCurrentStep()) {
+    if (validateCurrentStep()) {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
     }
-    // } else {
-    //   toast.error('Please fill in all required fields');
-    // }
+    } else {
+      toast.error('Please fill in all required fields');
+    }
   };
 
   const handlePrevious = () => {
@@ -780,12 +937,19 @@ const RentCoveredSpace = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate the final step before submission
+    if (!validateCurrentStep()) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
 
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
         const author = JSON.parse(user).id;
 
+        // Convert media files to base64
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -798,10 +962,53 @@ const RentCoveredSpace = () => {
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
-        console.log(formData)
 
+        // Transform the data to match the expected format for the database
         const transformedData = {
-          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            spaceType: formData.basicInformation.spaceType
+          },
+          spaceDetails: {
+            totalArea: formData.spaceDetails.totalArea,
+            areaUnit: formData.spaceDetails.areaUnit,
+            coveredArea: formData.spaceDetails.coveredArea,
+            openArea: formData.spaceDetails.openArea,
+            roadWidth: formData.spaceDetails.roadWidth.value || 0,
+            roadWidthUnit: formData.spaceDetails.roadWidth.unit,
+            ceilingHeight: formData.spaceDetails.ceilingHeight.value || 0,
+            ceilingHeightUnit: formData.spaceDetails.ceilingHeight.unit,
+            noOfOpenSides: formData.spaceDetails.noOfOpenSides
+          },
+          propertyDetails: {
+            area: {
+              totalArea: formData.propertyDetails.area.totalArea || 0,
+              builtUpArea: formData.propertyDetails.area.builtUpArea || 0,
+              carpetArea: formData.propertyDetails.area.carpetArea || 0
+            },
+            floor: {
+              floorNumber: formData.propertyDetails.floor.floorNumber || 0,
+              totalFloors: formData.propertyDetails.floor.totalFloors || 0
+            },
+            facingDirection: formData.propertyDetails.facingDirection,
+            furnishingStatus: formData.propertyDetails.furnishingStatus,
+            propertyAmenities: formData.propertyDetails.propertyAmenities,
+            wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
+            electricitySupply: {
+              powerLoad: formData.propertyDetails.electricitySupply.powerLoad || 0,
+              backup: formData.propertyDetails.electricitySupply.backup
+            },
+            waterAvailability: formData.propertyDetails.waterAvailability,
+            propertyAge: formData.propertyDetails.propertyAge || 0,
+            propertyCondition: formData.propertyDetails.propertyCondition
+          },
+          rentalTerms: formData.rentalTerms,
+          availability: {
+            availableFrom: formData.rentalTerms.availability.availableFrom,
+            availableImmediately: formData.rentalTerms.availability.availableImmediately,
+            type: formData.rentalTerms.availability.type
+          },
+          contactInformation: formData.contactInformation,
           media: convertedMedia,
           metadata: {
             createdBy: author,
@@ -809,30 +1016,32 @@ const RentCoveredSpace = () => {
           }
         };
 
-
-        console.log(transformedData);
-        const response = await axios.post('/api/commercial-rent-warehouses', transformedData, {
+        // Send the data to the backend
+        const response = await axios.post('/api/commercial-rent-covered-space', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
-        console.log(response.data)
 
         if (response.data.success) {
-          toast.success('Commercial warehouse listing created successfully!');
+          toast.success('Commercial covered space listing created successfully!');
+          // Redirect to the property listing page or dashboard
+          navigate('/dashboard');
+        } else {
+          toast.error(response.data.error || 'Failed to create listing. Please try again.');
         }
       } else {
         navigate('/login');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to create commercial shop listing. Please try again.');
+      const errorMessage = error.response?.data?.error || error.response?.data?.details || 'Failed to create commercial covered space listing. Please try again.';
+      toast.error(errorMessage);
     }
-    // console.log(formData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-12">
+    <div onSubmit={handleSubmit} className="space-y-12">
       <div className="space-y-12">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -896,7 +1105,7 @@ const RentCoveredSpace = () => {
           </button>
         )}
       </div>
-    </form>
+    </div>
   );
 };
 

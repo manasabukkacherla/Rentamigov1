@@ -127,7 +127,7 @@ interface IFloor {
   totalFloors: number;
 }
 
-interface ICommercialOpenSpace extends Document {
+interface ICommercialRentOpenSpace extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   warehouseDetails: {
@@ -170,7 +170,7 @@ interface ICommercialOpenSpace extends Document {
 }
 
 // Schema
-const CommercialOpenSpaceSchema = new Schema<ICommercialOpenSpace>({
+const CommercialRentOpenSpaceSchema = new Schema<ICommercialRentOpenSpace>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
@@ -288,13 +288,13 @@ const CommercialOpenSpaceSchema = new Schema<ICommercialOpenSpace>({
 });
 
 // Indexes
-CommercialOpenSpaceSchema.index({ propertyId: 1 }, { unique: true });
-CommercialOpenSpaceSchema.index({ 'basicInformation.city': 1 });
-CommercialOpenSpaceSchema.index({ 'basicInformation.state': 1 });
-CommercialOpenSpaceSchema.index({ 'pricingDetails.propertyPrice': 1 });
-CommercialOpenSpaceSchema.index({ 'propertyDetails.area.totalArea': 1 });
-CommercialOpenSpaceSchema.index({ 'metadata.createdAt': -1 });
+CommercialRentOpenSpaceSchema.index({ propertyId: 1 }, { unique: true });
+CommercialRentOpenSpaceSchema.index({ 'basicInformation.city': 1 });
+CommercialRentOpenSpaceSchema.index({ 'basicInformation.state': 1 });
+CommercialRentOpenSpaceSchema.index({ 'pricingDetails.propertyPrice': 1 });
+CommercialRentOpenSpaceSchema.index({ 'propertyDetails.area.totalArea': 1 });
+CommercialRentOpenSpaceSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialOpenSpace, IBasicInformation, IArea, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialOpenSpace>('CommercialOpenSpace', CommercialOpenSpaceSchema); 
+export { ICommercialRentOpenSpace, IBasicInformation, IArea, IAvailability, IContactInformation, IMedia, IMetadata };
+export default model<ICommercialRentOpenSpace>('CommercialRentOpenSpace', CommercialRentOpenSpaceSchema); 

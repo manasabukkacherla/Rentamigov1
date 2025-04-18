@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
-import CommercialOpenSpace from '../models/commercial/CommercialopenSpace';
+import CommercialRentOpenSpace from '../../models/commercial/CommercialRentopenSpace';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
 
-// Generate property ID with format RA-COMREWH-XXXX
+// Generate property ID with format RA-COMREOS-XXXX
 const generatePropertyId = async (): Promise<string> => {
   try {
     // Prefix for the commercial shop property ID
     const prefix = "RA-COMREOS";
     
     // Find the shop with the highest property ID number
-    const highestShop = await CommercialOpenSpace.findOne({
+    const highestShop = await CommercialRentOpenSpace.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
     }).sort({ propertyId: -1 });
     
@@ -28,7 +28,7 @@ const generatePropertyId = async (): Promise<string> => {
     const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
     
     // Check if this exact ID somehow exists (should be rare but possible with manual entries)
-    const existingWithExactId = await CommercialOpenSpace.findOne({ propertyId });
+    const existingWithExactId = await CommercialRentOpenSpace.findOne({ propertyId });
     
     if (existingWithExactId) {
       // In case of collision (e.g., if IDs were manually entered), recursively try the next number
@@ -39,7 +39,7 @@ const generatePropertyId = async (): Promise<string> => {
       const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
       
       // Double-check this new ID
-      const forcedExisting = await CommercialOpenSpace.findOne({ propertyId: forcedPropertyId });
+      const forcedExisting = await CommercialRentOpenSpace.findOne({ propertyId: forcedPropertyId });
       
       if (forcedExisting) {
         // If still colliding, recursively generate a new ID
@@ -59,7 +59,7 @@ const generatePropertyId = async (): Promise<string> => {
 };
 
 // Create a new commercial shop listing
-export const createRentOpenSpace = async (req: Request, res: Response) => {
+export const createCommercialRentOpenSpace = async (req: Request, res: Response) => {
   try {
     const formData = req.body;
     console.log(formData)
@@ -81,7 +81,7 @@ export const createRentOpenSpace = async (req: Request, res: Response) => {
     };
 
     // // Create new shop listing
-    const openSpace = new CommercialOpenSpace(openSpaceData);
+    const openSpace = new CommercialRentOpenSpace(openSpaceData);
     await openSpace.save();
 
     res.status(201).json({
@@ -97,4 +97,31 @@ export const createRentOpenSpace = async (req: Request, res: Response) => {
     });
   }
 };
+
+// export const getAllOpenSpaces = async (req: Request, res: Response) => {
+//   try {
+//     const openSpaces = await CommercialOpenSpace.find();
+//     res.status(200).json(openSpaces);
+//   } catch (error) {
+//     res.status(500).json({
+//       error: 'Failed to fetch commercial open spaces',
+//       details: error.message
+//     });
+//   }
+// };
+
+// export const getOpenSpaceById = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const openSpace = await CommercialOpenSpace.findById(id);
+//     res.status(200).json(openSpace);
+//   } catch (error: any) {
+//     res.status(500).json({
+//       error: 'Failed to fetch commercial open space',
+//       details: error.message
+//     });
+//   }
+// };  
+
+
 

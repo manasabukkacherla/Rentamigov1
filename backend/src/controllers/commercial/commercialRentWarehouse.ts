@@ -77,6 +77,7 @@ export const createRentWarehouse = async (req: Request, res: Response) => {
         // createdAt: new Date(),
         // updatedAt: new Date(),
         // isVerified: false
+        createdAt: new Date()
       }
     };
 
