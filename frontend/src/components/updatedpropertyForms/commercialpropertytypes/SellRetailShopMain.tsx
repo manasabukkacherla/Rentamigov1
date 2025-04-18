@@ -1,48 +1,230 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import PropertyName from "../PropertyName"
 import RetailStoreType from "../CommercialComponents/RetailStoreType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
-import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import RetailStoreDetails from "../CommercialComponents/RetailStoreDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
-import PricePerSqft from "../sell/PricePerSqft"
 import RegistrationCharges from "../sell/RegistrationCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import axios from "axios"
+import { toast } from "react-hot-toast"
+
+interface MediaFile {
+  url: string;
+  file: File;
+}
+
+interface MediaCategory {
+  category: string;
+  files: MediaFile[];
+}
+
+interface MediaDocument {
+  type: string;
+  file: File;
+}
+
+interface FormDataState {
+  basicInformation: {
+    title: string;
+    retailStoreType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
+  };
+  retailStoreDetails: {
+    location: string;
+    anchorStores: boolean;
+    footfallData: string;
+    signageAllowed: boolean;
+    sharedWashrooms: boolean;
+    fireExit: boolean;
+  };
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string[];
+    propertyAge: number;
+    propertyCondition: string;
+    ownershipType: string;
+    possessionStatus: string;
+  };
+  priceDetails: {
+    price: number;
+    pricePerSqft: number;
+    isNegotiable: boolean;
+    registrationCharges: {
+      registrationAmount: number;
+      stampDuty: number;
+      otherCharges: number;
+    };
+    brokerage: {
+      required: string;
+      amount: number;
+    };
+    availability: {
+      type: string;
+      date?: string;
+    };
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
+  media: {
+    images: MediaCategory[];
+    video: { url: string; file: File } | null;
+    documents: MediaDocument[];
+  };
+  metadata?: {
+    createdBy?: string;
+    createdAt?: Date;
+    status?: string;
+    isVerified?: boolean;
+  };
+}
 
 const SellRetailShopMain = () => {
-  const [formData, setFormData] = useState({
-    propertyName: "",
-    retailStoreType: "",
-    address: {},
-    landmark: "",
-    coordinates: { latitude: "", longitude: "" },
-    isCornerProperty: false,
-    retailStoreDetails: {},
-    propertyDetails: {},
-    price: "",
-    area: {
-      superBuiltUpAreaSqft: "",
-      builtUpAreaSqft: "",
-      carpetAreaSqft: "",
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<FormDataState>({
+    basicInformation: {
+      title: '',
+      retailStoreType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0
+      },
+      isCornerProperty: false
     },
-    registrationCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [], video: null },
-  })
+    retailStoreDetails: {
+      location: '',
+      anchorStores: false,
+      footfallData: '',
+      signageAllowed: false,
+      sharedWashrooms: false,
+      fireExit: false
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false
+      },
+      waterAvailability: [],
+      propertyAge: 0,
+      propertyCondition: '',
+      ownershipType: 'Freehold',
+      possessionStatus: 'Ready to Move'
+    },
+    priceDetails: {
+      price: 0,
+      pricePerSqft: 0,
+      isNegotiable: false,
+      registrationCharges: {
+        registrationAmount: 0,
+        stampDuty: 0,
+        otherCharges: 0
+      },
+      brokerage: {
+        required: 'No',
+        amount: 0
+      },
+      availability: {
+        type: 'Ready to Move',
+        date: ''
+      }
+    },
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
+    media: {
+      images: [
+        { category: 'exterior', files: [] },
+        { category: 'interior', files: [] },
+        { category: 'floorPlan', files: [] },
+        { category: 'washrooms', files: [] },
+        { category: 'lifts', files: [] },
+        { category: 'emergencyExits', files: [] }
+      ],
+      video: null,
+      documents: []
+    }
+  });
 
   const [currentStep, setCurrentStep] = useState(0)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Check login status on component mount
+  useEffect(() => {
+    const user = sessionStorage.getItem('user')
+    if (!user) {
+      navigate('/login')
+    } else {
+      setIsLoggedIn(true)
+    }
+  }, [navigate])
 
   // Define form steps
   const steps = [
@@ -58,10 +240,10 @@ const SellRetailShopMain = () => {
             </div>
             <div className="space-y-6">
               <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+                propertyName={formData.basicInformation.title}
+                onPropertyNameChange={(name: string) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
               />
-              <RetailStoreType onRetailTypeChange={(type) => setFormData({ ...formData, retailStoreType: type })} />
+              <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: types } })} />
             </div>
           </div>
 
@@ -71,11 +253,11 @@ const SellRetailShopMain = () => {
               <h3 className="text-xl font-semibold text-black">Location Details</h3>
             </div>
             <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, address })} />
-              <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })} />
+              <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })} />
+              <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })} />
               
               <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
+                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
               />
             </div>
           </div>
@@ -93,10 +275,45 @@ const SellRetailShopMain = () => {
           </div>
           <div className="space-y-6">
             <RetailStoreDetails
-              onDetailsChange={(details) => setFormData({ ...formData, retailStoreDetails: details })}
+              onDetailsChange={(details) => setFormData({
+                ...formData,
+                retailStoreDetails: {
+                  location: details.location || '',
+                  anchorStores: details.anchorStores || false,
+                  footfallData: details.footfallData || '',
+                  signageAllowed: details.signageAllowed || false,
+                  sharedWashrooms: details.sharedWashrooms || false,
+                  fireExit: details.fireExit || false
+                }
+              })}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
+              onDetailsChange={(details) => setFormData({
+                ...formData,
+                propertyDetails: {
+                  ...formData.propertyDetails,
+                  area: {
+                    totalArea: parseFloat(details.area?.totalArea?.toString() || '0'),
+                    carpetArea: parseFloat(details.area?.carpetArea?.toString() || '0'),
+                    builtUpArea: parseFloat(details.area?.builtUpArea?.toString() || '0')
+                  },
+                  floor: {
+                    floorNumber: parseInt(details.floor?.floorNumber?.toString() || '0'),
+                    totalFloors: parseInt(details.floor?.totalFloors?.toString() || '0')
+                  },
+                  facingDirection: details.facingDirection || '',
+                  furnishingStatus: details.furnishingStatus || '',
+                  propertyAmenities: details.propertyAmenities || [],
+                  wholeSpaceAmenities: details.wholeSpaceAmenities || [],
+                  electricitySupply: {
+                    powerLoad: parseFloat(details.electricitySupply?.powerLoad?.toString() || '0'),
+                    backup: details.electricitySupply?.backup || false
+                  },
+                  waterAvailability: details.waterAvailability || [],
+                  propertyAge: parseInt(details.propertyAge?.toString() || '0'),
+                  propertyCondition: details.propertyCondition || ''
+                }
+              })}
             />
           </div>
         </div>
@@ -115,8 +332,13 @@ const SellRetailShopMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => setFormData({ ...formData, price: price.amount })} />
-                <PricePerSqft price={formData.price} area={formData.area} />
+                <Price onPriceChange={(price) => setFormData({
+                  ...formData,
+                  priceDetails: {
+                    ...formData.priceDetails,
+                    price: parseFloat(price.amount.toString())
+                  }
+                })} />
               </div>
             </div>
             
@@ -125,12 +347,31 @@ const SellRetailShopMain = () => {
               <div className="space-y-4 text-black">
                 <div className="text-black">
                   <RegistrationCharges
-                    onRegistrationChargesChange={(charges) => setFormData({ ...formData, registrationCharges: charges })}
+                    onRegistrationChargesChange={(charges) => setFormData({
+                      ...formData,
+                      priceDetails: {
+                        ...formData.priceDetails,
+                        registrationCharges: {
+                          registrationAmount: parseFloat(charges.registrationAmount?.toString() || '0'),
+                          stampDuty: parseFloat(charges.stampDuty?.toString() || '0'),
+                          otherCharges: parseFloat(charges.otherCharges?.toString() || '0')
+                        }
+                      }
+                    })}
                   />
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })} />
+                  <Brokerage onBrokerageChange={(brokerage) => setFormData({
+                    ...formData,
+                    priceDetails: {
+                      ...formData.priceDetails,
+                      brokerage: {
+                        required: brokerage.required || 'No',
+                        amount: parseFloat(brokerage.amount?.toString() || '0')
+                      }
+                    }
+                  })} />
                 </div>
               </div>
             </div>
@@ -148,7 +389,16 @@ const SellRetailShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Availability</h3>
           </div>
           <div className="space-y-6">
-            <CommercialAvailability onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
+            <CommercialAvailability onAvailabilityChange={(availability) => setFormData({
+              ...formData,
+              priceDetails: {
+                ...formData.priceDetails,
+                availability: {
+                  type: availability.type || 'Ready to Move',
+                  date: availability.date
+                }
+              }
+            })} />
           </div>
         </div>
       ),
@@ -164,7 +414,16 @@ const SellRetailShopMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails
-              onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
+              onContactChange={(contact) => setFormData({
+                ...formData,
+                contactInformation: {
+                  name: contact.name || '',
+                  email: contact.email || '',
+                  phone: contact.phone || '',
+                  alternatePhone: contact.alternatePhone,
+                  bestTimeToContact: contact.bestTimeToContact
+                }
+              })}
             />
           </div>
         </div>
@@ -180,7 +439,18 @@ const SellRetailShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />
+            <CommercialMediaUpload 
+              onMediaChange={(mediaData) => {
+                setFormData({ 
+                  ...formData, 
+                  media: {
+                    images: mediaData.images,
+                    video: mediaData.video || null, 
+                    documents: mediaData.documents
+                  } 
+                });
+              }} 
+            />
           </div>
         </div>
       ),
@@ -189,20 +459,178 @@ const SellRetailShopMain = () => {
 
   // Navigation handlers
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+    if (validateCurrentStep()) {
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
-  }
+  };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Validation function for each step
+  function validateCurrentStep(): boolean {
+    switch (currentStep) {
+      case 0: // Basic Information
+        return !!formData.basicInformation.title && 
+               formData.basicInformation.retailStoreType.length > 0 &&
+               !!formData.basicInformation.address.street;
+      case 1: // Property Details
+        return !!formData.retailStoreDetails.location && 
+               formData.propertyDetails.area.totalArea > 0;
+      case 2: // Pricing Details
+        return formData.priceDetails.price > 0;
+      case 3: // Availability
+        return !!formData.priceDetails.availability.type;
+      case 4: // Contact Information
+        return !!formData.contactInformation.name && 
+               !!formData.contactInformation.email && 
+               !!formData.contactInformation.phone;
+      default:
+        return true;
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Form Data:", formData)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form Data:', formData);
+    setIsSubmitting(true);
+    
+    try {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('You need to be logged in to create a listing');
+        navigate('/login');
+        return;
+      }
+
+      const userData = JSON.parse(user);
+      const author = userData.id;
+      const token = sessionStorage.getItem('token');
+      
+      // Convert media files to base64
+      const convertFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
+      };
+
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all(
+            (formData.media.images.find(img => img.category === 'exterior')?.files || [])
+              .map(fileObj => convertFileToBase64(fileObj.file))
+          ),
+          interior: await Promise.all(
+            (formData.media.images.find(img => img.category === 'interior')?.files || [])
+              .map(fileObj => convertFileToBase64(fileObj.file))
+          ),
+          floorPlan: await Promise.all(
+            (formData.media.images.find(img => img.category === 'floorPlan')?.files || [])
+              .map(fileObj => convertFileToBase64(fileObj.file))
+          ),
+          washrooms: await Promise.all(
+            (formData.media.images.find(img => img.category === 'washrooms')?.files || [])
+              .map(fileObj => convertFileToBase64(fileObj.file))
+          ),
+          lifts: await Promise.all(
+            (formData.media.images.find(img => img.category === 'lifts')?.files || [])
+              .map(fileObj => convertFileToBase64(fileObj.file))
+          ),
+          emergencyExits: await Promise.all(
+            (formData.media.images.find(img => img.category === 'emergencyExits')?.files || [])
+              .map(fileObj => convertFileToBase64(fileObj.file))
+          )
+        },
+        videoTour: formData.media.video ? await convertFileToBase64(formData.media.video.file) : undefined,
+        documents: await Promise.all(formData.media.documents.map(doc => convertFileToBase64(doc.file)))
+      };
+
+      console.log('Sending data to backend with author ID:', author);
+      
+      const transformedData = {
+        basicInformation: formData.basicInformation,
+        retailStoreDetails: formData.retailStoreDetails,
+        propertyDetails: formData.propertyDetails,
+        priceDetails: formData.priceDetails,
+        contactInformation: formData.contactInformation,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          status: 'draft',
+          isVerified: false
+        }
+      };
+
+      // Use the same format as in the backend routes configuration
+      const API_ENDPOINT = '/api/commercial/sell/retail-store';
+      console.log(`About to send API request to ${API_ENDPOINT}`);
+      console.log('Request headers:', {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : ''
+      });
+
+      const response = await axios.post(API_ENDPOINT, transformedData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+
+      console.log('API response:', response.data);
+
+      if (response.data.success) {
+        toast.success('Commercial sell retail shop listing created successfully!');
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
+      } else {
+        toast.error(response.data.error || 'Failed to create listing');
+      }
+    } catch (error: any) {
+      console.error('Error submitting form:', error);
+      
+      // Improved error handling with better user feedback
+      if (error.response) {
+        // Server responded with an error
+        const errorMessage = error.response.data.error || error.response.data.message || 'Failed to create listing';
+        toast.error(errorMessage);
+      } else if (error.request) {
+        // Request was made but no response
+        toast.error('No response from server. Please check your internet connection and try again.');
+      } else {
+        // Error in setting up the request
+        toast.error('Failed to create commercial sell retail shop listing. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  // Show login prompt if not logged in
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -289,8 +717,9 @@ const SellRetailShopMain = () => {
                 <button
                   type="submit"
                   className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+                  disabled={isSubmitting}
                 >
-                  Submit
+                  {isSubmitting ? "Submitting..." : "Submit"}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </button>
               )}

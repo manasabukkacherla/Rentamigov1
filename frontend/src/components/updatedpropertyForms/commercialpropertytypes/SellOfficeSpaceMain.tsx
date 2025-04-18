@@ -1,16 +1,17 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import axios from "axios"
 import PropertyName from "../PropertyName"
 import OfficeSpaceType from "../CommercialComponents/OfficeSpaceType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
-import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import OfficeSpaceDetails from "../CommercialComponents/OfficeSpaceDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
-import PricePerSqft from "../sell/PricePerSqft"
 import RegistrationCharges from "../sell/RegistrationCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
@@ -20,9 +21,7 @@ import {
   MapPin, 
   Building2, 
   DollarSign, 
-  Calendar, 
-  User, 
-  Image, 
+  Calendar,  
   Briefcase, 
   ImageIcon, 
   UserCircle,
@@ -30,30 +29,147 @@ import {
   ChevronRight
 } from "lucide-react"
 
+// Define proper interface for form data
+interface FormData {
+  propertyName: string;
+  officeType: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  landmark: string;
+  coordinates: { 
+    latitude: string; 
+    longitude: string 
+  };
+  isCornerProperty: boolean;
+  officeDetails: Record<string, any>;
+  propertyDetails: Record<string, any>;
+  price: {
+    expectedPrice: number;
+    isNegotiable: boolean;
+  };
+  area: {
+    totalArea: number;
+    builtUpArea: number;
+    carpetArea: number;
+  };
+  registrationCharges: {
+    included: boolean;
+    amount?: number;
+    stampDuty?: number;
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: 'immediate' | 'specific';
+    date?: string;
+  };
+  contactDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+      others: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+  };
+}
+
+// Helper function to convert File objects to base64 strings
+const convertFileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+};
+
 const SellOfficeSpaceMain = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Initialize form data with proper structure
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
     officeType: "",
-    address: {},
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
     officeDetails: {},
     propertyDetails: {},
-    price: "",
-    area: {
-      superBuiltUpAreaSqft: "",
-      builtUpAreaSqft: "",
-      carpetAreaSqft: "",
+    price: {
+      expectedPrice: 0,
+      isNegotiable: false
     },
-    registrationCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [], video: null },
-  })
+    area: {
+      totalArea: 0,
+      builtUpArea: 0,
+      carpetArea: 0
+    },
+    registrationCharges: {
+      included: false
+    },
+    brokerage: {
+      required: "No"
+    },
+    availability: {
+      type: "immediate"
+    },
+    contactDetails: {
+      name: "",
+      email: "",
+      phone: "",
+      alternatePhone: "",
+      bestTimeToContact: ""
+    },
+    media: { 
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+        others: []
+      },
+      videoTour: null,
+      documents: []
+    }
+  });
 
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0);
+
+  // Check login status on component mount
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (user) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const steps = [
     {
@@ -72,7 +188,11 @@ const SellOfficeSpaceMain = () => {
                 onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
               />
               <OfficeSpaceType
-                onOfficeTypeChange={(type) => setFormData((prev) => ({ ...prev, officeType: type }))}
+                onOfficeTypeChange={(types) => {
+                  if (types && types.length > 0) {
+                    setFormData((prev) => ({ ...prev, officeType: types[0] }))
+                  }
+                }}
               />
             </div>
           </div>
@@ -86,7 +206,16 @@ const SellOfficeSpaceMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               />
-              <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
+              <Landmark 
+                onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+                onLocationSelect={(location) => setFormData((prev) => ({
+                  ...prev,
+                  coordinates: {
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  }
+                }))}
+              />
               
               <CornerProperty
                 onCornerPropertyChange={(isCorner) =>
@@ -112,7 +241,21 @@ const SellOfficeSpaceMain = () => {
               onDetailsChange={(details) => setFormData((prev) => ({ ...prev, officeDetails: details }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
+              onDetailsChange={(details) => {
+                setFormData((prev) => {
+                  // Extract area data for price per sqft calculations
+                  const area = {
+                    totalArea: Number(details.area?.totalArea || 0),
+                    builtUpArea: Number(details.area?.builtUpArea || 0),
+                    carpetArea: Number(details.area?.carpetArea || 0)
+                  };
+                  return { 
+                    ...prev,
+                    propertyDetails: details,
+                    area
+                  };
+                });
+              }}
             />
           </div>
         </div>
@@ -131,8 +274,16 @@ const SellOfficeSpaceMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
-                <PricePerSqft price={formData.price} area={formData.area} />
+                <Price onPriceChange={(price) => 
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    price: {
+                      expectedPrice: parseFloat(price.propertyPrice.toString()),
+                      isNegotiable: price.pricetype === 'negotiable'
+                    }
+                  }))
+                } />
+                
               </div>
             </div>
             
@@ -142,13 +293,30 @@ const SellOfficeSpaceMain = () => {
                 <div className="text-black">
                   <RegistrationCharges
                     onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({ ...prev, registrationCharges: charges }))
+                      setFormData((prev) => ({ 
+                        ...prev, 
+                        registrationCharges: {
+                          included: charges.included,
+                          amount: charges.amount,
+                          stampDuty: charges.stampDuty
+                        }
+                      }))
                     }
                   />
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
+                  <Brokerage 
+                    onBrokerageChange={(brokerage) => 
+                      setFormData((prev) => ({ 
+                        ...prev, 
+                        brokerage: {
+                          required: brokerage.required,
+                          amount: brokerage.amount
+                        }
+                      }))
+                    } 
+                  />
                 </div>
               </div>
             </div>
@@ -167,7 +335,15 @@ const SellOfficeSpaceMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialAvailability
-              onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
+              onAvailabilityChange={(availability) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  availability: {
+                    type: availability.type,
+                    date: availability.date
+                  }
+                }));
+              }}
             />
           </div>
         </div>
@@ -184,7 +360,16 @@ const SellOfficeSpaceMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
+              onContactChange={(contact) => setFormData((prev) => ({ 
+                ...prev, 
+                contactDetails: {
+                  name: contact.name,
+                  email: contact.email,
+                  phone: contact.phone,
+                  alternatePhone: contact.alternatePhone,
+                  bestTimeToContact: contact.bestTimeToContact
+                }
+              }))}
             />
           </div>
         </div>
@@ -200,28 +385,143 @@ const SellOfficeSpaceMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))} />
+            <CommercialMediaUpload 
+              onMediaChange={(media) => {
+                const photos: Record<string, File[]> = {};
+                media.images.forEach(({ category, files }) => {
+                  photos[category] = files.map(f => f.file);
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photos.exterior || [],
+                      interior: photos.interior || [],
+                      floorPlan: photos.floorPlan || [],
+                      washrooms: photos.washrooms || [],
+                      lifts: photos.lifts || [],
+                      emergencyExits: photos.emergencyExits || [],
+                      others: photos.others || []
+                    },
+                    videoTour: media.video?.file || null,
+                    documents: media.documents.map(d => d.file)
+                  }
+                }));
+              }}
+            />
           </div>
         </div>
       ),
     },
-  ]
+  ];
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
     }
-  }
+  };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
-  }
+  };
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    console.log("Form Data:", formData)
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    console.log("Form Data:", formData);
+    
+    try {
+      setIsSubmitting(true);
+      
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('You must be logged in to create a property listing');
+        return;
+      }
+      
+      const userData = JSON.parse(user);
+      const author = userData.id;
+      
+     
+      
+      // Convert uploaded files to base64 strings
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all((formData.media?.photos?.exterior || []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior || []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan || []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms || []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts || []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits || []).map(convertFileToBase64)),
+          others: await Promise.all((formData.media?.photos?.others || []).map(convertFileToBase64))
+        },
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents || []).map(convertFileToBase64))
+      };
+      
+      // Create payload for API
+      const transformedData = {
+        basicInformation: {
+          title: formData.propertyName,
+          officeType: [formData.officeType],
+          address: formData.address,
+          landmark: formData.landmark,
+          location: {
+            latitude: formData.coordinates.latitude,
+            longitude: formData.coordinates.longitude
+          },
+          isCornerProperty: formData.isCornerProperty
+        },
+        officeDetails: formData.officeDetails,
+        propertyDetails: formData.propertyDetails,
+        price: formData.price,
+        registrationCharges: formData.registrationCharges,
+        brokerage: formData.brokerage,
+        availability: formData.availability,
+        contactInformation: formData.contactDetails,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date()
+        }
+      };
+      
+      // Send data to API
+      const response = await axios.post('/api/commercial/sell/office-space', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (response.data.success) {
+        toast.success('Sell office space listing created successfully!');
+      } else {
+        toast.error(response.data.message || 'Failed to create listing');
+      }
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      toast.error(error.response?.data?.message || 'Failed to create property listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
+          <button
+            onClick={() => navigate('/login')}
+            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -308,17 +608,18 @@ const SellOfficeSpaceMain = () => {
             <button
               type="submit"
               onClick={handleSubmit}
+              disabled={isSubmitting}
               className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
             >
-              Submit
+              {isSubmitting ? 'Submitting...' : 'Submit'}
               <ChevronRight className="w-5 h-5 ml-2" />
             </button>
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SellOfficeSpaceMain
+export default SellOfficeSpaceMain;
 
