@@ -197,8 +197,7 @@ app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
 app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
-app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
-app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
+ 
 
 app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.get("/testing", (req: Request, res: Response) => {
