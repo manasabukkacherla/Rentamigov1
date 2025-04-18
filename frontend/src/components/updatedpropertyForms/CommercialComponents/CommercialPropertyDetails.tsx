@@ -20,7 +20,7 @@ interface CommercialPropertyDetailsProps {
       powerLoad: number | null;
       backup: boolean;
     };
-    waterAvailability: string[];
+    waterAvailability: string;
     propertyAge: number | null;
     propertyCondition: string;
   }) => void;
@@ -45,7 +45,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
       powerLoad: null as number | null,
       backup: false
     },
-    waterAvailability: [] as string[],
+    waterAvailability: '',
     propertyAge: null as number | null,
     propertyCondition: 'new'
   });
@@ -78,7 +78,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
         powerLoad: propertyDetails.electricitySupply.powerLoad,
         backup: propertyDetails.electricitySupply.backup
       },
-      waterAvailability: propertyDetails.waterAvailability || [],
+      waterAvailability: propertyDetails.waterAvailability,
       propertyAge: propertyDetails.propertyAge,
       propertyCondition: propertyDetails.propertyCondition
     };
@@ -92,7 +92,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
         powerLoad: null,
         backup: false
       },
-      waterAvailability: [],
+      waterAvailability: '',
       propertyAge: null,
       propertyCondition: 'new'
     });
@@ -353,24 +353,17 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             <Droplets size={20} className="text-black" />
             Water Availability
           </h4>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {['24x7', 'scheduled', 'limited'].map((option) => (
-              <label key={option} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  checked={propertyDetails.waterAvailability.includes(option)}
-                  onChange={(e) => {
-                    const newAvailability = e.target.checked
-                      ? [...propertyDetails.waterAvailability, option]
-                      : propertyDetails.waterAvailability.filter(item => item !== option);
-                    handleChange('waterAvailability', newAvailability);
-                  }}
-                  className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
-                />
-                <span className="text-black">{option.charAt(0).toUpperCase() + option.slice(1)}</span>
-              </label>
-            ))}
-          </div>
+          <select
+            value={propertyDetails.waterAvailability}
+            onChange={(e) => handleChange('waterAvailability', e.target.value)}
+            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
+          >
+            <option value="" disabled>Select Availability</option>
+            <option value="24 Hours">24 Hours Available</option>
+            <option value="Limited Hours">Limited Hours</option>
+            <option value="None">None</option>
+            {/* Add other relevant options as needed */}
+          </select>
         </div>
 
         {/* Property Age and Condition */}

@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import CommercialShed from '../../models/commercial/CommercialSellShed';
-import { ICommercialSellShed } from '../../models/commercial/CommercialSellShed';
 
 // Generate property ID with format RA-COMSHED-XXXX
 const generatePropertyId = async (): Promise<string> => {
