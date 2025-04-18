@@ -192,15 +192,14 @@ app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
 
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
-app.use('/api/commercial/warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
 app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
+app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
-app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
-app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
 
-app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
+
+
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
   res.json({ message: "Test message" });
@@ -234,9 +233,9 @@ const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8000;
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log("Environment variables loaded:", {
-    VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "****" : undefined,
-    ACCOUNT_SID: process.env.ACCOUNT_SID ? "****" : undefined,
-    AUTH_TOKEN: process.env.AUTH_TOKEN ? "****" : undefined,
+    VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "" : undefined,
+    ACCOUNT_SID: process.env.ACCOUNT_SID ? "" : undefined,
+    AUTH_TOKEN: process.env.AUTH_TOKEN ? "" : undefined,
   });
 }).on('error', (error: NodeJS.ErrnoException) => {
   if (error.code === 'EADDRINUSE') {

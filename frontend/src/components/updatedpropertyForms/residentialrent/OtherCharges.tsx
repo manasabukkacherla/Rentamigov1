@@ -21,10 +21,10 @@ interface ChargesState {
 
 const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => {
   const [charges, setCharges] = useState<ChargesState>({
-    water: { amount: 0, type: 'inclusive' },
-    electricity: { amount: 0, type: 'inclusive' },
-    gas: { amount: 0, type: 'inclusive' },
-    others: { amount: 0, type: 'inclusive' },
+    water: { amount: 0, type: '' },
+    electricity: { amount: 0, type: '' },
+    gas: { amount: 0, type: '' },
+    others: { amount: 0, type: '' },
   })
 
   const handleChange = (field: keyof ChargesState, value: any) => {
@@ -78,20 +78,20 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
               <button
                 type="button"
                 onClick={() =>
-                  handleChange(key as keyof typeof charges, {
-                    ...(charges[key as keyof typeof charges] as Charge),
+                    handleChange(key as keyof typeof charges, {
+                      ...(charges[key as keyof typeof charges] as Charge),
                     type: 'exclusive',
-                  })
-                }
+                    })
+                  }
                 className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
                   (charges[key as keyof typeof charges] as Charge).type === 'exclusive'
                     ? "bg-blue-50 border-blue-500 text-blue-700"
                     : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
                 }`}
-              >
+                >
                 Exclusive
               </button>
-            </div>
+              </div>
 
             {(charges[key as keyof typeof charges] as Charge).type === 'exclusive' && (
               <div className="mt-4">
