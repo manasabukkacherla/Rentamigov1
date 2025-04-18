@@ -8,12 +8,10 @@ import PropertyName from "../PropertyName"
 import OfficeSpaceType from "../CommercialComponents/OfficeSpaceType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
-import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import OfficeSpaceDetails from "../CommercialComponents/OfficeSpaceDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
-import PricePerSqft from "../sell/PricePerSqft"
 import RegistrationCharges from "../sell/RegistrationCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
@@ -23,9 +21,7 @@ import {
   MapPin, 
   Building2, 
   DollarSign, 
-  Calendar, 
-  User, 
-  Image, 
+  Calendar,  
   Briefcase, 
   ImageIcon, 
   UserCircle,
