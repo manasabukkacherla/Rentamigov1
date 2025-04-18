@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import MapSelector from "../MapSelector"
 import ShopDetails from "../CommercialComponents/ShopDetails"
@@ -14,326 +13,433 @@ import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar } from "lucide-react"
+import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
+import Landmark from "../CommercialComponents/Landmark"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+import PropertyName from "../PropertyName"
+import ShopType from "../CommercialComponents/ShopType"
+import CornerProperty from "../CommercialComponents/CornerProperty"
 
-const globalStyles = `
-  input::placeholder,
-  textarea::placeholder {
-    color: rgba(0, 0, 0, 0.6);
-  }
-  
-  /* Make radio button and checkbox text black */
-  input[type="radio"] + label,
-  input[type="checkbox"] + label {
-    color: black;
-  }
-  
-  /* Make select placeholder text black */
-  select {
-    color: black;
-  }
-  
-  /* Make all form labels black */
-  label {
-    color: black;
-  }
-  
-  /* Make all input text black */
-  input,
-  textarea,
-  select {
-    color: black;
-  }
-`;
-
-interface FormData {
-  propertyName: string
-  shopType: string
-  address: Record<string, string>
-  landmark: string
-  coordinates: {
-    latitude: string
-    longitude: string
-  }
-  isCornerProperty: boolean
-  shopDetails: Record<string, any>
-  propertyDetails: {
-    expectedRent: string
-    isNegotiable: boolean
-    rentType: string
-  }
-  securityDeposit: Record<string, any>
-  maintenanceAmount: Record<string, any>
-  otherCharges: Record<string, any>
-  brokerage: Record<string, any>
-  availabilityDate: Record<string, any>
-  contactDetails: Record<string, string>
-  media: {
-    images: { category: string; files: { url: string; file: File }[] }[]
-    video?: { url: string; file: File }
-    documents: { type: string; file: File }[]
-  }
+interface IBasicInformation {
+  title: string;
+  shopType: string[];
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  landmark: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  isCornerProperty: boolean;
 }
 
-// Error display component for validation errors
-const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
-  if (Object.keys(errors).length === 0) return null;
-  
-  return (
-    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-      <div className="flex items-center">
-        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
-      </div>
-      <ul className="mt-2 list-disc list-inside text-red-600">
-        {Object.values(errors).map((error, index) => (
-          <li key={index} className="text-sm">{error}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+interface IShopDetails {
+  frontageWidth: number;
+  heightOfShop: number;
+  displayWindow: boolean;
+  attachedStorageRoom: boolean;
+  averageFootTraffic: string;
+  customerParking: boolean;
+  previousBusiness: string;
+}
+
+interface IRentalTerms {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  };
+  securityDeposit: {
+    amount: number;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount?: number;
+      type: string;
+    };
+    electricity: {
+      amount?: number;
+      type: string;
+    };
+    gas: {
+      amount?: number;
+      type: string;
+    };
+    others: {
+      amount?: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
+  };
+}
+
+interface IContactInformation {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+}
+
+interface IMedia {
+  photos: {
+    exterior: File[];
+    interior: File[];
+    floorPlan: File[];
+    washrooms: File[];
+    lifts: File[];
+    emergencyExits: File[];
+  };
+  videoTour: File | null;
+  documents: File[];
+}
+
+interface FormData {
+  basicInformation: IBasicInformation;
+  shopDetails: IShopDetails;
+  rentalTerms: IRentalTerms;
+  contactInformation: IContactInformation;
+  media: IMedia;
+}
+
+interface PropertyNameProps {
+  propertyName: string;
+  onPropertyNameChange: (name: string) => void;
+}
+
+interface ShopTypeProps {
+  onShopTypeChange: (types: string[]) => void;
+}
+
+interface CornerPropertyProps {
+  onCornerPropertyChange: (isCorner: boolean) => void;
+}
+
+interface ShopDetailsProps {
+  onDetailsChange: (details: IShopDetails) => void;
+}
+
+interface RentProps {
+  onRentChange: (rent: { expectedRent: number; isNegotiable: boolean; rentType: string }) => void;
+}
+
+interface SecurityDepositProps {
+  onSecurityDepositChange: (deposit: { amount: number }) => void;
+}
+
+interface MaintenanceAmountProps {
+  onMaintenanceAmountChange: (maintenance: { amount: number; frequency: string }) => void;
+}
+
+interface OtherChargesProps {
+  onOtherChargesChange: (charges: {
+    water: { type: string; amount?: number };
+    electricity: { type: string; amount?: number };
+    gas: { type: string; amount?: number };
+    others: { type: string; amount?: number };
+  }) => void;
+}
+
+interface BrokerageProps {
+  onBrokerageChange: (brokerage: { required: string; amount?: number }) => void;
+}
+
+interface AvailabilityDateProps {
+  onAvailabilityChange: (availability: { type: string; date?: string }) => void;
+}
+
+interface CommercialContactDetailsProps {
+  onContactChange: (contact: IContactInformation) => void;
+}
+
+interface CommercialMediaUploadProps {
+  onMediaChange: (media: {
+    images: { category: string; files: { file: File }[] }[];
+    video?: { file: File };
+    documents: { file: File }[];
+  }) => void;
+}
 
 const RentShopMain = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
-    shopType: "",
-    address: {},
-    landmark: "",
-    coordinates: {
-      latitude: "",
-      longitude: ""
+    basicInformation: {
+      title: '',
+      shopType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0
+      },
+      isCornerProperty: false
     },
-    isCornerProperty: false,
-    shopDetails: {},
-    propertyDetails: {
-      expectedRent: "",
-      isNegotiable: false,
-      rentType: ""
+    shopDetails: {
+      frontageWidth: 0,
+      heightOfShop: 0,
+      displayWindow: false,
+      attachedStorageRoom: false,
+      averageFootTraffic: 'low',
+      customerParking: false,
+      previousBusiness: ''
     },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availabilityDate: {},
-    contactDetails: {},
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: 'inclusive'
+      },
+      securityDeposit: {
+        amount: 0
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: ''
+      },
+      otherCharges: {
+        water: {
+          type: '',
+          amount: 0
+        },
+        electricity: {
+          type: '',
+          amount: 0
+        },
+        gas: {
+          type: '',
+          amount: 0
+        },
+        others: {
+          type: '',
+          amount: 0
+        }
+      },
+      brokerage: {
+        required: 'no'
+      },
+      availability: {
+        type: 'immediate',
+        date: ''
+      }
+    },
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
     media: {
-      images: [],
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
       documents: []
     }
   })
 
   const [currentStep, setCurrentStep] = useState(0)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Check login status on component mount
-  useEffect(() => {
-    const user = sessionStorage.getItem('user');
-    if (!user) {
-      navigate('/login');
-    } else {
-      setIsLoggedIn(true);
-    }
-  }, [navigate]);
-
-  // Function to update coordinates
   const handleLocationSelect = (latitude: string, longitude: string) => {
     setFormData({
       ...formData,
-      coordinates: { latitude, longitude },
-    })
-  }
-
-  const validateCurrentStep = () => {
-    const errors: Record<string, string> = {};
-    // Add validation logic here if needed
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+      basicInformation: {
+        ...formData.basicInformation,
+        location: {
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude)
+        }
+      }
+    });
   };
-
-  const renderFormSection = (content: React.ReactNode) => (
-    <div className="space-y-4">
-      <ErrorDisplay errors={formErrors} />
-      {content}
-    </div>
-  );
 
   const formSections = [
     {
       title: "Basic Information",
       icon: <Store className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Store className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Shop Details</h3>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label htmlFor="propertyName" className="block text-black font-medium mb-2">
-                Property Name
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="propertyName"
-                  placeholder="Enter shop name"
-                  value={formData.propertyName}
-                  onChange={(e) => setFormData({ ...formData, propertyName: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 text-black placeholder:text-black bg-white"
-                />
-                <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-black font-medium mb-2">Shop Type</label>
-              <select
-                value={formData.shopType}
-                onChange={(e) => setFormData({ ...formData, shopType: e.target.value })}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 bg-white text-black [&_option]:text-black [&_option]:bg-white"
-              >
-                <option value="" className="text-black bg-white">Select shop type</option>
-                <option value="retail" className="text-black bg-white">Retail Shop</option>
-                <option value="commercial" className="text-black bg-white">Commercial Shop</option>
-                <option value="food" className="text-black bg-white">Food & Beverage</option>
-                <option value="service" className="text-black bg-white">Service Shop</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="address" className="block text-black font-medium mb-2">
-                Address
-              </label>
-              <textarea
-                id="address"
-                placeholder="Enter complete address"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 min-h-[100px] text-black placeholder:text-black bg-white"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="landmark" className="block text-black font-medium mb-2">
-                Landmark
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  id="landmark"
-                  placeholder="Enter nearby landmark"
-                  value={formData.landmark}
-                  onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-0 focus:border-black outline-none transition-all duration-200 text-black placeholder:text-black bg-white"
-                />
-                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-              </div>
-            </div>
-
-            <MapSelector
-              latitude={formData.coordinates.latitude}
-              longitude={formData.coordinates.longitude}
-              onLocationSelect={handleLocationSelect}
-            />
-
-            <div>
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.isCornerProperty}
-                  onChange={(e) => setFormData({ ...formData, isCornerProperty: e.target.checked })}
-                  className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
-                />
-                <span className="text-black">This is a corner property</span>
-              </label>
-            </div>
-          </div>
+      content: (
+        <div className="space-y-6">
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, title: name }
+            }))}
+          />
+          <ShopType
+            onShopTypeChange={(types) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, shopType: types }
+            }))}
+          />
+          <CommercialPropertyAddress
+            onAddressChange={(address) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, address }
+            }))}
+          />
+          <Landmark
+            onLandmarkChange={(landmark) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, landmark }
+            }))}
+            onLocationSelect={(location) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                location: {
+                  latitude: parseFloat(location.latitude),
+                  longitude: parseFloat(location.longitude)
+                }
+              }
+            }))}
+          />
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
+            }))}
+          />
         </div>
       ),
     },
     {
-      title: "Property Details",
+      title: "Shop Details",
       icon: <Building2 className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <ShopDetails onDetailsChange={(details) => setFormData({ ...formData, shopDetails: details })} />
-          </div>
+      content: (
+        <div className="space-y-6">
+          <ShopDetails
+            onDetailsChange={(details) => setFormData(prev => ({
+              ...prev,
+              shopDetails: {
+                frontageWidth: details.frontageWidth,
+                heightOfShop: details.heightOfShop,
+                displayWindow: details.displayWindow,
+                attachedStorageRoom: details.attachedStorageRoom,
+                averageFootTraffic: details.averageFootTraffic,
+                customerParking: details.customerParking,
+                previousBusiness: details.previousBusiness
+              }
+            }))}
+          />
         </div>
       ),
     },
     {
       title: "Rental Terms",
       icon: <DollarSign className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={(rent) => setFormData({ ...formData, propertyDetails: { ...formData.propertyDetails, ...rent } })} />
-                <SecurityDeposit onSecurityDepositChange={(deposit) => setFormData({ ...formData, securityDeposit: deposit })} />
-                <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, maintenanceAmount: maintenance })} />
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges onOtherChargesChange={(charges) => setFormData({ ...formData, otherCharges: charges })} />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage: brokerage })} />
-              </div>
-            </div>
-          </div>
+      content: (
+        <div className="space-y-6">
+          <Rent
+            onRentChange={(rent) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                rentDetails: {
+                  expectedRent: rent.expectedRent,
+                  isNegotiable: rent.isNegotiable,
+                  rentType: rent.rentType
+                }
+              }
+            }))}
+          />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+              <MaintenanceAmount
+                onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    maintenanceAmount: {
+                      amount: maintenance.amount,
+                      frequency: maintenance.frequency
+                    }
+                  }
+                }))}
+              />
+            )}
+            <SecurityDeposit
+            onSecurityDepositChange={(deposit) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                securityDeposit: {
+                  amount: deposit.amount
+                }
+              }
+            }))}
+          />
+          <OtherCharges
+            onOtherChargesChange={(charges) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                otherCharges: {
+                  water: { type: charges.water.type, amount: charges.water.amount },
+                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                  gas: { type: charges.gas.type, amount: charges.gas.amount },
+                  others: { type: charges.others.type, amount: charges.others.amount }
+                }
+              }
+            }))}
+          />
+          <Brokerage
+            onBrokerageChange={(brokerage) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                brokerage: {
+                  required: brokerage.required,
+                  amount: brokerage.amount
+                }
+              }
+            }))}
+          />
         </div>
       ),
     },
     {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <AvailabilityDate onAvailabilityChange={(date) => setFormData({ ...formData, availabilityDate: date })} />
-        </div>
-      ),
-    },
-    {
-      title: "Location Details",
-      icon: <MapPin className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <MapPin className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Location Details</h3>
-          </div>
-          <MapSelector 
-            latitude={formData.coordinates.latitude}
-            longitude={formData.coordinates.longitude}
-            onLocationSelect={(lat, lng, address) => {
-              setFormData({
-                ...formData,
-                coordinates: { latitude: lat, longitude: lng },
-                address: address || {}
-              })
-            }}
+      content: (
+        <div className="space-y-6">
+          <AvailabilityDate
+            onAvailabilityChange={(availability) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                availability: {
+                  type: availability.type,
+                  date: availability.date
+                }
+              }
+            }))}
           />
         </div>
       ),
@@ -341,146 +447,204 @@ const RentShopMain = () => {
     {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
-          </div>
-          <CommercialContactDetails onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })} />
+      content: (
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData(prev => ({
+              ...prev,
+              contactInformation: {
+                name: contact.name,
+                email: contact.email,
+                phone: contact.phone,
+                alternatePhone: contact.alternatePhone,
+                bestTimeToContact: contact.bestTimeToContact
+              }
+            }))}
+          />
         </div>
       ),
     },
     {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <CommercialMediaUpload onMediaChange={(media) => setFormData({ ...formData, media })} />
+      content: (
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
-  ]
+  ];
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // const navigate = useNavigate()
 
   const handleNext = () => {
-    if (validateCurrentStep()) {
-      if (currentStep < formSections.length - 1) {
-        setCurrentStep(currentStep + 1)
-      }
-    } else {
-      toast.error('Please fill in all required fields');
-    }
-  }
+    if (currentStep < formSections.length - 1) {
+      setCurrentStep(currentStep + 1);
+    } 
+  };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleStepClick = (index: number) => {
+    setCurrentStep(index)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    // Add API submission logic here
-    console.log("Form Data:", formData)
-    toast.success('Form submitted successfully!')
-    setIsSubmitting(false)
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    console.log(formData)
+    
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Please log in to continue</h2>
-          <button
-            onClick={() => navigate('/login')}
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
+
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/commercial-rent-shops', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Commercial rent shop listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create commercial rent shop listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-white">
-      <style>{globalStyles}</style>
-
-      {/* Progress Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-2">
-              {formSections.map((section, index) => (
-                <div
-                  key={index}
-                  className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(index)}
-                >
-                  <div className="flex flex-col items-center group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
-                      ? 'bg-black text-white'
-                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}>
-                      {section.icon}
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="p-6 sm:p-10">
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
+            <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
+              {formSections.map((step, index) => (
+                <div key={index} className="flex items-center">
+                  <button
+                    onClick={() => handleStepClick(index)}
+                    className="flex items-center focus:outline-none"
+                  >
+                    <div
+                      className={`w-12 h-12 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
+                        }`}
+                    >
+                      {step.icon}
                     </div>
-                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
-                      ? 'text-black'
-                      : 'text-gray-500 group-hover:text-gray-700'
+                    <span className={`ml-3 text-sm font-medium whitespace-nowrap ${index <= currentStep ? 'text-black' : 'text-black/70'
                       }`}>
-                      {section.title}
+                      {step.title}
                     </span>
-                  </div>
+                  </button>
                   {index < formSections.length - 1 && (
-                    <div className="flex items-center mx-1">
-                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-                        }`} />
-                    </div>
+                    <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                      }`} />
                   )}
                 </div>
               ))}
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
-        </div>
+          <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+              <p className="text-gray-600">Please fill in the details for your property</p>
+            </div>
 
-        {formSections[currentStep].content}
-      </div>
+            {formSections[currentStep].content}
+          </div>
 
-      {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-black hover:bg-black hover:text-white'
-              }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Previous
-          </button>
-          <button
-            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            disabled={isSubmitting}
-          >
-            {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </button>
+          {/* Navigation Buttons */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0 || isSubmitting}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
+                  currentStep === 0 || isSubmitting
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-black hover:bg-black hover:text-white"
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                Previous
+              </button>
+              <button
+                onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+                disabled={isSubmitting}
+                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
+                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+              >
+                {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
