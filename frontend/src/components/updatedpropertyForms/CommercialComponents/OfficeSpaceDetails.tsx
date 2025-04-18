@@ -1,34 +1,58 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ArrowRight, Users, Building2, Video, Option as Reception, Wifi, Server, DoorOpen } from 'lucide-react';
 
-interface OfficeSpaceDetailsProps {
-  onDetailsChange?: (details: Record<string, any>) => void;
+interface IOfficeDetails {
+  seatingCapacity: number;
+  cabins: {
+    available: boolean;
+    count: number;
+  };
+  conferenceRoom: boolean;
+  meetingRoom: boolean;
+  receptionArea: boolean;
+  wifiSetup: boolean;
+  serverRoom: boolean;
+  coworkingFriendly: boolean;
 }
 
-const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
-  const [details, setDetails] = useState({
-    seatingCapacity: '',
+interface OfficeSpaceDetailsProps {
+  onDetailsChange: (details: IOfficeDetails) => void;
+}
+
+const OfficeSpaceDetails: React.FC<OfficeSpaceDetailsProps> = ({ onDetailsChange }) => {
+  const [details, setDetails] = useState<IOfficeDetails>({
+    seatingCapacity: 0,
     cabins: {
       available: false,
-      count: ''
+      count: 0
     },
     conferenceRoom: false,
+    meetingRoom: false,
     receptionArea: false,
     wifiSetup: false,
-    coworkingFriendly: false,
     serverRoom: false,
-    meetingRoom: false
+    coworkingFriendly: false
   });
 
-  const handleChange = (field: string, value: any) => {
-    const updatedDetails = { ...details, [field]: value };
-    setDetails(updatedDetails);
-    onDetailsChange?.(updatedDetails);
+  const handleChange = (field: keyof IOfficeDetails, value: any) => {
+    const newDetails = {
+      ...details,
+      [field]: value
+    };
+    setDetails(newDetails);
+    onDetailsChange(newDetails);
   };
 
-  const handleCabinChange = (field: string, value: any) => {
-    const updatedCabins = { ...details.cabins, [field]: value };
-    handleChange('cabins', updatedCabins);
+  const handleCabinsChange = (field: keyof IOfficeDetails['cabins'], value: any) => {
+    const newDetails = {
+      ...details,
+      cabins: {
+        ...details.cabins,
+        [field]: value
+      }
+    };
+    setDetails(newDetails);
+    onDetailsChange(newDetails);
   };
 
   return (
@@ -53,7 +77,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                 type="number"
                 min="0"
                 value={details.seatingCapacity}
-                onChange={(e) => handleChange('seatingCapacity', e.target.value)}
+                onChange={(e) => handleChange('seatingCapacity', parseInt(e.target.value))}
                 placeholder="Enter total seating capacity"
                 className="w-full px-4 py-3 rounded-lg bg-white border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors duration-200 text-gray-900 placeholder:text-gray-400"
               />
@@ -71,7 +95,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                     <input
                       type="radio"
                       checked={details.cabins.available}
-                      onChange={() => handleCabinChange('available', true)}
+                      onChange={(e) => handleCabinsChange('available', e.target.checked)}
                       className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
                     <span className="text-gray-700">Available</span>
@@ -80,7 +104,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                     <input
                       type="radio"
                       checked={!details.cabins.available}
-                      onChange={() => handleCabinChange('available', false)}
+                      onChange={(e) => handleCabinsChange('available', false)}
                       className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                     />
                     <span className="text-gray-700">Not Available</span>
@@ -91,7 +115,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                     type="number"
                     min="0"
                     value={details.cabins.count}
-                    onChange={(e) => handleCabinChange('count', e.target.value)}
+                    onChange={(e) => handleCabinsChange('count', parseInt(e.target.value))}
                     placeholder="Number of cabins"
                     className="w-full px-4 py-3 rounded-lg bg-white border border-gray-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors duration-200 text-gray-900 placeholder:text-gray-400"
                   />
@@ -115,7 +139,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.conferenceRoom}
-                    onChange={() => handleChange('conferenceRoom', true)}
+                    onChange={(e) => handleChange('conferenceRoom', e.target.checked)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Available</span>
@@ -124,7 +148,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.conferenceRoom}
-                    onChange={() => handleChange('conferenceRoom', false)}
+                    onChange={(e) => handleChange('conferenceRoom', false)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Not Available</span>
@@ -143,7 +167,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.meetingRoom}
-                    onChange={() => handleChange('meetingRoom', true)}
+                    onChange={(e) => handleChange('meetingRoom', e.target.checked)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Available</span>
@@ -152,7 +176,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.meetingRoom}
-                    onChange={() => handleChange('meetingRoom', false)}
+                    onChange={(e) => handleChange('meetingRoom', false)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Not Available</span>
@@ -176,7 +200,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.receptionArea}
-                    onChange={() => handleChange('receptionArea', true)}
+                    onChange={(e) => handleChange('receptionArea', e.target.checked)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Yes</span>
@@ -185,7 +209,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.receptionArea}
-                    onChange={() => handleChange('receptionArea', false)}
+                    onChange={(e) => handleChange('receptionArea', false)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">No</span>
@@ -204,7 +228,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.wifiSetup}
-                    onChange={() => handleChange('wifiSetup', true)}
+                    onChange={(e) => handleChange('wifiSetup', e.target.checked)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Available</span>
@@ -213,7 +237,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.wifiSetup}
-                    onChange={() => handleChange('wifiSetup', false)}
+                    onChange={(e) => handleChange('wifiSetup', false)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Not Available</span>
@@ -232,7 +256,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.serverRoom}
-                    onChange={() => handleChange('serverRoom', true)}
+                    onChange={(e) => handleChange('serverRoom', e.target.checked)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Available</span>
@@ -241,7 +265,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.serverRoom}
-                    onChange={() => handleChange('serverRoom', false)}
+                    onChange={(e) => handleChange('serverRoom', false)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Not Available</span>
@@ -260,7 +284,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={details.coworkingFriendly}
-                    onChange={() => handleChange('coworkingFriendly', true)}
+                    onChange={(e) => handleChange('coworkingFriendly', e.target.checked)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">Yes</span>
@@ -269,7 +293,7 @@ const OfficeSpaceDetails = ({ onDetailsChange }: OfficeSpaceDetailsProps) => {
                   <input
                     type="radio"
                     checked={!details.coworkingFriendly}
-                    onChange={() => handleChange('coworkingFriendly', false)}
+                    onChange={(e) => handleChange('coworkingFriendly', false)}
                     className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                   />
                   <span className="text-gray-700">No</span>

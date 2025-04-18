@@ -28,29 +28,56 @@ const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, onLocati
   const markerRef = useRef<google.maps.Marker | null>(null)
   const geocoderRef = useRef<google.maps.Geocoder | null>(null)
   const searchBoxRef = useRef<google.maps.places.SearchBox | null>(null)
+  const scriptRef = useRef<HTMLScriptElement | null>(null)
 
   // Initialize map when component mounts or when showMap changes to true
   useEffect(() => {
     if (!showMap || !mapRef.current) return
 
     const initMap = async () => {
-      // Check if Google Maps API is loaded
-      if (!window.google || !window.google.maps) {
-        // Load Google Maps API if not already loaded
-        const script = document.createElement("script")
-        script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&libraries=places,geocoding`
-        script.async = true
-        script.defer = true
-        script.onload = () => createMap()
-        script.onerror = () => setError("Failed to load Google Maps. Please try again later.")
-        document.head.appendChild(script)
-      } else {
+      // Check if Google Maps API is already loaded
+      if (window.google && window.google.maps) {
         createMap()
+        return undefined
+      }
+
+      // Check if script is already being loaded
+      if (scriptRef.current) {
+        return undefined
+      }
+
+      // Load Google Maps API if not already loaded
+      const script = document.createElement("script")
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}&libraries=places,geocoding`
+      script.async = true
+      script.defer = true
+      script.onload = () => {
+        if (window.google && window.google.maps) {
+          createMap()
+        } else {
+          setError("Failed to load Google Maps. Please try again later.")
+        }
+      }
+      script.onerror = () => setError("Failed to load Google Maps. Please try again later.")
+      document.head.appendChild(script)
+      scriptRef.current = script
+
+      return () => {
+        if (scriptRef.current) {
+          document.head.removeChild(scriptRef.current)
+          scriptRef.current = null
+        }
       }
     }
 
     const createMap = () => {
       try {
+        // Clear any existing map
+        if (mapInstanceRef.current) {
+          window.google.maps.event.clearInstanceListeners(mapInstanceRef.current)
+          mapInstanceRef.current = null
+        }
+
         // Default to a central location if no coordinates are provided
         const initialLat = latitude ? Number.parseFloat(latitude) : 20.5937
         const initialLng = longitude ? Number.parseFloat(longitude) : 78.9629
@@ -159,18 +186,53 @@ const MapSelector: React.FC<MapSelectorProps> = ({ latitude, longitude, onLocati
       }
     }
 
-    initMap()
+    const cleanup = initMap()
 
     // Cleanup function
     return () => {
       if (markerRef.current) {
         markerRef.current.setMap(null)
+        markerRef.current = null
       }
       if (mapInstanceRef.current) {
-        // Remove event listeners if needed
+        window.google.maps.event.clearInstanceListeners(mapInstanceRef.current)
+        mapInstanceRef.current = null
+      }
+      if (searchBoxRef.current) {
+        window.google.maps.event.clearInstanceListeners(searchBoxRef.current)
+        searchBoxRef.current = null
+      }
+      if (cleanup) {
+        cleanup.then(cleanupFn => {
+          if (cleanupFn) {
+            cleanupFn()
+          }
+        })
       }
     }
   }, [showMap, latitude, longitude])
+
+  // Add a cleanup effect to ensure proper cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      if (markerRef.current) {
+        markerRef.current.setMap(null)
+        markerRef.current = null
+      }
+      if (mapInstanceRef.current) {
+        window.google.maps.event.clearInstanceListeners(mapInstanceRef.current)
+        mapInstanceRef.current = null
+      }
+      if (searchBoxRef.current) {
+        window.google.maps.event.clearInstanceListeners(searchBoxRef.current)
+        searchBoxRef.current = null
+      }
+      if (scriptRef.current) {
+        document.head.removeChild(scriptRef.current)
+        scriptRef.current = null
+      }
+    }
+  }, [])
 
   const extractAddressComponents = (place: google.maps.places.PlaceResult) => {
     const addressComponents: Record<string, string> = {}
