@@ -197,7 +197,7 @@ app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
-//showroom, shed, plot
+
 
 
 app.get("/testing", (req: Request, res: Response) => {
