@@ -17,21 +17,92 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { Home, Building2, DollarSign, Calendar, Phone, Image } from 'lucide-react';
+import { Home, Building2, DollarSign, Calendar, Phone, Image, Store } from 'lucide-react';
+
+interface FormData {
+  propertyName: string;
+  showroomType: string;
+  address: {};
+  landmark: string;
+  coordinates: {
+    latitude: string;
+    longitude: string;
+  };
+  isCornerProperty: boolean;
+  showroomDetails: {};
+  propertyDetails: {};
+  amenities: string[];
+  rent: {
+    expectedRent: string;
+    isNegotiable: boolean;
+    rentType: string;
+    securityDeposit: {
+      amount: number | null;
+      depositType: string;
+    };
+    maintenanceCharges: {
+      amount: number | null;
+      frequency: string;
+    };
+    otherCharges: {
+      water: {
+        amount: number | null;
+        type: string;
+      };
+      electricity: {
+        amount: number | null;
+        type: string;
+      };
+      gas: {
+        amount: number | null;
+        type: string;
+      };
+      others: {
+        amount: number | null;
+        type: string;
+      };
+      propertyTax: boolean;
+      otherInclusives: string;
+    };
+  };
+  brokerage: {
+    amount: number | null;
+    type: string;
+  };
+  availability: {
+    fromDate: string;
+    isImmediate: boolean;
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  media: {
+    images: { category: string; files: { url: string; file: File }[] }[];
+    video?: { url: string; file: File };
+    documents: { type: string; file: File }[];
+  };
+}
 
 const RentShowroomMain = () => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     showroomType: '',
     address: {},
     landmark: '',
-    coordinates: { latitude: '', longitude: '' },
+    coordinates: {
+      latitude: '',
+      longitude: ''
+    },
     isCornerProperty: false,
     showroomDetails: {},
     propertyDetails: {},
+    amenities: [],
     rent: {
       expectedRent: '',
       isNegotiable: false,
+      rentType: '',
       securityDeposit: {
         amount: null,
         depositType: 'refundable'
@@ -58,47 +129,157 @@ const RentShowroomMain = () => {
           type: 'inclusive'
         },
         propertyTax: false,
-        otherInclusives: []
+        otherInclusives: ''
       }
     },
     brokerage: {
-      required: 'no',
-      amount: null
+      amount: null,
+      type: 'percentage'
     },
     availability: {
-      immediate: false,
-      specificDate: null,
-      availableImmediately: false,
-      leaseDuration: '12 months',
-      noticePeriod: '1 month',
-      petsAllowed: false,
-      operatingHours: {
-        restricted: false,
-        restrictions: 'Standard business hours'
-      }
+      fromDate: '',
+      isImmediate: false
     },
     contactInformation: {
       name: '',
       email: '',
-      phone: '',
-      alternatePhone: '',
-      bestTimeToContact: ''
+      phone: ''
     },
     media: {
-      photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: []
-      },
-      videoTour: '',
+      images: [
+        { category: 'exterior', files: [] },
+        { category: 'interior', files: [] },
+        { category: 'floorPlan', files: [] },
+        { category: 'washrooms', files: [] },
+        { category: 'lifts', files: [] },
+        { category: 'emergencyExits', files: [] }
+      ],
       documents: []
     }
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const handleRentChange = (rent: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      rent: {
+        ...prev.rent,
+        ...rent,
+        securityDeposit: {
+          ...prev.rent.securityDeposit,
+          ...rent.securityDeposit
+        },
+        maintenanceCharges: {
+          ...prev.rent.maintenanceCharges,
+          ...rent.maintenanceCharges
+        },
+        otherCharges: {
+          ...prev.rent.otherCharges,
+          ...rent.otherCharges,
+          water: {
+            ...prev.rent.otherCharges.water,
+            ...rent.otherCharges?.water
+          },
+          electricity: {
+            ...prev.rent.otherCharges.electricity,
+            ...rent.otherCharges?.electricity
+          },
+          gas: {
+            ...prev.rent.otherCharges.gas,
+            ...rent.otherCharges?.gas
+          },
+          others: {
+            ...prev.rent.otherCharges.others,
+            ...rent.otherCharges?.others
+          }
+        }
+      }
+    }));
+  };
+
+  const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      rent: {
+        ...prev.rent,
+        maintenanceCharges: {
+          amount: maintenance.amount || null,
+          frequency: maintenance.frequency || ''
+        }
+      }
+    }));
+  };
+
+  const handleBrokerageChange = (brokerage: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      brokerage: {
+        amount: brokerage.amount || null,
+        type: brokerage.type || 'percentage'
+      }
+    }));
+  };
+
+  const handleAvailabilityChange = (availability: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        ...availability
+      }
+    }));
+  };
+
+  const handleContactChange = (contact: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      contactInformation: {
+        ...prev.contactInformation,
+        ...contact
+      }
+    }));
+  };
+
+  const handleMediaChange = (media: {
+    images: { category: string; files: { url: string; file: File }[] }[];
+    video?: { url: string; file: File };
+    documents: { type: string; file: File }[];
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      media
+    }));
+  };
+
+  const validateCurrentStep = () => {
+    const errors: Record<string, string> = {};
+    // Add validation logic here
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const renderFormSection = (content: React.ReactNode) => (
+    <div className="space-y-4">
+      {Object.keys(formErrors).length > 0 && (
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
+          </div>
+          <ul className="mt-2 list-disc list-inside text-red-600">
+            {Object.values(formErrors).map((error, index) => (
+              <li key={index} className="text-sm">{error}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      {content}
+    </div>
+  );
 
   const formSections = [
     {
@@ -118,7 +299,7 @@ const RentShowroomMain = () => {
                   onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
                 />
                 <ShowroomType
-                  onShowroomTypeChange={(type) => setFormData({ ...formData, showroomType: type })}
+                  onTypeChange={(type) => setFormData({ ...formData, showroomType: type })}
                 />
               </div>
             </div>
@@ -137,7 +318,6 @@ const RentShowroomMain = () => {
                 <Landmark
                   onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
                 />
-
                 <CornerProperty
                   onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
                 />
@@ -183,26 +363,17 @@ const RentShowroomMain = () => {
                 <h3 className="text-2xl font-semibold text-black">Rental Terms</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <Rent onRentChange={(rent) => setFormData({ ...formData, rent })} />
+                <Rent onRentChange={handleRentChange} />
                 {formData.rent.rentType === 'exclusive' && (
                   <MaintenanceAmount
-                    onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                      ...prev,
-                      rentalDetails: {
-                        ...prev.rentalDetails,
-                        maintenanceCharges: {
-                          amount: maintenance.amount,
-                          frequency: maintenance.frequency || ''
-                        }
-                      }
-                    }))}
+                    onMaintenanceAmountChange={handleMaintenanceAmountChange}
                   />
                 )}
                 <SecurityDeposit
                   onSecurityDepositChange={(deposit: Record<string, any>) => setFormData(prev => ({
                     ...prev,
-                    rentalDetails: {
-                      ...prev.rentalDetails,
+                    rent: {
+                      ...prev.rent,
                       securityDeposit: {
                         amount: deposit.amount || null,
                         depositType: deposit.depositType || ''
@@ -219,28 +390,22 @@ const RentShowroomMain = () => {
                 <OtherCharges
                   onOtherChargesChange={(charges: Record<string, any>) => setFormData(prev => ({
                     ...prev,
-                    rentalDetails: {
-                      ...prev.rentalDetails,
+                    rent: {
+                      ...prev.rent,
                       otherCharges: {
                         water: { amount: Number(charges.water?.amount) || null, type: charges.water?.type || '' },
                         electricity: { amount: Number(charges.electricity?.amount) || null, type: charges.electricity?.type || '' },
                         gas: { amount: Number(charges.gas?.amount) || null, type: charges.gas?.type || '' },
                         others: { amount: Number(charges.others?.amount) || null, type: charges.others?.type || '' },
                         propertyTax: charges.propertyTax || false,
-                        otherInclusives: charges.otherInclusives || []
+                        otherInclusives: charges.otherInclusives || ''
                       }
                     }
                   }))}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <Brokerage
-                  onBrokerageChange={(brokerage: Record<string, any>) => setFormData(prev => ({
-                    ...prev,
-                    brokerage: {
-                      required: brokerage.required || 'no',
-                      amount: Number(brokerage.amount) || null
-                    }
-                  }))}
+                  onBrokerageChange={handleBrokerageChange}
                 />
               </div>
             </div>
@@ -261,7 +426,7 @@ const RentShowroomMain = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <AvailabilityDate
-                  onAvailabilityChange={(availability) => setFormData({ ...formData, availability })}
+                  onAvailabilityChange={handleAvailabilityChange}
                 />
               </div>
             </div>
@@ -282,7 +447,7 @@ const RentShowroomMain = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <CommercialContactDetails
-                  onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
+                  onContactChange={handleContactChange}
                 />
               </div>
             </div>
@@ -303,7 +468,7 @@ const RentShowroomMain = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <CommercialMediaUpload
-                  onMediaChange={(media) => setFormData({ ...formData, media })}
+                  onMediaChange={handleMediaChange}
                 />
               </div>
             </div>
