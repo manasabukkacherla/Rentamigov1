@@ -135,9 +135,8 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
   }, []);
 
 
-
   const handleNext = async () => {
-    await saveStepData();
+    
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
     } else {
@@ -405,16 +404,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       {steps[step].component}
 
       {/* Messages */}
-      {errorMessage && (
-        <div className="mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
-          {errorMessage}
-        </div>
-      )}
-      {successMessage && (
-        <div className="mt-4 p-4 bg-green-50 text-green-600 rounded-lg">
-          {successMessage}
-        </div>
-      )}
+      
 
       <div className="mt-8 flex justify-between">
         {step > 0 && (
@@ -427,25 +417,15 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
             Previous
           </button>
         )}
-        {step < steps.length - 1 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={loading}
-            className="ml-auto px-6 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200 flex items-center"
-          >
-            {loading ? "Saving..." : "Next"}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={loading}
-            className="ml-auto px-6 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200"
-          >
-            {loading ? "Saving..." : "List Property"}
-          </button>
-        )}
+        <button
+  type="button"
+  onClick={handleNext}
+  className="ml-auto px-6 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200"
+>
+  {step < steps.length - 1 ? "Next" : "List Property"}
+</button>
+
+        
       </div>
     </div>
   );

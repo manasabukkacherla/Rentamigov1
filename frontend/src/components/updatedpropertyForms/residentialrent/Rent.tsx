@@ -11,7 +11,7 @@ const Rent = ({ onRentChange }: RentProps) => {
   const [rent, setRent] = useState({
     expectedRent: 0,
     isNegotiable: false,
-    rentType: "",
+    rentType: "inclusive",
   })
 
   const handleChange = (field: string, value: any) => {

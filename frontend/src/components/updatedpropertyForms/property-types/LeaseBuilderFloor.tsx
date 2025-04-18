@@ -66,7 +66,7 @@ const LeaseBuilderFloor = ({
   }, []);
 
   // Function to save data at each step
-
+ 
 
   const steps = [
     {
@@ -207,7 +207,7 @@ const LeaseBuilderFloor = ({
   ];
 
   const handleNext = async () => {
-    await saveStepData();
+    
     setStep((prev) => prev + 1);
   };
 
@@ -217,17 +217,13 @@ const LeaseBuilderFloor = ({
       {steps[step].component}
 
       <button
-        type="button"
-        onClick={handleNext}
-        disabled={loading}
-        className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-      >
-        {loading
-          ? "Saving..."
-          : step < steps.length - 1
-          ? "Next"
-          : "List Property"}
-      </button>
+  type="button"
+  onClick={handleNext}
+  className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
+>
+  {step < steps.length - 1 ? "Next" : "List Property"}
+</button>
+
     </form>
   );
 };

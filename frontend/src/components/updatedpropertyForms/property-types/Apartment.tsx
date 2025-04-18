@@ -97,7 +97,7 @@ interface FlatAmenitiesProps {
   onChange: (amenities: string[]) => void
 }
 
-interface SocietyAmenitiesProps {
+interface SocietyAmenitiesProps {r
   amenities: string[]
   onChange: (amenities: string[]) => void
 }
@@ -178,6 +178,7 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
     }))
   }, [])
 
+ 
 
   const renderStep = () => {
     switch (currentStep) {
@@ -383,7 +384,7 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
               if (currentStep === 7) {
                 onSubmit?.()
               } else {
-                handleSaveStep(currentStep)
+                setCurrentStep((prev) => Math.min(prev + 1, 7))
               }
             }}
             disabled={loading}
@@ -394,20 +395,11 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
         </div>
 
         {/* Messages */}
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-            {success}
-          </div>
-        )}
+        
+        
       </div>
     </div>
   )
 }
 
 export default Apartment
-

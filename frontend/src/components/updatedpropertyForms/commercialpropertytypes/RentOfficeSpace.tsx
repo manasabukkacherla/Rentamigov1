@@ -5,7 +5,7 @@ import PropertyName from '../PropertyName';
 import OfficeSpaceType from '../CommercialComponents/OfficeSpaceType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
 import Landmark from '../CommercialComponents/Landmark';
-import MapCoordinates from '../MapCoordinates';
+import MapSelector from '../MapSelector';
 import CornerProperty from '../CommercialComponents/CornerProperty';
 import OfficeSpaceDetails from '../CommercialComponents/OfficeSpaceDetails';
 import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
@@ -52,7 +52,7 @@ const globalStyles = `
 // Error display component for validation errors
 const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   if (Object.keys(errors).length === 0) return null;
-  
+
   return (
     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
       <div className="flex items-center">
@@ -70,9 +70,38 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   );
 };
 
+interface FormData {
+  propertyName: string;
+  officeType: string;
+  address: Record<string, any>;
+  landmark: string;
+  coordinates: { latitude: string; longitude: string };
+  isCornerProperty: boolean;
+  officeDetails: Record<string, any>;
+  propertyDetails: Record<string, any>;
+  rent: {
+    expectedRent: string;
+    isNegotiable: boolean;
+    rentType: string;
+  };
+  securityDeposit: Record<string, any>;
+  maintenanceAmount: Record<string, any>;
+  otherCharges: Record<string, any>;
+  brokerage: Record<string, any>;
+  availability: {
+    type: 'immediate' | 'specific';
+    date: string;
+  };
+  contactDetails: Record<string, any>;
+  media: {
+    photos: File[];
+    video: File | null;
+  };
+}
+
 const RentOfficeSpace = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     officeType: '',
     address: {},
@@ -90,7 +119,10 @@ const RentOfficeSpace = () => {
     maintenanceAmount: {},
     otherCharges: {},
     brokerage: {},
-    availability: {},
+    availability: {
+      type: 'immediate',
+      date: ''
+    },
     contactDetails: {},
     media: { photos: [], video: null }
   });
@@ -156,13 +188,13 @@ const RentOfficeSpace = () => {
 
   const handleRentChange = (rent: Record<string, any>) => {
     // Preserve the existing structure while updating with new values
-    setFormData(prev => ({ 
-      ...prev, 
-      rent: { 
+    setFormData(prev => ({
+      ...prev,
+      rent: {
         expectedRent: rent.expectedRent || prev.rent.expectedRent,
         isNegotiable: rent.isNegotiable !== undefined ? rent.isNegotiable : prev.rent.isNegotiable,
         rentType: rent.rentType || prev.rent.rentType
-      } 
+      }
     }));
   };
 
@@ -182,24 +214,33 @@ const RentOfficeSpace = () => {
     setFormData({ ...formData, brokerage });
   };
 
-  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }) => {
-    setFormData({ ...formData, availability });
+  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string }) => {
+    // Get today's date in ISO format for immediate availability
+    const today = new Date().toISOString().split('T')[0];
+
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        type: availability.type,
+        date: availability.type === 'immediate' ? today : (availability.date || '')
+      }
+    }));
   };
 
   const handleContactChange = (contact: Record<string, any>) => {
     setFormData({ ...formData, contactDetails: contact });
   };
 
-  const handleMediaChange = (media: { 
-    images: { category: string; files: { url: string; file: File; }[]; }[]; 
-    video?: { url: string; file: File; } | undefined; 
-    documents: { type: string; file: File; }[]; 
+  const handleMediaChange = (media: {
+    images: { category: string; files: { url: string; file: File; }[]; }[];
+    video?: { url: string; file: File; } | undefined;
+    documents: { type: string; file: File; }[];
   }) => {
     const transformedMedia = {
       photos: [...media.images.flatMap(cat => cat.files.map(f => f.file))],
       video: media.video?.file || null
     };
-    
+
     // Update media with type safety
     setFormData(prev => ({
       ...prev,
@@ -242,6 +283,21 @@ const RentOfficeSpace = () => {
                 onAddressChange={handleAddressChange}
               />
               <Landmark onLandmarkChange={handleLandmarkChange} />
+              {currentStep === 0 && (
+                <MapSelector
+                  latitude={formData.coordinates.latitude}
+                  longitude={formData.coordinates.longitude}
+                  onLocationSelect={(lat, lng, address) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      coordinates: {
+                        latitude: lat,
+                        longitude: lng
+                      }
+                    }));
+                  }}
+                />
+              )}
               <CornerProperty
                 onCornerPropertyChange={handleCornerPropertyChange}
               />
@@ -294,7 +350,7 @@ const RentOfficeSpace = () => {
                 />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -374,13 +430,96 @@ const RentOfficeSpace = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Add API submission logic here
-    console.log('Form Data:', formData);
-    toast.success('Form submitted successfully!');
-    setIsSubmitting(false);
+
+    try {
+      // Validate coordinates
+      if (!formData.coordinates.latitude || !formData.coordinates.longitude) {
+        toast.error('Please select a location on the map');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const latitude = parseFloat(formData.coordinates.latitude);
+      const longitude = parseFloat(formData.coordinates.longitude);
+
+      if (isNaN(latitude) || isNaN(longitude)) {
+        toast.error('Invalid coordinates. Please select a location on the map');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Format the data according to the backend model
+      const formattedData = {
+        basicInformation: {
+          title: formData.propertyName,
+          officeType: [formData.officeType],
+          address: formData.address,
+          landmark: formData.landmark,
+          location: {
+            latitude: latitude,
+            longitude: longitude
+          },
+          isCornerProperty: formData.isCornerProperty
+        },
+        officeDetails: formData.officeDetails,
+        propertyDetails: formData.propertyDetails,
+        rentalTerms: {
+          rentDetails: {
+            expectedRent: parseFloat(formData.rent.expectedRent) || 0,
+            isNegotiable: formData.rent.isNegotiable,
+            rentType: formData.rent.rentType
+          },
+          securityDeposit: formData.securityDeposit,
+          maintenanceAmount: formData.maintenanceAmount,
+          otherCharges: formData.otherCharges,
+          brokerage: formData.brokerage,
+          availability: formData.availability
+        },
+        availability: {
+          availableFrom: formData.availability.date,
+          availableImmediately: formData.availability.type === 'immediate'
+        },
+        contactInformation: formData.contactDetails,
+        media: {
+          photos: {
+            exterior: [],
+            interior: [],
+            floorPlan: [],
+            washrooms: [],
+            lifts: [],
+            emergencyExits: []
+          },
+          videoTour: formData.media.video ? URL.createObjectURL(formData.media.video) : '',
+          documents: []
+        }
+      };
+
+      // Submit to backend API
+      const response = await fetch('/api/commercial/office-spaces', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('token')}`
+        },
+        body: JSON.stringify(formattedData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit form');
+      }
+
+      const result = await response.json();
+      toast.success('Office space listing created successfully!');
+      navigate('/updatePropertyform'); // Redirect to dashboard after successful submission
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to submit form. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isLoggedIn) {
@@ -480,4 +619,3 @@ const RentOfficeSpace = () => {
 };
 
 export default RentOfficeSpace;
-

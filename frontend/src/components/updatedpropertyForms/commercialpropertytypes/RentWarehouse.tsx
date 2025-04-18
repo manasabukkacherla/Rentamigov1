@@ -614,8 +614,8 @@ const RentWarehouse = () => {
               <div key={index} className="flex flex-col items-center">
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-full ${index <= currentStep
-                      ? 'bg-black text-white [forced-colors:active]:bg-[Highlight] [forced-colors:active]:text-[HighlightText]'
-                      : 'bg-gray-200 text-gray-500 [forced-colors:active]:bg-[ButtonText] [forced-colors:active]:text-[Canvas]'
+                    ? 'bg-black text-white [forced-colors:active]:bg-[Highlight] [forced-colors:active]:text-[HighlightText]'
+                    : 'bg-gray-200 text-gray-500 [forced-colors:active]:bg-[ButtonText] [forced-colors:active]:text-[Canvas]'
                     }`}
                 >
                   {section.icon}
@@ -636,31 +636,32 @@ const RentWarehouse = () => {
 
         {formSections[currentStep].content}
 
-            {/* Navigation Buttons */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-              <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-                <button
-                  onClick={handlePrevious}
-                  disabled={currentStep === 0}
-                  className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-black hover:bg-black hover:text-white'
-                    }`}
-                >
-                  <ChevronLeft className="w-5 h-5 mr-2" />
-                  Previous
-                </button>
-                <button
-                  onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-                >
-                  {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </button>
-              </div>
-            </div>
+        {/* Navigation Buttons */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-black hover:bg-black hover:text-white'
+                }`}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
+            </button>
+            <button
+              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
           </div>
         </div>
+      </div>
+    </div>
+
   );
 };
 
