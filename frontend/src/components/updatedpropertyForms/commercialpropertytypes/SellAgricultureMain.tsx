@@ -16,6 +16,9 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import axios from "axios"
 import {
   MapPin,
   Building2,
@@ -30,27 +33,184 @@ import {
   ChevronRight,
 } from "lucide-react"
 
+// Interface that matches the backend model structure
+interface FormData {
+  propertyId?: string;
+  propertyName: string;
+  landType: string[];
+  powerSupply: boolean;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  landmark: string;
+  coordinates: { 
+    latitude: string; 
+    longitude: string; 
+  };
+  isCornerProperty: boolean;
+  Agriculturelanddetails: {
+    totalArea: number;
+    soilType: string;
+    irrigation: boolean;
+    fencing: boolean;
+    cropSuitability: string;
+    waterSource: string;
+    legalClearances: boolean;
+  };
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    waterAvailability: string;
+    propertyAge: number;
+    propertyCondition: string;
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+  };
+  price: {
+    expectedPrice: number;
+    isNegotiable: boolean;
+  };
+  registrationCharges: {
+    included: boolean;
+    amount?: number;
+    stampDuty?: number;
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: 'immediate' | 'specific';
+    date?: Date;
+    preferredLeaseDuration?: string;
+    noticePeriod?: string;
+  };
+  petsAllowed: boolean;
+  operatingHoursRestrictions: boolean;
+  contactDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+  };
+  metaData?: {
+    createdBy: string;
+    createdAt: Date;
+  };
+}
+
 const SellAgricultureMain = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
-    landType: "",
-    address: {},
+    landType: [],
+    powerSupply: false,
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
-    landDetails: {},
-    propertyDetails: {},
-    price: "",
-    area: {
-      superBuiltUpAreaSqft: "",
-      builtUpAreaSqft: "",
-      carpetAreaSqft: "",
+    Agriculturelanddetails: {
+      totalArea: 0,
+      soilType: "",
+      irrigation: false,
+      fencing: false,
+      cropSuitability: "",
+      waterSource: "",
+      legalClearances: false
     },
-    registrationCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [], video: null },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: "",
+      furnishingStatus: "",
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      waterAvailability: "",
+      propertyAge: 0,
+      propertyCondition: "",
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false
+      }
+    },
+    price: {
+      expectedPrice: 0,
+      isNegotiable: false
+    },
+    registrationCharges: {
+      included: false
+    },
+    brokerage: {
+      required: "No",
+      amount: 0
+    },
+    availability: {
+      type: "immediate",
+      preferredLeaseDuration: "",
+      noticePeriod: ""
+    },
+    petsAllowed: false,
+    operatingHoursRestrictions: false,
+    contactDetails: {
+      name: "",
+      email: "",
+      phone: "",
+      alternatePhone: "",
+      bestTimeToContact: ""
+    },
+    media: { 
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
+      documents: []
+    }
   })
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -72,7 +232,7 @@ const SellAgricultureMain = () => {
                 onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
               />
               <AgriculturalLandType
-                onLandTypeChange={(type) => setFormData((prev) => ({ ...prev, landType: type }))}
+                onLandTypeChange={(types) => setFormData((prev) => ({ ...prev, landType: types }))}
               />
             </div>
           </div>
@@ -86,7 +246,16 @@ const SellAgricultureMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               />
-              <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
+              <Landmark 
+                onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+                onLocationSelect={(location) => setFormData((prev) => ({
+                  ...prev,
+                  coordinates: {
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  }
+                }))}
+              />
               
               <CornerProperty
                 onCornerPropertyChange={(isCorner) =>
@@ -109,10 +278,16 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <AgriculturalLandDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, landDetails: details }))}
+              onDetailsChange={(details) => setFormData((prev) => ({ 
+                ...prev, 
+                Agriculturelanddetails: details as FormData['Agriculturelanddetails']
+              }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
+              onDetailsChange={(details) => setFormData((prev) => ({ 
+                ...prev, 
+                propertyDetails: details as FormData['propertyDetails']
+              }))}
             />
           </div>
         </div>
@@ -131,8 +306,19 @@ const SellAgricultureMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
-                <PricePerSqft price={formData.price} area={formData.area} />
+                <Price onPriceChange={(price) => 
+                  setFormData((prev) => ({ 
+                    ...prev, 
+                    price: {
+                      ...prev.price,
+                      expectedPrice: parseFloat(price.propertyPrice.toString()),
+                      isNegotiable: price.pricetype === 'negotiable'
+                    }
+                  }))
+                } />
+                <div className="text-sm mt-2 text-gray-600">
+                  Price per unit will be calculated automatically based on the area information.
+                </div>
               </div>
             </div>
             
@@ -142,13 +328,27 @@ const SellAgricultureMain = () => {
                 <div className="text-black">
                   <RegistrationCharges
                     onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({ ...prev, registrationCharges: charges }))
+                      setFormData((prev) => ({ 
+                        ...prev, 
+                        registrationCharges: {
+                          included: charges.included,
+                          amount: charges.amount,
+                          stampDuty: charges.stampDuty
+                        }
+                      }))
                     }
                   />
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
+                  <Brokerage 
+                    onBrokerageChange={(brokerage) => 
+                      setFormData((prev) => ({ 
+                        ...prev, 
+                        brokerage: brokerage as FormData['brokerage']
+                      }))
+                    } 
+                  />
                 </div>
               </div>
             </div>
@@ -167,7 +367,19 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialAvailability
-              onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
+              onAvailabilityChange={(availability) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  availability: {
+                    type: availability.type,
+                    date: availability.date,
+                    preferredLeaseDuration: availability.preferredLeaseDuration,
+                    noticePeriod: availability.noticePeriod
+                  },
+                  petsAllowed: availability.petsAllowed || false,
+                  operatingHoursRestrictions: availability.operatingHoursRestrictions || false
+                }))
+              }}
             />
           </div>
         </div>
@@ -184,7 +396,10 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
+              onContactChange={(contact) => setFormData((prev) => ({ 
+                ...prev, 
+                contactDetails: contact as FormData['contactDetails']
+              }))}
             />
           </div>
         </div>
@@ -200,12 +415,44 @@ const SellAgricultureMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))} />
+            <CommercialMediaUpload 
+              onMediaChange={(media) => {
+                const photos: Record<string, File[]> = {};
+                media.images.forEach(({ category, files }) => {
+                  photos[category] = files.map(f => f.file);
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photos.exterior || [],
+                      interior: photos.interior || [],
+                      floorPlan: photos.floorPlan || [],
+                      washrooms: photos.washrooms || [],
+                      lifts: photos.lifts || [],
+                      emergencyExits: photos.emergencyExits || []
+                    },
+                    videoTour: media.video?.file || null,
+                    documents: media.documents.map(d => d.file)
+                  }
+                }));
+              }}
+            />
           </div>
         </div>
       ),
     },
   ]
+
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -219,9 +466,71 @@ const SellAgricultureMain = () => {
     }
   }
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
-    console.log("Form Data:", formData)
+    console.log(formData)
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+
+        // Create the payload matching the backend model structure
+        const transformedData = {
+          propertyName: formData.propertyName,
+          landType: formData.landType,
+          powerSupply: formData.powerSupply,
+          address: formData.address,
+          landmark: formData.landmark,
+          coordinates: formData.coordinates,
+          isCornerProperty: formData.isCornerProperty,
+          Agriculturelanddetails: formData.Agriculturelanddetails,
+          propertyDetails: formData.propertyDetails,
+          price: formData.price,
+          registrationCharges: formData.registrationCharges,
+          brokerage: formData.brokerage,
+          availability: formData.availability,
+          petsAllowed: formData.petsAllowed,
+          operatingHoursRestrictions: formData.operatingHoursRestrictions,
+          contactDetails: formData.contactDetails,
+          media: convertedMedia,
+          metaData: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/commercial/sell/agriculture', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data) {
+          toast.success('Agricultural land listing created successfully!');
+          // Navigate to dashboard or listing page
+          // navigate('/dashboard');
+        }
+      } else {
+        toast.error('You must be logged in to create a listing');
+        navigate('/login');
+      }
+    } catch (error: any) {
+      console.error("Error submitting form:", error);
+      toast.error(error.response?.data?.message || 'Failed to create agricultural land listing. Please try again.');
+    }
   }
 
   return (
@@ -306,11 +615,11 @@ const SellAgricultureMain = () => {
             </button>
           ) : (
             <button
-              type="submit"
+              type="button"
               onClick={handleSubmit}
               className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
             >
-              Submit
+              List Property
               <ChevronRight className="w-5 h-5 ml-2" />
             </button>
           )}

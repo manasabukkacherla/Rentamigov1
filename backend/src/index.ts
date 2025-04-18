@@ -58,7 +58,10 @@ import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgric
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouse";
 import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
-
+import commercialRentShop from "./routes/commercial/commercialRentShop";
+import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
+import commercialSellAgricultureRoutes from './routes/commercial/commercialSellAgricultureRoutes';
+import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthersRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -175,13 +178,17 @@ app.use("/api/commercial-shops", commercialShopRoutes);
 app.use("/api/commercial-showrooms", commercialShowroomRoutes);
 app.use('/api/commercial-sheds', commercialShedRoutes);
 app.use('/api/commercial-warehouses', commercialWarehouseRoutes);
-app.use('/api/commercial-plots', commercialPlotRoutes);
 
 app.use('/api/commercial/plots', commercialPlotRoutes);
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
 app.use('/api/commercial/warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
+app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
+app.use('/api/commercial-rent-shops', commercialRentShop);
+app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
+app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
+app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
   res.json({ message: "Test message" });
