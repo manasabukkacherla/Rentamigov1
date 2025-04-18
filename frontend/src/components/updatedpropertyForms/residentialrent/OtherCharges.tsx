@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowRight, Droplets, Zap, Flame, Plus, IndianRupee } from "lucide-react"
+import { ArrowRight, Droplets, Zap, Flame, Plus } from "lucide-react"
 
 interface OtherChargesProps {
   onOtherChargesChange?: (charges: Record<string, any>) => void
@@ -17,8 +17,6 @@ interface ChargesState {
   electricity: Charge
   gas: Charge
   others: Charge
-  propertyTax: boolean
-  otherInclusives: string
 }
 
 const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => {
@@ -27,44 +25,21 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
     electricity: { amount: 0, type: 'inclusive' },
     gas: { amount: 0, type: 'inclusive' },
     others: { amount: 0, type: 'inclusive' },
-    propertyTax: false,
-    otherInclusives: '',
   })
 
   const handleChange = (field: keyof ChargesState, value: any) => {
-    if (field === 'propertyTax') {
-      setCharges((prev) => ({
-        ...prev,
-        propertyTax: value as boolean,
-      }))
-    } else if (field === 'otherInclusives') {
-      setCharges((prev) => ({
-        ...prev,
-        otherInclusives: value as string,
-      }))
-    } else {
-      setCharges((prev) => ({
-        ...prev,
-        [field]: value as Charge,
-      }))
-    }
-    onOtherChargesChange?.(charges)
-  }
-
-  const handleOtherInclusivesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
     setCharges((prev) => ({
       ...prev,
-      otherInclusives: value,
+      [field]: value as Charge,
     }))
     onOtherChargesChange?.(charges)
   }
 
   const utilities = [
-    { key: "water", label: "Water", icon: Droplets, color: "text-black" },
-    { key: "electricity", label: "Electricity", icon: Zap, color: "text-black" },
-    { key: "gas", label: "Gas", icon: Flame, color: "text-black" },
-    { key: "others", label: "Others", icon: Plus, color: "text-black" },
+    { key: "water", label: "Water", icon: Droplets },
+    { key: "electricity", label: "Electricity", icon: Zap },
+    { key: "gas", label: "Gas", icon: Flame },
+    { key: "others", label: "Others", icon: Plus },
   ]
 
   return (
@@ -76,38 +51,54 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
       </div>
 
       <div className="space-y-6 max-w-4xl">
-        {utilities.map(({ key, label, icon: Icon, color }) => (
-          <div
-            key={key}
-            className="bg-white p-6 rounded-2xl shadow-lg space-y-6"
-          >
-            <div className="flex items-center gap-2">
-              <Icon size={24} className={color} />
+        {utilities.map(({ key, label, icon: Icon }) => (
+          <div key={key} className="bg-white p-6 rounded-2xl shadow-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Icon size={24} className="text-black" />
               <h4 className="text-lg font-medium text-gray-800">{label}</h4>
             </div>
 
-            <div className="space-y-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">Type</label>
-                <select
-                  className="border border-gray-300 rounded-md p-2"
-                  value={(charges[key as keyof typeof charges] as Charge).type}
-                  onChange={(e) =>
-                    handleChange(key as keyof typeof charges, {
-                      ...(charges[key as keyof typeof charges] as Charge),
-                      type: e.target.value,
-                    })
-                  }
-                >
-                  <option value="inclusive">Inclusive</option>
-                  <option value="exclusive">Exclusive</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-gray-700">Amount</label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() =>
+                  handleChange(key as keyof typeof charges, {
+                    ...(charges[key as keyof typeof charges] as Charge),
+                    type: 'inclusive',
+                  })
+                }
+                className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
+                  (charges[key as keyof typeof charges] as Charge).type === 'inclusive'
+                    ? "bg-blue-50 border-blue-500 text-blue-700"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Inclusive
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  handleChange(key as keyof typeof charges, {
+                    ...(charges[key as keyof typeof charges] as Charge),
+                    type: 'exclusive',
+                  })
+                }
+                className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
+                  (charges[key as keyof typeof charges] as Charge).type === 'exclusive'
+                    ? "bg-blue-50 border-blue-500 text-blue-700"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Exclusive
+              </button>
+            </div>
+
+            {(charges[key as keyof typeof charges] as Charge).type === 'exclusive' && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
                 <input
                   type="number"
-                  className="border border-gray-300 rounded-md p-2"
+                  className="w-full border border-gray-300 rounded-xl p-3 focus:border-blue-500 outline-none transition-colors duration-200"
                   value={(charges[key as keyof typeof charges] as Charge).amount}
                   onChange={(e) =>
                     handleChange(key as keyof typeof charges, {
@@ -115,54 +106,12 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                       amount: parseFloat(e.target.value) || 0,
                     })
                   }
+                  placeholder="Enter amount"
                 />
               </div>
-            </div>
+            )}
           </div>
         ))}
-
-        <div className="bg-white p-6 rounded-2xl shadow-lg space-y-6">
-          <div className="flex items-center gap-2">
-            <h4 className="text-lg font-medium text-gray-800">Property Tax</h4>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={() => handleChange('propertyTax', true)}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${charges.propertyTax
-                ? "bg-blue-50 border-blue-500 text-blue-700"
-                : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
-                }`}
-            >
-              Included
-            </button>
-            <button
-              type="button"
-              onClick={() => handleChange('propertyTax', false)}
-              className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl border transition-all duration-200 ${!charges.propertyTax
-                ? "bg-blue-50 border-blue-500 text-blue-700"
-                : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
-                }`}
-            >
-              Not Included
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-lg space-y-6">
-          <div className="flex items-center gap-2">
-            <h4 className="text-lg font-medium text-gray-800">Other Inclusives</h4>
-          </div>
-          <div className="relative">
-            <input
-              type="text"
-              value={charges.otherInclusives}
-              onChange={handleOtherInclusivesChange}
-              placeholder="Enter other inclusive charges"
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 outline-none transition-colors duration-200 text-gray-800 placeholder:text-gray-400 hover:border-gray-300"
-            />
-          </div>
-        </div>
       </div>
     </div>
   )

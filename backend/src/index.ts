@@ -62,8 +62,6 @@ import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
 import commercialSellAgricultureRoutes from './routes/commercial/commercialSellAgricultureRoutes';
 import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthersRoutes";
-
-import commercialRentOpenSpaceRoutes from "./routes/commercial/commercialRentOpenSpaceRoutes";
 import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRentCoveredSpaceRoutes";
 dotenv.config();
 
