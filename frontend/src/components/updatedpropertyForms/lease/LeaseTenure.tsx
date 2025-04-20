@@ -2,17 +2,22 @@ import { useState } from 'react';
 import { ArrowRight, Calendar, Clock, Timer } from 'lucide-react';
 
 interface LeaseTenureProps {
-  onLeaseTenureChange?: (tenure: Record<string, any>) => void;
+  onLeaseTenureChange?: (tenure: {
+    minimumTenure: { duration: number; durationType: string };
+    maximumTenure: { duration: number; durationType: string };
+    lockInPeriod: { duration: number; durationType: string };
+    noticePeriod: { duration: number; durationType: string };
+  }) => void;
 }
 
 const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
   const [tenure, setTenure] = useState({
     minimumTenure: '',
-    minimumUnit: 'years',
+    minimumUnit: 'months',
     maximumTenure: '',
-    maximumUnit: 'years',
+    maximumUnit: 'months',
     lockInPeriod: '',
-    lockInUnit: 'years',
+    lockInUnit: 'months',
     noticePeriod: '',
     noticePeriodUnit: 'months'
   });
@@ -20,7 +25,28 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
   const handleChange = (field: string, value: any) => {
     const updatedTenure = { ...tenure, [field]: value };
     setTenure(updatedTenure);
-    onLeaseTenureChange?.(updatedTenure);
+    
+    // Convert to the structure expected by the backend
+    const structuredTenure = {
+      minimumTenure: {
+        duration: parseInt(updatedTenure.minimumTenure) || 0,
+        durationType: updatedTenure.minimumUnit
+      },
+      maximumTenure: {
+        duration: parseInt(updatedTenure.maximumTenure) || 0,
+        durationType: updatedTenure.maximumUnit
+      },
+      lockInPeriod: {
+        duration: parseInt(updatedTenure.lockInPeriod) || 0,
+        durationType: updatedTenure.lockInUnit
+      },
+      noticePeriod: {
+        duration: parseInt(updatedTenure.noticePeriod) || 0,
+        durationType: updatedTenure.noticePeriodUnit
+      }
+    };
+
+    onLeaseTenureChange?.(structuredTenure);
   };
 
   return (
