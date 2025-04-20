@@ -1014,7 +1014,7 @@ const RentCoveredSpace = () => {
         //     'Content-Type': 'application/json'
         const token = JSON.parse(user).token;
         const response = await axios.post(
-          `/api/commercial/rent/covered-space`,
+          `/api/commercial-rent-covered-space`,
           transformedData,
           {
             headers: {
@@ -1105,3 +1105,5 @@ const RentCoveredSpace = () => {
 };
 
 export default RentCoveredSpace;
+
+

@@ -1,30 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useState } from "react";
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
-import PropertyName from "../PropertyName"
-import AgriculturalLandType from "../CommercialComponents/AgriculturalLandType"
-import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
-import Landmark from "../CommercialComponents/Landmark"
-
-import CornerProperty from "../CommercialComponents/CornerProperty"
-import AgriculturalLandDetails from "../CommercialComponents/AgriculturalLandDetails"
-import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
-import LeaseAmount from "../lease/LeaseAmount"
-import LeaseTenure from "../lease/LeaseTenure"
-import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
-import OtherCharges from "../residentialrent/OtherCharges"
-import Brokerage from "../residentialrent/Brokerage"
-import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
-import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { useNavigate } from "react-router-dom"
-import { toast } from "react-toastify"
-import axios from "axios"
+import PropertyName from '../PropertyName';
+import OtherCommercialType from '../CommercialComponents/OtherCommercialType';
+import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
+import Landmark from '../CommercialComponents/Landmark';
+import MapCoordinates from '../MapCoordinates';
+import CornerProperty from '../CommercialComponents/CornerProperty';
+import OtherPropertyDetails from '../CommercialComponents/OtherPropertyDetails';
+import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
+import LeaseAmount from '../lease/LeaseAmount';
+import LeaseTenure from '../lease/LeaseTenure';
+import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
+import OtherCharges from '../residentialrent/OtherCharges';
+import Brokerage from '../residentialrent/Brokerage';
+import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
+import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
+import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
 
 interface FormData {
   title: string;
-  landType: string[];
+  commercialType: string[];
   address: {
     street: string;
     city: string;
@@ -33,19 +33,18 @@ interface FormData {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
-  landDetails: {
-    totalArea: number;
-    soilType: string;
-    irrigation: boolean;
-    fencing: boolean;
-    cropSuitability: string;
-    waterSource: string;
-    legalClearances: boolean;
+  
+  otherDetails: {
+    propertyTypeDescription: string;
+    specialFeatures: string;
+    usageRecommendation: string;
+    additionalRequirements: string;
   };
+  
   propertyDetails: {
     area: {
       totalArea: number;
@@ -61,19 +60,21 @@ interface FormData {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: number | null;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
       backup: boolean;
     };
   };
+  
   leaseAmount: {
     amount: number;
     duration: number;
     durationType: string;
     isNegotiable: boolean;
   };
+  
   leaseTenure: {
     minimumTenure: string;
     minimumUnit: string;
@@ -84,44 +85,49 @@ interface FormData {
     noticePeriod: string;
     noticePeriodUnit: string;
   };
+  
   maintenanceAmount: {
     amount?: number;
     frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
+  
   otherCharges: {
-    waterCharges: {
+    electricityCharges: {
       type: "inclusive" | "exclusive";
       amount?: number;
     };
-    electricityCharges: {
+    waterCharges: { 
       type: "inclusive" | "exclusive";
       amount?: number;
     };
     gasCharges: {
       type: "inclusive" | "exclusive";
       amount?: number;
-    };
+    };  
     otherCharges: {
       type: "inclusive" | "exclusive";
       amount?: number;
     };
   };
+  
   brokerage: {
-    required: boolean;
+    required: string;
     amount?: number;
   };
+  
   availability: {
-    availableFrom: Date;
+    availableFrom: Date | null;
     availableImmediately: boolean;
     availabilityStatus: string;
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
-    operatingHours: {
+    operatingHours: {   
       restricted: boolean;
       restrictions: string;
     };
   };
+  
   contactDetails: {
     name: string;
     email: string;
@@ -129,24 +135,25 @@ interface FormData {
     alternatePhone?: string;
     bestTimeToContact?: string;
   };
+  
   media: {
     photos: {
       exterior: File[];
       interior: File[];
       floorPlan: File[];
       aerial: File[];
-      soil: File[];
-      irrigation: File[];
+      surroundings: File[];
+      documents: File[];
     };
     videoTour: File | null;
     documents: File[];
   };
 }
 
-const LeaseAgricultureMain = () => {
+const CommercialLeaseOthersForm = () => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    landType: [],
+    commercialType: [],
     address: {
       street: '',
       city: '',
@@ -155,18 +162,15 @@ const LeaseAgricultureMain = () => {
     },
     landmark: '',
     location: {
-      latitude: 0,
-      longitude: 0
+      latitude: '',
+      longitude: ''
     },
     isCornerProperty: false,
-    landDetails: {
-      totalArea: 0,
-      soilType: '',
-      irrigation: false,
-      fencing: false,
-      cropSuitability: '',
-      waterSource: '',
-      legalClearances: false
+    otherDetails: {
+      propertyTypeDescription: '',
+      specialFeatures: '',
+      usageRecommendation: '',
+      additionalRequirements: ''
     },
     propertyDetails: {
       area: {
@@ -183,7 +187,7 @@ const LeaseAgricultureMain = () => {
       propertyAmenities: [],
       wholeSpaceAmenities: [],
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: null,
       propertyCondition: '',
       electricitySupply: {
         powerLoad: 0,
@@ -192,50 +196,50 @@ const LeaseAgricultureMain = () => {
     },
     leaseAmount: {
       amount: 0,
-      duration: 0,
-      durationType: 'months',
+      duration: 1,
+      durationType: 'years',
       isNegotiable: false
     },
     leaseTenure: {
-      minimumTenure: '',
-      minimumUnit: 'months',
-      maximumTenure: '',
-      maximumUnit: 'months',
-      lockInPeriod: '',
-      lockInUnit: 'months',
-      noticePeriod: '',
+      minimumTenure: '1',
+      minimumUnit: 'years',
+      maximumTenure: '1',
+      maximumUnit: 'years',
+      lockInPeriod: '1',
+      lockInUnit: 'years',
+      noticePeriod: '1',
       noticePeriodUnit: 'months'
     },
     maintenanceAmount: {
       amount: 0,
-      frequency: 'monthly'
+      frequency: "monthly"
     },
     otherCharges: {
-      waterCharges: {
-        type: 'inclusive',
+      electricityCharges: {
+        type: "exclusive",
         amount: 0
       },
-      electricityCharges: {
-        type: 'inclusive',
+      waterCharges: {
+        type: "exclusive",
         amount: 0
       },
       gasCharges: {
-        type: 'inclusive',
+        type: "exclusive",
         amount: 0
       },
       otherCharges: {
-        type: 'inclusive',
+        type: "exclusive",
         amount: 0
       }
     },
     brokerage: {
-      required: false,
+      required: 'No',
       amount: 0
     },
     availability: {
-      availableFrom: new Date(),
-      availableImmediately: false,
-      availabilityStatus: '',
+      availableFrom: null,
+      availableImmediately: true,
+      availabilityStatus: 'Available',
       leaseDuration: '',
       noticePeriod: '',
       isPetsAllowed: false,
@@ -257,33 +261,16 @@ const LeaseAgricultureMain = () => {
         interior: [],
         floorPlan: [],
         aerial: [],
-        soil: [],
-        irrigation: []
+        surroundings: [],
+        documents: []
       },
       videoTour: null,
       documents: []
     }
   });
 
-  const [currentStep, setCurrentStep] = useState(0)
-  const navigate = useNavigate()
-
-  // Adapter function to convert from component output to FormData structure
-  const handleLeaseTenureChange = (tenure: any) => {
-    setFormData(prev => ({
-      ...prev,
-      leaseTenure: {
-        minimumTenure: String(tenure.minimumTenure?.duration || ''),
-        minimumUnit: tenure.minimumTenure?.durationType || 'months',
-        maximumTenure: String(tenure.maximumTenure?.duration || ''),
-        maximumUnit: tenure.maximumTenure?.durationType || 'months',
-        lockInPeriod: String(tenure.lockInPeriod?.duration || ''),
-        lockInUnit: tenure.lockInPeriod?.durationType || 'months',
-        noticePeriod: String(tenure.noticePeriod?.duration || ''),
-        noticePeriodUnit: tenure.noticePeriod?.durationType || 'months'
-      }
-    }));
-  };
+  const [currentStep, setCurrentStep] = useState(0);
+  const navigate = useNavigate();
 
   const steps = [
     {
@@ -304,10 +291,10 @@ const LeaseAgricultureMain = () => {
                   title: name
                 }))}
               />
-              <AgriculturalLandType
-                onLandTypeChange={(types: string[]) => setFormData(prev => ({
+              <OtherCommercialType
+                onCommercialTypeChange={(types) => setFormData(prev => ({
                   ...prev,
-                  landType: types
+                  commercialType: types
                 }))}
               />
             </div>
@@ -333,8 +320,8 @@ const LeaseAgricultureMain = () => {
                 onLocationSelect={(location) => setFormData(prev => ({
                   ...prev,
                   location: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
+                    latitude: location.latitude,
+                    longitude: location.longitude
                   }
                 }))}
               />
@@ -359,25 +346,20 @@ const LeaseAgricultureMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
-            <AgriculturalLandDetails
+            <OtherPropertyDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                landDetails: { ...prev.landDetails, ...details }
+                otherDetails: { ...prev.otherDetails, ...details }
               }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                propertyDetails: {
-                  ...prev.propertyDetails,
-                  ...details,
-                  propertyAge: details.propertyAge ?? 0,
-                  electricitySupply: {
-                    ...prev.propertyDetails.electricitySupply,
-                    powerLoad: details.electricitySupply?.powerLoad ?? 0
-                  }
-                }
-              }))}
+              onDetailsChange={(details) => {
+                const updatedDetails = details as Partial<typeof formData.propertyDetails>;
+                setFormData(prev => ({
+                  ...prev,
+                  propertyDetails: { ...prev.propertyDetails, ...updatedDetails }
+                }));
+              }}
             />
           </div>
         </div>
@@ -402,8 +384,37 @@ const LeaseAgricultureMain = () => {
                     leaseAmount: { ...prev.leaseAmount, ...amount }
                   }))} 
                 />
-                <LeaseTenure
-                  onLeaseTenureChange={handleLeaseTenureChange}
+                <LeaseTenure 
+                  onLeaseTenureChange={(tenure) => {
+                    // Create a compatible object structure for leaseTenure
+                    const updatedTenure: Partial<typeof formData.leaseTenure> = {};
+                    
+                    // Map complex values to the expected string format
+                    if (tenure.minimumTenure) {
+                      updatedTenure.minimumTenure = String(tenure.minimumTenure.duration || '1');
+                      updatedTenure.minimumUnit = tenure.minimumTenure.durationType || 'years';
+                    }
+                    
+                    if (tenure.maximumTenure) {
+                      updatedTenure.maximumTenure = String(tenure.maximumTenure.duration || '1');
+                      updatedTenure.maximumUnit = tenure.maximumTenure.durationType || 'years';
+                    }
+                    
+                    if (tenure.lockInPeriod) {
+                      updatedTenure.lockInPeriod = String(tenure.lockInPeriod.duration || '1');
+                      updatedTenure.lockInUnit = tenure.lockInPeriod.durationType || 'years';
+                    }
+                    
+                    if (tenure.noticePeriod) {
+                      updatedTenure.noticePeriod = String(tenure.noticePeriod.duration || '1');
+                      updatedTenure.noticePeriodUnit = tenure.noticePeriod.durationType || 'months';
+                    }
+                    
+                    setFormData(prev => ({
+                      ...prev,
+                      leaseTenure: { ...prev.leaseTenure, ...updatedTenure }
+                    }));
+                  }} 
                 />
               </div>
             </div>
@@ -447,18 +458,18 @@ const LeaseAgricultureMain = () => {
             <h3 className="text-xl font-semibold text-black">Availability</h3>
           </div>
           <div className="space-y-6">
-            <CommercialAvailability
+            <CommercialAvailability 
               onAvailabilityChange={(availability) => setFormData(prev => ({
                 ...prev,
                 availability: { ...prev.availability, ...availability }
-              }))}
+              }))} 
             />
           </div>
         </div>
       ),
     },
     {
-      title: "Contact Information",
+      title: "Contact Details",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
@@ -467,51 +478,49 @@ const LeaseAgricultureMain = () => {
             <h3 className="text-xl font-semibold text-black">Contact Details</h3>
           </div>
           <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData(prev => ({
-                ...prev,
-                contactDetails: { ...prev.contactDetails, ...contact }
-              }))}
+            <CommercialContactDetails 
+              onContactChange={(contactDetails) => {
+                const updatedContactDetails = contactDetails as Partial<typeof formData.contactDetails>;
+                setFormData(prev => ({
+                  ...prev,
+                  contactDetails: { ...prev.contactDetails, ...updatedContactDetails }
+                }));
+              }} 
             />
           </div>
         </div>
       ),
     },
     {
-      title: "Property Media",
+      title: "Media Upload",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
             <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
+            <h3 className="text-xl font-semibold text-black">Media Upload</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload
+            <CommercialMediaUpload 
               onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
-
+                const processedMedia = {
+                  ...formData.media,
+                  ...media,
+                  documents: Array.isArray(media.documents) ? 
+                    media.documents.map(doc => doc.file || doc) : 
+                    formData.media.documents
+                };
+                
                 setFormData(prev => ({
                   ...prev,
-                  media: {
-                    ...prev.media,
-                    photos: {
-                      ...prev.media.photos,
-                      ...photos
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
+                  media: processedMedia
                 }));
-              }}
+              }} 
             />
           </div>
         </div>
       ),
-    },
+    }
   ];
 
   const convertFileToBase64 = (file: File): Promise<string> => {
@@ -523,53 +532,41 @@ const LeaseAgricultureMain = () => {
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log(formData);
     try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
-
-        const convertedMedia = {
-          photos: {
-            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            aerial: await Promise.all((formData.media?.photos?.aerial ?? []).map(convertFileToBase64)),
-            soil: await Promise.all((formData.media?.photos?.soil ?? []).map(convertFileToBase64)),
-            irrigation: await Promise.all((formData.media?.photos?.irrigation ?? []).map(convertFileToBase64))
-          },
-          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-        };
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date()
-          }
-        };
-
-        console.log('Sending data to backend:', JSON.stringify(transformedData, null, 2));
-
-        const response = await axios.post('/api/commercial/lease/agriculture', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          toast.success('Agricultural land lease listing created successfully!');
-          
-        }
+      // Convert files to base64 strings for API submission
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all(formData.media.photos.exterior.map(convertFileToBase64)),
+          interior: await Promise.all(formData.media.photos.interior.map(convertFileToBase64)),
+          floorPlan: await Promise.all(formData.media.photos.floorPlan.map(convertFileToBase64)),
+          aerial: await Promise.all(formData.media.photos.aerial.map(convertFileToBase64)),
+          surroundings: await Promise.all(formData.media.photos.surroundings.map(convertFileToBase64)),
+          documents: await Promise.all(formData.media.photos.documents.map(convertFileToBase64))
+        },
+        videoTour: formData.media.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all(formData.media.documents.map(convertFileToBase64))
+      };
+      
+      // Prepare the final data object for submission
+      const submissionData = {
+        ...formData,
+        media: convertedMedia
+      };
+      
+      // Submit the form data to backend API
+      const response = await axios.post('/api/commercial/lease/others', submissionData);
+      
+      if (response.data.success) {
+        toast.success("Property listed successfully!");
       } else {
-        navigate('/login');
+        toast.error("Error listing property. Please try again.");
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create agricultural land lease listing. Please try again.');
+      console.error("Error submitting form:", error);
+      toast.error("Error submitting form. Please try again later.");
     }
   };
 
@@ -586,99 +583,74 @@ const LeaseAgricultureMain = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Progress indicator */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex justify-center">
+    <div className="max-w-5xl mx-auto py-10 px-4">
+      <form onSubmit={handleSubmit}>
+        <div className="bg-white p-4 rounded-lg mb-6 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              {steps.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(i)}
-                >
-                  <div className="flex flex-col items-center group">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
-                    >
-                      {s.icon}
-                    </div>
-                    <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
-                    >
-                      {s.title}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className="flex items-center mx-1">
-                      <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
-                      ></div>
-                    </div>
-                  )}
-                </div>
-              ))}
+              <Store className="w-5 h-5 text-black" />
+              <h1 className="text-2xl font-bold text-black">Commercial Property Lease - Other Type</h1>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+        {/* Progress Steps */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
+          <div className="flex justify-between items-center">
+            {steps.map((step, index) => (
+              <div 
+                key={index} 
+                className={`flex flex-col items-center ${index === currentStep ? 'text-blue-600' : 'text-gray-400'}`}
+                style={{ width: `${100 / steps.length}%` }}
+              >
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full mb-2 ${index === currentStep ? 'bg-blue-600 text-white' : index < currentStep ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                  {index < currentStep ? '✓' : step.icon}
+                </div>
+                <span className="text-sm text-center">{step.title}</span>
+                {index < steps.length - 1 && (
+                  <div className={`h-1 w-full mt-2 ${index < currentStep ? 'bg-green-500' : 'bg-gray-200'}`} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
+        {/* Current Step Content */}
         {steps[currentStep].component}
-      </div>
 
-      {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+        {/* Navigation Buttons */}
+        <div className="flex justify-between mt-8">
           <button
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-            }`}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg ${currentStep === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-gray-800 text-white hover:bg-gray-700'}`}
           >
-            <ChevronLeft className="w-5 h-5 mr-2" />
+            <ChevronLeft className="w-5 h-5" />
             Previous
           </button>
-          {currentStep < steps.length - 1 ? (
+          
+          {currentStep === steps.length - 1 ? (
             <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+              type="submit"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Next
-              <ChevronRight className="w-5 h-5 ml-2" />
+              Submit Listing
             </button>
           ) : (
             <button
               type="button"
-              onClick={handleSubmit}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+              onClick={handleNext}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              List Property
-              <ChevronRight className="w-5 h-5 ml-2" />
+              Next
+              <ChevronRight className="w-5 h-5" />
             </button>
           )}
         </div>
-      </div>
+      </form>
     </div>
   );
 };
 
-export default LeaseAgricultureMain;
+export default CommercialLeaseOthersForm; 

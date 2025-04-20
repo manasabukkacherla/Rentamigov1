@@ -7,17 +7,23 @@ interface CommercialAvailabilityProps {
   onAvailabilityChange?: (availability: Record<string, any>) => void;
 }
 
+interface AvailabilityState {
+  type: 'immediate' | 'specific';
+  date?: Date;
+  preferredSaleDuration: string;
+  noticePeriod: string;
+  isPetsAllowed: boolean;
+  operatingHours: boolean;
+}
+
 const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailabilityProps) => {
-  const [availability, setAvailability] = useState({
-    availableFrom: '',
-    availableImmediately: false,
-    leaseDuration: '',
+  const [availability, setAvailability] = useState<AvailabilityState>({
+    type: 'immediate',
+    date: undefined,
+    preferredSaleDuration: '',
     noticePeriod: '',
-    petsAllowed: false,
-    operatingHours: {
-      restricted: false,
-      restrictions: ''
-    }
+    isPetsAllowed: false,
+    operatingHours: false
   });
 
   const handleChange = (field: string, value: any) => {
@@ -33,14 +39,6 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
     
   //   handleChange('preferredTenants', updatedTenants);
   // };
-
-  const handleOperatingHoursChange = (field: string, value: any) => {
-    const updatedHours = {
-      ...availability.operatingHours,
-      [field]: value
-    };
-    handleChange('operatingHours', updatedHours);
-  };
 
   const tenantTypes = [
     'Corporate',
@@ -66,21 +64,33 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
         </div>
 
         <div className="bg-white p-6 rounded-lg space-y-6">
-          {/* Available Immediately */}
+          {/* Availability Type */}
           <div>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={availability.availableImmediately}
-                onChange={(e) => handleChange('availableImmediately', e.target.checked)}
-                className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
-              />
-              <span className="text-black">Available Immediately</span>
-            </label>
+            <label className="block text-gray-800 font-medium mb-2">Availability</label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  checked={availability.type === 'immediate'}
+                  onChange={() => handleChange('type', 'immediate')}
+                  className="text-black border-gray-300 focus:ring-black"
+                />
+                <span className="text-black/80">Available Immediately</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  checked={availability.type === 'specific'}
+                  onChange={() => handleChange('type', 'specific')}
+                  className="text-black border-gray-300 focus:ring-black"
+                />
+                <span className="text-black/80">Specific Date</span>
+              </label>
+            </div>
           </div>
 
           {/* Available From */}
-          {!availability.availableImmediately && (
+          {availability.type === 'specific' && (
             <div>
               <label htmlFor="availableFrom" className="block text-gray-800 font-medium mb-2">
                 Available From
@@ -89,32 +99,33 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                 <input
                   type="date"
                   id="availableFrom"
-                  value={availability.availableFrom}
-                  onChange={(e) => handleChange('availableFrom', e.target.value)}
+                  onChange={(e) => {
+                    const selectedDate = e.target.value ? new Date(e.target.value) : undefined;
+                    handleChange('date', selectedDate);
+                  }}
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
                 />
               </div>
             </div>
           )}
 
-          {/* Lease Duration */}
+          {/* Preferred Sale Duration */}
           <div>
-            <label htmlFor="leaseDuration" className="block text-gray-800 font-medium mb-2">
-              Preferred Lease Duration
+            <label htmlFor="preferredSaleDuration" className="block text-gray-800 font-medium mb-2">
+              Preferred Sale Duration
             </label>
             <select
-              id="leaseDuration"
-              value={availability.leaseDuration}
-              onChange={(e) => handleChange('leaseDuration', e.target.value)}
+              id="preferredSaleDuration"
+              value={availability.preferredSaleDuration}
+              onChange={(e) => handleChange('preferredSaleDuration', e.target.value)}
               className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
             >
-              <option value="">Select lease duration</option>
-              <option value="6 months">6 Months</option>
-              <option value="1 year">1 Year</option>
-              <option value="2 years">2 Years</option>
-              <option value="3 years">3 Years</option>
-              <option value="5 years">5 Years</option>
-              <option value="flexible">Flexible</option>
+              <option value="">Select preferred duration</option>
+              <option value="1-3 months">1-3 Months</option>
+              <option value="3-6 months">3-6 Months</option>
+              <option value="6-12 months">6-12 Months</option>
+              <option value="Over 1 year">Over 1 Year</option>
+              <option value="Flexible">Flexible</option>
             </select>
           </div>
 
@@ -150,18 +161,18 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      checked={availability.petsAllowed}
-                      onChange={() => handleChange('petsAllowed', true)}
-                      className="text-white border-white/20 bg-transparent focus:ring-white"
+                      checked={availability.isPetsAllowed}
+                      onChange={() => handleChange('isPetsAllowed', true)}
+                      className="text-black border-gray-300 focus:ring-black"
                     />
                     <span className="text-black/80">Yes</span>
                   </label>
                   <label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      checked={!availability.petsAllowed}
-                      onChange={() => handleChange('petsAllowed', false)}
-                      className="text-white border-white/20 bg-transparent focus:ring-white"
+                      checked={!availability.isPetsAllowed}
+                      onChange={() => handleChange('isPetsAllowed', false)}
+                      className="text-black border-gray-300 focus:ring-black"
                     />
                     <span className="text-black/80">No</span>
                   </label>
@@ -179,31 +190,22 @@ const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailability
                     <label className="flex items-center gap-2">
                       <input
                         type="radio"
-                        checked={availability.operatingHours.restricted}
-                        onChange={() => handleOperatingHoursChange('restricted', true)}
-                        className="text-white border-white/20 bg-transparent focus:ring-white"
+                        checked={availability.operatingHours}
+                        onChange={() => handleChange('operatingHours', true)}
+                        className="text-black border-gray-300 focus:ring-black"
                       />
                       <span className="text-black/80">Yes</span>
                     </label>
                     <label className="flex items-center gap-2">
                       <input
                         type="radio"
-                        checked={!availability.operatingHours.restricted}
-                        onChange={() => handleOperatingHoursChange('restricted', false)}
-                        className="text-white border-white/20 bg-transparent focus:ring-white"
+                        checked={!availability.operatingHours}
+                        onChange={() => handleChange('operatingHours', false)}
+                        className="text-black border-gray-300 focus:ring-black"
                       />
                       <span className="text-black/80">No</span>
                     </label>
                   </div>
-                  {availability.operatingHours.restricted && (
-                    <input
-                      type="text"
-                      value={availability.operatingHours.restrictions}
-                      onChange={(e) => handleOperatingHoursChange('restrictions', e.target.value)}
-                      placeholder="Specify operating hours restrictions"
-                      className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-white placeholder:text-white/40"
-                    />
-                  )}
                 </div>
               </div>
             </div>

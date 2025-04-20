@@ -103,7 +103,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                   onChange={(e) =>
                     handleChange(key as keyof typeof charges, {
                       ...(charges[key as keyof typeof charges] as Charge),
-                      amount: parseFloat(e.target.value) || 0,
+                      amount: parseFloat(e.target.value) || '',
                     })
                   }
                   placeholder="Enter amount"

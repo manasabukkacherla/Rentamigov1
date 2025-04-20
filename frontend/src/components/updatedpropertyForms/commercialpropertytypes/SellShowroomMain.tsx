@@ -261,36 +261,53 @@ const SellShowroomMain = () => {
     {
       title: "Basic Information",
       icon: <Store className="w-5 h-5" />,
-      content: (
-        <div className="space-y-6">
-          <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
-          />
-          <ShowroomType
-            onTypeChange={(type) => setFormData(prev => ({
-              ...prev,
-              showroomType: Array.isArray(type) ? type : [type]
-            }))}
-          />
-          <CommercialPropertyAddress
-            onAddressChange={(address) => setFormData(prev => ({
-              ...prev,
-              address
-            }))}
-          />
-          <Landmark
-            onLandmarkChange={(landmark) => setFormData(prev => ({
-              ...prev,
-              landmark
-            }))}
-          />
-          <CornerProperty
-            onCornerPropertyChange={(isCorner) => setFormData(prev => ({
-              ...prev,
-              isCornerProperty: isCorner
-            }))}
-          />
+      component: (
+        <div className="space-y-8">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <Store className="text-black w-6 h-6" />
+              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
+            </div>
+            <div className="space-y-6">
+              <PropertyName
+                propertyName={formData.propertyName}
+                onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+              />
+              <ShowroomType
+                onTypeChange={(type) => setFormData(prev => ({
+                  ...prev,
+                  showroomType: Array.isArray(type) ? type : [type]
+                }))}
+              />
+            </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center gap-3 mb-6">
+              <MapPin className="text-black w-6 h-6" />
+              <h3 className="text-xl font-semibold text-black">Location Details</h3>
+            </div>
+            <div className="space-y-6">
+              <CommercialPropertyAddress
+                onAddressChange={(address) => setFormData(prev => ({
+                  ...prev,
+                  address
+                }))}
+              />
+              <Landmark
+                onLandmarkChange={(landmark) => setFormData(prev => ({
+                  ...prev,
+                  landmark
+                }))}
+              />
+              <CornerProperty
+                onCornerPropertyChange={(isCorner) => setFormData(prev => ({
+                  ...prev,
+                  isCornerProperty: isCorner
+                }))}
+              />
+            </div>
+          </div>
         </div>
       ),
     },
@@ -311,10 +328,19 @@ const SellShowroomMain = () => {
               }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                propertyDetails: { ...prev.propertyDetails, ...details }
-              }))}
+              onDetailsChange={(details) => {
+                const modifiedDetails = {
+                  ...details,
+                  waterAvailability: Array.isArray(details.waterAvailability) 
+                    ? details.waterAvailability 
+                    : details.waterAvailability ? [details.waterAvailability] : []
+                };
+                
+                setFormData(prev => ({
+                  ...prev,
+                  propertyDetails: { ...prev.propertyDetails, ...modifiedDetails }
+                }))
+              }}
             />
           </div>
         </div>
@@ -532,27 +558,42 @@ const SellShowroomMain = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 sm:p-10">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black">Sell Commercial Showroom</h1>
-            <div className="mt-6 flex items-center space-x-6">
-              {steps.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
+    <div className="min-h-screen bg-white">
+      {/* Progress indicator */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {steps.map((step, i) => (
+                <div
+                  key={i}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => setCurrentStep(i)}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                       }`}
-                  >
-                    {step.icon}
+                    >
+                      {step.icon}
+                    </div>
+                    <span
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
+                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                      }`}
+                    >
+                      {step.title}
+                    </span>
                   </div>
-                  <span className={`ml-3 text-sm font-medium ${index <= currentStep ? 'text-black' : 'text-black/70'
-                    }`}>
-                    {step.title}
-                  </span>
-                  {index < steps.length - 1 && (
-                    <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-                      }`} />
+                  {i < steps.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div
+                        className={`w-12 h-1 transition-colors duration-200 ${
+                          i < currentStep ? "bg-black" : "bg-gray-200"
+                        }`}
+                      ></div>
+                    </div>
                   )}
                 </div>
               ))}
@@ -561,50 +602,56 @@ const SellShowroomMain = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
-            <p className="text-gray-600">Please fill in the details for your property</p>
-          </div>
+      {/* Form Content */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your showroom property</p>
+        </div>
 
+        <form onSubmit={handleSubmit}>
           {steps[currentStep].component}
-        </div>
 
-        <div className="flex justify-between pt-4">
-          <button
-            type="button"
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`px-6 py-2.5 rounded-lg border transition-all duration-200 ${currentStep === 0
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "border-black/20 text-black hover:bg-black hover:text-white"
-              }`}
-          >
-            Previous
-          </button>
-
-          {currentStep < steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              List Property
-            </button>
-          )}
-        </div>
-      </form>
+          {/* Navigation Buttons */}
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+              <button
+                type="button"
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
+                  currentStep === 0
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-black hover:bg-black hover:text-white"
+                }`}
+              >
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                Previous
+              </button>
+              {currentStep < steps.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+                >
+                  Next
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+                >
+                  Submit
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </button>
+              )}
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
 
 export default SellShowroomMain;
-

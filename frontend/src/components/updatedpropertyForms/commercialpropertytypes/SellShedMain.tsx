@@ -1,13 +1,11 @@
-"use client"
-
 import { useState } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import PropertyName from "../PropertyName"
-import ShopType from "../CommercialComponents/ShopType"
+import ShedType from "../CommercialComponents/ShedType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import CornerProperty from "../CommercialComponents/CornerProperty"
-import ShopDetails from "../CommercialComponents/ShopDetails"
+import ShedDetails from "../CommercialComponents/ShedDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
 import PricePerSqft from "../sell/PricePerSqft"
@@ -16,28 +14,124 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import axios from "axios"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
 
-const SellShopMain = () => {
-  const [formData, setFormData] = useState({
+// Interfaces
+interface IArea {
+  totalArea?: number;
+  builtUpArea?: number;
+  carpetArea?: number;
+}
+
+interface IFloor {
+  floorNumber: number;
+  totalFloors: number;
+}
+
+interface ShedDetailsType {
+  totalArea: number;
+  carpetArea: number;
+  Height: number;
+  entranceWidth: number;
+  additionalDetails: string;
+}
+
+interface PropertyDetailsType {
+  area: IArea;
+  floorDetails: IFloor;
+  facingDirection: string;
+  furnishingStatus: string;
+  propertyAmenities: string[];
+  wholeSpaceAmenities: string[];
+  propertyAge: number;
+  propertyCondition: string;
+  waterAvailability: string[];
+  electricitySupply: {
+    powerLoad: number;
+    backup: boolean;
+  };
+}
+
+interface RegistrationChargesType {
+  included: boolean;
+  amount?: number;
+  stampDuty?: number;
+}
+
+interface BrokerageType {
+  required: string;
+  amount?: number;
+}
+
+interface AvailabilityType {
+  type: 'immediate' | 'specific';
+  date?: Date;
+  preferredSaleDuration?: string;
+  noticePeriod?: string;
+  isPetsAllowed: boolean;
+  operatingHours: boolean;
+}
+
+interface ContactDetailsType {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+}
+
+interface MediaType {
+  photos: (string | File)[];
+  video?: string | File;
+}
+
+interface FormDataType {
+  propertyName: string;
+  shedType: string;
+  address: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+  };
+  landmark: string;
+  coordinates: {
+    latitude: string;
+    longitude: string;
+  };
+  isCornerProperty: boolean;
+  shedDetails: Partial<ShedDetailsType>;
+  propertyDetails: Partial<PropertyDetailsType>;
+  price: string | number;
+  registrationCharges: Partial<RegistrationChargesType>;
+  brokerage: Partial<BrokerageType>;
+  availability: Partial<AvailabilityType>;
+  contactDetails: Partial<ContactDetailsType>;
+  media: {
+    photos: (string | File)[];
+    video?: string | File;
+  };
+}
+
+const SellShedMain = () => {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState<FormDataType>({
     propertyName: "",
-    shopType: "",
+    shedType: "",
     address: {},
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
-    shopDetails: {},
+    shedDetails: {},
     propertyDetails: {},
     price: "",
-    area: {
-      superBuiltUpAreaSqft: "",
-      builtUpAreaSqft: "",
-      carpetAreaSqft: "",
-    },
     registrationCharges: {},
     brokerage: {},
     availability: {},
     contactDetails: {},
-    media: { photos: [], video: null },
+    media: { photos: [] },
   })
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -57,7 +151,7 @@ const SellShopMain = () => {
                 propertyName={formData.propertyName}
                 onPropertyNameChange={(name) => handleChange("propertyName", name)}
               />
-              <ShopType onShopTypeChange={(type) => handleChange("shopType", type)} />
+              <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
             </div>
           </div>
 
@@ -86,7 +180,7 @@ const SellShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
-            <ShopDetails onDetailsChange={(details) => handleChange("shopDetails", details)} />
+            <ShedDetails onDetailsChange={(details) => handleChange("shedDetails", details)} />
             <CommercialPropertyDetails onDetailsChange={(details) => handleChange("propertyDetails", details)} />
           </div>
         </div>
@@ -180,10 +274,72 @@ const SellShopMain = () => {
   const handleChange = (key: string, value: string | boolean | Record<string, any>) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
   }
+  
+  // Function to convert File to base64 string
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
 
-  const handleSubmit = (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    console.log("Submitted Data:", formData)
+  const handleSubmit = async (e?: { preventDefault: () => void }) => {
+    if (e) e.preventDefault();
+    console.log(formData);
+    try {
+      // Convert media files to base64 strings if they exist
+      let mediaData: Partial<MediaType> = { photos: [] };
+      
+      if (formData.media.photos && formData.media.photos.length > 0) {
+        const photoPromises = formData.media.photos.map(async (photo: any) => {
+          if (photo instanceof File) {
+            return await convertFileToBase64(photo);
+          }
+          return photo;
+        });
+        mediaData.photos = await Promise.all(photoPromises);
+      }
+      
+      if (formData.media.video && formData.media.video instanceof File) {
+        mediaData.video = await convertFileToBase64(formData.media.video);
+      }
+      
+      // Transform data for backend
+      const transformedData = {
+        ...formData,
+        media: mediaData,
+        // Ensure availability data matches the schema
+        availability: {
+          type: formData.availability.type || 'immediate',
+          date: formData.availability.date,
+          preferredSaleDuration: formData.availability.preferredSaleDuration,
+          noticePeriod: formData.availability.noticePeriod,
+          isPetsAllowed: formData.availability.isPetsAllowed || false,
+          operatingHours: formData.availability.operatingHours || false
+        },
+        // Add metadata
+        metaData: {
+          createdAt: new Date(),
+          createdBy: sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') || '{}').id : null
+        }
+      };
+      
+      console.log('Submitting data:', transformedData);
+      
+      // Submit to backend API
+      const response = await axios.post('/api/commercial/sell/sheds', transformedData);
+      
+      if (response.status === 201) {
+        toast.success("Property listed successfully!");
+        // Redirect to some success page or dashboard
+       
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error("Failed to list property. Please try again.");
+    }
   }
 
   return (
@@ -235,10 +391,10 @@ const SellShopMain = () => {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
+          <p className="text-gray-600">Please fill in the details for your shed property</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <div>
           {steps[currentStep].component}
 
           {/* Navigation Buttons */}
@@ -268,7 +424,8 @@ const SellShopMain = () => {
                 </button>
               ) : (
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleSubmit}
                   className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
                 >
                   Submit
@@ -277,11 +434,11 @@ const SellShopMain = () => {
               )}
             </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )
 }
 
-export default SellShopMain
+export default SellShedMain
 

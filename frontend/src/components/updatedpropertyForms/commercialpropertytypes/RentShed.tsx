@@ -15,14 +15,15 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar } from "lucide-react"
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
 import PropertySize from '../PropertySize';
 import PropertyFeatures from '../PropertyFeatures';
 import MediaUpload from '../MediaUpload';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
 
 interface FormData {
   basicInformation: {
@@ -219,6 +220,7 @@ interface MediaUploadProps {
 }
 
 const RentShed = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -456,7 +458,7 @@ const RentShed = () => {
     },
     {
       title: 'Rental Terms',
-      icon: <Building2 className="w-5 h-5" />,
+      icon: <DollarSign className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           {/* <div className="flex items-center gap-3 mb-6">
