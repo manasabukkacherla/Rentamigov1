@@ -56,43 +56,65 @@ interface propertyDetails {
     propertyAge: number | null;
     propertyCondition: string;
 }
-interface ILeaseDetails {
-    expectedRent: number;
-    rentType: "inclusive" | "exclusive";
-    isNegotiable: boolean;
-    securityDeposit: {
-        amount: number;
-        depositType: string;
-    };
-    maintenanceCharges?: {
-        amount?: number;
-        frequency?: "monthly" | "quarterly" | "yearly" | "Half-yearly";
-    };
-    otherCharges: {
-        water: {
-            amount: number;
-            type: string;
-        };
-        electricity: {
-            amount: number;
-            type: string;
-        };
-        gas: {
-            amount: number;
-            type: string;
-        };
-        others: {
-            amount: number;
-            type: string;
-        };
+interface ILeaseTerms {
+    leaseTerms: {
+        leaseDetails: {
+            leaseAmount:{
+                amount: number,
+                type: string,
+                duration: number,
+                durationUnit: string,
+              },
+        },
+        tenureDetails: {
+          minimumTenure: number;
+          minimumUnit: string;
+          maximumTenure: number;
+          maximumUnit: string;
+          lockInPeriod: number;
+          lockInUnit: string;
+          noticePeriod: number;
+          noticePeriodUnit: string;
+        },
+        maintenanceAmount: {
+            amount: number,
+            frequency: string,
+        },
+        otherCharges: {
+            water: {
+                amount?: number,
+                type: string,
+            },
+            electricity: {
+                amount?: number,
+                type: string,
+            },
+            gas: {
+                amount?: number,
+                type: string,
+            },
+            others: {
+                amount?: number,
+                type: string,
+            }
+        },
         brokerage: {
-            required: boolean;
-            amount: number;
-        };
-
-
-    };
-
+            required: string,
+            amount?: number,
+        },
+        availability: {
+            availableFrom: Date,
+            availableImmediately: Boolean,
+            leaseDuration: String,
+            noticePeriod: String,
+            petsAllowed: Boolean,
+            operatingHours: {
+                restricted: Boolean,
+                restrictions: String
+            }
+        },
+      },
+    
 }
 
 interface IAvailability {
@@ -121,73 +143,6 @@ interface IMedia {
     };
     videoTour?: string;
     documents: string[];
-}
-
-interface ILeaseTerms {
-    leaseTerms: {
-        leaseDetails: {
-            leaseAmount:number,
-            leaseDuration: {
-                duration: number,
-                years: string,
-            },
-            leaseType: string,
-        },
-        tenureDetails: {
-            minimumTenure: {
-                duration: number,
-                years: string,
-            },
-            maximumTenure: {
-                duration: number,
-                years: string,
-            },
-            lockInPeriod: {
-                duration: number,
-                years: string,
-            },
-            noticePeriod: { 
-                duration: number,
-                years: string,
-            },
-        },
-        maintenanceAmount: {
-            amount: number,
-            frequency: string,
-        },
-        otherCharges: {
-            water: {
-                amount: number,
-                type: string,
-            },
-            electricity: {
-                amount: number,
-                type: string,
-            },
-            gas: {
-                amount: number,
-                type: string,
-            },
-            others: {
-                amount: number,
-                type: string,
-            }
-        },
-        brokerage: {
-            required: string,
-            amount: number,
-        },
-        availability: {
-            type: string,
-            availableFrom: string,
-            preferredTenure: string,
-            noticePeriod: string,
-            isPetsAllowed: boolean,
-            operatingHours: boolean,
-            //   date?: string;
-        }
-      },    
-   
 }
 
 interface IMetadata {
@@ -269,34 +224,24 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
     // leaseTerms: {
         leaseTerms: {
             leaseDetails: {
-                leaseAmount: { type: Number, required: true },
-                leaseDuration: {
+                leaseAmount: { 
+                    amount: { type: Number, required: true },
+                    type: { type: String, required: true },
                     duration: { type: Number, required: true },
-                    years: { type: String, required: true },
+                    durationUnit: { type: String, required: true },
                 },
-                leaseType: { type: String, required: true },
             },
             tenureDetails: {
-                minimumTenure: {
-                    duration: { type: Number, required: true },
-                    years: { type: String, required: true },
-                },
-                maximumTenure: {
-                    duration: { type: Number, required: true },
-                    years: { type: String, required: true },
-                },
-                lockInPeriod: {
-                    duration: { type: Number, required: true },
-                    years: { type: String, required: true },
-                },
-                noticePeriod: { 
-                    duration: { type: Number, required: true },
-                    years: { type: String, required: true },
-                },
+                minimumTenure: {type: String, required: true },
+                minimumUnit: {type: String, required: true },
+                lockInPeriod: {type: String, required: true },
+                lockInUnit: {type: String, required: true },
+                noticePeriod: {type: String, required: true },
+                noticePeriodUnit: {type: String, required: true },
             },
             maintenanceAmount: {
-                amount: { type: Number },
-                frequency: { type: String },
+                amount: { type: Number ,required: true},
+                frequency: { type: String ,required: true},
             },
             otherCharges: {
                 water: {
@@ -317,19 +262,18 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
                 }
             },
             brokerage: {
-                required: { type: String, enum: ['yes', 'no'], required: true },
+                required: { type: String, required: true },
                 amount: { type: Number }
             },
             availability: {
-                immediate: Boolean,
-                specificDate: Date,
-                availableImmediately: Boolean,
-                leaseDuration: String,
-                noticePeriod: String,
-                petsAllowed: Boolean,
+                availableFrom: { type: Date, required: true },
+                availableImmediately: { type: Boolean, required: true },
+                leaseDuration: { type: String, required: true },
+                noticePeriod: { type: String, required: true },
+                petsAllowed: { type: Boolean, required: true },
                 operatingHours: {
-                    restricted: Boolean,
-                    restrictions: String
+                    restricted: { type: Boolean, required: true },
+                    restrictions: { type: String, required: true }  
                 }
             }
           },
@@ -369,5 +313,5 @@ CommercialLeaseShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialLeaseShowroomSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialLeaseShowroom, IBasicInformation, IArea, ILeaseDetails, IAvailability, IContactInformation, IMedia, IMetadata };
+export { ICommercialLeaseShowroom, IBasicInformation, IArea, ILeaseTerms, IAvailability, IContactInformation, IMedia, IMetadata };
 export default model<ICommercialLeaseShowroom>('CommercialLeaseShowroom', CommercialLeaseShowroomSchema); 

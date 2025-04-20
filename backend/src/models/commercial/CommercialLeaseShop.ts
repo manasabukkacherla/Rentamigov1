@@ -92,9 +92,9 @@ interface ILeaseTerms {
         availability: {
             availableFrom: Date,
             availableImmediately: Boolean,
-            leaseDuration: String,
+            preferredSaleDuration: String,
             noticePeriod: String,
-            petsAllowed: Boolean,
+            isPetsAllowed: Boolean,
             operatingHours: {
                 restricted: Boolean,
                 restrictions: String
@@ -241,9 +241,9 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
     availability: {
         availableFrom: { type: Date, required: true },
         availableImmediately: { type: Boolean, required: true },
-        leaseDuration: { type: String, required: true },
+        preferredSaleDuration: { type: String, required: true },
         noticePeriod: { type: String, required: true },
-        petsAllowed: { type: Boolean, required: true },
+        isPetsAllowed: { type: Boolean, required: true },
         operatingHours: {
             restricted: { type: Boolean, required: true },
             restrictions: { type: String, required: true }  
