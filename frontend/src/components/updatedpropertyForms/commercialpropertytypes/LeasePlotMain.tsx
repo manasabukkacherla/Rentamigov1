@@ -458,20 +458,20 @@ const LeasePlotMain = () => {
                     ...formData.leaseDetails,
                     leasetenure: {
                       minimumTenure: {
-                        duration: tenure.leaseTenure || 0,
-                        type: tenure.leaseTermType || 'month'
+                        duration: tenure.minimumTenure.duration || 0,
+                        type: tenure.minimumTenure.durationType || 'month'
                       },
                       maximumTenure: {
-                        duration: tenure.leaseTenure * 2 || 0,
-                        type: tenure.leaseTermType || 'month'
+                        duration: tenure.maximumTenure.duration || 0,
+                        type: tenure.maximumTenure.durationType || 'month'
                       },
                       lockInPeriod: {
-                        duration: tenure.lockInPeriod || 0,
-                        type: tenure.lockInPeriodType || 'month'
+                        duration: tenure.lockInPeriod.duration || 0,
+                        type: tenure.lockInPeriod.durationType || 'month'
                       },
                       noticePeriod: {
-                        duration: 1,
-                        type: 'month'
+                        duration: tenure.noticePeriod.duration || 1,
+                        type: tenure.noticePeriod.durationType || 'month'
                       }
                     }
                   })} 
