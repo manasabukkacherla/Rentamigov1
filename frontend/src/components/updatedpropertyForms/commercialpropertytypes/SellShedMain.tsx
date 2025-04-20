@@ -1,10 +1,7 @@
 import { useState } from "react"
-import { Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, Store} from "lucide-react"
+import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import PropertyName from "../PropertyName"
-<<<<<<< HEAD
-=======
 import ShedType from "../CommercialComponents/ShedType"
->>>>>>> c2620c2f257f092ae01ad4200b851a6554a446c9
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import CornerProperty from "../CommercialComponents/CornerProperty"
@@ -17,12 +14,6 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-<<<<<<< HEAD
-import ShedType from "../CommercialComponents/ShedType"
-
-const SellShedMain = () => {
-  const [formData, setFormData] = useState({
-=======
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -127,7 +118,6 @@ interface FormDataType {
 const SellShedMain = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormDataType>({
->>>>>>> c2620c2f257f092ae01ad4200b851a6554a446c9
     propertyName: "",
     shedType: "",
     address: {},
