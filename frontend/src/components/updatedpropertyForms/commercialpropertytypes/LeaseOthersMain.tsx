@@ -23,7 +23,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 interface FormData {
-  propertyName: string;
+  title: string;
   commercialType: string[];
   address: {
     street: string;
@@ -32,15 +32,28 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: number;
     longitude: number;
+  };
+  coordinates: {
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
   otherDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
   leaseAmount: Record<string, any>;
-  leaseTenure: Record<string, any>;
+  leaseTenure: {
+    minimumTenure: string;
+    minimumUnit: string;
+    maximumTenure: string;
+    maximumUnit: string;
+    lockInPeriod: string;
+    lockInUnit: string;
+    noticePeriod: string;
+    noticePeriodUnit: string;
+  };
   maintenanceAmount: Record<string, any>;
   otherCharges: Record<string, any>;
   brokerage: Record<string, any>;
@@ -62,7 +75,7 @@ interface FormData {
 
 const LeaseOthersMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
+    title: '',
     commercialType: [],
     address: {
       street: '',
@@ -71,15 +84,28 @@ const LeaseOthersMain = () => {
       zipCode: ''
     },
     landmark: '',
-    coordinates: {
+    location: {
       latitude: 0,
       longitude: 0
+    },
+    coordinates: {
+      latitude: '',
+      longitude: ''
     },
     isCornerProperty: false,
     otherDetails: {},
     propertyDetails: {},
     leaseAmount: {},
-    leaseTenure: {},
+    leaseTenure: {
+      minimumTenure: '1',
+      minimumUnit: 'years',
+      maximumTenure: '3',
+      maximumUnit: 'years',
+      lockInPeriod: '1',
+      lockInUnit: 'years',
+      noticePeriod: '1',
+      noticePeriodUnit: 'months'
+    },
     maintenanceAmount: {},
     otherCharges: {},
     brokerage: {},
@@ -115,10 +141,10 @@ const LeaseOthersMain = () => {
             </div>
             <div className="space-y-6">
               <PropertyName
-                propertyName={formData.propertyName}
+                propertyName={formData.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-                  propertyName: name
+                  title: name
                 }))}
               />
               <OtherCommercialType
@@ -149,7 +175,48 @@ const LeaseOthersMain = () => {
                 }))}
                 onLocationSelect={(location) => setFormData(prev => ({
                   ...prev,
+                  location: {
+                    latitude: parseFloat(location.latitude),
+                    longitude: parseFloat(location.longitude)
+                  },
                   coordinates: {
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  }
+                }))}
+              />
+              <MapCoordinates
+                latitude={formData.coordinates.latitude}
+                longitude={formData.coordinates.longitude}
+                onLatitudeChange={(lat) => setFormData(prev => ({
+                  ...prev,
+                  coordinates: {
+                    ...prev.coordinates,
+                    latitude: lat
+                  },
+                  location: {
+                    ...prev.location,
+                    latitude: parseFloat(lat)
+                  }
+                }))}
+                onLongitudeChange={(lng) => setFormData(prev => ({
+                  ...prev,
+                  coordinates: {
+                    ...prev.coordinates,
+                    longitude: lng
+                  },
+                  location: {
+                    ...prev.location,
+                    longitude: parseFloat(lng)
+                  }
+                }))}
+                onLocationChange={(location) => setFormData(prev => ({
+                  ...prev,
+                  coordinates: {
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                  },
+                  location: {
                     latitude: parseFloat(location.latitude),
                     longitude: parseFloat(location.longitude)
                   }
@@ -212,10 +279,24 @@ const LeaseOthersMain = () => {
                   }))} 
                 />
                 <LeaseTenure 
-                  onLeaseTenureChange={(tenure) => setFormData(prev => ({
-                    ...prev,
-                    leaseTenure: { ...prev.leaseTenure, ...tenure }
-                  }))} 
+                  onLeaseTenureChange={(tenure) => {
+                    // Format the tenure data to match what the backend schema expects
+                    const formattedTenure = {
+                      minimumTenure: tenure.minimumTenure.duration.toString(),
+                      minimumUnit: tenure.minimumTenure.durationType,
+                      maximumTenure: tenure.maximumTenure.duration.toString(),
+                      maximumUnit: tenure.maximumTenure.durationType,
+                      lockInPeriod: tenure.lockInPeriod.duration.toString(),
+                      lockInUnit: tenure.lockInPeriod.durationType,
+                      noticePeriod: tenure.noticePeriod.duration.toString(),
+                      noticePeriodUnit: tenure.noticePeriod.durationType
+                    };
+                    
+                    setFormData(prev => ({
+                      ...prev,
+                      leaseTenure: formattedTenure
+                    }));
+                  }} 
                 />
               </div>
             </div>
@@ -337,11 +418,70 @@ const LeaseOthersMain = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    console.log(formData);
     try {
+      // Validate form data before submission
+      if (!formData.title.trim()) {
+        toast.error('Property name is required');
+        return;
+      }
+
+      if ((!formData.location.latitude && !formData.coordinates.latitude) || 
+          (!formData.location.longitude && !formData.coordinates.longitude)) {
+        toast.error('Property location is required');
+        return;
+      }
+
+      // Ensure leaseTenure data is properly formatted
+      if (typeof formData.leaseTenure.minimumTenure === 'object' || 
+          typeof formData.leaseTenure.maximumTenure === 'object' ||
+          typeof formData.leaseTenure.lockInPeriod === 'object' ||
+          typeof formData.leaseTenure.noticePeriod === 'object') {
+        
+        toast.error('Lease tenure data is not properly formatted. Please correct it before submitting.');
+        console.error('Lease tenure format error:', formData.leaseTenure);
+        return;
+      }
+
       const user = sessionStorage.getItem('user');
       if (user) {
         const author = JSON.parse(user).id;
 
+        // Prepare location data for API submission
+        const locationData = {
+          latitude: formData.location.latitude.toString() || formData.coordinates.latitude,
+          longitude: formData.location.longitude.toString() || formData.coordinates.longitude
+        };
+
+        // Normalize leaseTenure data to ensure all values are strings
+        const normalizedLeaseTenure = {
+          minimumTenure: typeof formData.leaseTenure.minimumTenure === 'object' 
+            ? ((formData.leaseTenure.minimumTenure as any)?.duration?.toString() || '1')
+            : formData.leaseTenure.minimumTenure,
+          minimumUnit: typeof formData.leaseTenure.minimumUnit === 'object'
+            ? ((formData.leaseTenure.minimumUnit as any)?.durationType || 'years')
+            : formData.leaseTenure.minimumUnit,
+          maximumTenure: typeof formData.leaseTenure.maximumTenure === 'object'
+            ? ((formData.leaseTenure.maximumTenure as any)?.duration?.toString() || '3')
+            : formData.leaseTenure.maximumTenure,
+          maximumUnit: typeof formData.leaseTenure.maximumUnit === 'object'
+            ? ((formData.leaseTenure.maximumUnit as any)?.durationType || 'years')
+            : formData.leaseTenure.maximumUnit,
+          lockInPeriod: typeof formData.leaseTenure.lockInPeriod === 'object'
+            ? ((formData.leaseTenure.lockInPeriod as any)?.duration?.toString() || '1')
+            : formData.leaseTenure.lockInPeriod,
+          lockInUnit: typeof formData.leaseTenure.lockInUnit === 'object'
+            ? ((formData.leaseTenure.lockInUnit as any)?.durationType || 'years')
+            : formData.leaseTenure.lockInUnit,
+          noticePeriod: typeof formData.leaseTenure.noticePeriod === 'object'
+            ? ((formData.leaseTenure.noticePeriod as any)?.duration?.toString() || '1')
+            : formData.leaseTenure.noticePeriod,
+          noticePeriodUnit: typeof formData.leaseTenure.noticePeriodUnit === 'object'
+            ? ((formData.leaseTenure.noticePeriodUnit as any)?.durationType || 'months')
+            : formData.leaseTenure.noticePeriodUnit
+        };
+
+        // Convert files to base64 strings
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -355,8 +495,13 @@ const LeaseOthersMain = () => {
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+        // Remove redundant coordinates field from final submission
+        const { coordinates, ...formDataWithoutCoordinates } = formData;
+
         const transformedData = {
-          ...formData,
+          ...formDataWithoutCoordinates,
+          location: locationData,
+          leaseTenure: normalizedLeaseTenure,
           media: convertedMedia,
           metadata: {
             createdBy: author,
@@ -364,7 +509,9 @@ const LeaseOthersMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-other/lease', transformedData, {
+        toast.info('Submitting property listing... Please wait');
+        
+        const response = await axios.post('/api/commercial/lease/others', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -372,9 +519,12 @@ const LeaseOthersMain = () => {
 
         if (response.data.success) {
           toast.success('Other commercial property lease listing created successfully!');
+        } else {
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
-        navigate('/login');
+        toast.warning('You need to be logged in to create a listing');
+       
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -384,6 +534,21 @@ const LeaseOthersMain = () => {
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
+      // Simple validation for the current step
+      if (currentStep === 0) {
+        // Check if title is present
+        if (!formData.title.trim()) {
+          toast.warning('Please enter a property name');
+          return;
+        }
+        // Check if location coordinates are present
+        if ((!formData.location.latitude && !formData.coordinates.latitude) || 
+            (!formData.location.longitude && !formData.coordinates.longitude)) {
+          toast.warning('Please select a location on the map');
+          return;
+        }
+      }
+      
       setCurrentStep(currentStep + 1);
     }
   };
