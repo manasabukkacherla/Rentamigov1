@@ -131,7 +131,7 @@ interface ICommercialRentCoveredSpace extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   rentalTerms: IRentalTerms;
@@ -193,7 +193,7 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
       backup: { type: Boolean, default: false },
     },
     waterAvailability: { type: String, required: true },
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type: String, required: true },
     propertyCondition: { type: String, required: true },
   },
   rentalTerms: {

@@ -17,40 +17,128 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 
 import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar } from "lucide-react"
+import PropertySize from '../PropertySize';
+import PropertyFeatures from '../PropertyFeatures';
+import MediaUpload from '../MediaUpload';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
 interface FormData {
-  propertyName: string;
-  address: Record<string, string>;
-  size: {
-    totalArea: string;
-    builtUpArea: string;
-    carpetArea: string;
+  basicInformation: {
+    title: string;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
   };
-  features: {
-    propertyType: string;
-    propertyAge: string;
-    propertyCondition: string;
-    propertyDescription: string;
+  propertyDetails: {
+    propertySize: number;
+    propertyFeatures: {
+      bedrooms: number;
+      washrooms: number;
+      balconies: number;
+      hasParking: boolean;
+      parkingDetails?: {
+        twoWheeler?: number;
+        fourWheeler?: number;
+      };
+      extraRooms: {
+        servant: boolean;
+        puja: boolean;
+        store: boolean;
+        others: boolean;
+      };
+      utilityArea: string;
+      furnishingStatus: string;
+      totalFloors: number;
+      propertyOnFloor: string;
+      facing: string;
+      propertyAge: string;
+      superBuiltUpAreaSqft: number;
+      superBuiltUpAreaSqmt: number;
+      builtUpAreaSqft: number;
+      builtUpAreaSqmt: number;
+      carpetAreaSqft: number;
+      carpetAreaSqmt: number;
+      electricityAvailability: string;
+      waterAvailability: {
+        borewell: boolean;
+        governmentSupply: boolean;
+        tankerSupply: boolean;
+      };
+    };
   };
   rentalTerms: {
-    expectedRent: string;
-    isNegotiable: boolean;
-    rentType: string;
-    maintenanceAmount?: string;
-    securityDeposit: string;
-    otherCharges: string;
-    brokerage: string;
+    rentDetails: {
+      expectedRent: number;
+      isNegotiable: boolean;
+      rentType: string;
+    };
+    securityDeposit: {
+      amount: number;
+    };
+    maintenanceAmount?: {
+      amount?: number;
+      frequency?: string;
+    };
+    otherCharges: {
+      water: {
+        amount?: number;
+        type: string;
+      };
+      electricity: {
+        amount?: number;
+        type: string;
+      };
+      gas: {
+        amount?: number;
+        type: string;
+      };
+      others: {
+        amount?: number;
+        type: string;
+      };
+    };
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
+    availability: {
+      type: string;
+      date?: string;
+    };
   };
-  availabilityDate: string;
-  contactInfo: {
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
-    whatsapp: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
   };
   media: {
-    images: File[];
-    videoTour: File | null;
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour?: File | null;
+    documents: File[];
+  };
+  metadata: {
+    createdBy: string;
+    createdAt: Date;
   };
 }
 
@@ -60,57 +148,57 @@ interface PropertyNameProps {
 }
 
 interface CommercialPropertyAddressProps {
-  value: Record<string, string>;
-  onChange: (value: Record<string, string>) => void;
+  onAddressChange: (value: Record<string, string>) => void;
 }
 
 interface PropertySizeProps {
-  value: {
-    totalArea: string;
-    builtUpArea: string;
-    carpetArea: string;
-  };
-  onChange: (value: {
-    totalArea: string;
-    builtUpArea: string;
-    carpetArea: string;
-  }) => void;
+  onPropertySizeChange: (value: number) => void;
 }
 
 interface PropertyFeaturesProps {
-  value: {
-    propertyType: string;
+  onFeaturesChange: (value: {
+    bedrooms: number;
+    washrooms: number;
+    balconies: number;
+    hasParking: boolean;
+    parkingDetails: {
+      twoWheeler: number;
+      fourWheeler: number;
+    };
+    extraRooms: {
+      servant: boolean;
+      puja: boolean;
+      store: boolean;
+      others: boolean;
+    };
+    utilityArea: string;
+    furnishingStatus: string;
+    totalFloors: number;
+    propertyOnFloor: string;
+    facing: string;
     propertyAge: string;
-    propertyCondition: string;
-    propertyDescription: string;
-  };
-  onChange: (value: {
-    propertyType: string;
-    propertyAge: string;
-    propertyCondition: string;
-    propertyDescription: string;
+    superBuiltUpAreaSqft: number;
+    superBuiltUpAreaSqmt: number;
+    builtUpAreaSqft: number;
+    builtUpAreaSqmt: number;
+    carpetAreaSqft: number;
+    carpetAreaSqmt: number;
+    electricityAvailability: string;
+    waterAvailability: {
+      borewell: boolean;
+      governmentSupply: boolean;
+      tankerSupply: boolean;
+    };
   }) => void;
 }
 
 interface RentalTermsProps {
-  value: {
-    expectedRent: string;
-    isNegotiable: boolean;
-    rentType: string;
-    maintenanceAmount?: string;
-    securityDeposit: string;
-    otherCharges: string;
-    brokerage: string;
-  };
-  onChange: (value: {
-    expectedRent: string;
-    isNegotiable: boolean;
-    rentType: string;
-    maintenanceAmount?: string;
-    securityDeposit: string;
-    otherCharges: string;
-    brokerage: string;
-  }) => void;
+  onRentChange: (value: Record<string, any>) => void;
+  onMaintenanceAmountChange: (value: Record<string, any>) => void;
+  onSecurityDepositChange: (value: Record<string, any>) => void;
+  onOtherChargesChange: (value: Record<string, any>) => void;
+  onBrokerageChange: (value: Record<string, any>) => void;
+  onAvailabilityChange: (value: Record<string, any>) => void;
 }
 
 interface AvailabilityDateProps {
@@ -119,65 +207,133 @@ interface AvailabilityDateProps {
 }
 
 interface ContactInformationProps {
-  value: {
-    name: string;
-    email: string;
-    phone: string;
-    whatsapp: string;
-  };
-  onChange: (value: {
-    name: string;
-    email: string;
-    phone: string;
-    whatsapp: string;
-  }) => void;
+  onContactChange: (value: Record<string, any>) => void;
 }
 
 interface MediaUploadProps {
-  value: {
-    images: File[];
-    videoTour: File | null;
-  };
-  onChange: (value: {
-    images: File[];
-    videoTour: File | null;
+  onMediaChange: (value: {
+    images: { category: string; files: { url: string; file: File }[] }[];
+    video?: { url: string; file: File };
+    documents: { type: string; file: File }[];
   }) => void;
 }
 
 const RentShed = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    address: {},
-    size: {
-      totalArea: '',
-      builtUpArea: '',
-      carpetArea: ''
+    basicInformation: {
+      title: '',
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0
+      },
+      isCornerProperty: false
     },
-    features: {
-      propertyType: '',
-      propertyAge: '',
-      propertyCondition: '',
-      propertyDescription: ''
+    propertyDetails: {
+      propertySize: 0,
+      propertyFeatures: {
+        bedrooms: 0,
+        washrooms: 0,
+        balconies: 0,
+        hasParking: false,
+        parkingDetails: {
+          twoWheeler: 0,
+          fourWheeler: 0
+        },
+        extraRooms: {
+          servant: false,
+          puja: false,
+          store: false,
+          others: false
+        },
+        utilityArea: '',
+        furnishingStatus: '',
+        totalFloors: 0,
+        propertyOnFloor: '',
+        facing: '',
+        propertyAge: '',
+        superBuiltUpAreaSqft: 0,
+        superBuiltUpAreaSqmt: 0,
+        builtUpAreaSqft: 0,
+        builtUpAreaSqmt: 0,
+        carpetAreaSqft: 0,
+        carpetAreaSqmt: 0,
+        electricityAvailability: '',
+        waterAvailability: {
+          borewell: false,
+          governmentSupply: false,
+          tankerSupply: false
+        }
+      }
     },
     rentalTerms: {
-      expectedRent: '',
-      isNegotiable: false,
-      rentType: '',
-      maintenanceAmount: undefined,
-      securityDeposit: '',
-      otherCharges: '',
-      brokerage: ''
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: 'inclusive'
+      },
+      securityDeposit: {
+        amount: 0
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: 'monthly'
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: 'inclusive'
+        },
+        electricity: {
+          amount: 0,
+          type: 'inclusive'
+        },
+        gas: {
+          amount: 0,
+          type: 'inclusive'
+        },
+        others: {
+          amount: 0,
+          type: 'inclusive'
+        }
+      },
+      brokerage: {
+        required: 'no',
+        amount: 0
+      },
+      availability: {
+        type: 'immediate',
+        date: new Date().toISOString()
+      }
     },
-    availabilityDate: '',
-    contactInfo: {
+    contactInformation: {
       name: '',
       email: '',
       phone: '',
-      whatsapp: ''
+      alternatePhone: '',
+      bestTimeToContact: ''
     },
     media: {
-      images: [],
-      videoTour: null
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
+      documents: []
+    },
+    metadata: {
+      createdBy: '',
+      createdAt: new Date()
     }
   });
 
@@ -188,20 +344,50 @@ const RentShed = () => {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
       content: (
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
+            {/* <div className="flex items-center gap-3 mb-6">
               <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Property Details</h3>
+              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
+            </div> */}
+            <div className="space-y-6">
+              <PropertyName
+                propertyName={formData.basicInformation.title}
+                onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
+              />
             </div>
-            <PropertyName
-              value={formData.propertyName}
-              onChange={(value) => setFormData({ ...formData, propertyName: value })}
-            />
-            <CommercialPropertyAddress
-              value={formData.address}
-              onChange={(value) => setFormData({ ...formData, address: value })}
-            />
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            {/* <div className="flex items-center gap-3 mb-6">
+              <MapPin className="w-6 h-6 text-black" />
+              <h3 className="text-xl font-semibold text-black">Location Details</h3>
+            </div> */}
+            <div className="space-y-6">
+              <CommercialPropertyAddress
+                onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
+              />
+              <Landmark
+                onLandmarkChange={(landmark) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: { ...prev.basicInformation, landmark }
+                }))}
+                onLocationSelect={(location) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    location: {
+                      latitude: parseFloat(location.latitude),
+                      longitude: parseFloat(location.longitude)
+                    }
+                  }
+                }))}
+              />
+
+              <CornerProperty
+                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
+              />
+            </div>
           </div>
         </div>
       )
@@ -211,17 +397,59 @@ const RentShed = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <Building2 className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
+          </div> */}
           <PropertySize
-            value={formData.size}
-            onChange={(value) => setFormData({ ...formData, size: value })}
+            onPropertySizeChange={(value) => setFormData({ ...formData, propertyDetails: { ...formData.propertyDetails, propertySize: Number(value) } })}
           />
           <PropertyFeatures
-            value={formData.features}
-            onChange={(value) => setFormData({ ...formData, features: value })}
+            onFeaturesChange={(value) => {
+              // Ensure all required properties are present with default values
+              const propertyFeatures = {
+                bedrooms: value.bedrooms || 0,
+                washrooms: value.washrooms || 0,
+                balconies: value.balconies || 0,
+                hasParking: value.hasParking || false,
+                parkingDetails: {
+                  twoWheeler: value.parkingDetails?.twoWheeler || 0,
+                  fourWheeler: value.parkingDetails?.fourWheeler || 0
+                },
+                extraRooms: {
+                  servant: value.extraRooms?.servant || false,
+                  puja: value.extraRooms?.puja || false,
+                  store: value.extraRooms?.store || false,
+                  others: value.extraRooms?.others || false
+                },
+                utilityArea: value.utilityArea || '',
+                furnishingStatus: value.furnishingStatus || '',
+                totalFloors: value.totalFloors || 0,
+                propertyOnFloor: value.propertyOnFloor || '',
+                facing: value.facing || '',
+                propertyAge: value.propertyAge || '',
+                superBuiltUpAreaSqft: value.superBuiltUpAreaSqft,
+                superBuiltUpAreaSqmt: value.superBuiltUpAreaSqmt || 0,
+                builtUpAreaSqft: value.builtUpAreaSqft || 0,
+                builtUpAreaSqmt: value.builtUpAreaSqmt || 0,
+                carpetAreaSqft: value.carpetAreaSqft || 0,
+                carpetAreaSqmt: value.carpetAreaSqmt || 0,
+                electricityAvailability: value.electricityAvailability || '',
+                waterAvailability: {
+                  borewell: value.waterAvailability?.borewell || false,
+                  governmentSupply: value.waterAvailability?.governmentSupply || false,
+                  tankerSupply: value.waterAvailability?.tankerSupply || false
+                }
+              };
+
+              setFormData({
+                ...formData,
+                propertyDetails: {
+                  ...formData.propertyDetails,
+                  propertyFeatures
+                }
+              });
+            }}
           />
         </div>
       )
@@ -231,14 +459,90 @@ const RentShed = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <Building2 className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
+          </div> */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
+              <div className="space-y-4 text-black">
+                <Rent onRentChange={(rent) => {
+                  setFormData({
+                    ...formData,
+                    rentalTerms: {
+                      ...formData.rentalTerms,
+                      rentDetails: {
+                        ...formData.rentalTerms.rentDetails,
+                        expectedRent: Number(rent.expectedRent) || 0,
+                        isNegotiable: rent.isNegotiable || false,
+                        rentType: rent.rentType || 'inclusive'
+                      }
+                    }
+                  });
+                }} />
+                {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+                  <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
+                )}
+                <SecurityDeposit onSecurityDepositChange={(deposit) => {
+                  setFormData({
+                    ...formData,
+                    rentalTerms: {
+                      ...formData.rentalTerms,
+                      securityDeposit: {
+                        amount: Number(deposit.amount) || 0
+                      }
+                    }
+                  });
+                }} />
+              </div>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              <div className="space-y-4 text-black">
+                <OtherCharges onOtherChargesChange={(charges) => {
+                  setFormData({
+                    ...formData,
+                    rentalTerms: {
+                      ...formData.rentalTerms,
+                      otherCharges: {
+                        water: {
+                          amount: Number(charges.water?.amount) || 0,
+                          type: charges.water?.type || 'inclusive'
+                        },
+                        electricity: {
+                          amount: Number(charges.electricity?.amount) || 0,
+                          type: charges.electricity?.type || 'inclusive'
+                        },
+                        gas: {
+                          amount: Number(charges.gas?.amount) || 0,
+                          type: charges.gas?.type || 'inclusive'
+                        },
+                        others: {
+                          amount: Number(charges.others?.amount) || 0,
+                          type: charges.others?.type || 'inclusive'
+                        }
+                      }
+                    }
+                  });
+                }} />
+                <div className="border-t border-gray-200 my-4"></div>
+                <Brokerage onBrokerageChange={(brokerage) => {
+                  setFormData({
+                    ...formData,
+                    rentalTerms: {
+                      ...formData.rentalTerms,
+                      brokerage: {
+                        required: brokerage.required || 'no',
+                        amount: Number(brokerage.amount) || 0
+                      }
+                    }
+                  });
+                }} />
+              </div>
+            </div>
           </div>
-          <RentalTerms
-            value={formData.rentalTerms}
-            onChange={(value) => setFormData({ ...formData, rentalTerms: value })}
-          />
         </div>
       )
     },
@@ -247,14 +551,20 @@ const RentShed = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <AvailabilityDate
-            value={formData.availabilityDate}
-            onChange={(value) => setFormData({ ...formData, availabilityDate: value })}
-          />
+          </div> */}
+          <AvailabilityDate onAvailabilityChange={(availability) => setFormData({
+            ...formData,
+            rentalTerms: {
+              ...formData.rentalTerms,
+              availability: {
+                type: availability.type || 'immediate',
+                date: availability.date || new Date().toISOString()
+              }
+            }
+          })} />
         </div>
       )
     },
@@ -263,13 +573,23 @@ const RentShed = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <UserCircle className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Contact Information</h3>
-          </div>
-          <ContactInformation
-            value={formData.contactInfo}
-            onChange={(value) => setFormData({ ...formData, contactInfo: value })}
+          </div> */}
+          <CommercialContactDetails
+            onContactChange={(contact) => {
+              setFormData({
+                ...formData,
+                contactInformation: {
+                  name: contact.name || '',
+                  email: contact.email || '',
+                  phone: contact.phone || '',
+                  alternatePhone: contact.alternatePhone || '',
+                  bestTimeToContact: contact.bestTimeToContact || ''
+                }
+              });
+            }}
           />
         </div>
       )
@@ -279,13 +599,30 @@ const RentShed = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <ImageIcon className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <MediaUpload
-            value={formData.media}
-            onChange={(value) => setFormData({ ...formData, media: value })}
+          </div> */}
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
           />
         </div>
       )
@@ -304,9 +641,69 @@ const RentShed = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    // Add API submission logic here
     console.log('Form Data:', formData);
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
+
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/commercial/rent/sheds', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Commercial rent shed listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create commercial rent shed listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -318,15 +715,13 @@ const RentShed = () => {
             <div className="flex items-center space-x-4">
               {formSections.map((section, index) => (
                 <div key={index} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                    index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                  }`}>
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                    }`}>
                     {section.icon}
                   </div>
                   {index < formSections.length - 1 && (
-                    <div className={`w-16 h-1 mx-2 ${
-                      index < currentStep ? 'bg-black' : 'bg-gray-200'
-                    }`} />
+                    <div className={`w-16 h-1 mx-2 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                      }`} />
                   )}
                 </div>
               ))}
@@ -341,7 +736,7 @@ const RentShed = () => {
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
-        
+
         {formSections[currentStep].content}
       </div>
 
@@ -351,20 +746,22 @@ const RentShed = () => {
           <button
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-white text-black hover:bg-black hover:text-white'
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
+              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
+            disabled={isSubmitting}
           >
-            {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+            {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}
             <ChevronRight className="w-5 h-5 ml-2" />
           </button>
         </div>

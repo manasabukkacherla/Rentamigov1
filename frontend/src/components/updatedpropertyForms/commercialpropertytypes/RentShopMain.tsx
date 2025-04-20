@@ -556,7 +556,7 @@ const RentShopMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-rent-shops', transformedData, {
+        const response = await axios.post('/api/commercial/rent/shops', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

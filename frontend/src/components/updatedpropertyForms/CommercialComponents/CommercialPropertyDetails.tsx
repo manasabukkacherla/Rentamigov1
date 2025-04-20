@@ -21,7 +21,7 @@ interface CommercialPropertyDetailsProps {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number | null;
+    propertyAge: string;
     propertyCondition: string;
   }) => void;
 }
@@ -46,7 +46,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
       backup: false
     },
     waterAvailability: '',
-    propertyAge: null as number | null,
+    propertyAge: '',
     propertyCondition: 'new'
   });
 
@@ -93,7 +93,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
         backup: false
       },
       waterAvailability: '',
-      propertyAge: null,
+      propertyAge: '',
       propertyCondition: 'new'
     });
   }, []);
@@ -359,9 +359,9 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
           >
             <option value="" disabled>Select Availability</option>
-            <option value="24 Hours">24 Hours Available</option>
-            <option value="Limited Hours">Limited Hours</option>
-            <option value="None">None</option>
+            <option value="24x7" className="text-black bg-white">24x7</option>
+            <option value="scheduled" className="text-black bg-white">Scheduled</option>
+            <option value="limited" className="text-black bg-white">Limited</option>
             {/* Add other relevant options as needed */}
           </select>
         </div>
@@ -374,13 +374,26 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
           </h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="relative">
-              <input
+              {/* <input
                 type="number"
                 value={propertyDetails.propertyAge === null ? '' : propertyDetails.propertyAge}
                 onChange={(e) => handleChange('propertyAge', e.target.value === '' ? null : parseFloat(e.target.value))}
                 placeholder="Property Age (Years)"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-              />
+              /> */}
+
+              <select
+                value={propertyDetails.propertyAge}
+                onChange={(e) => handleChange('propertyAge', e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
+              >
+                <option value="" disabled>Select Property Age</option>
+                <option value="0-5" className="text-black bg-white">0-5</option>
+                <option value="5-10" className="text-black bg-white">5-10</option>
+                <option value="10-15" className="text-black bg-white">10-15</option>
+                <option value="15+" className="text-black bg-white">15+</option>
+                {/* Add other relevant options as needed */}
+              </select>
             </div>
             <div className="relative">
               <select

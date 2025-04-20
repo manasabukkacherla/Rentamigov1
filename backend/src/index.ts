@@ -65,6 +65,9 @@ import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthers
 import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRentCoveredSpaceRoutes";
 import commercialSellOfficeSpaceRoutes from './routes/commercial/CommercialSellOfficeSpace';
 import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
+import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
+import commercialRentSheds from "./routes/commercial/commercialRentSheds";
+import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 
 dotenv.config();
 
@@ -190,15 +193,16 @@ app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
 //retail,openspace
 
 //rent routes
-app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
-app.use('/api/commercial/others', commercialRentOthersRoutes);
-app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
-app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
-app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
-app.use('/api/commercial-rent-shops', commercialRentShop);
-app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
-
-
+app.use('/api/commercial/rent/agriculture', commercialrentcultureRoutes);
+app.use('/api/commercial/rent/others', commercialRentOthersRoutes);
+app.use('/api/commercial/rent/office-spaces', commercialRentOfficeSpaceRoutes);
+app.use('/api/commercial/rent/warehouses', commercialRentWarehouseRoutes);
+app.use('/api/commercial/rent/covered-space', commercialRentCoveredSpaceRoutes);
+app.use('/api/commercial/rent/shops', commercialRentShop);
+app.use('/api/commercial/rent/retail-stores', commercialRentRetailStore);
+app.use('/api/commercial/rent/showrooms', commercialRentShowroom);
+app.use('/api/commercial/rent/sheds', commercialRentSheds);
+app.use('/api/commercial/rent/plots', commercialRentPlot);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

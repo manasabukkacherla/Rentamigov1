@@ -7,7 +7,7 @@ interface PlotDetailsProps {
 
 const PlotDetails = ({ onDetailsChange }: PlotDetailsProps) => {
   const [details, setDetails] = useState({
-    totalArea: '',
+    totalArea: 0,
     zoningType: '',
     boundaryWall: false,
     waterSewer: false,
@@ -52,7 +52,7 @@ const PlotDetails = ({ onDetailsChange }: PlotDetailsProps) => {
                 type="number"
                 min="0"
                 value={details.totalArea}
-                onChange={(e) => handleChange('totalArea', e.target.value)}
+                onChange={(e) => handleChange('totalArea', parseInt(e.target.value))}
                 placeholder="Area in sq.ft"
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
