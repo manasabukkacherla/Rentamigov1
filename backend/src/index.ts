@@ -69,6 +69,7 @@ import commercialSellRetailStore from "./routes/commercial/commercialSellRetailS
 import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
 import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
 import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
+import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 
 dotenv.config();
 
@@ -204,6 +205,10 @@ app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
+
+app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
+
+
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

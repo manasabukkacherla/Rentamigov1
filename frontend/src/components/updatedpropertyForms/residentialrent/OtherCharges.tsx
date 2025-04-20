@@ -21,10 +21,10 @@ interface ChargesState {
 
 const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => {
   const [charges, setCharges] = useState<ChargesState>({
-    water: { amount: 0, type: '' },
-    electricity: { amount: 0, type: '' },
-    gas: { amount: 0, type: '' },
-    others: { amount: 0, type: '' },
+    water: { amount: 0, type: 'inclusive' },
+    electricity: { amount: 0, type: 'inclusive' },
+    gas: { amount: 0, type: 'inclusive' },
+    others: { amount: 0, type: 'inclusive' },
   })
 
   const handleChange = (field: keyof ChargesState, value: any) => {
@@ -103,7 +103,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                   onChange={(e) =>
                     handleChange(key as keyof typeof charges, {
                       ...(charges[key as keyof typeof charges] as Charge),
-                      amount: parseFloat(e.target.value) || 0,
+                      amount: parseFloat(e.target.value) || '',
                     })
                   }
                   placeholder="Enter amount"
