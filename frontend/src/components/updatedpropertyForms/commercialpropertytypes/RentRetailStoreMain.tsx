@@ -93,8 +93,8 @@ interface FormData {
       powerLoad: number;
       backup: boolean;
     };
-    waterAvailability: string[];
-    propertyAge: number;
+    waterAvailability: string;
+    propertyAge: string;
     propertyCondition: string;
   };
   rentalTerms: {
@@ -234,8 +234,8 @@ const RentRetailStoreMain = () => {
         powerLoad: 0,
         backup: false
       },
-      waterAvailability: [],
-      propertyAge: 0,
+      waterAvailability: '',
+      propertyAge: '',
       propertyCondition: ''
     },
     rentalTerms: {
@@ -254,27 +254,27 @@ const RentRetailStoreMain = () => {
       otherCharges: {
         water: {
           amount: 0,
-          type: ''
+          type: 'inclusive'
         },
         electricity: {
           amount: 0,
-          type: ''
+          type: 'inclusive'
         },
         gas: {
           amount: 0,
-          type: ''
+          type: 'inclusive'
         },
         others: {
           amount: 0,
-          type: ''
+          type: 'inclusive'
         }
       },
       brokerage: {
-        required: '',
+        required: 'no',
         amount: 0
       },
       availability: {
-        type: '',
+        type: 'immediate',
         date: ''
       }
     },
@@ -339,10 +339,6 @@ const RentRetailStoreMain = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
             <div className="space-y-6">
               <PropertyName
                 propertyName={formData.basicInformation.title}
@@ -355,15 +351,26 @@ const RentRetailStoreMain = () => {
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
             <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
               />
-              <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })} />
+              <Landmark
+            onLandmarkChange={(landmark) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, landmark }
+            }))}
+            onLocationSelect={(location) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                location: {
+                  latitude: parseFloat(location.latitude),
+                  longitude: parseFloat(location.longitude)
+                }
+              }
+            }))}
+          />
               
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
@@ -378,10 +385,6 @@ const RentRetailStoreMain = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
           <div className="space-y-6">
             <RetailStoreDetails
               onDetailsChange={(details) => {
@@ -420,8 +423,8 @@ const RentRetailStoreMain = () => {
                       powerLoad: details.electricitySupply?.powerLoad || 0,
                       backup: details.electricitySupply?.backup || false
                     },
-                    waterAvailability: details.waterAvailability || [],
-                    propertyAge: details.propertyAge || 0,
+                    waterAvailability: details.waterAvailability || '',
+                    propertyAge: details.propertyAge || '',
                     propertyCondition: details.propertyCondition || ''
                   }
                 });
@@ -436,10 +439,6 @@ const RentRetailStoreMain = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div>
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
@@ -450,9 +449,9 @@ const RentRetailStoreMain = () => {
                     rentalTerms: {
                       ...formData.rentalTerms,
                       rentDetails: {
-                        expectedRent: rent.expectedRent || 0,
-                        isNegotiable: rent.isNegotiable || false,
-                        rentType: rent.rentType || ""
+                        expectedRent: rent.expectedRent,
+                        isNegotiable: rent.isNegotiable,
+                        rentType: rent.rentType
                       }
                     }
                   })
@@ -466,7 +465,7 @@ const RentRetailStoreMain = () => {
                     rentalTerms: {
                       ...formData.rentalTerms,
                       securityDeposit: {
-                        amount: deposit.amount || 0
+                        amount: deposit.amount
                       }
                     }
                   });
@@ -484,20 +483,20 @@ const RentRetailStoreMain = () => {
                       ...formData.rentalTerms,
                       otherCharges: {
                         water: {
-                          amount: charges.water?.amount || 0,
-                          type: charges.water?.type || ''
+                          amount: charges.water?.amount,
+                          type: charges.water?.type
                         },
                         electricity: {
-                          amount: charges.electricity?.amount || 0,
-                          type: charges.electricity?.type || ''
+                          amount: charges.electricity?.amount,
+                          type: charges.electricity?.type
                         },
                         gas: {
-                          amount: charges.gas?.amount || 0,
-                          type: charges.gas?.type || ''
+                          amount: charges.gas?.amount,
+                          type: charges.gas?.type
                         },
                         others: {
-                          amount: charges.others?.amount || 0,
-                          type: charges.others?.type || ''
+                          amount: charges.others?.amount,
+                          type: charges.others?.type
                         }
                       }
                     }
@@ -510,8 +509,8 @@ const RentRetailStoreMain = () => {
                     rentalTerms: {
                       ...formData.rentalTerms,
                       brokerage: {
-                        required: brokerage.required || '',
-                        amount: brokerage.amount || 0
+                        required: brokerage.required,
+                        amount: brokerage.amount
                       }
                     }
                   });
@@ -527,10 +526,6 @@ const RentRetailStoreMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
           <AvailabilityDate onAvailabilityChange={(availability) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, availability } })} />
         </div>
       )
@@ -540,10 +535,6 @@ const RentRetailStoreMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
           <CommercialContactDetails
             onContactChange={(contact) => {
               setFormData({
@@ -566,10 +557,6 @@ const RentRetailStoreMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
           <CommercialMediaUpload
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
@@ -654,7 +641,7 @@ const RentRetailStoreMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-rent-retail-stores', transformedData, {
+        const response = await axios.post('/api/commercial/rent/retail-stores', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -758,7 +745,9 @@ const RentRetailStoreMain = () => {
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
+              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+            }`}
             disabled={isSubmitting}
           >
             {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}

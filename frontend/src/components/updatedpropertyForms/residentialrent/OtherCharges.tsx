@@ -99,7 +99,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                 <input
                   type="number"
                   className="w-full border border-gray-300 rounded-xl p-3 focus:border-blue-500 outline-none transition-colors duration-200"
-                  value={(charges[key as keyof typeof charges] as Charge).amount}
+                  value={(charges[key as keyof typeof charges] as Charge).amount || ''}
                   onChange={(e) =>
                     handleChange(key as keyof typeof charges, {
                       ...(charges[key as keyof typeof charges] as Charge),

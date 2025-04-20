@@ -7,13 +7,13 @@ interface PropertyFeaturesProps {
 
 const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
   const [features, setFeatures] = useState({
-    bedrooms: '',
-    washrooms: '',
-    balconies: '',
+    bedrooms: 0,
+    washrooms: 0,
+    balconies: 0,
     hasParking: false,
     parkingDetails: {
-      twoWheeler: '',
-      fourWheeler: ''
+      twoWheeler: 0,
+      fourWheeler: 0
     },
     extraRooms: {
       servant: false,
@@ -22,18 +22,18 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
       others: false
     },
     utilityArea: 'no',
-    furnishingStatus: '',
-    flooring: '',
-    totalFloors: '',
-    propertyOnFloor: '',
+    furnishingStatus: 'fullyfurnished',
+    // flooring: '',
+    totalFloors: 0,
+    propertyOnFloor: 0,
     facing: '',
     propertyAge: '',
-    superBuiltUpAreaSqft: '',
-    superBuiltUpAreaSqmt: '',
-    builtUpAreaSqft: '',
-    builtUpAreaSqmt: '',
-    carpetAreaSqft: '',
-    carpetAreaSqmt: '',
+    superBuiltUpAreaSqft: 0,
+    superBuiltUpAreaSqmt: 0,
+    builtUpAreaSqft: 0,
+    builtUpAreaSqmt: 0,
+    carpetAreaSqft: 0,
+    carpetAreaSqmt: 0,
     electricityAvailability: '',
     waterAvailability: {
       borewell: false,
@@ -48,7 +48,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
     onFeaturesChange?.(updatedFeatures);
   };
 
-  const handleParkingChange = (field: string, value: string) => {
+  const handleParkingChange = (field: string, value: number) => {
     const updatedFeatures = {
       ...features,
       parkingDetails: {
@@ -84,19 +84,19 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
     onFeaturesChange?.(updatedFeatures);
   };
 
-  const convertSqftToSqmt = (sqft: string) => {
-    if (!sqft) return '';
-    const sqftNum = parseFloat(sqft);
-    return (sqftNum * 0.092903).toFixed(2);
+  const convertSqftToSqmt = (sqft: number) => {
+    if (!sqft) return 0;
+    const sqftNum = sqft;
+    return (sqftNum * 0.092903);
   };
 
-  const convertSqmtToSqft = (sqmt: string) => {
-    if (!sqmt) return '';
-    const sqmtNum = parseFloat(sqmt);
-    return (sqmtNum * 10.7639).toFixed(2);
+  const convertSqmtToSqft = (sqmt: number) => {
+    if (!sqmt) return 0;
+    const sqmtNum = sqmt;
+    return (sqmtNum * 10.7639);
   };
 
-  const handleAreaChange = (field: string, value: string, unit: 'sqft' | 'sqmt') => {
+  const handleAreaChange = (field: string, value: number, unit: 'sqft' | 'sqmt') => {
     if (unit === 'sqft') {
       setFeatures({
         ...features,
@@ -130,10 +130,10 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             <input
               type="number"
               min="0"
-              value={features.bedrooms}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
+              value={features.bedrooms || ''}
+              onChange={(e) => handleChange('bedrooms', parseInt(e.target.value))}
               placeholder="No. of Bedrooms"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
             />
           </div>
 
@@ -144,10 +144,10 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             <input
               type="number"
               min="0"
-              value={features.washrooms}
-              onChange={(e) => handleChange('washrooms', e.target.value)}
+              value={features.washrooms || ''}
+              onChange={(e) => handleChange('washrooms', parseInt(e.target.value))}
               placeholder="No. of Washrooms"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
             />
           </div>
 
@@ -158,10 +158,10 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             <input
               type="number"
               min="0"
-              value={features.balconies}
-              onChange={(e) => handleChange('balconies', e.target.value)}
+              value={features.balconies || '' }
+              onChange={(e) => handleChange('balconies', parseInt(e.target.value))}
               placeholder="No. of Balconies"
-              className="w-full pl-10 pr-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
             />
           </div>
         </div>
@@ -179,7 +179,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                   type="radio"
                   checked={features.hasParking}
                   onChange={() => handleChange('hasParking', true)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black"
+                  className="text-black border-black/20 bg-white focus:ring-black"
                 />
                 <span className="text-black/80">Yes</span>
               </label>
@@ -188,7 +188,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                   type="radio"
                   checked={!features.hasParking}
                   onChange={() => handleChange('hasParking', false)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black"
+                  className="text-black border-black/20 bg-white focus:ring-black"
                 />
                 <span className="text-black/80">No</span>
               </label>
@@ -202,9 +202,9 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                     type="number"
                     min="0"
                     value={features.parkingDetails.twoWheeler}
-                    onChange={(e) => handleParkingChange('twoWheeler', e.target.value)}
+                    onChange={(e) => handleParkingChange('twoWheeler', parseInt(e.target.value))}
                     placeholder="No. of 2 wheeler parking"
-                    className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                    className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                   />
                 </div>
                 <div className="space-y-2">
@@ -213,9 +213,9 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                     type="number"
                     min="0"
                     value={features.parkingDetails.fourWheeler}
-                    onChange={(e) => handleParkingChange('fourWheeler', e.target.value)}
+                    onChange={(e) => handleParkingChange('fourWheeler', parseInt(e.target.value))}
                     placeholder="No. of 4 wheeler parking"
-                    className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                    className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                   />
                 </div>
               </div>
@@ -235,7 +235,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 type="checkbox"
                 checked={features.extraRooms.servant}
                 onChange={(e) => handleExtraRoomChange('servant', e.target.checked)}
-                className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+                className="rounded border-black/20 bg-white focus:ring-black text-black"
               />
               <span className="text-black/80">Servant Room</span>
             </label>
@@ -244,7 +244,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 type="checkbox"
                 checked={features.extraRooms.puja}
                 onChange={(e) => handleExtraRoomChange('puja', e.target.checked)}
-                className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+                className="rounded border-black/20 bg-white focus:ring-black text-black"
               />
               <span className="text-black/80">Puja Room</span>
             </label>
@@ -253,7 +253,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 type="checkbox"
                 checked={features.extraRooms.store}
                 onChange={(e) => handleExtraRoomChange('store', e.target.checked)}
-                className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+                className="rounded border-black/20 bg-white focus:ring-black text-black"
               />
               <span className="text-black/80">Store Room</span>
             </label>
@@ -262,7 +262,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                   type="checkbox"
                 checked={features.extraRooms.others}
                 onChange={(e) => handleExtraRoomChange('others', e.target.checked)}
-                className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+                className="rounded border-black/20 bg-white focus:ring-black text-black"
               />
               <span className="text-black/80">Others</span>
               </label>
@@ -283,7 +283,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 value="yes"
                 checked={features.utilityArea === 'yes'}
                 onChange={(e) => handleChange('utilityArea', e.target.value)}
-                className="text-black border-black/20 bg-transparent focus:ring-black"
+                className="text-black border-black/20 bg-white focus:ring-black"
               />
               <span className="text-black/80">Yes</span>
             </label>
@@ -294,7 +294,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 value="no"
                 checked={features.utilityArea === 'no'}
                 onChange={(e) => handleChange('utilityArea', e.target.value)}
-                className="text-black border-black/20 bg-transparent focus:ring-black"
+                className="text-black border-black/20 bg-white focus:ring-black"
               />
               <span className="text-black/80">No</span>
             </label>
@@ -315,7 +315,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 value="unfurnished"
                 checked={features.furnishingStatus === 'unfurnished'}
                 onChange={(e) => handleChange('furnishingStatus', e.target.value)}
-                className="text-black border-black/20 bg-transparent focus:ring-black"
+                className="text-black border-black/20 bg-white focus:ring-black"
               />
               <span className="text-black/80">Unfurnished</span>
             </label>
@@ -326,7 +326,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 value="semifurnished"
                 checked={features.furnishingStatus === 'semifurnished'}
                 onChange={(e) => handleChange('furnishingStatus', e.target.value)}
-                className="text-black border-black/20 bg-transparent focus:ring-black"
+                className="text-black border-black/20 bg-white focus:ring-black"
               />
               <span className="text-black/80">Semi-Furnished</span>
             </label>
@@ -337,7 +337,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 value="fullyfurnished"
                 checked={features.furnishingStatus === 'fullyfurnished'}
               onChange={(e) => handleChange('furnishingStatus', e.target.value)}
-                className="text-black border-black/20 bg-transparent focus:ring-black"
+                className="text-black border-black/20 bg-white focus:ring-black"
               />
               <span className="text-black/80">Fully Furnished</span>
             </label>
@@ -354,18 +354,18 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             <input
               type="number"
               min="0"
-              value={features.totalFloors}
-              onChange={(e) => handleChange('totalFloors', e.target.value)}
+              value={features.totalFloors || ''}
+              onChange={(e) => handleChange('totalFloors', parseInt(e.target.value))}
               placeholder="Total No. of Floors"
-              className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
             />
             <input
               type="number"
               min="0"
-              value={features.propertyOnFloor}
-              onChange={(e) => handleChange('propertyOnFloor', e.target.value)}
+              value={features.propertyOnFloor || ''}
+              onChange={(e) => handleChange('propertyOnFloor', parseInt(e.target.value))}
               placeholder="Property on Floor"
-              className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
             />
           </div>
         </div>
@@ -377,19 +377,19 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             Property Facing
           </h4>
           <select
-            value={features.facing}
+            value={features.facing || ''}
             onChange={(e) => handleChange('facing', e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black"
+            className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black"
           >
-            <option value="" disabled className="bg-black">Select Facing</option>
-            <option value="N" className="bg-black">North</option>
-            <option value="S" className="bg-black">South</option>
-            <option value="E" className="bg-black">East</option>
-            <option value="W" className="bg-black">West</option>
-            <option value="NE" className="bg-black">North East</option>
-            <option value="NW" className="bg-black">North West</option>
-            <option value="SE" className="bg-black">South East</option>
-            <option value="SW" className="bg-black">South West</option>
+            <option value="" disabled className="bg-white">Select Facing</option>
+            <option value="N" className="bg-white">North</option>
+            <option value="S" className="bg-white">South</option>
+            <option value="E" className="bg-white">East</option>
+            <option value="W" className="bg-white">West</option>
+            <option value="NE" className="bg-white">North East</option>
+            <option value="NW" className="bg-white">North West</option>
+            <option value="SE" className="bg-white">South East</option>
+            <option value="SW" className="bg-white">South West</option>
           </select>
         </div>
 
@@ -399,14 +399,18 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             <Calendar size={20} className="text-black/60" />
             Property Age
           </h4>
-          <input
-            type="number"
-            min="0"
-            value={features.propertyAge}
-            onChange={(e) => handleChange('propertyAge', e.target.value)}
-            placeholder="Age of the property (in years)"
-            className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-          />
+          <select
+                value={features.propertyAge}
+                onChange={(e) => handleChange('propertyAge', e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
+              >
+                <option value="" disabled>Select Property Age</option>
+                <option value="0-5" className="text-black bg-white">0-5</option>
+                <option value="5-10" className="text-black bg-white">5-10</option>
+                <option value="10-15" className="text-black bg-white">10-15</option>
+                <option value="15+" className="text-black bg-white">15+</option>
+                {/* Add other relevant options as needed */}
+              </select>
         </div>
 
         {/* Area Details */}
@@ -422,18 +426,18 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={features.superBuiltUpAreaSqft}
-                  onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqft')}
+                  value={features.superBuiltUpAreaSqft || ''} 
+                  onChange={(e) => handleAreaChange('superBuiltUpArea', parseFloat(e.target.value), 'sqft')}
                   placeholder="Area in sq.ft"
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <input
                   type="number"
                   min="0"
-                  value={features.superBuiltUpAreaSqmt}
-                  onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqmt')}
+                  value={features.superBuiltUpAreaSqmt || ''}
+                  onChange={(e) => handleAreaChange('superBuiltUpArea', parseFloat(e.target.value), 'sqmt')}
                   placeholder="Area in sq.mt"
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
               </div>
             </div>
@@ -444,18 +448,18 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={features.builtUpAreaSqft}
-                  onChange={(e) => handleAreaChange('builtUpArea', e.target.value, 'sqft')}
+                  value={features.builtUpAreaSqft || ''}
+                  onChange={(e) => handleAreaChange('builtUpArea', parseFloat(e.target.value), 'sqft')}
                   placeholder="Area in sq.ft"
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <input
                   type="number"
                   min="0"
-                  value={features.builtUpAreaSqmt}
-                  onChange={(e) => handleAreaChange('builtUpArea', e.target.value, 'sqmt')}
+                  value={features.builtUpAreaSqmt || ''}
+                  onChange={(e) => handleAreaChange('builtUpArea', parseFloat(e.target.value), 'sqmt')}
                   placeholder="Area in sq.mt"
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
               </div>
             </div>
@@ -466,18 +470,18 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={features.carpetAreaSqft}
-                  onChange={(e) => handleAreaChange('carpetArea', e.target.value, 'sqft')}
+                  value={features.carpetAreaSqft || ''}
+                  onChange={(e) => handleAreaChange('carpetArea', parseFloat(e.target.value), 'sqft')}
                   placeholder="Area in sq.ft"
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
                 <input
                   type="number"
                   min="0"
-                  value={features.carpetAreaSqmt}
-                  onChange={(e) => handleAreaChange('carpetArea', e.target.value, 'sqmt')}
+                  value={features.carpetAreaSqmt || ''}
+                  onChange={(e) => handleAreaChange('carpetArea', parseFloat(e.target.value), 'sqmt')}
                   placeholder="Area in sq.mt"
-                  className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                  className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
                 />
               </div>
             </div>
@@ -494,12 +498,12 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
             <select
               value={features.electricityAvailability}
               onChange={(e) => handleChange('electricityAvailability', e.target.value)}
-              className="w-full px-4 py-3 rounded-lg bg-transparent border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black"
+              className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black"
             >
-              <option value="" disabled className="bg-black">Select Availability</option>
-              <option value="24hours" className="bg-black">24 Hours Power</option>
-              <option value="partial" className="bg-black">Partial Power Cuts</option>
-              <option value="no" className="bg-black">No Power</option>
+              <option value="" disabled className="bg-white">Select Availability</option>
+              <option value="24hours" className="bg-white">24 Hours Power</option>
+              <option value="partial" className="bg-white">Partial Power Cuts</option>
+              <option value="no" className="bg-white">No Power</option>
             </select>
           </div>
 
@@ -519,7 +523,7 @@ const PropertyFeatures = ({ onFeaturesChange }: PropertyFeaturesProps) => {
                     type="checkbox"
                     checked={features.waterAvailability[key as keyof typeof features.waterAvailability]}
                     onChange={(e) => handleWaterAvailabilityChange(key, e.target.checked)}
-                    className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+                    className="rounded border-black/20 bg-white focus:ring-black text-black"
                   />
                   <span className="text-black/80">{label}</span>
                 </label>

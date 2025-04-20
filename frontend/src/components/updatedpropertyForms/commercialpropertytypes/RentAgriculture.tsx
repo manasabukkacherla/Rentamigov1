@@ -110,7 +110,7 @@ interface FormData {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -227,7 +227,7 @@ const RentAgriculture = () => {
       propertyAmenities: [] as string[],
       wholeSpaceAmenities: [] as string[],
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: '',
       electricitySupply: {
         powerLoad: 0,
@@ -455,10 +455,6 @@ const RentAgriculture = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
             <div className="space-y-6">
               <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
               <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
@@ -484,10 +480,6 @@ const RentAgriculture = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
           <div className="space-y-6">
             <AgriculturalLandDetails onDetailsChange={handleLandDetailsChange} />
             <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
@@ -500,10 +492,6 @@ const RentAgriculture = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div>
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
@@ -552,10 +540,6 @@ const RentAgriculture = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
           <CommercialContactDetails onContactChange={handleContactChange} />
         </div>
       )
@@ -565,10 +549,6 @@ const RentAgriculture = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
           <CommercialMediaUpload onMediaChange={handleMediaChange} />
         </div>
       )
@@ -625,7 +605,7 @@ const RentAgriculture = () => {
         };
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial/agriculture', transformedData, {
+        const response = await axios.post('/api/commercial/rent/agriculture', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -635,7 +615,6 @@ const RentAgriculture = () => {
         if (response.data.success) {
           // Show success message and redirect
           toast.success('Commercial rent agriculture listing created successfully!');
-          navigate('/dashboard'); // Redirect to dashboard or appropriate page
         }
       } else {
         navigate('/login');
