@@ -185,43 +185,7 @@ const LeaseOthersMain = () => {
                   }
                 }))}
               />
-              <MapCoordinates
-                latitude={formData.coordinates.latitude}
-                longitude={formData.coordinates.longitude}
-                onLatitudeChange={(lat) => setFormData(prev => ({
-                  ...prev,
-                  coordinates: {
-                    ...prev.coordinates,
-                    latitude: lat
-                  },
-                  location: {
-                    ...prev.location,
-                    latitude: parseFloat(lat)
-                  }
-                }))}
-                onLongitudeChange={(lng) => setFormData(prev => ({
-                  ...prev,
-                  coordinates: {
-                    ...prev.coordinates,
-                    longitude: lng
-                  },
-                  location: {
-                    ...prev.location,
-                    longitude: parseFloat(lng)
-                  }
-                }))}
-                onLocationChange={(location) => setFormData(prev => ({
-                  ...prev,
-                  coordinates: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  },
-                  location: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
-                  }
-                }))}
-              />
+             
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
