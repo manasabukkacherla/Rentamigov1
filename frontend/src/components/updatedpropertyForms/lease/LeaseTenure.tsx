@@ -2,51 +2,25 @@ import { useState } from 'react';
 import { ArrowRight, Calendar, Clock, Timer } from 'lucide-react';
 
 interface LeaseTenureProps {
-  onLeaseTenureChange?: (tenure: {
-    minimumTenure: { duration: number; durationType: string };
-    maximumTenure: { duration: number; durationType: string };
-    lockInPeriod: { duration: number; durationType: string };
-    noticePeriod: { duration: number; durationType: string };
-  }) => void;
+  onLeaseTenureChange?: (tenure: Record<string, any>) => void;
 }
 
 const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
   const [tenure, setTenure] = useState({
-    minimumTenure: '',
-    minimumUnit: 'months',
-    maximumTenure: '',
-    maximumUnit: 'months',
-    lockInPeriod: '',
-    lockInUnit: 'months',
-    noticePeriod: '',
+    minimumTenure: 0,
+    minimumUnit: 'years',
+    maximumTenure: 0,
+    maximumUnit: 'years',
+    lockInPeriod: 0,
+    lockInUnit: 'years',
+    noticePeriod: 0,
     noticePeriodUnit: 'months'
   });
 
   const handleChange = (field: string, value: any) => {
     const updatedTenure = { ...tenure, [field]: value };
     setTenure(updatedTenure);
-    
-    // Convert to the structure expected by the backend
-    const structuredTenure = {
-      minimumTenure: {
-        duration: parseInt(updatedTenure.minimumTenure) || 0,
-        durationType: updatedTenure.minimumUnit
-      },
-      maximumTenure: {
-        duration: parseInt(updatedTenure.maximumTenure) || 0,
-        durationType: updatedTenure.maximumUnit
-      },
-      lockInPeriod: {
-        duration: parseInt(updatedTenure.lockInPeriod) || 0,
-        durationType: updatedTenure.lockInUnit
-      },
-      noticePeriod: {
-        duration: parseInt(updatedTenure.noticePeriod) || 0,
-        durationType: updatedTenure.noticePeriodUnit
-      }
-    };
-
-    onLeaseTenureChange?.(structuredTenure);
+    onLeaseTenureChange?.(updatedTenure);
   };
 
   return (
@@ -68,7 +42,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.minimumTenure}
+              value={tenure.minimumTenure || ''}
               onChange={(e) => handleChange('minimumTenure', e.target.value)}
               placeholder="Enter minimum tenure"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
@@ -94,7 +68,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.maximumTenure}
+              value={tenure.maximumTenure || ''}
               onChange={(e) => handleChange('maximumTenure', e.target.value)}
               placeholder="Enter maximum tenure"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
@@ -120,7 +94,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.lockInPeriod}
+              value={tenure.lockInPeriod || ''}
               onChange={(e) => handleChange('lockInPeriod', e.target.value)}
               placeholder="Enter lock-in period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
@@ -146,7 +120,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.noticePeriod}
+              value={tenure.noticePeriod || ''   }
               onChange={(e) => handleChange('noticePeriod', e.target.value)}
               placeholder="Enter notice period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"

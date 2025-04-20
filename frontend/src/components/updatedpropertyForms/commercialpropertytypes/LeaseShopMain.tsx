@@ -70,12 +70,11 @@ interface FormData {
   };
   leaseTerms: {
     leaseDetails: {
-      leaseAmount: {
         amount: number;
         type: string;
         duration: number;
         durationUnit: string;
-      };
+      
     };
     tenureDetails: {
       minimumTenure: number;
@@ -118,7 +117,7 @@ interface FormData {
       availableFrom: Date;
       // specificDate: Date;
       availableImmediately: boolean;
-      leaseDuration: string;
+      preferredSaleDuration: string;
       noticePeriod: string;
       petsAllowed: boolean;
       operatingHours: {
@@ -200,12 +199,11 @@ const LeaseShopMain = () => {
     },
     leaseTerms: {
       leaseDetails: {
-        leaseAmount: {
           amount: 0,
           type: 'fixed',
           duration: 0,
           durationUnit: 'years'
-        },
+        
       },
       tenureDetails: {
         minimumTenure: 0,
@@ -248,7 +246,7 @@ const LeaseShopMain = () => {
         availableFrom: new Date(),
         // specificDate: new Date(),
         availableImmediately: false,
-        leaseDuration: '',
+        preferredSaleDuration: '',
         noticePeriod: '',
         petsAllowed: false,
         operatingHours: {
@@ -422,9 +420,9 @@ const LeaseShopMain = () => {
                       leaseDetails: {
                         ...prev.leaseTerms.leaseDetails,
                         leaseAmount: {
-                          amount: Number(amount.amount) || 0,
+                          amount: amount.amount || 0,
                           type: amount.type || 'fixed',
-                          duration: Number(amount.duration) || 0,
+                          duration: amount.duration || 0,
                           durationUnit: amount.durationUnit || 'years'
                         },
                         
@@ -522,7 +520,7 @@ const LeaseShopMain = () => {
                       availableFrom: availability.availableFrom || new Date(),
                       // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
                       availableImmediately: availability.availableImmediately || false,
-                      leaseDuration: availability.leaseDuration || '',
+                      preferredSaleDuration: availability.preferredSaleDuration || '',
                       noticePeriod: availability.noticePeriod || '',
                       petsAllowed: availability.petsAllowed || false,
                       operatingHours: {

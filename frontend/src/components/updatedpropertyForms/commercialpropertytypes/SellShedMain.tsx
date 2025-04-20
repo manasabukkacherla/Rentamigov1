@@ -1,7 +1,6 @@
 import { useState } from "react"
-import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import { Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, Store} from "lucide-react"
 import PropertyName from "../PropertyName"
-import ShedType from "../CommercialComponents/ShedType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import CornerProperty from "../CommercialComponents/CornerProperty"
@@ -18,6 +17,7 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 
+import ShedType from "../CommercialComponents/ShedType"
 // Interfaces
 interface IArea {
   totalArea?: number;
