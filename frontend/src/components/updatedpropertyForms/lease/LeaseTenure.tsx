@@ -7,13 +7,13 @@ interface LeaseTenureProps {
 
 const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
   const [tenure, setTenure] = useState({
-    minimumTenure: '',
+    minimumTenure: 0,
     minimumUnit: 'years',
-    maximumTenure: '',
+    maximumTenure: 0,
     maximumUnit: 'years',
-    lockInPeriod: '',
+    lockInPeriod: 0,
     lockInUnit: 'years',
-    noticePeriod: '',
+    noticePeriod: 0,
     noticePeriodUnit: 'months'
   });
 
@@ -42,7 +42,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.minimumTenure}
+              value={tenure.minimumTenure || ''}
               onChange={(e) => handleChange('minimumTenure', e.target.value)}
               placeholder="Enter minimum tenure"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
@@ -68,7 +68,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.maximumTenure}
+              value={tenure.maximumTenure || ''}
               onChange={(e) => handleChange('maximumTenure', e.target.value)}
               placeholder="Enter maximum tenure"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
@@ -94,7 +94,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.lockInPeriod}
+              value={tenure.lockInPeriod || ''}
               onChange={(e) => handleChange('lockInPeriod', e.target.value)}
               placeholder="Enter lock-in period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
@@ -120,7 +120,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.noticePeriod}
+              value={tenure.noticePeriod || ''   }
               onChange={(e) => handleChange('noticePeriod', e.target.value)}
               placeholder="Enter notice period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"

@@ -1,15 +1,7 @@
 import { Schema, model, Document, Types } from 'mongoose';
 
-// Interfaces
-interface IArea {
-    totalArea: number;
-    builtUpArea: number;
-    carpetArea: number;
-}
-
 interface IBasicInformation {
     title: string;
-    officeType: string[];
     address: {
         street: string;
         city: string;
@@ -18,29 +10,10 @@ interface IBasicInformation {
     };
     landmark: string;
     location: {
-        latitude?: number;
-        longitude?: number;
+        latitude: number;
+        longitude: number;
     };
     isCornerProperty: boolean;
-}
-
-interface IOfficeDetails {
-    seatingCapacity: number;
-    cabins: {
-        available: boolean;
-        count?: number;
-    };
-    conferenceRoom: boolean;
-    meetingRoom: boolean;
-    receptionArea: boolean;
-    wifiSetup: boolean;
-    serverRoom: boolean;
-    coworkingFriendly: boolean;
-}
-
-interface IAvailability {
-    availableFrom?: string;
-    availableImmediately: boolean;
 }
 
 interface IContactInformation {
@@ -74,79 +47,94 @@ interface IRentalTerms {
         expectedRent: number;
         isNegotiable: boolean;
         rentType: string;
-    };
+    }
     securityDeposit: {
         amount: number;
-    };
-    maintenanceAmount: {
-        amount: number;
-        frequency: string;
-    };
+    }
+    maintenanceAmount?: {
+        amount?: number;
+        frequency?: string;
+    }
     otherCharges: {
         water: {
             amount?: number;
             type: string;
-        };
+        }
         electricity: {
             amount?: number;
             type: string;
-        };
+        }
         gas: {
             amount?: number;
             type: string;
-        };
+        }
         others: {
             amount?: number;
             type: string;
-        };
-    };
+        }
+    }
     brokerage: {
         required: string;
         amount?: number;
-    };
+    }
     availability: {
         type: string;
         date?: string;
-    };
+    }
 }
 
-interface IFloor {
-    floorNumber: number;
-    totalFloors: number;
-}
-
-interface ICommercialRentOfficeSpace extends Document {
+interface ICommercialRentShed extends Document {
     propertyId: string;
+
     basicInformation: IBasicInformation;
-    officeDetails: IOfficeDetails;
     propertyDetails: {
-        area: IArea;
-        floor: IFloor;
-        facingDirection: string;
-        furnishingStatus: string;
-        propertyAmenities: string[];
-        wholeSpaceAmenities: string[];
-        electricitySupply: {
-            powerLoad: number;
-            backup: boolean;
-        };
-        waterAvailability: string;
-        propertyAge: string;
-        propertyCondition: string;
+        propertySize: number;
+        propertyFeatures: {
+            bedrooms: number;
+            washrooms: number;
+            balconies: number;
+            hasParking: boolean;
+            parkingDetails?: {
+                twoWheeler?: number;
+                fourWheeler?: number;
+            };
+            extraRooms: {
+                servant: boolean;
+                puja: boolean;
+                store: boolean;
+                others: boolean;
+            };
+            utilityArea: string;
+            furnishingStatus: string;
+            totalFloors: number;
+            propertyOnFloor: string;
+            facing: string;
+            propertyAge: string;
+            superBuiltUpAreaSqft: number;
+            superBuiltUpAreaSqmt: number;
+            builtUpAreaSqft: number;
+            builtUpAreaSqmt: number;
+            carpetAreaSqft: number;
+            carpetAreaSqmt: number;
+            electricityAvailability: string;
+            waterAvailability: {
+                borewell: boolean;
+                governmentSupply: boolean;
+                tankerSupply: boolean;
+            };
+        };          
     };
     rentalTerms: IRentalTerms;
-    availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
     metadata: IMetadata;
 }
 
 // Schema
-const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
+const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        officeType: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -155,45 +143,47 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         },
         landmark: { type: String, required: true },
         location: {
-            latitude: { type: Number },
-            longitude: { type: Number },
+            latitude: { type: Number, required: true },
+            longitude: { type: Number, required: true },
         },
         isCornerProperty: { type: Boolean }
     },
-    officeDetails: {
-        seatingCapacity: { type: Number, required: true },
-        cabins: {
-            available: { type: Boolean, required: true },
-            count: { type: Number }
-        },
-        conferenceRoom: { type: Boolean, required: true },
-        meetingRoom: { type: Boolean, required: true },
-        receptionArea: { type: Boolean, required: true },
-        wifiSetup: { type: Boolean, required: true },
-        serverRoom: { type: Boolean, required: true },
-        coworkingFriendly: { type: Boolean, required: true }
-    },
     propertyDetails: {
-        area: {
-            totalArea: { type: Number, required: true },
-            carpetArea: { type: Number, required: true },
-            builtUpArea: { type: Number, required: true }
+        propertySize: { type: Number, required: true },
+        propertyFeatures: {
+            bedrooms: { type: Number, required: true },
+            washrooms: { type: Number, required: true },
+            balconies: { type: Number, required: true },
+            hasParking: { type: Boolean, required: true },
+            parkingDetails: {
+                twoWheeler: { type: Number, required: false },
+                fourWheeler: { type: Number, required: false }
+            },
+            extraRooms: {
+                servant: { type: Boolean, required: true },
+                puja: { type: Boolean, required: true },
+                store: { type: Boolean, required: true },
+                others: { type: Boolean, required: true }
+            },
+            utilityArea: { type: String, required: true },
+            furnishingStatus: { type: String, required: true },
+            totalFloors: { type: Number, required: true },
+            propertyOnFloor: { type: String, required: true },
+            facing: { type: String, required: true },
+            propertyAge: { type: String, required: true },
+            superBuiltUpAreaSqft: { type: Number, required: true },
+            superBuiltUpAreaSqmt: { type: Number, required: true },
+            builtUpAreaSqft: { type: Number, required: true },
+            builtUpAreaSqmt: { type: Number, required: true },
+            carpetAreaSqft: { type: Number, required: true },
+            carpetAreaSqmt: { type: Number, required: true },
+            electricityAvailability: { type: String, required: true },
+            waterAvailability: {
+                borewell: { type: Boolean, required: true },
+                governmentSupply: { type: Boolean, required: true },
+                tankerSupply: { type: Boolean, required: true }
+            }
         },
-        floor: {
-            floorNumber: { type: Number, required: true },
-            totalFloors: { type: Number, required: true }
-        },
-        facingDirection: { type: String },
-        furnishingStatus: { type: String },
-        propertyAmenities: [{ type: String }],
-        wholeSpaceAmenities: [{ type: String }],
-        electricitySupply: {
-            powerLoad: { type: Number },
-            backup: { type: Boolean, default: false }
-        },
-        waterAvailability: [{ type: String }],
-        propertyAge: { type: String },
-        propertyCondition: { type: String }
     },
     rentalTerms: {
         rentDetails: {
@@ -205,8 +195,8 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
             amount: { type: Number, required: true },
         },
         maintenanceAmount: {
-            amount: { type: Number, required: true },
-            frequency: { type: String, required: true },
+            amount: { type: Number },
+            frequency: { type: String },
         },
         otherCharges: {
             water: {
@@ -235,10 +225,6 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
             date: { type: String },
         }
     },
-    availability: {
-        availableFrom: { type: String },
-        availableImmediately: { type: Boolean, required: true }
-    },
     contactInformation: {
         name: { type: String, required: true },
         email: { type: String, required: true },
@@ -259,7 +245,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         createdAt: { type: Date, default: Date.now }
     }
 }, {
@@ -267,12 +253,11 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
 });
 
 // Indexes
-CommercialRentOfficeSpaceSchema.index({ 'basicInformation.city': 1 });
-CommercialRentOfficeSpaceSchema.index({ 'basicInformation.state': 1 });
-CommercialRentOfficeSpaceSchema.index({ 'rentalTerms.rentDetails.expectedRent': 1 });
-CommercialRentOfficeSpaceSchema.index({ 'propertyDetails.area.totalArea': 1 });
-CommercialRentOfficeSpaceSchema.index({ 'metadata.createdAt': -1 });
+CommercialRentShedSchema.index({ propertyId: 1 }, { unique: true });
+CommercialRentShedSchema.index({ 'basicInformation.city': 1 });
+CommercialRentShedSchema.index({ 'basicInformation.state': 1 });
+CommercialRentShedSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialRentOfficeSpace, IBasicInformation, IArea, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialRentOfficeSpace>('CommercialRentOfficeSpace', CommercialRentOfficeSpaceSchema); 
+// export { ICommercialrentShop, IBasicInformation, IAvailability, IContactInformation, IMedia, IMetadata };
+export default model<ICommercialRentShed>('CommercialRentShed', CommercialRentShedSchema);

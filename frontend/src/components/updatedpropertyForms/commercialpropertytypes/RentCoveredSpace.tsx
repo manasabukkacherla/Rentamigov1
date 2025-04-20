@@ -15,7 +15,7 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import {  DollarSign, Calendar, User, Image,  ImageIcon, UserCircle } from 'lucide-react';
+import {  DollarSign, Calendar, User, Image,  ImageIcon, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -73,7 +73,7 @@ interface IFormData {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   rentalTerms: {
@@ -193,7 +193,7 @@ const RentCoveredSpace = () => {
         backup: false
       },  
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: ''
     },
     rentalTerms: {
@@ -261,10 +261,6 @@ const RentCoveredSpace = () => {
     },
   });
 
-  // Add useEffect to log form data changes
-  useEffect(() => {
-    console.log('Form Data Updated:', formData);
-  }, [formData]);
 
   // Add validation utility functions
   const validateEmail = (email: string) => {
@@ -445,9 +441,7 @@ const RentCoveredSpace = () => {
 
         if (!formData.propertyDetails.propertyAge) {
           errors.propertyAge = 'Property age is required';
-        } else if (formData.propertyDetails.propertyAge < 0) {
-          errors.propertyAge = 'Property age cannot be negative';
-        }
+        } 
 
         if (!formData.propertyDetails.propertyCondition) {
           errors.propertyCondition = 'Property condition is required';
@@ -610,8 +604,6 @@ const RentCoveredSpace = () => {
       noOfOpenSides: details.openSides || ''
     };
 
-    console.log('Input Details:', details);
-    console.log('Transformed Details:', transformedDetails);
 
     setFormData(prev => ({
       ...prev,
@@ -622,34 +614,34 @@ const RentCoveredSpace = () => {
     }));
   };
 
-  const handlePropertyDetailsChange = (details: Record<string, any>) => {
-    setFormData(prev => ({
-      ...prev,
-      propertyDetails: {
-        ...prev.propertyDetails,
-        area: {
-          totalArea: details.totalArea ? parseFloat(details.totalArea) : 0,
-          builtUpArea: details.builtUpArea ? parseFloat(details.builtUpArea) : 0,
-          carpetArea: details.carpetArea ? parseFloat(details.carpetArea) : 0
-        },
-        floor: {
-          floorNumber: details.floorNumber ? parseInt(details.floorNumber) : 0,
-          totalFloors: details.totalFloors ? parseInt(details.totalFloors) : 0
-        },
-        facingDirection: details.facingDirection || '',
-        furnishingStatus: details.furnishingStatus || '',
-        propertyAmenities: details.propertyAmenities || [],
-        wholeSpaceAmenities: details.wholeSpaceAmenities || [],
-        electricitySupply: {
-          powerLoad: details.powerLoad ? parseFloat(details.powerLoad) : 0,
-          backup: details.backup || false
-        },
-        waterAvailability: details.waterAvailability || '',
-        propertyAge: details.propertyAge ? parseInt(details.propertyAge) : 0,
-        propertyCondition: details.propertyCondition || ''
-      }
-    }));
-  };
+  // const handlePropertyDetailsChange = (details: Record<string, any>) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     propertyDetails: {
+  //       ...prev.propertyDetails,
+  //       area: {
+  //         totalArea: details.totalArea ? parseFloat(details.totalArea) : 0,
+  //         builtUpArea: details.builtUpArea ? parseFloat(details.builtUpArea) : 0,
+  //         carpetArea: details.carpetArea ? parseFloat(details.carpetArea) : 0
+  //       },
+  //       floor: {
+  //         floorNumber: details.floorNumber ? parseInt(details.floorNumber) : 0,
+  //         totalFloors: details.totalFloors ? parseInt(details.totalFloors) : 0
+  //       },
+  //       facingDirection: details.facingDirection || '',
+  //       furnishingStatus: details.furnishingStatus || '',
+  //       propertyAmenities: details.propertyAmenities || [],
+  //       wholeSpaceAmenities: details.wholeSpaceAmenities || [],
+  //       electricitySupply: {
+  //         powerLoad: details.powerLoad ? parseFloat(details.powerLoad) : 0,
+  //         backup: details.backup || false
+  //       },
+  //       waterAvailability: details.waterAvailability || '',
+  //       propertyAge: details.propertyAge ? parseInt(details.propertyAge) : 0,
+  //       propertyCondition: details.propertyCondition || ''
+  //     }
+  //   }));
+  // };
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
@@ -999,7 +991,7 @@ const RentCoveredSpace = () => {
               backup: formData.propertyDetails.electricitySupply.backup
             },
             waterAvailability: formData.propertyDetails.waterAvailability,
-            propertyAge: formData.propertyDetails.propertyAge || 0,
+            propertyAge: formData.propertyDetails.propertyAge || '',
             propertyCondition: formData.propertyDetails.propertyCondition
           },
           rentalTerms: formData.rentalTerms,
@@ -1017,16 +1009,23 @@ const RentCoveredSpace = () => {
         };
 
         // Send the data to the backend
-        const response = await axios.post('/api/commercial-rent-covered-space', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
+        // const response = await axios.post('/api/commercial-rent-covered-space', transformedData, {
+        //   headers: {
+        //     'Content-Type': 'application/json'
+        const token = JSON.parse(user).token;
+        const response = await axios.post(
+          `/api/commercial-rent-covered-space`,
+          transformedData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
+        );
 
         if (response.data.success) {
           toast.success('Commercial covered space listing created successfully!');
-          // Redirect to the property listing page or dashboard
-          navigate('/dashboard');
         } else {
           toast.error(response.data.error || 'Failed to create listing. Please try again.');
         }
@@ -1041,7 +1040,7 @@ const RentCoveredSpace = () => {
   };
 
   return (
-    <div onSubmit={handleSubmit} className="space-y-12">
+    <div className="space-y-12">
       <div className="space-y-12">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -1078,36 +1077,33 @@ const RentCoveredSpace = () => {
         <div className="space-y-8">{formSections[currentStep].content}</div>
       </div>
 
-      <div className="mt-8 flex justify-between items-center">
-        {currentStep > 0 && (
-          <button
-            type="button"
-            onClick={handlePrevious}
-            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
-          >
-            Previous
-          </button>
-        )}
-        {currentStep < formSections.length - 1 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-          >
-            Next
-          </button>
-        ) : (
-          <button
-            type="submit"
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-          >
-            List Property
-          </button>
-        )}
-      </div>
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-black hover:bg-black hover:text-white'
+                }`}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
+            </button>
+            <button
+              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          </div>
+        </div>
     </div>
   );
 };
 
 export default RentCoveredSpace;
+
 

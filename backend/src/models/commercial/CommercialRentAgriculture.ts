@@ -45,7 +45,7 @@ export interface ICommercialRentAgriculture extends Document {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -156,7 +156,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     propertyAmenities: { type: [String] },
     wholeSpaceAmenities: { type: [String] },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String, required: true },
     propertyCondition: { type: String },
     electricitySupply: {
       powerLoad: { type: Number },

@@ -18,6 +18,7 @@ import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import { MapPin, Building2, DollarSign, Calendar, ChevronLeft, ChevronRight, Store, ImageIcon, UserCircle } from 'lucide-react';
+import axios from 'axios';
 
 const globalStyles = `
   input::placeholder,
@@ -70,61 +71,263 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   );
 };
 
-interface FormData {
-  propertyName: string;
-  officeType: string;
-  address: Record<string, any>;
+interface IArea {
+  totalArea: number;
+  builtUpArea: number;
+  carpetArea: number;
+}
+
+interface IBasicInformation {
+  title: string;
+  officeType: string[];
+  address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+  };
   landmark: string;
-  coordinates: { latitude: string; longitude: string };
+  location: {
+      latitude?: number;
+      longitude?: number;
+  };
   isCornerProperty: boolean;
-  officeDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  rent: {
-    expectedRent: string;
-    isNegotiable: boolean;
-    rentType: string;
+}
+
+interface IOfficeDetails {
+  seatingCapacity: number;
+  cabins: {
+      available: boolean;
+      count?: number;
   };
-  securityDeposit: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
-  otherCharges: Record<string, any>;
-  brokerage: Record<string, any>;
+  conferenceRoom: boolean;
+  meetingRoom: boolean;
+  receptionArea: boolean;
+  wifiSetup: boolean;
+  serverRoom: boolean;
+  coworkingFriendly: boolean;
+}
+
+interface IAvailability {
+  availableFrom?: string;
+  availableImmediately: boolean;
+}
+
+interface IContactInformation {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+}
+
+interface IMedia {
+  photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+  };
+  videoTour?: File | null;
+  documents: File[];
+}
+
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+}
+
+interface IRentalTerms {
+  rentDetails: {
+      expectedRent: number;
+      isNegotiable: boolean;
+      rentType: string;
+  };
+  securityDeposit: {
+      amount: number;
+  };
+  maintenanceAmount: {
+      amount: number;
+      frequency: string;
+  };
+  otherCharges: {
+      water: {
+          amount?: number;
+          type: string;
+      };
+      electricity: {
+          amount?: number;
+          type: string;
+      };
+      gas: {
+          amount?: number;
+          type: string;
+      };
+      others: {
+          amount?: number;
+          type: string;
+      };
+  };
+  brokerage: {
+      required: string;
+      amount?: number;
+  };
   availability: {
-    type: 'immediate' | 'specific';
-    date: string;
+      type: string;
+      date?: string;
   };
-  contactDetails: Record<string, any>;
-  media: {
-    photos: File[];
-    video: File | null;
-  };
+}
+
+interface IFloor {
+  floorNumber: number;
+  totalFloors: number;
+}
+
+interface FormData {
+  basicInformation: IBasicInformation;
+    officeDetails: IOfficeDetails;
+    propertyDetails: {
+        area: IArea;
+        floor: IFloor;
+        facingDirection: string;
+        furnishingStatus: string;
+        propertyAmenities: string[];
+        wholeSpaceAmenities: string[];
+        electricitySupply: {
+            powerLoad: number;
+            backup: boolean;
+        };
+        waterAvailability: string;
+        propertyAge: string;
+        propertyCondition: string;
+    };
+    rentalTerms: IRentalTerms;
+    availability: IAvailability;
+    contactInformation: IContactInformation;
+    media: IMedia;
+    metadata: IMetadata;
 }
 
 const RentOfficeSpace = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    officeType: '',
-    address: {},
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
-    officeDetails: {},
-    propertyDetails: {},
-    rent: {
-      expectedRent: '',
-      isNegotiable: false,
-      rentType: ''
+    basicInformation: {
+      title: '',
+      officeType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0,   
+      },
+      isCornerProperty: false,
     },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
+    officeDetails: {
+      seatingCapacity: 0,
+      cabins: { available: false, count: 0 },
+      conferenceRoom: false,
+      meetingRoom: false,
+      receptionArea: false,
+      wifiSetup: false,
+      serverRoom: false,
+      coworkingFriendly: false,
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        builtUpArea: 0,
+        carpetArea: 0,
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0,
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false,
+      },
+      waterAvailability: '',
+      propertyAge: '',      
+      propertyCondition: '',
+    },
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: '',
+      },
+      securityDeposit: {
+        amount: 0,
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: '',  
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: '',
+        },
+        electricity: {
+          amount: 0,
+          type: '',
+        },
+        gas: {
+          amount: 0,
+          type: '', 
+        },
+        others: {
+          amount: 0,
+          type: '',
+        },
+      },    
+      brokerage: {
+        required: '',
+        amount: 0,
+      },
+      availability: {
+        type: '',
+        date: '',
+      },
+    },
     availability: {
-      type: 'immediate',
-      date: ''
+      availableFrom: '',
+      availableImmediately: false,
     },
-    contactDetails: {},
-    media: { photos: [], video: null }
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: '',
+    },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+      },
+      videoTour: null,
+      documents: [],
+    },
+    metadata: {
+      createdBy: '',
+      createdAt: new Date(),
+    },
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -158,97 +361,165 @@ const RentOfficeSpace = () => {
 
   const handleOfficeTypeChange = (types: string[]) => {
     if (types && types.length > 0) {
-      setFormData({ ...formData, officeType: types[0] });
+      setFormData({ ...formData, basicInformation: { ...formData.basicInformation, officeType: types } });
     }
   };
 
   const handlePropertyNameChange = (name: string) => {
-    setFormData({ ...formData, propertyName: name });
+    setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } });
   };
 
   const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }) => {
-    setFormData({ ...formData, address });
+    setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address: address } });
   };
 
   const handleLandmarkChange = (landmark: string) => {
-    setFormData({ ...formData, landmark });
+    setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark: landmark } });
   };
 
   const handleCornerPropertyChange = (isCorner: boolean) => {
-    setFormData({ ...formData, isCornerProperty: isCorner });
+    setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } });
   };
 
   const handleOfficeDetailsChange = (details: Record<string, any>) => {
-    setFormData({ ...formData, officeDetails: details });
+    setFormData({ ...formData, officeDetails: details as IOfficeDetails });
   };
 
   const handlePropertyDetailsChange = (details: Record<string, any>) => {
-    setFormData({ ...formData, propertyDetails: details });
+    setFormData({
+      ...formData,
+      propertyDetails: {
+        area: {
+          totalArea: details.area?.totalArea || 0,
+          carpetArea: details.area?.carpetArea || 0,
+          builtUpArea: details.area?.builtUpArea || 0
+        },
+        floor: {
+          floorNumber: details.floor?.floorNumber || 0,
+          totalFloors: details.floor?.totalFloors || 0
+        },
+        facingDirection: details.facingDirection || '',
+        furnishingStatus: details.furnishingStatus || '',
+        propertyAmenities: details.propertyAmenities || [],
+        wholeSpaceAmenities: details.wholeSpaceAmenities || [],
+        electricitySupply: {
+          powerLoad: details.electricitySupply?.powerLoad || 0,
+          backup: details.electricitySupply?.backup || false
+        },
+        waterAvailability: details.waterAvailability || '',
+        propertyAge: details.propertyAge || '',
+        propertyCondition: details.propertyCondition || ''
+      }
+    });
   };
 
   const handleRentChange = (rent: Record<string, any>) => {
-    // Preserve the existing structure while updating with new values
-    setFormData(prev => ({
-      ...prev,
-      rent: {
-        expectedRent: rent.expectedRent || prev.rent.expectedRent,
-        isNegotiable: rent.isNegotiable !== undefined ? rent.isNegotiable : prev.rent.isNegotiable,
-        rentType: rent.rentType || prev.rent.rentType
+    setFormData({
+      ...formData,
+      rentalTerms: {
+        ...formData.rentalTerms,
+        rentDetails: {
+          expectedRent: rent.expectedRent || 0,
+          isNegotiable: rent.isNegotiable || false,
+          rentType: rent.rentType || 'inclusive'
+        }
       }
-    }));
+    });
   };
 
   const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
-    setFormData({ ...formData, maintenanceAmount: maintenance });
+    setFormData({
+      ...formData,
+      rentalTerms: {
+        ...formData.rentalTerms,
+        maintenanceAmount: {
+          amount: maintenance.amount || 0,
+          frequency: maintenance.frequency || 'monthly'
+        }
+      }
+    });
   };
 
   const handleSecurityDepositChange = (deposit: Record<string, any>) => {
-    setFormData({ ...formData, securityDeposit: deposit });
+    setFormData({
+      ...formData,
+      rentalTerms: {
+        ...formData.rentalTerms,
+        securityDeposit: {
+          amount: deposit.amount || 0
+        }
+      }
+    });
   };
 
   const handleOtherChargesChange = (charges: Record<string, any>) => {
-    setFormData({ ...formData, otherCharges: charges });
+    setFormData({
+      ...formData,
+      rentalTerms: {
+        ...formData.rentalTerms,
+        otherCharges: {
+          water: {
+            amount: charges.water?.amount || 0,
+            type: charges.water?.type || 'inclusive'
+          },
+          electricity: {
+            amount: charges.electricity?.amount || 0,
+            type: charges.electricity?.type || 'inclusive'
+          },
+          gas: {
+            amount: charges.gas?.amount || 0,
+            type: charges.gas?.type || 'inclusive'
+          },
+          others: {
+            amount: charges.others?.amount || 0,
+            type: charges.others?.type || 'inclusive'
+          }
+        }
+      }
+    });
   };
 
   const handleBrokerageChange = (brokerage: Record<string, any>) => {
-    setFormData({ ...formData, brokerage });
+    setFormData({
+      ...formData,
+      rentalTerms: {
+        ...formData.rentalTerms,
+        brokerage: {
+          required: brokerage.required || 'no',
+          amount: brokerage.amount || 0
+        }
+      }
+    });
   };
 
-  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string }) => {
-    // Get today's date in ISO format for immediate availability
-    const today = new Date().toISOString().split('T')[0];
-
-    setFormData(prev => ({
-      ...prev,
+  const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }) => {
+    setFormData({
+      ...formData,
+      rentalTerms: {
+        ...formData.rentalTerms,
+        availability: {
+          type: availability.type || 'immediate',
+          date: availability.date || new Date().toISOString()
+        }
+      },
       availability: {
-        type: availability.type,
-        date: availability.type === 'immediate' ? today : (availability.date || '')
+        availableFrom: availability.type === 'immediate' ? new Date().toISOString() : availability.date || '',
+        availableImmediately: availability.type === 'immediate'
       }
-    }));
+    });
   };
 
   const handleContactChange = (contact: Record<string, any>) => {
-    setFormData({ ...formData, contactDetails: contact });
-  };
-
-  const handleMediaChange = (media: {
-    images: { category: string; files: { url: string; file: File; }[]; }[];
-    video?: { url: string; file: File; } | undefined;
-    documents: { type: string; file: File; }[];
-  }) => {
-    const transformedMedia = {
-      photos: [...media.images.flatMap(cat => cat.files.map(f => f.file))],
-      video: media.video?.file || null
-    };
-
-    // Update media with type safety
-    setFormData(prev => ({
-      ...prev,
-      media: {
-        photos: transformedMedia.photos,
-        video: transformedMedia.video
+    setFormData({
+      ...formData,
+      contactInformation: {
+        name: contact.name || '',
+        email: contact.email || '',
+        phone: contact.phone || '',
+        alternatePhone: contact.alternatePhone || '',
+        bestTimeToContact: contact.bestTimeToContact || ''
       }
-    }));
+    });
   };
 
   const formSections = [
@@ -258,13 +529,9 @@ const RentOfficeSpace = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
             <div className="space-y-6">
               <PropertyName
-                propertyName={formData.propertyName}
+                propertyName={formData.basicInformation.title}
                 onPropertyNameChange={handlePropertyNameChange}
               />
               <OfficeSpaceType
@@ -274,19 +541,15 @@ const RentOfficeSpace = () => {
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
             <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={handleAddressChange}
               />
               <Landmark onLandmarkChange={handleLandmarkChange} />
-              {currentStep === 0 && (
+              {/* {currentStep === 0 && (
                 <MapSelector
-                  latitude={formData.coordinates.latitude}
-                  longitude={formData.coordinates.longitude}
+                  latitude={formData.basicInformation.location.latitude}
+                  longitude={formData.basicInformation.location.longitude}
                   onLocationSelect={(lat, lng, address) => {
                     setFormData(prev => ({
                       ...prev,
@@ -297,7 +560,7 @@ const RentOfficeSpace = () => {
                     }));
                   }}
                 />
-              )}
+              )} */}
               <CornerProperty
                 onCornerPropertyChange={handleCornerPropertyChange}
               />
@@ -311,10 +574,10 @@ const RentOfficeSpace = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <Building2 className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
+          </div> */}
           <div className="space-y-6">
             <OfficeSpaceDetails
               onDetailsChange={handleOfficeDetailsChange}
@@ -331,16 +594,16 @@ const RentOfficeSpace = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <DollarSign className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div>
+          </div> */}
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
               <div className="space-y-4 text-black">
                 <Rent onRentChange={handleRentChange} />
-                {formData.rent.rentType === 'exclusive' && (
+                {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
                   <MaintenanceAmount
                     onMaintenanceAmountChange={handleMaintenanceAmountChange}
                   />
@@ -372,10 +635,10 @@ const RentOfficeSpace = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <Calendar className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
+          </div> */}
           <AvailabilityDate
             onAvailabilityChange={handleAvailabilityChange}
           />
@@ -387,10 +650,10 @@ const RentOfficeSpace = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <UserCircle className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
+          </div> */}
           <CommercialContactDetails
             onContactChange={handleContactChange}
           />
@@ -402,13 +665,31 @@ const RentOfficeSpace = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
+          {/* <div className="flex items-center gap-3 mb-6">
             <ImageIcon className="w-6 h-6 text-black" />
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
+          </div> */}
           <CommercialMediaUpload
-            onMediaChange={handleMediaChange}
-          />
+              onMediaChange={(media) => {
+                const photos: Record<string, File[]> = {};
+                media.images.forEach(({ category, files }) => {
+                  photos[category] = files.map(f => f.file);
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    ...prev.media,
+                    photos: {
+                      ...prev.media.photos,
+                      ...photos
+                    },
+                    videoTour: media.video?.file || null,
+                    documents: media.documents.map(d => d.file)
+                  }
+                }));
+              }}
+            />
         </div>
       )
     }
@@ -434,89 +715,59 @@ const RentOfficeSpace = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    console.log(formData);
     try {
-      // Validate coordinates
-      if (!formData.coordinates.latitude || !formData.coordinates.longitude) {
-        toast.error('Please select a location on the map');
-        setIsSubmitting(false);
-        return;
-      }
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
 
-      const latitude = parseFloat(formData.coordinates.latitude);
-      const longitude = parseFloat(formData.coordinates.longitude);
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
 
-      if (isNaN(latitude) || isNaN(longitude)) {
-        toast.error('Invalid coordinates. Please select a location on the map');
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Format the data according to the backend model
-      const formattedData = {
-        basicInformation: {
-          title: formData.propertyName,
-          officeType: [formData.officeType],
-          address: formData.address,
-          landmark: formData.landmark,
-          location: {
-            latitude: latitude,
-            longitude: longitude
-          },
-          isCornerProperty: formData.isCornerProperty
-        },
-        officeDetails: formData.officeDetails,
-        propertyDetails: formData.propertyDetails,
-        rentalTerms: {
-          rentDetails: {
-            expectedRent: parseFloat(formData.rent.expectedRent) || 0,
-            isNegotiable: formData.rent.isNegotiable,
-            rentType: formData.rent.rentType
-          },
-          securityDeposit: formData.securityDeposit,
-          maintenanceAmount: formData.maintenanceAmount,
-          otherCharges: formData.otherCharges,
-          brokerage: formData.brokerage,
-          availability: formData.availability
-        },
-        availability: {
-          availableFrom: formData.availability.date,
-          availableImmediately: formData.availability.type === 'immediate'
-        },
-        contactInformation: formData.contactDetails,
-        media: {
+        const convertedMedia = {
           photos: {
-            exterior: [],
-            interior: [],
-            floorPlan: [],
-            washrooms: [],
-            lifts: [],
-            emergencyExits: []
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
           },
-          videoTour: formData.media.video ? URL.createObjectURL(formData.media.video) : '',
-          documents: []
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/commercial/rent/office-spaces', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Commercial rent office space listing created successfully!');
         }
-      };
-
-      // Submit to backend API
-      const response = await fetch('/api/commercial/office-spaces', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('token')}`
-        },
-        body: JSON.stringify(formattedData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to submit form');
+      } else {
+        navigate('/login');
       }
-
-      const result = await response.json();
-      toast.success('Office space listing created successfully!');
-      navigate('/updatePropertyform'); // Redirect to dashboard after successful submission
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to submit form. Please try again.');
+      toast.error('Failed to create commercial rent office space listing. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

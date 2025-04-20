@@ -54,48 +54,66 @@ interface IMetadata {
   createdAt: Date;
 }
 
-interface IRentalTerms {
-    rentDetails: {
-        expectedRent: number;
-        isNegotiable: boolean;
-        rentType: string;
-    }
-    securityDeposit: {
-        amount: number;
-    }
-    maintenanceAmount?: {
-        amount?: number;
-        frequency?: string;
-    }
-    otherCharges: {
-        water: {
-            amount?: number;
-            type: string;
-        }
-        electricity: {
-            amount?: number;
-            type: string;
-        }
-        gas: {
-            amount?: number;
-            type: string;
-        }
-        others: {
-            amount?: number;
-            type: string;
-        }
-    }
-    brokerage: {
-        required: string;
-        amount?: number;
-    }
-    availability: {
-        type: string;
-        date?: string;
-    }
+interface ILeaseTerms {
+  leaseTerms: {
+      leaseDetails: {
+        leaseAmount: {
+              amount: number,
+              type: string,
+              duration: number,
+              durationUnit: string,
+        },
+      },
+      tenureDetails: {
+        minimumTenure: number;
+        minimumUnit: string;
+        maximumTenure: number;
+        maximumUnit: string;
+        lockInPeriod: number;
+        lockInUnit: string;
+        noticePeriod: number;
+        noticePeriodUnit: string;
+      },
+      maintenanceAmount: {
+          amount: number,
+          frequency: string,
+      },
+      otherCharges: {
+          water: {
+              amount?: number,
+              type: string,
+          },
+          electricity: {
+              amount?: number,
+              type: string,
+          },
+          gas: {
+              amount?: number,
+              type: string,
+          },
+          others: {
+              amount?: number,
+              type: string,
+          }
+      },
+      brokerage: {
+          required: string,
+          amount?: number,
+      },
+      availability: {
+          date: Date,
+          availableImmediately: Boolean,
+          preferredSaleDuration: String,
+          noticePeriod: String,
+          isPetsAllowed: Boolean,
+          operatingHours: Boolean,
+            
+      },
+    },
+  
 }
 
-interface ICommercialRentRetailStore extends Document {
+interface ICommercialLeaseRetailStore extends Document {
   propertyId: string;
   
   basicInformation: IBasicInformation;
@@ -119,21 +137,21 @@ interface ICommercialRentRetailStore extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: string;
+    propertyAge: number;
     propertyCondition: string;
   };
-  rentalTerms: IRentalTerms;
+  leaseTerms: ILeaseTerms;
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
 }
 
 // Schema
-const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
+const CommercialLeaseRetailStoreSchema = new Schema<ICommercialLeaseRetailStore>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    retailStoreType: [{ type: String, required: true }],
+    storeType: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -156,39 +174,48 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
     fireExit: { type: Boolean, default: false }
   },
   propertyDetails: {
-    area: { 
+    area: {
       totalArea: { type: Number, required: true },
-      carpetArea: { type: Number, required: true },
       builtUpArea: { type: Number, required: true },
+      carpetArea: { type: Number, required: true }, 
     },
-    floor: { 
+    floor: {
       floorNumber: { type: Number, required: true },
       totalFloors: { type: Number, required: true },
-    },
+    },  
     facingDirection: { type: String, required: true },
     furnishingStatus: { type: String, required: true },
-    propertyAmenities: { type: [String], required: true },
-    wholeSpaceAmenities: { type: [String], required: true },
-    electricitySupply: { 
-      powerLoad: { type: Number, required: true },
-      backup: { type: Boolean, required: true },
+    propertyAmenities: [{ type: String }],
+    wholeSpaceAmenities: [{ type: String }],
+    electricitySupply: {
+      powerLoad: { type: Number, required: true },  
+      backup: { type: Boolean, default: false },
     },
     waterAvailability: { type: String, required: true },
-    propertyAge: { type: String, required: true },
+    propertyAge: { type: Number, required: true },
     propertyCondition: { type: String, required: true },
-  },  
-  rentalTerms: {
-    rentDetails: {
-        expectedRent: { type: Number, required: true },
-        isNegotiable: { type: Boolean, default: false },
-        rentType: { type: String, required: true },
-    },
-    securityDeposit: {
+  },
+  
+  leaseTerms: {
+    leaseDetails: {
+        leaseAmount:{
         amount: { type: Number, required: true },
+        type: { type: String, required: true },
+        duration: { type: Number, required: true },
+        durationUnit: { type: String, required: true },
+      },        
+    },
+    tenureDetails: {
+        minimumTenure: {type: String, required: true },
+        minimumUnit: {type: String, required: true },
+        lockInPeriod: {type: String, required: true },
+        lockInUnit: {type: String, required: true },
+        noticePeriod: {type: String, required: true },
+        noticePeriodUnit: {type: String, required: true },
     },
     maintenanceAmount: {
-        amount: { type: Number },
-        frequency: { type: String },
+        amount: { type: Number ,required: true},
+        frequency: { type: String ,required: true},
     },
     otherCharges: {
         water: {
@@ -210,11 +237,15 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
     },
     brokerage: {
         required: { type: String, required: true },
-        amount: { type: Number },
+        amount: { type: Number }
     },
     availability: {
-        type: { type: String, required: true },
-        date: { type: String },
+        date: { type: Date, required: true },
+        availableImmediately: { type: Boolean, required: true },
+        preferredSaleDuration: { type: String, required: true },
+        noticePeriod: { type: String, required: true },
+        isPetsAllowed: { type: Boolean, required: true },
+        operatingHours: { type: Boolean, required: true },
     }
   },
   contactInformation: {
@@ -245,11 +276,11 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
 });
 
 // Indexes
-CommercialRentRetailStoreSchema.index({ propertyId: 1 }, { unique: true });
-CommercialRentRetailStoreSchema.index({ 'basicInformation.city': 1 });
-CommercialRentRetailStoreSchema.index({ 'basicInformation.state': 1 });
-CommercialRentRetailStoreSchema.index({ 'metadata.createdAt': -1 });
+CommercialLeaseRetailStoreSchema.index({ propertyId: 1 }, { unique: true });
+CommercialLeaseRetailStoreSchema.index({ 'basicInformation.city': 1 });
+CommercialLeaseRetailStoreSchema.index({ 'basicInformation.state': 1 });
+CommercialLeaseRetailStoreSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-// export { ICommercialrentShop, IBasicInformation, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialRentRetailStore>('CommercialRentRetailStore', CommercialRentRetailStoreSchema);
+export { ICommercialLeaseRetailStore, IBasicInformation, IArea, IFloor, ILeaseTerms, IContactInformation, IMedia, IMetadata };
+export default model<ICommercialLeaseRetailStore>('CommercialLeaseRetail', CommercialLeaseRetailStoreSchema);

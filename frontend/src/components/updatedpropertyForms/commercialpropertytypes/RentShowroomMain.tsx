@@ -17,144 +17,239 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { Home, Building2, DollarSign, Calendar, Phone, Image, Store } from 'lucide-react';
+import { Home, Building2, DollarSign, Calendar, Phone, Image, Store, ChevronLeft, ChevronRight } from 'lucide-react';
+import axios from 'axios';
 
 interface FormData {
-  propertyName: string;
-  showroomType: string;
-  address: {};
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
+  basicInformation: {
+    title: string;
+    showroomType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
   };
-  isCornerProperty: boolean;
-  showroomDetails: {};
-  propertyDetails: {};
-  amenities: string[];
-  rent: {
-    expectedRent: string;
+  showroomDetails: {
+    totalSpace: number;
+    frontageWidth: number;
+    ceilingHeight: number;
+    glassFrontage: boolean;
+    lightingType: string;
+    acInstalled: boolean;
+    nearbyCompetitors: {
+      present: boolean;
+      brandNames: string;
+    };
+    displayRacks: boolean;
+  };
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number | null;
+      backup: boolean;
+    };
+    waterAvailability: string;
+    propertyAge: string;
+    propertyCondition: string;
+  };
+  rentalTerms: {
+    expectedRent: number;
+    rentType: "inclusive" | "exclusive";
     isNegotiable: boolean;
-    rentType: string;
     securityDeposit: {
-      amount: number | null;
+      amount: number;
       depositType: string;
     };
-    maintenanceCharges: {
-      amount: number | null;
-      frequency: string;
+    maintenanceCharges?: {
+      amount?: number;
+      frequency?: "monthly" | "quarterly" | "yearly" | "Half-yearly";
     };
     otherCharges: {
       water: {
-        amount: number | null;
+        amount: number;
         type: string;
       };
       electricity: {
-        amount: number | null;
+        amount: number;
         type: string;
       };
       gas: {
-        amount: number | null;
+        amount: number;
         type: string;
       };
       others: {
-        amount: number | null;
+        amount: number;
         type: string;
       };
-      propertyTax: boolean;
-      otherInclusives: string;
     };
   };
   brokerage: {
-    amount: number | null;
-    type: string;
+    required: string;
+    amount: number;
   };
   availability: {
-    fromDate: string;
-    isImmediate: boolean;
+    immediate: boolean;
+    specificDate?: Date;
   };
   contactInformation: {
     name: string;
     email: string;
     phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
   };
   media: {
-    images: { category: string; files: { url: string; file: File }[] }[];
-    video?: { url: string; file: File };
-    documents: { type: string; file: File }[];
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour?: File | null;
+    documents: File[];
+  };
+  metadata: {
+    createdBy: string;
+    createdAt: Date;
   };
 }
 
 const RentShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    showroomType: '',
-    address: {},
-    landmark: '',
-    coordinates: {
-      latitude: '',
-      longitude: ''
+    basicInformation: {
+      title: '',
+      showroomType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0
+      },
+      isCornerProperty: false
     },
-    isCornerProperty: false,
-    showroomDetails: {},
-    propertyDetails: {},
-    amenities: [],
-    rent: {
-      expectedRent: '',
+    showroomDetails: {
+      totalSpace: 0,
+      frontageWidth: 0,
+      ceilingHeight: 0,
+      glassFrontage: false,
+      lightingType: '',
+      acInstalled: false,
+      nearbyCompetitors: {
+        present: false,
+        brandNames: ''
+      },
+      displayRacks: false
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: null,
+        backup: false
+      },
+      waterAvailability: '',
+      propertyAge: '',
+      propertyCondition: 'new'
+    },
+    rentalTerms: {
+      expectedRent: 0,
+      rentType: 'inclusive',
       isNegotiable: false,
-      rentType: '',
       securityDeposit: {
-        amount: null,
+        amount: 0,
         depositType: 'refundable'
       },
       maintenanceCharges: {
-        amount: null,
-        frequency: ''
+        amount: 0,
+        frequency: 'monthly'
       },
       otherCharges: {
         water: {
-          amount: null,
+          amount: 0,
           type: 'inclusive'
         },
         electricity: {
-          amount: null,
+          amount: 0,
           type: 'inclusive'
         },
         gas: {
-          amount: null,
+          amount: 0,
           type: 'inclusive'
         },
         others: {
-          amount: null,
+          amount: 0,
           type: 'inclusive'
         },
-        propertyTax: false,
-        otherInclusives: ''
-      }
+      },
     },
     brokerage: {
-      amount: null,
-      type: 'percentage'
+      required: 'no',
+      amount: 0
     },
     availability: {
-      fromDate: '',
-      isImmediate: false
+      immediate: false,
+      specificDate: new Date(),
     },
     contactInformation: {
       name: '',
       email: '',
-      phone: ''
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
     },
     media: {
-      images: [
-        { category: 'exterior', files: [] },
-        { category: 'interior', files: [] },
-        { category: 'floorPlan', files: [] },
-        { category: 'washrooms', files: [] },
-        { category: 'lifts', files: [] },
-        { category: 'emergencyExits', files: [] }
-      ],
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
       documents: []
+    },
+    metadata: {
+      createdBy: '',
+      createdAt: new Date()
     }
   });
 
@@ -164,37 +259,11 @@ const RentShowroomMain = () => {
   const handleRentChange = (rent: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      rent: {
-        ...prev.rent,
-        ...rent,
-        securityDeposit: {
-          ...prev.rent.securityDeposit,
-          ...rent.securityDeposit
-        },
-        maintenanceCharges: {
-          ...prev.rent.maintenanceCharges,
-          ...rent.maintenanceCharges
-        },
-        otherCharges: {
-          ...prev.rent.otherCharges,
-          ...rent.otherCharges,
-          water: {
-            ...prev.rent.otherCharges.water,
-            ...rent.otherCharges?.water
-          },
-          electricity: {
-            ...prev.rent.otherCharges.electricity,
-            ...rent.otherCharges?.electricity
-          },
-          gas: {
-            ...prev.rent.otherCharges.gas,
-            ...rent.otherCharges?.gas
-          },
-          others: {
-            ...prev.rent.otherCharges.others,
-            ...rent.otherCharges?.others
-          }
-        }
+      rentalTerms: {
+        ...prev.rentalTerms,
+        expectedRent: rent.expectedRent || 0,
+        isNegotiable: rent.isNegotiable || false,
+        rentType: rent.rentType || 'inclusive'
       }
     }));
   };
@@ -202,11 +271,11 @@ const RentShowroomMain = () => {
   const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      rent: {
-        ...prev.rent,
+      rentalTerms: {
+        ...prev.rentalTerms,
         maintenanceCharges: {
-          amount: maintenance.amount || null,
-          frequency: maintenance.frequency || ''
+          amount: maintenance.amount || 0,
+          frequency: maintenance.frequency || 'monthly'
         }
       }
     }));
@@ -216,8 +285,8 @@ const RentShowroomMain = () => {
     setFormData(prev => ({
       ...prev,
       brokerage: {
-        amount: brokerage.amount || null,
-        type: brokerage.type || 'percentage'
+        required: brokerage.required || 'no',
+        amount: brokerage.amount || 0
       }
     }));
   };
@@ -227,7 +296,16 @@ const RentShowroomMain = () => {
       ...prev,
       availability: {
         ...prev.availability,
-        ...availability
+        immediate: availability.immediate || false,
+        specificDate: availability.specificDate || new Date(),
+        availableImmediately: availability.availableImmediately || false,
+        leaseDuration: availability.leaseDuration || '',
+        noticePeriod: availability.noticePeriod || '',
+        petsAllowed: availability.petsAllowed || false,
+        operatingHours: {
+          restricted: availability.operatingHours?.restricted || false,
+          restrictions: availability.operatingHours?.restrictions || ''
+        }
       }
     }));
   };
@@ -236,20 +314,12 @@ const RentShowroomMain = () => {
     setFormData(prev => ({
       ...prev,
       contactInformation: {
-        ...prev.contactInformation,
-        ...contact
+        name: contact.name || '',
+        email: contact.email || '',
+        phone: contact.phone || '',
+        alternatePhone: contact.alternatePhone || '',
+        bestTimeToContact: contact.bestTimeToContact || ''
       }
-    }));
-  };
-
-  const handleMediaChange = (media: {
-    images: { category: string; files: { url: string; file: File }[] }[];
-    video?: { url: string; file: File };
-    documents: { type: string; file: File }[];
-  }) => {
-    setFormData(prev => ({
-      ...prev,
-      media
     }));
   };
 
@@ -289,17 +359,19 @@ const RentShowroomMain = () => {
         <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
-              </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertyName
-                  propertyName={formData.propertyName}
-                  onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+                  propertyName={formData.basicInformation.title}
+                  onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
                 />
                 <ShowroomType
-                  onTypeChange={(type) => setFormData({ ...formData, showroomType: type })}
+                  onTypeChange={(type) => setFormData(prev => ({
+                    ...prev,
+                    basicInformation: {
+                      ...prev.basicInformation,
+                      showroomType: Array.isArray(type) ? type : [type]
+                    }
+                  }))}
                 />
               </div>
             </div>
@@ -307,21 +379,15 @@ const RentShowroomMain = () => {
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Location Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <CommercialPropertyAddress
-                  onAddressChange={(address) => setFormData({ ...formData, address })}
+                  onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
                 />
                 <Landmark
-                  onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
+                  onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })}
                 />
                 <CornerProperty
-                  onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
+                  onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
                 />
-              </div>
             </div>
           </div>
         </div>
@@ -332,21 +398,28 @@ const RentShowroomMain = () => {
       icon: <Building2 className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Building2 className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Property Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <ShowroomDetails
-                  onDetailsChange={(details) => setFormData({ ...formData, showroomDetails: details })}
-                />
-                <CommercialPropertyDetails
-                  onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
-                />
-              </div>
-            </div>
+          <div className="space-y-8">
+            <ShowroomDetails
+              onDetailsChange={(details) => setFormData(prev => ({
+                ...prev,
+                showroomDetails: {
+                  totalSpace: details.totalSpace || 0,
+                  frontageWidth: details.frontageWidth || 0,
+                  ceilingHeight: details.ceilingHeight || 0,
+                  glassFrontage: details.glassFrontage || false,
+                  lightingType: details.lightingType || '',
+                  acInstalled: details.acInstalled || false,
+                  nearbyCompetitors: {
+                    present: details.nearbyCompetitors?.present || false,
+                    brandNames: details.nearbyCompetitors?.brandNames || ''
+                  },
+                  displayRacks: details.displayRacks || false
+                }
+              }))}
+            />
+            <CommercialPropertyDetails
+              onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
+            />
           </div>
         </div>
       )
@@ -356,58 +429,55 @@ const RentShowroomMain = () => {
       icon: <DollarSign className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <DollarSign className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Rental Terms</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rent.rentType === 'exclusive' && (
-                  <MaintenanceAmount
-                    onMaintenanceAmountChange={handleMaintenanceAmountChange}
-                  />
-                )}
-                <SecurityDeposit
-                  onSecurityDepositChange={(deposit: Record<string, any>) => setFormData(prev => ({
-                    ...prev,
-                    rent: {
-                      ...prev.rent,
-                      securityDeposit: {
-                        amount: deposit.amount || null,
-                        depositType: deposit.depositType || ''
-                      }
-                    }
-                  }))}
-                />
-              </div>
-            </div>
+          <Rent onRentChange={handleRentChange} />
+          {formData.rentalTerms.rentType === 'exclusive' && (
+            <MaintenanceAmount
+              onMaintenanceAmountChange={handleMaintenanceAmountChange}
+            />
+          )}
+          <SecurityDeposit
+            onSecurityDepositChange={(deposit: Record<string, any>) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                securityDeposit: {
+                  amount: deposit.amount,
+                  depositType: deposit.depositType || ''
+                }
+              }
+            }))}
+          />
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges
-                  onOtherChargesChange={(charges: Record<string, any>) => setFormData(prev => ({
-                    ...prev,
-                    rent: {
-                      ...prev.rent,
-                      otherCharges: {
-                        water: { amount: Number(charges.water?.amount) || null, type: charges.water?.type || '' },
-                        electricity: { amount: Number(charges.electricity?.amount) || null, type: charges.electricity?.type || '' },
-                        gas: { amount: Number(charges.gas?.amount) || null, type: charges.gas?.type || '' },
-                        others: { amount: Number(charges.others?.amount) || null, type: charges.others?.type || '' },
-                        propertyTax: charges.propertyTax || false,
-                        otherInclusives: charges.otherInclusives || ''
-                      }
+          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+            <div className="space-y-4 text-black">
+              <OtherCharges
+                onOtherChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    otherCharges: {
+                      water: { type: charges.water.type, amount: charges.water.amount },
+                      electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                      gas: { type: charges.gas.type, amount: charges.gas.amount },
+                      others: { type: charges.others.type, amount: charges.others.amount }
                     }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={handleBrokerageChange}
-                />
-              </div>
+                  }
+                }))}
+              />
+              <div className="border-t border-gray-200 my-4"></div>
+              <Brokerage
+                onBrokerageChange={(brokerage) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    brokerage: {
+                      required: brokerage.required,
+                      amount: brokerage.amount
+                    }
+                  }
+                }))}
+              />
             </div>
           </div>
         </div>
@@ -417,20 +487,19 @@ const RentShowroomMain = () => {
       title: 'Availability',
       icon: <Calendar className="w-6 h-6" />,
       content: (
-        <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Calendar className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Availability</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <AvailabilityDate
-                  onAvailabilityChange={handleAvailabilityChange}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-6">
+          <AvailabilityDate
+            onAvailabilityChange={(availability) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                availability: {
+                  type: availability.type,
+                  date: availability.date
+                }
+              }
+            }))}
+          />
         </div>
       )
     },
@@ -438,20 +507,19 @@ const RentShowroomMain = () => {
       title: 'Contact Information',
       icon: <Phone className="w-6 h-6" />,
       content: (
-        <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Phone className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Contact Information</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <CommercialContactDetails
-                  onContactChange={handleContactChange}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData(prev => ({
+              ...prev,
+              contactInformation: {
+                name: contact.name,
+                email: contact.email,
+                phone: contact.phone,
+                alternatePhone: contact.alternatePhone,
+                bestTimeToContact: contact.bestTimeToContact
+              }
+            }))}
+          />
         </div>
       )
     },
@@ -459,20 +527,28 @@ const RentShowroomMain = () => {
       title: 'Property Media',
       icon: <Image className="w-6 h-6" />,
       content: (
-        <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Image className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <CommercialMediaUpload
-                  onMediaChange={handleMediaChange}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       )
     }
@@ -508,9 +584,69 @@ const RentShowroomMain = () => {
     return true;
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form Data:', formData);
+    setIsSubmitting(true);
+
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
+
+        const convertedMedia = {
+          photos: {
+            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+          },
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
+          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        };
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/commercial/rent/showrooms', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Commercial rent showroom listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create commercial rent showroom listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -546,32 +682,29 @@ const RentShowroomMain = () => {
 
       {formSections[currentStep].content}
 
-      <div className="mt-8 flex justify-between items-center">
-        {currentStep > 0 && (
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            type="button"
             onClick={handlePrevious}
-            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
+            disabled={currentStep === 0 || isSubmitting}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0 || isSubmitting
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
           >
+            <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-        )}
-        {currentStep < formSections.length - 1 ? (
           <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+              }`}
           >
-            Next
+            {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+            <ChevronRight className="w-5 h-5 ml-2" />
           </button>
-        ) : (
-          <button
-            type="submit"
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-          >
-            List Property
-          </button>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -29,15 +29,11 @@ interface ISpaceDetails {
   areaUnit: string;
   coveredArea: number;
   openArea: number;
-  roadWidth: {
-    value: number;
-    unit: string;
-  };
-  ceilingHeight: {
-    value: number;
-    unit: string;
-  };
-  noOfOpenSides: string;
+  roadWidth: number;
+  roadWidthUnit: string;
+  ceilingHeight: number;
+  ceilingHeightUnit: string;
+  noOfOpenSides: number;
 }
 
 interface IFloor {
@@ -91,8 +87,6 @@ interface IContactInformation {
   name: string;
   email: string;
   phone: string;
-  preferredContactMethod: string;
-  responseTime: string;
   alternatePhone: string;
   bestTimeToContact: string;
 }
@@ -131,7 +125,7 @@ interface ICommercialRentCoveredSpace extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   rentalTerms: IRentalTerms;
@@ -164,21 +158,17 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     areaUnit: { type: String, required: true },
     coveredArea: { type: Number, required: true },
     openArea: { type: Number, required: true },
-    roadWidth: {
-      value: { type: Number, required: true },
-      unit: { type: String, required: true },
-    },
-    ceilingHeight: {
-      value: { type: Number, required: true },
-      unit: { type: String, required: true },
-    },
-    noOfOpenSides: { type: String, required: true },
+    roadWidth: { type: Number, required: true },
+    roadWidthUnit: { type: String, required: true },
+    ceilingHeight: { type: Number, required: true },
+    ceilingHeightUnit: { type: String, required: true },
+    noOfOpenSides: { type: Number, required: true }, // ✅ Changed to Number
   },
   propertyDetails: {
     area: {
-      totalArea: { type: Number, required: true },
-      builtUpArea: { type: Number, required: true },
-      carpetArea: { type: Number, required: true },
+      totalArea: { type: Number, required: true }, // ✅ Changed to Number
+      builtUpArea: { type: Number, required: true }, // ✅ Changed to Number
+      carpetArea: { type: Number, required: true }, // ✅ Changed to Number
     },
     floor: {
       floorNumber: { type: Number, required: true },
@@ -193,7 +183,7 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
       backup: { type: Boolean, default: false },
     },
     waterAvailability: { type: String, required: true },
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type: String, required: true }, // ✅ Changed to Number
     propertyCondition: { type: String, required: true },
   },
   rentalTerms: {
@@ -206,8 +196,8 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
       amount: { type: Number, required: true },
     },
     maintenanceAmount: {
-      amount: { type: Number, required: true },
-      frequency: { type: String, required: true },
+      amount: { type: Number },
+      frequency: { type: String },
     },
     otherCharges: {
       water: {
@@ -241,47 +231,17 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     name: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String, required: true },
-    preferredContactMethod: { type: String },
-    responseTime: { type: String },
     alternatePhone: { type: String },
     bestTimeToContact: { type: String },
   },
-  media: {
-    photos: {
-      exterior: [{ type: String }],
-      interior: [{ type: String }],
-      floorPlan: [{ type: String }],
-      washrooms: [{ type: String }],
-      lifts: [{ type: String }],
-      emergencyExits: [{ type: String }],
-    },
-    videoTour: { type: String },
-    documents: [{ type: String }],
-  },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // ✅ Corrected ObjectId
     createdAt: { type: Date, default: Date.now },
   },
 }, {
   timestamps: true,
 });
 
-// Indexes
-CommercialRentCoveredSpaceSchema.index({ propertyId: 1 }, { unique: true });
-CommercialRentCoveredSpaceSchema.index({ 'spaceDetails.totalArea': 1 });
-CommercialRentCoveredSpaceSchema.index({ 'propertyDetails.area.totalArea': 1 });
 
-// Export model and interfaces
-export {
-  ICommercialRentCoveredSpace,
-  IBasicInformation,
-  ISpaceDetails,
-  IArea,
-  IFloor,
-  IRentalTerms,
-  IContactInformation,
-  IMedia,
-  IMetadata,
-};
-
-export default model<ICommercialRentCoveredSpace>('CommercialRentCoveredSpace', CommercialRentCoveredSpaceSchema); 
+// Export
+export default model<ICommercialRentCoveredSpace>('CommercialRentCoveredSpace', CommercialRentCoveredSpaceSchema);

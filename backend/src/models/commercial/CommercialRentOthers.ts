@@ -42,7 +42,7 @@ export interface ICommercialRentOthers extends Document {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -150,7 +150,7 @@ const CommercialRentOthersSchema: Schema = new Schema({
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String, required: true },
     propertyCondition: { type: String },
     electricitySupply: {
       powerLoad: { type: Number },
