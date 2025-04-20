@@ -70,11 +70,13 @@ import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
+import commercialLeaseShedRoutes from './routes/commercial/commercialLeaseShedRoutes';
 import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
 import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
-import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes";
+import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
+
 
 dotenv.config();
 
