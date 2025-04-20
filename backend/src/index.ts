@@ -70,13 +70,13 @@ import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
-import commercialLeaseWarehouseRoutes from './routes/commercial/commercialLeaseWarehouseRoutes';
 import commercialLeaseShedRoutes from './routes/commercial/commercialLeaseShedRoutes';
 import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
 import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
+
 
 dotenv.config();
 
@@ -208,26 +208,17 @@ app.use('/api/commercial/lease/agriculture', commercialLeaseAgricultureRoutes);
 app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
 app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
 
-//rent routes
-app.use('/api/commercial/rent/agriculture', commercialrentcultureRoutes);
-app.use('/api/commercial/rent/others', commercialRentOthersRoutes);
-app.use('/api/commercial/rent/office-spaces', commercialRentOfficeSpaceRoutes);
-app.use('/api/commercial/rent/warehouses', commercialRentWarehouseRoutes);
-app.use('/api/commercial/rent/covered-space', commercialRentCoveredSpaceRoutes);
-app.use('/api/commercial/rent/shops', commercialRentShop);
-app.use('/api/commercial/rent/retail-stores', commercialRentRetailStore);
-app.use('/api/commercial/rent/showrooms', commercialRentShowroom);
-app.use('/api/commercial/rent/sheds', commercialRentSheds);
-app.use('/api/commercial/rent/plots', commercialRentPlot);
-
-
-app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
-app.use('/api/commercial/lease/retail-store', commercialLeaseRetailRoutes);
-
-
-
-app.use('/api/commercial/lease/warehouses', commercialLeaseWarehouseRoutes);
+app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
+app.use('/api/commercial/others', commercialRentOthersRoutes);
+app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
+app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
+app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
+app.use('/api/commercial-rent-shops', commercialRentShop);
+app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
+app.use('/api/commercial-rent-showrooms', commercialRentShowroom);
+app.use('/api/commercial-rent-sheds', commercialRentSheds);
 app.use('/api/commercial/lease/sheds', commercialLeaseShedRoutes);
+
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

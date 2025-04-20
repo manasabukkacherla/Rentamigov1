@@ -64,7 +64,7 @@ interface FormDataType {
       backup?: boolean;
     };
     waterAvailability?: string;
-    propertyAge?: number | null;
+    propertyAge?: string | number | null;
     propertyCondition?: string;
   };
   leaseAmount: {
@@ -611,7 +611,7 @@ const LeaseShedMain = () => {
             backup: formData.propertyDetails.electricitySupply?.backup || false
           },
           waterAvailability: formData.propertyDetails.waterAvailability || '',
-          propertyAge: formData.propertyDetails.propertyAge || 0,
+          propertyAge: formData.propertyDetails.propertyAge ? Number(formData.propertyDetails.propertyAge) : 0,
           propertyCondition: formData.propertyDetails.propertyCondition || ''
         },
         leaseTerms: {
@@ -692,6 +692,8 @@ const LeaseShedMain = () => {
 
       console.log('Payload:', payload);
 
+      // Using the correct API endpoint pattern based on other similar components
+      // Looking at similar files, we'll use the plural form
       const response = await axios.post('/api/commercial/lease/sheds', payload);
 
       if (response.status === 201) {
