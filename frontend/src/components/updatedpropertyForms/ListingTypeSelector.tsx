@@ -27,7 +27,7 @@ const ListingTypeSelector = ({ propertyType, onListingTypeSelect }: ListingTypeS
         },
         {
           id: "Sell",
-          name: "Sell",
+          name: "Sale",
           icon: DollarSign,
           description: "List your property for sale",
         },
@@ -54,7 +54,7 @@ const ListingTypeSelector = ({ propertyType, onListingTypeSelect }: ListingTypeS
         },
         {
           id: "Sell",
-          name: "Sell",
+          name: "Sale",
           icon: DollarSign,
           description: "List your commercial property for sale",
         },
