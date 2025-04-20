@@ -1,13 +1,12 @@
 "use client"
 
 import { useState } from "react"
-import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
+import { Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, Store} from "lucide-react"
 import PropertyName from "../PropertyName"
-import ShopType from "../CommercialComponents/ShopType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import CornerProperty from "../CommercialComponents/CornerProperty"
-import ShopDetails from "../CommercialComponents/ShopDetails"
+import ShedDetails from "../CommercialComponents/ShedDetails"
 import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
 import PricePerSqft from "../sell/PricePerSqft"
@@ -16,16 +15,17 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import ShedType from "../CommercialComponents/ShedType"
 
-const SellShopMain = () => {
+const SellShedMain = () => {
   const [formData, setFormData] = useState({
     propertyName: "",
-    shopType: "",
+    shedType: "",
     address: {},
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
-    shopDetails: {},
+    shedDetails: {},
     propertyDetails: {},
     price: "",
     area: {
@@ -57,7 +57,7 @@ const SellShopMain = () => {
                 propertyName={formData.propertyName}
                 onPropertyNameChange={(name) => handleChange("propertyName", name)}
               />
-              <ShopType onShopTypeChange={(type) => handleChange("shopType", type)} />
+              <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
             </div>
           </div>
 
@@ -86,7 +86,7 @@ const SellShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
-            <ShopDetails onDetailsChange={(details) => handleChange("shopDetails", details)} />
+            <ShedDetails onDetailsChange={(details) => handleChange("shedDetails", details)} />
             <CommercialPropertyDetails onDetailsChange={(details) => handleChange("propertyDetails", details)} />
           </div>
         </div>
@@ -283,5 +283,5 @@ const SellShopMain = () => {
   )
 }
 
-export default SellShopMain
+export default SellShedMain
 

@@ -42,7 +42,6 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
               <div className="relative">
                 <input
                   type="number"
-                  min="0"
                   id="totalArea"
                   value={details.totalArea || ''}
                   onChange={(e) => handleChange('totalArea', parseFloat(e.target.value) || 0)}
@@ -72,7 +71,6 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             <div className="relative">
               <input
                 type="number"
-                min="0"
                 id="coveredArea"
                 value={details.coveredArea || ''}
                 onChange={(e) => handleChange('coveredArea', parseFloat(e.target.value) || 0)}
@@ -91,7 +89,6 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
             <div className="relative">
               <input
                 type="number"
-                min="0"
                 id="openArea"
                 value={details.openArea || ''}
                 onChange={(e) => handleChange('openArea', parseFloat(e.target.value) || 0)}
@@ -111,7 +108,6 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
               <div className="relative">
                 <input
                   type="number"
-                  min="0"
                   id="roadWidth"
                   value={details.roadWidth || ''}
                   onChange={(e) => handleChange('roadWidth', parseFloat(e.target.value) || 0)}
@@ -140,7 +136,6 @@ const CoveredOpenSpaceDetails = ({ onDetailsChange }: CoveredOpenSpaceDetailsPro
               <div className="relative">
                 <input
                   type="number"
-                  min="0"
                   id="ceilingHeight"
                   value={details.ceilingHeight || ''}
                   onChange={(e) => handleChange('ceilingHeight', parseFloat(e.target.value) || 0)}

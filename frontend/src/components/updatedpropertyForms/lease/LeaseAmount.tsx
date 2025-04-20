@@ -41,7 +41,7 @@ const LeaseAmount = ({ onLeaseAmountChange }: LeaseAmountProps) => {
             <input
               type="number"
               min="0"
-              value={leaseAmount.amount}
+              value={leaseAmount.amount || ''}
               onChange={(e) => handleChange('amount', e.target.value)}
               placeholder="Enter lease amount"
               className="w-full pl-12 pr-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black"
@@ -59,13 +59,13 @@ const LeaseAmount = ({ onLeaseAmountChange }: LeaseAmountProps) => {
             <input
               type="number"
               min="1"
-              value={leaseAmount.duration}
+              value={leaseAmount.duration || '' }
               onChange={(e) => handleChange('duration', e.target.value)}
               placeholder="Enter duration"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black"
             />
             <select
-              value={leaseAmount.durationUnit}
+              value={leaseAmount.durationUnit || '' }
               onChange={(e) => handleChange('durationUnit', e.target.value)}
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 hover:border-black"
             >
@@ -80,27 +80,25 @@ const LeaseAmount = ({ onLeaseAmountChange }: LeaseAmountProps) => {
           <h4 className="text-lg font-semibold text-gray-700">Amount Type</h4>
           <div className="flex gap-6">
             <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                leaseAmount.type === 'fixed' 
-                  ? 'border-black-500 bg-black-500' 
-                  : 'border-gray-300 group-hover:border-black-300'
-              }`}>
-                {leaseAmount.type === 'fixed' && (
-                  <div className="w-3 h-3 rounded-full bg-white" />
-                )}
-              </div>
+              <input
+                type="radio"
+                name="amountType"
+                value="fixed"
+                checked={leaseAmount.type === 'fixed'}
+                onChange={() => handleChange('type', 'fixed')}
+                className="w-5 h-5 text-black border-gray-300 focus:ring-black"
+              />
               <span className="text-gray-700 group-hover:text-black transition-colors duration-200">Fixed</span>
             </label>
             <label className="flex items-center gap-3 cursor-pointer group">
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                leaseAmount.type === 'negotiable' 
-                  ? 'border-black bg-black' 
-                  : 'border-gray-300 group-hover:border-black'
-              }`}>
-                {leaseAmount.type === 'negotiable' && (
-                  <div className="w-3 h-3 rounded-full bg-white" />
-                )}
-              </div>
+              <input
+                type="radio"
+                name="amountType"
+                value="negotiable"
+                checked={leaseAmount.type === 'negotiable'}
+                onChange={() => handleChange('type', 'negotiable')}
+                className="w-5 h-5 text-black border-gray-300 focus:ring-black"
+              />
               <span className="text-gray-700 group-hover:text-black transition-colors duration-200">Negotiable</span>
             </label>
           </div>
