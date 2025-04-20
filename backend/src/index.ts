@@ -74,6 +74,7 @@ import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRo
 import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
+import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes";
 
 dotenv.config();
 
@@ -212,6 +213,9 @@ app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
+app.use('/api/commercial-rent-showrooms', commercialRentShowroom);
+app.use('/api/commercial-rent-sheds', commercialRentSheds);
+app.use('/api/commercial/lease/sheds', commercialLeaseShedRoutes);
 
 
 app.get("/testing", (req: Request, res: Response) => {
