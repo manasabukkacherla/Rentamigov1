@@ -78,6 +78,7 @@ export const createCommercialRentOthers = async (req: Request, res: Response) =>
     await otherProperty.save();
 
     res.status(201).json({
+      success: true,
       message: 'Commercial rent others listing created successfully',
       data: otherProperty
     });

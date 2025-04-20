@@ -73,7 +73,7 @@ interface IFormData {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   rentalTerms: {
@@ -193,7 +193,7 @@ const RentCoveredSpace = () => {
         backup: false
       },  
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: ''
     },
     rentalTerms: {
@@ -441,9 +441,7 @@ const RentCoveredSpace = () => {
 
         if (!formData.propertyDetails.propertyAge) {
           errors.propertyAge = 'Property age is required';
-        } else if (formData.propertyDetails.propertyAge < 0) {
-          errors.propertyAge = 'Property age cannot be negative';
-        }
+        } 
 
         if (!formData.propertyDetails.propertyCondition) {
           errors.propertyCondition = 'Property condition is required';
@@ -993,7 +991,7 @@ const RentCoveredSpace = () => {
               backup: formData.propertyDetails.electricitySupply.backup
             },
             waterAvailability: formData.propertyDetails.waterAvailability,
-            propertyAge: formData.propertyDetails.propertyAge || 0,
+            propertyAge: formData.propertyDetails.propertyAge || '',
             propertyCondition: formData.propertyDetails.propertyCondition
           },
           rentalTerms: formData.rentalTerms,
@@ -1028,8 +1026,6 @@ const RentCoveredSpace = () => {
 
         if (response.data.success) {
           toast.success('Commercial covered space listing created successfully!');
-          // Redirect to the property listing page or dashboard
-          navigate('/dashboard');
         } else {
           toast.error(response.data.error || 'Failed to create listing. Please try again.');
         }
