@@ -23,8 +23,8 @@ import { toast } from "react-toastify"
 import axios from "axios"
 
 interface FormData {
-  propertyName: string;
-  landType: string;
+  title: string;
+  landType: string[];
   address: {
     street: string;
     city: string;
@@ -32,20 +32,103 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: { 
-    latitude: number; 
-    longitude: number; 
+  location: {
+    latitude: number;
+    longitude: number;
   };
   isCornerProperty: boolean;
-  landDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  leaseAmount: Record<string, any>;
-  leaseTenure: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
-  otherCharges: Record<string, any>;
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, any>;
+  landDetails: {
+    totalArea: number;
+    soilType: string;
+    irrigation: boolean;
+    fencing: boolean;
+    cropSuitability: string;
+    waterSource: string;
+    legalClearances: boolean;
+  };
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    waterAvailability: string;
+    propertyAge: number;
+    propertyCondition: string;
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+  };
+  leaseAmount: {
+    amount: number;
+    duration: number;
+    durationType: string;
+    isNegotiable: boolean;
+  };
+  leaseTenure: {
+    minimumTenure: string;
+    minimumUnit: string;
+    maximumTenure: string;
+    maximumUnit: string;
+    lockInPeriod: string;
+    lockInUnit: string;
+    noticePeriod: string;
+    noticePeriodUnit: string;
+  };
+  maintenanceAmount: {
+    amount?: number;
+    frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
+  };
+  otherCharges: {
+    waterCharges: {
+      type: "inclusive" | "exclusive";
+      amount?: number;
+    };
+    electricityCharges: {
+      type: "inclusive" | "exclusive";
+      amount?: number;
+    };
+    gasCharges: {
+      type: "inclusive" | "exclusive";
+      amount?: number;
+    };
+    otherCharges: {
+      type: "inclusive" | "exclusive";
+      amount?: number;
+    };
+  };
+  brokerage: {
+    required: boolean;
+    amount?: number;
+  };
+  availability: {
+    availableFrom: Date;
+    availableImmediately: boolean;
+    availabilityStatus: string;
+    leaseDuration: string;
+    noticePeriod: string;
+    isPetsAllowed: boolean;
+    operatingHours: {
+      restricted: boolean;
+      restrictions: string;
+    };
+  };
+  contactDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
   media: {
     photos: {
       exterior: File[];
@@ -62,8 +145,8 @@ interface FormData {
 
 const LeaseAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    landType: '',
+    title: '',
+    landType: [],
     address: {
       street: '',
       city: '',
@@ -71,20 +154,103 @@ const LeaseAgricultureMain = () => {
       zipCode: ''
     },
     landmark: '',
-    coordinates: {
+    location: {
       latitude: 0,
       longitude: 0
     },
     isCornerProperty: false,
-    landDetails: {},
-    propertyDetails: {},
-    leaseAmount: {},
-    leaseTenure: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    landDetails: {
+      totalArea: 0,
+      soilType: '',
+      irrigation: false,
+      fencing: false,
+      cropSuitability: '',
+      waterSource: '',
+      legalClearances: false
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      waterAvailability: '',
+      propertyAge: 0,
+      propertyCondition: '',
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false
+      }
+    },
+    leaseAmount: {
+      amount: 0,
+      duration: 0,
+      durationType: 'months',
+      isNegotiable: false
+    },
+    leaseTenure: {
+      minimumTenure: '',
+      minimumUnit: 'months',
+      maximumTenure: '',
+      maximumUnit: 'months',
+      lockInPeriod: '',
+      lockInUnit: 'months',
+      noticePeriod: '',
+      noticePeriodUnit: 'months'
+    },
+    maintenanceAmount: {
+      amount: 0,
+      frequency: 'monthly'
+    },
+    otherCharges: {
+      waterCharges: {
+        type: 'inclusive',
+        amount: 0
+      },
+      electricityCharges: {
+        type: 'inclusive',
+        amount: 0
+      },
+      gasCharges: {
+        type: 'inclusive',
+        amount: 0
+      },
+      otherCharges: {
+        type: 'inclusive',
+        amount: 0
+      }
+    },
+    brokerage: {
+      required: false,
+      amount: 0
+    },
+    availability: {
+      availableFrom: new Date(),
+      availableImmediately: false,
+      availabilityStatus: '',
+      leaseDuration: '',
+      noticePeriod: '',
+      isPetsAllowed: false,
+      operatingHours: {
+        restricted: false,
+        restrictions: ''
+      }
+    },
+    contactDetails: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
     media: {
       photos: {
         exterior: [],
@@ -102,6 +268,23 @@ const LeaseAgricultureMain = () => {
   const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
 
+  // Adapter function to convert from component output to FormData structure
+  const handleLeaseTenureChange = (tenure: any) => {
+    setFormData(prev => ({
+      ...prev,
+      leaseTenure: {
+        minimumTenure: String(tenure.minimumTenure?.duration || ''),
+        minimumUnit: tenure.minimumTenure?.durationType || 'months',
+        maximumTenure: String(tenure.maximumTenure?.duration || ''),
+        maximumUnit: tenure.maximumTenure?.durationType || 'months',
+        lockInPeriod: String(tenure.lockInPeriod?.duration || ''),
+        lockInUnit: tenure.lockInPeriod?.durationType || 'months',
+        noticePeriod: String(tenure.noticePeriod?.duration || ''),
+        noticePeriodUnit: tenure.noticePeriod?.durationType || 'months'
+      }
+    }));
+  };
+
   const steps = [
     {
       title: "Basic Information",
@@ -115,16 +298,16 @@ const LeaseAgricultureMain = () => {
             </div>
             <div className="space-y-6">
               <PropertyName
-                propertyName={formData.propertyName}
+                propertyName={formData.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-                  propertyName: name
+                  title: name
                 }))}
               />
               <AgriculturalLandType
-                onLandTypeChange={(type) => setFormData(prev => ({
+                onLandTypeChange={(types: string[]) => setFormData(prev => ({
                   ...prev,
-                  landType: type
+                  landType: types
                 }))}
               />
             </div>
@@ -149,7 +332,7 @@ const LeaseAgricultureMain = () => {
                 }))}
                 onLocationSelect={(location) => setFormData(prev => ({
                   ...prev,
-                  coordinates: {
+                  location: {
                     latitude: parseFloat(location.latitude),
                     longitude: parseFloat(location.longitude)
                   }
@@ -185,7 +368,15 @@ const LeaseAgricultureMain = () => {
             <CommercialPropertyDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                propertyDetails: { ...prev.propertyDetails, ...details }
+                propertyDetails: {
+                  ...prev.propertyDetails,
+                  ...details,
+                  propertyAge: details.propertyAge ?? 0,
+                  electricitySupply: {
+                    ...prev.propertyDetails.electricitySupply,
+                    powerLoad: details.electricitySupply?.powerLoad ?? 0
+                  }
+                }
               }))}
             />
           </div>
@@ -211,11 +402,8 @@ const LeaseAgricultureMain = () => {
                     leaseAmount: { ...prev.leaseAmount, ...amount }
                   }))} 
                 />
-                <LeaseTenure 
-                  onLeaseTenureChange={(tenure) => setFormData(prev => ({
-                    ...prev,
-                    leaseTenure: { ...prev.leaseTenure, ...tenure }
-                  }))} 
+                <LeaseTenure
+                  onLeaseTenureChange={handleLeaseTenureChange}
                 />
               </div>
             </div>
@@ -364,7 +552,9 @@ const LeaseAgricultureMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-agricultural/lease', transformedData, {
+        console.log('Sending data to backend:', JSON.stringify(transformedData, null, 2));
+
+        const response = await axios.post('/api/commercial/lease/agriculture', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -372,6 +562,7 @@ const LeaseAgricultureMain = () => {
 
         if (response.data.success) {
           toast.success('Agricultural land lease listing created successfully!');
+          
         }
       } else {
         navigate('/login');

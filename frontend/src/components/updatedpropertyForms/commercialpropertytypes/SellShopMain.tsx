@@ -5,7 +5,6 @@ import PropertyName from '../PropertyName';
 import ShopType from '../CommercialComponents/ShopType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
 import Landmark from '../CommercialComponents/Landmark';
-import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
 import ShopDetails from '../CommercialComponents/ShopDetails';
 import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
@@ -17,7 +16,7 @@ import CommercialAvailability from '../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
+import { Store, ChevronRight, ChevronLeft, Building2,  UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
 import { toast } from 'react-toastify';
 
 const globalStyles = `

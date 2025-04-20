@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialShed from '../../models/commercial/CommercialSellShed';
-import { ICommercialShed } from '../../models/commercial/CommercialSellShed';
+import { ICommercialSellShed } from '../../models/commercial/CommercialSellShed';
 
 // Generate property ID with format RA-COMSHED-XXXX
 const generatePropertyId = async (): Promise<string> => {
@@ -14,8 +14,8 @@ const generatePropertyId = async (): Promise<string> => {
     
     let nextNumber = 1;
     
-    if (highestShed) {
-      const match = highestShed.propertyId.match(/-(\d+)$/);
+    if (highestShed && highestShed.propertyId) {
+      const match = highestShed.propertyId?.match(/-(\d+)$/);
       if (match && match[1]) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
@@ -53,14 +53,14 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     const shedData = req.body;
     
     // Basic validation - ensure required fields exist
-    if (!shedData.basicInformation?.propertyName) {
+    if (!shedData.propertyName) {
       return res.status(400).json({
         success: false,
         error: 'Missing required field: property name'
       });
     }
     
-    if (!shedData.propertyDetails?.area?.totalArea) {
+    if (!shedData.shedDetails?.totalArea) {
       return res.status(400).json({
         success: false,
         error: 'Missing required field: property area'
@@ -71,8 +71,8 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     const propertyId = await generatePropertyId();
     
     // Add metadata and property ID
-    shedData.metadata = {
-      createdBy: shedData.metadata?.createdBy || "65f2d6f35714c7f89c4e7537", // Default or provided user ID
+    shedData.metaData = {
+      createdBy: shedData.metaData?.createdBy || "65f2d6f35714c7f89c4e7537", // Default or provided user ID
       createdAt: new Date(),
       status: 'pending',
       isVerified: false,
@@ -96,8 +96,8 @@ export const createCommercialShed = async (req: Request, res: Response) => {
       data: {
         propertyId: shed.propertyId,
         _id: shed._id,
-        basicInformation: shed.basicInformation,
-        metadata: shed.metadata
+        propertyName: shed.propertyName,
+        metaData: shed.metaData
       }
     });
 
@@ -144,47 +144,47 @@ export const getAllCommercialSheds = async (req: Request, res: Response) => {
     const query: any = {};
     
     if (city) {
-      query['basicInformation.address.city'] = city;
+      query['address.city'] = city;
     }
     
     if (minPrice) {
-      query['pricingDetails.price'] = { $gte: parseInt(minPrice as string, 10) };
+      query['pricingDetails.propertyPrice'] = { $gte: parseInt(minPrice as string, 10) };
     }
     
     if (maxPrice) {
-      query['pricingDetails.price'] = { 
-        ...query['pricingDetails.price'] || {},
+      query['pricingDetails.propertyPrice'] = { 
+        ...query['pricingDetails.propertyPrice'] || {},
         $lte: parseInt(maxPrice as string, 10) 
       };
     }
     
     if (minArea) {
-      query['propertyDetails.area.totalArea'] = { $gte: parseInt(minArea as string, 10) };
+      query['shedDetails.totalArea'] = { $gte: parseInt(minArea as string, 10) };
     }
     
     if (maxArea) {
-      query['propertyDetails.area.totalArea'] = { 
-        ...query['propertyDetails.area.totalArea'] || {},
+      query['shedDetails.totalArea'] = { 
+        ...query['shedDetails.totalArea'] || {},
         $lte: parseInt(maxArea as string, 10) 
       };
     }
     
     // Build sort query
-    let sortQuery: any = { 'metadata.createdAt': -1 }; // Default sorting
+    let sortQuery: any = { 'metaData.createdAt': -1 }; // Default sorting
     
     if (sort === 'price-asc') {
-      sortQuery = { 'pricingDetails.price': 1 };
+      sortQuery = { 'pricingDetails.propertyPrice': 1 };
     } else if (sort === 'price-desc') {
-      sortQuery = { 'pricingDetails.price': -1 };
+      sortQuery = { 'pricingDetails.propertyPrice': -1 };
     } else if (sort === 'area-asc') {
-      sortQuery = { 'propertyDetails.area.totalArea': 1 };
+      sortQuery = { 'shedDetails.totalArea': 1 };
     } else if (sort === 'area-desc') {
-      sortQuery = { 'propertyDetails.area.totalArea': -1 };
+      sortQuery = { 'shedDetails.totalArea': -1 };
     }
     
     // Execute query with projection for list view
     const sheds = await CommercialShed.find(query)
-      .select('propertyId basicInformation propertyDetails.area pricingDetails.price media.photos.exterior metadata')
+      .select('propertyId propertyName shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metaData')
       .sort(sortQuery)
       .skip(skip)
       .limit(limitNum)
@@ -235,7 +235,7 @@ export const getCommercialShedById = async (req: Request, res: Response) => {
     // Update view count
     await CommercialShed.updateOne(
       query, 
-      { $inc: { 'metadata.views': 1 } }
+      { $inc: { 'metaData.views': 1 } }
     );
     
     return res.status(200).json({
@@ -264,8 +264,8 @@ export const updateCommercialShed = async (req: Request, res: Response) => {
       : { propertyId: id };
     
     // Update metadata
-    updateData.metadata = {
-      ...updateData.metadata,
+    updateData.metaData = {
+      ...updateData.metaData,
       updatedAt: new Date()
     };
     

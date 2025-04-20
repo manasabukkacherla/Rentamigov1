@@ -359,9 +359,9 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
             className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
           >
             <option value="" disabled>Select Availability</option>
-            <option value="24 Hours">24 Hours Available</option>
-            <option value="Limited Hours">Limited Hours</option>
-            <option value="None">None</option>
+            <option value="24x7" className="text-black bg-white">24x7</option>
+             <option value="scheduled" className="text-black bg-white">Scheduled</option>
+             <option value="limited" className="text-black bg-white">Limited</option>
             {/* Add other relevant options as needed */}
           </select>
         </div>
