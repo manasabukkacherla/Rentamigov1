@@ -360,7 +360,6 @@ const SellCoveredSpaceMain = () => {
       toast.success("Property listed successfully!");
       
       // Redirect to listing page or dashboard
-      navigate("/dashboard/properties");
     } catch (err: any) {
       console.error("Error submitting form:", err);
       const errorMessage = err.response?.data?.error || "Failed to submit property. Please try again.";

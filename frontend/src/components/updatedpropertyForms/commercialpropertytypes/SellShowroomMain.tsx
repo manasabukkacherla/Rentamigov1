@@ -328,10 +328,19 @@ const SellShowroomMain = () => {
               }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                propertyDetails: { ...prev.propertyDetails, ...details }
-              }))}
+              onDetailsChange={(details) => {
+                const modifiedDetails = {
+                  ...details,
+                  waterAvailability: Array.isArray(details.waterAvailability) 
+                    ? details.waterAvailability 
+                    : details.waterAvailability ? [details.waterAvailability] : []
+                };
+                
+                setFormData(prev => ({
+                  ...prev,
+                  propertyDetails: { ...prev.propertyDetails, ...modifiedDetails }
+                }))
+              }}
             />
           </div>
         </div>

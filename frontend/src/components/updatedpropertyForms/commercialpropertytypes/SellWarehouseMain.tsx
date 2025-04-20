@@ -303,18 +303,28 @@ const SellWarehouseMain = () => {
             }))}
           />
           <CommercialPropertyDetails
-            onDetailsChange={(details) => setFormData(prev => ({
-              ...prev,
-              propertyDetails: {
-                ...prev.propertyDetails,
+            onDetailsChange={(details) => {
+              // Ensure waterAvailability is treated as string array
+              const modifiedDetails = {
                 ...details,
-                electricitySupply: {
-                  ...prev.propertyDetails.electricitySupply,
-                  powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
-                },
-                propertyAge: details.propertyAge ?? prev.propertyDetails.propertyAge
-              }
-            }))}
+                waterAvailability: Array.isArray(details.waterAvailability) 
+                  ? details.waterAvailability 
+                  : details.waterAvailability ? [details.waterAvailability] : []
+              };
+              
+              setFormData(prev => ({
+                ...prev,
+                propertyDetails: {
+                  ...prev.propertyDetails,
+                  ...modifiedDetails,
+                  electricitySupply: {
+                    ...prev.propertyDetails.electricitySupply,
+                    powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
+                  },
+                  propertyAge: details.propertyAge ?? prev.propertyDetails.propertyAge
+                }
+              }))
+            }}
           />
         </div>
       ),
