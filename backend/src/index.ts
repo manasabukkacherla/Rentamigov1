@@ -70,6 +70,8 @@ import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
+import commercialLeaseWarehouseRoutes from './routes/commercial/commercialLeaseWarehouseRoutes';
+import commercialLeaseShedRoutes from './routes/commercial/commercialLeaseShedRoutes';
 import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
 import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
@@ -193,7 +195,7 @@ app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
 app.use('/api/commercial/sell/warehouses', commercialWarehouseRoutes);
 app.use('/api/commercial/sell/plots', commercialPlotRoutes);
 app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
-app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
+app.use('/api/commercial/sell/others', commercialSellOthersRoutes);
 app.use('/api/commercial/sell/office-space', commercialSellOfficeSpaceRoutes);
 app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
 app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
@@ -223,6 +225,9 @@ app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
 app.use('/api/commercial/lease/retail-store', commercialLeaseRetailRoutes);
 
 
+
+app.use('/api/commercial/lease/warehouses', commercialLeaseWarehouseRoutes);
+app.use('/api/commercial/lease/sheds', commercialLeaseShedRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
