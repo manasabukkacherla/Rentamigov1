@@ -66,7 +66,14 @@ import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRent
 import commercialSellCoveredSpaceRoutes from "./routes/commercial/commercialSellCoveredSpaceRoutes";
 import commercialSellOfficeSpaceRoutes from './routes/commercial/CommercialSellOfficeSpace';
 import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
+import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
+import commercialRentSheds from "./routes/commercial/commercialRentSheds";
+import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
+import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
+import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
+import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
+import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 
 dotenv.config();
 
@@ -192,6 +199,7 @@ app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
 app.use('/api/commercial/sell/covered-space', commercialSellCoveredSpaceRoutes);
 //openspace
 
+//lease routes
 app.use('/api/commercial/lease/plot', commercialLeasePlotRoutes);
 app.use('/api/commercial/lease/agriculture', commercialLeaseAgricultureRoutes);
 app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
@@ -204,6 +212,7 @@ app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
 app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
 app.use('/api/commercial-rent-shops', commercialRentShop);
 app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
+
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

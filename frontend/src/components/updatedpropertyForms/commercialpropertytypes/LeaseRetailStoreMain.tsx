@@ -23,29 +23,113 @@ import { toast } from "react-toastify"
 import axios from "axios"
 
 interface FormData {
-  propertyName: string;
-  retailType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    retailStoreType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  coordinates: { 
-    latitude: number; 
-    longitude: number; 
+  retailStoreDetails: {
+    location: string;
+    anchorStores: boolean;
+    footfallData: string;
+    signageAllowed: boolean;
+    sharedWashrooms: boolean;
+    fireExit: boolean;
   };
-  isCornerProperty: boolean;
-  retailDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  leaseAmount: Record<string, any>;
-  leaseTenure: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
-  otherCharges: Record<string, any>;
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, any>;
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string;
+    propertyAge: number;
+    propertyCondition: string;
+  };
+  leaseTerms: {
+    leaseDetails: {
+      leaseAmount: {
+        amount: number;
+        type: string;
+        duration: number;
+        durationUnit: string;
+      };
+    };
+    tenureDetails: {
+      minimumTenure: number;
+      minimumUnit: string;
+      maximumTenure: number;
+      maximumUnit: string;
+      lockInPeriod: number;
+      lockInUnit: string;
+      noticePeriod: number;
+      noticePeriodUnit: string;
+    };
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
+    };
+    otherCharges: {
+      water: {
+        amount?: number;
+        type: string;
+      };
+      electricity: {
+        amount?: number;
+        type: string;
+      };
+      gas: {
+        amount?: number;
+        type: string;
+      };
+      others: {
+        amount?: number;
+        type: string;
+      };
+    };
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
+    availability: {
+      date: Date;
+      availableImmediately: boolean;
+      preferredSaleDuration: string;
+      noticePeriod: string;
+      isPetsAllowed: boolean;
+      operatingHours: boolean;
+    };
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
   media: {
     photos: {
       exterior: File[];
@@ -55,36 +139,124 @@ interface FormData {
       lifts: File[];
       emergencyExits: File[];
     };
-    videoTour: File | null;
+    videoTour?: File;
     documents: File[];
+  };
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
   };
 }
 
 const LeaseRetailStoreMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    retailType: [],
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    basicInformation: {
+      title: '',
+      retailStoreType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0
+      },
+      isCornerProperty: false
     },
-    landmark: '',
-    coordinates: {
-      latitude: 0,
-      longitude: 0
+    retailStoreDetails: {
+      location: '',
+      anchorStores: false,
+      footfallData: '',
+      signageAllowed: false,
+      sharedWashrooms: false,
+      fireExit: false
     },
-    isCornerProperty: false,
-    retailDetails: {},
-    propertyDetails: {},
-    leaseAmount: {},
-    leaseTenure: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false
+      },
+      waterAvailability: '',
+      propertyAge: 0,
+      propertyCondition: ''
+    },
+    leaseTerms: {
+      leaseDetails: {
+        leaseAmount: {
+          amount: 0,
+          type: 'fixed',
+          duration: 0,
+          durationUnit: 'years'
+        },
+      },
+      tenureDetails: {
+        minimumTenure: 0,
+    minimumUnit: 'years',
+    maximumTenure: 0,
+    maximumUnit: 'years',
+    lockInPeriod: 0,
+    lockInUnit: 'years',
+    noticePeriod: 0,
+    noticePeriodUnit: 'months'
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: 'monthly'
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        electricity: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        gas: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        others: {
+          amount: 0,
+          type: 'inclusive',
+        },
+      },
+      brokerage: {
+        required: 'no',
+        amount: 0
+      },
+      availability: {
+        date: new Date(),
+        availableImmediately: false,
+        preferredSaleDuration: '',
+        noticePeriod: '',
+        isPetsAllowed: false,
+        operatingHours:  false,
+      }
+    },
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
     media: {
       photos: {
         exterior: [],
@@ -94,7 +266,8 @@ const LeaseRetailStoreMain = () => {
         lifts: [],
         emergencyExits: []
       },
-      videoTour: null,
+
+      videoTour: undefined,
       documents: []
     }
   });
@@ -115,16 +288,16 @@ const LeaseRetailStoreMain = () => {
             </div>
             <div className="space-y-6">
               <PropertyName
-                propertyName={formData.propertyName}
+                propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-                  propertyName: name
+                  basicInformation: { ...prev.basicInformation, title: name }
                 }))}
               />
               <RetailStoreType
                 onRetailTypeChange={(types) => setFormData(prev => ({
                   ...prev,
-                  retailType: types
+                  basicInformation: { ...prev.basicInformation, retailStoreType: types }
                 }))}
               />
             </div>
@@ -139,26 +312,23 @@ const LeaseRetailStoreMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
-                  address
+                  basicInformation: { ...prev.basicInformation, address }
                 }))}
               />
               <Landmark
                 onLandmarkChange={(landmark) => setFormData(prev => ({
                   ...prev,
-                  landmark
+                  basicInformation: { ...prev.basicInformation, landmark }
                 }))}
                 onLocationSelect={(location) => setFormData(prev => ({
                   ...prev,
-                  coordinates: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
-                  }
+                  basicInformation: { ...prev.basicInformation, location: { latitude: parseFloat(location.latitude), longitude: parseFloat(location.longitude) } }
                 }))}
               />
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
-                  isCornerProperty: isCorner
+                  basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
                 }))}
               />
             </div>
@@ -179,13 +349,23 @@ const LeaseRetailStoreMain = () => {
             <RetailStoreDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                retailDetails: { ...prev.retailDetails, ...details }
+                retailStoreDetails: { ...prev.retailStoreDetails, ...details }
               }))}
             />
             <CommercialPropertyDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                propertyDetails: { ...prev.propertyDetails, ...details }
+                propertyDetails: {
+                  ...prev.propertyDetails,
+                  ...details,
+                  propertyAge: details.propertyAge ?? 0,
+                  electricitySupply: {
+                    ...prev.propertyDetails.electricitySupply,
+                    ...details.electricitySupply,
+                    powerLoad: details.electricitySupply?.powerLoad ?? 0
+                  },
+                  waterAvailability: details.waterAvailability
+                }
               }))}
             />
           </div>
@@ -205,46 +385,89 @@ const LeaseRetailStoreMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
               <div className="space-y-4">
-                <LeaseAmount 
+              <LeaseAmount 
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
-                  }))} 
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      leaseDetails: {
+                        ...prev.leaseTerms.leaseDetails,
+                        leaseAmount: {
+                          amount: Number(amount.amount) || 0,
+                          type: amount.type || 'fixed',
+                          duration: Number(amount.duration) || 0,
+                          durationUnit: amount.durationUnit || 'years'
+                        },
+                        
+                      }
+                    }
+                  }))}
                 />
                 <LeaseTenure 
                   onLeaseTenureChange={(tenure) => setFormData(prev => ({
                     ...prev,
-                    leaseTenure: { ...prev.leaseTenure, ...tenure }
-                  }))} 
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      leaseDetails: {
+                        ...prev.leaseTerms.leaseDetails,
+                        // leaseDuration: tenure.leaseDuration || '',
+                      },
+                      tenureDetails: {
+                        minimumTenure: Number(tenure.minimumTenure) || 0,
+                        minimumUnit: tenure.minimumUnit || 'years',
+                        maximumTenure: Number(tenure.maximumTenure) || 0,
+                        maximumUnit: tenure.maximumUnit || 'years',
+                        lockInPeriod: Number(tenure.lockInPeriod) || 0,
+                        lockInUnit: tenure.lockInUnit || 'years',
+                        noticePeriod: Number(tenure.noticePeriod) || 0,
+                        noticePeriodUnit: tenure.noticePeriodUnit || 'months'
+                      }
+                    }
+                  }))}
                 />
-              </div>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4">
                 <MaintenanceAmount 
                   onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                     ...prev,
-                    maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
-                  }))} 
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      maintenanceAmount: {
+                        amount: Number(maintenance.amount) || 0,
+                        frequency: maintenance.frequency || 'monthly'
+                      }
+                    }
+                  }))}
                 />
+              {/* </div>
+            </div>
+             */}
+            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              <div className="space-y-4">
+                
                 <div className="border-t border-gray-200 my-4"></div>
                 <OtherCharges 
                   onOtherChargesChange={(charges) => setFormData(prev => ({
                     ...prev,
-                    otherCharges: { ...prev.otherCharges, ...charges }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      otherCharges: { ...prev.leaseTerms.otherCharges, ...charges }
+                    }
                   }))} 
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <Brokerage 
                   onBrokerageChange={(brokerage) => setFormData(prev => ({
                     ...prev,
-                    brokerage: { ...prev.brokerage, ...brokerage }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      brokerage: { ...prev.leaseTerms.brokerage, ...brokerage }
+                    }
                   }))} 
                 />
               </div>
             </div>
+          </div>
+          </div>
           </div>
         </div>
       ),
@@ -259,12 +482,40 @@ const LeaseRetailStoreMain = () => {
             <h3 className="text-xl font-semibold text-black">Availability</h3>
           </div>
           <div className="space-y-6">
-            <CommercialAvailability
+          <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+          {/* <CommercialAvailability
+                onAvailabilityChange={(availability) => setFormData(prev => ({
+                  ...prev,
+                  leaseTerms: {
+                    ...prev.leaseTerms,
+                    availability: {
+                      // immediate: availability.immediate || false,
+                      availableFrom: availability.availableFrom || new Date(),
+                      // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
+                      availableImmediately: availability.availableImmediately || false,
+                      preferredSaleDuration: availability.preferredSaleDuration || '',
+                      noticePeriod: availability.noticePeriod || '',
+                      petsAllowed: availability.petsAllowed || false,
+                      operatingHours:availability.operatingHours?.restricted || false,
+                    }
+                  }
+                }))}
+                  /> */}
+                   <CommercialAvailability
               onAvailabilityChange={(availability) => setFormData(prev => ({
                 ...prev,
-                availability: { ...prev.availability, ...availability }
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  availability: {
+                    ...prev.leaseTerms.availability,
+                    ...availability,
+                    date: availability.availableImmediately ? new Date() : availability.date
+                  }
+                }
               }))}
             />
+
+                  </div>
           </div>
         </div>
       ),
@@ -282,7 +533,7 @@ const LeaseRetailStoreMain = () => {
             <CommercialContactDetails
               onContactChange={(contact) => setFormData(prev => ({
                 ...prev,
-                contactDetails: { ...prev.contactDetails, ...contact }
+                contactInformation: { ...prev.contactInformation, ...contact }
               }))}
             />
           </div>
@@ -314,7 +565,7 @@ const LeaseRetailStoreMain = () => {
                       ...prev.media.photos,
                       ...photos
                     },
-                    videoTour: media.video?.file || null,
+                    videoTour: media.video?.file || undefined,
                     documents: media.documents.map(d => d.file)
                   }
                 }));
@@ -364,7 +615,7 @@ const LeaseRetailStoreMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-retail/lease', transformedData, {
+        const response = await axios.post('/api/commercial/lease/retail-store', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -380,6 +631,7 @@ const LeaseRetailStoreMain = () => {
       console.error('Error submitting form:', error);
       toast.error('Failed to create retail store lease listing. Please try again.');
     }
+    console.log(formData);
   };
 
   const handleNext = () => {

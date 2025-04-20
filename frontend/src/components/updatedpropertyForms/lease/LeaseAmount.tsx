@@ -7,9 +7,9 @@ interface LeaseAmountProps {
 
 const LeaseAmount = ({ onLeaseAmountChange }: LeaseAmountProps) => {
   const [leaseAmount, setLeaseAmount] = useState({
-    amount: '',
+    amount: 0,
     type: 'fixed',
-    duration: '',
+    duration: 0,
     durationUnit: 'years'
   });
 
@@ -42,7 +42,7 @@ const LeaseAmount = ({ onLeaseAmountChange }: LeaseAmountProps) => {
               type="number"
               min="0"
               value={leaseAmount.amount || ''}
-              onChange={(e) => handleChange('amount', e.target.value)}
+              onChange={(e) => handleChange('amount',parseFloat(e.target.value))}
               placeholder="Enter lease amount"
               className="w-full pl-12 pr-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black"
             />
@@ -60,7 +60,7 @@ const LeaseAmount = ({ onLeaseAmountChange }: LeaseAmountProps) => {
               type="number"
               min="1"
               value={leaseAmount.duration || '' }
-              onChange={(e) => handleChange('duration', e.target.value)}
+              onChange={(e) => handleChange('duration',parseFloat(e.target.value))}
               placeholder="Enter duration"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black"
             />

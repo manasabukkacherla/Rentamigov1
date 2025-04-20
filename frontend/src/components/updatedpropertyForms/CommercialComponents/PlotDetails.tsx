@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Info } from 'lucide-react';
+import { Building2, Info, Ruler, Shield } from 'lucide-react';
 
 interface DetailsProps {
   onDetailsChange: (details: any) => void;
@@ -7,9 +7,11 @@ interface DetailsProps {
 
 const PlotDetails: React.FC<DetailsProps> = ({ onDetailsChange }) => {
   const [details, setDetails] = useState({
-    totalPlotArea: 0,
-    zoningType: 'commercial',
-    infrastructure: [] as string[],
+    totalArea: 0,
+    zoningType: '',
+    boundaryWall: false,
+    waterSewer: false,
+    electricity: false,
     roadAccess: '',
     securityRoom: false,
     previousConstruction: '',
@@ -23,101 +25,101 @@ const PlotDetails: React.FC<DetailsProps> = ({ onDetailsChange }) => {
     onDetailsChange(updatedDetails);
   };
 
-  const handleInfrastructureChange = (item: string) => {
-    let updatedInfrastructure = [...details.infrastructure];
+  // const handleInfrastructureChange = (item: string) => {
+  //   let updatedInfrastructure = [...details.infrastructure];
     
-    if (updatedInfrastructure.includes(item)) {
-      updatedInfrastructure = updatedInfrastructure.filter(i => i !== item);
-    } else {
-      updatedInfrastructure.push(item);
-    }
+  //   if (updatedInfrastructure.includes(item)) {
+  //     updatedInfrastructure = updatedInfrastructure.filter(i => i !== item);
+  //   } else {
+  //     updatedInfrastructure.push(item);
+  //   }
     
-    handleChange('infrastructure', updatedInfrastructure);
-  };
+  //   handleChange('infrastructure', updatedInfrastructure);
+  // };
 
   return (
-    <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-      <h4 className="text-lg font-medium text-black mb-4">Plot Details <span className="text-red-500">*</span></h4>
-      
-      {/* Plot Area */}
-      <div className="space-y-4 mb-6">
-        <div className="grid grid-cols-1 gap-3">
-          <label className="block text-md font-medium mb-2 text-black">Total Plot Area (sq. ft) <span className="text-red-500">*</span></label>
-          <input
-            type="number"
-            value={details.totalPlotArea}
-            onChange={(e) => handleChange('totalPlotArea', Number(e.target.value))}
-            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
-            required
-          />
-          {details.totalPlotArea <= 0 && (
-            <p className="text-red-500 text-sm">This field is required</p>
-          )}
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <div className="space-y-8">
+        <div className="flex items-center mb-8">
+          <Building2 className="text-black mr-3" size={28} />
+          <h3 className="text-2xl font-semibold text-black">Plot Details</h3>
         </div>
-      </div>
-      
-      {/* Built-up Area & Carpet Area */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <label className="block text-md font-medium mb-2 text-black">Built-up Area (sq. ft) <span className="text-red-500">*</span></label>
-          <input
-            type="number"
-            value={details.builtUpArea}
-            onChange={(e) => handleChange('builtUpArea', Number(e.target.value))}
-            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-md font-medium mb-2 text-black">Carpet Area (sq. ft) <span className="text-red-500">*</span></label>
-          <input
-            type="number"
-            value={details.carpetArea}
-            onChange={(e) => handleChange('carpetArea', Number(e.target.value))}
-            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
-            required
-          />
-        </div>
-      </div>
-      
-      {/* Zoning Type */}
-      <div className="grid grid-cols-1 gap-3 mb-6">
-        <label className="block text-md font-medium mb-2 text-black">Zoning Type <span className="text-red-500">*</span></label>
-        <select
-          value={details.zoningType}
-          onChange={(e) => handleChange('zoningType', e.target.value)}
-          className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
-          required
-        >
-          <option value="commercial" className="text-black bg-white">Commercial</option>
-          <option value="residential" className="text-black bg-white">Residential</option>
-          <option value="industrial" className="text-black bg-white">Industrial</option>
-          <option value="mixed" className="text-black bg-white">Mixed Use</option>
-        </select>
-      </div>
-      
-      {/* Infrastructure */}
-      <div className="mb-6">
-        <label className="block text-md font-medium mb-3 text-black">Infrastructure Available <span className="text-red-500">*</span></label>
-        <div className="grid grid-cols-2 gap-3">
-          {['Water Connection', 'Electricity Connection', 'Sewage System', 'Drainage System', 
-            'Street Lights', 'Boundary Wall', 'Security Gate', 'Paved Roads'].map((item) => (
-            <div key={item} className="flex items-center">
+
+        {/* Area and Zoning */}
+        <div className="bg-white p-6 rounded-lg space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Total Area */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium flex items-center gap-2 text-black">
+                <Ruler size={20} className="text-black" />
+                Total Plot Area
+              </h4>
               <input
-                type="checkbox"
-                id={item.replace(/\s+/g, '-').toLowerCase()}
-                checked={details.infrastructure.includes(item)}
-                onChange={() => handleInfrastructureChange(item)}
-                className="h-5 w-5 rounded border-gray-300 text-black focus:ring-0 cursor-pointer"
+                type="number"
+                min="0"
+                value={details.totalArea}
+                onChange={(e) => handleChange('totalArea', parseInt(e.target.value))}
+                placeholder="Area in sq.ft"
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
               />
-              <label 
-                htmlFor={item.replace(/\s+/g, '-').toLowerCase()} 
-                className="ml-2 text-sm font-medium text-black cursor-pointer"
+            </div>
+
+            {/* Zoning Type */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-medium flex items-center gap-2 text-black">
+                <Building2 size={20} className="text-black" />
+                Zoning Type
+              </h4>
+              <select
+                value={details.zoningType}
+                onChange={(e) => handleChange('zoningType', e.target.value)}
+                className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
-                {item}
+                <option value="" disabled className="text-black bg-white">Select Zoning Type</option>
+                <option value="commercial" className="text-black bg-white">Commercial</option>
+                <option value="industrial" className="text-black bg-white">Industrial</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Infrastructure */}
+        <div className="bg-white p-6 rounded-lg space-y-6">
+          <h4 className="text-lg font-medium flex items-center gap-2 text-black">
+            <Shield size={20} className="text-black" />
+            Infrastructure
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={details.boundaryWall}
+                  onChange={(e) => handleChange('boundaryWall', e.target.checked)}
+                  className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
+                />
+                <span className="text-black">Boundary Wall</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={details.waterSewer}
+                  onChange={(e) => handleChange('waterSewer', e.target.checked)}
+                  className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
+                />
+                <span className="text-black">Water & Sewer Connection</span>
+              </label>
+              <label className="flex items-center space-x-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={details.electricity}
+                  onChange={(e) => handleChange('electricity', e.target.checked)}
+                  className="w-5 h-5 text-black border-gray-300 rounded focus:ring-black"
+                />
+                <span className="text-black">Electricity Connection</span>
               </label>
             </div>
-          ))}
+          </div>
         </div>
       </div>
       

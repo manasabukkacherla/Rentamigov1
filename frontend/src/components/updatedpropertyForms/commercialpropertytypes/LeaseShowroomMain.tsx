@@ -23,29 +23,121 @@ import { toast } from "react-toastify"
 import axios from "axios"
 
 interface FormData {
-  propertyName: string;
-  showroomType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    showroomType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  coordinates: { 
-    latitude: number; 
-    longitude: number; 
+  showroomDetails: {
+    totalSpace: number;
+    frontageWidth: number;
+    ceilingHeight: number;
+    glassFrontage: boolean;
+    lightingType: string;
+    acInstalled: boolean;
+    nearbyCompetitors: {
+      present: boolean;
+      brandNames: string;
+    };
+    displayRacks: boolean;
   };
-  isCornerProperty: boolean;
-  showroomDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  leaseAmount: Record<string, any>;
-  leaseTenure: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
-  otherCharges: Record<string, any>;
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, any>;
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number | null;
+      backup: boolean;
+    };
+    waterAvailability: string[];
+    propertyAge: number | null;
+    propertyCondition: string;
+  };
+  leaseTerms: {
+    leaseDetails: {
+      leaseAmount: {
+        amount: number;
+        type: string;
+        duration: number;
+        durationUnit: string;
+      };
+    };
+    tenureDetails: {
+      minimumTenure: number;
+      minimumUnit: string;
+      maximumTenure: number;
+      maximumUnit: string;
+      lockInPeriod: number;
+      lockInUnit: string;
+      noticePeriod: number;
+      noticePeriodUnit: string;
+    };
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
+    };
+    otherCharges: {
+      water: {
+        amount?: number;
+        type: string;
+      };
+      electricity: {
+        amount?: number;
+        type: string;
+      };
+      gas: {
+        amount?: number;
+        type: string;
+      };
+      others: {
+        amount?: number;
+        type: string;
+      };
+    };
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
+    availability: {
+      availableFrom: Date;
+      availableImmediately: boolean;
+      leaseDuration: string;
+      noticePeriod: string;
+      petsAllowed: boolean;
+      operatingHours: {
+        restricted: boolean;
+        restrictions: string;
+      };
+    };
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
   media: {
     photos: {
       exterior: File[];
@@ -55,36 +147,132 @@ interface FormData {
       lifts: File[];
       emergencyExits: File[];
     };
-    videoTour: File | null;
+    videoTour?: File;
     documents: File[];
+  };
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
   };
 }
 
 const LeaseShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    showroomType: [],
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    basicInformation: {
+      title: '',
+      showroomType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: 0,
+        longitude: 0
+      },
+      isCornerProperty: false,
     },
-    landmark: '',
-    coordinates: {
-      latitude: 0,
-      longitude: 0
+    showroomDetails: {
+      totalSpace: 0,
+      frontageWidth: 0,
+      ceilingHeight: 0,
+      glassFrontage: false,
+      lightingType: '',
+      acInstalled: false,
+      nearbyCompetitors: {
+        present: false,
+        brandNames: ''
+      },
+      displayRacks: false
     },
-    isCornerProperty: false,
-    showroomDetails: {},
-    propertyDetails: {},
-    leaseAmount: {},
-    leaseTenure: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0
+      },
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: null,
+        backup: false
+      },
+      waterAvailability: [],
+      propertyAge: null,
+      propertyCondition: ''
+    },
+    leaseTerms: {
+      leaseDetails: {
+        leaseAmount: {
+          amount: 0,
+          type: '',
+          duration: 0,
+          durationUnit: ''
+        }
+      },
+      tenureDetails: {
+        minimumTenure: 0,
+        minimumUnit: '',
+        maximumTenure: 0,
+        maximumUnit: '',
+        lockInPeriod: 0,
+        lockInUnit: '',
+        noticePeriod: 0,
+        noticePeriodUnit: ''
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: ''
+      },
+      otherCharges: {
+        water: {
+          amount: undefined,
+          type: ''
+        },
+        electricity: {
+          amount: undefined,
+          type: ''
+        },
+        gas: {
+          amount: undefined,
+          type: ''
+        },
+        others: {
+          amount: undefined,
+          type: ''
+        }
+      },
+      brokerage: {
+        required: '',
+        amount: undefined
+      },
+      availability: {
+        availableFrom: new Date(),
+        availableImmediately: false,
+        leaseDuration: '',
+        noticePeriod: '',
+        petsAllowed: false,
+        operatingHours: {
+          restricted: false,
+          restrictions: ''
+        }
+      }
+    },
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: undefined,
+      bestTimeToContact: undefined
+    },
     media: {
       photos: {
         exterior: [],
@@ -94,9 +282,10 @@ const LeaseShowroomMain = () => {
         lifts: [],
         emergencyExits: []
       },
-      videoTour: null,
+      videoTour: undefined,
       documents: []
-    }
+    },
+    metadata: undefined
   });
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -115,16 +304,16 @@ const LeaseShowroomMain = () => {
             </div>
             <div className="space-y-6">
               <PropertyName
-                propertyName={formData.propertyName}
+                propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-                  propertyName: name
+                  basicInformation: { ...prev.basicInformation, title: name }
                 }))}
               />
               <ShowroomType
                 onTypeChange={(type) => setFormData(prev => ({
                   ...prev,
-                  showroomType: [type]
+                  basicInformation: { ...prev.basicInformation, showroomType: [type] }
                 }))}
               />
             </div>
@@ -139,26 +328,23 @@ const LeaseShowroomMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
-                  address
+                  basicInformation: { ...prev.basicInformation, address }
                 }))}
               />
               <Landmark
                 onLandmarkChange={(landmark) => setFormData(prev => ({
                   ...prev,
-                  landmark
+                  basicInformation: { ...prev.basicInformation, landmark }
                 }))}
                 onLocationSelect={(location) => setFormData(prev => ({
                   ...prev,
-                  coordinates: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
-                  }
+                  basicInformation: { ...prev.basicInformation, location: { latitude: parseFloat(location.latitude), longitude: parseFloat(location.longitude) } }
                 }))}
               />
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
-                  isCornerProperty: isCorner
+                  basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
                 }))}
               />
             </div>
@@ -208,13 +394,25 @@ const LeaseShowroomMain = () => {
                 <LeaseAmount 
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      leaseDetails: {
+                        ...prev.leaseTerms.leaseDetails,
+                        ...amount
+                      }
+                    }
                   }))} 
                 />
                 <LeaseTenure 
                   onLeaseTenureChange={(tenure) => setFormData(prev => ({
                     ...prev,
-                    leaseTenure: { ...prev.leaseTenure, ...tenure }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      tenureDetails: {
+                        ...prev.leaseTerms.tenureDetails,
+                        ...tenure
+                      }
+                    }
                   }))} 
                 />
               </div>
@@ -226,21 +424,39 @@ const LeaseShowroomMain = () => {
                 <MaintenanceAmount 
                   onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                     ...prev,
-                    maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      maintenanceAmount: {
+                        ...prev.leaseTerms.maintenanceAmount,
+                        ...maintenance
+                      }
+                    }
                   }))} 
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <OtherCharges 
                   onOtherChargesChange={(charges) => setFormData(prev => ({
                     ...prev,
-                    otherCharges: { ...prev.otherCharges, ...charges }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      otherCharges: {
+                        ...prev.leaseTerms.otherCharges,
+                        ...charges
+                      }
+                    }
                   }))} 
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <Brokerage 
                   onBrokerageChange={(brokerage) => setFormData(prev => ({
                     ...prev,
-                    brokerage: { ...prev.brokerage, ...brokerage }
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      brokerage: {
+                        ...prev.leaseTerms.brokerage,
+                        ...brokerage
+                      }
+                    }
                   }))} 
                 />
               </div>
@@ -262,7 +478,14 @@ const LeaseShowroomMain = () => {
             <CommercialAvailability
               onAvailabilityChange={(availability) => setFormData(prev => ({
                 ...prev,
-                availability: { ...prev.availability, ...availability }
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  availability: {
+                    ...prev.leaseTerms.availability,
+                    ...availability,
+                    availableFrom: availability.availableImmediately ? new Date() : availability.availableFrom
+                  }
+                }
               }))}
             />
           </div>
@@ -282,7 +505,7 @@ const LeaseShowroomMain = () => {
             <CommercialContactDetails
               onContactChange={(contact) => setFormData(prev => ({
                 ...prev,
-                contactDetails: { ...prev.contactDetails, ...contact }
+                contactInformation: { ...prev.contactInformation, ...contact }
               }))}
             />
           </div>
@@ -314,7 +537,7 @@ const LeaseShowroomMain = () => {
                       ...prev.media.photos,
                       ...photos
                     },
-                    videoTour: media.video?.file || null,
+                    videoTour: media.video?.file || undefined,
                     documents: media.documents.map(d => d.file)
                   }
                 }));
@@ -351,7 +574,7 @@ const LeaseShowroomMain = () => {
             lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
             emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
           },
-          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : undefined,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 

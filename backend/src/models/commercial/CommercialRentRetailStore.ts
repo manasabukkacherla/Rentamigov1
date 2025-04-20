@@ -118,8 +118,8 @@ interface ICommercialRentRetailStore extends Document {
       powerLoad: number;
       backup: boolean;
     };
-    waterAvailability: string[];
-    propertyAge: number;
+    waterAvailability: string;
+    propertyAge: string;
     propertyCondition: string;
   };
   rentalTerms: IRentalTerms;
@@ -133,7 +133,7 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    shopType: [{ type: String, required: true }],
+    retailStoreType: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -155,6 +155,28 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
     sharedWashrooms: { type: Boolean, default: false },
     fireExit: { type: Boolean, default: false }
   },
+  propertyDetails: {
+    area: { 
+      totalArea: { type: Number, required: true },
+      carpetArea: { type: Number, required: true },
+      builtUpArea: { type: Number, required: true },
+    },
+    floor: { 
+      floorNumber: { type: Number, required: true },
+      totalFloors: { type: Number, required: true },
+    },
+    facingDirection: { type: String, required: true },
+    furnishingStatus: { type: String, required: true },
+    propertyAmenities: { type: [String], required: true },
+    wholeSpaceAmenities: { type: [String], required: true },
+    electricitySupply: { 
+      powerLoad: { type: Number, required: true },
+      backup: { type: Boolean, required: true },
+    },
+    waterAvailability: { type: String, required: true },
+    propertyAge: { type: String, required: true },
+    propertyCondition: { type: String, required: true },
+  },  
   rentalTerms: {
     rentDetails: {
         expectedRent: { type: Number, required: true },
