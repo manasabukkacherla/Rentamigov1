@@ -49,7 +49,6 @@ import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
-import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
 import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
 import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
@@ -203,7 +202,6 @@ app.use('/api/commercial/sell/shops', commercialSellShopRoutes);
 app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
 app.use('/api/commercial/sell/covered-space', commercialSellCoveredSpaceRoutes);
 
-//openspace
 
 //lease routes
 app.use('/api/commercial/lease/plot', commercialLeasePlotRoutes);
