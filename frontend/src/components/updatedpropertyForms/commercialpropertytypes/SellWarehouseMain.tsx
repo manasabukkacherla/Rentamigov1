@@ -321,7 +321,9 @@ const SellWarehouseMain = () => {
                     ...prev.propertyDetails.electricitySupply,
                     powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
                   },
-                  propertyAge: details.propertyAge ?? prev.propertyDetails.propertyAge
+                  propertyAge: typeof details.propertyAge === 'string' 
+                    ? parseInt(String(details.propertyAge).split('-')[0], 10) || 0
+                    : Number(details.propertyAge) || prev.propertyDetails.propertyAge
                 }
               }))
             }}
@@ -484,7 +486,39 @@ const SellWarehouseMain = () => {
         console.log(formData)
 
         const transformedData = {
-          ...formData,
+          basicInformation: {
+            ...formData.basicInformation
+          },
+          warehouseDetails: {
+            ...formData.warehouseDetails
+          },
+          propertyDetails: {
+            ...formData.propertyDetails,
+            waterAvailability: Array.isArray(formData.propertyDetails.waterAvailability) 
+              ? formData.propertyDetails.waterAvailability[0] || 'scheduled'
+              : formData.propertyDetails.waterAvailability,
+            propertyAge: typeof formData.propertyDetails.propertyAge === 'string' 
+              ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
+              : formData.propertyDetails.propertyAge || 0
+          },
+          pricingDetails: {
+            ...formData.pricingDetails
+          },
+          registration: {
+            ...formData.registration
+          },
+          brokerage: {
+            ...formData.brokerage
+          },
+          availability: {
+            ...formData.availability,
+            leaseDuration: formData.availability.leaseDuration || 'Not Specified',
+            noticePeriod: formData.availability.noticePeriod || 'Not Specified',
+            petsAllowed: formData.availability.petsAllowed === true
+          },
+          contactInformation: {
+            ...formData.contactInformation
+          },
           media: convertedMedia,
           metadata: {
             createdBy: author,

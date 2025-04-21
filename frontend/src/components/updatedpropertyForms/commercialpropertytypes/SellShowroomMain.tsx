@@ -336,10 +336,17 @@ const SellShowroomMain = () => {
                     : details.waterAvailability ? [details.waterAvailability] : []
                 };
                 
-                setFormData(prev => ({
-                  ...prev,
-                  propertyDetails: { ...prev.propertyDetails, ...modifiedDetails }
-                }))
+                setFormData(prev => {
+                  const propertyDetails = {
+                    ...prev.propertyDetails,
+                    ...modifiedDetails,
+                    propertyAge: Number(modifiedDetails.propertyAge) // Convert to number
+                  };
+                  return {
+                    ...prev,
+                    propertyDetails
+                  };
+                })
               }}
             />
           </div>
@@ -516,14 +523,59 @@ const SellShowroomMain = () => {
         console.log(formData)
 
         const transformedData = {
-          ...formData,
+          basicInformation: {
+            title: formData.basicInformation?.title || formData.propertyName || 'Commercial Showroom',
+            showroomType: Array.isArray(formData.showroomType) ? formData.showroomType : [],
+            address: {
+              street: formData.basicInformation?.address?.street || formData.address?.street || '',
+              city: formData.basicInformation?.address?.city || formData.address?.city || '',
+              state: formData.basicInformation?.address?.state || formData.address?.state || '',
+              zipCode: formData.basicInformation?.address?.zipCode || formData.address?.zipCode || ''
+            },
+            landmark: formData.basicInformation?.landmark || formData.landmark || '',
+            location: {
+              latitude: typeof formData.basicInformation?.location?.latitude === 'number' 
+                ? formData.basicInformation.location.latitude : 0,
+              longitude: typeof formData.basicInformation?.location?.longitude === 'number' 
+                ? formData.basicInformation.location.longitude : 0
+            },
+            isCornerProperty: formData.basicInformation?.isCornerProperty || formData.isCornerProperty || false
+          },
+          propertyDetails: {
+            ...formData.propertyDetails,
+            propertyAge: typeof formData.propertyDetails?.propertyAge === 'string' 
+              ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
+              : formData.propertyDetails?.propertyAge || 0
+          },
+          showroomDetails: formData.showroomDetails,
+          pricingDetails: formData.pricingDetails,
+          registration: formData.registration,
+          brokerage: {
+            required: typeof formData.brokerage?.required === 'boolean' 
+              ? (formData.brokerage.required ? 'yes' : 'no')
+              : formData.brokerage?.required || 'no',
+            amount: formData.brokerage?.amount || 0
+          },
+          availability: {
+            availableImmediately: formData.availability?.availableImmediately === true,
+            availableFrom: formData.availability?.availableFrom 
+              ? new Date(formData.availability.availableFrom)
+              : new Date(),
+            leaseDuration: formData.availability?.leaseDuration || 'Not Specified',
+            noticePeriod: formData.availability?.noticePeriod || 'Not Specified',
+            petsAllowed: formData.availability?.petsAllowed === true,
+            operatingHours: {
+              restricted: formData.availability?.operatingHours?.restricted === true,
+              restrictions: formData.availability?.operatingHours?.restrictions || 'No restrictions'
+            }
+          },
+          contactInformation: formData.contactInformation,
           media: convertedMedia,
           metadata: {
             createdBy: author,
             createdAt: new Date()
           }
         };
-
 
         console.log(transformedData);
         const response = await axios.post('/api/commercial/sell/showrooms', transformedData, {

@@ -76,6 +76,7 @@ import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeas
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
+import commercialSellShopRoutes from './routes/commercial/commercialSellShopRoutes';
 
 
 dotenv.config();
@@ -190,7 +191,6 @@ app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
 
-app.use("/api/commercial/sell/shops", commercialShopRoutes);
 app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
 app.use('/api/commercial/sell/warehouses', commercialWarehouseRoutes);
 app.use('/api/commercial/sell/plots', commercialPlotRoutes);
@@ -198,8 +198,10 @@ app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
 app.use('/api/commercial/sell/others', commercialSellOthersRoutes);
 app.use('/api/commercial/sell/office-space', commercialSellOfficeSpaceRoutes);
 app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
+app.use('/api/commercial/sell/shops', commercialSellShopRoutes);
 app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
 app.use('/api/commercial/sell/covered-space', commercialSellCoveredSpaceRoutes);
+
 //openspace
 
 //lease routes
