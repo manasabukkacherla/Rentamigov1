@@ -80,7 +80,7 @@ import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseReta
 import commercialSellShopRoutes from './routes/commercial/commercialSellShopRoutes';
 
 import commercialLeaseCoveredSpaceRoutes from './routes/commercial/commercialLeaseCoveredSpaceRoutes';
-
+import commercialLeaseWarehouseRoutes from './routes/commercial/commercialLeaseWarehouseRoutes';
 
 
 dotenv.config();
@@ -215,6 +215,7 @@ app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
 app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
 app.use('/api/commercial/lease/retail', commercialLeaseRetailRoutes);
 app.use('/api/commercial/lease/covered-space', commercialLeaseCoveredSpaceRoutes);
+app.use('/api/commercial/lease/warehouse', commercialLeaseWarehouseRoutes);
 
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
