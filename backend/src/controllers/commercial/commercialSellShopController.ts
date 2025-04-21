@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
-import CommercialsellShop, { ICommercialShop } from '../../models/commercial/CommercialsellShop';
+import CommercialsellShop from '../../models/commercial/CommercialsellShop';
 
 // Custom request type with authenticated user
 interface AuthenticatedRequest extends Request {
