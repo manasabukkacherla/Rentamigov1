@@ -45,7 +45,7 @@ import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
 import path from "path";
 import bugRouter from "./routes/BugRouter";
-import { Server as SocketIOServer, Socket, Server } from "socket.io";
+import { Server as SocketIOServer, Socket, Server } from "socket.io"
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
