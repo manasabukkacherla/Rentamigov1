@@ -210,6 +210,7 @@ app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
 app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
 app.use('/api/commercial/lease/retail', commercialLeaseRetailRoutes);
 app.use('/api/commercial/lease/covered-space', commercialLeaseCoveredSpaceRoutes);
+app.use('/api/commercial/lease/warehouse', commercialLeaseWarehouseRoutes);
 
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
