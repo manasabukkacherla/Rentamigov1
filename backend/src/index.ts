@@ -76,6 +76,7 @@ import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeas
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
+import commercialLeaseOfficeSpaceRoutes from "./routes/commercial/CommericalLeaseOfficeSpace";
 
 import commercialSellShopRoutes from './routes/commercial/commercialSellShopRoutes';
 
@@ -216,6 +217,7 @@ app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
 app.use('/api/commercial/lease/retail', commercialLeaseRetailRoutes);
 app.use('/api/commercial/lease/covered-space', commercialLeaseCoveredSpaceRoutes);
 app.use('/api/commercial/lease/warehouse', commercialLeaseWarehouseRoutes);
+app.use('/api/commercial/lease/office-space', commercialLeaseOfficeSpaceRoutes);
 
 app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
 app.use('/api/commercial/others', commercialRentOthersRoutes);
@@ -227,7 +229,6 @@ app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
 app.use('/api/commercial-rent-showrooms', commercialRentShowroom);
 app.use('/api/commercial-rent-sheds', commercialRentSheds);
 app.use('/api/commercial/lease/sheds', commercialLeaseShedRoutes);
-
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

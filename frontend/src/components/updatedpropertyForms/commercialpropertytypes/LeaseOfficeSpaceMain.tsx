@@ -1,75 +1,126 @@
 "use client"
 
-import type React from "react"
-import { useState } from "react"
-import PropertyName from "../PropertyName"
-import OfficeSpaceType from "../CommercialComponents/OfficeSpaceType"
-import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
-import Landmark from "../CommercialComponents/Landmark"
-import MapCoordinates from "../MapCoordinates"
-import CornerProperty from "../CommercialComponents/CornerProperty"
-import OfficeSpaceDetails from "../CommercialComponents/OfficeSpaceDetails"
-import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
-import LeaseAmount from "../lease/LeaseAmount"
-import LeaseTenure from "../lease/LeaseTenure"
-import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
-import OtherCharges from "../residentialrent/OtherCharges"
-import Brokerage from "../residentialrent/Brokerage"  
-import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
-import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ChevronRight, ChevronLeft, ImageIcon, Users, DoorClosed, Presentation, Wifi, Server, Users2, UserCircle } from "lucide-react"
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import axios from 'axios';
+import PropertyName from '../PropertyName';
+import OfficeSpaceType from '../CommercialComponents/OfficeSpaceType';
+import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
+import Landmark from '../CommercialComponents/Landmark';
+import MapCoordinates from '../MapCoordinates';
+import CornerProperty from '../CommercialComponents/CornerProperty';
+import OfficeSpaceDetails from '../CommercialComponents/OfficeSpaceDetails';
+import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
+import LeaseAmount from '../lease/LeaseAmount';
+import LeaseTenure from '../lease/LeaseTenure';
+import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
+import OtherCharges from '../residentialrent/OtherCharges';
+import Brokerage from '../residentialrent/Brokerage';
+import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
+import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
+import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
+
+interface MediaType {
+  images: { category: string; files: { url: string; file: File; }[]; }[];
+  video?: { url: string; file: File; };
+  documents: { type: string; file: File; }[];
+}
 
 interface OfficeDetails {
-  seatingCapacity: string;
-  hasCabins: boolean;
-  hasConferenceRoom: boolean;
-  hasMeetingRoom: boolean;
-  hasReception: boolean;
-  hasWifi: boolean;
-  hasServerRoom: boolean;
-  isCoWorkingFriendly: boolean;
+  seatingCapacity: string | number;
+  cabins: {
+    available: boolean;
+    count: number;
+  };
+  conferenceRoom: boolean;
+  meetingRoom: boolean;
+  receptionArea: boolean;
+  wifiSetup: boolean;
+  serverRoom: boolean;
+  coworkingFriendly: boolean;
+}
+
+interface FormData {
+  propertyName: string;
+  officeType: string[];
+  address: Record<string, string>;
+  landmark: string;
+  coordinates: {
+    latitude: string;
+    longitude: string;
+  };
+  isCornerProperty: boolean;
+  officeDetails: OfficeDetails;
+  propertyDetails: Record<string, any>;
+  leaseAmount: Record<string, any>;
+  leaseTenure: Record<string, any>;
+  maintenanceAmount: Record<string, any>;
+  otherCharges: {
+    water: { amount: number; type: string };
+    electricity: { amount: number; type: string };
+    gas: { amount: number; type: string };
+    others: { amount: number; type: string };
+  };
+  brokerage: Record<string, any>;
+  availability: Record<string, any>;
+  contactDetails: Record<string, string>;
+  media: MediaType;
 }
 
 const LeaseOfficeSpaceMain = () => {
-  const [formData, setFormData] = useState({
-    propertyName: "",
-    officeType: "",
+  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    propertyName: '',
+    officeType: [] as string[],
     address: {},
-    landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    landmark: '',
+    coordinates: { latitude: '', longitude: '' },
     isCornerProperty: false,
     officeDetails: {
-      seatingCapacity: "",
-      hasCabins: false,
-      hasConferenceRoom: false,
-      hasMeetingRoom: false,
-      hasReception: false,
-      hasWifi: false,
-      hasServerRoom: false,
-      isCoWorkingFriendly: false
-    } as OfficeDetails,
+      seatingCapacity: '',
+      cabins: {
+        available: false,
+        count: 0
+      },
+      conferenceRoom: false,
+      meetingRoom: false,
+      receptionArea: false,
+      wifiSetup: false,
+      serverRoom: false,
+      coworkingFriendly: false
+    },
     propertyDetails: {},
     leaseAmount: {},
     leaseTenure: {},
     maintenanceAmount: {},
-    otherCharges: {},
+    otherCharges: {
+      water: { amount: 0, type: 'inclusive' },
+      electricity: { amount: 0, type: 'inclusive' },
+      gas: { amount: 0, type: 'inclusive' },
+      others: { amount: 0, type: 'inclusive' }
+    },
     brokerage: {},
     availability: {},
     contactDetails: {},
-    media: { categories: [], video: null, documents: [] }
-  })
+    media: {
+      images: [] as { category: string; files: { url: string; file: File; }[]; }[],
+      video: undefined,
+      documents: [] as { type: string; file: File; }[]
+    }
+  });
 
-  const [step, setStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(0);
 
-  const handleOfficeDetailsChange = (field: keyof OfficeDetails, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      officeDetails: {
-        ...prev.officeDetails,
-        [field]: value
-      }
-    }));
+  // Form prevention utility function
+  const preventDefault = (e: React.MouseEvent | React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    return false;
   };
 
   const steps = [
@@ -77,36 +128,41 @@ const LeaseOfficeSpaceMain = () => {
       title: "Basic Information",
       icon: <MapPin className="w-6 h-6" />,
       component: (
-        <div className="space-y-8">
-          <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Store className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
+        <div className="space-y-6">
+          <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+            <div className="flex items-center mb-6">
+              <Store className="text-black mr-2" size={24} />
+              <h3 className="text-xl font-semibold text-gray-800">Basic Details</h3>
+            </div>
+            <div className="space-y-6">
+              <div className="relative">
+                <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+                <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyName
-                  propertyName={formData.propertyName}
-                  onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
-                />
-                <OfficeSpaceType onOfficeTypeChange={(type) => setFormData((prev) => ({ ...prev, officeType: type }))} />
-              </div>
+              <OfficeSpaceType onOfficeTypeChange={(type) => setFormData(prev => ({ ...prev, officeType: type }))} />
             </div>
           </div>
 
-          <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <MapPin className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Location Details</h3>
+          <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+            <div className="flex items-center mb-6">
+              <MapPin className="text-black mr-2" size={24} />
+              <h3 className="text-xl font-semibold text-gray-800">Location Details</h3>
+            </div>
+            <div className="space-y-6">
+              <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+              <div className="relative">
+                <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
+                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <CommercialPropertyAddress onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
-                <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
-          
-                <CornerProperty
-                  onCornerPropertyChange={(isCorner) => setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))}
-                />
+              <MapCoordinates
+                latitude={formData.coordinates.latitude}
+                longitude={formData.coordinates.longitude}
+                onLatitudeChange={(latitude) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude } }))}
+                onLongitudeChange={(longitude) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude } }))}
+              />
+              <div className="flex items-center space-x-2 cursor-pointer">
+                <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
+                <span className="text-black">This is a corner property</span>
               </div>
             </div>
           </div>
@@ -117,16 +173,18 @@ const LeaseOfficeSpaceMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <OfficeSpaceDetails onDetailsChange={details => setFormData(prev => ({ ...prev, officeDetails: details }))} />
-              <CommercialPropertyDetails onDetailsChange={details => setFormData(prev => ({ ...prev, propertyDetails: details }))} />
-            </div>
+        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center mb-6">
+            <Building2 className="text-black mr-2" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Property Details</h3>
+          </div>
+          <div className="space-y-6">
+            <OfficeSpaceDetails onDetailsChange={(details) => {
+              console.log('OfficeSpaceDetails provided:', details);
+              console.log('Cabins data:', details.cabins);
+              setFormData(prev => ({ ...prev, officeDetails: details }));
+            }} />
+            <CommercialPropertyDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, propertyDetails: details }))} />
           </div>
         </div>
       ),
@@ -135,19 +193,31 @@ const LeaseOfficeSpaceMain = () => {
       title: "Lease Terms",
       icon: <DollarSign className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Lease Terms</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <LeaseAmount onLeaseAmountChange={amount => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
-              <LeaseTenure onLeaseTenureChange={tenure => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
-              <MaintenanceAmount onMaintenanceAmountChange={maintenance => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
-              <OtherCharges onOtherChargesChange={charges => setFormData(prev => ({ ...prev, otherCharges: charges }))} />
-              <Brokerage onBrokerageChange={brokerage => setFormData(prev => ({ ...prev, brokerage }))} />
-            </div>
+        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center mb-6">
+            <DollarSign className="text-black mr-2" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Lease Terms</h3>
+          </div>
+          <div className="space-y-6">
+            <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
+            <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
+            <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
+            <OtherCharges onOtherChargesChange={(charges) => {
+              // Since the OtherCharges component sends the old state, wait for the component to update
+              // by deferring the formData update with setTimeout
+              setTimeout(() => {
+                setFormData(prev => ({
+                  ...prev,
+                  otherCharges: {
+                    water: charges.water || { amount: 0, type: 'inclusive' },
+                    electricity: charges.electricity || { amount: 0, type: 'inclusive' },
+                    gas: charges.gas || { amount: 0, type: 'inclusive' },
+                    others: charges.others || { amount: 0, type: 'inclusive' }
+                  }
+                }));
+              }, 0);
+            }} />
+            <Brokerage onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
           </div>
         </div>
       ),
@@ -156,15 +226,13 @@ const LeaseOfficeSpaceMain = () => {
       title: "Availability",
       icon: <Calendar className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialAvailability onAvailabilityChange={availability => setFormData(prev => ({ ...prev, availability }))} />
-            </div>
+        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center mb-6">
+            <Calendar className="text-black mr-2" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Availability</h3>
+          </div>
+          <div className="space-y-6">
+            <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
           </div>
         </div>
       ),
@@ -173,15 +241,13 @@ const LeaseOfficeSpaceMain = () => {
       title: "Contact Information",
       icon: <User className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <UserCircle className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Contact Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialContactDetails onContactChange={contact => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
-            </div>
+        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center mb-6">
+            <UserCircle className="text-black mr-2" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Contact Details</h3>
+          </div>
+          <div className="space-y-6">
+            <CommercialContactDetails onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
           </div>
         </div>
       ),
@@ -190,40 +256,397 @@ const LeaseOfficeSpaceMain = () => {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <ImageIcon className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialMediaUpload onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))} />
-            </div>
+        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
+          <div className="flex items-center mb-6">
+            <ImageIcon className="text-black mr-2" size={24} />
+            <h3 className="text-xl font-semibold text-gray-800">Property Media</h3>
+          </div>
+          <div className="space-y-6">
+            <CommercialMediaUpload
+              onMediaChange={(media: MediaType) => {
+                setFormData(prev => ({ ...prev, media }));
+                console.log("Media changed:", media);
+              }}
+            />
           </div>
         </div>
       ),
     },
   ]
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Form Data:", formData)
-  }
+  const validateCurrentStep = () => {
+    // Add validation logic based on the current step
+    switch (currentStep) {
+      case 0: // Basic Information
+        return !!formData.propertyName &&
+          formData.officeType.length > 0 &&
+          !!formData.address.street &&
+          !!formData.address.city &&
+          !!formData.address.state &&
+          !!formData.address.zipCode;
+      case 1: // Property Details
+        return !!formData.officeDetails.seatingCapacity;
+      case 2: // Lease Terms
+        return !!formData.leaseAmount.amount &&
+          !!formData.leaseAmount.duration;
+      case 3: // Availability
+        return true; // Optional fields
+      case 4: // Contact Information
+        return !!formData.contactDetails.name &&
+          !!formData.contactDetails.email &&
+          !!formData.contactDetails.phone;
+      case 5: // Property Media
+        return true; // We'll validate this in validateFinalStep when actually submitting
+      default:
+        return true;
+    }
+  };
+
+  const validateFinalStep = () => {
+    // Check if media uploads are required and validate accordingly
+    const hasRequiredMedia =
+      formData.media.images.some(category => category.files.length > 0) ||
+      formData.media.documents.some(doc => !!doc.file);
+
+    return hasRequiredMedia;
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      preventDefault(e);
+    }
+
+    // If not on the last step, move to the next step instead of submitting
+    if (currentStep < steps.length - 1) {
+      handleNext(e as React.MouseEvent);
+      return;
+    }
+
+    // Validate the final step before submitting
+    if (!validateFinalStep()) {
+      toast.error("Please add at least one image or document");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      toast.loading("Submitting your property listing...");
+
+      // Log the office details for debugging
+      console.log('Office Details before mapping:', formData.officeDetails);
+
+      // Map form data to backend model structure
+      const backendData = await mapFormDataToBackendModel();
+
+      // Log the complete data being sent to the API
+      console.log('Submitting data to API:', backendData);
+      console.log('API Endpoint:', '/api/commercial/lease/office-space');
+
+      try {
+        // Make API call to create commercial lease office space
+        const response = await axios.post(
+          `/api/commercial/lease/office-space`, // Fixed endpoint path to match backend route
+          backendData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+
+        if (response.data.success) {
+          // Clear the stored property ID after successful submission
+          localStorage.removeItem('officeSpacePropertyId');
+
+          toast.dismiss();
+          toast.success("Property listed successfully!");
+          navigate('/updatePropertyForm');
+        } else {
+          toast.dismiss();
+          toast.error(response.data.error || "Failed to create property listing");
+          console.error('Failed to create property listing:', response.data.error);
+        }
+      } catch (apiError: any) {
+        toast.dismiss();
+        console.error('API Error Details:', apiError);
+
+        if (apiError.response) {
+          console.error('API Response Status:', apiError.response.status);
+          console.error('API Response Data:', apiError.response.data);
+
+          // Check if endpoint not found (404)
+          if (apiError.response.status === 404) {
+            toast.error("API endpoint not found. Please check with administrators.");
+            console.error("API endpoint '/api/commercial/lease/office-space' not found. Please verify the correct endpoint with your backend team.");
+          } else {
+            toast.error(apiError.response.data?.message || apiError.response.data?.details ||
+              "Server error. Please try again later.");
+          }
+        } else if (apiError.request) {
+          // Request was made but no response received
+          toast.error("No response from server. Please check your connection.");
+          console.error('No response received:', apiError.request);
+        } else {
+          // Error in setting up the request
+          toast.error(apiError.message || "An error occurred. Please try again.");
+          console.error('Error setting up request:', apiError.message);
+        }
+      }
+    } catch (error: any) {
+      toast.dismiss();
+      toast.error("Failed to process form data. Please try again.");
+      console.error('Error in form processing:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    preventDefault(e);
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePrevious = (e: React.MouseEvent) => {
+    preventDefault(e);
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Function to upload media files to a server or cloud storage
+  const uploadMediaFiles = async () => {
+    // In a real implementation, you would upload files to your server or a cloud service
+    // For this example, we'll return the URLs we have (even if they're blob URLs)
+    const uploadedMedia = {
+      photos: {
+        exterior: formData.media.images.find(img => img.category === 'exterior')?.files.map(f => f.url) || [],
+        interior: formData.media.images.find(img => img.category === 'interior')?.files.map(f => f.url) || [],
+        floorPlan: formData.media.images.find(img => img.category === 'floorPlan')?.files.map(f => f.url) || [],
+        washrooms: formData.media.images.find(img => img.category === 'washrooms')?.files.map(f => f.url) || [],
+        lifts: formData.media.images.find(img => img.category === 'lifts')?.files.map(f => f.url) || [],
+        emergencyExits: formData.media.images.find(img => img.category === 'emergencyExits')?.files.map(f => f.url) || []
+      },
+      videoTour: formData.media.video?.url || '',
+      documents: formData.media.documents.map(doc => doc.type) || []
+    };
+
+    return uploadedMedia;
+  };
+
+  // Map frontend form data to backend model structure
+  const mapFormDataToBackendModel = async () => {
+    // Handle media upload first (this would involve actual file uploads in production)
+    const uploadedMedia = await uploadMediaFiles();
+
+    // Function to ensure correct casing for enum values
+    const formatEnumValue = (value: string | undefined, enumType: 'leaseType' | 'frequency'): string => {
+      if (!value) return '';
+
+      if (enumType === 'leaseType') {
+        // First letter capitalized for lease type ('Fixed' or 'Negotiable')
+        return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      } else if (enumType === 'frequency') {
+        // First letter capitalized for frequency ('Monthly', 'Quarterly', 'Yearly', 'Half-Yearly')
+        if (value.toLowerCase() === 'half-yearly') return 'Half-Yearly';
+        return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+      }
+
+      return value;
+    };
+
+    // Format the lease type and frequency values
+    const leaseType = formatEnumValue(formData.leaseAmount?.type, 'leaseType');
+    const maintenanceFrequency = formatEnumValue(formData.maintenanceAmount?.frequency, 'frequency');
+
+    // Enhanced debugging for property age and other charges
+    console.log('Frontend Form Data:', formData);
+    console.log('Office Details:', formData.officeDetails);
+
+    // Helper function to handle charge types and amounts
+    const formatCharge = (charge: any) => {
+      // Default values if charge is undefined
+      const defaultCharge = { type: 'inclusive', amount: 0 };
+      if (!charge) return defaultCharge;
+
+      return {
+        type: charge.type || 'inclusive',
+        amount: charge.type === 'exclusive' ? Number(charge.amount || 0) : 0
+      };
+    };
+
+    // Ensure we have the right structure for charges
+    console.log('Other Charges before mapping:', formData.otherCharges);
+
+    // Map the charges from OtherCharges component to the backend format
+    const mappedCharges = {
+      electricityCharges: formatCharge(formData.otherCharges.electricity),
+      waterCharges: formatCharge(formData.otherCharges.water),
+      gasCharges: formatCharge(formData.otherCharges.gas),
+      otherCharges: formatCharge(formData.otherCharges.others)
+    };
+
+    console.log('Mapped charges for backend:', mappedCharges);
+
+    // Convert boolean values to "Available" or "Not Available" for office details
+    const formatOfficeFeature = (value: boolean) => value ? 'Available' : 'Not Available';
+
+    // Check if propertyId already exists in localStorage, otherwise generate a new one
+    let propertyId = localStorage.getItem('officeSpacePropertyId');
+    console.log('Existing propertyId from localStorage:', propertyId);
+
+    if (!propertyId) {
+      const timestamp = new Date().getTime();
+      const randomStr = Math.random().toString(36).substring(2, 8);
+      propertyId = `OFFICE-${timestamp}-${randomStr}`;
+      localStorage.setItem('officeSpacePropertyId', propertyId);
+      console.log('Generated new propertyId:', propertyId);
+    } else {
+      console.log('Using existing propertyId:', propertyId);
+    }
+
+    // Log the office details before mapping
+    console.log('Office Details before mapping:', {
+      seatingCapacity: formData.officeDetails?.seatingCapacity,
+      cabins: formatOfficeFeature(formData.officeDetails?.cabins.available),
+      cabinCount: formData.officeDetails?.cabins.count
+    });
+
+    // Create the backend data object with proper mapping
+    const backendData = {
+      propertyId: propertyId,
+      basicInformation: {
+        title: formData.propertyName || '',
+        officeType: formData.officeType || [],
+        address: {
+          street: formData.address.street || '',
+          city: formData.address.city || '',
+          state: formData.address.state || '',
+          zipCode: formData.address.zipCode || ''
+        },
+        landmark: formData.landmark || '',
+        location: {
+          latitude: parseFloat(formData.coordinates.latitude) || 0,
+          longitude: parseFloat(formData.coordinates.longitude) || 0
+        },
+        isCornerProperty: formData.isCornerProperty || false
+      },
+      officeSpaceDetails: {
+        seatingcapacity: Number(formData.officeDetails?.seatingCapacity) || 0,
+        cabins: formatOfficeFeature(formData.officeDetails?.cabins.available),
+        meetingrooms: formatOfficeFeature(formData.officeDetails?.meetingRoom),
+        conferenceRooms: formatOfficeFeature(formData.officeDetails?.conferenceRoom),
+        receptionarea: formatOfficeFeature(formData.officeDetails?.receptionArea),
+        wifi: formatOfficeFeature(formData.officeDetails?.wifiSetup),
+        serverroom: formatOfficeFeature(formData.officeDetails?.serverRoom),
+        coworkingfriendly: formatOfficeFeature(formData.officeDetails?.coworkingFriendly),
+        cabinsDetails: {
+          count: Number(formData.officeDetails?.cabins.count) || 0
+        }
+      },
+      propertyDetails: {
+        area: {
+          totalArea: Number(formData.propertyDetails?.area?.totalArea) || 0,
+          builtUpArea: Number(formData.propertyDetails?.area?.builtUpArea) || 0,
+          carpetArea: Number(formData.propertyDetails?.area?.carpetArea) || 0
+        },
+        floor: {
+          floorNumber: Number(formData.propertyDetails?.floor?.floorNumber) || 0,
+          totalFloors: Number(formData.propertyDetails?.floor?.totalFloors) || 0
+        },
+        facingDirection: formData.propertyDetails?.facingDirection || '',
+        furnishingStatus: formData.propertyDetails?.furnishingStatus || '',
+        propertyAmenities: Array.isArray(formData.propertyDetails?.propertyAmenities)
+          ? formData.propertyDetails.propertyAmenities
+          : [],
+        wholeSpaceAmenities: Array.isArray(formData.propertyDetails?.wholeSpaceAmenities)
+          ? formData.propertyDetails.wholeSpaceAmenities
+          : [],
+        electricitySupply: {
+          powerLoad: Number(formData.propertyDetails?.electricitySupply?.powerLoad) || 0,
+          backup: Boolean(formData.propertyDetails?.electricitySupply?.backup)
+        },
+        propertyAge: String(formData.propertyDetails?.propertyAge || formData.propertyDetails?.age || '0-5'),
+        propertyCondition: formData.propertyDetails?.propertyCondition || formData.propertyDetails?.condition || ''
+      },
+      leaseTerms: {
+        leaseDetails: {
+          leaseAmount: {
+            amount: Number(formData.leaseAmount?.amount) || 0,
+            type: leaseType || 'Fixed',
+            duration: Number(formData.leaseAmount?.duration) || 1,
+            durationUnit: (formData.leaseAmount?.durationUnit || 'Month').toLowerCase()
+          }
+        },
+        tenureDetails: {
+          minimumTenure: Number(formData.leaseTenure?.minimumTenure) || 0,
+          minimumUnit: (formData.leaseTenure?.minimumUnit || '').toLowerCase(),
+          maximumTenure: Number(formData.leaseTenure?.maximumTenure) || 0,
+          maximumUnit: (formData.leaseTenure?.maximumUnit || '').toLowerCase(),
+          lockInPeriod: Number(formData.leaseTenure?.lockInPeriod) || 0,
+          lockInUnit: (formData.leaseTenure?.lockInUnit || '').toLowerCase(),
+          noticePeriod: Number(formData.leaseTenure?.noticePeriod) || 0,
+          noticePeriodUnit: (formData.leaseTenure?.noticePeriodUnit || '').toLowerCase()
+        },
+        maintenanceAmount: {
+          amount: Number(formData.maintenanceAmount?.amount) || 0,
+          frequency: maintenanceFrequency || 'Monthly'
+        },
+        otherCharges: mappedCharges,
+        brokerage: {
+          required: formData.brokerage?.required || 'no',
+          amount: Number(formData.brokerage?.amount) || 0
+        },
+        availability: {
+          availableFrom: formData.availability?.availableFrom || new Date(),
+          availableImmediately: Boolean(formData.availability?.availableImmediately),
+          leaseDuration: formData.availability?.leaseDuration || '',
+          noticePeriod: formData.availability?.noticePeriod || '',
+          petsAllowed: Boolean(formData.availability?.petsAllowed),
+          operatingHours: Boolean(formData.availability?.operatingHours)
+        }
+      },
+      contactInformation: {
+        name: formData.contactDetails?.name || '',
+        email: formData.contactDetails?.email || '',
+        phone: formData.contactDetails?.phone || '',
+        alternatePhone: formData.contactDetails?.alternatePhone || '',
+        bestTimeToContact: formData.contactDetails?.bestTimeToContact || ''
+      },
+      media: uploadedMedia,
+      metadata: {
+        status: 'active',
+        views: 0,
+        favorites: 0,
+        isVerified: false,
+        createdBy: localStorage.getItem('userId') || null
+      }
+    };
+
+    // Log for debugging
+    console.log('Backend Data:', backendData);
+    console.log('Office Space Details in Backend Data:', backendData.officeSpaceDetails);
+    console.log('Other Charges in Backend Data:', backendData.leaseTerms.otherCharges);
+
+    return backendData;
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto text-black">
-      {/* Progress indicator */}
+    <form onSubmit={preventDefault} className="max-w-3xl mx-auto" noValidate>
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           {steps.map((s, i) => (
             <div
               key={i}
-              className={`flex flex-col items-center ${i <= step ? "text-black" : "text-gray-400"}`}
-              onClick={() => i < step && setStep(i)}
-              style={{ cursor: i < step ? "pointer" : "default" }}
+              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
+              onClick={() => i < currentStep && setCurrentStep(i)}
+              style={{ cursor: i < currentStep ? "pointer" : "default" }}
             >
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= step ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
+                  }`}
               >
                 {s.icon}
               </div>
@@ -233,62 +656,64 @@ const LeaseOfficeSpaceMain = () => {
         </div>
         <div className="w-full bg-gray-200 h-1 rounded-full">
           <div
-            className="bg-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(step / (steps.length - 1)) * 100}%` }}
+            className="bg-black text-black h-1 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
           ></div>
         </div>
       </div>
 
-      <h2 className="text-3xl font-bold mb-8 text-black">{steps[step].title}</h2>
-
-      <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-gray-300 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-gray-300 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-gray-300 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-      {steps[step].component}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-gray-800">{steps[currentStep].title}</h2>
       </div>
 
-      <div className="mt-8 flex justify-between">
-          {step > 0 && (
-            <button
-              type="button"
-            onClick={() => setStep((prev) => prev - 1)}
-            className="px-6 py-3 rounded-lg border border-gray-300 hover:border-black text-black transition-colors duration-200 flex items-center"
+      {steps[currentStep].component}
+
+      <div className="mt-8 flex justify-between items-center">
+        {currentStep > 0 && (
+          <button
+            type="button"
+            onClick={handlePrevious}
+            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
+            disabled={isSubmitting}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-              Previous
-            </button>
-          )}
-          {step < steps.length - 1 ? (
-            <button
-              type="button"
-            onClick={() => setStep((prev) => prev + 1)}
-            className="ml-auto px-6 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200 flex items-center"
-            >
-              Next
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            </button>
-          ) : (
-            <button
-              type="submit"
-            className="ml-auto px-6 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200"
-            >
-              List Property
-            </button>
-          )}
+            <ChevronLeft className="mr-2" size={18} />
+            Previous
+          </button>
+        )}
+        {currentStep < steps.length - 1 ? (
+          <button
+            type="button"
+            onClick={handleNext}
+            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+            disabled={!validateCurrentStep() || isSubmitting}
+          >
+            Next
+            <ChevronRight className="ml-2" size={18} />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={(e) => handleSubmit(e)}
+            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                List Property
+                <ChevronRight className="ml-2" size={18} />
+              </>
+            )}
+          </button>
+        )}
       </div>
     </form>
-  )
-}
+  );
+};
 
-export default LeaseOfficeSpaceMain
+export default LeaseOfficeSpaceMain;
 
