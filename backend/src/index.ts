@@ -45,11 +45,10 @@ import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
 import path from "path";
 import bugRouter from "./routes/BugRouter";
-import { Server as SocketIOServer, Socket, Server } from "socket.io";
+import { Server as SocketIOServer, Socket, Server } from "socket.io"
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
-import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
 import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
 import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
@@ -77,12 +76,10 @@ import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
 import commercialLeaseOfficeSpaceRoutes from "./routes/commercial/CommericalLeaseOfficeSpace";
-
 import commercialSellShopRoutes from './routes/commercial/commercialSellShopRoutes';
-
-import commercialLeaseCoveredSpaceRoutes from './routes/commercial/commercialLeaseCoveredSpaceRoutes';
-import commercialLeaseWarehouseRoutes from './routes/commercial/commercialLeaseWarehouseRoutes';
-
+import commercialLeaseCoveredSpaceRoutes from "./routes/commercial/commercialLeaseCoveredSpaceRoutes";
+import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
+import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 
 dotenv.config();
 
@@ -207,7 +204,6 @@ app.use('/api/commercial/sell/shops', commercialSellShopRoutes);
 app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
 app.use('/api/commercial/sell/covered-space', commercialSellCoveredSpaceRoutes);
 
-//openspace
 
 //lease routes
 app.use('/api/commercial/lease/plot', commercialLeasePlotRoutes);
@@ -229,6 +225,7 @@ app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
 app.use('/api/commercial-rent-showrooms', commercialRentShowroom);
 app.use('/api/commercial-rent-sheds', commercialRentSheds);
 app.use('/api/commercial/lease/sheds', commercialLeaseShedRoutes);
+app.use('/api/commercial/shops', commercialShopRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
