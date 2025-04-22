@@ -90,7 +90,7 @@ interface ILeaseTerms {
             amount?: number,
         },
         availability: {
-            availableFrom: Date,
+            date: Date,
             availableImmediately: Boolean,
             preferredSaleDuration: String,
             noticePeriod: String,
@@ -207,6 +207,8 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
     tenureDetails: {
         minimumTenure: {type: String, required: true },
         minimumUnit: {type: String, required: true },
+        maximumTenure: {type: String, required: true },
+        maximumUnit: {type: String, required: true },
         lockInPeriod: {type: String, required: true },
         lockInUnit: {type: String, required: true },
         noticePeriod: {type: String, required: true },
@@ -239,7 +241,7 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
         amount: { type: Number }
     },
     availability: {
-        availableFrom: { type: Date, required: true },
+        date: { type: Date, required: true },
         availableImmediately: { type: Boolean, required: true },
         preferredSaleDuration: { type: String, required: true },
         noticePeriod: { type: String, required: true },

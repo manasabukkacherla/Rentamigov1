@@ -65,7 +65,7 @@ interface FormData {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   leaseTerms: {
@@ -114,7 +114,7 @@ interface FormData {
     };
     availability: {
       // immediate: boolean;
-      availableFrom: Date;
+      date: Date;
       // specificDate: Date;
       availableImmediately: boolean;
       preferredSaleDuration: string;
@@ -194,7 +194,7 @@ const LeaseShopMain = () => {
         backup: false
       },
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: ''
     },
     leaseTerms: {
@@ -243,7 +243,7 @@ const LeaseShopMain = () => {
       },
       availability: {
         // immediate: false,
-        availableFrom: new Date(),
+        date: new Date(),
         // specificDate: new Date(),
         availableImmediately: false,
         preferredSaleDuration: '',
@@ -389,7 +389,7 @@ const LeaseShopMain = () => {
                         backup: details.electricitySupply?.backup || false
                       },
                       waterAvailability: details.waterAvailability || '',
-                      propertyAge: details.propertyAge || 0,
+                      propertyAge: details.propertyAge || '',
                       propertyCondition: details.propertyCondition || ''
                     }
                   }))}
@@ -517,7 +517,7 @@ const LeaseShopMain = () => {
                     ...prev.leaseTerms,
                     availability: {
                       // immediate: availability.immediate || false,
-                      availableFrom: availability.availableFrom || new Date(),
+                      date: availability.date || new Date(),
                       // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
                       availableImmediately: availability.availableImmediately || false,
                       preferredSaleDuration: availability.preferredSaleDuration || '',

@@ -45,10 +45,11 @@ import BlogStats from "./routes/blogs/BlogStatisticsRoutes";
 import userRouter from "./routes/userRouter";
 import path from "path";
 import bugRouter from "./routes/BugRouter";
-import { Server as SocketIOServer, Socket, Server } from "socket.io"
+import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 import socketHandler from "./socketHandler";
+import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
 import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
 import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
@@ -69,18 +70,12 @@ import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
-import commercialLeaseShedRoutes from './routes/commercial/commercialLeaseShedRoutes';
 import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
 import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
-import commercialLeaseOfficeSpaceRoutes from "./routes/commercial/CommericalLeaseOfficeSpace";
-import commercialSellShopRoutes from './routes/commercial/commercialSellShopRoutes';
-import commercialLeaseCoveredSpaceRoutes from "./routes/commercial/commercialLeaseCoveredSpaceRoutes";
-import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
-import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
-
+import commercialLeaseShowroomRoutes from "./routes/commercial/commercialLeaseShowroom";
 dotenv.config();
 
 // Validate required environment variables
@@ -193,39 +188,42 @@ app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
 
+app.use("/api/commercial/sell/shops", commercialShopRoutes);
 app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
 app.use('/api/commercial/sell/warehouses', commercialWarehouseRoutes);
 app.use('/api/commercial/sell/plots', commercialPlotRoutes);
 app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
-app.use('/api/commercial/sell/others', commercialSellOthersRoutes);
+app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
 app.use('/api/commercial/sell/office-space', commercialSellOfficeSpaceRoutes);
 app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
-app.use('/api/commercial/sell/shops', commercialSellShopRoutes);
 app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
 app.use('/api/commercial/sell/covered-space', commercialSellCoveredSpaceRoutes);
-
+//openspace
 
 //lease routes
 app.use('/api/commercial/lease/plot', commercialLeasePlotRoutes);
 app.use('/api/commercial/lease/agriculture', commercialLeaseAgricultureRoutes);
 app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
 app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
-app.use('/api/commercial/lease/retail', commercialLeaseRetailRoutes);
-app.use('/api/commercial/lease/covered-space', commercialLeaseCoveredSpaceRoutes);
-app.use('/api/commercial/lease/warehouse', commercialLeaseWarehouseRoutes);
-app.use('/api/commercial/lease/office-space', commercialLeaseOfficeSpaceRoutes);
+app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
+app.use('/api/commercial/lease/retail-store', commercialLeaseRetailRoutes);
+app.use('/api/commercial/lease/showrooms', commercialLeaseShowroomRoutes);
 
-app.use('/api/commercial/agriculture', commercialrentcultureRoutes);
-app.use('/api/commercial/others', commercialRentOthersRoutes);
-app.use('/api/commercial/office-spaces', commercialRentOfficeSpaceRoutes);
-app.use('/api/commercial-rent-warehouses', commercialRentWarehouseRoutes);
-app.use('/api/commercial-rent-covered-space', commercialRentCoveredSpaceRoutes);
-app.use('/api/commercial-rent-shops', commercialRentShop);
-app.use('/api/commercial-rent-retail-stores', commercialRentRetailStore);
-app.use('/api/commercial-rent-showrooms', commercialRentShowroom);
-app.use('/api/commercial-rent-sheds', commercialRentSheds);
-app.use('/api/commercial/lease/sheds', commercialLeaseShedRoutes);
-app.use('/api/commercial/shops', commercialShopRoutes);
+//rent routes
+app.use('/api/commercial/rent/agriculture', commercialrentcultureRoutes);
+app.use('/api/commercial/rent/others', commercialRentOthersRoutes);
+app.use('/api/commercial/rent/office-spaces', commercialRentOfficeSpaceRoutes);
+app.use('/api/commercial/rent/warehouses', commercialRentWarehouseRoutes);
+app.use('/api/commercial/rent/covered-space', commercialRentCoveredSpaceRoutes);
+app.use('/api/commercial/rent/shops', commercialRentShop);
+app.use('/api/commercial/rent/retail-stores', commercialRentRetailStore);
+app.use('/api/commercial/rent/showrooms', commercialRentShowroom);
+app.use('/api/commercial/rent/sheds', commercialRentSheds);
+app.use('/api/commercial/rent/plots', commercialRentPlot);
+
+
+
+
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

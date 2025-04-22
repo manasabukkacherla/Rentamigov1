@@ -52,8 +52,8 @@ interface propertyDetails {
         powerLoad: number | null;
         backup: boolean;
     };
-    waterAvailability: string[];
-    propertyAge: number | null;
+    waterAvailability: string;
+    propertyAge: string;
     propertyCondition: string;
 }
 interface ILeaseTerms {
@@ -103,15 +103,13 @@ interface ILeaseTerms {
             amount?: number,
         },
         availability: {
-            availableFrom: Date,
+            date: Date,
             availableImmediately: Boolean,
-            leaseDuration: String,
+            preferredSaleDuration: String,
             noticePeriod: String,
-            petsAllowed: Boolean,
-            operatingHours: {
-                restricted: Boolean,
-                restrictions: String
-            }
+            isPetsAllowed: Boolean,
+            operatingHours:  Boolean,
+               
         },
       },
     
@@ -156,10 +154,6 @@ interface ICommercialLeaseShowroom extends Document {
     showroomDetails: showRoomDetails;
     propertyDetails: propertyDetails;
     leaseTerms: ILeaseTerms;
-    brokerage: {
-        required: string;
-        amount: number;
-    };
     availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
@@ -216,8 +210,8 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
             powerLoad: { type: Number, required: false, default: null },
             backup: { type: Boolean, default: false }
         },
-        waterAvailability: { type: [String], default: [] },
-        propertyAge: { type: Number, required: false, default: null },
+        waterAvailability: { type: String, required: false, default: '' },
+        propertyAge: { type: String, required: false, default: '' },
         propertyCondition: { type: String, required: false, default: 'new' }
     },
     
@@ -232,11 +226,13 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
                 },
             },
             tenureDetails: {
-                minimumTenure: {type: String, required: true },
+                minimumTenure: {type: Number, required: true },
                 minimumUnit: {type: String, required: true },
-                lockInPeriod: {type: String, required: true },
+                maximumTenure: {type: Number, required: true },
+                maximumUnit: {type: String, required: true },
+                lockInPeriod: {type: Number, required: true },
                 lockInUnit: {type: String, required: true },
-                noticePeriod: {type: String, required: true },
+                noticePeriod: {type: Number, required: true },
                 noticePeriodUnit: {type: String, required: true },
             },
             maintenanceAmount: {
@@ -262,19 +258,17 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
                 }
             },
             brokerage: {
-                required: { type: String, required: true },
+                required: { type: String, required: false ,default:'no'},
                 amount: { type: Number }
             },
             availability: {
-                availableFrom: { type: Date, required: true },
+                date: { type: Date, required: true },
                 availableImmediately: { type: Boolean, required: true },
-                leaseDuration: { type: String, required: true },
+                preferredSaleDuration: { type: String, required: true },
                 noticePeriod: { type: String, required: true },
-                petsAllowed: { type: Boolean, required: true },
-                operatingHours: {
-                    restricted: { type: Boolean, required: true },
-                    restrictions: { type: String, required: true }  
-                }
+                isPetsAllowed: { type: Boolean, required: true },
+                operatingHours: { type: Boolean, required: true },
+               
             }
           },
           contactInformation: {
@@ -286,15 +280,15 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
           },
           media: {
             photos: {
-              exterior: [{ type: File }], 
-              interior: [{ type: File }], 
-              floorPlan: [{ type: File }], 
-              washrooms: [{ type: File }],
-              lifts: [{ type: File }],
-              emergencyExits: [{ type: File }] 
+              exterior: [{ type: String }], 
+              interior: [{ type: String }], 
+              floorPlan: [{ type: String }], 
+              washrooms: [{ type: String }],
+              lifts: [{ type: String }],
+              emergencyExits: [{ type: String }] 
             },
-            videoTour: { type: File }, 
-            documents: [{ type: File }] 
+            videoTour: { type: String }, 
+            documents: [{ type: String }] 
           },
           metadata: {
             createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
@@ -308,7 +302,6 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
 CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: true });
 CommercialLeaseShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseShowroomSchema.index({ 'basicInformation.state': 1 });
-CommercialLeaseShowroomSchema.index({ 'leaseDetails.expectedRent': 1 });
 CommercialLeaseShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialLeaseShowroomSchema.index({ 'metadata.createdAt': -1 });
 

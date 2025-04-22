@@ -9,7 +9,7 @@ interface CommercialAvailabilityProps {
 
 interface AvailabilityState {
   type: 'immediate' | 'specific';
-  date?: Date;
+  date: Date;
   preferredSaleDuration: string;
   noticePeriod: string;
   isPetsAllowed: boolean;
@@ -19,7 +19,7 @@ interface AvailabilityState {
 const CommercialAvailability = ({ onAvailabilityChange }: CommercialAvailabilityProps) => {
   const [availability, setAvailability] = useState<AvailabilityState>({
     type: 'immediate',
-    date: undefined,
+    date: new Date(),
     preferredSaleDuration: '',
     noticePeriod: '',
     isPetsAllowed: false,

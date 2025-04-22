@@ -66,7 +66,7 @@ interface FormData {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   leaseTerms: {
@@ -193,7 +193,7 @@ const LeaseRetailStoreMain = () => {
         backup: false
       },
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: ''
     },
     leaseTerms: {
@@ -207,13 +207,13 @@ const LeaseRetailStoreMain = () => {
       },
       tenureDetails: {
         minimumTenure: 0,
-    minimumUnit: 'years',
-    maximumTenure: 0,
-    maximumUnit: 'years',
-    lockInPeriod: 0,
-    lockInUnit: 'years',
-    noticePeriod: 0,
-    noticePeriodUnit: 'months'
+        minimumUnit: 'years',
+        maximumTenure: 0,
+        maximumUnit: 'years',
+        lockInPeriod: 0,
+        lockInUnit: 'years',
+        noticePeriod: 0,
+        noticePeriodUnit: 'months'
       },
       maintenanceAmount: {
         amount: 0,
@@ -247,7 +247,7 @@ const LeaseRetailStoreMain = () => {
         preferredSaleDuration: '',
         noticePeriod: '',
         isPetsAllowed: false,
-        operatingHours:  false,
+        operatingHours: false,
       }
     },
     contactInformation: {
@@ -358,7 +358,7 @@ const LeaseRetailStoreMain = () => {
                 propertyDetails: {
                   ...prev.propertyDetails,
                   ...details,
-                  propertyAge: details.propertyAge ?? 0,
+                  propertyAge: details.propertyAge ?? '',
                   electricitySupply: {
                     ...prev.propertyDetails.electricitySupply,
                     ...details.electricitySupply,
@@ -393,9 +393,9 @@ const LeaseRetailStoreMain = () => {
                       leaseDetails: {
                         ...prev.leaseTerms.leaseDetails,
                         leaseAmount: {
-                          amount: Number(amount.amount) || 0,
+                          amount: amount.amount || 0,
                           type: amount.type || 'fixed',
-                          duration: Number(amount.duration) || 0,
+                          duration: amount.duration || 0,
                           durationUnit: amount.durationUnit || 'years'
                         },
                         
@@ -455,15 +455,18 @@ const LeaseRetailStoreMain = () => {
                   }))} 
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage 
-                  onBrokerageChange={(brokerage) => setFormData(prev => ({
-                    ...prev,
-                    leaseTerms: {
-                      ...prev.leaseTerms,
-                      brokerage: { ...prev.leaseTerms.brokerage, ...brokerage }
-                    }
-                  }))} 
-                />
+                <Brokerage
+            onBrokerageChange={(brokerage) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                brokerage: {
+                  required: brokerage.required || 'no',
+                  amount: brokerage.amount || 0
+                }
+              }
+            }))}
+          />
               </div>
             </div>
           </div>
@@ -483,24 +486,7 @@ const LeaseRetailStoreMain = () => {
           </div>
           <div className="space-y-6">
           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-          {/* <CommercialAvailability
-                onAvailabilityChange={(availability) => setFormData(prev => ({
-                  ...prev,
-                  leaseTerms: {
-                    ...prev.leaseTerms,
-                    availability: {
-                      // immediate: availability.immediate || false,
-                      availableFrom: availability.availableFrom || new Date(),
-                      // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
-                      availableImmediately: availability.availableImmediately || false,
-                      preferredSaleDuration: availability.preferredSaleDuration || '',
-                      noticePeriod: availability.noticePeriod || '',
-                      petsAllowed: availability.petsAllowed || false,
-                      operatingHours:availability.operatingHours?.restricted || false,
-                    }
-                  }
-                }))}
-                  /> */}
+          
                    <CommercialAvailability
               onAvailabilityChange={(availability) => setFormData(prev => ({
                 ...prev,
@@ -608,6 +594,13 @@ const LeaseRetailStoreMain = () => {
 
         const transformedData = {
           ...formData,
+          leaseTerms: {
+            ...formData.leaseTerms,
+            brokerage: {
+              required: formData.leaseTerms.brokerage.required || 'no',
+              amount: formData.leaseTerms.brokerage.amount || 0
+            }
+          },
           media: convertedMedia,
           metadata: {
             createdBy: author,
