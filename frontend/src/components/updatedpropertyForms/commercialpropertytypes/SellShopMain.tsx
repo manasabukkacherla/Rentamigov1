@@ -16,7 +16,7 @@ import CommercialAvailability from '../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 
-import { Store, ChevronRight, ChevronLeft, Building2,  UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
+import { Store, ChevronRight, ChevronLeft, Building2, UserCircle, ImageIcon, Calendar, DollarSign, CheckCircle, Loader2 } from "lucide-react"
 import { toast } from 'react-toastify';
 
 const globalStyles = `
@@ -52,7 +52,7 @@ const globalStyles = `
 interface FormData {
   basicInformation: {
     title: string;
-    shopType: string;
+    shopType: string[];
     address: {
       street: string;
       city: string;
@@ -100,21 +100,24 @@ interface FormData {
   pricingDetails: {
     propertyPrice: number;
     pricetype: string;
-    area: number;
-    totalprice: number;
-    pricePerSqft: number;
+    pricecalculator: {
+      area: number;
+      totalprice: number;
+    };
   };
   registration: {
     chargestype: string;
     registrationAmount: number;
     stampDutyAmount: number;
+    brokeragedetails: boolean;
+    brokerageAmount: number;
   };
   brokerage: {
-    required: string;
+    required: boolean;
     amount: number;
   };
   availability: {
-    availableFrom: Date;
+    availableFrom: string;
     availableImmediately: boolean;
     leaseDuration: string;
     noticePeriod: string;
@@ -145,57 +148,12 @@ interface FormData {
   };
 }
 
-// Add validation utility functions
-const validateEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
-};
-
-const validatePhone = (phone: string) => {
-  const phoneRegex = /^[0-9]{10}$/;
-  return phoneRegex.test(phone);
-};
-
-const validateZipCode = (zipCode: string) => {
-  const zipRegex = /^[0-9]{6}$/;
-  return zipRegex.test(zipCode);
-};
-
-const validatePrice = (price: number) => {
-  return price > 0;
-};
-
-const validateArea = (area: number) => {
-  return area > 0;
-};
-
-// Add error display component
-const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
-  if (Object.keys(errors).length === 0) return null;
-  
-  return (
-    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-      <div className="flex items-center">
-        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
-      </div>
-      <ul className="mt-2 list-disc list-inside text-red-600">
-        {Object.values(errors).map((error, index) => (
-          <li key={index} className="text-sm">{error}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
 const SellShopMain = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      shopType: '',
+      shopType: [],
       address: {
         street: '',
         city: '',
@@ -243,21 +201,24 @@ const SellShopMain = () => {
     pricingDetails: {
       propertyPrice: 0,
       pricetype: "fixed",
-      area: 0,
-      totalprice: 0,
-      pricePerSqft: 0
+      pricecalculator: {
+        area: 0,
+        totalprice: 0,
+      }
     },
     registration: {
       chargestype: '',
       registrationAmount: 0,
       stampDutyAmount: 0,
+      brokeragedetails: false,
+      brokerageAmount: 0
     },
     brokerage: {
-      required: 'no',
+      required: false,
       amount: 0
     },
     availability: {
-      availableFrom: new Date(),
+      availableFrom: '',
       availableImmediately: false,
       leaseDuration: '',
       noticePeriod: '',
@@ -290,7 +251,11 @@ const SellShopMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isDebugMode, setIsDebugMode] = useState(false);
+
+  // Function to get auth token
 
   // Check login status on component mount
   useEffect(() => {
@@ -302,185 +267,8 @@ const SellShopMain = () => {
     }
   }, [navigate]);
 
-  // Enhanced validation for current step
-  const validateCurrentStep = () => {
-    const errors: Record<string, string> = {};
-    
-    switch (currentStep) {
-      case 0: // Basic Information
-        if (!formData.basicInformation.title.trim()) {
-          errors.title = 'Title is required';
-        } else if (formData.basicInformation.title.length < 5) {
-          errors.title = 'Title must be at least 5 characters long';
-        }
-
-        if (!formData.basicInformation.shopType) {
-          errors.shopType = 'Shop type is required';
-        }
-
-        if (!formData.basicInformation.address.street.trim()) {
-          errors.street = 'Street address is required';
-        }
-
-        if (!formData.basicInformation.address.city.trim()) {
-          errors.city = 'City is required';
-        }
-
-        if (!formData.basicInformation.address.state.trim()) {
-          errors.state = 'State is required';
-        }
-
-        if (!formData.basicInformation.address.zipCode) {
-          errors.zipCode = 'ZIP code is required';
-        } else if (!validateZipCode(formData.basicInformation.address.zipCode)) {
-          errors.zipCode = 'ZIP code must be 6 digits';
-        }
-
-        if (!formData.basicInformation.landmark.trim()) {
-          errors.landmark = 'Landmark is required';
-        }
-
-        if (!formData.basicInformation.location.latitude || !formData.basicInformation.location.longitude) {
-          errors.location = 'Please select a location on the map';
-        }
-        break;
-      
-      case 1: // Property Details
-        if (!formData.propertyDetails.area.totalArea) {
-          errors.totalArea = 'Total area is required';
-        } else if (!validateArea(formData.propertyDetails.area.totalArea)) {
-          errors.totalArea = 'Total area must be greater than 0';
-        }
-
-        if (!formData.propertyDetails.area.builtUpArea) {
-          errors.builtUpArea = 'Built-up area is required';
-        } else if (!validateArea(formData.propertyDetails.area.builtUpArea)) {
-          errors.builtUpArea = 'Built-up area must be greater than 0';
-        }
-
-        if (!formData.propertyDetails.area.carpetArea) {
-          errors.carpetArea = 'Carpet area is required';
-        } else if (!validateArea(formData.propertyDetails.area.carpetArea)) {
-          errors.carpetArea = 'Carpet area must be greater than 0';
-        }
-
-        if (!formData.propertyDetails.floor.floorNumber) {
-          errors.floorNumber = 'Floor number is required';
-        } else if (formData.propertyDetails.floor.floorNumber < 0) {
-          errors.floorNumber = 'Floor number cannot be negative';
-        }
-
-        if (!formData.propertyDetails.floor.totalFloors) {
-          errors.totalFloors = 'Total floors is required';
-        } else if (formData.propertyDetails.floor.totalFloors <= 0) {
-          errors.totalFloors = 'Total floors must be greater than 0';
-        }
-
-        if (!formData.propertyDetails.facingDirection) {
-          errors.facingDirection = 'Facing direction is required';
-        }
-
-        if (!formData.propertyDetails.furnishingStatus) {
-          errors.furnishingStatus = 'Furnishing status is required';
-        }
-
-        if (!formData.propertyDetails.electricitySupply.powerLoad) {
-          errors.powerLoad = 'Power load is required';
-        } else if (formData.propertyDetails.electricitySupply.powerLoad <= 0) {
-          errors.powerLoad = 'Power load must be greater than 0';
-        }
-
-        if (!formData.propertyDetails.waterAvailability) {
-          errors.waterAvailability = 'Water availability is required';
-        }
-
-        if (!formData.propertyDetails.propertyAge) {
-          errors.propertyAge = 'Property age is required';
-        } else if (formData.propertyDetails.propertyAge < 0) {
-          errors.propertyAge = 'Property age cannot be negative';
-        }
-
-        if (!formData.propertyDetails.propertyCondition) {
-          errors.propertyCondition = 'Property condition is required';
-        }
-        break;
-      
-      case 2: // Pricing Details
-        if (!formData.pricingDetails.propertyPrice) {
-          errors.propertyPrice = 'Property price is required';
-        } else if (!validatePrice(formData.pricingDetails.propertyPrice)) {
-          errors.propertyPrice = 'Property price must be greater than 0';
-        }
-
-        if (!formData.pricingDetails.pricetype) {
-          errors.pricetype = 'Price type is required';
-        }
-
-        if (!formData.pricingDetails.area) {
-          errors.area = 'Area is required';
-        } else if (!validateArea(formData.pricingDetails.area)) {
-          errors.area = 'Area must be greater than 0';
-        }
-
-        if (!formData.pricingDetails.totalprice) {
-          errors.totalprice = 'Total price is required';
-        } else if (!validatePrice(formData.pricingDetails.totalprice)) {
-          errors.totalprice = 'Total price must be greater than 0';
-        }
-        break;
-      
-      case 3: // Availability
-        if (!formData.availability.availableFrom) {
-          errors.availableFrom = 'Available from date is required';
-        }
-
-        if (!formData.availability.leaseDuration) {
-          errors.leaseDuration = 'Lease duration is required';
-        }
-
-        if (!formData.availability.noticePeriod) {
-          errors.noticePeriod = 'Notice period is required';
-        }
-        break;
-      
-      case 4: // Contact Information
-        if (!formData.contactInformation.name.trim()) {
-          errors.name = 'Name is required';
-        } else if (formData.contactInformation.name.length < 3) {
-          errors.name = 'Name must be at least 3 characters long';
-        }
-
-        if (!formData.contactInformation.email.trim()) {
-          errors.email = 'Email is required';
-        } else if (!validateEmail(formData.contactInformation.email)) {
-          errors.email = 'Please enter a valid email address';
-        }
-
-        if (!formData.contactInformation.phone.trim()) {
-          errors.phone = 'Phone number is required';
-        } else if (!validatePhone(formData.contactInformation.phone)) {
-          errors.phone = 'Please enter a valid 10-digit phone number';
-        }
-
-        if (formData.contactInformation.alternatePhone && !validatePhone(formData.contactInformation.alternatePhone)) {
-          errors.alternatePhone = 'Please enter a valid 10-digit phone number';
-        }
-        break;
-      
-      case 5: // Property Media
-        if (!formData.media.photos.exterior.length) {
-          errors.exteriorPhotos = 'At least one exterior photo is required';
-        }
-        break;
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const renderFormSection = (content: React.ReactNode) => (
     <div className="space-y-4">
-      <ErrorDisplay errors={formErrors} />
       {content}
     </div>
   );
@@ -550,7 +338,20 @@ const SellShopMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => handleChange('pricingDetails', price)} />
+                <Price onPriceChange={(price) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    pricingDetails: {
+                      ...prev.pricingDetails,
+                      propertyPrice: price.propertyPrice,
+                      pricetype: price.pricetype,
+                      pricecalculator: {
+                        area: price.area || 0,
+                        totalprice: price.totalprice || 0
+                      }
+                    }
+                  }));
+                }} />
                 <PricePerSqft
                   propertyPrice={formData.pricingDetails.propertyPrice}
                   Area={formData.propertyDetails.area}
@@ -559,9 +360,10 @@ const SellShopMain = () => {
                       ...prev,
                       pricingDetails: {
                         ...prev.pricingDetails,
-                        area: data.area,
-                        totalprice: data.totalprice,
-                        pricePerSqft: data.pricePerSqft
+                        pricecalculator: {
+                          area: data.area || 0,
+                          totalprice: data.totalprice || 0
+                        }
                       }
                     }));
                   }}
@@ -573,11 +375,30 @@ const SellShopMain = () => {
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
                 <div className="text-black">
-                  <RegistrationCharges onRegistrationChargesChange={(charges) => handleChange('registration', charges)} />
+                  <RegistrationCharges onRegistrationChargesChange={(charges) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      registration: {
+                        chargestype: charges.chargestype,
+                        registrationAmount: charges.registrationAmount,
+                        stampDutyAmount: charges.stampDutyAmount,
+                        brokeragedetails: false,
+                        brokerageAmount: 0
+                      }
+                    }));
+                  }} />
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => handleChange('brokerage', brokerage)} />
+                  <Brokerage onBrokerageChange={(brokerage) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      brokerage: {
+                        required: brokerage.required === 'yes',
+                        amount: brokerage.amount
+                      }
+                    }));
+                  }} />
                 </div>
               </div>
             </div>
@@ -670,62 +491,155 @@ const SellShopMain = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
+    console.log(formData);
+    
+    setIsSubmitting(true);
+    
     try {
       const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
+      if (!user) {
+        toast.error('Please log in to continue');
+        navigate('/login');
+        return;
+      }
+      
+      const userData = JSON.parse(user);
+      const author = userData.id;
+      const token = userData.token;
+      
+      console.log("User authenticated:", { userId: author });
+      console.log("Converting media files...");
+      
+      // Convert all image files to base64
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+        },
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+      };
+      
+      console.log("Media conversion complete");
 
-        const convertedMedia = {
-          photos: {
-            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-          },
-          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-        };
-        console.log(formData)
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date()
+      // Create a payload with all the necessary data
+      const transformedData = {
+        basicInformation: {
+          ...formData.basicInformation,
+          // Ensure shopType is an array
+          shopType: Array.isArray(formData.basicInformation.shopType) 
+            ? formData.basicInformation.shopType 
+            : [formData.basicInformation.shopType].filter(Boolean),
+          // Convert location coordinates to numbers
+          location: {
+            latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
+            longitude: parseFloat(formData.basicInformation.location.longitude) || 0
           }
-        };
-
-
-        console.log(transformedData);
-        const response = await axios.post('/api/commercial/sell/shops', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
+        },
+        propertyDetails: {
+          ...formData.propertyDetails,
+          // Fix propertyAge to ensure it's a number
+          propertyAge: typeof formData.propertyDetails.propertyAge === 'string' 
+            ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
+            : formData.propertyDetails.propertyAge || 0
+        },
+        shopDetails: formData.shopDetails,
+        pricingDetails: formData.pricingDetails,
+        registration: {
+          ...formData.registration,
+          // Convert chargestype to expected enum values
+          chargestype: formData.registration.chargestype || 'inclusive'
+        },
+        brokerage: {
+          // Convert required from string to boolean if needed
+          required: typeof formData.brokerage.required === 'string' 
+            ? formData.brokerage.required === 'yes' 
+            : Boolean(formData.brokerage.required),
+          amount: formData.brokerage.amount
+        },
+        availability: {
+          // Ensure all required fields are present
+          availableImmediately: formData.availability.availableImmediately === true,
+          availableFrom: formData.availability.availableFrom 
+            ? new Date(formData.availability.availableFrom)
+            : new Date(),
+          leaseDuration: formData.availability.leaseDuration || 'Not Specified',
+          noticePeriod: formData.availability.noticePeriod || 'Not Specified',
+          petsAllowed: formData.availability.petsAllowed === true,
+          operatingHours: {
+            restricted: formData.availability.operatingHours?.restricted === true,
+            restrictions: formData.availability.operatingHours?.restrictions || 'No restrictions'
           }
-        });
-        console.log(response.data)
+        },
+        contactInformation: formData.contactInformation,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          status: 'active'
+        }
+      };
 
-        if (response.data.success) {
-          toast.success('Commercial shop listing created successfully!');
+      console.log("Sending request to backend...");
+      console.log("Request endpoint:", '/api/commercial/sell/shops');
+      
+      // Send the data to the backend
+      const response = await axios.post('/api/commercial/sell/shops', transformedData, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log("Response received:", response.data);
+      
+      if (response.data.success) {
+        setFormSubmitted(true);
+        toast.success('Commercial shop listing created successfully!');
+        
+        // Show the property ID to the user
+        if (response.data.data && response.data.data.propertyId) {
+          toast.info(`Your property ID is: ${response.data.data.propertyId}`);
         }
       } else {
-        navigate('/login');
+        console.error("API returned success: false", response.data);
+        throw new Error(response.data.message || 'Failed to create listing');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to create commercial shop listing. Please try again.');
+      
+      // Handle different types of errors
+      if (error.response) {
+        // Server responded with an error status code
+        const errorMessage = error.response.data.message || error.response.data.error || 'Server error occurred';
+        toast.error(`Submission failed: ${errorMessage}`);
+        
+        // Display validation errors if any
+        if (error.response.data.validationErrors) {
+          console.error('Validation errors:', error.response.data.validationErrors);
+          Object.values(error.response.data.validationErrors).forEach((message: any) => {
+            toast.error(`Validation error: ${message}`);
+          });
+        }
+      } else if (error.request) {
+        // Request was made but no response received
+        toast.error('Network error: Please check your internet connection');
+      } else {
+        // Something else happened while setting up the request
+        toast.error(`Error: ${error.message || 'An unknown error occurred'}`);
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleNext = () => {
-    if (validateCurrentStep()) {
-      if (currentStep < formSections.length - 1) {
-        setCurrentStep(currentStep + 1);
-      }
-    } else {
-      toast.error('Please fill in all required fields');
+    if (currentStep < formSections.length - 1) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
@@ -734,6 +648,52 @@ const SellShopMain = () => {
       setCurrentStep(currentStep - 1);
     }
   };
+
+  // Debug function to test API connection
+  const testApiConnection = async () => {
+    try {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('Please log in to continue');
+        return;
+      }
+      
+      const userData = JSON.parse(user);
+      const token = userData.token;
+      
+      // Test request to the API
+      const response = await axios.get('/api/commercial/sell/shops', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('API connection test successful:', response.data);
+      toast.success('API connection successful!');
+    } catch (error: any) {
+      console.error('API connection test failed:', error);
+      
+      if (error.response) {
+        toast.error(`API test failed with status ${error.response.status}: ${error.response.data.error || 'Unknown error'}`);
+      } else if (error.request) {
+        toast.error('Network error: No response received from server');
+      } else {
+        toast.error(`Error: ${error.message}`);
+      }
+    }
+  };
+
+  // Toggle debug mode with Ctrl+Shift+D
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+        setIsDebugMode(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   if (!isLoggedIn) {
     return (
@@ -798,34 +758,72 @@ const SellShopMain = () => {
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
+          
+          {isDebugMode && (
+            <button
+              onClick={testApiConnection}
+              className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            >
+              Test API Connection
+            </button>
+          )}
         </div>
 
-        {formSections[currentStep].content}
+        {formSubmitted ? (
+          <div className="bg-green-50 border-l-4 border-green-500 p-8 rounded-lg text-center">
+            <div className="flex flex-col items-center justify-center">
+              <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
+              <h3 className="text-2xl font-bold text-green-800 mb-2">Listing Submitted Successfully!</h3>
+              <p className="text-green-600 mb-6">Your commercial shop listing has been created.</p>
+              <button 
+                onClick={() => navigate('/dashboard/properties')} 
+                className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Go to My Properties
+              </button>
+            </div>
+          </div>
+        ) : (
+          formSections[currentStep].content
+        )}
       </div>
 
       {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              : 'bg-white text-black hover:bg-black hover:text-white'
+      {!formSubmitted && (
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
+                currentStep === 0
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Previous
-          </button>
-          <button
-            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-          >
-            {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
-          </button>
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
+            </button>
+            <button
+              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+              disabled={isSubmitting}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  {currentStep === formSections.length - 1 ? 'Submit Listing' : 'Next'}
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

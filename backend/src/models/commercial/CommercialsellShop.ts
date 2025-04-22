@@ -27,18 +27,20 @@ interface IBasicInformation {
 interface IPricingDetails {
   propertyPrice: number;
   pricetype: "fixed" | "negotiable";
-  area: number;
-  totalprice: number;
-  pricePerSqft: number;
+  pricecalculator: {
+    area: number;
+    totalprice: number;
+  };
 }
 
 interface IAvailability {
-  availableFrom?: string;
+  
   availableImmediately: boolean;
+  availableFrom?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
-  operatingHours: {
+  operatingHours: { 
     restricted: boolean;
     restrictions: string;
   };
@@ -68,6 +70,7 @@ interface IMedia {
 interface IMetadata {
   createdBy: Types.ObjectId;
   createdAt: Date;
+  status?: 'active' | 'inactive' | 'deleted';
 }
 
 interface IFloor {
@@ -90,7 +93,7 @@ interface ICommercialShop extends Document {
       powerLoad: number;
       backup: boolean;
     };
-    waterAvailability: string[];
+    waterAvailability: string;
     propertyAge: number;
     propertyCondition: string;
   };
@@ -110,8 +113,8 @@ interface ICommercialShop extends Document {
     stampDutyAmount?: number;
   }
   brokerage: {
-    required: string;
-    amount: number;
+    required: boolean;
+    amount?: number;
   };
   availability: IAvailability;
   contactInformation: IContactInformation;
@@ -156,7 +159,7 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
       powerLoad: { type: Number },
       backup: { type: Boolean, default: false }
     },
-    waterAvailability: [{ type: String }],
+    waterAvailability: { type: String },
     propertyAge: { type: Number },
     propertyCondition: { type: String }
   },
@@ -172,9 +175,10 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   pricingDetails: {
     propertyPrice: { type: Number, required: true },
     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
-    area: { type: Number, required: true },
-    totalprice: { type: Number, required: true },
-    pricePerSqft: { type: Number, required: true }
+    pricecalculator: {
+      area: { type: Number, required: true },
+      totalprice: { type: Number, required: true },
+    },
   },
   registration: {
     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
@@ -184,19 +188,16 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     brokerageAmount: { type: Number, required: false }
   },
   brokerage: {
-    required: { type: String, enum: ['yes', 'no'], required: true },
+    required: { type: Boolean, required: true },
     amount: { type: Number, required: false }
   },
   availability: {
-    availableFrom: { type: String },
+    availableFrom: { type: Date, required: false },
     availableImmediately: { type: Boolean, required: true },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
-    petsAllowed: { type: Boolean, default: false },
-    operatingHours: {
-      restricted: { type: Boolean, required: true },
-      restrictions: { type: String }
-    }
+    petsAllowed: { type: Boolean, required: true },
+    operatingHours: { type: Object, required: true }
   },
   contactInformation: {
     name: { type: String, required: true },
@@ -219,7 +220,8 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    status: { type: String, enum: ['active', 'inactive', 'deleted'], default: 'active' }
   }
 }, {
   timestamps: true

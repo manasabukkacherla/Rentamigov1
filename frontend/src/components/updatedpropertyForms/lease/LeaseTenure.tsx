@@ -120,7 +120,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
             <input
               type="number"
               min="0"
-              value={tenure.noticePeriod || ''   }
+              value={tenure.noticePeriod || ''}
               onChange={(e) => handleChange('noticePeriod', e.target.value)}
               placeholder="Enter notice period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-blue-300"
