@@ -614,34 +614,7 @@ const RentCoveredSpace = () => {
     }));
   };
 
-  // const handlePropertyDetailsChange = (details: Record<string, any>) => {
-  //   setFormData(prev => ({
-  //     ...prev,
-  //     propertyDetails: {
-  //       ...prev.propertyDetails,
-  //       area: {
-  //         totalArea: details.totalArea ? parseFloat(details.totalArea) : 0,
-  //         builtUpArea: details.builtUpArea ? parseFloat(details.builtUpArea) : 0,
-  //         carpetArea: details.carpetArea ? parseFloat(details.carpetArea) : 0
-  //       },
-  //       floor: {
-  //         floorNumber: details.floorNumber ? parseInt(details.floorNumber) : 0,
-  //         totalFloors: details.totalFloors ? parseInt(details.totalFloors) : 0
-  //       },
-  //       facingDirection: details.facingDirection || '',
-  //       furnishingStatus: details.furnishingStatus || '',
-  //       propertyAmenities: details.propertyAmenities || [],
-  //       wholeSpaceAmenities: details.wholeSpaceAmenities || [],
-  //       electricitySupply: {
-  //         powerLoad: details.powerLoad ? parseFloat(details.powerLoad) : 0,
-  //         backup: details.backup || false
-  //       },
-  //       waterAvailability: details.waterAvailability || '',
-  //       propertyAge: details.propertyAge ? parseInt(details.propertyAge) : 0,
-  //       propertyCondition: details.propertyCondition || ''
-  //     }
-  //   }));
-  // };
+  
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
@@ -1009,12 +982,9 @@ const RentCoveredSpace = () => {
         };
 
         // Send the data to the backend
-        // const response = await axios.post('/api/commercial-rent-covered-space', transformedData, {
-        //   headers: {
-        //     'Content-Type': 'application/json'
         const token = JSON.parse(user).token;
         const response = await axios.post(
-          `/api/commercial-rent-covered-space`,
+          `/api/commercial/rent/covered-space`,
           transformedData,
           {
             headers: {

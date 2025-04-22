@@ -70,8 +70,8 @@ interface FormData {
       powerLoad: number | null;
       backup: boolean;
     };
-    waterAvailability: string[];
-    propertyAge: number | null;
+    waterAvailability: string;
+    propertyAge: string;
     propertyCondition: string;
   };
   leaseTerms: {
@@ -120,15 +120,12 @@ interface FormData {
       amount?: number;
     };
     availability: {
-      availableFrom: Date;
+      date: Date;
       availableImmediately: boolean;
       leaseDuration: string;
       noticePeriod: string;
-      petsAllowed: boolean;
-      operatingHours: {
-        restricted: boolean;
-        restrictions: string;
-      };
+      isPetsAllowed: boolean;
+      operatingHours:boolean;
     };
   };
   contactInformation: {
@@ -205,65 +202,62 @@ const LeaseShowroomMain = () => {
         powerLoad: null,
         backup: false
       },
-      waterAvailability: [],
-      propertyAge: null,
+      waterAvailability: '',
+      propertyAge: '',
       propertyCondition: ''
     },
     leaseTerms: {
       leaseDetails: {
         leaseAmount: {
           amount: 0,
-          type: '',
+          type: 'fixed',
           duration: 0,
-          durationUnit: ''
+          durationUnit: 'years'
         }
       },
       tenureDetails: {
         minimumTenure: 0,
-        minimumUnit: '',
+        minimumUnit: 'years',
         maximumTenure: 0,
-        maximumUnit: '',
+        maximumUnit: 'years',
         lockInPeriod: 0,
-        lockInUnit: '',
+        lockInUnit: 'years',
         noticePeriod: 0,
-        noticePeriodUnit: ''
+        noticePeriodUnit: 'months'
       },
       maintenanceAmount: {
         amount: 0,
-        frequency: ''
+        frequency: 'monthly'
       },
       otherCharges: {
         water: {
-          amount: undefined,
-          type: ''
+          amount: 0,
+          type: 'inclusive'
         },
         electricity: {
-          amount: undefined,
-          type: ''
+          amount: 0,
+          type: 'inclusive'
         },
         gas: {
-          amount: undefined,
-          type: ''
+          amount: 0,
+          type: 'inclusive'
         },
         others: {
-          amount: undefined,
-          type: ''
+          amount: 0,
+          type: 'inclusive'
         }
       },
       brokerage: {
-        required: '',
-        amount: undefined
+        required: 'no',
+        amount: 0
       },
       availability: {
-        availableFrom: new Date(),
+        date: new Date(),
         availableImmediately: false,
         leaseDuration: '',
         noticePeriod: '',
-        petsAllowed: false,
-        operatingHours: {
-          restricted: false,
-          restrictions: ''
-        }
+        isPetsAllowed: false,
+        operatingHours: false,
       }
     },
     contactInformation: {
@@ -365,13 +359,34 @@ const LeaseShowroomMain = () => {
             <ShowroomDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                showroomDetails: { ...prev.showroomDetails, ...details }
+                showroomDetails: {
+                  ...prev.showroomDetails,
+                  ...details,
+                  totalSpace: details.totalSpace ?? 0,
+                  frontageWidth: details.frontageWidth ?? 0,
+                  ceilingHeight: details.ceilingHeight ?? 0,
+                  lightingType: details.lightingType ?? '',
+                  acInstalled: details.acInstalled ?? false,
+                  nearbyCompetitors: details.nearbyCompetitors ?? { present: false, brandNames: '' },
+                  displayRacks: details.displayRacks ?? false 
+                }
               }))}
             />
+
             <CommercialPropertyDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                propertyDetails: { ...prev.propertyDetails, ...details }
+                propertyDetails: {
+                  ...prev.propertyDetails,
+                  ...details,
+                  propertyAge: details.propertyAge ?? '',
+                  electricitySupply: {
+                    ...prev.propertyDetails.electricitySupply,
+                    ...details.electricitySupply,
+                    powerLoad: details.electricitySupply?.powerLoad ?? 0
+                  },
+                  waterAvailability: details.waterAvailability
+                }
               }))}
             />
           </div>
@@ -398,7 +413,12 @@ const LeaseShowroomMain = () => {
                       ...prev.leaseTerms,
                       leaseDetails: {
                         ...prev.leaseTerms.leaseDetails,
-                        ...amount
+                        leaseAmount: {
+                          amount: Number(amount.amount) || 0,
+                          type: amount.type || 'fixed',
+                          duration: Number(amount.duration) || 0,
+                          durationUnit: amount.durationUnit || 'years'
+                        }
                       }
                     }
                   }))} 
@@ -409,8 +429,14 @@ const LeaseShowroomMain = () => {
                     leaseTerms: {
                       ...prev.leaseTerms,
                       tenureDetails: {
-                        ...prev.leaseTerms.tenureDetails,
-                        ...tenure
+                        minimumTenure: Number(tenure.minimumTenure) || 0,
+                        minimumUnit: tenure.minimumUnit || 'years',
+                        maximumTenure: Number(tenure.maximumTenure) || 0,
+                        maximumUnit: tenure.maximumUnit || 'years',
+                        lockInPeriod: Number(tenure.lockInPeriod) || 0,
+                        lockInUnit: tenure.lockInUnit || 'years',
+                        noticePeriod: Number(tenure.noticePeriod) || 0,
+                        noticePeriodUnit: tenure.noticePeriodUnit || 'months'
                       }
                     }
                   }))} 
@@ -453,8 +479,8 @@ const LeaseShowroomMain = () => {
                     leaseTerms: {
                       ...prev.leaseTerms,
                       brokerage: {
-                        ...prev.leaseTerms.brokerage,
-                        ...brokerage
+                        required: brokerage.required || 'no',
+                        amount: Number(brokerage.amount) || 0
                       }
                     }
                   }))} 
@@ -483,7 +509,12 @@ const LeaseShowroomMain = () => {
                   availability: {
                     ...prev.leaseTerms.availability,
                     ...availability,
-                    availableFrom: availability.availableImmediately ? new Date() : availability.availableFrom
+                    leaseDuration: availability.leaseDuration,
+                    noticePeriod: availability.noticePeriod ?? '',
+                    isPetsAllowed: availability.isPetsAllowed ?? false,
+                    operatingHours: availability.operatingHours ?? false,
+
+                    date: availability.availableImmediately ? new Date() : availability.date
                   }
                 }
               }))}
@@ -587,7 +618,7 @@ const LeaseShowroomMain = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial-showrooms/lease', transformedData, {
+        const response = await axios.post('/api/commercial/lease/showrooms', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

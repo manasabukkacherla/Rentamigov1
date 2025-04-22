@@ -75,7 +75,7 @@ import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeas
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
-
+import commercialLeaseShowroomRoutes from "./routes/commercial/commercialLeaseShowroom";
 dotenv.config();
 
 // Validate required environment variables
@@ -205,6 +205,9 @@ app.use('/api/commercial/lease/plot', commercialLeasePlotRoutes);
 app.use('/api/commercial/lease/agriculture', commercialLeaseAgricultureRoutes);
 app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
 app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
+app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
+app.use('/api/commercial/lease/retail-store', commercialLeaseRetailRoutes);
+app.use('/api/commercial/lease/showrooms', commercialLeaseShowroomRoutes);
 
 //rent routes
 app.use('/api/commercial/rent/agriculture', commercialrentcultureRoutes);
@@ -219,8 +222,6 @@ app.use('/api/commercial/rent/sheds', commercialRentSheds);
 app.use('/api/commercial/rent/plots', commercialRentPlot);
 
 
-app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
-app.use('/api/commercial/lease/retail-store', commercialLeaseRetailRoutes);
 
 
 

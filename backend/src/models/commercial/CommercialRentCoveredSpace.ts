@@ -183,7 +183,7 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
       backup: { type: Boolean, default: false },
     },
     waterAvailability: { type: String, required: true },
-    propertyAge: { type: String, required: true }, // ✅ Changed to Number
+    propertyAge: { type: String, required: true }, 
     propertyCondition: { type: String, required: true },
   },
   rentalTerms: {
@@ -235,7 +235,7 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     bestTimeToContact: { type: String },
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, // ✅ Corrected ObjectId
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
     createdAt: { type: Date, default: Date.now },
   },
 }, {
