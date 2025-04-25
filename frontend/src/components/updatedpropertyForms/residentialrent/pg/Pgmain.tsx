@@ -145,6 +145,51 @@ function Pgmain() {
   return (
     <div className="min-h-screen bg-gray-50">
       <style>{globalStyles}</style>
+      
+      {/* Progress Bar */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={section.id}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                      index <= currentStep
+                        ? 'bg-black text-white'
+                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                    }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${
+                      index <= currentStep
+                        ? 'text-black'
+                        : 'text-gray-500 group-hover:text-gray-700'
+                    }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${
+                        index < currentStep ? 'bg-black' : 'bg-gray-200'
+                      }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
@@ -152,111 +197,65 @@ function Pgmain() {
           <p className="text-gray-600 mt-2">Fill in the details below to list your PG property</p>
         </div>
 
-        {/* Main Content with Steps */}
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* Left Sidebar - Steps Navigation */}
-          <div className="md:w-1/4">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sticky top-8">
-              <h3 className="font-medium text-gray-900 mb-4 pb-2 border-b">Form Sections</h3>
-              <ul className="space-y-1">
-                {formSections.map((section, index) => (
-                  <li key={section.id}>
-                    <button
-                      onClick={() => {
-                        setCurrentStep(index);
-                        window.scrollTo(0, 0);
-                      }}
-                      className={`w-full flex items-center p-2 rounded-md text-sm transition-colors ${
-                        currentStep === index
-                          ? "bg-black text-white"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <span className="mr-3">{section.icon}</span>
-                      <span>{section.title}</span>
-                      {currentStep === index && (
-                        <ChevronRight className="ml-auto h-4 w-4" />
-                      )}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 pt-4 border-t">
-                <div className="text-sm text-gray-600 mb-2">
-                  Progress: {Math.round(((currentStep + 1) / formSections.length) * 100)}%
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-black h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${((currentStep + 1) / formSections.length) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
+        {/* Form Content */}
+        <div className="space-y-8">
+          {/* Current Section Title */}
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-black rounded-lg text-white">
+              {formSections[currentStep].icon}
             </div>
+            <h2 className="text-2xl font-semibold text-gray-900">
+              {formSections[currentStep].title}
+            </h2>
           </div>
 
-          {/* Right Content - Current Form Section */}
-          <div className="md:w-3/4">
-            <div className="space-y-8">
-              {/* Current Section Title */}
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-black rounded-lg text-white">
-                  {formSections[currentStep].icon}
-                </div>
-                <h2 className="text-2xl font-semibold text-gray-900">
-                  {formSections[currentStep].title}
-                </h2>
-              </div>
+          {/* Form Section Content */}
+          {renderFormSection(formSections[currentStep].component)}
 
-              {/* Form Section Content */}
-              {renderFormSection(formSections[currentStep].component)}
+          {/* Navigation Buttons */}
+          <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              className={`
+                flex items-center gap-2 px-5 py-2 rounded-md text-sm font-medium transition-colors
+                ${currentStep === 0 
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                }
+              `}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Previous</span>
+            </button>
 
-              {/* Navigation Buttons */}
-              <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
-                <button
-                  onClick={handlePrevious}
-                  disabled={currentStep === 0}
-                  className={`
-                    flex items-center gap-2 px-5 py-2 rounded-md text-sm font-medium transition-colors
-                    ${currentStep === 0 
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                    }
-                  `}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  <span>Previous</span>
-                </button>
-
-                {currentStep < formSections.length - 1 ? (
-                  <button
-                    onClick={handleNext}
-                    className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-                  >
-                    <span>Next</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+            {currentStep < formSections.length - 1 ? (
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+              >
+                <span>Next</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Submitting...</span>
+                  </>
                 ) : (
-                  <button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Submitting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Submit</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
+                  <>
+                    <span>Submit</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </>
                 )}
-              </div>
-            </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
