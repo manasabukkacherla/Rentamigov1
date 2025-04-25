@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check, Bed, Armchair } from 'lucide-react';
 
 interface Amenity {
   id: string;
@@ -38,41 +39,68 @@ const SingleRoomAmenities = () => {
   };
 
   return (
-    <div className="p-6 bg-black text-white">
-      <h1 className="text-2xl font-bold mb-6">Single Room Amenities</h1>
+    <div className="space-y-4">
+      <div className="flex items-center mb-2">
+        <Bed className="w-4 h-4 text-gray-500 mr-2" />
+        <p className="text-sm text-gray-500">
+          Select the amenities available in single occupancy rooms
+        </p>
+      </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {amenities.map((amenity) => (
-          <div key={amenity.id} className="flex items-center">
-            <input
-              type="checkbox"
-              id={amenity.id}
-              checked={selectedAmenities.has(amenity.id)}
-              onChange={() => handleAmenityChange(amenity.id)}
-              className="h-5 w-5 border-white rounded bg-black checked:bg-white checked:border-white focus:ring-white focus:ring-2"
-            />
-            <label htmlFor={amenity.id} className="ml-3 text-white flex items-center">
+          <div 
+            key={amenity.id} 
+            onClick={() => handleAmenityChange(amenity.id)}
+            className={`
+              flex items-center p-3 rounded-md border cursor-pointer transition-colors
+              ${selectedAmenities.has(amenity.id) 
+                ? 'border-black bg-black/5 hover:bg-black hover:text-white' 
+                : 'border-gray-200 hover:border-black hover:bg-black hover:text-white'
+              }
+            `}
+          >
+            <div className={`
+              w-4 h-4 flex-shrink-0 flex items-center justify-center border rounded-sm transition-colors
+              ${selectedAmenities.has(amenity.id) 
+                ? 'bg-black border-black text-white' 
+                : 'border-gray-300'
+              }
+              group-hover:border-white
+            `}>
+              {selectedAmenities.has(amenity.id) && <Check className="w-3 h-3" />}
+            </div>
+            
+            <label htmlFor={amenity.id} className="ml-2 text-sm flex-grow cursor-pointer">
               {amenity.label}
               {amenity.isOptional && (
-                <span className="ml-2 text-sm text-gray-400">(Optional)</span>
+                <span className={`ml-1 text-xs ${selectedAmenities.has(amenity.id) ? 'text-gray-500' : 'text-gray-500'} hover:text-white`}>(Optional)</span>
               )}
             </label>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-white mt-6 pt-4">
-        <h2 className="text-lg font-semibold mb-2">Selected Amenities:</h2>
-        <div className="text-sm">
-          <ul className="list-disc list-inside">
-            {Array.from(selectedAmenities).map(amenityId => (
-              <li key={amenityId}>
-                {amenities.find(a => a.id === amenityId)?.label}
-              </li>
-            ))}
-          </ul>
+      {selectedAmenities.size > 0 && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="flex items-center mb-3">
+            <Armchair className="w-4 h-4 text-gray-500 mr-2" />
+            <h3 className="text-sm font-medium text-gray-900">Selected Amenities</h3>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            {Array.from(selectedAmenities).map(amenityId => {
+              const amenity = amenities.find(a => a.id === amenityId);
+              return (
+                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-gray-800 hover:bg-black hover:text-white transition-colors">
+                  <Check className="w-3 h-3 mr-1" />
+                  <span>{amenity?.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

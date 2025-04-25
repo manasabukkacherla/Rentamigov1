@@ -8,34 +8,26 @@ interface Amenity {
   isShared?: boolean;
 }
 
-const ThreeShareRoomAmenities = () => {
+const DoubleShareRoomAmenities = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
 
   const amenities: Amenity[] = [
     { id: 'bed-single-1', label: 'Single Bed (Occupant 1)' },
     { id: 'bed-single-2', label: 'Single Bed (Occupant 2)' },
-    { id: 'bed-single-3', label: 'Single Bed (Occupant 3)' },
     { id: 'bed-double-1', label: 'Double Bed (Occupant 1)' },
     { id: 'bed-double-2', label: 'Double Bed (Occupant 2)' },
-    { id: 'bed-double-3', label: 'Double Bed (Occupant 3)' },
     { id: 'mattress-1', label: 'Mattress (Occupant 1)' },
     { id: 'mattress-2', label: 'Mattress (Occupant 2)' },
-    { id: 'mattress-3', label: 'Mattress (Occupant 3)' },
     { id: 'pillow-1', label: 'Pillow (Occupant 1)' },
     { id: 'pillow-2', label: 'Pillow (Occupant 2)' },
-    { id: 'pillow-3', label: 'Pillow (Occupant 3)' },
     { id: 'bedsheet-1', label: 'Bedsheet (Occupant 1)' },
     { id: 'bedsheet-2', label: 'Bedsheet (Occupant 2)' },
-    { id: 'bedsheet-3', label: 'Bedsheet (Occupant 3)' },
     { id: 'blanket-1', label: 'Blanket (Occupant 1)' },
     { id: 'blanket-2', label: 'Blanket (Occupant 2)' },
-    { id: 'blanket-3', label: 'Blanket (Occupant 3)' },
     { id: 'wardrobe-1', label: 'Wardrobe/Storage Unit (Occupant 1)' },
     { id: 'wardrobe-2', label: 'Wardrobe/Storage Unit (Occupant 2)' },
-    { id: 'wardrobe-3', label: 'Wardrobe/Storage Unit (Occupant 3)' },
     { id: 'study-set-1', label: 'Study Table and Chair (Occupant 1)' },
     { id: 'study-set-2', label: 'Study Table and Chair (Occupant 2)' },
-    { id: 'study-set-3', label: 'Study Table and Chair (Occupant 3)' },
     { id: 'study-set-shared', label: 'Shared Study Table and Chair', isShared: true },
     { id: 'fan', label: 'Ceiling Fan', isShared: true },
     { id: 'lights', label: 'Lights', isShared: true },
@@ -45,7 +37,6 @@ const ThreeShareRoomAmenities = () => {
     { id: 'curtains', label: 'Curtains for Privacy', isShared: true },
     { id: 'charging-1', label: 'Personal Charging Points (Occupant 1)' },
     { id: 'charging-2', label: 'Personal Charging Points (Occupant 2)' },
-    { id: 'charging-3', label: 'Personal Charging Points (Occupant 3)' },
     { id: 'mirror', label: 'Mirror', isShared: true }
   ];
 
@@ -101,7 +92,7 @@ const ThreeShareRoomAmenities = () => {
       <div className="flex items-center mb-1">
         <Users className="w-4 h-4 text-gray-500 mr-2" />
         <p className="text-sm text-gray-500">
-          Select the amenities available in triple occupancy rooms
+          Select the amenities available in double occupancy rooms
         </p>
       </div>
       
@@ -154,4 +145,4 @@ const ThreeShareRoomAmenities = () => {
   );
 };
 
-export default ThreeShareRoomAmenities;
+export default DoubleShareRoomAmenities; 

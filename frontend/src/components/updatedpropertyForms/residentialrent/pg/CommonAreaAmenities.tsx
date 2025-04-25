@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wifi, Tv, RefrigeratorIcon, WashingMachine, Microwave, UtensilsCrossed, Droplets } from 'lucide-react';
+import { Wifi, Tv, RefrigeratorIcon, WashingMachine, Microwave, UtensilsCrossed, Droplets, Check } from 'lucide-react';
 
 interface Amenity {
   id: string;
@@ -70,52 +70,73 @@ const CommonAreaAmenities = () => {
   };
 
   return (
-    <div className="p-4 bg-black text-white">
-      <h1 className="text-xl font-bold mb-4">Common Area Amenities</h1>
+    <div className="space-y-6">
+      <div className="pb-4 mb-4 border-b border-gray-200">
+        <p className="text-sm text-gray-500">
+          Select the amenities available in common areas of your PG accommodation
+        </p>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {amenities.map((amenity) => (
           <div 
             key={amenity.id} 
-            className="bg-gray-900 rounded-lg p-3 flex items-start space-x-3 hover:bg-gray-800 transition-colors"
+            onClick={() => handleAmenityChange(amenity.id)}
+            className={`
+              flex items-start p-4 rounded-lg border cursor-pointer transition-colors
+              ${selectedAmenities.has(amenity.id) 
+                ? 'border-black bg-black/5 hover:bg-black/10' 
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+              }
+            `}
           >
-            <div className="flex-shrink-0 mt-0.5">
+            <div className={`
+              flex-shrink-0 p-1.5 rounded-md mr-3
+              ${selectedAmenities.has(amenity.id) ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}
+            `}>
               {amenity.icon}
             </div>
+            
             <div className="flex-grow">
               <div className="flex items-center justify-between">
-                <label htmlFor={amenity.id} className="text-sm font-medium flex items-center">
+                <label htmlFor={amenity.id} className="text-sm font-medium text-gray-900 cursor-pointer">
                   {amenity.label}
                   {amenity.isOptional && (
-                    <span className="ml-1 text-xs text-gray-400">(Optional)</span>
+                    <span className="ml-1 text-xs text-gray-500">(Optional)</span>
                   )}
                 </label>
-                <input
-                  type="checkbox"
-                  id={amenity.id}
-                  checked={selectedAmenities.has(amenity.id)}
-                  onChange={() => handleAmenityChange(amenity.id)}
-                  className="h-4 w-4 border-white rounded bg-black checked:bg-white checked:border-white focus:ring-1 focus:ring-white"
-                />
+                <div className={`
+                  w-5 h-5 flex items-center justify-center rounded-md border
+                  ${selectedAmenities.has(amenity.id) 
+                    ? 'bg-black border-black text-white' 
+                    : 'border-gray-300'
+                  }
+                `}>
+                  {selectedAmenities.has(amenity.id) && <Check className="w-3.5 h-3.5" />}
+                </div>
               </div>
-              <p className="text-xs text-gray-400 mt-0.5">{amenity.description}</p>
+              <p className="text-xs text-gray-500 mt-1">{amenity.description}</p>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-gray-800 mt-6 pt-4">
-        <h2 className="text-base font-semibold mb-3">Selected Common Area Amenities:</h2>
-        <div className="text-sm">
-          <ul className="list-disc list-inside space-y-1">
-            {Array.from(selectedAmenities).map(amenityId => (
-              <li key={amenityId} className="text-gray-300 text-sm">
-                {amenities.find(a => a.id === amenityId)?.label}
-              </li>
-            ))}
-          </ul>
+      {selectedAmenities.size > 0 && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <h3 className="text-sm font-medium text-gray-900 mb-3">Selected Amenities</h3>
+          <div className="flex flex-wrap gap-2">
+            {Array.from(selectedAmenities).map(amenityId => {
+              const amenity = amenities.find(a => a.id === amenityId);
+              return (
+                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-gray-800">
+                  <span className="mr-1.5">{amenity?.icon}</span>
+                  <span>{amenity?.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
