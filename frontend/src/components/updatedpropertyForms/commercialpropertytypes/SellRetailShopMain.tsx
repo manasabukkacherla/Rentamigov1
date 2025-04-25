@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import PropertyName from "../PropertyName"
 import RetailStoreType from "../CommercialComponents/RetailStoreType"
@@ -51,6 +51,7 @@ interface FormDataState {
       longitude: number;
     };
     isCornerProperty: boolean;
+    shopType?: string[];
   };
   retailStoreDetails: {
     location: string;
@@ -215,6 +216,7 @@ const SellRetailShopMain = () => {
   const [currentStep, setCurrentStep] = useState(0)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Check login status on component mount
   useEffect(() => {
@@ -255,7 +257,7 @@ const SellRetailShopMain = () => {
             <div className="space-y-6">
               <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })} />
               <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })} />
-              
+
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
               />
@@ -341,7 +343,7 @@ const SellRetailShopMain = () => {
                 })} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -439,17 +441,17 @@ const SellRetailShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload 
+            <CommercialMediaUpload
               onMediaChange={(mediaData) => {
-                setFormData({ 
-                  ...formData, 
+                setFormData({
+                  ...formData,
                   media: {
                     images: mediaData.images,
-                    video: mediaData.video || null, 
+                    video: mediaData.video || null,
                     documents: mediaData.documents
-                  } 
+                  }
                 });
-              }} 
+              }}
             />
           </div>
         </div>
@@ -462,6 +464,20 @@ const SellRetailShopMain = () => {
     if (validateCurrentStep()) {
       if (currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -471,6 +487,20 @@ const SellRetailShopMain = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -478,20 +508,20 @@ const SellRetailShopMain = () => {
   function validateCurrentStep(): boolean {
     switch (currentStep) {
       case 0: // Basic Information
-        return !!formData.basicInformation.title && 
-               formData.basicInformation.retailStoreType.length > 0 &&
-               !!formData.basicInformation.address.street;
+        return !!formData.basicInformation.title &&
+          formData.basicInformation.retailStoreType.length > 0 &&
+          !!formData.basicInformation.address.street;
       case 1: // Property Details
-        return !!formData.retailStoreDetails.location && 
-               formData.propertyDetails.area.totalArea > 0;
+        return !!formData.retailStoreDetails.location &&
+          formData.propertyDetails.area.totalArea > 0;
       case 2: // Pricing Details
         return formData.priceDetails.price > 0;
       case 3: // Availability
         return !!formData.priceDetails.availability.type;
       case 4: // Contact Information
-        return !!formData.contactInformation.name && 
-               !!formData.contactInformation.email && 
-               !!formData.contactInformation.phone;
+        return !!formData.contactInformation.name &&
+          !!formData.contactInformation.email &&
+          !!formData.contactInformation.phone;
       default:
         return true;
     }
@@ -501,7 +531,7 @@ const SellRetailShopMain = () => {
     e.preventDefault();
     console.log('Form Data:', formData);
     setIsSubmitting(true);
-    
+
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
@@ -513,7 +543,7 @@ const SellRetailShopMain = () => {
       const userData = JSON.parse(user);
       const author = userData.id;
       const token = sessionStorage.getItem('token');
-      
+
       // Convert media files to base64
       const convertFileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -556,13 +586,106 @@ const SellRetailShopMain = () => {
       };
 
       console.log('Sending data to backend with author ID:', author);
-      
+
       const transformedData = {
-        basicInformation: formData.basicInformation,
-        retailStoreDetails: formData.retailStoreDetails,
-        propertyDetails: formData.propertyDetails,
-        priceDetails: formData.priceDetails,
-        contactInformation: formData.contactInformation,
+        basicInformation: {
+          ...formData.basicInformation,
+          shopType: Array.isArray(formData.basicInformation.shopType)
+            ? formData.basicInformation.shopType
+            : (formData.basicInformation.shopType ? [formData.basicInformation.shopType] : []),
+          location: {
+            latitude: formData.basicInformation.location.latitude,
+            longitude: formData.basicInformation.location.longitude
+          },
+          address: {
+            street: formData.basicInformation.address.street,
+            city: formData.basicInformation.address.city,
+            state: formData.basicInformation.address.state,
+            zipCode: formData.basicInformation.address.zipCode
+          },
+          landmark: formData.basicInformation.landmark,
+          isCornerProperty: formData.basicInformation.isCornerProperty,
+          possessionStatus: formData.propertyDetails.possessionStatus,
+          ownershipType: formData.propertyDetails.ownershipType,
+          propertyAge: formData.propertyDetails.propertyAge,
+          propertyCondition: formData.propertyDetails.propertyCondition,
+          facingDirection: formData.propertyDetails.facingDirection,
+          furnishingStatus: formData.propertyDetails.furnishingStatus,
+          propertyAmenities: formData.propertyDetails.propertyAmenities,
+          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
+          electricitySupply: {
+            powerLoad: formData.propertyDetails.electricitySupply.powerLoad,
+            backup: formData.propertyDetails.electricitySupply.backup
+          },
+          waterAvailability: formData.propertyDetails.waterAvailability,
+          area: {
+            totalArea: formData.propertyDetails.area.totalArea,
+            carpetArea: formData.propertyDetails.area.carpetArea,
+            builtUpArea: formData.propertyDetails.area.builtUpArea
+          },
+          floor: {
+            floorNumber: formData.propertyDetails.floor.floorNumber,
+            totalFloors: formData.propertyDetails.floor.totalFloors
+          }
+        },
+        retailStoreDetails: {
+          location: formData.retailStoreDetails.location,
+          anchorStores: formData.retailStoreDetails.anchorStores,
+          footfallData: formData.retailStoreDetails.footfallData,
+          signageAllowed: formData.retailStoreDetails.signageAllowed,
+          sharedWashrooms: formData.retailStoreDetails.sharedWashrooms,
+          fireExit: formData.retailStoreDetails.fireExit
+        },
+        propertyDetails: {
+          ...formData.propertyDetails,
+          area: {
+            totalArea: parseFloat(formData.propertyDetails.area.totalArea.toString()),
+            carpetArea: parseFloat(formData.propertyDetails.area.carpetArea.toString()),
+            builtUpArea: parseFloat(formData.propertyDetails.area.builtUpArea.toString())
+          },
+          floor: {
+            floorNumber: parseInt(formData.propertyDetails.floor.floorNumber.toString()),
+            totalFloors: parseInt(formData.propertyDetails.floor.totalFloors.toString())
+          },
+          facingDirection: formData.propertyDetails.facingDirection,
+          furnishingStatus: formData.propertyDetails.furnishingStatus,
+          propertyAmenities: formData.propertyDetails.propertyAmenities,
+          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
+          electricitySupply: {
+            powerLoad: parseFloat(formData.propertyDetails.electricitySupply.powerLoad.toString()),
+            backup: formData.propertyDetails.electricitySupply.backup
+          },
+          waterAvailability: formData.propertyDetails.waterAvailability,
+          propertyAge: parseInt(formData.propertyDetails.propertyAge.toString()),
+          propertyCondition: formData.propertyDetails.propertyCondition
+        },
+        priceDetails: {
+          ...formData.priceDetails,
+          price: parseFloat(formData.priceDetails.price.toString()),
+          pricePerSqft: parseFloat(formData.priceDetails.pricePerSqft.toString()),
+          isNegotiable: formData.priceDetails.isNegotiable,
+          registrationCharges: {
+            registrationAmount: parseFloat(formData.priceDetails.registrationCharges.registrationAmount.toString()),
+            stampDuty: parseFloat(formData.priceDetails.registrationCharges.stampDuty.toString()),
+            otherCharges: parseFloat(formData.priceDetails.registrationCharges.otherCharges.toString())
+          },
+          brokerage: {
+            required: formData.priceDetails.brokerage.required,
+            amount: parseFloat(formData.priceDetails.brokerage.amount.toString())
+          },
+          availability: {
+            type: formData.priceDetails.availability.type,
+            date: formData.priceDetails.availability.date
+          }
+        },
+        contactInformation: {
+          ...formData.contactInformation,
+          name: formData.contactInformation.name,
+          email: formData.contactInformation.email,
+          phone: formData.contactInformation.phone,
+          alternatePhone: formData.contactInformation.alternatePhone,
+          bestTimeToContact: formData.contactInformation.bestTimeToContact
+        },
         media: convertedMedia,
         metadata: {
           createdBy: author,
@@ -599,7 +722,7 @@ const SellRetailShopMain = () => {
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
-      
+
       // Improved error handling with better user feedback
       if (error.response) {
         // Server responded with an error
@@ -648,16 +771,14 @@ const SellRetailShopMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -665,9 +786,8 @@ const SellRetailShopMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -679,7 +799,7 @@ const SellRetailShopMain = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -687,7 +807,7 @@ const SellRetailShopMain = () => {
 
         <form onSubmit={handleSubmit}>
           {steps[currentStep].component}
-          
+
           {/* Navigation Buttons */}
           <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
             <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
@@ -695,11 +815,10 @@ const SellRetailShopMain = () => {
                 type="button"
                 onClick={handlePrevious}
                 disabled={currentStep === 0}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-                  currentStep === 0
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5 mr-2" />
                 Previous

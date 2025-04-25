@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropertyName from '../PropertyName';
 import ShedType from '../CommercialComponents/ShedType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -340,6 +340,7 @@ const RentShed = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const formSections = [
     {
@@ -631,15 +632,54 @@ const RentShed = () => {
     }
   ];
 
+  // Simple validation function
+  const validateCurrentStep = () => {
+    // For simplicity, just return true
+    // In a real implementation, this would validate the fields in the current step
+    return true;
+  };
+
   const handleNext = () => {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (validateCurrentStep()) {
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -733,8 +773,8 @@ const RentShed = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="mb-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div ref={formRef} className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
@@ -758,9 +798,8 @@ const RentShed = () => {
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             disabled={isSubmitting}
           >
             {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}
