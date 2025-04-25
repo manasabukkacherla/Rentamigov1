@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { toast } from 'react-toastify'
 import MapSelector from "../MapSelector"
 import ShopDetails from "../CommercialComponents/ShopDetails"
@@ -179,6 +179,7 @@ interface CommercialMediaUploadProps {
 
 const RentShopMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -371,20 +372,20 @@ const RentShopMain = () => {
             }))}
           />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-              <MaintenanceAmount
-                onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                  ...prev,
-                  rentalTerms: {
-                    ...prev.rentalTerms,
-                    maintenanceAmount: {
-                      amount: maintenance.amount,
-                      frequency: maintenance.frequency
-                    }
+            <MaintenanceAmount
+              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  maintenanceAmount: {
+                    amount: maintenance.amount,
+                    frequency: maintenance.frequency
                   }
-                }))}
-              />
-            )}
-            <SecurityDeposit
+                }
+              }))}
+            />
+          )}
+          <SecurityDeposit
             onSecurityDepositChange={(deposit) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -501,24 +502,66 @@ const RentShopMain = () => {
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
-    } 
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handleStepClick = (index: number) => {
     setCurrentStep(index)
+    // Scroll to top of the form
+    setTimeout(() => {
+      if (formRef.current) {
+        window.scrollTo({
+          top: formRef.current.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     console.log(formData)
-    
+
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -579,7 +622,7 @@ const RentShopMain = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 sm:p-10">
+        <div ref={formRef} className="p-6 sm:p-10">
           <div className="mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
             <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
@@ -624,11 +667,10 @@ const RentShopMain = () => {
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0 || isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-                  currentStep === 0 || isSubmitting
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0 || isSubmitting
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5 mr-2" />
                 Previous
@@ -636,9 +678,8 @@ const RentShopMain = () => {
               <button
                 onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
                 disabled={isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
-                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
+                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
               >
                 {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />

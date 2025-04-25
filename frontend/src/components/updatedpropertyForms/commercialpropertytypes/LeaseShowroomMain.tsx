@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
 import PropertyName from "../PropertyName"
 import ShowroomType from "../CommercialComponents/ShowroomType"
@@ -125,7 +125,7 @@ interface FormData {
       leaseDuration: string;
       noticePeriod: string;
       isPetsAllowed: boolean;
-      operatingHours:boolean;
+      operatingHours: boolean;
     };
   };
   contactInformation: {
@@ -284,6 +284,7 @@ const LeaseShowroomMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
+  const formRef = useRef<HTMLDivElement>(null)
 
   const steps = [
     {
@@ -368,7 +369,7 @@ const LeaseShowroomMain = () => {
                   lightingType: details.lightingType ?? '',
                   acInstalled: details.acInstalled ?? false,
                   nearbyCompetitors: details.nearbyCompetitors ?? { present: false, brandNames: '' },
-                  displayRacks: details.displayRacks ?? false 
+                  displayRacks: details.displayRacks ?? false
                 }
               }))}
             />
@@ -406,7 +407,7 @@ const LeaseShowroomMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
               <div className="space-y-4">
-                <LeaseAmount 
+                <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -421,9 +422,9 @@ const LeaseShowroomMain = () => {
                         }
                       }
                     }
-                  }))} 
+                  }))}
                 />
-                <LeaseTenure 
+                <LeaseTenure
                   onLeaseTenureChange={(tenure) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -439,15 +440,15 @@ const LeaseShowroomMain = () => {
                         noticePeriodUnit: tenure.noticePeriodUnit || 'months'
                       }
                     }
-                  }))} 
+                  }))}
                 />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4">
-                <MaintenanceAmount 
+                <MaintenanceAmount
                   onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -457,10 +458,10 @@ const LeaseShowroomMain = () => {
                         ...maintenance
                       }
                     }
-                  }))} 
+                  }))}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges 
+                <OtherCharges
                   onOtherChargesChange={(charges) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -470,10 +471,10 @@ const LeaseShowroomMain = () => {
                         ...charges
                       }
                     }
-                  }))} 
+                  }))}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage 
+                <Brokerage
                   onBrokerageChange={(brokerage) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -483,7 +484,7 @@ const LeaseShowroomMain = () => {
                         amount: Number(brokerage.amount) || 0
                       }
                     }
-                  }))} 
+                  }))}
                 />
               </div>
             </div>
@@ -639,12 +640,38 @@ const LeaseShowroomMain = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -663,16 +690,14 @@ const LeaseShowroomMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -680,9 +705,8 @@ const LeaseShowroomMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -694,7 +718,7 @@ const LeaseShowroomMain = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -710,11 +734,10 @@ const LeaseShowroomMain = () => {
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous

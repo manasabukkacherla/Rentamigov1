@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
@@ -171,7 +171,7 @@ interface MediaUploadProps {
 // Error display component for validation errors
 const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   if (Object.keys(errors).length === 0) return null;
-  
+
   return (
     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
       <div className="flex items-center">
@@ -191,6 +191,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 
 const RentRetailStoreMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -356,22 +357,22 @@ const RentRetailStoreMain = () => {
                 onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
               />
               <Landmark
-            onLandmarkChange={(landmark) => setFormData(prev => ({
-              ...prev,
-              basicInformation: { ...prev.basicInformation, landmark }
-            }))}
-            onLocationSelect={(location) => setFormData(prev => ({
-              ...prev,
-              basicInformation: {
-                ...prev.basicInformation,
-                location: {
-                  latitude: parseFloat(location.latitude),
-                  longitude: parseFloat(location.longitude)
-                }
-              }
-            }))}
-          />
-              
+                onLandmarkChange={(landmark) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: { ...prev.basicInformation, landmark }
+                }))}
+                onLocationSelect={(location) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    location: {
+                      latitude: parseFloat(location.latitude),
+                      longitude: parseFloat(location.longitude)
+                    }
+                  }
+                }))}
+              />
+
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
               />
@@ -444,8 +445,8 @@ const RentRetailStoreMain = () => {
               <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
               <div className="space-y-4 text-black">
                 <Rent onRentChange={(rent) => {
-                  setFormData({ 
-                    ...formData, 
+                  setFormData({
+                    ...formData,
                     rentalTerms: {
                       ...formData.rentalTerms,
                       rentDetails: {
@@ -472,7 +473,7 @@ const RentRetailStoreMain = () => {
                 }} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -587,6 +588,20 @@ const RentRetailStoreMain = () => {
     if (validateCurrentStep()) {
       if (currentStep < formSections.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -596,6 +611,20 @@ const RentRetailStoreMain = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -721,7 +750,7 @@ const RentRetailStoreMain = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div ref={formRef} className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
@@ -745,9 +774,8 @@ const RentRetailStoreMain = () => {
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             disabled={isSubmitting}
           >
             {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}

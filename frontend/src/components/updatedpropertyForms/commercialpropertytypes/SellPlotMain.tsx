@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -154,6 +154,7 @@ const globalStyles = `
 
 const SellPlotMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       propertyName: "",
@@ -489,12 +490,40 @@ const SellPlotMain = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -676,7 +705,7 @@ const SellPlotMain = () => {
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div ref={formRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex justify-center">
             <div className="flex items-center space-x-2">

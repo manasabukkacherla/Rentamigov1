@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import PropertyName from "../PropertyName"
 import CoveredOpenSpaceType from "../CommercialComponents/CoveredOpenSpaceType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -14,13 +14,13 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { 
-  MapPin, 
-  Building2, 
-  DollarSign, 
-  Calendar, 
-  Warehouse, 
-  ImageIcon, 
+import {
+  MapPin,
+  Building2,
+  DollarSign,
+  Calendar,
+  Warehouse,
+  ImageIcon,
   UserCircle,
   ChevronLeft,
   ChevronRight,
@@ -57,6 +57,7 @@ const SellCoveredSpaceMain = () => {
   })
 
   const [currentStep, setCurrentStep] = useState(0)
+  const formRef = useRef<HTMLDivElement>(null)
 
   const steps = [
     {
@@ -90,7 +91,7 @@ const SellCoveredSpaceMain = () => {
                 onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               />
               <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
-              
+
               <CornerProperty
                 onCornerPropertyChange={(isCorner) =>
                   setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
@@ -137,7 +138,7 @@ const SellCoveredSpaceMain = () => {
                 <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -202,21 +203,21 @@ const SellCoveredSpaceMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload 
+            <CommercialMediaUpload
               onMediaChange={(mediaInput) => {
                 // Extract just the URLs from image files
-                const photoUrls = mediaInput.images.flatMap(img => 
+                const photoUrls = mediaInput.images.flatMap(img =>
                   img.files.map(file => file.url)
                 );
-                
-                setFormData((prev) => ({ 
-                  ...prev, 
+
+                setFormData((prev) => ({
+                  ...prev,
                   media: {
                     photos: photoUrls,
                     video: mediaInput.video?.url || null
                   }
                 }));
-              }} 
+              }}
             />
           </div>
         </div>
@@ -227,12 +228,40 @@ const SellCoveredSpaceMain = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   }
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   }
 
@@ -240,7 +269,7 @@ const SellCoveredSpaceMain = () => {
     // Format address from form data
     const addressData = formData.address as any;
     const photoUrls = formData.media.photos;
-    
+
     // Organize photos by categories - this can be enhanced based on your UI's categorization
     const photos = {
       exterior: photoUrls.slice(0, Math.min(2, photoUrls.length)),
@@ -250,10 +279,10 @@ const SellCoveredSpaceMain = () => {
       lifts: photoUrls.slice(6, Math.min(7, photoUrls.length)),
       emergencyExits: photoUrls.slice(7, photoUrls.length)
     };
-    
+
     // Get property details
     const propertyDetailsData = formData.propertyDetails as any;
-    
+
     return {
       basicInformation: {
         title: formData.propertyName,
@@ -358,7 +387,7 @@ const SellCoveredSpaceMain = () => {
 
       console.log("Response:", response.data);
       toast.success("Property listed successfully!");
-      
+
       // Redirect to listing page or dashboard
     } catch (err: any) {
       console.error("Error submitting form:", err);
@@ -385,16 +414,14 @@ const SellCoveredSpaceMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -402,9 +429,8 @@ const SellCoveredSpaceMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -416,7 +442,7 @@ const SellCoveredSpaceMain = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -439,11 +465,10 @@ const SellCoveredSpaceMain = () => {
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
@@ -462,9 +487,8 @@ const SellCoveredSpaceMain = () => {
               type="submit"
               onClick={handleSubmit}
               disabled={loading}
-              className={`flex items-center px-6 py-2 rounded-lg ${
-                loading ? "bg-gray-600" : "bg-black hover:bg-gray-800"
-              } text-white transition-all duration-200`}
+              className={`flex items-center px-6 py-2 rounded-lg ${loading ? "bg-gray-600" : "bg-black hover:bg-gray-800"
+                } text-white transition-all duration-200`}
             >
               {loading ? "Submitting..." : "Submit"}
               {!loading && <ChevronRight className="w-5 h-5 ml-2" />}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import PropertyName from "../PropertyName"
 import OtherCommercialType from "../CommercialComponents/OtherCommercialType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -16,18 +16,18 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { 
-  MapPin, 
-  Building2, 
-  DollarSign, 
-  Calendar, 
-  User, 
-  Image, 
-  FileQuestion, 
-  ImageIcon, 
+import {
+  MapPin,
+  Building2,
+  DollarSign,
+  Calendar,
+  User,
+  Image,
+  FileQuestion,
+  ImageIcon,
   UserCircle,
   ChevronLeft,
-  ChevronRight 
+  ChevronRight
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -45,9 +45,9 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: { 
-    latitude: string; 
-    longitude: string 
+  coordinates: {
+    latitude: string;
+    longitude: string
   };
   isCornerProperty: boolean;
   propertyDetails: {
@@ -127,6 +127,7 @@ interface FormData {
 
 const SellOthersMain = () => {
   const navigate = useNavigate()
+  const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     propertyName: "",
     commercialType: [],
@@ -190,7 +191,7 @@ const SellOthersMain = () => {
       alternatePhone: "",
       bestTimeToContact: ""
     },
-    media: { 
+    media: {
       photos: {
         exterior: [],
         interior: [],
@@ -238,7 +239,7 @@ const SellOthersMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               />
-              <Landmark 
+              <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
                   ...prev,
@@ -248,7 +249,7 @@ const SellOthersMain = () => {
                   }
                 }))}
               />
-              
+
               <CornerProperty
                 onCornerPropertyChange={(isCorner) =>
                   setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
@@ -286,7 +287,7 @@ const SellOthersMain = () => {
                 // Merge the returned details with our existing propertyDetails
                 // This preserves the otherDetails structure
                 Object.assign(updatedDetails, details);
-                setFormData((prev) => ({ 
+                setFormData((prev) => ({
                   ...prev,
                   propertyDetails: updatedDetails
                 }));
@@ -309,9 +310,9 @@ const SellOthersMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => 
-                  setFormData((prev) => ({ 
-                    ...prev, 
+                <Price onPriceChange={(price) =>
+                  setFormData((prev) => ({
+                    ...prev,
                     price: {
                       expectedPrice: parseFloat(price.propertyPrice.toString()),
                       isNegotiable: price.pricetype === 'negotiable'
@@ -320,15 +321,15 @@ const SellOthersMain = () => {
                 } />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
                 <div className="text-black">
                   <RegistrationCharges
                     onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({ 
-                        ...prev, 
+                      setFormData((prev) => ({
+                        ...prev,
                         registrationCharges: {
                           included: charges.included,
                           amount: charges.amount,
@@ -340,13 +341,13 @@ const SellOthersMain = () => {
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage 
-                    onBrokerageChange={(brokerage) => 
-                      setFormData((prev) => ({ 
-                        ...prev, 
-                        brokerage: brokerage as FormData['brokerage'] 
+                  <Brokerage
+                    onBrokerageChange={(brokerage) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        brokerage: brokerage as FormData['brokerage']
                       }))
-                    } 
+                    }
                   />
                 </div>
               </div>
@@ -395,8 +396,8 @@ const SellOthersMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({ 
-                ...prev, 
+              onContactChange={(contact) => setFormData((prev) => ({
+                ...prev,
                 contactDetails: contact as FormData['contactDetails']
               }))}
             />
@@ -414,7 +415,7 @@ const SellOthersMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload 
+            <CommercialMediaUpload
               onMediaChange={(media) => {
                 const photos: Record<string, File[]> = {};
                 media.images.forEach(({ category, files }) => {
@@ -456,20 +457,48 @@ const SellOthersMain = () => {
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
+      setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
-  }
+  };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
+      setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
-  }
+  };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     console.log("Form Data:", formData)
-    
+
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
@@ -477,9 +506,9 @@ const SellOthersMain = () => {
         // navigate('/login');
         return;
       }
-      
+
       const author = JSON.parse(user).id;
-      
+
       // Convert uploaded files to base64 strings
       const convertedMedia = {
         photos: {
@@ -494,7 +523,7 @@ const SellOthersMain = () => {
         videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
         documents: await Promise.all((formData.media?.documents || []).map(convertFileToBase64))
       };
-      
+
       // Create payload matching the backend model structure
       const transformedData = {
         propertyName: formData.propertyName,
@@ -517,14 +546,14 @@ const SellOthersMain = () => {
           createdAt: new Date()
         }
       };
-      
+
       // Send data to API
       const response = await axios.post('/api/commercial/sell/others', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
-      
+
       if (response.data) {
         toast.success('Commercial property successfully listed!');
         // Navigate to dashboard
@@ -551,16 +580,14 @@ const SellOthersMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -568,9 +595,8 @@ const SellOthersMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -598,11 +624,10 @@ const SellOthersMain = () => {
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous

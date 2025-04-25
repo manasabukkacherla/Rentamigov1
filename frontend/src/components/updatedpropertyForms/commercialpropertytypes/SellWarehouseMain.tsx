@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronRight, ChevronLeft } from "lucide-react"
 import PropertyName from "../PropertyName"
 import WarehouseType from "../CommercialComponents/WarehouseType"
@@ -241,6 +241,8 @@ const SellWarehouseMain = () => {
   const [, setSubmitError] = useState<string | null>(null)
 
   const [currentStep, setCurrentStep] = useState(0)
+  const formRef = useRef<HTMLDivElement>(null)
+
   const steps = [
     {
       title: "Basic Information",
@@ -307,11 +309,11 @@ const SellWarehouseMain = () => {
               // Ensure waterAvailability is treated as string array
               const modifiedDetails = {
                 ...details,
-                waterAvailability: Array.isArray(details.waterAvailability) 
-                  ? details.waterAvailability 
+                waterAvailability: Array.isArray(details.waterAvailability)
+                  ? details.waterAvailability
                   : details.waterAvailability ? [details.waterAvailability] : []
               };
-              
+
               setFormData(prev => ({
                 ...prev,
                 propertyDetails: {
@@ -321,7 +323,7 @@ const SellWarehouseMain = () => {
                     ...prev.propertyDetails.electricitySupply,
                     powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
                   },
-                  propertyAge: typeof details.propertyAge === 'string' 
+                  propertyAge: typeof details.propertyAge === 'string'
                     ? parseInt(String(details.propertyAge).split('-')[0], 10) || 0
                     : Number(details.propertyAge) || prev.propertyDetails.propertyAge
                 }
@@ -430,25 +432,49 @@ const SellWarehouseMain = () => {
   ]
 
   const handleNext = () => {
-    // if (validateCurrentStep()) {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
-      // }
-    } else {
-      toast.error('Please fill in all required fields');
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handleStepClick = (index: number) => {
     setCurrentStep(index)
   }
-  
+
   const navigate = useNavigate();
 
   const convertFileToBase64 = (file: File): Promise<string> => {
@@ -494,10 +520,10 @@ const SellWarehouseMain = () => {
           },
           propertyDetails: {
             ...formData.propertyDetails,
-            waterAvailability: Array.isArray(formData.propertyDetails.waterAvailability) 
+            waterAvailability: Array.isArray(formData.propertyDetails.waterAvailability)
               ? formData.propertyDetails.waterAvailability[0] || 'scheduled'
               : formData.propertyDetails.waterAvailability,
-            propertyAge: typeof formData.propertyDetails.propertyAge === 'string' 
+            propertyAge: typeof formData.propertyDetails.propertyAge === 'string'
               ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
               : formData.propertyDetails.propertyAge || 0
           },
@@ -582,7 +608,7 @@ const SellWarehouseMain = () => {
             </div>
           </div>
 
-          <div className="max-w-5xl mx-auto px-4 py-8">
+          <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
             <div className="mb-8">
               <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
               <p className="text-gray-600">Please fill in the details for your property</p>
@@ -597,11 +623,10 @@ const SellWarehouseMain = () => {
               <button
                 onClick={handlePrevious}
                 disabled={currentStep === 0 || isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-                  currentStep === 0 || isSubmitting
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0 || isSubmitting
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5 mr-2" />
                 Previous
@@ -609,9 +634,8 @@ const SellWarehouseMain = () => {
               <button
                 onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
                 disabled={isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
-                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
+                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
               >
                 {isSubmitting ? "Submitting..." : currentStep === steps.length - 1 ? 'Submit' : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />

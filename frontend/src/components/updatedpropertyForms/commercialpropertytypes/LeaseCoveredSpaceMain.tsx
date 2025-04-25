@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -83,6 +83,7 @@ const LeaseCoveredSpaceMain = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Form prevention utility function
   const preventDefault = (e: React.MouseEvent | React.FormEvent) => {
