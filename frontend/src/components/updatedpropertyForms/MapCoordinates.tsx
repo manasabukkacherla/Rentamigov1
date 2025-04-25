@@ -51,9 +51,6 @@ const MapCoordinates: React.FC<MapCoordinatesProps> = ({
           </p>
         )}
       </div>
-      <div className="mt-3 text-sm text-gray-500">
-        <p>Click on the map to set the property location or search for an address.</p>
-      </div>
     </div>
   )
 }

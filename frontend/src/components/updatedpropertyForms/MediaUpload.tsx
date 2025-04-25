@@ -97,10 +97,18 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
     e.stopPropagation();
     handleFileSelect(category, e.dataTransfer.files);
   };
-
   const removeFile = (category: keyof typeof media, index: number) => {
-    const updatedFiles = [...media[category]];
-    updatedFiles.splice(index, 1);
+    const currentFiles = media[category];
+    let updatedFiles: File[] = [];
+    
+    if (Array.isArray(currentFiles)) {
+      updatedFiles = [...currentFiles];
+      updatedFiles.splice(index, 1);
+    } else if (currentFiles) {
+      // Handle single file case (like videoTour)
+      updatedFiles = [];
+    }
+
     setMedia(prev => ({ ...prev, [category]: updatedFiles }));
     onMediaChange?.({
       ...media,
@@ -110,7 +118,15 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
 
   const handleCameraCapture = (image: File) => {
     if (currentCategory) {
-      const updatedFiles = [...media[currentCategory], image].slice(0, 5);
+      const currentFiles = media[currentCategory];
+      let updatedFiles: File[] = [];
+      
+      if (Array.isArray(currentFiles)) {
+        updatedFiles = [...currentFiles, image].slice(0, 5);
+      } else if (currentFiles) {
+        updatedFiles = [image];
+      }
+
       setMedia(prev => ({ ...prev, [currentCategory]: updatedFiles }));
       onMediaChange?.({
         ...media,
@@ -132,7 +148,7 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
         {icon}
         {title}
         <span className="text-sm font-normal text-gray-500">
-          {media[category].length}/{maxFiles} {category === 'videoTour' ? 'video' : 'photos'} uploaded
+          {Array.isArray(media[category]) ? media[category].length : 0}/{maxFiles} {category === 'videoTour' ? 'video' : 'photos'} uploaded
         </span>
       </h2>
       <div
@@ -177,10 +193,10 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
           </p>
         </div>
       </div>
-      {media[category].length > 0 && (
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {Array.isArray(media[category]) ? (
-            media[category].map((file, index) => (
+      {Array.isArray(media[category]) ? (
+        media[category].length > 0 && (
+          <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {media[category].map((file, index) => (
               <div key={index} className="relative group">
                 {file.type.startsWith('image/') ? (
                   <img
@@ -199,9 +215,10 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
                   >
                   <X className="w-4 h-4" />
                   </button>
-                    </div>
-            ))
-          ) : (
+            </div>
+            ))}
+          </div>
+          ) ): (
             media[category] && (
               <div className="relative group">
                 <video
@@ -217,8 +234,8 @@ const MediaUpload: React.FC<MediaUploadProps> = ({ onMediaChange }) => {
                 </div>
             )
           )}
-        </div>
-      )}
+        {/* </div> */}
+      {/* // </div>   */}
     </section>
   );
 
