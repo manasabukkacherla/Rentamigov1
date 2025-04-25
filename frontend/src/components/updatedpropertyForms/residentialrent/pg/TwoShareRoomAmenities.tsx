@@ -62,8 +62,8 @@ const TwoShareRoomAmenities = () => {
       className={`
         flex items-center p-3 rounded-md border cursor-pointer transition-colors
         ${selectedAmenities.has(amenity.id) 
-          ? 'border-black bg-black/5 hover:bg-black hover:text-white' 
-          : 'border-gray-200 hover:border-black hover:bg-black hover:text-white'
+          ? 'border-black bg-black/5 hover:text-white' 
+          : 'border-gray-200 hover:border-black hover:text-white'
         }
       `}
     >
@@ -128,7 +128,7 @@ const TwoShareRoomAmenities = () => {
               const amenity = amenities.find(a => a.id === amenityId);
               return (
                 <div key={amenityId} 
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs transition-colors bg-black/5 text-gray-800 hover:bg-black hover:text-white"
+                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs transition-colors bg-black/5 text-gray-800 hover:text-white"
                 >
                   {amenity?.isShared ? 
                     <Share2 className="w-3 h-3 mr-1 text-blue-500 hover:text-white" /> : 
