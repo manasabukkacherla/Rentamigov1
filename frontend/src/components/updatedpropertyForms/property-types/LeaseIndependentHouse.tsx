@@ -14,6 +14,7 @@ import OtherCharges from "../residentialrent/OtherCharges";
 import MediaUpload from "../MediaUpload";
 import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
+import { Building2 } from "lucide-react";
 
 interface LeaseIndependentHouseProps {
   propertyId: string;
@@ -62,10 +63,7 @@ const LeaseIndependentHouse = ({
     }));
   }, []);
 
- 
-
   const handleNext = async () => {
-    
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
     } else {
@@ -211,8 +209,11 @@ const LeaseIndependentHouse = ({
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-8 text-black">Lease Independent House</h1>
-        
+        <div className="flex items-center gap-2 mb-8">
+          <Building2 className="h-8 w-8 text-black" />
+          <h1 className="text-3xl font-bold text-black">Lease Your Independent House</h1>
+        </div>
+
         {/* Progress Steps */}
         <div className="flex items-center justify-between mb-8">
           {steps.map((s, index) => (
@@ -237,33 +238,35 @@ const LeaseIndependentHouse = ({
           {steps[step].component}
         </div>
 
-        {/* Messages */}
-        
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8">
           <button
             onClick={handlePrevious}
             disabled={step === 0}
-            className={`px-6 py-3 rounded-lg ${
-              step === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-black hover:bg-gray-200"
-            }`}
+            className="px-6 py-3 bg-white text-black border border-black/20 rounded-lg hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
           <button
             onClick={handleNext}
             disabled={loading}
-            className={`px-6 py-3 rounded-lg ${
-              loading
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800"
-            }`}
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-black/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Saving..." : step < steps.length - 1 ? "Next" : "List Property"}
+            {loading ? "Saving..." : step === steps.length - 1 ? "Submit" : "Next"}
           </button>
         </div>
+
+        {/* Messages */}
+        {errorMessage && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
+            {successMessage}
+          </div>
+        )}
       </div>
     </div>
   );

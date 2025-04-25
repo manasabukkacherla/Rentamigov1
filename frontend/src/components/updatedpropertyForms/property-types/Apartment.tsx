@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Building2, MapPin, IndianRupee, Calendar, Image } from "lucide-react"
+import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
 import MapSelector from "../MapSelector"
@@ -153,6 +153,44 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
     }
   })
 
+  const steps = [
+    {
+      title: "Basic Info",
+      icon: <Building2 className="w-6 h-6" />,
+      step: 1
+    },
+    {
+      title: "Size",
+      icon: <Ruler className="w-6 h-6" />,
+      step: 2
+    },
+    {
+      title: "Features",
+      icon: <Home className="w-6 h-6" />,
+      step: 3
+    },
+    {
+      title: "Amenities",
+      icon: <Building2 className="w-6 h-6" />,
+      step: 4
+    },
+    {
+      title: "Media",
+      icon: <Image className="w-6 h-6" />,
+      step: 5
+    },
+    {
+      title: "Availability",
+      icon: <Calendar className="w-6 h-6" />,
+      step: 6
+    },
+    {
+      title: "Review",
+      icon: <Building2 className="w-6 h-6" />,
+      step: 7
+    }
+  ]
+
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
       ...prev,
@@ -177,8 +215,6 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       }
     }))
   }, [])
-
- 
 
   const renderStep = () => {
     switch (currentStep) {
@@ -223,7 +259,7 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
-                <Building2 className="text-black mr-3" size={28} />
+                <Ruler className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Size</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
@@ -245,7 +281,7 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
-                <Building2 className="text-black mr-3" size={28} />
+                <Home className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Features</h3>
               </div>
               <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_input[type=number]]:text-black [&_input[type=number]]:placeholder:text-black [&_input[type=number]]:bg-white [&_input[type=number]]:border-black/20 [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
@@ -350,32 +386,44 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Progress Bar */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Building2 className="h-6 w-6 text-black" />
-          <h1 className="text-2xl font-semibold text-black">List Your Apartment</h1>
+    <div className="min-h-screen bg-gray-100">
+      <div className="max-w-4xl mx-auto p-8">
+        <div className="flex items-center gap-2 mb-8">
+          <Building2 className="h-8 w-8 text-black" />
+          <h1 className="text-3xl font-bold text-black">List Your Apartment</h1>
         </div>
-        <div className="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-black h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / 7) * 100}%` }}
-          />
-        </div>
-        <p className="text-sm text-black/60 mt-2">Step {currentStep} of 7</p>
-      </div>
 
-      {/* Form Content */}
-      <div className="space-y-6">
-        {renderStep()}
+        {/* Progress Steps */}
+        <div className="flex items-center justify-between mb-8">
+          {steps.map((step) => (
+            <div key={step.step} className="flex flex-col items-center">
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 ${
+                  step.step <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600"
+                }`}
+                onClick={() => setCurrentStep(step.step)}
+              >
+                {step.icon}
+              </div>
+              <div className="mt-2 text-sm font-medium text-black">{step.title}</div>
+              {step.step < 7 && (
+                <div className="w-16 h-0.5 bg-gray-200 mt-4"></div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Form Content */}
+        <div className="bg-white rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          {renderStep()}
+        </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between items-center mt-8">
+        <div className="flex justify-between mt-8">
           <button
             onClick={() => setCurrentStep(prev => Math.max(1, prev - 1))}
             disabled={currentStep === 1 || loading}
-            className="px-6 py-2 bg-white text-black border border-black/20 rounded-lg hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-white text-black border border-black/20 rounded-lg hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
@@ -388,15 +436,23 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
               }
             }}
             disabled={loading}
-            className="px-6 py-2 bg-black text-white rounded-lg hover:bg-black/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-black/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Saving..." : currentStep === 7 ? "Submit" : "Next"}
           </button>
         </div>
 
         {/* Messages */}
-        
-        
+        {error && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
+            {success}
+          </div>
+        )}
       </div>
     </div>
   )
