@@ -55,8 +55,8 @@ const SingleRoomAmenities = () => {
             className={`
               flex items-center p-3 rounded-md border cursor-pointer transition-colors
               ${selectedAmenities.has(amenity.id) 
-                ? 'border-black bg-black/5 hover:bg-black hover:text-white' 
-                : 'border-gray-200 hover:border-black hover:bg-black hover:text-white'
+                ? 'border-black bg-black/5  hover:text-white' 
+                : 'border-gray-200 hover:border-black  hover:text-white'
               }
             `}
           >
@@ -92,7 +92,7 @@ const SingleRoomAmenities = () => {
             {Array.from(selectedAmenities).map(amenityId => {
               const amenity = amenities.find(a => a.id === amenityId);
               return (
-                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-gray-800 hover:bg-black hover:text-white transition-colors">
+                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-gray-800 hover:text-white transition-colors">
                   <Check className="w-3 h-3 mr-1" />
                   <span>{amenity?.label}</span>
                 </div>

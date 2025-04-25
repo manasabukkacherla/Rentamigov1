@@ -71,8 +71,8 @@ const Configuration = () => {
               className={`
                 flex items-center p-4 rounded-lg border cursor-pointer transition-all
                 ${selectedShare === option.id 
-                  ? 'border-black bg-black text-white shadow-md' 
-                  : 'border-gray-200 bg-white text-gray-800'
+                  ? 'border-black  text-white shadow-md' 
+                  : 'border-gray-200 bg-white  hover:border-black hover:text-white'
                 }
               `}
             >
