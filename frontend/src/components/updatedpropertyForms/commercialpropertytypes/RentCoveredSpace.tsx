@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropertyName from '../PropertyName';
 import CoveredOpenSpaceType from '../CommercialComponents/CoveredOpenSpaceType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -15,7 +15,7 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import {  DollarSign, Calendar, User, Image,  ImageIcon, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DollarSign, Calendar, User, Image, ImageIcon, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -23,19 +23,19 @@ import { useNavigate } from 'react-router-dom';
 interface IFormData {
   basicInformation: {
     title: string;
-  spaceType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  isCornerProperty: boolean;
+    spaceType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
   };
 
   spaceDetails: {
@@ -57,8 +57,8 @@ interface IFormData {
   propertyDetails: {
     area: {
       totalArea: number;
-  builtUpArea: number;
-  carpetArea: number;
+      builtUpArea: number;
+      carpetArea: number;
     };
     floor: {
       floorNumber: number;
@@ -113,11 +113,11 @@ interface IFormData {
     };
     availability: {
       type: 'immediate' | 'specific';
-    availableFrom?: string;
-    availableImmediately: boolean;
+      availableFrom?: string;
+      availableImmediately: boolean;
+    };
   };
-  };
-  
+
   contactInformation: {
     name: string;
     email: string;
@@ -161,16 +161,16 @@ const RentCoveredSpace = () => {
     },
     spaceDetails: {
       totalArea: 0,
-      areaUnit:'',
+      areaUnit: '',
       coveredArea: 0,
       openArea: 0,
       roadWidth: {
         value: 0,
-        unit:'',
+        unit: '',
       },
       ceilingHeight: {
         value: 0,
-        unit:'',
+        unit: '',
       },
       noOfOpenSides: ''
     },
@@ -191,7 +191,7 @@ const RentCoveredSpace = () => {
       electricitySupply: {
         powerLoad: 0,
         backup: false
-      },  
+      },
       waterAvailability: '',
       propertyAge: '',
       propertyCondition: ''
@@ -233,11 +233,11 @@ const RentCoveredSpace = () => {
       },
       availability: {
         type: 'immediate',
-      availableFrom: '',
-      availableImmediately: true,
+        availableFrom: '',
+        availableImmediately: true,
+      },
     },
-    },
-    
+
     contactInformation: {
       name: '',
       email: '',
@@ -285,7 +285,7 @@ const RentCoveredSpace = () => {
   // Add error display component
   const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
     if (Object.keys(errors).length === 0) return null;
-    
+
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
         <div className="flex items-center">
@@ -304,10 +304,11 @@ const RentCoveredSpace = () => {
   };
 
   const [currentStep, setCurrentStep] = useState(0);
-  
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Check login status on component mount
   useEffect(() => {
@@ -322,7 +323,7 @@ const RentCoveredSpace = () => {
   // Enhanced validation for current step
   const validateCurrentStep = () => {
     const errors: Record<string, string> = {};
-    
+
     switch (currentStep) {
       case 0: // Basic Information
         if (!formData.basicInformation.title.trim()) {
@@ -361,7 +362,7 @@ const RentCoveredSpace = () => {
           errors.location = 'Please select a location on the map';
         }
         break;
-      
+
       case 1: // Property Details (includes both Space Details and Property Details)
         // Validate Space Details
         if (!formData.spaceDetails.totalArea) {
@@ -441,7 +442,7 @@ const RentCoveredSpace = () => {
 
         if (!formData.propertyDetails.propertyAge) {
           errors.propertyAge = 'Property age is required';
-        } 
+        }
 
         if (!formData.propertyDetails.propertyCondition) {
           errors.propertyCondition = 'Property condition is required';
@@ -463,7 +464,7 @@ const RentCoveredSpace = () => {
           errors.securityDeposit = 'Security deposit is required';
         } else if (formData.rentalTerms.securityDeposit.amount <= 0) {
           errors.securityDeposit = 'Security deposit must be greater than 0';
-        } 
+        }
 
         // Validate maintenance amount only if rent type is exclusive
         if (formData.rentalTerms.rentDetails.rentType === 'exclusive') {
@@ -538,7 +539,7 @@ const RentCoveredSpace = () => {
           errors.availableFrom = 'Available from date is required';
         }
         break;
-      
+
       case 4: // Contact Information
         if (!formData.contactInformation.name.trim()) {
           errors.name = 'Name is required';
@@ -562,7 +563,7 @@ const RentCoveredSpace = () => {
           errors.alternatePhone = 'Please enter a valid 10-digit phone number';
         }
         break;
-      
+
       case 5: // Property Media
         if (!formData.media.photos.exterior.length) {
           errors.exteriorPhotos = 'At least one exterior photo is required';
@@ -614,20 +615,20 @@ const RentCoveredSpace = () => {
     }));
   };
 
-  
+
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
       const fields = field.split('.');
       const lastField = fields.pop() || '';
-  
+
       const newData = { ...prev };
       let current: any = newData;
-  
+
       for (const field of fields) {
         current = { ...current[field] };
       }
-  
+
       current[lastField] = value;
       return newData;
     });
@@ -648,42 +649,42 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <>
           <PropertyName propertyName={formData.basicInformation.title}
-                onPropertyNameChange={(name) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, title: name }
-                }))}/>
+            onPropertyNameChange={(name) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, title: name }
+            }))} />
           <CoveredOpenSpaceType onSpaceTypeChange={(types) => setFormData(prev => ({
-                ...prev,
-                basicInformation: { ...prev.basicInformation, spaceType: types }
-              }))} />
+            ...prev,
+            basicInformation: { ...prev.basicInformation, spaceType: types }
+          }))} />
           <CommercialPropertyAddress
-              onAddressChange={(address) => setFormData(prev => ({
-                ...prev,
-                basicInformation: { ...prev.basicInformation, address }
-              }))}
-            />
-            <Landmark
-                onLandmarkChange={(landmark) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, landmark }
-                }))}
-                onLocationSelect={(location) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: {
-                    ...prev.basicInformation,
-                    location: {
-                      latitude: parseFloat(location.latitude),
-                      longitude: parseFloat(location.longitude)
-                    }
-                  }
-                }))}
-              />
+            onAddressChange={(address) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, address }
+            }))}
+          />
+          <Landmark
+            onLandmarkChange={(landmark) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, landmark }
+            }))}
+            onLocationSelect={(location) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                location: {
+                  latitude: parseFloat(location.latitude),
+                  longitude: parseFloat(location.longitude)
+                }
+              }
+            }))}
+          />
           <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
-                }))}
-              />
+            onCornerPropertyChange={(isCorner) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
+            }))}
+          />
         </>
       )
     },
@@ -692,9 +693,9 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <>
           <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
-          <CommercialPropertyDetails 
-              onDetailsChange={(details) => handleChange('propertyDetails', details)}
-            />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => handleChange('propertyDetails', details)}
+          />
         </>
       )
     },
@@ -702,81 +703,81 @@ const RentCoveredSpace = () => {
       title: 'Rental Terms',
       content: renderFormSection(
         <>
-          
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="flex items-center gap-2 mb-6">
-            <DollarSign className="text-black" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Rental Terms</h3>
-          </div>
-          <div className="space-y-6">
-            <Rent
-              onRentChange={(rent) => setFormData(prev => ({
-                ...prev,
-                rentalTerms: {
-                  ...prev.rentalTerms,
-                  rentDetails: {
-                    expectedRent: rent.expectedRent,
-                    isNegotiable: rent.isNegotiable,
-                    rentType: rent.rentType
-                  }
-                }
-              }))}
-            />
-            {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-              <MaintenanceAmount
-                onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+
+          <div className="bg-white p-6 rounded-2xl shadow-lg">
+            <div className="flex items-center gap-2 mb-6">
+              <DollarSign className="text-black" size={24} />
+              <h3 className="text-xl font-semibold text-gray-800">Rental Terms</h3>
+            </div>
+            <div className="space-y-6">
+              <Rent
+                onRentChange={(rent) => setFormData(prev => ({
                   ...prev,
                   rentalTerms: {
                     ...prev.rentalTerms,
-                    maintenanceAmount: {
-                      amount: maintenance.amount,
-                      frequency: maintenance.frequency
+                    rentDetails: {
+                      expectedRent: rent.expectedRent,
+                      isNegotiable: rent.isNegotiable,
+                      rentType: rent.rentType
                     }
                   }
                 }))}
               />
-            )}
-            <SecurityDeposit
-              onSecurityDepositChange={(deposit) => setFormData(prev => ({
-                ...prev,
-                rentalTerms: {
-                  ...prev.rentalTerms,
-                  securityDeposit: {
-                    amount: deposit.amount
-                  }
-                }
-              }))}
-            />
-            <OtherCharges
-              onOtherChargesChange={(charges) => setFormData(prev => ({
-                ...prev,
-                rentalTerms: {
-                  ...prev.rentalTerms,
-                  otherCharges: {
-                    water: { type: charges.water.type, amount: charges.water.amount },
-                    electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                    gas: { type: charges.gas.type, amount: charges.gas.amount },
-                    others: { type: charges.others.type, amount: charges.others.amount }
-                  }
-                }
-              }))}
-            />
-            <Brokerage
-              onBrokerageChange={(brokerage) => {
-                setFormData(prev => ({
+              {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+                <MaintenanceAmount
+                  onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                    ...prev,
+                    rentalTerms: {
+                      ...prev.rentalTerms,
+                      maintenanceAmount: {
+                        amount: maintenance.amount,
+                        frequency: maintenance.frequency
+                      }
+                    }
+                  }))}
+                />
+              )}
+              <SecurityDeposit
+                onSecurityDepositChange={(deposit) => setFormData(prev => ({
                   ...prev,
                   rentalTerms: {
                     ...prev.rentalTerms,
-                    brokerage: {
-                      required: brokerage.required,
-                      amount: brokerage.amount
+                    securityDeposit: {
+                      amount: deposit.amount
                     }
                   }
-                }));
-              }}
+                }))}
               />
+              <OtherCharges
+                onOtherChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    otherCharges: {
+                      water: { type: charges.water.type, amount: charges.water.amount },
+                      electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                      gas: { type: charges.gas.type, amount: charges.gas.amount },
+                      others: { type: charges.others.type, amount: charges.others.amount }
+                    }
+                  }
+                }))}
+              />
+              <Brokerage
+                onBrokerageChange={(brokerage) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    rentalTerms: {
+                      ...prev.rentalTerms,
+                      brokerage: {
+                        required: brokerage.required,
+                        amount: brokerage.amount
+                      }
+                    }
+                  }));
+                }}
+              />
+            </div>
           </div>
-        </div>
         </>
       )
     },
@@ -807,7 +808,7 @@ const RentCoveredSpace = () => {
                       }
                     }
                   }));
-                } 
+                }
                 // For specific date, set availableImmediately to false and availableFrom to user's selected date
                 else {
                   const userDate = availability.date || '';
@@ -850,7 +851,7 @@ const RentCoveredSpace = () => {
     {
       title: 'Property Media',
       icon: <Image className="w-6 h-6" />,
-      content: renderFormSection    (
+      content: renderFormSection(
         <div className="bg-white p-6 rounded-2xl shadow-lg">
           <div className="flex items-center gap-2 mb-6">
             <ImageIcon className="text-black" size={24} />
@@ -886,23 +887,52 @@ const RentCoveredSpace = () => {
 
   const handleNext = () => {
     if (validateCurrentStep()) {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
     } else {
-      toast.error('Please fill in all required fields');
+      toast.error('Please fix the errors in the form before proceeding');
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+      setFormErrors({});
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate the final step before submission
     if (!validateCurrentStep()) {
       toast.error('Please fill in all required fields');
@@ -1022,9 +1052,8 @@ const RentCoveredSpace = () => {
                 style={{ cursor: i < currentStep ? "pointer" : "default" }}
               >
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                    i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
+                    }`}
                 >
                   {i + 1}
                 </div>
@@ -1049,27 +1078,27 @@ const RentCoveredSpace = () => {
 
       {/* Navigation Buttons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-black hover:bg-black hover:text-white'
-                }`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
-            </button>
-            <button
-              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          </div>
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+            <ChevronRight className="w-5 h-5 ml-2" />
+          </button>
         </div>
+      </div>
     </div>
   );
 };
