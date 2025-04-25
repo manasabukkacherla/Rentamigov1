@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Coffee, UtensilsCrossed } from 'lucide-react';
+import { Coffee, UtensilsCrossed, Copy, Check, X } from 'lucide-react';
 
 interface MealTime {
   id: string;
@@ -72,65 +72,78 @@ const FoodServices = () => {
   };
 
   return (
-    <div className="p-6 bg-white text-black">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Food Services</h1>
-        <div className="flex items-center space-x-2">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={isEnabled}
-              onChange={() => setIsEnabled(!isEnabled)}
-            />
-            <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            <span className="ml-3 text-sm font-medium text-black">Enable Food Services</span>
-          </label>
+    <div className="space-y-6">
+      {/* Food Services Toggle */}
+      <div className="flex items-center justify-between pb-4 mb-2 border-b border-gray-200">
+        <div>
+          <h2 className="text-base font-medium text-gray-900">Food Services</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            Enable if your PG offers food services to residents
+          </p>
         </div>
+        
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            type="checkbox"
+            className="sr-only peer"
+            checked={isEnabled}
+            onChange={() => setIsEnabled(!isEnabled)}
+          />
+          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+        </label>
       </div>
 
       {isEnabled && (
         <div className="space-y-6">
           {/* Snacks Service Option */}
-          <div className="bg-gray-900 rounded-lg p-4">
-            <div className="flex items-start space-x-4 mb-4">
-              <Coffee className="w-6 h-6 flex-shrink-0 mt-1" />
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div className="flex items-start mb-4">
+              <div className={`p-2 rounded-md mr-3 ${includeSnacks ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
+                <Coffee className="w-5 h-5" />
+              </div>
               <div className="flex-grow">
                 <div className="flex items-center justify-between">
-                  <label htmlFor="snacks" className="font-medium">
-                    Snacks/Tea/Coffee Service
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      Snacks & Beverages
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      Tea, coffee, and snacks between main meals
+                    </p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={includeSnacks}
+                      onChange={() => setIncludeSnacks(!includeSnacks)}
+                    />
+                    <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                   </label>
-                  <input
-                    type="checkbox"
-                    id="snacks"
-                    checked={includeSnacks}
-                    onChange={() => setIncludeSnacks(!includeSnacks)}
-                    className="h-5 w-5 border-white rounded bg-black checked:bg-white checked:border-white focus:ring-white focus:ring-2"
-                  />
                 </div>
               </div>
             </div>
             
             {includeSnacks && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pl-11">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Morning Snacks (11:00 AM)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Morning Snacks (11:00 AM)</label>
                   <input
                     type="text"
                     value={snackItems.morning}
                     onChange={(e) => setSnackItems(prev => ({ ...prev, morning: e.target.value }))}
-                    placeholder="Enter morning snack items"
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                    placeholder="Tea, coffee, biscuits, etc."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Evening Snacks (5:00 PM)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Evening Snacks (5:00 PM)</label>
                   <input
                     type="text"
                     value={snackItems.evening}
                     onChange={(e) => setSnackItems(prev => ({ ...prev, evening: e.target.value }))}
-                    placeholder="Enter evening snack items"
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
+                    placeholder="Cookies, sandwiches, etc."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -138,103 +151,130 @@ const FoodServices = () => {
           </div>
 
           {/* Meal Schedule Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-gray-900">
-                  <th className="p-3 text-left">Day</th>
-                  {mealTimes.map((meal) => (
-                    <th key={meal.id} className="p-3 text-left">
-                      <div>
-                        <span>{meal.label}</span>
-                        <div className="text-xs text-gray-400 font-normal">
-                          {meal.time}
-                        </div>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {days.map((day) => (
-                  <tr key={day} className="border-b border-gray-800">
-                    <td className="p-3 capitalize">{day}</td>
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+            <div className="flex items-center mb-4">
+              <div className="p-2 rounded-md bg-black text-white mr-3">
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <h3 className="font-medium text-gray-900">Weekly Meal Schedule</h3>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="p-3 text-left font-medium text-gray-600">Day</th>
                     {mealTimes.map((meal) => (
-                      <td key={`${day}-${meal.id}`} className="p-3">
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={weekMeals[day][meal.id as keyof DayMeals]}
-                            onChange={(e) => handleMealChange(day, meal.id as keyof DayMeals, e.target.value)}
-                            placeholder="Enter menu items"
-                            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
-                          />
-                          {day === 'monday' && (
-                            <button
-                              onClick={() => copyMealToAllDays(meal.id as keyof DayMeals, day)}
-                              className="absolute right-2 top-2 text-xs text-gray-400 hover:text-white"
-                              title="Copy to all days"
-                            >
-                              Copy ↓
-                            </button>
-                          )}
+                      <th key={meal.id} className="p-3 text-left font-medium text-gray-600">
+                        <div>
+                          <span>{meal.label}</span>
+                          <div className="text-xs text-gray-500 font-normal">
+                            {meal.time}
+                          </div>
                         </div>
-                      </td>
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {days.map((day) => (
+                    <tr key={day} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="p-3 capitalize font-medium text-gray-700">{day}</td>
+                      {mealTimes.map((meal) => (
+                        <td key={`${day}-${meal.id}`} className="p-3">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              value={weekMeals[day][meal.id as keyof DayMeals]}
+                              onChange={(e) => handleMealChange(day, meal.id as keyof DayMeals, e.target.value)}
+                              placeholder="Enter menu items"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400 pr-8"
+                            />
+                            {day === 'monday' && (
+                              <button
+                                onClick={() => copyMealToAllDays(meal.id as keyof DayMeals, day)}
+                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black p-1"
+                                title="Copy to all days"
+                              >
+                                <Copy className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Selected Meals Summary */}
-          <div className="border-t border-gray-800 mt-8 pt-6">
-            <h2 className="text-lg font-semibold mb-4 flex items-center">
-              <UtensilsCrossed className="w-5 h-5 mr-2" />
-              Weekly Menu
-            </h2>
-            <div className="space-y-4">
-              {days.map((day) => {
-                const hasMeals = Object.values(weekMeals[day]).some(meal => meal.trim() !== '');
-                if (!hasMeals) return null;
+          {days.some(day => Object.values(weekMeals[day]).some(meal => meal.trim() !== '')) && (
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+              <h3 className="font-medium text-gray-900 mb-4 flex items-center">
+                <div className="p-1.5 rounded-md bg-gray-100 text-gray-700 mr-2">
+                  <UtensilsCrossed className="w-4 h-4" />
+                </div>
+                Weekly Menu Summary
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {days.map((day) => {
+                  const hasMeals = Object.values(weekMeals[day]).some(meal => meal.trim() !== '');
+                  if (!hasMeals) return null;
 
-                return (
-                  <div key={day} className="bg-gray-900 p-4 rounded-lg">
-                    <h3 className="capitalize font-medium mb-2">{day}</h3>
-                    <div className="space-y-2">
-                      {mealTimes.map((meal) => {
-                        const mealItems = weekMeals[day][meal.id as keyof DayMeals];
-                        if (!mealItems.trim()) return null;
+                  return (
+                    <div key={day} className="p-3 rounded-lg border border-gray-200 bg-gray-50">
+                      <h4 className="capitalize font-medium text-gray-900 mb-2">{day}</h4>
+                      <div className="space-y-1.5">
+                        {mealTimes.map((meal) => {
+                          const mealItems = weekMeals[day][meal.id as keyof DayMeals];
+                          if (!mealItems.trim()) return null;
 
-                        return (
-                          <div key={meal.id} className="text-sm">
-                            <span className="font-medium">{meal.label}</span>:{' '}
-                            <span className="text-gray-400">{mealItems}</span>
-                          </div>
-                        );
-                      })}
+                          return (
+                            <div key={meal.id} className="flex text-sm">
+                              <span className="font-medium text-gray-700 min-w-[80px]">{meal.label}:</span>
+                              <span className="text-gray-600 ml-2">{mealItems}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              
               {includeSnacks && (snackItems.morning || snackItems.evening) && (
-                <div className="bg-gray-900 p-4 rounded-lg">
-                  <h3 className="font-medium mb-2">Daily Snacks</h3>
-                  {snackItems.morning && (
-                    <div className="text-sm">
-                      <span className="font-medium">Morning Snacks</span>:{' '}
-                      <span className="text-gray-400">{snackItems.morning}</span>
-                    </div>
-                  )}
-                  {snackItems.evening && (
-                    <div className="text-sm">
-                      <span className="font-medium">Evening Snacks</span>:{' '}
-                      <span className="text-gray-400">{snackItems.evening}</span>
-                    </div>
-                  )}
+                <div className="mt-4 p-3 rounded-lg border border-gray-200 bg-gray-50">
+                  <h4 className="font-medium text-gray-900 mb-2">Daily Snacks</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {snackItems.morning && (
+                      <div className="text-sm flex">
+                        <span className="font-medium text-gray-700 min-w-[80px]">Morning:</span>
+                        <span className="text-gray-600 ml-2">{snackItems.morning}</span>
+                      </div>
+                    )}
+                    {snackItems.evening && (
+                      <div className="text-sm flex">
+                        <span className="font-medium text-gray-700 min-w-[80px]">Evening:</span>
+                        <span className="text-gray-600 ml-2">{snackItems.evening}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
+          )}
+        </div>
+      )}
+      
+      {!isEnabled && (
+        <div className="flex items-center justify-center py-10 border-2 border-dashed border-gray-200 rounded-lg">
+          <div className="text-center text-gray-500">
+            <UtensilsCrossed className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+            <p className="text-gray-600 font-medium">Food Services Disabled</p>
+            <p className="text-sm text-gray-500 mt-1">Toggle the switch above to add meal options</p>
           </div>
         </div>
       )}
