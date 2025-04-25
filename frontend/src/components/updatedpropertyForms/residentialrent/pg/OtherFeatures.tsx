@@ -12,7 +12,10 @@ interface Feature {
 
 const OtherFeatures = () => {
   const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(new Set());
-  const [visitorPolicy, setVisitorPolicy] = useState<string>('');
+  const [visitorPolicies, setVisitorPolicies] = useState<Set<string>>(new Set());
+  
+  // Common checkbox style
+  const checkboxClassName = "h-5 w-5 border-gray-300 rounded";
 
   const features: Feature[] = [
     {
@@ -54,12 +57,22 @@ const OtherFeatures = () => {
     if (newSelectedFeatures.has(featureId)) {
       newSelectedFeatures.delete(featureId);
       if (featureId === 'visitor-access') {
-        setVisitorPolicy('');
+        setVisitorPolicies(new Set());
       }
     } else {
       newSelectedFeatures.add(featureId);
     }
     setSelectedFeatures(newSelectedFeatures);
+  };
+
+  const handleVisitorPolicyChange = (policy: string) => {
+    const newVisitorPolicies = new Set(visitorPolicies);
+    if (newVisitorPolicies.has(policy)) {
+      newVisitorPolicies.delete(policy);
+    } else {
+      newVisitorPolicies.add(policy);
+    }
+    setVisitorPolicies(newVisitorPolicies);
   };
 
   return (
@@ -80,7 +93,7 @@ const OtherFeatures = () => {
                 <label htmlFor={feature.id} className="font-medium flex items-center">
                   {feature.label}
                   {feature.isOptional && (
-                    <span className="ml-2 text-sm text-gray-400">(Optional)</span>
+                    <span className="ml-2 text-sm text-black-400">(Optional)</span>
                   )}
                 </label>
                 <input
@@ -88,29 +101,29 @@ const OtherFeatures = () => {
                   id={feature.id}
                   checked={selectedFeatures.has(feature.id)}
                   onChange={() => handleFeatureChange(feature.id)}
-                  className="h-5 w-5 border-black rounded bg-white checked:bg-white checked:border-white focus:ring-white focus:ring-2"
+                  className={checkboxClassName}
                 />
               </div>
-              <p className="text-sm text-gray-400 mt-1">{feature.description}</p>
+              <p className="text-sm text-black-400 mt-1">{feature.description}</p>
 
               {/* Visitor Policy Options */}
               {feature.id === 'visitor-access' && 
                selectedFeatures.has('visitor-access') && 
                feature.options && (
                 <div className="mt-4 border-t border-gray-800 pt-4">
-                  <h3 className="text-sm font-semibold mb-3">Select Visitor Policy:</h3>
+                  <h3 className="text-sm font-semibold mb-3">Select Visitor Policy (Multiple):</h3>
                   <div className="space-y-2">
                     {feature.options.map((option) => (
                       <label key={option} className="flex items-center space-x-2">
                         <input
-                          type="radio"
+                          type="checkbox"
                           name="visitorPolicy"
                           value={option}
-                          checked={visitorPolicy === option}
-                          onChange={(e) => setVisitorPolicy(e.target.value)}
-                          className="h-4 w-4 border-gray-300"
+                          checked={visitorPolicies.has(option)}
+                          onChange={() => handleVisitorPolicyChange(option)}
+                          className={checkboxClassName}
                         />
-                        <span className="text-sm text-gray-300">{option}</span>
+                        <span className="text-sm text-black-300">{option}</span>
                       </label>
                     ))}
                   </div>
@@ -128,11 +141,11 @@ const OtherFeatures = () => {
             {Array.from(selectedFeatures).map(featureId => {
               const feature = features.find(f => f.id === featureId);
               return (
-                <li key={featureId} className="text-gray-300">
+                <li key={featureId} className="text-black-300">
                   {feature?.label}
-                  {featureId === 'visitor-access' && visitorPolicy && (
-                    <span className="text-gray-400 ml-2">
-                      - {visitorPolicy}
+                  {featureId === 'visitor-access' && visitorPolicies.size > 0 && (
+                    <span className="text-black-400 ml-2">
+                      - {Array.from(visitorPolicies).join(', ')}
                     </span>
                   )}
                 </li>

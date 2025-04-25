@@ -12,32 +12,16 @@ const TwoShareRoomAmenities = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
 
   const amenities: Amenity[] = [
-    { id: 'bed-single-1', label: 'Single Bed (Occupant 1)' },
-    { id: 'bed-single-2', label: 'Single Bed (Occupant 2)' },
-    { id: 'bed-double-1', label: 'Double Bed (Occupant 1)' },
-    { id: 'bed-double-2', label: 'Double Bed (Occupant 2)' },
-    { id: 'mattress-1', label: 'Mattress (Occupant 1)' },
-    { id: 'mattress-2', label: 'Mattress (Occupant 2)' },
-    { id: 'pillow-1', label: 'Pillow (Occupant 1)' },
-    { id: 'pillow-2', label: 'Pillow (Occupant 2)' },
-    { id: 'bedsheet-1', label: 'Bedsheet (Occupant 1)' },
-    { id: 'bedsheet-2', label: 'Bedsheet (Occupant 2)' },
-    { id: 'blanket-1', label: 'Blanket (Occupant 1)' },
-    { id: 'blanket-2', label: 'Blanket (Occupant 2)' },
-    { id: 'wardrobe-1', label: 'Wardrobe/Storage Unit (Occupant 1)' },
-    { id: 'wardrobe-2', label: 'Wardrobe/Storage Unit (Occupant 2)' },
-    { id: 'study-set-1', label: 'Study Table and Chair (Occupant 1)' },
-    { id: 'study-set-2', label: 'Study Table and Chair (Occupant 2)' },
-    { id: 'study-set-shared', label: 'Shared Study Table and Chair', isShared: true },
-    { id: 'fan', label: 'Ceiling Fan', isShared: true },
-    { id: 'lights', label: 'Lights', isShared: true },
-    { id: 'ac', label: 'Air Conditioning (AC)', isOptional: true, isShared: true },
-    { id: 'bathroom-attached', label: 'Attached Bathroom', isOptional: true, isShared: true },
-    { id: 'bathroom-shared', label: 'Shared Bathroom', isOptional: true, isShared: true },
-    { id: 'curtains', label: 'Curtains for Privacy', isShared: true },
-    { id: 'charging-1', label: 'Personal Charging Points (Occupant 1)' },
-    { id: 'charging-2', label: 'Personal Charging Points (Occupant 2)' },
-    { id: 'mirror', label: 'Mirror', isShared: true }
+    { id: 'beds', label: 'Two single beds or one bunk bed', isShared: true },
+    { id: 'wardrobe-1', label: 'Separate wardrobe (Occupant 1)' },
+    { id: 'wardrobe-2', label: 'Separate wardrobe (Occupant 2)' },
+    { id: 'study-individual', label: 'Individual study tables', isShared: false },
+    { id: 'study-shared', label: 'Shared study table', isShared: true },
+    { id: 'bathroom', label: 'Shared attached bathroom', isShared: true },
+    { id: 'charging-1', label: 'Charging point near bed (Occupant 1)' },
+    { id: 'charging-2', label: 'Charging point near bed (Occupant 2)' },
+    { id: 'fan', label: 'Fan', isShared: true },
+    { id: 'ac', label: 'Air Conditioning (AC)', isShared: true }
   ];
 
   const handleAmenityChange = (amenityId: string) => {
@@ -62,26 +46,25 @@ const TwoShareRoomAmenities = () => {
       className={`
         flex items-center p-3 rounded-md border cursor-pointer transition-colors
         ${selectedAmenities.has(amenity.id) 
-          ? 'border-black bg-black/5 hover:text-white' 
-          : 'border-gray-200 hover:border-black hover:text-white'
+          ? 'border-black bg-black/5' 
+          : 'border-gray-200 hover:border-black'
         }
       `}
     >
       <div className={`
-        w-4 h-4 flex-shrink-0 flex items-center justify-center border rounded-sm transition-colors
+        w-4 h-4 flex-shrink-0 flex items-center justify-center border rounded-sm
         ${selectedAmenities.has(amenity.id) 
           ? 'bg-black border-black text-white' 
           : 'border-gray-300'
         }
-        group-hover:border-white
       `}>
         {selectedAmenities.has(amenity.id) && <Check className="w-3 h-3" />}
       </div>
       
-      <label htmlFor={amenity.id} className="ml-2 text-sm flex-grow cursor-pointer">
+      <label htmlFor={amenity.id} className="ml-2 text-sm flex-grow cursor-pointer text-black">
         {amenity.label}
         {amenity.isOptional && (
-          <span className={`ml-1 text-xs ${selectedAmenities.has(amenity.id) ? 'text-gray-500' : 'text-gray-500'} hover:text-white`}>(Optional)</span>
+          <span className="ml-1 text-xs text-gray-500">(Optional)</span>
         )}
       </label>
     </div>
@@ -128,10 +111,10 @@ const TwoShareRoomAmenities = () => {
               const amenity = amenities.find(a => a.id === amenityId);
               return (
                 <div key={amenityId} 
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs transition-colors bg-black/5 text-gray-800 hover:text-white"
+                  className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black"
                 >
                   {amenity?.isShared ? 
-                    <Share2 className="w-3 h-3 mr-1 text-blue-500 hover:text-white" /> : 
+                    <Share2 className="w-3 h-3 mr-1 text-blue-500" /> : 
                     <Check className="w-3 h-3 mr-1" />
                   }
                   <span>{amenity?.label}</span>

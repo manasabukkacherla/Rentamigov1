@@ -11,21 +11,13 @@ const SingleRoomAmenities = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
 
   const amenities: Amenity[] = [
-    { id: 'bed-single', label: 'Single Bed' },
-    { id: 'bed-double', label: 'Double Bed' },
-    { id: 'mattress', label: 'Mattress' },
-    { id: 'pillow', label: 'Pillow' },
-    { id: 'bedsheet', label: 'Bedsheet' },
-    { id: 'blanket', label: 'Blanket' },
-    { id: 'wardrobe', label: 'Wardrobe/Closet for Personal Storage' },
-    { id: 'study-set', label: 'Study Table and Chair' },
+    { id: 'premium-mattress', label: 'Personal bed with premium mattress' },
+    { id: 'private-wardrobe', label: 'Private wardrobe' },
+    { id: 'study-set', label: 'Individual study table and chair' },
+    { id: 'private-bathroom', label: 'Attached private bathroom' },
+    { id: 'charging-ports', label: 'Personal charging ports' },
     { id: 'fan', label: 'Fan' },
-    { id: 'lights', label: 'Lights' },
-    { id: 'ac', label: 'Air Conditioning (AC)', isOptional: true },
-    { id: 'bathroom', label: 'Attached Bathroom' },
-    { id: 'curtains', label: 'Curtains' },
-    { id: 'charging-points', label: 'Charging Points' },
-    { id: 'mirror', label: 'Mirror' }
+    { id: 'ac', label: 'Air Conditioning (AC)' }
   ];
 
   const handleAmenityChange = (amenityId: string) => {
@@ -55,8 +47,8 @@ const SingleRoomAmenities = () => {
             className={`
               flex items-center p-3 rounded-md border cursor-pointer transition-colors
               ${selectedAmenities.has(amenity.id) 
-                ? 'border-black bg-black/5  hover:text-white' 
-                : 'border-gray-200 hover:border-black  hover:text-white'
+                ? 'border-black bg-black/5' 
+                : 'border-gray-200 hover:border-black'
               }
             `}
           >
@@ -66,15 +58,14 @@ const SingleRoomAmenities = () => {
                 ? 'bg-black border-black text-white' 
                 : 'border-gray-300'
               }
-              group-hover:border-white
             `}>
               {selectedAmenities.has(amenity.id) && <Check className="w-3 h-3" />}
             </div>
             
-            <label htmlFor={amenity.id} className="ml-2 text-sm flex-grow cursor-pointer">
+            <label htmlFor={amenity.id} className="ml-2 text-sm flex-grow cursor-pointer text-black">
               {amenity.label}
               {amenity.isOptional && (
-                <span className={`ml-1 text-xs ${selectedAmenities.has(amenity.id) ? 'text-gray-500' : 'text-gray-500'} hover:text-white`}>(Optional)</span>
+                <span className="ml-1 text-xs text-gray-500">(Optional)</span>
               )}
             </label>
           </div>
@@ -92,7 +83,7 @@ const SingleRoomAmenities = () => {
             {Array.from(selectedAmenities).map(amenityId => {
               const amenity = amenities.find(a => a.id === amenityId);
               return (
-                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-gray-800 hover:text-white transition-colors">
+                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black">
                   <Check className="w-3 h-3 mr-1" />
                   <span>{amenity?.label}</span>
                 </div>
