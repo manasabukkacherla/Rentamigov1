@@ -1,5 +1,5 @@
-import React, { useState, useRef, ChangeEvent } from 'react';
-import { Image as ImageIcon, Video, X, Upload, Camera, AlertCircle, Tag } from 'lucide-react';
+import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
+import { Image as ImageIcon, Video, X, Upload, Camera, AlertCircle, Tag, Users, Home, Key, Lightbulb, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface MediaItem {
   id: string;
@@ -8,6 +8,13 @@ interface MediaItem {
   preview: string;
   title: string;
   tags: string[];
+  roomType?: string;
+}
+
+interface RoomTypeOption {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
 }
 
 const PgMedia = () => {
@@ -16,12 +23,114 @@ const PgMedia = () => {
   const [selectedType, setSelectedType] = useState<'photo' | 'video'>('photo');
   const [error, setError] = useState('');
   const [newTag, setNewTag] = useState('');
+  const [selectedRoomType, setSelectedRoomType] = useState<string>('');
+  const [cameraActive, setCameraActive] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const defaultPhotoTags = ['Exterior', 'Interior', 'Room', 'Bathroom', 'Kitchen', 'Common Area'];
   const defaultVideoTags = ['Room Tour', 'Facility Tour', 'Amenities', 'Overview'];
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+  const roomTypeOptions: RoomTypeOption[] = [
+    { id: 'single', label: 'Single Room', icon: <Home className="h-4 w-4" /> },
+    { id: 'double', label: 'Double Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'triple', label: 'Triple Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'four', label: 'Four Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'five', label: 'Five Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'custom', label: 'Multi Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'common', label: 'Common Areas', icon: <Lightbulb className="h-4 w-4" /> },
+    { id: 'exterior', label: 'Building Exterior', icon: <Key className="h-4 w-4" /> },
+  ];
+
+  const toggleSection = (sectionId: string) => {
+    if (expandedSection === sectionId) {
+      setExpandedSection(null);
+    } else {
+      setExpandedSection(sectionId);
+      setSelectedRoomType(sectionId);
+    }
+  };
+
+  const startCamera = async (roomType: string) => {
+    setSelectedRoomType(roomType);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'environment' },
+        audio: false 
+      });
+      
+      setCameraStream(stream);
+      setCameraActive(true);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error('Error accessing camera:', err);
+      setError('Camera access failed. Please check your permissions.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      setCameraStream(null);
+    }
+    setCameraActive(false);
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw current video frame to canvas
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Convert canvas to file
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const capturedFileName = `captured-photo-${Date.now()}.jpg`;
+            const file = new File([blob], capturedFileName, { type: 'image/jpeg' });
+            
+            // Create media item for the captured photo
+            const newMediaItem: MediaItem = {
+              id: `captured-${Date.now()}`,
+              type: 'photo',
+              file: file,
+              preview: URL.createObjectURL(blob),
+              title: batchTitle || `${getRoomTypeLabel(selectedRoomType)} Photo`,
+              tags: [],
+              roomType: selectedRoomType || undefined
+            };
+            
+            setMediaItems(prev => [...prev, newMediaItem]);
+            stopCamera();
+          }
+        }, 'image/jpeg', 0.9);
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Cleanup camera when component unmounts
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
+  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>, roomType?: string) => {
     setError('');
     const files = Array.from(e.target.files || []);
     
@@ -30,11 +139,8 @@ const PgMedia = () => {
       return;
     }
 
-    if (!batchTitle) {
-      setError('Please enter a title for the batch');
-      return;
-    }
-
+    const title = batchTitle || `${getRoomTypeLabel(roomType || selectedRoomType)} ${selectedType === 'photo' ? 'Photo' : 'Video'}`;
+    
     // Validate file types
     const invalidFiles = files.filter(file => {
       if (selectedType === 'photo') {
@@ -57,15 +163,16 @@ const PgMedia = () => {
         type: selectedType,
         file,
         preview,
-        title: files.length === 1 ? batchTitle : `${batchTitle} ${index + 1}`,
-        tags: []
+        title: files.length === 1 ? title : `${title} ${index + 1}`,
+        tags: [],
+        roomType: roomType || selectedRoomType || undefined
       };
     });
 
     setMediaItems(prev => [...prev, ...newMediaItems]);
     setBatchTitle('');
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (e.target) {
+      e.target.value = '';
     }
   };
 
@@ -103,6 +210,17 @@ const PgMedia = () => {
     }));
   };
 
+  // Get media items for a specific room type
+  const getMediaItemsByRoomType = (roomType: string) => {
+    return mediaItems.filter(item => item.roomType === roomType);
+  };
+
+  // Get room type label from id
+  const getRoomTypeLabel = (roomTypeId: string): string => {
+    const option = roomTypeOptions.find(opt => opt.id === roomTypeId);
+    return option ? option.label : 'Unknown';
+  };
+
   // Cleanup previews when component unmounts
   React.useEffect(() => {
     return () => {
@@ -112,6 +230,186 @@ const PgMedia = () => {
     };
   }, []);
 
+  const renderRoomTypeMediaUploader = (roomType: RoomTypeOption) => {
+    const roomItems = getMediaItemsByRoomType(roomType.id);
+    const isExpanded = expandedSection === roomType.id;
+    
+    return (
+      <div key={roomType.id} className="border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white">
+        {/* Header */}
+        <div 
+          className={`flex items-center justify-between p-4 cursor-pointer ${isExpanded ? 'bg-gray-50 border-b border-gray-200' : ''}`}
+          onClick={() => toggleSection(roomType.id)}
+        >
+          <div className="flex items-center gap-2">
+            <div className="p-2 rounded-md bg-gray-100">
+              {roomType.icon}
+            </div>
+            <h3 className="font-medium text-gray-900">{roomType.label}</h3>
+            <span className="text-sm text-gray-500">
+              ({roomItems.length} {roomItems.length === 1 ? 'item' : 'items'})
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-500" />
+            )}
+          </div>
+        </div>
+
+        {/* Expanded Content */}
+        {isExpanded && (
+          <div className="p-4">
+            <div className="space-y-4">
+              {/* Media Type Selector */}
+              <div className="flex space-x-4">
+                <button
+                  onClick={() => setSelectedType('photo')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                    selectedType === 'photo'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-black hover:bg-gray-300'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4" />
+                  <span>Photos</span>
+                </button>
+                <button
+                  onClick={() => setSelectedType('video')}
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
+                    selectedType === 'video'
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-black hover:bg-gray-300'
+                  }`}
+                >
+                  <Video className="w-4 h-4" />
+                  <span>Videos</span>
+                </button>
+              </div>
+
+              {/* Upload Controls */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1">
+                    Upload {roomType.label} {selectedType === 'photo' ? 'Photos' : 'Videos'}
+                  </label>
+                  <input
+                    type="file"
+                    accept={selectedType === 'photo' ? 'image/*' : 'video/*'}
+                    multiple
+                    onChange={(e) => handleFileSelect(e, roomType.id)}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-200 file:text-black hover:file:bg-gray-300 cursor-pointer"
+                  />
+                </div>
+                
+                {selectedType === 'photo' && (
+                  <div className="flex-none">
+                    <label className="block text-sm font-medium mb-1">Take Photo</label>
+                    <button
+                      onClick={() => startCamera(roomType.id)}
+                      className="flex items-center justify-center px-4 py-2 rounded-md w-full bg-blue-500 text-white hover:bg-blue-600"
+                    >
+                      <Camera className="w-4 h-4 mr-2" />
+                      Use Camera
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Gallery Preview */}
+              {roomItems.length > 0 && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">
+                    {roomType.label} Gallery ({roomItems.length})
+                  </h4>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {roomItems.map(item => (
+                      <div key={item.id} className="relative aspect-square rounded-md overflow-hidden group">
+                        {item.type === 'photo' ? (
+                          <img src={item.preview} alt={item.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <video src={item.preview} className="w-full h-full object-cover" />
+                        )}
+                        <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button
+                            onClick={() => handleRemoveMedia(item.id)}
+                            className="p-1.5 bg-red-500 rounded-full text-white"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Add more button */}
+                    <div className="flex items-center justify-center aspect-square rounded-md border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors">
+                      <input
+                        type="file"
+                        accept={selectedType === 'photo' ? 'image/*' : 'video/*'}
+                        multiple
+                        onChange={(e) => handleFileSelect(e, roomType.id)}
+                        className="hidden"
+                        id={`add-more-${roomType.id}`}
+                      />
+                      <label htmlFor={`add-more-${roomType.id}`} className="w-full h-full flex flex-col items-center justify-center cursor-pointer">
+                        <Plus className="w-6 h-6 text-gray-400" />
+                        <span className="text-xs text-gray-500 mt-1">Add more</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderRoomTypeGalleries = () => {
+    return (
+      <div className="mt-8 space-y-6">
+        <h2 className="text-xl font-bold text-gray-900">Room Configuration Galleries</h2>
+        
+        {roomTypeOptions.map(roomType => {
+          const roomItems = getMediaItemsByRoomType(roomType.id);
+          if (roomItems.length === 0) return null;
+          
+          return (
+            <div key={roomType.id} className="bg-white rounded-lg shadow p-4 border border-gray-200">
+              <div className="flex items-center gap-2 mb-4">
+                {roomType.icon}
+                <h3 className="font-medium text-gray-900">{roomType.label} ({roomItems.length})</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {roomItems.map(item => (
+                  <div key={item.id} className="relative aspect-square rounded-md overflow-hidden">
+                    {item.type === 'photo' ? (
+                      <img src={item.preview} alt={item.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <video src={item.preview} controls className="w-full h-full object-cover" />
+                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button
+                        onClick={() => handleRemoveMedia(item.id)}
+                        className="p-1 bg-red-500 rounded-full text-white"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="p-4 bg-white text-black">
       <div className="flex items-center space-x-2 mb-4">
@@ -119,184 +417,91 @@ const PgMedia = () => {
         <h1 className="text-xl font-bold">PG Photos & Videos</h1>
       </div>
 
-      {/* File Upload Form */}
-      <div className="bg-white rounded-lg p-4 mb-6">
-        <div className="flex items-center space-x-2 mb-4">
-          <Upload className="w-5 h-5 text-green-400" />
-          <h2 className="font-semibold">Upload Media</h2>
-        </div>
-
-        <div className="space-y-4">
-          {/* Media Type Selection */}
-          <div className="flex space-x-4">
-            <button
-              onClick={() => setSelectedType('photo')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                selectedType === 'photo'
-                  ? 'bg-white text-black'
-                  : 'bg-black text-white hover:bg-gray-700'
-              }`}
-            >
-              <ImageIcon className="w-4 h-4" />
-              <span>Photos</span>
-            </button>
-            <button
-              onClick={() => setSelectedType('video')}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                selectedType === 'video'
-                  ? 'bg-white text-black'
-                  : 'bg-black text-white hover:bg-gray-700'
-              }`}
-            >
-              <Video className="w-4 h-4" />
-              <span>Videos</span>
-            </button>
-          </div>
-
-          {/* Batch Title */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              {selectedType === 'photo' ? 'Photo' : 'Video'} Title
-              {' '}
-              <span className="text-black">(will be numbered for multiple files)</span>
-            </label>
-            <input
-              type="text"
-              value={batchTitle}
-              onChange={(e) => setBatchTitle(e.target.value)}
-              placeholder={`Enter ${selectedType} title`}
-              className="w-full px-3 py-2 text-sm bg-white border border-gray-700 rounded-md text-white placeholder-gray-400 focus:outline-none focus:border-white"
-            />
-          </div>
-
-          {/* File Input */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Select {selectedType === 'photo' ? 'Photos' : 'Videos'}
-            </label>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={selectedType === 'photo' ? 'image/*' : 'video/*'}
-              multiple
-              onChange={handleFileSelect}
-              className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-white file:text-black hover:file:bg-gray-100 cursor-pointer"
-            />
-          </div>
-
-          {error && (
-            <div className="flex items-center space-x-2 text-red-400 text-sm">
-              <AlertCircle className="w-4 h-4" />
-              <span>{error}</span>
-            </div>
-          )}
+      {/* Room Type Specific Upload Sections */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold mb-4">Upload Media by Room Type</h2>
+        <div className="space-y-2">
+          {roomTypeOptions.map(roomType => renderRoomTypeMediaUploader(roomType))}
         </div>
       </div>
 
-      {/* Media Preview Grid */}
-      {mediaItems.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {mediaItems.map((item) => (
-            <div key={item.id} className="group relative bg-gray-900 rounded-lg overflow-hidden">
-              <div className="relative aspect-video">
-                {item.type === 'photo' ? (
-                  <img
-                    src={item.preview}
-                    alt={item.title}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      console.error('Image failed to load:', e);
-                      const target = e.target as HTMLImageElement;
-                      target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTggMThIMlYySDIyVjIySDZNNiAxOEgxOE0xOCA2SDZNNiAxMEgxOE02IDE0SDE4IiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+';
-                    }}
-                  />
-                ) : (
-                  <video
-                    src={item.preview}
-                    title={item.title}
-                    controls
-                    className="w-full h-full object-cover"
-                  />
-                )}
-                {/* Remove Button */}
+      {/* Camera Preview - Shared across all sections */}
+      {cameraActive && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-white rounded-lg overflow-hidden">
+            <div className="p-4 bg-gray-100 flex justify-between items-center">
+              <h3 className="font-medium">Taking photo for {getRoomTypeLabel(selectedRoomType)}</h3>
+              <button 
+                onClick={stopCamera}
+                className="p-1 rounded-full hover:bg-gray-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="relative bg-black">
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                className="w-full h-64 md:h-80 object-cover"
+              />
+              <canvas ref={canvasRef} className="hidden" />
+              
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                 <button
-                  onClick={() => handleRemoveMedia(item.id)}
-                  className="absolute top-2 right-2 p-2 bg-white bg-opacity-75 rounded-full text-black hover:bg-red-500 transition-colors duration-200"
-                  title="Remove"
+                  onClick={capturePhoto}
+                  className="p-4 bg-white rounded-full shadow-md hover:bg-gray-100"
                 >
-                  <X className="w-4 h-4" />
+                  <Camera className="w-6 h-6 text-black" />
                 </button>
               </div>
-              <div className="p-3">
-                <h3 className="font-medium text-sm truncate">{item.title}</h3>
-                
-                {/* Tags Section */}
-                <div className="mt-2">
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {item.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-gray-800 text-gray-300"
-                      >
-                        {tag}
-                        <button
-                          onClick={() => handleRemoveTag(item.id, tag)}
-                          className="ml-1 text-gray-400 hover:text-red-400"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {(item.type === 'photo' ? defaultPhotoTags : defaultVideoTags)
-                      .filter(tag => !item.tags.includes(tag))
-                      .map((tag, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleAddTag(item.id, tag)}
-                          className="text-xs px-2 py-1 rounded-full bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white transition-colors"
-                        >
-                          + {tag}
-                        </button>
-                      ))
-                    }
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mt-2 text-xs text-gray-400">
-                  <div className="flex items-center space-x-2">
-                    {item.type === 'photo' ? (
-                      <ImageIcon className="w-4 h-4 text-blue-400" />
-                    ) : (
-                      <Video className="w-4 h-4 text-purple-400" />
-                    )}
-                    <span className="capitalize">{item.type}</span>
-                  </div>
-                  <span>{(item.file.size / (1024 * 1024)).toFixed(1)} MB</span>
-                </div>
+            </div>
+            <div className="p-4 bg-gray-100">
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={stopCamera}
+                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                >
+                  Cancel
+                </button>
+                <span className="text-sm text-gray-500">Position the room in frame and tap the camera button</span>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       )}
 
       {/* Media Summary */}
       {mediaItems.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-gray-800">
+        <div className="mt-6 pt-4 border-t border-gray-200">
           <h2 className="text-lg font-semibold mb-3">Media Summary</h2>
-          <div className="flex items-center space-x-4 text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
             <div className="flex items-center space-x-2">
-              <ImageIcon className="w-4 h-4 text-blue-400" />
+              <ImageIcon className="w-4 h-4 text-blue-500" />
               <span>{mediaItems.filter(item => item.type === 'photo').length} Photos</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Video className="w-4 h-4 text-purple-400" />
+              <Video className="w-4 h-4 text-purple-500" />
               <span>{mediaItems.filter(item => item.type === 'video').length} Videos</span>
             </div>
-            <div className="text-gray-400">
+            <div className="text-gray-500">
               Total Size: {(mediaItems.reduce((acc, item) => acc + item.file.size, 0) / (1024 * 1024)).toFixed(1)} MB
             </div>
+          </div>
+          
+          {/* Room Type Distribution */}
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {roomTypeOptions.map(roomType => {
+              const count = mediaItems.filter(item => item.roomType === roomType.id).length;
+              if (count === 0) return null;
+              
+              return (
+                <div key={roomType.id} className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
+                  {roomType.icon}
+                  <span className="text-sm text-gray-700">{roomType.label}: {count}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
