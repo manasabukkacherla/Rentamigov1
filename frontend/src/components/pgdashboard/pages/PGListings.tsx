@@ -98,7 +98,7 @@ const PGListings: React.FC = () => {
   };
 
   const handleView = (pgId: string) => {
-    navigate(`/listings/${pgId}`);
+    navigate(`/pgdash/listings/${pgId}`);
   };
 
   const handleEdit = (pgId: string) => {
