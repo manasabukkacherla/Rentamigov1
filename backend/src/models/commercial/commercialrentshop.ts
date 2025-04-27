@@ -199,7 +199,7 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
 });
 
 // Indexes
-CommercialrentShopSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialrentShopSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialrentShopSchema.index({ 'basicInformation.city': 1 });
 CommercialrentShopSchema.index({ 'basicInformation.state': 1 });
 CommercialrentShopSchema.index({ 'metadata.createdAt': -1 });

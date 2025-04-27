@@ -280,7 +280,6 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
 });
 
 // Indexes
-CommercialLeaseShopSchema.index({ propertyId: 1 }, { unique: true });
 CommercialLeaseShopSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseShopSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShopSchema.index({ 'metadata.createdAt': -1 });

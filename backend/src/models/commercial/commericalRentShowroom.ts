@@ -260,7 +260,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
 });
 
 // Indexes
-CommercialRentShowroomSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialRentShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialRentShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialRentShowroomSchema.index({ 'basicInformation.state': 1 });
 CommercialRentShowroomSchema.index({ 'rentalDetails.expectedRent': 1 });

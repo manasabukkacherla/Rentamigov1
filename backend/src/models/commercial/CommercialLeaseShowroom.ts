@@ -299,7 +299,7 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
         });
 
 // Indexes
-CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialLeaseShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseShowroomSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
