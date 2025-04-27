@@ -246,7 +246,7 @@ app.get("/testing", (req: Request, res: Response) => {
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-console.log("cd pipeline check - 4rd time....");
+console.log("cd pipeline check - 5th time....");
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);
