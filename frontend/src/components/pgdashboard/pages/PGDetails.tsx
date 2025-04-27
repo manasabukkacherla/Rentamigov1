@@ -153,7 +153,27 @@ const PGDetails: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8">
+    <div className="max-w-7xl mx-auto space-y-8 px-6 sm:px-8 lg:px-10 pt-10">
+
+<div className="flex items-center justify-between flex-wrap gap-4">
+  <div>
+    <h1 className="text-3xl font-bold text-gray-900">{pg.name}</h1>
+    <div className="flex items-center text-gray-600 mt-1">
+      <MapPin className="h-5 w-5 mr-1" />
+      <span>{pg.location}, {pg.area}</span>
+    </div>
+  </div>
+
+  {/* Rating Section */}
+  <div className="flex items-center bg-gray-100 px-3 py-1 rounded-lg">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="orange" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 mr-1">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l2.39 6.97H21l-5.8 4.22L16.6 21 12 16.97 7.4 21l1.4-7.81L3 8.97h6.61z" />
+    </svg>
+    <span className="font-semibold text-gray-900 mr-1">4.8</span>
+    <span className="text-gray-500">(42 reviews)</span>
+  </div>
+</div>
+
       {/* Main Image and Basic Info */}
       <div className="relative h-[400px] rounded-lg overflow-hidden">
         <img
