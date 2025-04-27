@@ -10,7 +10,7 @@ import { ToastContainer } from "./ToastContainer";
 import { Notification } from "./types";
 
 // Import Plans component
-import Plans from "./pages/Plans"; 
+import Plans from "./pages/Plans";
 
 // Define the types
 import { Plan, TokenPackage } from "./types";
@@ -67,7 +67,10 @@ function UsrDashboard() {
             }
           />
 
-          <Route path="*" element={<h1 className="text-center mt-10">Page Not Found</h1>} />
+          <Route
+            path="*"
+            element={<h1 className="text-center mt-10">Page Not Found</h1>}
+          />
         </Routes>
       </main>
 
