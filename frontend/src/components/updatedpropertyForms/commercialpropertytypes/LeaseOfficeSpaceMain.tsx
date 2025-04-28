@@ -20,7 +20,7 @@ import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2, Locate, Navigation } from 'lucide-react';
 
 interface MediaType {
   images: { category: string; files: { url: string; file: File; }[]; }[];
@@ -115,6 +115,127 @@ const LeaseOfficeSpaceMain = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
 
+  // Function to update map location based on latitude and longitude
+  const updateMapLocation = (lat: string, lng: string) => {
+    const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
+    if (iframe && lat && lng) {
+      // Use higher zoom level (18) and more precise marker for better accuracy
+      iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
+    }
+  };
+
+  // Function to get current location
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          
+          // Update form data
+          setFormData(prev => ({
+            ...prev,
+            coordinates: {
+              latitude: lat,
+              longitude: lng
+            }
+          }));
+          
+          // Update map
+          updateMapLocation(lat, lng);
+          
+          // Attempt to reverse geocode for address
+          reverseGeocode(lat, lng);
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+          toast.error("Unable to get your current location. Please check your browser permissions.");
+        }
+      );
+    } else {
+      toast.error("Geolocation is not supported by your browser.");
+    }
+  };
+
+  // Reverse geocode to get address from coordinates
+  const reverseGeocode = (lat: string, lng: string) => {
+    const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
+    
+    fetch(geocodingUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "OK" && data.results && data.results.length > 0) {
+          const address = data.results[0];
+          
+          // Extract address components
+          const addressComponents: Record<string, string> = {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: ''
+          };
+          
+          // Map address components to our format
+          address.address_components.forEach((component: any) => {
+            const types = component.types;
+            
+            if (types.includes('route')) {
+              addressComponents.street = component.long_name;
+            } else if (types.includes('locality')) {
+              addressComponents.city = component.long_name;
+            } else if (types.includes('administrative_area_level_1')) {
+              addressComponents.state = component.long_name;
+            } else if (types.includes('postal_code')) {
+              addressComponents.zipCode = component.long_name;
+            }
+          });
+          
+          // Check if we have a street address, if not use formatted address
+          if (!addressComponents.street && address.formatted_address) {
+            const formattedParts = address.formatted_address.split(',');
+            if (formattedParts.length > 0) {
+              addressComponents.street = formattedParts[0];
+            }
+          }
+          
+          // Update address in form data
+          setFormData(prev => ({
+            ...prev,
+            address: addressComponents
+          }));
+          
+          // Update landmark with nearby point of interest if available
+          const landmark = data.results.find((result: any) => 
+            result.types.some((type: string) => 
+              ['point_of_interest', 'establishment', 'premise'].includes(type)
+            )
+          );
+          
+          if (landmark && landmark.name) {
+            setFormData(prev => ({
+              ...prev,
+              landmark: landmark.name
+            }));
+          }
+          
+          toast.success("Location details updated successfully");
+        } else {
+          console.error("Geocoding failed:", data.status);
+        }
+      })
+      .catch(error => {
+        console.error("Error during reverse geocoding:", error);
+      });
+  };
+
+  // Function to open location picker in Google Maps
+  const openLocationPicker = () => {
+    const lat = formData.coordinates.latitude || "20.5937";
+    const lng = formData.coordinates.longitude || "78.9629";
+    window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
+    toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
+  };
+
   // Form prevention utility function
   const preventDefault = (e: React.MouseEvent | React.FormEvent) => {
     if (e) {
@@ -151,16 +272,143 @@ const LeaseOfficeSpaceMain = () => {
             </div>
             <div className="space-y-6">
               <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+              
+              <div className="bg-white p-6 rounded-lg space-y-6">
+                <h4 className="text-lg font-medium mb-4 text-black">Map Location</h4>
+                <p className="text-sm text-gray-500 mb-4">
+                  Use the map below to set your property's location. Click on the map or search for an address.
+                </p>
+                <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
+                  <iframe
+                    id="map-iframe"
+                    src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${formData.coordinates.longitude || '78.9629'}!3d${formData.coordinates.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${formData.coordinates.latitude || '20.5937'},${formData.coordinates.longitude || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="rounded-xl"
+                    title="Property Location Map"
+                  ></iframe>
+                  
+                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                    <button 
+                      onClick={() => getCurrentLocation()}
+                      className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
+                      aria-label="Get current location"
+                      type="button"
+                    >
+                      <Locate className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-medium">My Location</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => openLocationPicker()}
+                      className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
+                      aria-label="Select location"
+                      type="button"
+                    >
+                      <Navigation className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-medium">Select Location</span>
+                    </button>
+                  </div>
+                  
+                  <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
+                    Powered by Google Maps
+                  </div>
+                </div>
+                
+                <div>
+                  <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
+                        Latitude
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          id="latitude"
+                          value={formData.coordinates.latitude}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (!isNaN(Number(value)) || value === '-' || value === '') {
+                              setFormData(prev => ({
+                                ...prev,
+                                coordinates: {
+                                  ...prev.coordinates,
+                                  latitude: value
+                                }
+                              }));
+                              
+                              // Update map when latitude changes
+                              updateMapLocation(
+                                value, 
+                                formData.coordinates.longitude || '78.9629'
+                              );
+                            }
+                          }}
+                          placeholder="Enter latitude (e.g., 17.683301)"
+                          className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                        />
+                        <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      </div>
+                    </div>
+                    <div>
+                      <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
+                        Longitude
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          id="longitude"
+                          value={formData.coordinates.longitude}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (!isNaN(Number(value)) || value === '-' || value === '') {
+                              setFormData(prev => ({
+                                ...prev,
+                                coordinates: {
+                                  ...prev.coordinates,
+                                  longitude: value
+                                }
+                              }));
+                              
+                              // Update map when longitude changes
+                              updateMapLocation(
+                                formData.coordinates.latitude || '20.5937',
+                                value
+                              );
+                            }
+                          }}
+                          placeholder="Enter longitude (e.g., 83.019301)"
+                          className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                        />
+                        <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    Enter coordinates manually or use the map above to set the location.
+                  </p>
+                </div>
+              </div>
+              
               <div className="relative">
-                <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
+                <Landmark 
+                  onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} 
+                  onLocationSelect={(location) => {
+                    setFormData(prev => ({ ...prev, coordinates: location }));
+                    // Update map when location changes
+                    updateMapLocation(location.latitude, location.longitude);
+                  }}
+                  latitude={formData.coordinates.latitude}
+                  longitude={formData.coordinates.longitude}
+                />
                 <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
               </div>
-              <MapCoordinates
-                latitude={formData.coordinates.latitude}
-                longitude={formData.coordinates.longitude}
-                onLatitudeChange={(latitude) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude } }))}
-                onLongitudeChange={(longitude) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude } }))}
-              />
+              
               <div className="flex items-center space-x-2 cursor-pointer">
                 <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
                 <span className="text-black">This is a corner property</span>
