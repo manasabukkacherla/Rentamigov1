@@ -7,10 +7,15 @@ interface MealTime {
   time: string;
 }
 
+interface MealEntry {
+  name: string;
+  time: string;
+}
+
 interface DayMeals {
-  breakfast: string;
-  lunch: string;
-  dinner: string;
+  breakfast: MealEntry;
+  lunch: MealEntry;
+  dinner: MealEntry;
 }
 
 type WeekMeals = {
@@ -22,14 +27,14 @@ const FoodServices = () => {
   const [includeSnacks, setIncludeSnacks] = useState(false);
   const [snackItems, setSnackItems] = useState({ morning: '', evening: '' });
   const [weekMeals, setWeekMeals] = useState<WeekMeals>({
-    monday: { breakfast: '', lunch: '', dinner: '' },
-    tuesday: { breakfast: '', lunch: '', dinner: '' },
-    wednesday: { breakfast: '', lunch: '', dinner: '' },
-    thursday: { breakfast: '', lunch: '', dinner: '' },
-    friday: { breakfast: '', lunch: '', dinner: '' },
-    saturday: { breakfast: '', lunch: '', dinner: '' },
-    sunday: { breakfast: '', lunch: '', dinner: '' },
-  });
+  monday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  tuesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  wednesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  thursday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  friday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  saturday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  sunday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+});
 
   const days = [
     'monday',
@@ -47,15 +52,18 @@ const FoodServices = () => {
     { id: 'dinner', label: 'Dinner', time: '8:00 PM - 9:30 PM' },
   ];
 
-  const handleMealChange = (day: string, meal: keyof DayMeals, value: string) => {
-    setWeekMeals((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [meal]: value,
+  const handleMealChange = (day: string, meal: keyof DayMeals, field: 'name' | 'time', value: string) => {
+  setWeekMeals((prev) => ({
+    ...prev,
+    [day]: {
+      ...prev[day],
+      [meal]: {
+        ...prev[day][meal],
+        [field]: value,
       },
-    }));
-  };
+    },
+  }));
+};
 
   const copyMealToAllDays = (meal: keyof DayMeals, sourceDay: string) => {
     const mealValue = weekMeals[sourceDay][meal];
@@ -168,9 +176,8 @@ const FoodServices = () => {
                       <th key={meal.id} className="p-3 text-left font-medium text-gray-600">
                         <div>
                           <span>{meal.label}</span>
-                          <div className="text-xs text-gray-500 font-normal">
-                            {meal.time}
-                          </div>
+                          <div className="text-xs text-gray-500 font-normal">Default: {meal.time}</div>
+                          <div className="text-xs text-gray-400 font-normal">(Set time below)</div>
                         </div>
                       </th>
                     ))}
@@ -182,16 +189,17 @@ const FoodServices = () => {
                       <td className="p-3 capitalize font-medium text-gray-700">{day}</td>
                       {mealTimes.map((meal) => (
                         <td key={`${day}-${meal.id}`} className="p-3">
-                          <div className="relative">
+                          <div className="relative mb-1">
                             <input
                               type="text"
-                              value={weekMeals[day][meal.id as keyof DayMeals]}
-                              onChange={(e) => handleMealChange(day, meal.id as keyof DayMeals, e.target.value)}
+                              value={weekMeals[day][meal.id as keyof DayMeals].name}
+                              onChange={(e) => handleMealChange(day, meal.id as keyof DayMeals, 'name', e.target.value)}
                               placeholder="Enter menu items"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400 pr-8"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400 pr-8 mb-1"
                             />
                             {day === 'monday' && (
                               <button
+                                type="button"
                                 onClick={() => copyMealToAllDays(meal.id as keyof DayMeals, day)}
                                 className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black p-1"
                                 title="Copy to all days"
@@ -200,6 +208,13 @@ const FoodServices = () => {
                               </button>
                             )}
                           </div>
+                          <input
+                            type="time"
+                            value={weekMeals[day][meal.id as keyof DayMeals].time}
+                            onChange={(e) => handleMealChange(day, meal.id as keyof DayMeals, 'time', e.target.value)}
+                            placeholder="Set time"
+                            className="w-full px-3 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-300 text-xs"
+                          />
                         </td>
                       ))}
                     </tr>
@@ -210,7 +225,7 @@ const FoodServices = () => {
           </div>
 
           {/* Selected Meals Summary */}
-          {days.some(day => Object.values(weekMeals[day]).some(meal => meal.trim() !== '')) && (
+          {days.some(day => Object.values(weekMeals[day]).some(meal => meal.name.trim() !== '' || meal.time.trim() !== '')) && (
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
               <h3 className="font-medium text-gray-900 mb-4 flex items-center">
                 <div className="p-1.5 rounded-md bg-gray-100 text-gray-700 mr-2">
@@ -218,10 +233,9 @@ const FoodServices = () => {
                 </div>
                 Weekly Menu Summary
               </h3>
-              
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {days.map((day) => {
-                  const hasMeals = Object.values(weekMeals[day]).some(meal => meal.trim() !== '');
+                  const hasMeals = Object.values(weekMeals[day]).some(meal => meal.name.trim() !== '' || meal.time.trim() !== '');
                   if (!hasMeals) return null;
 
                   return (
@@ -229,13 +243,14 @@ const FoodServices = () => {
                       <h4 className="capitalize font-medium text-gray-900 mb-2">{day}</h4>
                       <div className="space-y-1.5">
                         {mealTimes.map((meal) => {
-                          const mealItems = weekMeals[day][meal.id as keyof DayMeals];
-                          if (!mealItems.trim()) return null;
+                          const mealEntry = weekMeals[day][meal.id as keyof DayMeals];
+                          if (!mealEntry.name.trim() && !mealEntry.time.trim()) return null;
 
                           return (
-                            <div key={meal.id} className="flex text-sm">
+                            <div key={meal.id} className="flex flex-col text-sm">
                               <span className="font-medium text-gray-700 min-w-[80px]">{meal.label}:</span>
-                              <span className="text-gray-600 ml-2">{mealItems}</span>
+                              {mealEntry.name && <span className="text-gray-600 ml-2">Menu: {mealEntry.name}</span>}
+                              {mealEntry.time && <span className="text-gray-500 ml-2">Time: {mealEntry.time}</span>}
                             </div>
                           );
                         })}
@@ -244,7 +259,6 @@ const FoodServices = () => {
                   );
                 })}
               </div>
-              
               {includeSnacks && (snackItems.morning || snackItems.evening) && (
                 <div className="mt-4 p-3 rounded-lg border border-gray-200 bg-gray-50">
                   <h4 className="font-medium text-gray-900 mb-2">Daily Snacks</h4>

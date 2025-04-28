@@ -17,7 +17,12 @@ interface RoomTypeOption {
   icon: React.ReactNode;
 }
 
-const PgMedia = () => {
+interface PgMediaProps {
+  selectedShares: string[];
+  customShare: string;
+}
+
+const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const [batchTitle, setBatchTitle] = useState('');
   const [selectedType, setSelectedType] = useState<'photo' | 'video'>('photo');
@@ -40,10 +45,14 @@ const PgMedia = () => {
     { id: 'triple', label: 'Triple Share Room', icon: <Users className="h-4 w-4" /> },
     { id: 'four', label: 'Four Share Room', icon: <Users className="h-4 w-4" /> },
     { id: 'five', label: 'Five Share Room', icon: <Users className="h-4 w-4" /> },
-    { id: 'custom', label: 'Multi Share Room', icon: <Users className="h-4 w-4" /> },
-    { id: 'common', label: 'Common Areas', icon: <Lightbulb className="h-4 w-4" /> },
-    { id: 'exterior', label: 'Building Exterior', icon: <Key className="h-4 w-4" /> },
+    // custom/multi-share will be handled separately
   ];
+
+  // Filter roomTypeOptions to only those currently selected
+  const selectedRoomTypeOptions = roomTypeOptions.filter(opt => selectedShares.includes(opt.id));
+
+  // If 'more' (custom/multi-share) is selected and customShare is set, add a dynamic option
+  const showCustomShare = selectedShares.includes('more') && customShare && Number(customShare) >= 6;
 
   const toggleSection = (sectionId: string) => {
     if (expandedSection === sectionId) {
