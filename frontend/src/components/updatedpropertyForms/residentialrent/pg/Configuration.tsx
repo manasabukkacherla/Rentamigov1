@@ -13,9 +13,14 @@ interface ShareOption {
   value: number;
 }
 
-const Configuration = () => {
-  const [selectedShare, setSelectedShare] = useState<string>('');
-  const [customShare, setCustomShare] = useState<string>('');
+interface ConfigurationProps {
+  selectedShares: string[];
+  setSelectedShares: React.Dispatch<React.SetStateAction<string[]>>;
+  customShare: string;
+  setCustomShare: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const Configuration: React.FC<ConfigurationProps> = ({ selectedShares, setSelectedShares, customShare, setCustomShare }) => {
 
   const shareOptions: ShareOption[] = [
     { id: 'single', label: 'Single Share', value: 1 },
@@ -27,7 +32,14 @@ const Configuration = () => {
   ];
 
   const handleShareChange = (optionId: string) => {
-    setSelectedShare(optionId);
+    setSelectedShares((prev) => {
+      if (prev.includes(optionId)) {
+        // Remove if already selected
+        return prev.filter((id) => id !== optionId);
+      } else {
+        return [...prev, optionId];
+      }
+    });
     if (optionId !== 'more') {
       setCustomShare('');
     }
@@ -66,33 +78,32 @@ const Configuration = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {shareOptions.map((option) => (
             <div 
-              key={option.id} 
-              onClick={() => handleShareChange(option.id)}
+              key={option.id}
               className={`
                 flex items-center p-4 rounded-lg border cursor-pointer transition-all
-                ${selectedShare === option.id 
-                  ? 'border-black  text-white shadow-md' 
-                  : 'border-gray-200 bg-white  hover:border-black hover:text-white'
+                ${selectedShares.includes(option.id)
+                  ? 'border-black text-white shadow-md '
+                  : 'border-gray-200 bg-white hover:border-black  hover:text-white'
                 }
               `}
             >
               <input
-                type="radio"
+                type="checkbox"
                 id={option.id}
                 name="shareType"
-                checked={selectedShare === option.id}
-                onChange={() => {}}
-                className={`h-4 w-4 ${selectedShare === option.id ? 'accent-white' : 'accent-black'}`}
+                checked={selectedShares.includes(option.id)}
+                onChange={() => handleShareChange(option.id)}
+                className={`h-4 w-4 ${selectedShares.includes(option.id) ? 'accent-white' : 'accent-black'}`}
               />
-              <label htmlFor={option.id} className="ml-3 flex-grow cursor-pointer">
+              <label htmlFor={option.id} className="ml-3 flex-grow cursor-pointer group-hover:text-white">
                 {option.label}
               </label>
-              <UserPlus className={`h-4 w-4 ${selectedShare === option.id ? 'text-white' : 'text-gray-500'}`} />
+              <UserPlus className={`h-4 w-4 ${selectedShares.includes(option.id) ? 'text-white' : 'text-gray-500'}`} />
             </div>
           ))}
         </div>
         
-        {selectedShare === 'more' && (
+        {selectedShares.includes('more') && (
           <div className="mt-4 max-w-md">
             <label htmlFor="customShare" className="block text-sm text-gray-700 mb-2">
               Custom Number of Shares (6 or more)
@@ -114,23 +125,36 @@ const Configuration = () => {
       </div>
 
       {/* Room Amenities Section */}
-      {selectedShare && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      {selectedShares.filter(s => s !== 'more').map((share) => (
+        <div key={share} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="mb-4">
             <h3 className="text-lg font-medium text-gray-900">
-              {selectedShare === 'single' ? 'Single Room' : 
-               selectedShare === 'double' ? 'Double Share Room' :
-               selectedShare === 'triple' ? 'Triple Share Room' :
-               selectedShare === 'four' ? 'Four Share Room' :
-               selectedShare === 'five' ? 'Five Share Room' :
-               `${customShare}-Share Room`} Amenities
+              {share === 'single' ? 'Single Room' :
+                share === 'double' ? 'Double Share Room' :
+                share === 'triple' ? 'Triple Share Room' :
+                share === 'four' ? 'Four Share Room' :
+                share === 'five' ? 'Five Share Room' :
+                ''} Amenities
             </h3>
             <p className="text-sm text-gray-500 mt-1">
               Select amenities available for this room type
             </p>
           </div>
-          
-          {renderAmenitiesComponent(selectedShare)}
+          {renderAmenitiesComponent(share)}
+        </div>
+      ))}
+      {/* Custom share amenities */}
+      {selectedShares.includes('more') && customShare && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="mb-4">
+            <h3 className="text-lg font-medium text-gray-900">
+              {customShare}-Share Room Amenities
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              Select amenities available for this room type
+            </p>
+          </div>
+          {renderAmenitiesComponent('more')}
         </div>
       )}
     </div>
