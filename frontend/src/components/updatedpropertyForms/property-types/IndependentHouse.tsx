@@ -241,9 +241,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
                 <AvailabilityDate
                   onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))}
                 />
-                <Restrictions
-                  onRestrictionsChange={(restrictions) => setFormData(prev => ({ ...prev, restrictions }))}
-                />
+                
               </div>
             </div>
           </div>
