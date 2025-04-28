@@ -457,25 +457,23 @@ const RentOthers = () => {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={handlePropertyNameChange}
-            />
-            <OtherCommercialType
-              onCommercialTypeChange={handleCommercialTypeChange}
-            />
-            <CommercialPropertyAddress
-              onAddressChange={handleAddressChange}
-            />
-            <Landmark
-              onLandmarkChange={handleLandmarkChange}
-            />
-            <CornerProperty
-              onCornerPropertyChange={handleCornerPropertyChange}
-            />
-          </div>
+        <div className="space-y-6">
+          <PropertyName
+            propertyName={formData.propertyName}
+            onPropertyNameChange={handlePropertyNameChange}
+          />
+          <OtherCommercialType
+            onCommercialTypeChange={handleCommercialTypeChange}
+          />
+          <CommercialPropertyAddress
+            onAddressChange={handleAddressChange}
+          />
+          <Landmark
+            onLandmarkChange={handleLandmarkChange}
+          />
+          <CornerProperty
+            onCornerPropertyChange={handleCornerPropertyChange}
+          />
         </div>
       )
     },
@@ -483,11 +481,9 @@ const RentOthers = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <OtherPropertyDetails onDetailsChange={handleOtherDetailsChange} />
-            <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
-          </div>
+        <div className="space-y-6">
+          <OtherPropertyDetails onDetailsChange={handleOtherDetailsChange} />
+          <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
         </div>
       )
     },
@@ -495,28 +491,17 @@ const RentOthers = () => {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rent.rentType === 'exclusive' && (
-                  <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-                )}
-                <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
-              </div>
-            </div>
+        <div className="space-y-6">
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage onBrokerageChange={handleBrokerageChange} />
-              </div>
-            </div>
-          </div>
+          <Rent onRentChange={handleRentChange} />
+          {formData.rent.rentType === 'exclusive' && (
+            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+          )}
+          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+
+
+          <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
+          <Brokerage onBrokerageChange={handleBrokerageChange} />
         </div>
       )
     },
@@ -533,7 +518,7 @@ const RentOthers = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
           <CommercialContactDetails onContactChange={handleContactChange} />
         </div>
       )
@@ -542,7 +527,7 @@ const RentOthers = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
           <CommercialMediaUpload onMediaChange={handleMediaChange} />
         </div>
       )
@@ -669,7 +654,7 @@ const RentOthers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -712,7 +697,10 @@ const RentOthers = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div ref={formRef} className="mb-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Others</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

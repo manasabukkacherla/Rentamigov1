@@ -21,8 +21,8 @@ const Rent = ({ onRentChange }: RentProps) => {
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+      <div className="flex items-center gap-3 mb-6 ">
         <h3 className="text-2xl font-semibold text-black">Rent Details</h3>
         <ArrowRight className="opacity-40" size={20} />
         <span className="text-sm opacity-70">Enter Rent Information</span>

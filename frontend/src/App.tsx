@@ -37,7 +37,7 @@ import Chatbottt from "./components/chatbott/App";
 import Pgapp from "./components/pgdashboard/pgdashboard";
 import Allproperties from "./components/allpropertiespage/App";
 import PGDetails from "./components/pgdashboard/pages/PGDetails";
-import Agriplot from "./components/Agriplotpage/App";
+import Agriplot from "./components/Agriplotpage/App.tsx";
 // import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
@@ -234,6 +234,8 @@ const App = () => {
 {/* Dynamic PG Details page route */}
 <Route path="/pgdash/listings/:id" element={<PGDetails />} />
 
+ {/* agriplot routes*/}
+ <Route path="/agriplot" element={<Agriplot />} />
 
 {/* Agriplot route */}
 <Route path="/agriplot" element={<Agriplot />} />
