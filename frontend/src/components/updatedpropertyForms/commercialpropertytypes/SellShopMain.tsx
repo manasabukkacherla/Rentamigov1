@@ -279,30 +279,24 @@ const SellShopMain = () => {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Store className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <PropertyName
-              propertyName={formData.basicInformation.title}
-              onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
-            />
-            <ShopType
-              onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
-            />
-            <CommercialPropertyAddress
-              onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            />
-            <Landmark
-              onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
-              onLocationSelect={(location) => handleChange('basicInformation.location', location)}
-            />
-            <CornerProperty
-              onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
-            />
-          </div>
+        <div className="space-y-6">
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
+          />
+          <ShopType
+            onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
+          />
+          <CommercialPropertyAddress
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+          />
+          <Landmark
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+            onLocationSelect={(location) => handleChange('basicInformation.location', location)}
+          />
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
+          />
         </div>
       )
     },
@@ -310,11 +304,6 @@ const SellShopMain = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
           <div className="space-y-6">
             <ShopDetails
               onDetailsChange={(details) => handleChange('shopDetails', details)}
@@ -323,22 +312,13 @@ const SellShopMain = () => {
               onDetailsChange={(details) => handleChange('propertyDetails', details)}
             />
           </div>
-        </div>
       )
     },
     {
       title: 'Pricing Details',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
-          </div>
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
                 <Price onPriceChange={(price) => {
                   setFormData(prev => ({
                     ...prev,
@@ -369,11 +349,6 @@ const SellShopMain = () => {
                     }));
                   }}
                 />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
                 <div className="text-black">
                   <RegistrationCharges onRegistrationChargesChange={(charges) => {
@@ -403,19 +378,13 @@ const SellShopMain = () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
       )
     },
     {
       title: 'Availability',
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
+        <div className="space-y-6">
           <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
         </div>
       )
@@ -424,11 +393,7 @@ const SellShopMain = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
-          </div>
+        <div className="space-y-6">
           <CommercialContactDetails onContactChange={(contact) => handleChange('contactInformation', contact)} />
         </div>
       )
@@ -437,11 +402,7 @@ const SellShopMain = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
+        <div className="space-y-6">
           <CommercialMediaUpload
             onMediaChange={(mediaUpdate) => {
               const convertedPhotos: any = {};
@@ -856,11 +817,11 @@ const SellShopMain = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                  Processing...
+                  Submitting...
                 </>
               ) : (
                 <>
-                  {currentStep === formSections.length - 1 ? 'Submit Listing' : 'Next'}
+                  {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </>
               )}
