@@ -440,6 +440,57 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
         </div>
       </div>
 
+      {/* Facility Upload Sections */}
+      <div className="mb-8">
+        <h2 className="text-lg font-semibold mb-4">Other Facility Photos</h2>
+        {[
+          { id: 'lifts', label: 'Lifts' },
+          { id: 'dining', label: 'Dining Hall' },
+          { id: 'staircases', label: 'Staircases' },
+          { id: 'kitchen', label: 'Kitchen Area' }
+        ].map(facility => (
+          <div key={facility.id} className="mb-6">
+            <label className="block font-medium mb-2">{facility.label} Photos</label>
+            <div className="flex flex-col md:flex-row gap-4 mb-2">
+              <div className="flex-1">
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={e => handleFileSelect(e, facility.id)}
+                  className="mb-2"
+                />
+              </div>
+              <div className="flex-none">
+                <button
+                  onClick={() => startCamera(facility.id)}
+                  className="flex items-center justify-center px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                >
+                  <Camera className="w-4 h-4 mr-2" />
+                  Take Photo
+                </button>
+              </div>
+            </div>
+            {/* Preview grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {mediaItems.filter(item => item.roomType === facility.id).map(item => (
+                <div key={item.id} className="relative aspect-square rounded-md overflow-hidden">
+                  <img src={item.preview} alt={item.title} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={() => handleRemoveMedia(item.id)}
+                      className="p-1 bg-red-500 rounded-full text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Camera Preview - Shared across all sections */}
       {cameraActive && (
         <div className="fixed inset-0 z-50 bg-black bg-opacity-75 flex items-center justify-center p-4">
