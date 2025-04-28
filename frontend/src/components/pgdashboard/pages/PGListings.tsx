@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Building2, Search, Filter, MapPin, Users, IndianRupee, Eye, Pencil, Trash2 } from 'lucide-react';
+import { Building2, Search, Filter, MapPin, Users, IndianRupee, Wifi, Car, Dumbbell, Eye, Pencil, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface PG {
@@ -114,8 +114,8 @@ const PGListings: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-semibold text-gray-800">PG Listings</h1>
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        <h1 className="text-2xl font-semibold text-gray-900">PG Listings</h1>
+        <button className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors">
           Add New PG
         </button>
       </div>
@@ -130,7 +130,7 @@ const PGListings: React.FC = () => {
                 placeholder="Search PGs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
               />
             </div>
             <button
@@ -196,7 +196,7 @@ const PGListings: React.FC = () => {
                       type="checkbox"
                       checked={filters.amenities.includes('wifi')}
                       onChange={() => handleAmenityToggle('wifi')}
-                      className="rounded text-indigo-600"
+                      className="rounded text-black"
                     />
                     <span className="ml-2 text-sm text-gray-600">WiFi</span>
                   </label>
@@ -205,7 +205,7 @@ const PGListings: React.FC = () => {
                       type="checkbox"
                       checked={filters.amenities.includes('parking')}
                       onChange={() => handleAmenityToggle('parking')}
-                      className="rounded text-indigo-600"
+                      className="rounded text-black"
                     />
                     <span className="ml-2 text-sm text-gray-600">Parking</span>
                   </label>
@@ -214,7 +214,7 @@ const PGListings: React.FC = () => {
                       type="checkbox"
                       checked={filters.amenities.includes('gym')}
                       onChange={() => handleAmenityToggle('gym')}
-                      className="rounded text-indigo-600"
+                      className="rounded text-black"
                     />
                     <span className="ml-2 text-sm text-gray-600">Gym</span>
                   </label>
@@ -234,23 +234,23 @@ const PGListings: React.FC = () => {
               />
               <div className="p-4">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold text-gray-800">{pg.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">{pg.name}</h3>
                   <div className="flex space-x-2">
                     <button
                       onClick={() => handleView(pg.id)}
-                      className="p-1 text-blue-600 hover:text-blue-900"
+                      className="p-1 text-gray-600 hover:text-gray-900"
                     >
                       <Eye className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleEdit(pg.id)}
-                      className="p-1 text-indigo-600 hover:text-indigo-900"
+                      className="p-1 text-gray-600 hover:text-gray-900"
                     >
                       <Pencil className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(pg.id)}
-                      className="p-1 text-red-600 hover:text-red-900"
+                      className="p-1 text-gray-600 hover:text-gray-900"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
@@ -268,6 +268,17 @@ const PGListings: React.FC = () => {
                   <div className="flex items-center text-gray-600">
                     <IndianRupee className="h-4 w-4 mr-2" />
                     <span className="text-sm">₹{pg.rent.toLocaleString()}/month</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {pg.amenities.includes('wifi') && (
+                      <Wifi className="h-4 w-4 text-gray-600" />
+                    )}
+                    {pg.amenities.includes('parking') && (
+                      <Car className="h-4 w-4 text-gray-600" />
+                    )}
+                    {pg.amenities.includes('gym') && (
+                      <Dumbbell className="h-4 w-4 text-gray-600" />
+                    )}
                   </div>
                 </div>
               </div>
