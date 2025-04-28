@@ -14,7 +14,7 @@ import AvailabilityDate from "../AvailabilityDate"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation ,Loader2} from "lucide-react"
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation, Loader2 } from "lucide-react"
 
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom"
 import PropertyName from "../PropertyName"
 import ShopType from "../CommercialComponents/ShopType"
 import CornerProperty from "../CommercialComponents/CornerProperty"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 interface IBasicInformation {
   title: string;
@@ -286,7 +287,7 @@ const RentShopMain = () => {
         (position) => {
           const lat = position.coords.latitude.toString();
           const lng = position.coords.longitude.toString();
-          
+
           // Update form data
           setFormData(prev => ({
             ...prev,
@@ -298,10 +299,10 @@ const RentShopMain = () => {
               }
             }
           }));
-          
+
           // Update map
           updateMapLocation(lat, lng);
-          
+
           // Attempt to reverse geocode for address
           reverseGeocode(lat, lng);
         },
@@ -318,13 +319,13 @@ const RentShopMain = () => {
   // Reverse geocode to get address from coordinates
   const reverseGeocode = (lat: string, lng: string) => {
     const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
+
     fetch(geocodingUrl)
       .then(response => response.json())
       .then(data => {
         if (data.status === "OK" && data.results && data.results.length > 0) {
           const address = data.results[0];
-          
+
           // Extract address components
           const addressComponents = {
             street: '',
@@ -332,11 +333,11 @@ const RentShopMain = () => {
             state: '',
             zipCode: ''
           };
-          
+
           // Map address components to our format
           address.address_components.forEach((component: any) => {
             const types = component.types;
-            
+
             if (types.includes('route')) {
               addressComponents.street = component.long_name;
             } else if (types.includes('locality')) {
@@ -347,7 +348,7 @@ const RentShopMain = () => {
               addressComponents.zipCode = component.long_name;
             }
           });
-          
+
           // Check if we have a street address, if not use formatted address
           if (!addressComponents.street && address.formatted_address) {
             const formattedParts = address.formatted_address.split(',');
@@ -355,7 +356,7 @@ const RentShopMain = () => {
               addressComponents.street = formattedParts[0];
             }
           }
-          
+
           // Update address in form data
           setFormData(prev => ({
             ...prev,
@@ -364,14 +365,14 @@ const RentShopMain = () => {
               address: addressComponents
             }
           }));
-          
+
           // Update landmark with nearby point of interest if available
-          const landmark = data.results.find((result: any) => 
-            result.types.some((type: string) => 
+          const landmark = data.results.find((result: any) =>
+            result.types.some((type: string) =>
               ['point_of_interest', 'establishment', 'premise'].includes(type)
             )
           );
-          
+
           if (landmark && landmark.name) {
             setFormData(prev => ({
               ...prev,
@@ -381,7 +382,7 @@ const RentShopMain = () => {
               }
             }));
           }
-          
+
           toast.success("Location details updated successfully");
         } else {
           console.error("Geocoding failed:", data.status);
@@ -411,7 +412,7 @@ const RentShopMain = () => {
         }
       }
     });
-    
+
     // Update map when coordinates change
     updateMapLocation(latitude, longitude);
   };
@@ -441,7 +442,7 @@ const RentShopMain = () => {
               basicInformation: { ...prev.basicInformation, address }
             }))}
           />
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center mb-8">
               <MapPin className="text-black mr-3" size={28} />
               <h3 className="text-2xl font-semibold text-black">Map Location</h3>
@@ -575,8 +576,34 @@ const RentShopMain = () => {
                 </p>
               </div>
             </div>
-          </div>
-          <Landmark
+          </div> */}
+          <MapLocation
+            onLandmarkChange={(landmark) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, landmark }
+            }))}
+            onLocationSelect={(location) => {
+              setFormData(prev => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  location: {
+                    latitude: parseFloat(location.latitude),
+                    longitude: parseFloat(location.longitude)
+                  }
+                }
+              }));
+              // Update map when location changes from Landmark component
+              updateMapLocation(location.latitude, location.longitude);
+            }}
+            onAddressChange={(address) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, address }
+            }))}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+          />
+          {/* <Landmark
             onLandmarkChange={(landmark) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, landmark }
@@ -597,7 +624,7 @@ const RentShopMain = () => {
             }}
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
-          />
+          /> */}
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({
               ...prev,

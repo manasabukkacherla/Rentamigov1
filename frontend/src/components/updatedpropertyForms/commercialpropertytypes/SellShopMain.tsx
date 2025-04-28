@@ -291,16 +291,16 @@ const SellShopMain = () => {
         (position) => {
           const lat = position.coords.latitude.toString();
           const lng = position.coords.longitude.toString();
-          
+
           // Update form data
           handleChange('basicInformation.location', {
             latitude: lat,
             longitude: lng
           });
-          
+
           // Update map
           updateMapLocation(lat, lng);
-          
+
           // Attempt to reverse geocode for address
           reverseGeocode(lat, lng);
         },
@@ -317,13 +317,13 @@ const SellShopMain = () => {
   // Reverse geocode to get address from coordinates
   const reverseGeocode = (lat: string, lng: string) => {
     const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
+
     fetch(geocodingUrl)
       .then(response => response.json())
       .then(data => {
         if (data.status === "OK" && data.results && data.results.length > 0) {
           const address = data.results[0];
-          
+
           // Extract address components
           const addressComponents = {
             street: '',
@@ -331,11 +331,11 @@ const SellShopMain = () => {
             state: '',
             zipCode: ''
           };
-          
+
           // Map address components to our format
           address.address_components.forEach((component: any) => {
             const types = component.types;
-            
+
             if (types.includes('route')) {
               addressComponents.street = component.long_name;
             } else if (types.includes('locality')) {
@@ -346,7 +346,7 @@ const SellShopMain = () => {
               addressComponents.zipCode = component.long_name;
             }
           });
-          
+
           // Check if we have a street address, if not use formatted address
           if (!addressComponents.street && address.formatted_address) {
             const formattedParts = address.formatted_address.split(',');
@@ -354,21 +354,21 @@ const SellShopMain = () => {
               addressComponents.street = formattedParts[0];
             }
           }
-          
+
           // Update address in form data
           handleChange('basicInformation.address', addressComponents);
-          
+
           // Update landmark with nearby point of interest if available
-          const landmark = data.results.find((result: any) => 
-            result.types.some((type: string) => 
+          const landmark = data.results.find((result: any) =>
+            result.types.some((type: string) =>
               ['point_of_interest', 'establishment', 'premise'].includes(type)
             )
           );
-          
+
           if (landmark && landmark.name) {
             handleChange('basicInformation.landmark', landmark.name);
           }
-          
+
           toast.success("Location details updated successfully");
         } else {
           console.error("Geocoding failed:", data.status);
@@ -392,11 +392,6 @@ const SellShopMain = () => {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Store className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
           <div className="space-y-6">
             <PropertyName
               propertyName={formData.basicInformation.title}
@@ -432,9 +427,9 @@ const SellShopMain = () => {
                       className="rounded-xl"
                       title="Property Location Map"
                     ></iframe>
-                    
+
                     <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                      <button 
+                      <button
                         onClick={() => getCurrentLocation()}
                         className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
                         aria-label="Get current location"
@@ -443,7 +438,7 @@ const SellShopMain = () => {
                         <Locate className="w-5 h-5 text-blue-600" />
                         <span className="text-sm font-medium">My Location</span>
                       </button>
-                      
+
                       <button
                         onClick={() => openLocationPicker()}
                         className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
@@ -454,13 +449,13 @@ const SellShopMain = () => {
                         <span className="text-sm font-medium">Select Location</span>
                       </button>
                     </div>
-                    
+
                     <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
                       Powered by Google Maps
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -480,10 +475,10 @@ const SellShopMain = () => {
                                 ...formData.basicInformation.location,
                                 latitude: value
                               });
-                              
+
                               // Update iframe when latitude changes
                               updateMapLocation(
-                                value, 
+                                value,
                                 formData.basicInformation.location.longitude || '78.9629'
                               );
                             }
@@ -510,7 +505,7 @@ const SellShopMain = () => {
                                 ...formData.basicInformation.location,
                                 longitude: value
                               });
-                              
+
                               // Update iframe when longitude changes
                               updateMapLocation(
                                 formData.basicInformation.location.latitude || '20.5937',
@@ -541,87 +536,86 @@ const SellShopMain = () => {
               onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
             />
           </div>
-        </div>
       )
     },
     {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-          <div className="space-y-6">
-            <ShopDetails
-              onDetailsChange={(details) => handleChange('shopDetails', details)}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => handleChange('propertyDetails', details)}
-            />
-          </div>
+        <div className="space-y-6">
+          <ShopDetails
+            onDetailsChange={(details) => handleChange('shopDetails', details)}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => handleChange('propertyDetails', details)}
+          />
+        </div>
       )
     },
     {
       title: 'Pricing Details',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-          <div className="space-y-6">
-                <Price onPriceChange={(price) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    pricingDetails: {
-                      ...prev.pricingDetails,
-                      propertyPrice: price.propertyPrice,
-                      pricetype: price.pricetype,
-                      pricecalculator: {
-                        area: price.area || 0,
-                        totalprice: price.totalprice || 0
-                      }
-                    }
-                  }));
-                }} />
-                <PricePerSqft
-                  propertyPrice={formData.pricingDetails.propertyPrice}
-                  Area={formData.propertyDetails.area}
-                  onPricePerSqftChange={(data) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      pricingDetails: {
-                        ...prev.pricingDetails,
-                        pricecalculator: {
-                          area: data.area || 0,
-                          totalprice: data.totalprice || 0
-                        }
-                      }
-                    }));
-                  }}
-                />
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges onRegistrationChargesChange={(charges) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      registration: {
-                        chargestype: charges.chargestype,
-                        registrationAmount: charges.registrationAmount,
-                        stampDutyAmount: charges.stampDutyAmount,
-                        brokeragedetails: false,
-                        brokerageAmount: 0
-                      }
-                    }));
-                  }} />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      brokerage: {
-                        required: brokerage.required === 'yes',
-                        amount: brokerage.amount
-                      }
-                    }));
-                  }} />
-                </div>
-              </div>
+        <div className="space-y-6">
+          <Price onPriceChange={(price) => {
+            setFormData(prev => ({
+              ...prev,
+              pricingDetails: {
+                ...prev.pricingDetails,
+                propertyPrice: price.propertyPrice,
+                pricetype: price.pricetype,
+                pricecalculator: {
+                  area: price.area || 0,
+                  totalprice: price.totalprice || 0
+                }
+              }
+            }));
+          }} />
+          <PricePerSqft
+            propertyPrice={formData.pricingDetails.propertyPrice}
+            Area={formData.propertyDetails.area}
+            onPricePerSqftChange={(data) => {
+              setFormData(prev => ({
+                ...prev,
+                pricingDetails: {
+                  ...prev.pricingDetails,
+                  pricecalculator: {
+                    area: data.area || 0,
+                    totalprice: data.totalprice || 0
+                  }
+                }
+              }));
+            }}
+          />
+          <div className="space-y-4 text-black">
+            <div className="text-black">
+              <RegistrationCharges onRegistrationChargesChange={(charges) => {
+                setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
+                    brokeragedetails: false,
+                    brokerageAmount: 0
+                  }
+                }));
+              }} />
             </div>
+            <div className="border-t border-gray-200 my-4"></div>
+            <div className="text-black">
+              <Brokerage onBrokerageChange={(brokerage) => {
+                setFormData(prev => ({
+                  ...prev,
+                  brokerage: {
+                    required: brokerage.required === 'yes',
+                    amount: brokerage.amount
+                  }
+                }));
+              }} />
+            </div>
+          </div>
+        </div>
       )
     },
     {
@@ -1005,6 +999,9 @@ const SellShopMain = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Shop</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
