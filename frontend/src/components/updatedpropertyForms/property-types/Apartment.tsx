@@ -12,7 +12,6 @@ import SocietyAmenities from "../SocietyAmenities"
 import MediaUpload from "../MediaUpload"
 import AvailabilityDate from "../AvailabilityDate"
 import Restrictions from "../Restrictions"
-import FinalSteps from "../FinalSteps"
 
 interface ApartmentProps {
   propertyId: string
@@ -55,7 +54,6 @@ interface Features {
   maintenanceCharges: string
   maintenancePeriod: string
   availableFrom: Date
-  
   preferredTenants: string[]
   amenities: string[]
   propertyFeatures: string[]

@@ -440,11 +440,9 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
               style={{ cursor: i < step ? "pointer" : "default" }}
             >
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= step ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
               >
-                {stepObj.icon ? stepObj.icon : index + 1}
+                {s.icon}
               </div>
               <span className="text-xs font-medium">{s.title}</span>
             </div>
