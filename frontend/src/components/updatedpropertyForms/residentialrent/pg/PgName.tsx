@@ -22,6 +22,8 @@ interface PgDetails {
   };
 }
 
+type AccommodationType = 'boys' | 'girls' | 'both';
+
 const PgName = () => {
   const [details, setDetails] = useState<PgDetails>({
     name: '',
@@ -42,6 +44,7 @@ const PgName = () => {
       zipCode: ''
     }
   });
+  const [selectedType, setSelectedType] = useState<AccommodationType>('both');
 
   const handleChange = (field: keyof Pick<PgDetails, 'name' | 'address'>, value: string) => {
     setDetails(prev => ({
@@ -130,6 +133,40 @@ const PgName = () => {
               placeholder="Enter PG name"
               className="w-full pl-10 pr-3 py-2 bg-white border rounded-lg focus:ring-1 focus:ring-black"
             />
+          </div>
+        </div>
+
+        {/* PG Type Selection */}
+        <div>
+          <label className="block text-sm font-medium mb-1">PG Accommodation Type</label>
+          <div className="flex flex-col sm:flex-row gap-6">
+            {[
+              { id: 'boys', label: 'Boys Only' },
+              { id: 'girls', label: 'Girls Only' },
+              { id: 'both', label: 'Both Boys & Girls' },
+            ].map((option) => (
+              <div key={option.id} className="flex items-center">
+                <input
+                  type="radio"
+                  id={option.id}
+                  name="pgType"
+                  value={option.id}
+                  checked={selectedType === option.id}
+                  onChange={(e) => setSelectedType(e.target.value as AccommodationType)}
+                  className="h-5 w-5 border-black bg-white checked:bg-black focus:ring-black focus:ring-2"
+                />
+                <label htmlFor={option.id} className="ml-3 text-lg">
+                  {option.label}
+                </label>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2">
+            <span className="text-sm">Selected accommodation type: <span className="font-semibold">{[
+              { id: 'boys', label: 'Boys Only' },
+              { id: 'girls', label: 'Girls Only' },
+              { id: 'both', label: 'Both Boys & Girls' },
+            ].find(opt => opt.id === selectedType)?.label}</span></span>
           </div>
         </div>
 

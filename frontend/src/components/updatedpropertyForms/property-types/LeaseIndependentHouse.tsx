@@ -14,6 +14,7 @@ import OtherCharges from "../residentialrent/OtherCharges";
 import MediaUpload from "../MediaUpload";
 import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
+import { Building2, Home, IndianRupee, Calendar, Image } from "lucide-react";
 
 interface LeaseIndependentHouseProps {
   propertyId: string;
@@ -62,10 +63,7 @@ const LeaseIndependentHouse = ({
     }));
   }, []);
 
- 
-
   const handleNext = async () => {
-    
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
     } else {
@@ -211,22 +209,38 @@ const LeaseIndependentHouse = ({
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="max-w-4xl mx-auto p-8">
-        <h1 className="text-2xl font-bold mb-8 text-black">Lease Independent House</h1>
-        
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((s, index) => (
+        <div className="flex items-center gap-2 mb-8">
+          <Building2 className="h-8 w-8 text-black" />
+          <h1 className="text-3xl font-bold text-black">Lease Your Independent House</h1>
+        </div>
+
+        {/* Stepper Scroll Bar UI */}
+        <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2 mb-8">
+          {steps.map((stepObj, index) => (
             <div key={index} className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  index <= step ? "bg-black text-white" : "bg-gray-200 text-gray-600"
-                }`}
+              <button
+                onClick={() => setStep(index)}
+                className="flex items-center focus:outline-none"
               >
-                {index + 1}
-              </div>
-              <div className="ml-2 text-sm font-medium text-black">{s.title}</div>
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {index === 0 && <Building2 className="w-6 h-6" />} 
+                  {index === 1 && <Home className="w-6 h-6" />} 
+                  {index === 2 && <IndianRupee className="w-6 h-6" />} 
+                  {index === 3 && <Calendar className="w-6 h-6" />} 
+                  {index === 4 && <Image className="w-6 h-6" />} 
+                </div>
+                <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+                  index <= step ? 'text-black' : 'text-black/70'
+                }`}>
+                  {stepObj.title}
+                </span>
+              </button>
               {index < steps.length - 1 && (
-                <div className="w-16 h-0.5 bg-gray-200 mx-2"></div>
+                <div className={`w-16 h-1 mx-3 ${index < step ? 'bg-black' : 'bg-gray-200'}`} />
               )}
             </div>
           ))}
@@ -237,33 +251,35 @@ const LeaseIndependentHouse = ({
           {steps[step].component}
         </div>
 
-        {/* Messages */}
-        
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8">
           <button
             onClick={handlePrevious}
             disabled={step === 0}
-            className={`px-6 py-3 rounded-lg ${
-              step === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-gray-100 text-black hover:bg-gray-200"
-            }`}
+            className="px-6 py-3 bg-white text-black border border-black/20 rounded-lg hover:bg-black hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
           <button
             onClick={handleNext}
             disabled={loading}
-            className={`px-6 py-3 rounded-lg ${
-              loading
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800"
-            }`}
+            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-black/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? "Saving..." : step < steps.length - 1 ? "Next" : "List Property"}
+            {loading ? "Saving..." : step === steps.length - 1 ? "Submit" : "Next"}
           </button>
         </div>
+
+        {/* Messages */}
+        {errorMessage && (
+          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+            {errorMessage}
+          </div>
+        )}
+        {successMessage && (
+          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
+            {successMessage}
+          </div>
+        )}
       </div>
     </div>
   );

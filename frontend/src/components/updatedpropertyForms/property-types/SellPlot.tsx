@@ -14,9 +14,9 @@ import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import { Building2, Home, IndianRupee, Calendar, MapPin, Image } from 'lucide-react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Define media type to match CommercialMediaUpload component
 type MediaFileType = { url: string; file: File };
 
 type MediaType = {
@@ -25,7 +25,6 @@ type MediaType = {
   images: { category: string; files: MediaFileType[] }[];
   documents: { type: string; file: File }[];
 };
-
 const SellPlot = () => {
   const [formData, setFormData] = useState({
     propertyName: '',
@@ -216,13 +215,47 @@ const SellPlot = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
-      <div ref={formRef} className="space-y-12">
-        <div className="mb-8">
+    <form onSubmit={handleSubmit} className="space-y-12">
+      {/* Stepper Scroll Bar UI */}
+      <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2 mb-8">
+        {steps.map((stepObj, index) => (
+          <div key={index} className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setCurrentStep(index)}
+              className="flex items-center focus:outline-none"
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {index === 0 && <Building2 className="w-6 h-6" />} 
+                {index === 1 && <Home className="w-6 h-6" />} 
+                {index === 2 && <IndianRupee className="w-6 h-6" />} 
+                {index === 3 && <Calendar className="w-6 h-6" />} 
+                {index === 4 && <MapPin className="w-6 h-6" />} 
+                {index === 5 && <Image className="w-6 h-6" />} 
+              </div>
+              <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+                index <= currentStep ? 'text-black' : 'text-black/70'
+              }`}>
+                {stepObj.title}
+              </span>
+            </button>
+            {index < steps.length - 1 && (
+              <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-12">
+      <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your plot property</p>
-        </div>
-        <div className="space-y-8">{steps[currentStep].content}</div>
+        </div> 
+              <div className="space-y-8">{steps[currentStep].content}</div>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
