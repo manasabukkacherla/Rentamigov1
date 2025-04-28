@@ -130,6 +130,12 @@ const PgMedia = () => {
     };
   }, [cameraStream]);
 
+  useEffect(() => {
+    if (cameraActive && videoRef.current && cameraStream) {
+      videoRef.current.srcObject = cameraStream;
+    }
+  }, [cameraActive, cameraStream]);
+
   const handleFileSelect = (e: ChangeEvent<HTMLInputElement>, roomType?: string) => {
     setError('');
     const files = Array.from(e.target.files || []);

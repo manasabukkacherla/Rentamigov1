@@ -231,7 +231,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
 });
 
 // Indexes
-CommercialShowroomSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialShowroomSchema.index({ 'basicInformation.state': 1 });
 CommercialShowroomSchema.index({ 'pricingDetails.propertyPrice': 1 });

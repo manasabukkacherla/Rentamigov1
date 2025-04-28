@@ -240,7 +240,7 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
 });
 
 // Indexes
-CommercialPlotSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialPlotSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialPlotSchema.index({ 'basicInformation.city': 1 });
 CommercialPlotSchema.index({ 'basicInformation.state': 1 });
 CommercialPlotSchema.index({ 'pricingDetails.propertyPrice': 1 });
