@@ -55,6 +55,7 @@ interface Features {
   maintenanceCharges: string
   maintenancePeriod: string
   availableFrom: Date
+  
   preferredTenants: string[]
   amenities: string[]
   propertyFeatures: string[]
