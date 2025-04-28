@@ -167,7 +167,7 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
               />
             </div>
           </div>
-        // </div>
+        
       ),
     },
     {

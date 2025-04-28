@@ -77,34 +77,29 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
       step: 1
     },
     {
-      title: "Size",
-      icon: <Ruler className="w-6 h-6" />,
-      step: 2
-    },
-    {
       title: "Features",
       icon: <Home className="w-6 h-6" />,
-      step: 3
+      step: 2
     },
     {
       title: "Amenities",
       icon: <Building2 className="w-6 h-6" />,
-      step: 4
+      step: 3
     },
     {
       title: "Rental Terms",
       icon: <IndianRupee className="w-6 h-6" />,
+      step: 4
+    },
+    {
+      title: "Availability",
+      icon: <Calendar className="w-6 h-6" />,
       step: 5
     },
     {
       title: "Media",
       icon: <Image className="w-6 h-6" />,
       step: 6
-    },
-    {
-      title: "Availability",
-      icon: <Calendar className="w-6 h-6" />,
-      step: 7
     }
   ];
 
@@ -185,7 +180,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
             </div>
           </div>
         );
-      case 4:
+      case 3:
         return (
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
@@ -204,7 +199,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
             </div>
           </div>
         );
-      case 5:
+      case 4:
         return (
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
@@ -234,23 +229,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
             </div>
           </div>
         );
-      case 6:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Image className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Media Upload</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <MediaUpload
-                  onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 7:
+      case 5:
         return (
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
@@ -269,6 +248,22 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
             </div>
           </div>
         );
+        case 6:
+          return (
+            <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+              <div className="space-y-8">
+                <div className="flex items-center mb-8">
+                  <Image className="text-black mr-3" size={28} />
+                  <h3 className="text-2xl font-semibold text-black">Media Upload</h3>
+                </div>
+                <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                  <MediaUpload
+                    onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))}
+                  />
+                </div>
+              </div>
+            </div>
+          );
       default:
         return null;
     }
