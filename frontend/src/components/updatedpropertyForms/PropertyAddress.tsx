@@ -6,8 +6,8 @@ import MapSelector from "./MapSelector"
 
 interface PropertyAddressProps {
   address: {
-    flatNo?: string;
-    floor?: string;
+    flatNo?: number;
+    floor?: number;
     apartmentName?: string;
     street?: string;
     city?: string;
@@ -76,7 +76,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
             <input
               type="checkbox"
               checked={!!address.flatNo}
-              onChange={(e) => handleChange("showFlatNo", e.target.checked ? "true" : "")}
+              onChange={(e) => handleChange("showFlatNo", e.target.checked ? true : false)}
               className="rounded border-black/10 text-black focus:ring-black/5"
             />
             Show Flat No. in the Listing
@@ -106,7 +106,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
               <input
                 type="text"
                 value={address.flatNo || ""}
-                onChange={(e) => handleChange("flatNo", e.target.value)}
+                onChange={(e) => handleChange("flatNo", parseFloat(e.target.value))}
                 placeholder="Enter flat/block number"
                 className={inputClasses}
               />
@@ -118,7 +118,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
               <input
                 type="text"
                 value={address.floor || ""}
-                onChange={(e) => handleChange("floor", e.target.value)}
+                onChange={(e) => handleChange("floor", parseFloat(e.target.value))}
                 placeholder="Enter floor"
                 className={inputClasses}
               />

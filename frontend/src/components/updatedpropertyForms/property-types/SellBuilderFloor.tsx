@@ -318,6 +318,36 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
 
       {steps[step].component}
 
+      {/* Stepper Scroll Bar UI */}
+      <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
+        {steps.map((stepObj, index) => (
+          <div key={index} className="flex items-center">
+            <button
+              onClick={() => setStep(index)}
+              className="flex items-center focus:outline-none"
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {stepObj.icon ? stepObj.icon : index + 1}
+              </div>
+              <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+                index <= step ? 'text-black' : 'text-black/70'
+              }`}>
+                {stepObj.title}
+              </span>
+            </button>
+            {index < steps.length - 1 && (
+              <div className={`w-16 h-1 mx-3 ${index < step ? 'bg-black' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
+     
+
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           {step > 0 ? (

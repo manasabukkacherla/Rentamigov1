@@ -216,6 +216,34 @@ const LeaseBuilderFloor = ({
       <h2 className="text-3xl font-bold mb-8">{steps[step].title}</h2>
       {steps[step].component}
 
+      {/* Stepper Scroll Bar UI */}
+      <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
+        {steps.map((stepObj, index) => (
+          <div key={index} className="flex items-center">
+            <button
+              onClick={() => setStep(index)}
+              className="flex items-center focus:outline-none"
+            >
+              <div
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                }`}
+              >
+                {stepObj.icon ? stepObj.icon : index + 1}
+              </div>
+              <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+                index <= step ? 'text-black' : 'text-black/70'
+              }`}>
+                {stepObj.title}
+              </span>
+            </button>
+            {index < steps.length - 1 && (
+              <div className={`w-16 h-1 mx-3 ${index < step ? 'bg-black' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+
       <button
   type="button"
   onClick={handleNext}
