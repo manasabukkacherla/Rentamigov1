@@ -220,7 +220,6 @@ interface MediaUploadProps {
 }
 
 const RentShed = () => {
-  const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -348,50 +347,33 @@ const RentShed = () => {
       icon: <Store className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            {/* <div className="flex items-center gap-3 mb-6">
-              <Store className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div> */}
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.basicInformation.title}
-                onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
-              />
-            </div>
-          </div>
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
+          />
+          <CommercialPropertyAddress
+            onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
+          />
+          <Landmark
+            onLandmarkChange={(landmark) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, landmark }
+            }))}
+            onLocationSelect={(location) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                location: {
+                  latitude: parseFloat(location.latitude),
+                  longitude: parseFloat(location.longitude)
+                }
+              }
+            }))}
+          />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            {/* <div className="flex items-center gap-3 mb-6">
-              <MapPin className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div> */}
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
-              />
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, landmark }
-                }))}
-                onLocationSelect={(location) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: {
-                    ...prev.basicInformation,
-                    location: {
-                      latitude: parseFloat(location.latitude),
-                      longitude: parseFloat(location.longitude)
-                    }
-                  }
-                }))}
-              />
-
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
-              />
-            </div>
-          </div>
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
+          />
         </div>
       )
     },
@@ -400,10 +382,6 @@ const RentShed = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div> */}
           <PropertySize
             onPropertySizeChange={(value) => setFormData({ ...formData, propertyDetails: { ...formData.propertyDetails, propertySize: Number(value) } })}
           />
@@ -461,91 +439,79 @@ const RentShed = () => {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div> */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={(rent) => {
-                  setFormData({
-                    ...formData,
-                    rentalTerms: {
-                      ...formData.rentalTerms,
-                      rentDetails: {
-                        ...formData.rentalTerms.rentDetails,
-                        expectedRent: Number(rent.expectedRent) || 0,
-                        isNegotiable: rent.isNegotiable || false,
-                        rentType: rent.rentType || 'inclusive'
-                      }
-                    }
-                  });
-                }} />
-                {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-                  <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
-                )}
-                <SecurityDeposit onSecurityDepositChange={(deposit) => {
-                  setFormData({
-                    ...formData,
-                    rentalTerms: {
-                      ...formData.rentalTerms,
-                      securityDeposit: {
-                        amount: Number(deposit.amount) || 0
-                      }
-                    }
-                  });
-                }} />
-              </div>
-            </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges onOtherChargesChange={(charges) => {
-                  setFormData({
-                    ...formData,
-                    rentalTerms: {
-                      ...formData.rentalTerms,
-                      otherCharges: {
-                        water: {
-                          amount: Number(charges.water?.amount) || 0,
-                          type: charges.water?.type || 'inclusive'
-                        },
-                        electricity: {
-                          amount: Number(charges.electricity?.amount) || 0,
-                          type: charges.electricity?.type || 'inclusive'
-                        },
-                        gas: {
-                          amount: Number(charges.gas?.amount) || 0,
-                          type: charges.gas?.type || 'inclusive'
-                        },
-                        others: {
-                          amount: Number(charges.others?.amount) || 0,
-                          type: charges.others?.type || 'inclusive'
-                        }
-                      }
-                    }
-                  });
-                }} />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage onBrokerageChange={(brokerage) => {
-                  setFormData({
-                    ...formData,
-                    rentalTerms: {
-                      ...formData.rentalTerms,
-                      brokerage: {
-                        required: brokerage.required || 'no',
-                        amount: Number(brokerage.amount) || 0
-                      }
-                    }
-                  });
-                }} />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-6">
+
+
+          <Rent onRentChange={(rent) => {
+            setFormData({
+              ...formData,
+              rentalTerms: {
+                ...formData.rentalTerms,
+                rentDetails: {
+                  ...formData.rentalTerms.rentDetails,
+                  expectedRent: Number(rent.expectedRent) || 0,
+                  isNegotiable: rent.isNegotiable || false,
+                  rentType: rent.rentType || 'inclusive'
+                }
+              }
+            });
+          }} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+            <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
+          )}
+          <SecurityDeposit onSecurityDepositChange={(deposit) => {
+            setFormData({
+              ...formData,
+              rentalTerms: {
+                ...formData.rentalTerms,
+                securityDeposit: {
+                  amount: Number(deposit.amount) || 0
+                }
+              }
+            });
+          }} />
+
+
+          <OtherCharges onOtherChargesChange={(charges) => {
+            setFormData({
+              ...formData,
+              rentalTerms: {
+                ...formData.rentalTerms,
+                otherCharges: {
+                  water: {
+                    amount: Number(charges.water?.amount) || 0,
+                    type: charges.water?.type || 'inclusive'
+                  },
+                  electricity: {
+                    amount: Number(charges.electricity?.amount) || 0,
+                    type: charges.electricity?.type || 'inclusive'
+                  },
+                  gas: {
+                    amount: Number(charges.gas?.amount) || 0,
+                    type: charges.gas?.type || 'inclusive'
+                  },
+                  others: {
+                    amount: Number(charges.others?.amount) || 0,
+                    type: charges.others?.type || 'inclusive'
+                  }
+                }
+              }
+            });
+          }} />
+
+          <Brokerage onBrokerageChange={(brokerage) => {
+            setFormData({
+              ...formData,
+              rentalTerms: {
+                ...formData.rentalTerms,
+                brokerage: {
+                  required: brokerage.required || 'no',
+                  amount: Number(brokerage.amount) || 0
+                }
+              }
+            });
+          }} />
         </div>
       )
     },
@@ -554,10 +520,6 @@ const RentShed = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div> */}
           <AvailabilityDate onAvailabilityChange={(availability) => setFormData({
             ...formData,
             rentalTerms: {
@@ -575,11 +537,7 @@ const RentShed = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
-          </div> */}
+        <div className="space-y-6">
           <CommercialContactDetails
             onContactChange={(contact) => {
               setFormData({
@@ -601,11 +559,7 @@ const RentShed = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div> */}
+        <div className="space-y-6">
           <CommercialMediaUpload
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
@@ -749,21 +703,53 @@ const RentShed = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress Bar */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
               {formSections.map((section, index) => (
-                <div key={index} className="flex items-center">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                    }`}>
-                    {section.icon}
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
                   </div>
                   {index < formSections.length - 1 && (
-                    <div className={`w-16 h-1 mx-2 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-                      }`} />
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
                   )}
                 </div>
               ))}
@@ -774,7 +760,10 @@ const RentShed = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div ref={formRef} className="mb-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shed</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

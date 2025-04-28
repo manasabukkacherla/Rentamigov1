@@ -357,39 +357,32 @@ const RentShowroomMain = () => {
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyName
-                  propertyName={formData.basicInformation.title}
-                  onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
-                />
-                <ShowroomType
-                  onTypeChange={(type) => setFormData(prev => ({
-                    ...prev,
-                    basicInformation: {
-                      ...prev.basicInformation,
-                      showroomType: Array.isArray(type) ? type : [type]
-                    }
-                  }))}
-                />
-              </div>
-            </div>
-          </div>
+          {/* <div className="space-y-8"> */}
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
+          />
+          <ShowroomType
+            onTypeChange={(type) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                showroomType: Array.isArray(type) ? type : [type]
+              }
+            }))}
+          />
+          {/* </div> */}
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
-              />
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })}
-              />
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
-              />
-            </div>
-          </div>
+
+          <CommercialPropertyAddress
+            onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
+          />
+          <Landmark
+            onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })}
+          />
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
+          />
         </div>
       )
     },
@@ -398,29 +391,27 @@ const RentShowroomMain = () => {
       icon: <Building2 className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          <div className="space-y-8">
-            <ShowroomDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                showroomDetails: {
-                  totalSpace: details.totalSpace || 0,
-                  frontageWidth: details.frontageWidth || 0,
-                  ceilingHeight: details.ceilingHeight || 0,
-                  glassFrontage: details.glassFrontage || false,
-                  lightingType: details.lightingType || '',
-                  acInstalled: details.acInstalled || false,
-                  nearbyCompetitors: {
-                    present: details.nearbyCompetitors?.present || false,
-                    brandNames: details.nearbyCompetitors?.brandNames || ''
-                  },
-                  displayRacks: details.displayRacks || false
-                }
-              }))}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
-            />
-          </div>
+          <ShowroomDetails
+            onDetailsChange={(details) => setFormData(prev => ({
+              ...prev,
+              showroomDetails: {
+                totalSpace: details.totalSpace || 0,
+                frontageWidth: details.frontageWidth || 0,
+                ceilingHeight: details.ceilingHeight || 0,
+                glassFrontage: details.glassFrontage || false,
+                lightingType: details.lightingType || '',
+                acInstalled: details.acInstalled || false,
+                nearbyCompetitors: {
+                  present: details.nearbyCompetitors?.present || false,
+                  brandNames: details.nearbyCompetitors?.brandNames || ''
+                },
+                displayRacks: details.displayRacks || false
+              }
+            }))}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
+          />
         </div>
       )
     },
@@ -448,38 +439,33 @@ const RentShowroomMain = () => {
             }))}
           />
 
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-            <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-            <div className="space-y-4 text-black">
-              <OtherCharges
-                onOtherChargesChange={(charges) => setFormData(prev => ({
-                  ...prev,
-                  rentalTerms: {
-                    ...prev.rentalTerms,
-                    otherCharges: {
-                      water: { type: charges.water.type, amount: charges.water.amount },
-                      electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                      gas: { type: charges.gas.type, amount: charges.gas.amount },
-                      others: { type: charges.others.type, amount: charges.others.amount }
-                    }
-                  }
-                }))}
-              />
-              <div className="border-t border-gray-200 my-4"></div>
-              <Brokerage
-                onBrokerageChange={(brokerage) => setFormData(prev => ({
-                  ...prev,
-                  rentalTerms: {
-                    ...prev.rentalTerms,
-                    brokerage: {
-                      required: brokerage.required,
-                      amount: brokerage.amount
-                    }
-                  }
-                }))}
-              />
-            </div>
-          </div>
+          <OtherCharges
+            onOtherChargesChange={(charges) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                otherCharges: {
+                  water: { type: charges.water.type, amount: charges.water.amount },
+                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                  gas: { type: charges.gas.type, amount: charges.gas.amount },
+                  others: { type: charges.others.type, amount: charges.others.amount }
+                }
+              }
+            }))}
+          />
+          {/* <div className="border-t border-gray-200 my-4"></div> */}
+          <Brokerage
+            onBrokerageChange={(brokerage) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                brokerage: {
+                  required: brokerage.required,
+                  amount: brokerage.amount
+                }
+              }
+            }))}
+          />
         </div>
       )
     },
@@ -487,7 +473,7 @@ const RentShowroomMain = () => {
       title: 'Availability',
       icon: <Calendar className="w-6 h-6" />,
       content: (
-        <div className="space-y-6">
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
@@ -677,63 +663,94 @@ const RentShowroomMain = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <div className="max-w-4xl mx-auto text-black">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {formSections.map((section, i) => (
-              <div
-                key={i}
-                className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-                onClick={() => i < currentStep && setCurrentStep(i)}
-                style={{ cursor: i < currentStep ? "pointer" : "default" }}
-              >
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
-                >
-                  {section.icon}
-                </div>
-                <span className="text-xs font-medium">{section.title}</span>
+        <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4">
+            <div className="flex justify-center">
+              <div className="flex items-center space-x-2">
+                {formSections.map((section, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center cursor-pointer"
+                    onClick={() => {
+                      setCurrentStep(index);
+                      // Scroll to top of the form when clicking on progress indicators
+                      setTimeout(() => {
+                        if (formRef.current) {
+                          window.scrollTo({
+                            top: formRef.current.offsetTop - 100,
+                            behavior: 'smooth'
+                          });
+                        } else {
+                          window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }, 100);
+                    }}
+                  >
+                    <div className="flex flex-col items-center group">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                        ? 'bg-black text-white'
+                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                        }`}>
+                        {section.icon}
+                      </div>
+                      <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                        ? 'text-black'
+                        : 'text-gray-500 group-hover:text-gray-700'
+                        }`}>
+                        {section.title}
+                      </span>
+                    </div>
+                    {index < formSections.length - 1 && (
+                      <div className="flex items-center mx-1">
+                        <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                          }`} />
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="w-full bg-gray-200 h-1 rounded-full">
-            <div
-              className="bg-black h-1 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
-            ></div>
+            </div>
           </div>
         </div>
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Showroom</h1>
+          </div>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+            <p className="text-gray-600">Please fill in the details for your property</p>
+          </div>
 
-        <div ref={formRef} className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
-        </div>
+          {formSections[currentStep].content}
 
-        {formSections[currentStep].content}
-
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0 || isSubmitting}
-              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0 || isSubmitting
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
-            </button>
-            <button
-              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-              disabled={isSubmitting}
-              className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-            >
-              {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
+          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0 || isSubmitting}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0 || isSubmitting
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+                  }`}
+              >
+                <ChevronLeft className="w-5 h-5 mr-2" />
+                Previous
+              </button>
+              <button
+                onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+                disabled={isSubmitting}
+                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+              >
+                {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
