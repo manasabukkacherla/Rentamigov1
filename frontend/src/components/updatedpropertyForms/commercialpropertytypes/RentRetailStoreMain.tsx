@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
@@ -171,7 +171,7 @@ interface MediaUploadProps {
 // Error display component for validation errors
 const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   if (Object.keys(errors).length === 0) return null;
-  
+
   return (
     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
       <div className="flex items-center">
@@ -191,6 +191,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 
 const RentRetailStoreMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -338,8 +339,6 @@ const RentRetailStoreMain = () => {
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
               <PropertyName
                 propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
@@ -347,36 +346,29 @@ const RentRetailStoreMain = () => {
               <RetailStoreType
                 onRetailTypeChange={(type) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: type } })}
               />
-            </div>
-          </div>
-
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
               />
               <Landmark
-            onLandmarkChange={(landmark) => setFormData(prev => ({
-              ...prev,
-              basicInformation: { ...prev.basicInformation, landmark }
-            }))}
-            onLocationSelect={(location) => setFormData(prev => ({
-              ...prev,
-              basicInformation: {
-                ...prev.basicInformation,
-                location: {
-                  latitude: parseFloat(location.latitude),
-                  longitude: parseFloat(location.longitude)
-                }
-              }
-            }))}
-          />
-              
+                onLandmarkChange={(landmark) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: { ...prev.basicInformation, landmark }
+                }))}
+                onLocationSelect={(location) => setFormData(prev => ({
+                  ...prev,
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    location: {
+                      latitude: parseFloat(location.latitude),
+                      longitude: parseFloat(location.longitude)
+                    }
+                  }
+                }))}
+              />
+
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
               />
-            </div>
-          </div>
         </div>
       )
     },
@@ -384,7 +376,7 @@ const RentRetailStoreMain = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        // <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
             <RetailStoreDetails
               onDetailsChange={(details) => {
@@ -431,21 +423,21 @@ const RentRetailStoreMain = () => {
               }}
             />
           </div>
-        </div>
+        // </div>
       )
     },
     {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        // <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
+            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"> */}
+              {/* <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4> */}
               <div className="space-y-4 text-black">
                 <Rent onRentChange={(rent) => {
-                  setFormData({ 
-                    ...formData, 
+                  setFormData({
+                    ...formData,
                     rentalTerms: {
                       ...formData.rentalTerms,
                       rentDetails: {
@@ -471,10 +463,10 @@ const RentRetailStoreMain = () => {
                   });
                 }} />
               </div>
-            </div>
-            
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+            {/* </div> */}
+
+            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"> */}
+              {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
               <div className="space-y-4 text-black">
                 <OtherCharges onOtherChargesChange={(charges) => {
                   setFormData({
@@ -502,7 +494,7 @@ const RentRetailStoreMain = () => {
                     }
                   });
                 }} />
-                <div className="border-t border-gray-200 my-4"></div>
+                {/* <div className="border-t border-gray-200 my-4"></div> */}
                 <Brokerage onBrokerageChange={(brokerage) => {
                   setFormData({
                     ...formData,
@@ -516,9 +508,9 @@ const RentRetailStoreMain = () => {
                   });
                 }} />
               </div>
-            </div>
+            {/* </div> */}
           </div>
-        </div>
+        // </div>
       )
     },
     {
@@ -534,7 +526,7 @@ const RentRetailStoreMain = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
           <CommercialContactDetails
             onContactChange={(contact) => {
               setFormData({
@@ -556,7 +548,7 @@ const RentRetailStoreMain = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
           <CommercialMediaUpload
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
@@ -587,6 +579,20 @@ const RentRetailStoreMain = () => {
     if (validateCurrentStep()) {
       if (currentStep < formSections.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -596,6 +602,20 @@ const RentRetailStoreMain = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -678,7 +698,7 @@ const RentRetailStoreMain = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -721,6 +741,9 @@ const RentRetailStoreMain = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Retail Store</h1>
+          </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -745,9 +768,8 @@ const RentRetailStoreMain = () => {
           </button>
           <button
             onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             disabled={isSubmitting}
           >
             {currentStep === formSections.length - 1 ? (isSubmitting ? 'Submitting...' : 'Submit') : 'Next'}

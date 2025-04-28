@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropertyName from '../PropertyName';
 import CoveredOpenSpaceType from '../CommercialComponents/CoveredOpenSpaceType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -15,7 +15,7 @@ import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import {  DollarSign, Calendar, User, Image,  ImageIcon, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { DollarSign, Calendar, User, Image, ImageIcon, UserCircle, ChevronLeft, ChevronRight, Store, Building2, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -23,19 +23,19 @@ import { useNavigate } from 'react-router-dom';
 interface IFormData {
   basicInformation: {
     title: string;
-  spaceType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  isCornerProperty: boolean;
+    spaceType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: number;
+      longitude: number;
+    };
+    isCornerProperty: boolean;
   };
 
   spaceDetails: {
@@ -57,8 +57,8 @@ interface IFormData {
   propertyDetails: {
     area: {
       totalArea: number;
-  builtUpArea: number;
-  carpetArea: number;
+      builtUpArea: number;
+      carpetArea: number;
     };
     floor: {
       floorNumber: number;
@@ -113,11 +113,11 @@ interface IFormData {
     };
     availability: {
       type: 'immediate' | 'specific';
-    availableFrom?: string;
-    availableImmediately: boolean;
+      availableFrom?: string;
+      availableImmediately: boolean;
+    };
   };
-  };
-  
+
   contactInformation: {
     name: string;
     email: string;
@@ -161,16 +161,16 @@ const RentCoveredSpace = () => {
     },
     spaceDetails: {
       totalArea: 0,
-      areaUnit:'',
+      areaUnit: '',
       coveredArea: 0,
       openArea: 0,
       roadWidth: {
         value: 0,
-        unit:'',
+        unit: '',
       },
       ceilingHeight: {
         value: 0,
-        unit:'',
+        unit: '',
       },
       noOfOpenSides: ''
     },
@@ -191,7 +191,7 @@ const RentCoveredSpace = () => {
       electricitySupply: {
         powerLoad: 0,
         backup: false
-      },  
+      },
       waterAvailability: '',
       propertyAge: '',
       propertyCondition: ''
@@ -233,11 +233,11 @@ const RentCoveredSpace = () => {
       },
       availability: {
         type: 'immediate',
-      availableFrom: '',
-      availableImmediately: true,
+        availableFrom: '',
+        availableImmediately: true,
+      },
     },
-    },
-    
+
     contactInformation: {
       name: '',
       email: '',
@@ -285,7 +285,7 @@ const RentCoveredSpace = () => {
   // Add error display component
   const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
     if (Object.keys(errors).length === 0) return null;
-    
+
     return (
       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
         <div className="flex items-center">
@@ -304,10 +304,11 @@ const RentCoveredSpace = () => {
   };
 
   const [currentStep, setCurrentStep] = useState(0);
-  
+
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Check login status on component mount
   useEffect(() => {
@@ -322,7 +323,7 @@ const RentCoveredSpace = () => {
   // Enhanced validation for current step
   const validateCurrentStep = () => {
     const errors: Record<string, string> = {};
-    
+
     switch (currentStep) {
       case 0: // Basic Information
         if (!formData.basicInformation.title.trim()) {
@@ -361,7 +362,7 @@ const RentCoveredSpace = () => {
           errors.location = 'Please select a location on the map';
         }
         break;
-      
+
       case 1: // Property Details (includes both Space Details and Property Details)
         // Validate Space Details
         if (!formData.spaceDetails.totalArea) {
@@ -441,7 +442,7 @@ const RentCoveredSpace = () => {
 
         if (!formData.propertyDetails.propertyAge) {
           errors.propertyAge = 'Property age is required';
-        } 
+        }
 
         if (!formData.propertyDetails.propertyCondition) {
           errors.propertyCondition = 'Property condition is required';
@@ -463,7 +464,7 @@ const RentCoveredSpace = () => {
           errors.securityDeposit = 'Security deposit is required';
         } else if (formData.rentalTerms.securityDeposit.amount <= 0) {
           errors.securityDeposit = 'Security deposit must be greater than 0';
-        } 
+        }
 
         // Validate maintenance amount only if rent type is exclusive
         if (formData.rentalTerms.rentDetails.rentType === 'exclusive') {
@@ -538,7 +539,7 @@ const RentCoveredSpace = () => {
           errors.availableFrom = 'Available from date is required';
         }
         break;
-      
+
       case 4: // Contact Information
         if (!formData.contactInformation.name.trim()) {
           errors.name = 'Name is required';
@@ -562,7 +563,7 @@ const RentCoveredSpace = () => {
           errors.alternatePhone = 'Please enter a valid 10-digit phone number';
         }
         break;
-      
+
       case 5: // Property Media
         if (!formData.media.photos.exterior.length) {
           errors.exteriorPhotos = 'At least one exterior photo is required';
@@ -614,20 +615,20 @@ const RentCoveredSpace = () => {
     }));
   };
 
-  
+
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
       const fields = field.split('.');
       const lastField = fields.pop() || '';
-  
+
       const newData = { ...prev };
       let current: any = newData;
-  
+
       for (const field of fields) {
         current = { ...current[field] };
       }
-  
+
       current[lastField] = value;
       return newData;
     });
@@ -645,69 +646,66 @@ const RentCoveredSpace = () => {
   const formSections = [
     {
       title: 'Basic Information',
+      icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <>
           <PropertyName propertyName={formData.basicInformation.title}
-                onPropertyNameChange={(name) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, title: name }
-                }))}/>
+            onPropertyNameChange={(name) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, title: name }
+            }))} />
           <CoveredOpenSpaceType onSpaceTypeChange={(types) => setFormData(prev => ({
-                ...prev,
-                basicInformation: { ...prev.basicInformation, spaceType: types }
-              }))} />
+            ...prev,
+            basicInformation: { ...prev.basicInformation, spaceType: types }
+          }))} />
           <CommercialPropertyAddress
-              onAddressChange={(address) => setFormData(prev => ({
-                ...prev,
-                basicInformation: { ...prev.basicInformation, address }
-              }))}
-            />
-            <Landmark
-                onLandmarkChange={(landmark) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, landmark }
-                }))}
-                onLocationSelect={(location) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: {
-                    ...prev.basicInformation,
-                    location: {
-                      latitude: parseFloat(location.latitude),
-                      longitude: parseFloat(location.longitude)
-                    }
-                  }
-                }))}
-              />
+            onAddressChange={(address) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, address }
+            }))}
+          />
+          <Landmark
+            onLandmarkChange={(landmark) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, landmark }
+            }))}
+            onLocationSelect={(location) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                location: {
+                  latitude: parseFloat(location.latitude),
+                  longitude: parseFloat(location.longitude)
+                }
+              }
+            }))}
+          />
           <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
-                }))}
-              />
+            onCornerPropertyChange={(isCorner) => setFormData(prev => ({
+              ...prev,
+              basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
+            }))}
+          />
         </>
       )
     },
     {
       title: 'Property Details',
+      icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
         <>
           <CoveredOpenSpaceDetails onDetailsChange={handleSpaceDetailsChange} />
-          <CommercialPropertyDetails 
-              onDetailsChange={(details) => handleChange('propertyDetails', details)}
-            />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => handleChange('propertyDetails', details)}
+          />
         </>
       )
     },
     {
       title: 'Rental Terms',
+      icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
         <>
-          
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="flex items-center gap-2 mb-6">
-            <DollarSign className="text-black" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Rental Terms</h3>
-          </div>
           <div className="space-y-6">
             <Rent
               onRentChange={(rent) => setFormData(prev => ({
@@ -774,9 +772,8 @@ const RentCoveredSpace = () => {
                   }
                 }));
               }}
-              />
+            />
           </div>
-        </div>
         </>
       )
     },
@@ -784,49 +781,43 @@ const RentCoveredSpace = () => {
       title: 'Availability',
       icon: <Calendar className="w-6 h-6" />,
       content: renderFormSection(
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="flex items-center gap-2 mb-6">
-            <Calendar className="text-black" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <AvailabilityDate
-              onAvailabilityChange={(availability) => {
-                // For immediate availability, set availableImmediately to true and availableFrom to current date
-                if (availability.type === 'immediate') {
-                  const currentDate = new Date().toISOString();
-                  // Update the rentalTerms.availability object
-                  setFormData(prev => ({
-                    ...prev,
-                    rentalTerms: {
-                      ...prev.rentalTerms,
-                      availability: {
-                        type: 'immediate',
-                        availableFrom: currentDate,
-                        availableImmediately: true
-                      }
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <AvailabilityDate
+            onAvailabilityChange={(availability) => {
+              // For immediate availability, set availableImmediately to true and availableFrom to current date
+              if (availability.type === 'immediate') {
+                const currentDate = new Date().toISOString();
+                // Update the rentalTerms.availability object
+                setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    availability: {
+                      type: 'immediate',
+                      availableFrom: currentDate,
+                      availableImmediately: true
                     }
-                  }));
-                } 
-                // For specific date, set availableImmediately to false and availableFrom to user's selected date
-                else {
-                  const userDate = availability.date || '';
-                  // Update the rentalTerms.availability object
-                  setFormData(prev => ({
-                    ...prev,
-                    rentalTerms: {
-                      ...prev.rentalTerms,
-                      availability: {
-                        type: 'specific',
-                        availableFrom: userDate,
-                        availableImmediately: false
-                      }
+                  }
+                }));
+              }
+              // For specific date, set availableImmediately to false and availableFrom to user's selected date
+              else {
+                const userDate = availability.date || '';
+                // Update the rentalTerms.availability object
+                setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    availability: {
+                      type: 'specific',
+                      availableFrom: userDate,
+                      availableImmediately: false
                     }
-                  }));
-                }
-              }}
-            />
-          </div>
+                  }
+                }));
+              }
+            }}
+          />
         </div>
       )
     },
@@ -834,80 +825,99 @@ const RentCoveredSpace = () => {
       title: 'Contact Information',
       icon: <User className="w-6 h-6" />,
       content: renderFormSection(
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="flex items-center gap-2 mb-6">
-            <UserCircle className="text-black" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => handleChange('contactInformation', contact)}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => handleChange('contactInformation', contact)}
+          />
         </div>
       )
     },
     {
       title: 'Property Media',
       icon: <Image className="w-6 h-6" />,
-      content: renderFormSection    (
-        <div className="bg-white p-6 rounded-2xl shadow-lg">
-          <div className="flex items-center gap-2 mb-6">
-            <ImageIcon className="text-black" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
+      content: renderFormSection(
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    ...prev.media,
-                    photos: {
-                      ...prev.media.photos,
-                      ...photos
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
-                }));
-              }}
-            />
-          </div>
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       )
     }
   ];
 
   const handleNext = () => {
-    if (validateCurrentStep()) {
+    // if (validateCurrentStep()) {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
-    } else {
-      toast.error('Please fill in all required fields');
-    }
+    // } else {
+    //   toast.error('Please fix the errors in the form before proceeding');
+    // }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    setIsSubmitting(true);
     // Validate the final step before submission
-    if (!validateCurrentStep()) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
+    // if (!validateCurrentStep()) {
+    //   toast.error('Please fill in all required fields');
+    //   return;
+    // }
 
     try {
       const user = sessionStorage.getItem('user');
@@ -1005,71 +1015,112 @@ const RentCoveredSpace = () => {
     } catch (error: any) {
       console.error('Error submitting form:', error);
       const errorMessage = error.response?.data?.error || error.response?.data?.details || 'Failed to create commercial covered space listing. Please try again.';
-      toast.error(errorMessage);
+      toast.error("Please fill all details!");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="space-y-12">
-      <div className="space-y-12">
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {formSections.map((s, i) => (
-              <div
-                key={i}
-                className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-                onClick={() => i < currentStep && setCurrentStep(i)}
-                style={{ cursor: i < currentStep ? "pointer" : "default" }}
-              >
+    <div ref={formRef} className="min-h-screen bg-white">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                    i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                  }`}
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
                 >
-                  {i + 1}
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs font-medium">{s.title}</span>
-              </div>
-            ))}
-          </div>
-          <div className="w-full bg-gray-200 h-1 rounded-full">
-            <div
-              className="bg-black h-1 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
-            ></div>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-black">{formSections[currentStep].title}</h2>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Covered Space</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
 
-        <div className="space-y-8">{formSections[currentStep].content}</div>
+        {formSections[currentStep].content}
       </div>
 
       {/* Navigation Buttons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-black hover:bg-black hover:text-white'
-                }`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
-            </button>
-            <button
-              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          </div>
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
         </div>
+      </div>
     </div>
   );
 };

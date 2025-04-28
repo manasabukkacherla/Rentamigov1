@@ -20,7 +20,7 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
   };
 
   return (
-    <div>
+    <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
       <div className="flex items-center gap-3 mb-6">
         <h3 className="text-2xl font-semibold">Other Property Details</h3>
         <ArrowRight className="opacity-40" size={20} />
@@ -29,7 +29,7 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
 
       <div className="space-y-8 max-w-4xl">
         {/* Property Type Description */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
             <Store size={20} className="text-black/60" />
             Property Type Description
@@ -43,7 +43,7 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
         </div>
 
         {/* Special Features */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
             <FileText size={20} className="text-black/60" />
             Special Features or Restrictions
@@ -57,7 +57,7 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
         </div>
 
         {/* Usage Recommendation */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
             <Store size={20} className="text-black/60" />
             Usage Recommendation
@@ -71,7 +71,7 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
         </div>
 
         {/* Additional Requirements */}
-        <div className="bg-white/5 p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4">
           <h4 className="text-lg font-medium flex items-center gap-2">
             <AlertTriangle size={20} className="text-black/60" />
             Additional Requirements for Renters

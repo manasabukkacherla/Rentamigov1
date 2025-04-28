@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import PropertyName from "../PropertyName";
 import PropertyAddress from "../PropertyAddress";
 import MapCoordinates from "../MapCoordinates";
@@ -13,7 +13,16 @@ import MediaUpload from "../MediaUpload";
 import OtherCharges from "../residentialrent/OtherCharges";
 import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
-import { MapPin, Building2, DollarSign, Calendar, Image, Home, ImageIcon } from 'lucide-react';
+import { MapPin, Building2, DollarSign, Calendar, Image, Home, ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+
+// Add custom styles for inclusive/exclusive buttons
+const customStyles = `
+  /* Target inclusive buttons when selected */
+  button.bg-blue-50.border-blue-500.text-blue-700 {
+    border-color: #DBEAFE !important; /* border-blue-100 */
+    background-color: #EFF6FF !important; /* bg-blue-50 */
+  }
+`;
 
 interface FormData {
   propertyId: string;
@@ -29,7 +38,7 @@ interface FormData {
     state: string;
     zipCode: string;
   };
-  coordinates: { 
+  coordinates: {
     latitude: string;
     longitude: string;
     locationLabel: string;
@@ -80,8 +89,8 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       state: "",
       zipCode: "",
     },
-    coordinates: { 
-      latitude: "", 
+    coordinates: {
+      latitude: "",
       longitude: "",
       locationLabel: ""
     },
@@ -115,6 +124,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const handleAddressChange = useCallback((addressData: Partial<FormData['propertyAddress']>) => {
     setFormData((prev) => ({
@@ -122,7 +132,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
       propertyAddress: { ...prev.propertyAddress, ...addressData },
     }));
   }, []);
-  
+
   const handleLocationChange = useCallback((location: { latitude: string; longitude: string; label: string }) => {
     setFormData((prev) => ({
       ...prev,
@@ -136,9 +146,22 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
 
 
   const handleNext = async () => {
-    
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     } else {
       onSubmit?.(formData);
     }
@@ -147,6 +170,20 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
   const handlePrevious = () => {
     if (step > 0) {
       setStep((prev) => prev - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -162,7 +199,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <Home className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertyName
                   propertyName={formData.propertyName}
                   onPropertyNameChange={(name) =>
@@ -179,7 +216,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <MapPin className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Location Details</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertyAddress
                   address={formData.propertyAddress}
                   onAddressChange={handleAddressChange}
@@ -219,7 +256,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <Building2 className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Size</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertySize
                   onPropertySizeChange={(size) =>
                     setFormData((prev) => ({ ...prev, size }))
@@ -235,7 +272,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <Building2 className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Features</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertyFeatures
                   onFeaturesChange={(features) =>
                     setFormData((prev) => ({ ...prev, features }))
@@ -251,7 +288,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <Building2 className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Amenities</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <FlatAmenities
                   onAmenitiesChange={(amenities) =>
                     setFormData((prev) => ({ ...prev, flatAmenities: amenities }))
@@ -279,13 +316,20 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <DollarSign className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Price Details</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <Price
                   onPriceChange={(price) =>
                     setFormData((prev) => ({ ...prev, price: price.amount }))
                   }
                 />
-                <PricePerSqft price={formData.price} area={formData.area} />
+                <PricePerSqft
+                  propertyPrice={parseFloat(formData.price) || 0}
+                  Area={{
+                    totalArea: parseFloat(formData.area.superBuiltUpAreaSqft) || 0,
+                    builtUpArea: parseFloat(formData.area.builtUpAreaSqft) || 0,
+                    carpetArea: parseFloat(formData.area.carpetAreaSqft) || 0
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -296,7 +340,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <DollarSign className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Additional Charges</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <RegistrationCharges
                   onRegistrationChargesChange={(charges) =>
                     setFormData((prev) => ({ ...prev, registrationCharges: charges }))
@@ -329,7 +373,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <Calendar className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Availability</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <AvailabilityDate
                   onAvailabilityChange={(availability) =>
                     setFormData((prev) => ({ ...prev, availability }))
@@ -352,10 +396,10 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <ImageIcon className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Media</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <MediaUpload
-                  onMediaChange={(media) => setFormData((prev) => ({ 
-                    ...prev, 
+                  onMediaChange={(media) => setFormData((prev) => ({
+                    ...prev,
                     media: {
                       ...media,
                       videoTour: media.videoTour || null
@@ -371,14 +415,29 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
   ];
 
   return (
-    <div className="max-w-4xl mx-auto text-black">
-      {/* Stepper Scroll Bar UI */}
-      <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
-        {steps.map((stepObj, index) => (
-          <div key={index} className="flex items-center">
-            <button
-              onClick={() => setStep(index)}
-              className="flex items-center focus:outline-none"
+    <form onSubmit={(e) => e.preventDefault()} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
+      <style>{customStyles}</style>
+      {/* Progress indicator */}
+      <div ref={formRef} className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          {steps.map((s, i) => (
+            <div
+              key={i}
+              className={`flex flex-col items-center ${i <= step ? "text-black" : "text-gray-400"}`}
+              onClick={() => {
+                if (i < step) {
+                  setStep(i);
+                  setTimeout(() => {
+                    if (formRef.current) {
+                      window.scrollTo({
+                        top: formRef.current.offsetTop - 100,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }
+              }}
+              style={{ cursor: i < step ? "pointer" : "default" }}
             >
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center ${
@@ -387,48 +446,64 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
               >
                 {stepObj.icon ? stepObj.icon : index + 1}
               </div>
-              <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
-                index <= step ? 'text-black' : 'text-black/70'
-              }`}>
-                {stepObj.title}
-              </span>
+              <span className="text-xs font-medium">{s.title}</span>
+            </div>
+          ))}
+        </div>
+        <div className="w-full bg-gray-200 h-1 rounded-full">
+          <div
+            className="bg-black h-1 rounded-full transition-all duration-300"
+            style={{ width: `${(step / (steps.length - 1)) * 100}%` }}
+          ></div>
+        </div>
+      </div>
+
+      <div className="space-y-12">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{steps[step].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your apartment property</p>
+        </div>
+        <div className="space-y-8">{steps[step].component}</div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          {step > 0 ? (
+            <button
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg border border-black/20 bg-white text-black transition-all duration-200"
+              onClick={handlePrevious}
+              disabled={loading}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
             </button>
-            {index < steps.length - 1 && (
-              <div className={`w-16 h-1 mx-3 ${index < step ? 'bg-black' : 'bg-gray-200'}`} />
-            )}
-          </div>
-        ))}
+          ) : (
+            <div></div> /* Empty div to maintain layout when no Previous button */
+          )}
+
+          {step < steps.length - 1 ? (
+            <button
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
+              onClick={handleNext}
+            >
+              Next
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
+              onClick={() => onSubmit?.(formData)}
+            >
+              List Property
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          )}
+        </div>
       </div>
-
-      <h2 className="text-3xl font-bold mb-8 text-black">{steps[step].title}</h2>
-
-      {steps[step].component}
-
-      {/* Messages */}
-      
-
-      <div className="mt-8 flex justify-between">
-        {step > 0 && (
-          <button
-            type="button"
-            onClick={handlePrevious}
-            disabled={loading}
-            className="px-6 py-3 rounded-lg border border-black/20 hover:border-black text-black transition-colors duration-200 flex items-center"
-          >
-            Previous
-          </button>
-        )}
-        <button
-  type="button"
-  onClick={handleNext}
-  className="ml-auto px-6 py-3 rounded-lg bg-black text-white hover:bg-gray-800 transition-colors duration-200"
->
-  {step < steps.length - 1 ? "Next" : "List Property"}
-</button>
-
-        
-      </div>
-    </div>
+    </form>
   );
 };
 

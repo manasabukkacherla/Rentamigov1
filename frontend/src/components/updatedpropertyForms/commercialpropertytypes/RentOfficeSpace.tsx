@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
@@ -81,15 +81,15 @@ interface IBasicInformation {
   title: string;
   officeType: string[];
   address: {
-      street: string;
-      city: string;
-      state: string;
-      zipCode: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
   };
   landmark: string;
   location: {
-      latitude?: number;
-      longitude?: number;
+    latitude?: number;
+    longitude?: number;
   };
   isCornerProperty: boolean;
 }
@@ -97,8 +97,8 @@ interface IBasicInformation {
 interface IOfficeDetails {
   seatingCapacity: number;
   cabins: {
-      available: boolean;
-      count?: number;
+    available: boolean;
+    count?: number;
   };
   conferenceRoom: boolean;
   meetingRoom: boolean;
@@ -123,12 +123,12 @@ interface IContactInformation {
 
 interface IMedia {
   photos: {
-      exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      washrooms: File[];
-      lifts: File[];
-      emergencyExits: File[];
+    exterior: File[];
+    interior: File[];
+    floorPlan: File[];
+    washrooms: File[];
+    lifts: File[];
+    emergencyExits: File[];
   };
   videoTour?: File | null;
   documents: File[];
@@ -141,42 +141,42 @@ interface IMetadata {
 
 interface IRentalTerms {
   rentDetails: {
-      expectedRent: number;
-      isNegotiable: boolean;
-      rentType: string;
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
   };
   securityDeposit: {
-      amount: number;
+    amount: number;
   };
   maintenanceAmount: {
-      amount: number;
-      frequency: string;
+    amount: number;
+    frequency: string;
   };
   otherCharges: {
-      water: {
-          amount?: number;
-          type: string;
-      };
-      electricity: {
-          amount?: number;
-          type: string;
-      };
-      gas: {
-          amount?: number;
-          type: string;
-      };
-      others: {
-          amount?: number;
-          type: string;
-      };
+    water: {
+      amount?: number;
+      type: string;
+    };
+    electricity: {
+      amount?: number;
+      type: string;
+    };
+    gas: {
+      amount?: number;
+      type: string;
+    };
+    others: {
+      amount?: number;
+      type: string;
+    };
   };
   brokerage: {
-      required: string;
-      amount?: number;
+    required: string;
+    amount?: number;
   };
   availability: {
-      type: string;
-      date?: string;
+    type: string;
+    date?: string;
   };
 }
 
@@ -187,31 +187,32 @@ interface IFloor {
 
 interface FormData {
   basicInformation: IBasicInformation;
-    officeDetails: IOfficeDetails;
-    propertyDetails: {
-        area: IArea;
-        floor: IFloor;
-        facingDirection: string;
-        furnishingStatus: string;
-        propertyAmenities: string[];
-        wholeSpaceAmenities: string[];
-        electricitySupply: {
-            powerLoad: number;
-            backup: boolean;
-        };
-        waterAvailability: string;
-        propertyAge: string;
-        propertyCondition: string;
+  officeDetails: IOfficeDetails;
+  propertyDetails: {
+    area: IArea;
+    floor: IFloor;
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
     };
-    rentalTerms: IRentalTerms;
-    availability: IAvailability;
-    contactInformation: IContactInformation;
-    media: IMedia;
-    metadata: IMetadata;
+    waterAvailability: string;
+    propertyAge: string;
+    propertyCondition: string;
+  };
+  rentalTerms: IRentalTerms;
+  availability: IAvailability;
+  contactInformation: IContactInformation;
+  media: IMedia;
+  metadata: IMetadata;
 }
 
 const RentOfficeSpace = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -225,7 +226,7 @@ const RentOfficeSpace = () => {
       landmark: '',
       location: {
         latitude: 0,
-        longitude: 0,   
+        longitude: 0,
       },
       isCornerProperty: false,
     },
@@ -258,7 +259,7 @@ const RentOfficeSpace = () => {
         backup: false,
       },
       waterAvailability: '',
-      propertyAge: '',      
+      propertyAge: '',
       propertyCondition: '',
     },
     rentalTerms: {
@@ -272,7 +273,7 @@ const RentOfficeSpace = () => {
       },
       maintenanceAmount: {
         amount: 0,
-        frequency: '',  
+        frequency: '',
       },
       otherCharges: {
         water: {
@@ -285,13 +286,13 @@ const RentOfficeSpace = () => {
         },
         gas: {
           amount: 0,
-          type: '', 
+          type: '',
         },
         others: {
           amount: 0,
           type: '',
         },
-      },    
+      },
       brokerage: {
         required: '',
         amount: 0,
@@ -528,44 +529,21 @@ const RentOfficeSpace = () => {
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.basicInformation.title}
-                onPropertyNameChange={handlePropertyNameChange}
-              />
-              <OfficeSpaceType
-                onOfficeTypeChange={handleOfficeTypeChange}
-              />
-            </div>
-          </div>
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={handlePropertyNameChange}
+          />
+          <OfficeSpaceType
+            onOfficeTypeChange={handleOfficeTypeChange}
+          />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={handleAddressChange}
-              />
-              <Landmark onLandmarkChange={handleLandmarkChange} />
-              {/* {currentStep === 0 && (
-                <MapSelector
-                  latitude={formData.basicInformation.location.latitude}
-                  longitude={formData.basicInformation.location.longitude}
-                  onLocationSelect={(lat, lng, address) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      coordinates: {
-                        latitude: lat,
-                        longitude: lng
-                      }
-                    }));
-                  }}
-                />
-              )} */}
-              <CornerProperty
-                onCornerPropertyChange={handleCornerPropertyChange}
-              />
-            </div>
-          </div>
+          <CommercialPropertyAddress
+            onAddressChange={handleAddressChange}
+          />
+          <Landmark onLandmarkChange={handleLandmarkChange} />
+          <CornerProperty
+            onCornerPropertyChange={handleCornerPropertyChange}
+          />
         </div>
       )
     },
@@ -573,19 +551,13 @@ const RentOfficeSpace = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div> */}
-          <div className="space-y-6">
-            <OfficeSpaceDetails
-              onDetailsChange={handleOfficeDetailsChange}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={handlePropertyDetailsChange}
-            />
-          </div>
+        <div className="space-y-6">
+          <OfficeSpaceDetails
+            onDetailsChange={handleOfficeDetailsChange}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={handlePropertyDetailsChange}
+          />
         </div>
       )
     },
@@ -593,40 +565,22 @@ const RentOfficeSpace = () => {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div> */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-                  <MaintenanceAmount
-                    onMaintenanceAmountChange={handleMaintenanceAmountChange}
-                  />
-                )}
-                <SecurityDeposit
-                  onSecurityDepositChange={handleSecurityDepositChange}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges
-                  onOtherChargesChange={handleOtherChargesChange}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={handleBrokerageChange}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-6">
+          <Rent onRentChange={handleRentChange} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+            <MaintenanceAmount
+              onMaintenanceAmountChange={handleMaintenanceAmountChange}
+            />
+          )}
+          <SecurityDeposit
+            onSecurityDepositChange={handleSecurityDepositChange}
+          />
+          <OtherCharges
+            onOtherChargesChange={handleOtherChargesChange}
+          />
+          <Brokerage
+            onBrokerageChange={handleBrokerageChange}
+          />
         </div>
       )
     },
@@ -635,10 +589,6 @@ const RentOfficeSpace = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div> */}
           <AvailabilityDate
             onAvailabilityChange={handleAvailabilityChange}
           />
@@ -649,11 +599,7 @@ const RentOfficeSpace = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div> */}
+        <div className="space-y-6">
           <CommercialContactDetails
             onContactChange={handleContactChange}
           />
@@ -664,32 +610,28 @@ const RentOfficeSpace = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div> */}
+        <div className="space-y-6">
           <CommercialMediaUpload
-              onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    ...prev.media,
-                    photos: {
-                      ...prev.media.photos,
-                      ...photos
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
-                }));
-              }}
-            />
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       )
     }
@@ -699,6 +641,20 @@ const RentOfficeSpace = () => {
     if (validateCurrentStep()) {
       if (currentStep < formSections.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -708,6 +664,20 @@ const RentOfficeSpace = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -790,7 +760,7 @@ const RentOfficeSpace = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -802,7 +772,23 @@ const RentOfficeSpace = () => {
                 <div
                   key={index}
                   className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(index)}
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
                 >
                   <div className="flex flex-col items-center group">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep

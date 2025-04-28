@@ -251,7 +251,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
 });
 
 // Indexes
-CommercialRentPlotSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialRentPlotSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialRentPlotSchema.index({ 'basicInformation.city': 1 });
 CommercialRentPlotSchema.index({ 'basicInformation.state': 1 });
 CommercialRentPlotSchema.index({ 'metadata.createdAt': -1 });

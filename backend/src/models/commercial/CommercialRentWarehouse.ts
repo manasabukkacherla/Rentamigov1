@@ -274,7 +274,7 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
 });
 
 // Indexes
-CommercialRentWarehouseSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialRentWarehouseSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialRentWarehouseSchema.index({ 'basicInformation.city': 1 });
 CommercialRentWarehouseSchema.index({ 'basicInformation.state': 1 });
 CommercialRentWarehouseSchema.index({ 'pricingDetails.propertyPrice': 1 });

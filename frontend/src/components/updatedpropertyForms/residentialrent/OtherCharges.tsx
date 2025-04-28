@@ -43,7 +43,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
   ]
 
   return (
-    <div className="bg-gray-100 p-6 rounded-2xl">
+    <div className="bg-gray-100 p-6 rounded-2xl border border-black/20">
       <div className="flex items-center gap-3 mb-6">
         <h3 className="text-2xl font-semibold text-black">Other Charges</h3>
         <ArrowRight className="text-black" size={20} />
@@ -69,7 +69,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                 }
                 className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
                   (charges[key as keyof typeof charges] as Charge).type === 'inclusive'
-                    ? "bg-blue-50 border-blue-500 text-blue-700"
+                    ? "bg-gray-50 border-black-500 text-black-700"
                     : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -85,7 +85,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                   }
                 className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
                   (charges[key as keyof typeof charges] as Charge).type === 'exclusive'
-                    ? "bg-blue-50 border-blue-500 text-blue-700"
+                    ? "bg-gray-50 border-black-500 text-black-700"
                     : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
                 }`}
                 >
@@ -98,7 +98,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => 
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
                 <input
                   type="number"
-                  className="w-full border border-gray-300 rounded-xl p-3 focus:border-blue-500 outline-none transition-colors duration-200"
+                  className="w-full border border-gray-300 rounded-xl p-3 focus:border-black-500 outline-none transition-colors duration-200"
                   value={(charges[key as keyof typeof charges] as Charge).amount || ''}
                   onChange={(e) =>
                     handleChange(key as keyof typeof charges, {

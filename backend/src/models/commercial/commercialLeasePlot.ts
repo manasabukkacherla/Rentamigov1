@@ -293,7 +293,7 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
 });
 
 // Indexes
-CommercialLeasePlotSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialLeasePlotSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialLeasePlotSchema.index({ 'basicInformation.city': 1 });
 CommercialLeasePlotSchema.index({ 'leaseDetails.leaseAmount': 1 });
 CommercialLeasePlotSchema.index({ 'plotDetails.totalArea': 1 });

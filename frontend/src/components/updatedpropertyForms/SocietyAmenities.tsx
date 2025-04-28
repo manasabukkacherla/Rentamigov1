@@ -161,10 +161,7 @@ const SocietyAmenities = ({ onAmenitiesChange }: SocietyAmenitiesProps) => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((amenity) => (
-                <label 
-                  key={amenity} 
-                  className="flex items-center gap-3 p-3 hover:bg-black/5 rounded-lg transition-colors duration-200 cursor-pointer group"
-                >
+                <label key={amenity} className="flex items-center gap-3 p-3 hover:bg-black/5 rounded-lg transition-colors duration-200 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={selectedAmenities[amenity] || false}

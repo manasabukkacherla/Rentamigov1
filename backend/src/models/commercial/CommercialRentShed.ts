@@ -253,7 +253,7 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
 });
 
 // Indexes
-CommercialRentShedSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialRentShedSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialRentShedSchema.index({ 'basicInformation.city': 1 });
 CommercialRentShedSchema.index({ 'basicInformation.state': 1 });
 CommercialRentShedSchema.index({ 'metadata.createdAt': -1 });

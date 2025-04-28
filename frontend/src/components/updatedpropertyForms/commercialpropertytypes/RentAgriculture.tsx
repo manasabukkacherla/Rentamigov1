@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
@@ -52,7 +52,7 @@ const globalStyles = `
 // Error display component for validation errors
 const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   if (Object.keys(errors).length === 0) return null;
-  
+
   return (
     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
       <div className="flex items-center">
@@ -83,13 +83,13 @@ interface FormData {
   landmark: string;
   coordinates: {
     latitude: string;
-    longitude: string;  
+    longitude: string;
   };
   isCornerProperty: boolean;
   Agriculturelanddetails: {
     totalArea: number;
     soilType: string;
-    irrigation: boolean;  
+    irrigation: boolean;
     fencing: boolean;
     cropSuitability: string;
     waterSource: string;
@@ -187,13 +187,14 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 
 const RentAgriculture = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     landType: [] as string[],
     powerSupply: false,
     address: {
       street: '',
-      city: '', 
+      city: '',
       state: '',
       zipCode: ''
     },
@@ -281,15 +282,15 @@ const RentAgriculture = () => {
     },
     media: {
       photos: {
-        exterior: [] ,
-        interior: [] ,
-        floorPlan: [] ,
+        exterior: [],
+        interior: [],
+        floorPlan: [],
         washrooms: [],
-        lifts: [] ,
-        emergencyExits: [] 
+        lifts: [],
+        emergencyExits: []
       },
       videoTour: null,
-      documents: [] 
+      documents: []
     },
   });
 
@@ -326,113 +327,113 @@ const RentAgriculture = () => {
   const handlePropertyNameChange = (name: string) => {
     setFormData(prev => ({ ...prev, propertyName: name }));
   };
-  
+
   const handleLandTypeChange = (types: string[]) => {
     setFormData(prev => ({ ...prev, landType: types }));
   };
-  
+
   const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }) => {
     setFormData(prev => ({ ...prev, address }));
   };
-  
+
   const handleLandmarkChange = (landmark: string) => {
     setFormData(prev => ({ ...prev, landmark }));
   };
-  
+
   const handleLatitudeChange = (lat: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       coordinates: { ...prev.coordinates, latitude: lat }
     }));
   };
-  
+
   const handleLongitudeChange = (lng: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       coordinates: { ...prev.coordinates, longitude: lng }
     }));
   };
-  
+
   const handleCornerPropertyChange = (isCorner: boolean) => {
     setFormData(prev => ({ ...prev, isCornerProperty: isCorner }));
   };
-  
+
   const handleLandDetailsChange = (details: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       Agriculturelanddetails: { ...prev.Agriculturelanddetails, ...details }
     }));
   };
-  
+
   const handlePropertyDetailsChange = (details: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       propertyDetails: { ...prev.propertyDetails, ...details }
     }));
   };
-  
+
   const handleRentChange = (rent: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       rent: { ...prev.rent, ...rent }
     }));
   };
-  
+
   const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
     setFormData(prev => {
       // Create a new object to avoid directly modifying prev
       const updated = { ...prev };
-      
+
       // Initialize maintenanceAmount if it doesn't exist
       if (!updated.maintenanceAmount) {
         updated.maintenanceAmount = { amount: 0, frequency: 'monthly' };
       } else {
         // Merge with existing values
-        updated.maintenanceAmount = { 
-          ...updated.maintenanceAmount, 
-          ...maintenance 
+        updated.maintenanceAmount = {
+          ...updated.maintenanceAmount,
+          ...maintenance
         };
       }
-      
+
       return updated;
     });
   };
-  
+
   const handleSecurityDepositChange = (deposit: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       securityDeposit: { ...prev.securityDeposit, ...deposit }
     }));
   };
-  
+
   const handleOtherChargesChange = (charges: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       otherCharges: { ...prev.otherCharges, ...charges }
     }));
   };
-  
+
   const handleBrokerageChange = (brokerage: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       brokerage: { ...prev.brokerage, ...brokerage }
     }));
   };
-  
+
   const handleContactChange = (contact: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       contactDetails: { ...prev.contactDetails, ...contact }
     }));
   };
-  
-  const handleMediaChange = (media: { 
-    images: { category: string; files: { url: string; file: File; }[]; }[]; 
-    video?: { url: string; file: File; } | undefined; 
-    documents: { type: string; file: File; }[]; 
+
+  const handleMediaChange = (media: {
+    images: { category: string; files: { url: string; file: File; }[]; }[];
+    video?: { url: string; file: File; } | undefined;
+    documents: { type: string; file: File; }[];
   }) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       media: {
         photos: {
           exterior: media.images.find(img => img.category === 'exterior')?.files.map(f => f.file) || [],
@@ -503,7 +504,7 @@ const RentAgriculture = () => {
                 <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -559,6 +560,20 @@ const RentAgriculture = () => {
     if (validateCurrentStep()) {
       if (currentStep < formSections.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -568,6 +583,20 @@ const RentAgriculture = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -686,8 +715,8 @@ const RentAgriculture = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div ref={formRef} className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
@@ -714,8 +743,8 @@ const RentAgriculture = () => {
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
             disabled={currentStep === formSections.length - 1 && isSubmitting}
           >
-            {currentStep === formSections.length - 1 
-              ? (isSubmitting ? 'Submitting...' : 'Submit') 
+            {currentStep === formSections.length - 1
+              ? (isSubmitting ? 'Submitting...' : 'Submit')
               : 'Next'}
             {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}
           </button>

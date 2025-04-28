@@ -396,40 +396,40 @@ const LeaseAgricultureMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
               <div className="space-y-4">
-                <LeaseAmount 
+                <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
                     leaseAmount: { ...prev.leaseAmount, ...amount }
-                  }))} 
+                  }))}
                 />
                 <LeaseTenure
                   onLeaseTenureChange={handleLeaseTenureChange}
                 />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4">
-                <MaintenanceAmount 
+                <MaintenanceAmount
                   onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                     ...prev,
                     maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
-                  }))} 
+                  }))}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges 
+                <OtherCharges
                   onOtherChargesChange={(charges) => setFormData(prev => ({
                     ...prev,
                     otherCharges: { ...prev.otherCharges, ...charges }
-                  }))} 
+                  }))}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage 
+                <Brokerage
                   onBrokerageChange={(brokerage) => setFormData(prev => ({
                     ...prev,
                     brokerage: { ...prev.brokerage, ...brokerage }
-                  }))} 
+                  }))}
                 />
               </div>
             </div>
@@ -562,7 +562,7 @@ const LeaseAgricultureMain = () => {
 
         if (response.data.success) {
           toast.success('Agricultural land lease listing created successfully!');
-          
+
         }
       } else {
         navigate('/login');
@@ -600,16 +600,14 @@ const LeaseAgricultureMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -617,9 +615,8 @@ const LeaseAgricultureMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -647,11 +644,10 @@ const LeaseAgricultureMain = () => {
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous

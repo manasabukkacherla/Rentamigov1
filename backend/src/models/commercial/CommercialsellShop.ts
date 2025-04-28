@@ -228,7 +228,7 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
 });
 
 // Indexes
-CommercialShopSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialShopSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialShopSchema.index({ 'basicInformation.city': 1 });
 CommercialShopSchema.index({ 'basicInformation.state': 1 });
 CommercialShopSchema.index({ 'pricingDetails.propertyPrice': 1 });

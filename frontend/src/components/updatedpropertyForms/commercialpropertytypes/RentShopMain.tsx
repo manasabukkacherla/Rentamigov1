@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { toast } from 'react-toastify'
 import MapSelector from "../MapSelector"
 import ShopDetails from "../CommercialComponents/ShopDetails"
@@ -13,7 +13,9 @@ import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar } from "lucide-react"
+
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation ,Loader2} from "lucide-react"
+
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import axios from "axios"
@@ -179,6 +181,7 @@ interface CommercialMediaUploadProps {
 
 const RentShopMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -267,6 +270,136 @@ const RentShopMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0)
 
+  // Function to update map location based on latitude and longitude
+  const updateMapLocation = (lat: string, lng: string) => {
+    const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
+    if (iframe && lat && lng) {
+      // Use higher zoom level (18) and more precise marker for better accuracy
+      iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
+    }
+  };
+
+  // Function to get current location
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+          
+          // Update form data
+          setFormData(prev => ({
+            ...prev,
+            basicInformation: {
+              ...prev.basicInformation,
+              location: {
+                latitude: parseFloat(lat),
+                longitude: parseFloat(lng)
+              }
+            }
+          }));
+          
+          // Update map
+          updateMapLocation(lat, lng);
+          
+          // Attempt to reverse geocode for address
+          reverseGeocode(lat, lng);
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+          toast.error("Unable to get your current location. Please check your browser permissions.");
+        }
+      );
+    } else {
+      toast.error("Geolocation is not supported by your browser.");
+    }
+  };
+
+  // Reverse geocode to get address from coordinates
+  const reverseGeocode = (lat: string, lng: string) => {
+    const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
+    
+    fetch(geocodingUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "OK" && data.results && data.results.length > 0) {
+          const address = data.results[0];
+          
+          // Extract address components
+          const addressComponents = {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: ''
+          };
+          
+          // Map address components to our format
+          address.address_components.forEach((component: any) => {
+            const types = component.types;
+            
+            if (types.includes('route')) {
+              addressComponents.street = component.long_name;
+            } else if (types.includes('locality')) {
+              addressComponents.city = component.long_name;
+            } else if (types.includes('administrative_area_level_1')) {
+              addressComponents.state = component.long_name;
+            } else if (types.includes('postal_code')) {
+              addressComponents.zipCode = component.long_name;
+            }
+          });
+          
+          // Check if we have a street address, if not use formatted address
+          if (!addressComponents.street && address.formatted_address) {
+            const formattedParts = address.formatted_address.split(',');
+            if (formattedParts.length > 0) {
+              addressComponents.street = formattedParts[0];
+            }
+          }
+          
+          // Update address in form data
+          setFormData(prev => ({
+            ...prev,
+            basicInformation: {
+              ...prev.basicInformation,
+              address: addressComponents
+            }
+          }));
+          
+          // Update landmark with nearby point of interest if available
+          const landmark = data.results.find((result: any) => 
+            result.types.some((type: string) => 
+              ['point_of_interest', 'establishment', 'premise'].includes(type)
+            )
+          );
+          
+          if (landmark && landmark.name) {
+            setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                landmark: landmark.name
+              }
+            }));
+          }
+          
+          toast.success("Location details updated successfully");
+        } else {
+          console.error("Geocoding failed:", data.status);
+        }
+      })
+      .catch(error => {
+        console.error("Error during reverse geocoding:", error);
+      });
+  };
+
+  // Function to open location picker in Google Maps
+  const openLocationPicker = () => {
+    const lat = formData.basicInformation.location.latitude.toString() || "20.5937";
+    const lng = formData.basicInformation.location.longitude.toString() || "78.9629";
+    window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
+    toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
+  };
+
   const handleLocationSelect = (latitude: string, longitude: string) => {
     setFormData({
       ...formData,
@@ -278,6 +411,9 @@ const RentShopMain = () => {
         }
       }
     });
+    
+    // Update map when coordinates change
+    updateMapLocation(latitude, longitude);
   };
 
   const formSections = [
@@ -305,21 +441,162 @@ const RentShopMain = () => {
               basicInformation: { ...prev.basicInformation, address }
             }))}
           />
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center mb-8">
+              <MapPin className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Map Location</h3>
+            </div>
+            <div className="bg-white p-6 rounded-lg space-y-6">
+              <div>
+                <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
+                <p className="text-sm text-gray-500 mb-4">
+                  Use the map below to set your property's location. Click on the map or search for an address.
+                </p>
+                <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
+                  <iframe
+                    id="map-iframe"
+                    src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${formData.basicInformation.location.longitude || '78.9629'}!3d${formData.basicInformation.location.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${formData.basicInformation.location.latitude || '20.5937'},${formData.basicInformation.location.longitude || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    className="rounded-xl"
+                    title="Property Location Map"
+                  ></iframe>
+                  
+                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                    <button 
+                      onClick={() => getCurrentLocation()}
+                      className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
+                      aria-label="Get current location"
+                      type="button"
+                    >
+                      <Locate className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-medium">My Location</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => openLocationPicker()}
+                      className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
+                      aria-label="Select location"
+                      type="button"
+                    >
+                      <Navigation className="w-5 h-5 text-blue-600" />
+                      <span className="text-sm font-medium">Select Location</span>
+                    </button>
+                  </div>
+                  
+                  <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
+                    Powered by Google Maps
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
+                      Latitude
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="latitude"
+                        value={formData.basicInformation.location.latitude}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (!isNaN(Number(value)) || value === '-' || value === '') {
+                            setFormData(prev => ({
+                              ...prev,
+                              basicInformation: {
+                                ...prev.basicInformation,
+                                location: {
+                                  ...prev.basicInformation.location,
+                                  latitude: parseFloat(value) || 0
+                                }
+                              }
+                            }));
+                            
+                            // Update map when latitude changes
+                            updateMapLocation(
+                              value, 
+                              formData.basicInformation.location.longitude.toString() || '78.9629'
+                            );
+                          }
+                        }}
+                        placeholder="Enter latitude (e.g., 17.683301)"
+                        className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                      />
+                      <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
+                      Longitude
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="longitude"
+                        value={formData.basicInformation.location.longitude}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (!isNaN(Number(value)) || value === '-' || value === '') {
+                            setFormData(prev => ({
+                              ...prev,
+                              basicInformation: {
+                                ...prev.basicInformation,
+                                location: {
+                                  ...prev.basicInformation.location,
+                                  longitude: parseFloat(value) || 0
+                                }
+                              }
+                            }));
+                            
+                            // Update map when longitude changes
+                            updateMapLocation(
+                              formData.basicInformation.location.latitude.toString() || '20.5937',
+                              value
+                            );
+                          }
+                        }}
+                        placeholder="Enter longitude (e.g., 83.019301)"
+                        className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+                      />
+                      <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-2 text-xs text-gray-500">
+                  Enter coordinates manually or use the map above to set the location.
+                </p>
+              </div>
+            </div>
+          </div>
           <Landmark
             onLandmarkChange={(landmark) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, landmark }
             }))}
-            onLocationSelect={(location) => setFormData(prev => ({
-              ...prev,
-              basicInformation: {
-                ...prev.basicInformation,
-                location: {
-                  latitude: parseFloat(location.latitude),
-                  longitude: parseFloat(location.longitude)
+            onLocationSelect={(location) => {
+              setFormData(prev => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  location: {
+                    latitude: parseFloat(location.latitude),
+                    longitude: parseFloat(location.longitude)
+                  }
                 }
-              }
-            }))}
+              }));
+              // Update map when location changes from Landmark component
+              updateMapLocation(location.latitude, location.longitude);
+            }}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
           />
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({
@@ -371,20 +648,20 @@ const RentShopMain = () => {
             }))}
           />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-              <MaintenanceAmount
-                onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                  ...prev,
-                  rentalTerms: {
-                    ...prev.rentalTerms,
-                    maintenanceAmount: {
-                      amount: maintenance.amount,
-                      frequency: maintenance.frequency
-                    }
+            <MaintenanceAmount
+              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  maintenanceAmount: {
+                    amount: maintenance.amount,
+                    frequency: maintenance.frequency
                   }
-                }))}
-              />
-            )}
-            <SecurityDeposit
+                }
+              }))}
+            />
+          )}
+          <SecurityDeposit
             onSecurityDepositChange={(deposit) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -428,7 +705,7 @@ const RentShopMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       content: (
-        <div className="space-y-6">
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
@@ -501,24 +778,66 @@ const RentShopMain = () => {
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
-    } 
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handleStepClick = (index: number) => {
     setCurrentStep(index)
+    // Scroll to top of the form
+    setTimeout(() => {
+      if (formRef.current) {
+        window.scrollTo({
+          top: formRef.current.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     console.log(formData)
-    
+
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -577,77 +896,116 @@ const RentShopMain = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 sm:p-10">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
-            <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
-              {formSections.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <button
-                    onClick={() => handleStepClick(index)}
-                    className="flex items-center focus:outline-none"
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
-                        }`}
-                    >
-                      {step.icon}
-                    </div>
-                    <span className={`ml-3 text-sm font-medium whitespace-nowrap ${index <= currentStep ? 'text-black' : 'text-black/70'
+    <div ref={formRef} className="min-h-screen bg-white">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}>
-                      {step.title}
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
                     </span>
-                  </button>
+                  </div>
                   {index < formSections.length - 1 && (
-                    <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-                      }`} />
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
                   )}
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="max-w-5xl mx-auto px-4 py-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-              <p className="text-gray-600">Please fill in the details for your property</p>
-            </div>
-
-            {formSections[currentStep].content}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-              <button
-                onClick={handlePrevious}
-                disabled={currentStep === 0 || isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-                  currentStep === 0 || isSubmitting
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
-              >
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                Previous
-              </button>
-              <button
-                onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-                disabled={isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${
-                  isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-              >
-                {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
+      {/* <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> */}
+      {/* <div className="bg-white rounded-xl shadow-md overflow-hidden"> */}
+      {/* <div ref={formRef} className="p-6 sm:p-10"> */}
+      {/* <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
+          </div> */}
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+
+        {formSections[currentStep].content}
+      </div>
+      {/* Navigation Buttons */}
+      {/* {!formSubmitted && ( */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+      {/* )} */}
     </div>
+    // </div>
+    // </div>
+    // </div>
   )
 }
 

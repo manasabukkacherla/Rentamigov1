@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import PropertyName from "../PropertyName"
 import AgriculturalLandType from "../CommercialComponents/AgriculturalLandType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -46,9 +46,9 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: { 
-    latitude: string; 
-    longitude: string; 
+  coordinates: {
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
   Agriculturelanddetails: {
@@ -130,6 +130,7 @@ interface FormData {
 
 const SellAgricultureMain = () => {
   const navigate = useNavigate()
+  const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     propertyName: "",
     landType: [],
@@ -199,7 +200,7 @@ const SellAgricultureMain = () => {
       alternatePhone: "",
       bestTimeToContact: ""
     },
-    media: { 
+    media: {
       photos: {
         exterior: [],
         interior: [],
@@ -246,7 +247,7 @@ const SellAgricultureMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               />
-              <Landmark 
+              <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
                   ...prev,
@@ -256,7 +257,7 @@ const SellAgricultureMain = () => {
                   }
                 }))}
               />
-              
+
               <CornerProperty
                 onCornerPropertyChange={(isCorner) =>
                   setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
@@ -278,14 +279,14 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <AgriculturalLandDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ 
-                ...prev, 
+              onDetailsChange={(details) => setFormData((prev) => ({
+                ...prev,
                 Agriculturelanddetails: details as FormData['Agriculturelanddetails']
               }))}
             />
             <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ 
-                ...prev, 
+              onDetailsChange={(details) => setFormData((prev) => ({
+                ...prev,
                 propertyDetails: details as FormData['propertyDetails']
               }))}
             />
@@ -306,9 +307,9 @@ const SellAgricultureMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
               <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => 
-                  setFormData((prev) => ({ 
-                    ...prev, 
+                <Price onPriceChange={(price) =>
+                  setFormData((prev) => ({
+                    ...prev,
                     price: {
                       ...prev.price,
                       expectedPrice: parseFloat(price.propertyPrice.toString()),
@@ -321,15 +322,15 @@ const SellAgricultureMain = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
                 <div className="text-black">
                   <RegistrationCharges
                     onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({ 
-                        ...prev, 
+                      setFormData((prev) => ({
+                        ...prev,
                         registrationCharges: {
                           included: charges.included,
                           amount: charges.amount,
@@ -341,13 +342,13 @@ const SellAgricultureMain = () => {
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage 
-                    onBrokerageChange={(brokerage) => 
-                      setFormData((prev) => ({ 
-                        ...prev, 
+                  <Brokerage
+                    onBrokerageChange={(brokerage) =>
+                      setFormData((prev) => ({
+                        ...prev,
                         brokerage: brokerage as FormData['brokerage']
                       }))
-                    } 
+                    }
                   />
                 </div>
               </div>
@@ -396,8 +397,8 @@ const SellAgricultureMain = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({ 
-                ...prev, 
+              onContactChange={(contact) => setFormData((prev) => ({
+                ...prev,
                 contactDetails: contact as FormData['contactDetails']
               }))}
             />
@@ -415,7 +416,7 @@ const SellAgricultureMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload 
+            <CommercialMediaUpload
               onMediaChange={(media) => {
                 const photos: Record<string, File[]> = {};
                 media.images.forEach(({ category, files }) => {
@@ -457,12 +458,38 @@ const SellAgricultureMain = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1)
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   }
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1)
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   }
 
@@ -536,7 +563,7 @@ const SellAgricultureMain = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Progress indicator */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div ref={formRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex justify-center">
             <div className="flex items-center space-x-2">
@@ -548,16 +575,14 @@ const SellAgricultureMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -565,9 +590,8 @@ const SellAgricultureMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -595,11 +619,10 @@ const SellAgricultureMain = () => {
             type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
