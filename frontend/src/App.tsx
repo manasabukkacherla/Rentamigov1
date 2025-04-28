@@ -233,8 +233,13 @@ const App = () => {
 <Route path="/pgdash/settings" element={<Pgapp defaultSection="settings" />} />
 {/* Dynamic PG Details page route */}
 <Route path="/pgdash/listings/:id" element={<PGDetails />} />
+
  {/* agriplot routes*/}
  <Route path="/agriplot" element={<Agriplot />} />
+
+{/* Agriplot route */}
+<Route path="/agriplot" element={<Agriplot />} />
+
                 <Route path="/empdash" element={<Empapp />} />
                 <Route path="/propertypage" element={<Propertydetail />} />
                 {/* Logins Layout */}
