@@ -188,13 +188,13 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
     await newUser.save();
     console.log("✅ User Saved Successfully");
 
-    const stats = await BlogStatistics.findOne({userId: newUser._id})
-    if(!stats) {
-      console.log("No stat found")
+    const stats = await BlogStatistics.findOne({ userId: newUser._id });
+    if (!stats) {
+      console.log("No stat found");
       const newStat = new BlogStatistics({
-        userId: newUser._id
-      })
-      await newStat.save()
+        userId: newUser._id,
+      });
+      await newStat.save();
     }
 
     // ✅ Remove email from verified list after successful registration

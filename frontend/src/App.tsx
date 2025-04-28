@@ -34,6 +34,10 @@ import BugReportPage from "./components/bug-report/BugReportPage";
 import BugDashboard from "./components/bug-dashboard/BugDashboard";
 import TenantProperties from "./components/tenantProperties";
 import Chatbottt from "./components/chatbott/App";
+import Pgapp from "./components/pgdashboard/pgdashboard";
+import Allproperties from "./components/allpropertiespage/App";
+import PGDetails from "./components/pgdashboard/pages/PGDetails";
+import Agriplot from "./components/Agriplotpage/App";
 // import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
@@ -44,6 +48,7 @@ import Notifications from "./components/Empdashboaed/components/Notifications";
 import { useContext } from "react";
 import { SocketContext } from "./socketContext";
 import SellShowroomMain from "./components/updatedpropertyForms/commercialpropertytypes/SellShowroomMain";
+import Allprop from "./components/allpropertiespage/App";
 
 const App = () => {
   const [isEmployee, setIsEmployee] = useState(false);
@@ -95,6 +100,7 @@ const App = () => {
                 />
                 <Route path="/updatePropertyform" element={<Propertmain />} />
                 <Route path="/chat" element={<Chatbottt />} />
+                <Route path="/pgdash" element={<Pgapp />} />
                 {/* New route for property details with ID parameter */}
                 {/* <Route path="/property-details/:id" element={<PropertyDetailPage />} /> */}
 
@@ -214,12 +220,32 @@ const App = () => {
                   path="/admindash/settings"
                   element={<Admindash defaultSection="settings" />}
                 />
+                {/*pgdashboard routes*/}
+                <Route path="/pgdash" element={<Pgapp defaultSection="overview" />} />
+<Route path="/pgdash/overview" element={<Pgapp defaultSection="overview" />} />
+<Route path="/pgdash/listings" element={<Pgapp defaultSection="listings" />} />
+<Route path="/pgdash/details" element={<Pgapp defaultSection="details" />} />
+<Route path="/pgdash/leads" element={<Pgapp defaultSection="leads" />} />
+<Route path="/pgdash/notifications" element={<Pgapp defaultSection="notifications" />} />
+<Route path="/pgdash/plans" element={<Pgapp defaultSection="plans" />} />
+<Route path="/pgdash/revenue" element={<Pgapp defaultSection="revenue" />} />
+<Route path="/pgdash/reviews" element={<Pgapp defaultSection="reviews" />} />
+<Route path="/pgdash/settings" element={<Pgapp defaultSection="settings" />} />
+{/* Dynamic PG Details page route */}
+<Route path="/pgdash/listings/:id" element={<PGDetails />} />
+
+ {/* agriplot routes*/}
+ <Route path="/agriplot" element={<Agriplot />} />
+
+{/* Agriplot route */}
+<Route path="/agriplot" element={<Agriplot />} />
 
                 <Route path="/empdash" element={<Empapp />} />
                 <Route path="/propertypage" element={<Propertydetail />} />
                 {/* Logins Layout */}
                 <Route path="/Login" element={<Loginhome />} />
                 <Route path="/chat" element={<Chatbottt />} />
+
                 <Route
                   path="/emp-login"
                   element={
@@ -247,6 +273,7 @@ const App = () => {
                 <Route path="/propertypage" element={<Propertydetail />} />
                 {/* Logins Layout */}
                 <Route path="/Login" element={<Loginhome />} />
+                <Route path="/allproperties" element={<Allproperties />} />
                 <Route
                   path="/emp-login"
                   element={

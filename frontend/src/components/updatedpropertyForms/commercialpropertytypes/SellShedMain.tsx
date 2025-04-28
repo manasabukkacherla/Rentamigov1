@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, Store} from "lucide-react"
+import { useState, useRef } from "react"
+import { Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, Store } from "lucide-react"
 import PropertyName from "../PropertyName"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
@@ -117,6 +117,7 @@ interface FormDataType {
 
 const SellShedMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
     propertyName: "",
     shedType: "",
@@ -163,7 +164,7 @@ const SellShedMain = () => {
             <div className="space-y-6">
               <CommercialPropertyAddress onAddressChange={(address) => handleChange("address", address)} />
               <Landmark onLandmarkChange={(landmark) => handleChange("landmark", landmark)} />
-              
+
               <CornerProperty onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} />
             </div>
           </div>
@@ -202,7 +203,7 @@ const SellShedMain = () => {
                 <Price onPriceChange={(price) => handleChange("price", price.amount)} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -268,13 +269,46 @@ const SellShedMain = () => {
     },
   ]
 
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 0))
+  const nextStep = () => {
+    setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
+    // Scroll to top of the form
+    setTimeout(() => {
+      if (formRef.current) {
+        window.scrollTo({
+          top: formRef.current.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  }
+
+  const prevStep = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 0))
+    // Scroll to top of the form
+    setTimeout(() => {
+      if (formRef.current) {
+        window.scrollTo({
+          top: formRef.current.offsetTop - 100,
+          behavior: 'smooth'
+        });
+      } else {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      }
+    }, 100);
+  }
 
   const handleChange = (key: string, value: string | boolean | Record<string, any>) => {
     setFormData((prev) => ({ ...prev, [key]: value }))
   }
-  
+
   // Function to convert File to base64 string
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -291,7 +325,7 @@ const SellShedMain = () => {
     try {
       // Convert media files to base64 strings if they exist
       let mediaData: Partial<MediaType> = { photos: [] };
-      
+
       if (formData.media.photos && formData.media.photos.length > 0) {
         const photoPromises = formData.media.photos.map(async (photo: any) => {
           if (photo instanceof File) {
@@ -301,11 +335,11 @@ const SellShedMain = () => {
         });
         mediaData.photos = await Promise.all(photoPromises);
       }
-      
+
       if (formData.media.video && formData.media.video instanceof File) {
         mediaData.video = await convertFileToBase64(formData.media.video);
       }
-      
+
       // Transform data for backend
       const transformedData = {
         ...formData,
@@ -325,16 +359,16 @@ const SellShedMain = () => {
           createdBy: sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') || '{}').id : null
         }
       };
-      
+
       console.log('Submitting data:', transformedData);
-      
+
       // Submit to backend API
       const response = await axios.post('/api/commercial/sell/sheds', transformedData);
-      
+
       if (response.status === 201) {
         toast.success("Property listed successfully!");
         // Redirect to some success page or dashboard
-       
+
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -345,7 +379,7 @@ const SellShedMain = () => {
   return (
     <div className="min-h-screen bg-white">
       {/* Progress indicator */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div ref={formRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex justify-center">
             <div className="flex items-center space-x-2">
@@ -357,16 +391,14 @@ const SellShedMain = () => {
                 >
                   <div className="flex flex-col items-center group">
                     <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                      }`}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
                     >
                       {s.icon}
                     </div>
                     <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                        i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                      }`}
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
                     >
                       {s.title}
                     </span>
@@ -374,9 +406,8 @@ const SellShedMain = () => {
                   {i < steps.length - 1 && (
                     <div className="flex items-center mx-1">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${
-                          i < currentStep ? "bg-black" : "bg-gray-200"
-                        }`}
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
                       ></div>
                     </div>
                   )}
@@ -404,11 +435,10 @@ const SellShedMain = () => {
                 type="button"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-                  currentStep === 0
-                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                    : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
+                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : "bg-white text-black hover:bg-black hover:text-white"
+                  }`}
               >
                 <ChevronLeft className="w-5 h-5 mr-2" />
                 Previous

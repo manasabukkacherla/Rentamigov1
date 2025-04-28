@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check, Bed, Armchair } from 'lucide-react';
 
 interface Amenity {
   id: string;
@@ -10,21 +11,13 @@ const SingleRoomAmenities = () => {
   const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
 
   const amenities: Amenity[] = [
-    { id: 'bed-single', label: 'Single Bed' },
-    { id: 'bed-double', label: 'Double Bed' },
-    { id: 'mattress', label: 'Mattress' },
-    { id: 'pillow', label: 'Pillow' },
-    { id: 'bedsheet', label: 'Bedsheet' },
-    { id: 'blanket', label: 'Blanket' },
-    { id: 'wardrobe', label: 'Wardrobe/Closet for Personal Storage' },
-    { id: 'study-set', label: 'Study Table and Chair' },
+    { id: 'premium-mattress', label: 'Personal bed with premium mattress' },
+    { id: 'private-wardrobe', label: 'Private wardrobe' },
+    { id: 'study-set', label: 'Individual study table and chair' },
+    { id: 'private-bathroom', label: 'Attached private bathroom' },
+    { id: 'charging-ports', label: 'Personal charging ports' },
     { id: 'fan', label: 'Fan' },
-    { id: 'lights', label: 'Lights' },
-    { id: 'ac', label: 'Air Conditioning (AC)', isOptional: true },
-    { id: 'bathroom', label: 'Attached Bathroom' },
-    { id: 'curtains', label: 'Curtains' },
-    { id: 'charging-points', label: 'Charging Points' },
-    { id: 'mirror', label: 'Mirror' }
+    { id: 'ac', label: 'Air Conditioning (AC)' }
   ];
 
   const handleAmenityChange = (amenityId: string) => {
@@ -38,41 +31,67 @@ const SingleRoomAmenities = () => {
   };
 
   return (
-    <div className="p-6 bg-black text-white">
-      <h1 className="text-2xl font-bold mb-6">Single Room Amenities</h1>
+    <div className="space-y-4">
+      <div className="flex items-center mb-2">
+        <Bed className="w-4 h-4 text-gray-500 mr-2" />
+        <p className="text-sm text-gray-500">
+          Select the amenities available in single occupancy rooms
+        </p>
+      </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {amenities.map((amenity) => (
-          <div key={amenity.id} className="flex items-center">
-            <input
-              type="checkbox"
-              id={amenity.id}
-              checked={selectedAmenities.has(amenity.id)}
-              onChange={() => handleAmenityChange(amenity.id)}
-              className="h-5 w-5 border-white rounded bg-black checked:bg-white checked:border-white focus:ring-white focus:ring-2"
-            />
-            <label htmlFor={amenity.id} className="ml-3 text-white flex items-center">
+          <div 
+            key={amenity.id} 
+            onClick={() => handleAmenityChange(amenity.id)}
+            className={`
+              flex items-center p-3 rounded-md border cursor-pointer transition-colors
+              ${selectedAmenities.has(amenity.id) 
+                ? 'border-black bg-black/5' 
+                : 'border-gray-200 hover:border-black'
+              }
+            `}
+          >
+            <div className={`
+              w-4 h-4 flex-shrink-0 flex items-center justify-center border rounded-sm transition-colors
+              ${selectedAmenities.has(amenity.id) 
+                ? 'bg-black border-black text-white' 
+                : 'border-gray-300'
+              }
+            `}>
+              {selectedAmenities.has(amenity.id) && <Check className="w-3 h-3" />}
+            </div>
+            
+            <label htmlFor={amenity.id} className="ml-2 text-sm flex-grow cursor-pointer text-black">
               {amenity.label}
               {amenity.isOptional && (
-                <span className="ml-2 text-sm text-gray-400">(Optional)</span>
+                <span className="ml-1 text-xs text-gray-500">(Optional)</span>
               )}
             </label>
           </div>
         ))}
       </div>
 
-      <div className="border-t border-white mt-6 pt-4">
-        <h2 className="text-lg font-semibold mb-2">Selected Amenities:</h2>
-        <div className="text-sm">
-          <ul className="list-disc list-inside">
-            {Array.from(selectedAmenities).map(amenityId => (
-              <li key={amenityId}>
-                {amenities.find(a => a.id === amenityId)?.label}
-              </li>
-            ))}
-          </ul>
+      {selectedAmenities.size > 0 && (
+        <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="flex items-center mb-3">
+            <Armchair className="w-4 h-4 text-gray-500 mr-2" />
+            <h3 className="text-sm font-medium text-gray-900">Selected Amenities</h3>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            {Array.from(selectedAmenities).map(amenityId => {
+              const amenity = amenities.find(a => a.id === amenityId);
+              return (
+                <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black">
+                  <Check className="w-3 h-3 mr-1" />
+                  <span>{amenity?.label}</span>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

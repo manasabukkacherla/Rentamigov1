@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropertyName from '../PropertyName';
 import ShopType from '../CommercialComponents/ShopType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -70,11 +70,11 @@ interface FormData {
   };
   leaseTerms: {
     leaseDetails: {
-        amount: number;
-        type: string;
-        duration: number;
-        durationUnit: string;
-      
+      amount: number;
+      type: string;
+      duration: number;
+      durationUnit: string;
+
     };
     tenureDetails: {
       minimumTenure: number;
@@ -199,21 +199,21 @@ const LeaseShopMain = () => {
     },
     leaseTerms: {
       leaseDetails: {
-          amount: 0,
-          type: 'fixed',
-          duration: 0,
-          durationUnit: 'years'
-        
+        amount: 0,
+        type: 'fixed',
+        duration: 0,
+        durationUnit: 'years'
+
       },
       tenureDetails: {
         minimumTenure: 0,
-    minimumUnit: 'years',
-    maximumTenure: 0,
-    maximumUnit: 'years',
-    lockInPeriod: 0,
-    lockInUnit: 'years',
-    noticePeriod: 0,
-    noticePeriodUnit: 'months'
+        minimumUnit: 'years',
+        maximumTenure: 0,
+        maximumUnit: 'years',
+        lockInPeriod: 0,
+        lockInUnit: 'years',
+        noticePeriod: 0,
+        noticePeriodUnit: 'months'
       },
       maintenanceAmount: {
         amount: 0,
@@ -278,6 +278,7 @@ const LeaseShopMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -316,25 +317,25 @@ const LeaseShopMain = () => {
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
                 <div className="relative">
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: { ...prev.basicInformation, landmark }
-                }))}
-                onLocationSelect={(location) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation: {
-                    ...prev.basicInformation,
-                    location: {
-                      latitude: parseFloat(location.latitude),
-                      longitude: parseFloat(location.longitude)
-                    }
-                  }
-                }))}
-              />
-              <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            </div>
-            <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))} />
+                  <Landmark
+                    onLandmarkChange={(landmark) => setFormData(prev => ({
+                      ...prev,
+                      basicInformation: { ...prev.basicInformation, landmark }
+                    }))}
+                    onLocationSelect={(location) => setFormData(prev => ({
+                      ...prev,
+                      basicInformation: {
+                        ...prev.basicInformation,
+                        location: {
+                          latitude: parseFloat(location.latitude),
+                          longitude: parseFloat(location.longitude)
+                        }
+                      }
+                    }))}
+                  />
+                  <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                </div>
+                <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))} />
               </div>
             </div>
           </div>
@@ -412,7 +413,7 @@ const LeaseShopMain = () => {
             </div>
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <div className="space-y-4">
-                <LeaseAmount 
+                <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -425,12 +426,12 @@ const LeaseShopMain = () => {
                           duration: amount.duration || 0,
                           durationUnit: amount.durationUnit || 'years'
                         },
-                        
+
                       }
                     }
                   }))}
                 />
-                <LeaseTenure 
+                <LeaseTenure
                   onLeaseTenureChange={(tenure) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -452,7 +453,7 @@ const LeaseShopMain = () => {
                     }
                   }))}
                 />
-                <MaintenanceAmount 
+                <MaintenanceAmount
                   onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -466,21 +467,21 @@ const LeaseShopMain = () => {
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <OtherCharges
-              onOtherChargesChange={(charges) => setFormData(prev => ({
-                ...prev,
-                leaseTerms: {
-                  ...prev.leaseTerms,
-                  otherCharges: {
-                    water: { type: charges.water.type, amount: charges.water.amount },
-                    electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                    gas: { type: charges.gas.type, amount: charges.gas.amount },
-                    others: { type: charges.others.type, amount: charges.others.amount }
-                  }
-                }
-              }))}
-            />
+                  onOtherChargesChange={(charges) => setFormData(prev => ({
+                    ...prev,
+                    leaseTerms: {
+                      ...prev.leaseTerms,
+                      otherCharges: {
+                        water: { type: charges.water.type, amount: charges.water.amount },
+                        electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                        gas: { type: charges.gas.type, amount: charges.gas.amount },
+                        others: { type: charges.others.type, amount: charges.others.amount }
+                      }
+                    }
+                  }))}
+                />
                 <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage 
+                <Brokerage
                   onBrokerageChange={(brokerage) => setFormData(prev => ({
                     ...prev,
                     leaseTerms: {
@@ -530,7 +531,7 @@ const LeaseShopMain = () => {
                     }
                   }
                 }))}
-                  />
+              />
               <div className="border-t border-gray-200 my-4"></div>
             </div>
           </div>
@@ -611,7 +612,7 @@ const LeaseShopMain = () => {
                       }
                     }));
                   }}
-                  />
+                />
                 <div className="border-t border-gray-200 my-4"></div>
               </div>
             </div>
@@ -622,18 +623,42 @@ const LeaseShopMain = () => {
   ];
 
   const handleNext = () => {
-    // if (validateCurrentStep()) {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
-    // } else {
-    //   toast.error('Please fill in all required fields');
-    // }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -689,7 +714,7 @@ const LeaseShopMain = () => {
     }
     // console.log(formData);
     // navigate('/');
-  
+
   };
 
   return (
@@ -723,31 +748,34 @@ const LeaseShopMain = () => {
 
       <h2 className="text-3xl font-bold mb-8 text-black">{steps[currentStep].title}</h2>
 
-      {steps[currentStep].component}
+      {/* Form Content */}
+      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+        {steps[currentStep].component}
+      </div>
 
       {/* Navigation Buttons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                : 'bg-white text-black hover:bg-black hover:text-white'
-                }`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
-            </button>
-            <button
-              onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          </div>
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+            <ChevronRight className="w-5 h-5 ml-2" />
+          </button>
         </div>
+      </div>
     </div>
   );
 };

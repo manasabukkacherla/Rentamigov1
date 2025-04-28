@@ -60,18 +60,18 @@ import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWar
 import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
 import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
-import commercialSellAgricultureRoutes from './routes/commercial/commercialSellAgricultureRoutes';
+import commercialSellAgricultureRoutes from "./routes/commercial/commercialSellAgricultureRoutes";
 import commercialSellOthersRoutes from "./routes/commercial/commercialSellOthersRoutes";
 import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRentCoveredSpaceRoutes";
 import commercialSellCoveredSpaceRoutes from "./routes/commercial/commercialSellCoveredSpaceRoutes";
-import commercialSellOfficeSpaceRoutes from './routes/commercial/CommercialSellOfficeSpace';
+import commercialSellOfficeSpaceRoutes from "./routes/commercial/CommercialSellOfficeSpace";
 import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
 import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
-import commercialSellShedRoutes from './routes/commercial/commercialSellShedRoutes';
-import commercialLeasePlotRoutes from './routes/commercial/commercialLeasePlotRoutes';
-import commercialLeaseAgricultureRoutes from './routes/commercial/commercialLeaseAgricultureRoutes';
+import commercialSellShedRoutes from "./routes/commercial/commercialSellShedRoutes";
+import commercialLeasePlotRoutes from "./routes/commercial/commercialLeasePlotRoutes";
+import commercialLeaseAgricultureRoutes from "./routes/commercial/commercialLeaseAgricultureRoutes";
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
@@ -117,31 +117,44 @@ app.use(express.static(path.join(__dirname, "build")));
 app.use(cors());
 
 // Configure express with proper types
-app.use(express.json({
-  limit: '50mb',
-  verify: (req: express.Request, res: express.Response, buf: Buffer, encoding: BufferEncoding) => {
-    try {
-      JSON.parse(buf.toString());
-    } catch (e) {
-      res.status(400).json({
-        success: false,
-        error: 'Invalid JSON'
-      });
-      throw new Error('Invalid JSON');
-    }
-  }
-}));
-app.use(express.urlencoded({
-  extended: true,
-  limit: '50mb'
-}));
+app.use(
+  express.json({
+    limit: "50mb",
+    verify: (
+      req: express.Request,
+      res: express.Response,
+      buf: Buffer,
+      encoding: BufferEncoding
+    ) => {
+      try {
+        JSON.parse(buf.toString());
+      } catch (e) {
+        res.status(400).json({
+          success: false,
+          error: "Invalid JSON",
+        });
+        throw new Error("Invalid JSON");
+      }
+    },
+  })
+);
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "50mb",
+  })
+);
 
 // Add timeout middleware with proper types
-const timeout = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+const timeout = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
   res.setTimeout(120000, () => {
     res.status(408).json({
       success: false,
-      error: 'Request timeout'
+      error: "Request timeout",
     });
   });
   next();
@@ -190,40 +203,36 @@ app.use("/api/bug", bugRouter);
 
 app.use("/api/commercial/sell/shops", commercialShopRoutes);
 app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
-app.use('/api/commercial/sell/warehouses', commercialWarehouseRoutes);
-app.use('/api/commercial/sell/plots', commercialPlotRoutes);
-app.use('/api/commercial/sell/agriculture', commercialSellAgricultureRoutes);
-app.use('/api/commercial/sell/others', commercialSellOthersRoutes); 
-app.use('/api/commercial/sell/office-space', commercialSellOfficeSpaceRoutes);
-app.use('/api/commercial/sell/retail-store', commercialSellRetailStore);
-app.use('/api/commercial/sell/sheds', commercialSellShedRoutes);
-app.use('/api/commercial/sell/covered-space', commercialSellCoveredSpaceRoutes);
+app.use("/api/commercial/sell/warehouses", commercialWarehouseRoutes);
+app.use("/api/commercial/sell/plots", commercialPlotRoutes);
+app.use("/api/commercial/sell/agriculture", commercialSellAgricultureRoutes);
+app.use("/api/commercial/sell/others", commercialSellOthersRoutes);
+app.use("/api/commercial/sell/office-space", commercialSellOfficeSpaceRoutes);
+app.use("/api/commercial/sell/retail-store", commercialSellRetailStore);
+app.use("/api/commercial/sell/sheds", commercialSellShedRoutes);
+app.use("/api/commercial/sell/covered-space", commercialSellCoveredSpaceRoutes);
 //openspace
 
 //lease routes
-app.use('/api/commercial/lease/plot', commercialLeasePlotRoutes);
-app.use('/api/commercial/lease/agriculture', commercialLeaseAgricultureRoutes);
-app.use('/api/commercial/lease/shops', commercialLeaseShopRoutes);
-app.use('/api/commercial/lease/others', commercialLeaseOthersRoutes);
-app.use('/api/commercial/lease-shops', commercialLeaseShopRoutes);
-app.use('/api/commercial/lease/retail-store', commercialLeaseRetailRoutes);
-app.use('/api/commercial/lease/showrooms', commercialLeaseShowroomRoutes);
+app.use("/api/commercial/lease/plot", commercialLeasePlotRoutes);
+app.use("/api/commercial/lease/agriculture", commercialLeaseAgricultureRoutes);
+app.use("/api/commercial/lease/shops", commercialLeaseShopRoutes);
+app.use("/api/commercial/lease/others", commercialLeaseOthersRoutes);
+app.use("/api/commercial/lease-shops", commercialLeaseShopRoutes);
+app.use("/api/commercial/lease/retail-store", commercialLeaseRetailRoutes);
+app.use("/api/commercial/lease/showrooms", commercialLeaseShowroomRoutes);
 
 //rent routes
-app.use('/api/commercial/rent/agriculture', commercialrentcultureRoutes);
-app.use('/api/commercial/rent/others', commercialRentOthersRoutes);
-app.use('/api/commercial/rent/office-spaces', commercialRentOfficeSpaceRoutes);
-app.use('/api/commercial/rent/warehouses', commercialRentWarehouseRoutes);
-app.use('/api/commercial/rent/covered-space', commercialRentCoveredSpaceRoutes);
-app.use('/api/commercial/rent/shops', commercialRentShop);
-app.use('/api/commercial/rent/retail-stores', commercialRentRetailStore);
-app.use('/api/commercial/rent/showrooms', commercialRentShowroom);
-app.use('/api/commercial/rent/sheds', commercialRentSheds);
-app.use('/api/commercial/rent/plots', commercialRentPlot);
-
-
-
-
+app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
+app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
+app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
+app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
+app.use("/api/commercial/rent/covered-space", commercialRentCoveredSpaceRoutes);
+app.use("/api/commercial/rent/shops", commercialRentShop);
+app.use("/api/commercial/rent/retail-stores", commercialRentRetailStore);
+app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
+app.use("/api/commercial/rent/sheds", commercialRentSheds);
+app.use("/api/commercial/rent/plots", commercialRentPlot);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
@@ -237,7 +246,7 @@ app.get("/testing", (req: Request, res: Response) => {
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
-console.log("cd pipeline check - 3rd time....");
+console.log("cd pipeline check - 5th time....");
 // Enhanced error handling middleware
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("Error:", err.message);
@@ -255,19 +264,23 @@ app.use(errorHandler);
 
 // Start server
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8000;
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log("Environment variables loaded:", {
-    VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "" : undefined,
-    ACCOUNT_SID: process.env.ACCOUNT_SID ? "" : undefined,
-    AUTH_TOKEN: process.env.AUTH_TOKEN ? "" : undefined,
+server
+  .listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    console.log("Environment variables loaded:", {
+      VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "" : undefined,
+      ACCOUNT_SID: process.env.ACCOUNT_SID ? "" : undefined,
+      AUTH_TOKEN: process.env.AUTH_TOKEN ? "" : undefined,
+    });
+  })
+  .on("error", (error: NodeJS.ErrnoException) => {
+    if (error.code === "EADDRINUSE") {
+      console.error(
+        `Port ${PORT} is already in use. Please use a different port or terminate the process using this port.`
+      );
+      process.exit(1);
+    } else {
+      console.error("Server error:", error);
+      process.exit(1);
+    }
   });
-}).on('error', (error: NodeJS.ErrnoException) => {
-  if (error.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Please use a different port or terminate the process using this port.`);
-    process.exit(1);
-  } else {
-    console.error('Server error:', error);
-    process.exit(1);
-  }
-});

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import PropertyName from '../PropertyName';
@@ -254,6 +254,7 @@ const SellShopMain = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Function to get auth token
 
@@ -284,22 +285,22 @@ const SellShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
-            <PropertyName 
-              propertyName={formData.basicInformation.title} 
+            <PropertyName
+              propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
             />
-            <ShopType 
+            <ShopType
               onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
             />
-            <CommercialPropertyAddress 
+            <CommercialPropertyAddress
               onAddressChange={(address) => handleChange('basicInformation.address', address)}
             />
             <Landmark
               onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
               onLocationSelect={(location) => handleChange('basicInformation.location', location)}
             />
-            <CornerProperty 
-              onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} 
+            <CornerProperty
+              onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
             />
           </div>
         </div>
@@ -315,10 +316,10 @@ const SellShopMain = () => {
             <h3 className="text-xl font-semibold text-black">Property Details</h3>
           </div>
           <div className="space-y-6">
-            <ShopDetails 
+            <ShopDetails
               onDetailsChange={(details) => handleChange('shopDetails', details)}
             />
-            <CommercialPropertyDetails 
+            <CommercialPropertyDetails
               onDetailsChange={(details) => handleChange('propertyDetails', details)}
             />
           </div>
@@ -492,9 +493,9 @@ const SellShopMain = () => {
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     console.log(formData);
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
@@ -502,14 +503,14 @@ const SellShopMain = () => {
         navigate('/login');
         return;
       }
-      
+
       const userData = JSON.parse(user);
       const author = userData.id;
       const token = userData.token;
-      
+
       console.log("User authenticated:", { userId: author });
       console.log("Converting media files...");
-      
+
       // Convert all image files to base64
       const convertedMedia = {
         photos: {
@@ -523,7 +524,7 @@ const SellShopMain = () => {
         videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
         documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
       };
-      
+
       console.log("Media conversion complete");
 
       // Create a payload with all the necessary data
@@ -531,8 +532,8 @@ const SellShopMain = () => {
         basicInformation: {
           ...formData.basicInformation,
           // Ensure shopType is an array
-          shopType: Array.isArray(formData.basicInformation.shopType) 
-            ? formData.basicInformation.shopType 
+          shopType: Array.isArray(formData.basicInformation.shopType)
+            ? formData.basicInformation.shopType
             : [formData.basicInformation.shopType].filter(Boolean),
           // Convert location coordinates to numbers
           location: {
@@ -543,7 +544,7 @@ const SellShopMain = () => {
         propertyDetails: {
           ...formData.propertyDetails,
           // Fix propertyAge to ensure it's a number
-          propertyAge: typeof formData.propertyDetails.propertyAge === 'string' 
+          propertyAge: typeof formData.propertyDetails.propertyAge === 'string'
             ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
             : formData.propertyDetails.propertyAge || 0
         },
@@ -556,15 +557,15 @@ const SellShopMain = () => {
         },
         brokerage: {
           // Convert required from string to boolean if needed
-          required: typeof formData.brokerage.required === 'string' 
-            ? formData.brokerage.required === 'yes' 
+          required: typeof formData.brokerage.required === 'string'
+            ? formData.brokerage.required === 'yes'
             : Boolean(formData.brokerage.required),
           amount: formData.brokerage.amount
         },
         availability: {
           // Ensure all required fields are present
           availableImmediately: formData.availability.availableImmediately === true,
-          availableFrom: formData.availability.availableFrom 
+          availableFrom: formData.availability.availableFrom
             ? new Date(formData.availability.availableFrom)
             : new Date(),
           leaseDuration: formData.availability.leaseDuration || 'Not Specified',
@@ -586,7 +587,7 @@ const SellShopMain = () => {
 
       console.log("Sending request to backend...");
       console.log("Request endpoint:", '/api/commercial/sell/shops');
-      
+
       // Send the data to the backend
       const response = await axios.post('/api/commercial/sell/shops', transformedData, {
         headers: {
@@ -596,11 +597,11 @@ const SellShopMain = () => {
       });
 
       console.log("Response received:", response.data);
-      
+
       if (response.data.success) {
         setFormSubmitted(true);
         toast.success('Commercial shop listing created successfully!');
-        
+
         // Show the property ID to the user
         if (response.data.data && response.data.data.propertyId) {
           toast.info(`Your property ID is: ${response.data.data.propertyId}`);
@@ -611,13 +612,13 @@ const SellShopMain = () => {
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
-      
+
       // Handle different types of errors
       if (error.response) {
         // Server responded with an error status code
         const errorMessage = error.response.data.message || error.response.data.error || 'Server error occurred';
         toast.error(`Submission failed: ${errorMessage}`);
-        
+
         // Display validation errors if any
         if (error.response.data.validationErrors) {
           console.error('Validation errors:', error.response.data.validationErrors);
@@ -640,12 +641,40 @@ const SellShopMain = () => {
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -657,22 +686,22 @@ const SellShopMain = () => {
         toast.error('Please log in to continue');
         return;
       }
-      
+
       const userData = JSON.parse(user);
       const token = userData.token;
-      
+
       // Test request to the API
       const response = await axios.get('/api/commercial/sell/shops', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       console.log('API connection test successful:', response.data);
       toast.success('API connection successful!');
     } catch (error: any) {
       console.error('API connection test failed:', error);
-      
+
       if (error.response) {
         toast.error(`API test failed with status ${error.response.status}: ${error.response.data.error || 'Unknown error'}`);
       } else if (error.request) {
@@ -690,7 +719,7 @@ const SellShopMain = () => {
         setIsDebugMode(prev => !prev);
       }
     };
-    
+
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
@@ -724,7 +753,23 @@ const SellShopMain = () => {
                 <div
                   key={index}
                   className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(index)}
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
                 >
                   <div className="flex flex-col items-center group">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
@@ -754,11 +799,11 @@ const SellShopMain = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
-          
+
           {isDebugMode && (
             <button
               onClick={testApiConnection}
@@ -775,8 +820,8 @@ const SellShopMain = () => {
               <CheckCircle className="h-16 w-16 text-green-500 mb-4" />
               <h3 className="text-2xl font-bold text-green-800 mb-2">Listing Submitted Successfully!</h3>
               <p className="text-green-600 mb-6">Your commercial shop listing has been created.</p>
-              <button 
-                onClick={() => navigate('/dashboard/properties')} 
+              <button
+                onClick={() => navigate('/dashboard/properties')}
                 className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
               >
                 Go to My Properties
@@ -795,11 +840,10 @@ const SellShopMain = () => {
             <button
               onClick={handlePrevious}
               disabled={currentStep === 0}
-              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-                currentStep === 0
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-white text-black hover:bg-black hover:text-white'
-              }`}
+              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-white text-black hover:bg-black hover:text-white'
+                }`}
             >
               <ChevronLeft className="w-5 h-5 mr-2" />
               Previous

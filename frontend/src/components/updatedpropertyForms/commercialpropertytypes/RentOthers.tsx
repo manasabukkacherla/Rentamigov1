@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -58,7 +58,7 @@ interface FormData {
   commercialType: string[];
   address: {
     street: string;
-    city: string; 
+    city: string;
     state: string;
     zipCode: string;
   };
@@ -159,7 +159,7 @@ interface FormData {
 // Error display component for validation errors
 const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   if (Object.keys(errors).length === 0) return null;
-  
+
   return (
     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
       <div className="flex items-center">
@@ -188,6 +188,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 
 const RentOthers = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     commercialType: [],
@@ -306,120 +307,120 @@ const RentOthers = () => {
   const handlePropertyNameChange = (name: string) => {
     setFormData(prev => ({ ...prev, propertyName: name }));
   };
-  
+
   const handleCommercialTypeChange = (types: string[]) => {
     setFormData(prev => ({ ...prev, commercialType: types }));
   };
-  
+
   const handleAddressChange = (address: { street: string; city: string; state: string; zipCode: string; }) => {
     setFormData(prev => ({ ...prev, address }));
   };
-  
+
   const handleLandmarkChange = (landmark: string) => {
     setFormData(prev => ({ ...prev, landmark }));
   };
-  
+
   const handleLatitudeChange = (lat: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       coordinates: { ...prev.coordinates, latitude: lat }
     }));
   };
-  
+
   const handleLongitudeChange = (lng: string) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       coordinates: { ...prev.coordinates, longitude: lng }
     }));
   };
-  
+
   const handleCornerPropertyChange = (isCorner: boolean) => {
     setFormData(prev => ({ ...prev, isCornerProperty: isCorner }));
   };
-  
+
   const handleOtherDetailsChange = (details: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       otherDetails: { ...prev.otherDetails, ...details }
     }));
   };
-  
+
   const handlePropertyDetailsChange = (details: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       propertyDetails: { ...prev.propertyDetails, ...details }
     }));
   };
-  
+
   const handleRentChange = (rent: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       rent: { ...prev.rent, ...rent }
     }));
   };
-  
+
   const handleMaintenanceAmountChange = (maintenance: Record<string, any>) => {
     setFormData(prev => {
       const updated = { ...prev };
-      
+
       if (!updated.maintenanceAmount) {
         updated.maintenanceAmount = { amount: 0, frequency: 'monthly' };
       } else {
-        updated.maintenanceAmount = { 
-          ...updated.maintenanceAmount, 
-          ...maintenance 
+        updated.maintenanceAmount = {
+          ...updated.maintenanceAmount,
+          ...maintenance
         };
       }
-      
+
       return updated;
     });
   };
-  
+
   const handleSecurityDepositChange = (deposit: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       securityDeposit: { ...prev.securityDeposit, ...deposit }
     }));
   };
-  
+
   const handleOtherChargesChange = (charges: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       otherCharges: { ...prev.otherCharges, ...charges }
     }));
   };
-  
+
   const handleBrokerageChange = (brokerage: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       brokerage: { ...prev.brokerage, ...brokerage }
     }));
   };
-  
+
   const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string }) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       availability: {
         type: availability.type,
         date: availability.date
       }
     }));
   };
-  
+
   const handleContactChange = (contact: Record<string, any>) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       contactDetails: { ...prev.contactDetails, ...contact }
     }));
   };
-  
-  const handleMediaChange = (media: { 
-    images: { category: string; files: { url: string; file: File; }[]; }[]; 
-    video?: { url: string; file: File; } | undefined; 
-    documents: { type: string; file: File; }[]; 
+
+  const handleMediaChange = (media: {
+    images: { category: string; files: { url: string; file: File; }[]; }[];
+    video?: { url: string; file: File; } | undefined;
+    documents: { type: string; file: File; }[];
   }) => {
-    setFormData(prev => ({ 
-      ...prev, 
+    setFormData(prev => ({
+      ...prev,
       media: {
         photos: {
           exterior: media.images.find(img => img.category === 'exterior')?.files.map(f => f.file) || [],
@@ -458,21 +459,21 @@ const RentOthers = () => {
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
-            <PropertyName 
-              propertyName={formData.propertyName} 
-              onPropertyNameChange={handlePropertyNameChange} 
+            <PropertyName
+              propertyName={formData.propertyName}
+              onPropertyNameChange={handlePropertyNameChange}
             />
-            <OtherCommercialType 
-              onCommercialTypeChange={handleCommercialTypeChange} 
+            <OtherCommercialType
+              onCommercialTypeChange={handleCommercialTypeChange}
             />
-            <CommercialPropertyAddress 
-              onAddressChange={handleAddressChange} 
+            <CommercialPropertyAddress
+              onAddressChange={handleAddressChange}
             />
-            <Landmark 
-              onLandmarkChange={handleLandmarkChange} 
+            <Landmark
+              onLandmarkChange={handleLandmarkChange}
             />
-            <CornerProperty 
-              onCornerPropertyChange={handleCornerPropertyChange} 
+            <CornerProperty
+              onCornerPropertyChange={handleCornerPropertyChange}
             />
           </div>
         </div>
@@ -506,7 +507,7 @@ const RentOthers = () => {
                 <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -552,6 +553,20 @@ const RentOthers = () => {
     if (validateCurrentStep()) {
       if (currentStep < formSections.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -561,6 +576,20 @@ const RentOthers = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -683,7 +712,7 @@ const RentOthers = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div ref={formRef} className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

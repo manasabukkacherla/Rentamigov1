@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
@@ -53,7 +53,7 @@ const globalStyles = `
 // Error display component for validation errors
 const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
   if (Object.keys(errors).length === 0) return null;
-  
+
   return (
     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
       <div className="flex items-center">
@@ -190,6 +190,7 @@ interface FormData {
 
 const RentPlot = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -521,9 +522,9 @@ const RentPlot = () => {
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
-            <PropertyName 
-              propertyName={formData.basicInformation.title} 
-              onPropertyNameChange={handlePropertyNameChange} 
+            <PropertyName
+              propertyName={formData.basicInformation.title}
+              onPropertyNameChange={handlePropertyNameChange}
             />
             <PlotType onPlotTypeChange={handlePlotTypeChange} />
             <CommercialPropertyAddress onAddressChange={handleAddressChange} />
@@ -561,7 +562,7 @@ const RentPlot = () => {
                 <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
@@ -587,34 +588,34 @@ const RentPlot = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-          <CommercialContactDetails onContactChange={handleContactChange} />
+        <CommercialContactDetails onContactChange={handleContactChange} />
       )
     },
     {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-          <CommercialMediaUpload
-            onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
-                photos[category] = files.map(f => f.file);
-              });
+        <CommercialMediaUpload
+          onMediaChange={(media) => {
+            const photos: Record<string, File[]> = {};
+            media.images.forEach(({ category, files }) => {
+              photos[category] = files.map(f => f.file);
+            });
 
-              setFormData(prev => ({
-                ...prev,
-                media: {
-                  ...prev.media,
-                  photos: {
-                    ...prev.media.photos,
-                    ...photos
-                  },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
-                }
-              }));
-            }}
-          />
+            setFormData(prev => ({
+              ...prev,
+              media: {
+                ...prev.media,
+                photos: {
+                  ...prev.media.photos,
+                  ...photos
+                },
+                videoTour: media.video?.file || null,
+                documents: media.documents.map(d => d.file)
+              }
+            }));
+          }}
+        />
       )
     }
   ];
@@ -623,6 +624,20 @@ const RentPlot = () => {
     if (validateCurrentStep()) {
       if (currentStep < formSections.length - 1) {
         setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
       }
     } else {
       toast.error('Please fill in all required fields');
@@ -632,6 +647,20 @@ const RentPlot = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -757,7 +786,7 @@ const RentPlot = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div ref={formRef} className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

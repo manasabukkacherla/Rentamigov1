@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
@@ -319,6 +319,7 @@ const LeasePlotMain = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -379,13 +380,13 @@ const LeasePlotMain = () => {
               carpetArea: details.carpetArea || 0,
               builtUpArea: details.builtUpArea || 0
             };
-            
+
             // Update propertyDetails with area information
             handleChange('propertyDetails', {
               ...formData.propertyDetails,
               area: updatedArea,
             });
-            
+
             // Update plotDetails with plot-specific information
             handleChange('plotDetails', {
               ...formData.plotDetails,
@@ -441,7 +442,7 @@ const LeasePlotMain = () => {
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
               <div className="space-y-4 text-black">
-                <LeaseAmount 
+                <LeaseAmount
                   onLeaseAmountChange={(amount) => handleChange('leaseDetails', {
                     ...formData.leaseDetails,
                     leaseAmount: amount.leaseAmount,
@@ -451,9 +452,9 @@ const LeasePlotMain = () => {
                       type: amount.leaseTermType || 'month',
                       amountType: 'fixed'
                     }
-                  })} 
+                  })}
                 />
-                <LeaseTenure 
+                <LeaseTenure
                   onLeaseTenureChange={(tenure) => handleChange('leaseDetails', {
                     ...formData.leaseDetails,
                     leasetenure: {
@@ -474,25 +475,25 @@ const LeasePlotMain = () => {
                         type: tenure.noticePeriod.durationType || 'month'
                       }
                     }
-                  })} 
+                  })}
                 />
               </div>
             </div>
-            
+
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
-                <MaintenanceAmount 
+                <MaintenanceAmount
                   onMaintenanceAmountChange={(maintenance) => handleChange('leaseDetails', {
                     ...formData.leaseDetails,
                     maintenanceCharges: {
                       amount: maintenance.maintenanceAmount || 0,
                       frequency: maintenance.maintenanceType || 'monthly'
                     }
-                  })} 
+                  })}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges 
+                <OtherCharges
                   onOtherChargesChange={(charges) => handleChange('leaseDetails.otherCharges', {
                     electricityCharges: {
                       type: charges.electricityCharges === 'tenant' ? 'exclusive' : 'inclusive',
@@ -508,14 +509,14 @@ const LeasePlotMain = () => {
                     },
                     otherCharges: 'inclusive',
                     amount: 0
-                  })} 
+                  })}
                 />
                 <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage 
+                <Brokerage
                   onBrokerageChange={(brokerage) => handleChange('brokerage', {
                     required: brokerage.required === 'yes',
                     amount: brokerage.amount || 0
-                  })} 
+                  })}
                 />
               </div>
             </div>
@@ -587,51 +588,79 @@ const LeasePlotMain = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const validateFormData = () => {
     const errors = [];
-    
+
     // Check basic information
     if (!formData.basicInformation.title) errors.push("Property name");
     if (!formData.basicInformation.plotType || formData.basicInformation.plotType.length === 0) errors.push("Plot type");
     if (!formData.basicInformation.landmark) errors.push("Landmark");
-    
+
     // Check address
     const address = formData.basicInformation.address;
     if (!address.street) errors.push("Street address");
     if (!address.city) errors.push("City");
     if (!address.state) errors.push("State");
     if (!address.zipCode) errors.push("Zip code");
-    
+
     // Check property details
     if (formData.propertyDetails.area.totalArea <= 0) errors.push("Total area");
     if (formData.propertyDetails.area.carpetArea <= 0) errors.push("Carpet area");
     if (formData.propertyDetails.area.builtUpArea <= 0) errors.push("Built-up area");
-    
+
     // Check plot details
     if (!formData.plotDetails.zoningType) errors.push("Zoning type");
     if (!formData.plotDetails.roadAccess) errors.push("Road access");
     if (!formData.plotDetails.previousConstruction) errors.push("Previous construction");
-    
+
     // Check lease details
     if (formData.leaseDetails.leaseAmount <= 0) errors.push("Lease amount");
-    
+
     // Check contact information
     if (!formData.contactInformation.name) errors.push("Contact name");
     if (!formData.contactInformation.email) errors.push("Contact email");
     if (!formData.contactInformation.phone) errors.push("Contact phone");
-    
+
     return errors;
   };
-  
+
   // Submit button will also show validation summary
   const showValidationSummary = () => {
     const errors = validateFormData();
@@ -647,12 +676,12 @@ const LeasePlotMain = () => {
     e.preventDefault();
 
     console.log("Form submission started...");
-    
+
     // Run validation summary first
     if (!showValidationSummary()) {
       return; // Stop if validation fails
     }
-    
+
     console.log("Form data being submitted:", formData);
 
     try {
@@ -836,7 +865,7 @@ const LeasePlotMain = () => {
         console.error('Server response error:', error.response.data);
         console.error('Status code:', error.response.status);
         console.error('Headers:', error.response.headers);
-        
+
         // Try to provide a more helpful error message
         let errorMessage = 'Failed to create plot lease listing. Please try again.';
         if (error.response.data && error.response.data.message) {
@@ -846,7 +875,7 @@ const LeasePlotMain = () => {
         } else if (typeof error.response.data === 'string') {
           errorMessage = error.response.data;
         }
-        
+
         toast.error(errorMessage);
       } else if (error.request) {
         console.error('No response received:', error.request);
@@ -900,7 +929,8 @@ const LeasePlotMain = () => {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      {/* Form Content */}
+      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -923,7 +953,7 @@ const LeasePlotMain = () => {
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-          
+
           {currentStep === steps.length - 1 ? (
             <button
               onClick={(e) => {

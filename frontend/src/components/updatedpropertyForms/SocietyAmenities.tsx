@@ -143,30 +143,35 @@ const SocietyAmenities = ({ onAmenitiesChange }: SocietyAmenitiesProps) => {
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
+    <div className="bg-gray-50 p-6 rounded-xl">
+      <div className="flex items-center gap-3 mb-8">
         <h3 className="text-2xl font-semibold text-black">Society Amenities</h3>
         <ArrowRight className="opacity-40 text-black" size={20} />
         <span className="text-sm opacity-70 text-black">Select Available Features</span>
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-6">
         {amenitiesCategories.map(({ title, icon: Icon, items }) => (
-          <div key={title} className="bg-white/5 p-6 rounded-lg">
+          <div key={title} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300">
             <div className="flex items-center gap-3 mb-4">
-              <Icon size={24} className="text-black/60" />
+              <div className="p-2 bg-black/5 rounded-lg">
+                <Icon size={24} className="text-black" />
+              </div>
               <h4 className="text-lg font-medium text-black">{title}</h4>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {items.map((amenity) => (
-                <label key={amenity} className="flex items-center gap-2 p-2 hover:bg-white/5 rounded-lg transition-colors duration-200">
+                <label
+                  key={amenity}
+                  className="flex items-center gap-3 p-3 hover:bg-black/5 rounded-lg transition-colors duration-200 cursor-pointer group"
+                >
                   <input
                     type="checkbox"
                     checked={selectedAmenities[amenity] || false}
                     onChange={(e) => handleAmenityChange(amenity, e.target.checked)}
-                    className="rounded border-black/20 bg-transparent focus:ring-black text-black"
+                    className="w-5 h-5 rounded border-black/20 bg-white focus:ring-black text-black transition-colors duration-200"
                   />
-                  <span className="text-black/80 text-sm">{amenity}</span>
+                  <span className="text-black/80 text-sm group-hover:text-black transition-colors duration-200">{amenity}</span>
                 </label>
               ))}
             </div>

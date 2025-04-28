@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
+import { ChevronLeft, ChevronRight, Home, Building2, DollarSign, Calendar, Image } from 'lucide-react';
 import PropertyName from "../PropertyName";
 import PropertyAddress from "../PropertyAddress";
 import MapCoordinates from "../MapCoordinates";
@@ -14,10 +15,32 @@ import OtherCharges from "../residentialrent/OtherCharges";
 import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
 
+// Add custom styles for inclusive/exclusive buttons
+const customStyles = `
+  /* Target inclusive buttons when selected */
+  button.bg-blue-50.border-blue-500.text-blue-700 {
+    border-color: #DBEAFE !important; /* border-blue-100 */
+    background-color: #EFF6FF !important; /* bg-blue-50 */
+  }
+`;
+
 interface SellBuilderFloorProps {
   propertyId: string; // Property ID passed as a prop
   onSubmit?: (formData: any) => void;
 }
+
+type MediaType = {
+  photos: File[];
+  video: File | null;
+  exteriorViews: File[];
+  interiorViews: File[];
+  floorPlan: File[];
+  washrooms: File[];
+  lifts: File[];
+  emergencyExits: File[];
+  videoTour?: File;
+  legalDocuments: File[];
+};
 
 const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
   const [formData, setFormData] = useState({
@@ -45,7 +68,18 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
     registrationCharges: {},
     brokerage: {},
     availability: {},
-    media: { photos: [], video: null },
+    media: {
+      photos: [] as File[],
+      video: null as File | null,
+      exteriorViews: [] as File[],
+      interiorViews: [] as File[],
+      floorPlan: [] as File[],
+      washrooms: [] as File[],
+      lifts: [] as File[],
+      emergencyExits: [] as File[],
+      videoTour: undefined as File | undefined,
+      legalDocuments: [] as File[]
+    } as MediaType,
     otherCharges: {},
     flatAmenities: {},
     societyAmenities: {},
@@ -55,6 +89,7 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Function to update property address details
   const handleAddressChange = useCallback((addressData: any) => {
@@ -79,24 +114,7 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
             }
           />
           <PropertyAddress
-            onPropertyNameChange={(name) =>
-              setFormData((prev) => ({ ...prev, propertyName: name }))
-            }
-            onPropertyTypeSelect={(type) =>
-              setFormData((prev) => ({ ...prev, propertyType: type }))
-            }
-            onLatitudeChange={(lat) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, latitude: lat },
-              }))
-            }
-            onLongitudeChange={(lng) =>
-              setFormData((prev) => ({
-                ...prev,
-                coordinates: { ...prev.coordinates, longitude: lng },
-              }))
-            }
+            address={formData.propertyAddress}
             onAddressChange={handleAddressChange}
           />
           <MapCoordinates
@@ -154,7 +172,14 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
               setFormData((prev) => ({ ...prev, price: price.amount }))
             }
           />
-          <PricePerSqft price={formData.price} area={formData.area} />
+          <PricePerSqft
+            propertyPrice={Number(formData.price) || 0}
+            Area={{
+              totalArea: Number(formData.area.superBuiltUpAreaSqft) || 0,
+              builtUpArea: Number(formData.area.builtUpAreaSqft) || 0,
+              carpetArea: Number(formData.area.carpetAreaSqft) || 0
+            }}
+          />
           <RegistrationCharges
             onRegistrationChargesChange={(charges) =>
               setFormData((prev) => ({ ...prev, registrationCharges: charges }))
@@ -187,7 +212,17 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
       title: "Property Media",
       component: (
         <MediaUpload
-          onMediaChange={(media) => setFormData((prev) => ({ ...prev, media }))}
+          onMediaChange={(mediaData) => {
+            setFormData((prev) => ({
+              ...prev,
+              media: {
+                ...prev.media,
+                ...mediaData,
+                photos: [...(mediaData.exteriorViews || []), ...(mediaData.interiorViews || [])],
+                video: mediaData.videoTour || null
+              }
+            }));
+          }}
         />
       ),
     },
@@ -196,24 +231,129 @@ const SellBuilderFloor = ({ propertyId, onSubmit }: SellBuilderFloorProps) => {
   const handleNext = () => {
     if (step < steps.length - 1) {
       setStep((prev) => prev + 1);
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     } else {
       onSubmit?.(formData);
     }
   };
 
+  const handlePrevious = () => {
+    if (step > 0) {
+      setStep((prev) => prev - 1);
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="space-y-12">
-      <h2 className="text-3xl font-bold mb-8">{steps[step].title}</h2>
+    <form onSubmit={(e) => e.preventDefault()} className="max-w-4xl mx-auto text-black">
+      <style>{customStyles}</style>
+      {/* Progress indicator */}
+      <div ref={formRef} className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          {steps.map((s, i) => (
+            <div
+              key={i}
+              className={`flex flex-col items-center ${i <= step ? "text-black" : "text-gray-400"}`}
+              onClick={() => {
+                if (i < step) {
+                  setStep(i);
+                  setTimeout(() => {
+                    if (formRef.current) {
+                      window.scrollTo({
+                        top: formRef.current.offsetTop - 100,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }
+              }}
+              style={{ cursor: i < step ? "pointer" : "default" }}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= step ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
+              >
+                {s.title.includes("Basic") ? <Home className="w-6 h-6" /> :
+                  s.title.includes("Property") ? <Building2 className="w-6 h-6" /> :
+                    s.title.includes("Pricing") ? <DollarSign className="w-6 h-6" /> :
+                      s.title.includes("Availability") ? <Calendar className="w-6 h-6" /> :
+                        <Image className="w-6 h-6" />}
+              </div>
+              <span className="text-xs font-medium">{s.title}</span>
+            </div>
+          ))}
+        </div>
+        <div className="w-full bg-gray-200 h-1 rounded-full">
+          <div
+            className="bg-black h-1 rounded-full transition-all duration-300"
+            style={{ width: `${(step / (steps.length - 1)) * 100}%` }}
+          ></div>
+        </div>
+      </div>
+
+      <h2 className="text-3xl font-bold mb-8 text-black">{steps[step].title}</h2>
+
       {steps[step].component}
 
-      <button
-        type="button"
-        onClick={handleNext}
-        className="px-6 py-3 rounded-lg bg-white text-black hover:bg-white/90 transition-colors duration-200"
-      >
-        {step < steps.length - 1 ? "Next" : "List Property"}
-      </button>
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          {step > 0 ? (
+            <button
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg border border-black/20 bg-white text-black transition-all duration-200"
+              onClick={handlePrevious}
+            >
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
+            </button>
+          ) : (
+            <div></div> /* Empty div to maintain layout when no Previous button */
+          )}
 
+          {step < steps.length - 1 ? (
+            <button
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
+              onClick={handleNext}
+            >
+              Next
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
+              onClick={() => onSubmit?.(formData)}
+            >
+              List Property
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          )}
+        </div>
+      </div>
     </form>
   );
 };

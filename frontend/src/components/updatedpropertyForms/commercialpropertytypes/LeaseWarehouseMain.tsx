@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
@@ -85,6 +85,9 @@ const LeaseWarehouseMain = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+
+  // Add form reference
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Form prevention utility function
   const preventDefault = (e: React.MouseEvent | React.FormEvent) => {
@@ -246,6 +249,20 @@ const LeaseWarehouseMain = () => {
     preventDefault(e);
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -253,6 +270,20 @@ const LeaseWarehouseMain = () => {
     preventDefault(e);
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -539,84 +570,89 @@ const LeaseWarehouseMain = () => {
   };
 
   return (
-    <form onSubmit={preventDefault} className="max-w-3xl mx-auto" noValidate>
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {steps.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-              onClick={() => i < currentStep && setCurrentStep(i)}
-              style={{ cursor: i < currentStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                  }`}
-              >
-                {s.icon}
-              </div>
-              <span className="text-xs font-medium">{s.title}</span>
+    <div className="min-h-screen bg-white">
+      {/* Progress indicator */}
+      <div ref={formRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <form onSubmit={preventDefault} className="max-w-3xl mx-auto" noValidate>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              {steps.map((s, i) => (
+                <div
+                  key={i}
+                  className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
+                  onClick={() => i < currentStep && setCurrentStep(i)}
+                  style={{ cursor: i < currentStep ? "pointer" : "default" }}
+                >
+                  <div
+                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
+                      }`}
+                  >
+                    {s.icon}
+                  </div>
+                  <span className="text-xs font-medium">{s.title}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black text-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-          ></div>
-        </div>
-      </div>
+            <div className="w-full bg-gray-200 h-1 rounded-full">
+              <div
+                className="bg-black text-black h-1 rounded-full transition-all duration-300"
+                style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
+              ></div>
+            </div>
+          </div>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800">{steps[currentStep].title}</h2>
-      </div>
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-gray-800">{steps[currentStep].title}</h2>
+          </div>
 
-      {steps[currentStep].component}
+          {steps[currentStep].component}
 
-      <div className="mt-8 flex justify-between items-center">
-        {currentStep > 0 && (
-          <button
-            type="button"
-            onClick={handlePrevious}
-            className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
-            disabled={isSubmitting}
-          >
-            <ChevronLeft className="mr-2" size={18} />
-            Previous
-          </button>
-        )}
-        {currentStep < steps.length - 1 ? (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-            disabled={!validateCurrentStep() || isSubmitting}
-          >
-            Next
-            <ChevronRight className="ml-2" size={18} />
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={(e) => handleSubmit(e)}
-            className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                List Property
-                <ChevronRight className="ml-2" size={18} />
-              </>
+          <div className="mt-8 flex justify-between items-center">
+            {currentStep > 0 && (
+              <button
+                type="button"
+                onClick={handlePrevious}
+                className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
+                disabled={isSubmitting}
+              >
+                <ChevronLeft className="mr-2" size={18} />
+                Previous
+              </button>
             )}
-          </button>
-        )}
+            {currentStep < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+                disabled={!validateCurrentStep() || isSubmitting}
+              >
+                Next
+                <ChevronRight className="ml-2" size={18} />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={(e) => handleSubmit(e)}
+                className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    List Property
+                    <ChevronRight className="ml-2" size={18} />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import PropertyName from '../PropertyName';
@@ -153,6 +153,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 
 const RentWarehouse = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -555,7 +556,7 @@ const RentWarehouse = () => {
               <CornerProperty
                 onCornerPropertyChange={handleCornerPropertyChange}
               />
-              </div>
+            </div>
           </div>
         </div>
       )
@@ -602,19 +603,19 @@ const RentWarehouse = () => {
               onSecurityDepositChange={handleSecurityDepositChange}
             />
             <OtherCharges
-            onOtherChargesChange={(charges) => setFormData(prev => ({
-              ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                otherCharges: {
-                  water: { type: charges.water.type, amount: charges.water.amount },
-                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                  gas: { type: charges.gas.type, amount: charges.gas.amount },
-                  others: { type: charges.others.type, amount: charges.others.amount }
+              onOtherChargesChange={(charges) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  otherCharges: {
+                    water: { type: charges.water.type, amount: charges.water.amount },
+                    electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                    gas: { type: charges.gas.type, amount: charges.gas.amount },
+                    others: { type: charges.others.type, amount: charges.others.amount }
+                  }
                 }
-              }
-            }))}
-          />
+              }))}
+            />
             <Brokerage
               onBrokerageChange={handleBrokerageChange}
             />
@@ -693,19 +694,54 @@ const RentWarehouse = () => {
     }
   ];
 
+  // Simple validation function
+  const validateCurrentStep = () => {
+    // For simplicity, just return true
+    // In a real implementation, this would validate the fields in the current step
+    return true;
+  };
+
   const handleNext = () => {
-    // if (validateCurrentStep()) {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
+    if (validateCurrentStep()) {
+      if (currentStep < formSections.length - 1) {
+        setCurrentStep(currentStep + 1);
+        // Scroll to top of the form
+        setTimeout(() => {
+          if (formRef.current) {
+            window.scrollTo({
+              top: formRef.current.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          } else {
+            window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
+          }
+        }, 100);
+      }
+    } else {
+      toast.error('Please fill in all required fields');
     }
-    // } else {
-    //   toast.error('Please fill in all required fields');
-    // }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -763,8 +799,7 @@ const RentWarehouse = () => {
   };
 
   return (
-    // <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-    <div className='max-w-4xl mx-auto'>
+    <div className="min-h-screen bg-white">
       {/* Progress Steps */}
       <div className="bg-white p-6 rounded-2xl shadow-lg mb-8 [forced-colors:active] border border-transparent">
         <div className="flex items-center justify-between mb-6">
@@ -796,7 +831,7 @@ const RentWarehouse = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div ref={formRef} className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
@@ -828,7 +863,6 @@ const RentWarehouse = () => {
         </div>
       </div>
     </div>
-
   );
 };
 
