@@ -135,7 +135,11 @@ const pgData = {
           { name: 'Indoor Games', icon: Users }
         ]
       }
-    ]
+    ],
+    coordinates: {
+      latitude: 12.9716,
+      longitude: 77.5946
+    },
   }
 };
 
@@ -192,6 +196,33 @@ const PGDetails: React.FC = () => {
             <span>{pg.address}</span>
           </div>
           <p className="mt-2 text-white/80 max-w-3xl">{pg.description}</p>
+        </div>
+      </div>
+
+      {/* Location Map Section */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Location</h2>
+        <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.5965966906644!2d77.64163427473439!3d12.838572987455667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae6b2ef7f1c6f3%3A0x6c06e8c7dc1ac0e!2sElectronic%20City%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="rounded-xl"
+            title="PG Location Map"
+          ></iframe>
+        </div>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="bg-gray-100 p-2 rounded-full">
+            <MapPin className="w-5 h-5 text-gray-700" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-1">PG Address</h3>
+            <p className="text-gray-600">{pg.address}</p>
+          </div>
         </div>
       </div>
 

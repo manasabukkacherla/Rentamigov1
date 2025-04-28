@@ -281,7 +281,7 @@ const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
 }, { timestamps: true });
 
 // Add indexes for better query performance
-CommercialLeaseShedSchema.index({ propertyId: 1 });
+// CommercialLeaseShedSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialLeaseShedSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseShedSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShedSchema.index({ 'metadata.createdAt': -1 });
