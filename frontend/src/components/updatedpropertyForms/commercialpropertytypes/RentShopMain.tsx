@@ -13,7 +13,9 @@ import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation } from "lucide-react"
+
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation ,Loader2} from "lucide-react"
+
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import axios from "axios"
@@ -703,7 +705,7 @@ const RentShopMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       content: (
-        <div className="space-y-6">
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
@@ -894,75 +896,116 @@ const RentShopMain = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div ref={formRef} className="p-6 sm:p-10">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
-            <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
-              {formSections.map((step, index) => (
-                <div key={index} className="flex items-center">
-                  <button
-                    onClick={() => handleStepClick(index)}
-                    className="flex items-center focus:outline-none"
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-100 text-black'
-                        }`}
-                    >
-                      {step.icon}
-                    </div>
-                    <span className={`ml-3 text-sm font-medium whitespace-nowrap ${index <= currentStep ? 'text-black' : 'text-black/70'
+    <div ref={formRef} className="min-h-screen bg-white">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}>
-                      {step.title}
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
                     </span>
-                  </button>
+                  </div>
                   {index < formSections.length - 1 && (
-                    <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-                      }`} />
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
                   )}
                 </div>
               ))}
             </div>
           </div>
-
-          <div className="max-w-5xl mx-auto px-4 py-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-              <p className="text-gray-600">Please fill in the details for your property</p>
-            </div>
-
-            {formSections[currentStep].content}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-              <button
-                onClick={handlePrevious}
-                disabled={currentStep === 0 || isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0 || isSubmitting
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-black hover:bg-black hover:text-white"
-                  }`}
-              >
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                Previous
-              </button>
-              <button
-                onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-                disabled={isSubmitting}
-                className={`flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200 ${isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-                  }`}
-              >
-                {isSubmitting ? "Submitting..." : currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
+      {/* <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> */}
+      {/* <div className="bg-white rounded-xl shadow-md overflow-hidden"> */}
+      {/* <div ref={formRef} className="p-6 sm:p-10"> */}
+      {/* <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
+          </div> */}
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+
+        {formSections[currentStep].content}
+      </div>
+      {/* Navigation Buttons */}
+      {/* {!formSubmitted && ( */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+      {/* )} */}
     </div>
+    // </div>
+    // </div>
+    // </div>
   )
 }
 
