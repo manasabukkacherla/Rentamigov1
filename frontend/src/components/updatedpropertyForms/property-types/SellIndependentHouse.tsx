@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Building, Calendar, Image, IndianRupee } from "lucide-react";
+import { Building, Calendar, Image, IndianRupee, Home } from "lucide-react";
 import PropertyName from "../PropertyName";
 import IndependentPropertyAddress from "../IndependentPropertyAddress";
 import MapCoordinates from "../MapCoordinates";
@@ -330,20 +330,33 @@ const SellIndependentHouse = ({ propertyId, onSubmit }: SellIndependentHouseProp
       <div className="max-w-4xl mx-auto p-8">
         <h1 className="text-2xl font-bold mb-8 text-black">Sell Independent House</h1>
         
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((s, index) => (
+        {/* Stepper Scroll Bar UI */}
+        <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2 mb-8">
+          {steps.map((stepObj, index) => (
             <div key={index} className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                  index <= step ? "bg-black text-white" : "bg-gray-200 text-gray-600"
-                }`}
+              <button
+                onClick={() => setStep(index)}
+                className="flex items-center focus:outline-none"
               >
-                {index + 1}
-              </div>
-              <div className="ml-2 text-sm font-medium text-black">{s.title}</div>
+                <div
+                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                  }`}
+                >
+                  {index === 0 && <Building className="w-6 h-6" />} 
+                  {index === 1 && <Home className="w-6 h-6" />} 
+                  {index === 2 && <IndianRupee className="w-6 h-6" />} 
+                  {index === 3 && <Calendar className="w-6 h-6" />} 
+                  {index === 4 && <Image className="w-6 h-6" />} 
+                </div>
+                <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+                  index <= step ? 'text-black' : 'text-black/70'
+                }`}>
+                  {stepObj.title}
+                </span>
+              </button>
               {index < steps.length - 1 && (
-                <div className="w-16 h-0.5 bg-gray-200 mx-2"></div>
+                <div className={`w-16 h-1 mx-3 ${index < step ? 'bg-black' : 'bg-gray-200'}`} />
               )}
             </div>
           ))}

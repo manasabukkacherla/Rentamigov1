@@ -372,31 +372,32 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
 
   return (
     <div className="max-w-4xl mx-auto text-black">
-      {/* Progress indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {steps.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= step ? "text-black" : "text-gray-400"}`}
-              onClick={() => i < step && setStep(i)}
-              style={{ cursor: i < step ? "pointer" : "default" }}
+      {/* Stepper Scroll Bar UI */}
+      <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
+        {steps.map((stepObj, index) => (
+          <div key={index} className="flex items-center">
+            <button
+              onClick={() => setStep(index)}
+              className="flex items-center focus:outline-none"
             >
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= step ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
+                className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+                }`}
               >
-                {s.icon}
+                {stepObj.icon ? stepObj.icon : index + 1}
               </div>
-              <span className="text-xs font-medium">{s.title}</span>
-            </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(step / (steps.length - 1)) * 100}%` }}
-          ></div>
-        </div>
+              <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+                index <= step ? 'text-black' : 'text-black/70'
+              }`}>
+                {stepObj.title}
+              </span>
+            </button>
+            {index < steps.length - 1 && (
+              <div className={`w-16 h-1 mx-3 ${index < step ? 'bg-black' : 'bg-gray-200'}`} />
+            )}
+          </div>
+        ))}
       </div>
 
       <h2 className="text-3xl font-bold mb-8 text-black">{steps[step].title}</h2>

@@ -23,111 +23,106 @@ const Restrictions = ({ onRestrictionsChange }: RestrictionsProps) => {
   };
 
   return (
-    <div>
-      <div className="flex items-center gap-3 mb-6">
-        <h3 className="text-2xl font-semibold text-black">Restrictions</h3>
-        <ArrowRight className="opacity-40 text-black" size={20} />
-        <span className="text-sm opacity-70 text-black">Select Preferences</span>
-      </div>
-
-      <div className="space-y-6 max-w-2xl">
-        <div className="space-y-4">
+    <div className="bg-white rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+      <div className="space-y-8">
+        <div className="flex items-center mb-8">
+          <h3 className="text-2xl font-semibold text-black">Restrictions</h3>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Food Preference */}
-          <div className="bg-white/5 p-4 rounded-lg">
-            <h4 className="text-lg font-medium mb-3 text-black">Food Preference</h4>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2">
+          <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
+            <h4 className="text-lg font-medium mb-4 text-black">Food Preference</h4>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="foodPreference"
                   value="veg"
                   checked={restrictions.foodPreference === 'veg'}
                   onChange={(e) => handleChange('foodPreference', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
+                  className="accent-black"
                 />
-                <span className="text-black/80">Veg Only</span>
+                <span>Veg Only</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="foodPreference"
                   value="both"
                   checked={restrictions.foodPreference === 'both'}
                   onChange={(e) => handleChange('foodPreference', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
+                  className="accent-black"
                 />
-                <span className="text-black/80">Veg & Non-Veg</span>
+                <span>Veg & Non-Veg</span>
               </label>
             </div>
           </div>
-
           {/* Pets */}
-          <div className="bg-white/5 p-4 rounded-lg">
-            <h4 className="text-lg font-medium mb-3 text-black">Pets</h4>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2">
+          <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
+            <h4 className="text-lg font-medium mb-4 text-black">Pets</h4>
+            <div className="flex gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="petsAllowed"
                   value="allowed"
                   checked={restrictions.petsAllowed === 'allowed'}
                   onChange={(e) => handleChange('petsAllowed', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
+                  className="accent-black"
                 />
-                <span className="text-black/80">Allowed</span>
+                <span>Allowed</span>
               </label>
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="petsAllowed"
                   value="notAllowed"
                   checked={restrictions.petsAllowed === 'notAllowed'}
                   onChange={(e) => handleChange('petsAllowed', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
+                  className="accent-black"
                 />
-                <span className="text-black/80">Not Allowed</span>
+                <span>Not Allowed</span>
               </label>
             </div>
           </div>
-
-          {/* Tenant Type */}
-          <div className="bg-white/5 p-4 rounded-lg">
-            <h4 className="text-lg font-medium mb-3 text-black">Tenant Type</h4>
-            <div className="flex flex-wrap gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tenantType"
-                  value="bachelors"
-                  checked={restrictions.tenantType === 'bachelors'}
-                  onChange={(e) => handleChange('tenantType', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
-                />
-                <span className="text-black/80">Bachelors</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tenantType"
-                  value="family"
-                  checked={restrictions.tenantType === 'family'}
-                  onChange={(e) => handleChange('tenantType', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
-                />
-                <span className="text-black/80">Family</span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="tenantType"
-                  value="company"
-                  checked={restrictions.tenantType === 'company'}
-                  onChange={(e) => handleChange('tenantType', e.target.value)}
-                  className="text-black border-black/20 bg-transparent focus:ring-black focus:ring-offset-0"
-                />
-                <span className="text-black/80">Company Lease</span>
-              </label>
-            </div>
+        </div>
+        {/* Tenant Type */}
+        <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
+          <h4 className="text-lg font-medium mb-4 text-black">Tenant Type</h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tenantType"
+                value="bachelors"
+                checked={restrictions.tenantType === 'bachelors'}
+                onChange={(e) => handleChange('tenantType', e.target.value)}
+                className="accent-black"
+              />
+              <span>Bachelors</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tenantType"
+                value="family"
+                checked={restrictions.tenantType === 'family'}
+                onChange={(e) => handleChange('tenantType', e.target.value)}
+                className="accent-black"
+              />
+              <span>Family</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="tenantType"
+                value="company"
+                checked={restrictions.tenantType === 'company'}
+                onChange={(e) => handleChange('tenantType', e.target.value)}
+                className="accent-black"
+              />
+              <span>Company Lease</span>
+            </label>
           </div>
         </div>
       </div>

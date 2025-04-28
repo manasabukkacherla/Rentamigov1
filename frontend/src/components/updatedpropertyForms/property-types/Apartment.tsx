@@ -160,18 +160,18 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       step: 1
     },
     {
-      title: "Size",
-      icon: <Ruler className="w-6 h-6" />,
+      title: "Features",
+      icon: <Home className="w-6 h-6" />,
       step: 2
     },
     {
-      title: "Features",
+      title: "Amenities",
       icon: <Home className="w-6 h-6" />,
       step: 3
     },
     {
-      title: "Amenities",
-      icon: <Building2 className="w-6 h-6" />,
+      title: "Availability",
+      icon: <Calendar className="w-6 h-6" />,
       step: 4
     },
     {
@@ -179,16 +179,6 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       icon: <Image className="w-6 h-6" />,
       step: 5
     },
-    {
-      title: "Availability",
-      icon: <Calendar className="w-6 h-6" />,
-      step: 6
-    },
-    {
-      title: "Review",
-      icon: <Building2 className="w-6 h-6" />,
-      step: 7
-    }
   ]
 
   const handleAddressChange = useCallback((newAddress: Address) => {
@@ -254,13 +244,27 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
             </div>
           </div>
         )
+      
       case 2:
         return (
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
+              
+              
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                <Restrictions
+                  restrictions={formData.features.restrictions}
+                  onChange={(restrictions) => setFormData(prev => ({ ...prev, features: { ...prev.features, restrictions } }))}
+                />
+              </div>
+              <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            
+              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_input[type=number]]:text-black [&_input[type=number]]:placeholder:text-black [&_input[type=number]]:bg-white [&_input[type=number]]:border-black/20 [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
+                
+              <div className="space-y-8">
               <div className="flex items-center mb-8">
-                <Ruler className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Property Size</h3>
+                <Home className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Features</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
                 <PropertySize
@@ -275,16 +279,6 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
               </div>
             </div>
           </div>
-        )
-      case 3:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Property Features</h3>
-              </div>
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_input[type=number]]:text-black [&_input[type=number]]:placeholder:text-black [&_input[type=number]]:bg-white [&_input[type=number]]:border-black/20 [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
                 <PropertyFeatures
                   onFeaturesChange={(features: Record<string, any>) => {
                     setFormData(prev => ({
@@ -300,7 +294,7 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
             </div>
           </div>
         )
-      case 4:
+      case 3:
         return (
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
@@ -323,7 +317,26 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
             </div>
           </div>
         )
+      case 4:
+        return (
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Calendar className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Availability & Restrictions</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+                <AvailabilityDate
+                  date={formData.features.availableFrom}
+                  onChange={(date) => setFormData(prev => ({ ...prev, features: { ...prev.features, availableFrom: date } }))}
+                />
+              </div>
+              
+            </div>
+          </div>
+        )
       case 5:
+        
         return (
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
             <div className="space-y-8">
@@ -342,44 +355,6 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
             </div>
           </div>
         )
-      case 6:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Calendar className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Availability & Restrictions</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <AvailabilityDate
-                  date={formData.features.availableFrom}
-                  onChange={(date) => setFormData(prev => ({ ...prev, features: { ...prev.features, availableFrom: date } }))}
-                />
-              </div>
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
-                <Restrictions
-                  restrictions={formData.features.restrictions}
-                  onChange={(restrictions) => setFormData(prev => ({ ...prev, features: { ...prev.features, restrictions } }))}
-                />
-              </div>
-            </div>
-          </div>
-        )
-      case 7:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Building2 className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Final Review</h3>
-              </div>
-              <FinalSteps
-                formData={formData}
-                onSubmit={onSubmit}
-              />
-            </div>
-          </div>
-        )
       default:
         return null
     }
@@ -393,25 +368,33 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
           <h1 className="text-3xl font-bold text-black">List Your Apartment</h1>
         </div>
 
-        {/* Progress Steps */}
-        <div className="flex items-center justify-between mb-8">
-          {steps.map((step) => (
-            <div key={step.step} className="flex flex-col items-center">
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 ${
-                  step.step <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600"
-                }`}
-                onClick={() => setCurrentStep(step.step)}
-              >
-                {step.icon}
-              </div>
-              <div className="mt-2 text-sm font-medium text-black">{step.title}</div>
-              {step.step < 7 && (
-                <div className="w-16 h-0.5 bg-gray-200 mt-4"></div>
-              )}
-            </div>
-          ))}
+        {/* Stepper Scroll Bar UI */}
+<div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
+  {steps.map((step, index) => (
+    <div key={index} className="flex items-center">
+      <button
+        onClick={() => setCurrentStep(step.step)}
+        className="flex items-center focus:outline-none"
+      >
+        <div
+          className={`w-12 h-12 rounded-full flex items-center justify-center ${
+            step.step <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
+          }`}
+        >
+          {step.icon}
         </div>
+        <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
+          step.step <= currentStep ? 'text-black' : 'text-black/70'
+        }`}>
+          {step.title}
+        </span>
+      </button>
+      {index < steps.length - 1 && (
+        <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'}`} />
+      )}
+    </div>
+  ))}
+</div>
 
         {/* Form Content */}
         <div className="bg-white rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
