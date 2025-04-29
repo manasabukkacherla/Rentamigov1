@@ -51,10 +51,8 @@ type TabType = (typeof tabs)[number]["id"];
 
 export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
   const [activeTab, setActiveTab] = useState<TabType>("flat");
-  const [isManual, setIsManual] = useState(false);
 
   useEffect(() => {
-    if (isManual) return;
     const interval = setInterval(() => {
       setActiveTab((prevTab) => {
         const currentIndex = tabs.findIndex((tab) => tab.id === prevTab);
@@ -63,19 +61,18 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
       });
     }, 5000);
     return () => clearInterval(interval);
-  }, [isManual]);
+  }, []);
 
   const handleTabClick = (tabId: TabType) => {
     setActiveTab(tabId);
-    setIsManual(true);
   };
 
   const AmenityCard = ({ icon: Icon, label }: { icon: React.FC<React.SVGProps<SVGSVGElement>>; label: string }) => (
-    <div className="flex flex-col items-center p-0 bg-gray-50 rounded hover:bg-white hover:shadow-sm transition-all duration-300">
-      <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-        <Icon className="w-2 h-2 text-gray-700" />
+    <div className="flex flex-col items-center p-2 sm:p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-md transition-all duration-300">
+      <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center mb-2">
+        <Icon className="w-6 h-6 text-gray-700" />
       </div>
-      <span className="text-center text-[8px] font-medium text-gray-800">{label}</span>
+      <span className="text-center text-xs sm:text-sm font-medium text-gray-800 mt-1">{label}</span>
     </div>
   );
 
@@ -122,10 +119,10 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
   };
 
   return (
-    <div className="bg-white rounded border border-gray-100">
-      <h2 className="text-xs font-bold text-gray-900 m-0">Amenities & Details</h2>
+    <div className="bg-white rounded-xl border border-gray-100 p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">Amenities & Details</h2>
 
-      <div className="flex flex-wrap gap-0 border-b border-gray-200">
+      <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-2 mb-4">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
@@ -143,7 +140,7 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
         })}
       </div>
 
-      <div className="min-h-[60px] px-0">{getTabContent()}</div>
+      <div className="min-h-[100px] px-2 sm:px-4">{getTabContent()}</div>
     </div>
   );
 };
