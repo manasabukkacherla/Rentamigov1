@@ -32,6 +32,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 // Interface that matches the backend model structure
 interface FormData {
@@ -222,27 +223,21 @@ const SellAgricultureMain = () => {
       icon: <Tree className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
-              />
-              <AgriculturalLandType
-                onLandTypeChange={(types) => setFormData((prev) => ({ ...prev, landType: types }))}
-              />
-            </div>
+          <div className="space-y-6">
+            <PropertyName
+              propertyName={formData.propertyName}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+            />
+            <AgriculturalLandType
+              onLandTypeChange={(types) => setFormData((prev) => ({ ...prev, landType: types }))}
+            />
           </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              />
-              <Landmark
+          <div className="space-y-6">
+            <CommercialPropertyAddress
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+            />
+            {/* <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
                   ...prev,
@@ -251,14 +246,29 @@ const SellAgricultureMain = () => {
                     longitude: location.longitude
                   }
                 }))}
-              />
+              /> */}
+            <MapLocation
+              latitude={formData.coordinates?.latitude}
+              longitude={formData.coordinates?.longitude}
+              onLocationChange={(location) => setFormData(prev => ({
+                ...prev,
+                coordinates: location
+              }))}
+              onAddressChange={(address) => setFormData(prev => ({
+                ...prev,
+                address
+              }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({
+                ...prev,
+                landmark
+              }))}
+            />
 
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) =>
-                  setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
-                }
-              />
-            </div>
+            <CornerProperty
+              onCornerPropertyChange={(isCorner) =>
+                setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+              }
+            />
           </div>
         </div>
       ),
@@ -267,21 +277,19 @@ const SellAgricultureMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <AgriculturalLandDetails
-              onDetailsChange={(details) => setFormData((prev) => ({
-                ...prev,
-                Agriculturelanddetails: details as FormData['Agriculturelanddetails']
-              }))}
-            />
-            {/* <CommercialPropertyDetails
+        <div className="space-y-6">
+          <AgriculturalLandDetails
+            onDetailsChange={(details) => setFormData((prev) => ({
+              ...prev,
+              Agriculturelanddetails: details as FormData['Agriculturelanddetails']
+            }))}
+          />
+          {/* <CommercialPropertyDetails
               onDetailsChange={(details) => setFormData((prev) => ({
                 ...prev,
                 propertyDetails: details as FormData['propertyDetails']
               }))}
             /> */}
-          </div>
         </div>
       ),
     },
@@ -289,57 +297,20 @@ const SellAgricultureMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    price: {
-                      ...prev.price,
-                      expectedPrice: parseFloat(price.propertyPrice.toString()),
-                      isNegotiable: price.pricetype === 'negotiable'
-                    }
-                  }))
-                } />
-                <div className="text-sm mt-2 text-gray-600">
-                  Price per unit will be calculated automatically based on the area information.
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              {/* <h4  className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  {/* <RegistrationCharges
-                    onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        registrationCharges: {
-                          included: charges.included,
-                          amount: charges.amount,
-                          stampDuty: charges.stampDuty
-                        }
-                      }))
-                    }
-                  /> */}
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  {/* <Brokerage
-                    onBrokerageChange={(brokerage) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        brokerage: brokerage as FormData['brokerage']
-                      }))
-                    }
-                  /> */}
-                </div>
-              </div>
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <Price onPriceChange={(price) =>
+              setFormData((prev) => ({
+                ...prev,
+                price: {
+                  ...prev.price,
+                  expectedPrice: parseFloat(price.propertyPrice.toString()),
+                  isNegotiable: price.pricetype === 'negotiable'
+                }
+              }))
+            } />
+            <div className="text-sm mt-2 text-gray-600">
+              Price per unit will be calculated automatically based on the area information.
             </div>
           </div>
         </div>
@@ -349,24 +320,22 @@ const SellAgricultureMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <CommercialAvailability
-              onAvailabilityChange={(availability) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  availability: {
-                    type: availability.type,
-                    date: availability.date,
-                    preferredLeaseDuration: availability.preferredLeaseDuration,
-                    noticePeriod: availability.noticePeriod
-                  },
-                  petsAllowed: availability.petsAllowed || false,
-                  operatingHoursRestrictions: availability.operatingHoursRestrictions || false
-                }))
-              }}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability
+            onAvailabilityChange={(availability) => {
+              setFormData((prev) => ({
+                ...prev,
+                availability: {
+                  type: availability.type,
+                  date: availability.date,
+                  preferredLeaseDuration: availability.preferredLeaseDuration,
+                  noticePeriod: availability.noticePeriod
+                },
+                petsAllowed: availability.petsAllowed || false,
+                operatingHoursRestrictions: availability.operatingHoursRestrictions || false
+              }))
+            }}
+          />
         </div>
       ),
     },
@@ -374,15 +343,13 @@ const SellAgricultureMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({
-                ...prev,
-                contactDetails: contact as FormData['contactDetails']
-              }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData((prev) => ({
+              ...prev,
+              contactDetails: contact as FormData['contactDetails']
+            }))}
+          />
         </div>
       ),
     },
@@ -390,33 +357,31 @@ const SellAgricultureMain = () => {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <MediaUploadforagriplot
-              onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
+        <div className="space-y-6">
+          <MediaUploadforagriplot
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photos.exterior || [],
-                      interior: photos.interior || [],
-                      floorPlan: photos.floorPlan || [],
-                      washrooms: photos.washrooms || [],
-                      lifts: photos.lifts || [],
-                      emergencyExits: photos.emergencyExits || []
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
-                }));
-              }}
-            />
-          </div>
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photos.exterior || [],
+                    interior: photos.interior || [],
+                    floorPlan: photos.floorPlan || [],
+                    washrooms: photos.washrooms || [],
+                    lifts: photos.lifts || [],
+                    emergencyExits: photos.emergencyExits || []
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
