@@ -21,6 +21,8 @@ const sampleProperties: Property[] = [
     area: 1200,
     image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800',
     postedDate: '2024-03-15',
+    status: 'Available',
+    intent: 'Rent'
   },
   {
     id: '2',
@@ -35,6 +37,8 @@ const sampleProperties: Property[] = [
     area: 2500,
     image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800',
     postedDate: '2024-03-14',
+    status: 'Available',
+    intent: 'Sale'
   },
   {
     id: '3',
@@ -49,6 +53,8 @@ const sampleProperties: Property[] = [
     area: 500,
     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800',
     postedDate: '2024-03-13',
+    status: 'Rented',
+    intent: 'Rent'
   },
   {
     id: '4',
@@ -63,6 +69,8 @@ const sampleProperties: Property[] = [
     area: 3500,
     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800',
     postedDate: '2024-03-12',
+    status: 'Under Maintenance',
+    intent: 'Lease'
   },
   {
     id: '5',
@@ -77,6 +85,8 @@ const sampleProperties: Property[] = [
     area: 950,
     image: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=800',
     postedDate: '2024-03-16',
+    status: 'Available',
+    intent: 'Rent'
   },
   {
     id: '6',
@@ -91,6 +101,8 @@ const sampleProperties: Property[] = [
     area: 1600,
     image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800',
     postedDate: '2024-03-15',
+    status: 'Available',
+    intent: 'Rent'
   },
   {
     id: '7',
@@ -105,6 +117,8 @@ const sampleProperties: Property[] = [
     area: 650,
     image: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?auto=format&fit=crop&w=800',
     postedDate: '2024-03-14',
+    status: 'Rented',
+    intent: 'Rent'
   },
   {
     id: '8',
@@ -119,7 +133,9 @@ const sampleProperties: Property[] = [
     area: 400,
     image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800',
     postedDate: '2024-03-16',
-    sharing: '1 Share'
+    sharing: '1 Share',
+    status: 'Available',
+    intent: 'Rent'
   },
   {
     id: '9',
@@ -134,6 +150,8 @@ const sampleProperties: Property[] = [
     area: 2800,
     image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800',
     postedDate: '2024-03-13',
+    status: 'Available',
+    intent: 'Sale'
   },
   {
     id: '10',
@@ -148,7 +166,9 @@ const sampleProperties: Property[] = [
     area: 450,
     image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800',
     postedDate: '2024-03-15',
-    sharing: '3 Share'
+    sharing: '3 Share',
+    status: 'Available',
+    intent: 'Rent'
   },
   {
     id: '11',
@@ -163,6 +183,8 @@ const sampleProperties: Property[] = [
     area: 1800,
     image: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=800',
     postedDate: '2024-03-16',
+    status: 'Available',
+    intent: 'Lease'
   },
   {
     id: '12',
@@ -177,7 +199,9 @@ const sampleProperties: Property[] = [
     area: 400,
     image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800',
     postedDate: '2024-03-14',
-    sharing: '2 Share'
+    sharing: '2 Share',
+    status: 'Available',
+    intent: 'Rent'
   }
 ];
 
@@ -200,7 +224,21 @@ function Allproperties() {
   });
 
   const searchResults = useMemo(() => {
-    if (!searchQuery.trim() && !activeFilters.listingTypes.length && !activeFilters.propertyTypes.length && 
+    const normalizedQuery = searchQuery.trim()
+      .toLowerCase()
+      .replace(/rupees/g, 'rs')
+      .replace(/thousand/g, 'k')
+      .replace(/(\d+)\s*k/g, (_, num) => `${num}000`)
+      .replace(/(\d+)\s*rupees/g, '$1')
+      .replace(/price is/g, 'price')
+      .replace(/cost is/g, 'cost')
+      .replace(/rent is/g, 'rent')
+      .replace(/square feet/g, 'sqft')
+      .replace(/sq feet/g, 'sqft')
+      .replace(/sq ft/g, 'sqft')
+      .replace(/square ft/g, 'sqft');
+
+    if (!normalizedQuery && !activeFilters.listingTypes.length && !activeFilters.propertyTypes.length && 
         !activeFilters.furnishingTypes.length && !activeFilters.bhkTypes.length && !activeFilters.sharingTypes.length &&
         !activeFilters.priceRange.min && !activeFilters.priceRange.max) {
       return { 
@@ -212,7 +250,7 @@ function Allproperties() {
       };
     }
 
-    const criteria = extractSearchCriteria(searchQuery);
+    const criteria = extractSearchCriteria(normalizedQuery);
     
     if (activeFilters.listingTypes.length) {
       criteria.listingTypes = activeFilters.listingTypes;
@@ -306,7 +344,7 @@ function Allproperties() {
                   </div>
                   <input
                     type="text"
-                    placeholder={isListening ? 'Listening...' : "Try: '2 BHK in HSR Layout under ₹30,000'"}
+                    placeholder={isListening ? 'Listening...' : "Try: '2 BHK in HSR Layout under 30000' or '13000 rent in Koramangala'"}
                     className="w-full px-3 py-2 pl-9 rounded text-black text-sm focus:outline-none focus:ring-1 focus:ring-black"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
