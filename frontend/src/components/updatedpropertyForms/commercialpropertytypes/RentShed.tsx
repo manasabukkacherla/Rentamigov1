@@ -17,6 +17,8 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+
+import MapLocation from "../CommercialComponents/MapLocation"
 import { toast } from 'react-toastify';
 
 import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
@@ -219,6 +221,7 @@ interface MediaUploadProps {
   }) => void;
 }
 
+
 const RentShed = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -340,7 +343,21 @@ const RentShed = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
-
+  const handleChange = (key: string, value: any) => {
+    setFormData((prev: FormData) => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: Record<string, any> = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
   const formSections = [
     {
       title: 'Basic Information',
@@ -354,21 +371,12 @@ const RentShed = () => {
           <CommercialPropertyAddress
             onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
           />
-          <Landmark
-            onLandmarkChange={(landmark) => setFormData(prev => ({
-              ...prev,
-              basicInformation: { ...prev.basicInformation, landmark }
-            }))}
-            onLocationSelect={(location) => setFormData(prev => ({
-              ...prev,
-              basicInformation: {
-                ...prev.basicInformation,
-                location: {
-                  latitude: parseFloat(location.latitude),
-                  longitude: parseFloat(location.longitude)
-                }
-              }
-            }))}
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty
