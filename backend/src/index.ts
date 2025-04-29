@@ -48,7 +48,7 @@ import bugRouter from "./routes/BugRouter";
 import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
-import socketHandler from "./socketHandler";
+
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
 import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
@@ -76,6 +76,9 @@ import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
 import commercialLeaseShowroomRoutes from "./routes/commercial/commercialLeaseShowroom";
+import conversationRoutes from "./routes/conversationRoutes";
+import messageRoutes from "./routes/messageRoutes";
+import socketHandler from "./sockets";
 dotenv.config();
 
 // Validate required environment variables
@@ -175,6 +178,9 @@ app.use("/api", ownerIntrstrouter); // Owner interest routes
 
 app.use("/api/forms", subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter);
+// chat app routes
+app.use("/api/messages", messageRoutes);
+app.use("/api/conversation", conversationRoutes);
 
 //Property listing apis
 //app.use("/api/property-selection", Propertyrouter);

@@ -20,7 +20,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import MediaUploadforagriplot from "../Mediauploadforagriplot"
 
 interface FormData {
   propertyId?: string;
@@ -344,10 +344,7 @@ const LeasePlotMain = () => {
       icon: <Store className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Store className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
+
           <PropertyName
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
@@ -369,10 +366,7 @@ const LeasePlotMain = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
+
           <PlotDetails onDetailsChange={(details) => {
             // Make sure totalArea is properly set
             const updatedArea = {
@@ -423,9 +417,9 @@ const LeasePlotMain = () => {
             </div>
           </div>
 
-          <CommercialPropertyDetails
+          {/* <CommercialPropertyDetails
             onDetailsChange={(details) => handleChange('propertyDetails', details)}
-          />
+          /> */}
         </div>
       ),
     },
@@ -434,13 +428,9 @@ const LeasePlotMain = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Lease Terms</h3>
-          </div>
+
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
               <div className="space-y-4 text-black">
                 <LeaseAmount
                   onLeaseAmountChange={(amount) => handleChange('leaseDetails', {
@@ -480,7 +470,7 @@ const LeasePlotMain = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
                 <MaintenanceAmount
@@ -519,7 +509,7 @@ const LeasePlotMain = () => {
                   })}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       ),
@@ -529,10 +519,6 @@ const LeasePlotMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
           <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
         </div>
       ),
@@ -542,10 +528,7 @@ const LeasePlotMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
-          </div>
+
           <CommercialContactDetails
             onContactChange={(contact) => handleChange('contactInformation', contact)}
           />
@@ -557,11 +540,8 @@ const LeasePlotMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <CommercialMediaUpload
+
+          <MediaUploadforagriplot
             onMediaChange={(mediaUpdate) => {
               const convertedPhotos: any = {};
 

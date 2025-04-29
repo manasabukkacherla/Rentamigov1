@@ -3,6 +3,8 @@ export type ListingType = 'Owner' | 'Agent' | 'PG' | 'RentAmigo';
 export type FurnishingType = 'Fully Furnished' | 'Semi Furnished' | 'Partially Furnished' | 'Unfurnished';
 export type BHKType = '1 RK' | '1 BHK' | '2 BHK' | '3 BHK' | '4 BHK' | '4+ BHK';
 export type SharingType = '1 Share' | '2 Share' | '3 Share' | '4 Share' | '4+ Share';
+export type PropertyStatus = 'Available' | 'Rented' | 'Under Maintenance';
+export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
 
 export interface SearchCriteria {
   location: string | null;
@@ -53,4 +55,6 @@ export interface Property {
   image: string;
   postedDate: string;
   sharing?: SharingType;
+  status: PropertyStatus;
+  intent: PropertyIntent;
 }

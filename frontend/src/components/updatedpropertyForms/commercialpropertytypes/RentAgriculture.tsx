@@ -15,7 +15,7 @@ import OtherCharges from '../residentialrent/OtherCharges';
 import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import MediaUploadforagriplot from '../Mediauploadforagriplot';
 import { ChevronLeft, ChevronRight, Store, Building2, Calendar, MapPin, DollarSign, ImageIcon, UserCircle } from 'lucide-react';
 import axios from 'axios';
 
@@ -455,23 +455,19 @@ const RentAgriculture = () => {
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
-              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
-              <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
-            </div>
+          <div className="space-y-6">
+            <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
+            <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
           </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="w-6 h-6 text-black" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-              <Landmark onLandmarkChange={handleLandmarkChange} />
-              <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
-            </div>
+
+
+
+          <div className="space-y-6">
+            <CommercialPropertyAddress onAddressChange={handleAddressChange} />
+            <Landmark onLandmarkChange={handleLandmarkChange} />
+            <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
+
           </div>
         </div>
       )
@@ -480,38 +476,37 @@ const RentAgriculture = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <AgriculturalLandDetails onDetailsChange={handleLandDetailsChange} />
-            <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
-          </div>
+
+        <div className="space-y-6">
+          <AgriculturalLandDetails onDetailsChange={handleLandDetailsChange} />
+          {/* <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} /> */}
         </div>
+
       )
     },
     {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rent.maintenanceType === 'exclusive' && (
-                  <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-                )}
-                <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
-              </div>
-            </div>
+
+        <div className="space-y-6">
+
+          <div className="space-y-4 text-black">
+            <Rent onRentChange={handleRentChange} />
+            {formData.rent.maintenanceType === 'exclusive' && (
+              <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+            )}
+            <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+
+
 
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4 text-black">
                 <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
                 <div className="border-t border-gray-200 my-4"></div>
                 <Brokerage onBrokerageChange={handleBrokerageChange} />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -519,13 +514,9 @@ const RentAgriculture = () => {
     },
     {
       title: 'Availability',
-      icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
+        <div className="flex items-center gap-3 mb-6">
+
           <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({
             ...prev,
             availability: {
@@ -534,24 +525,24 @@ const RentAgriculture = () => {
             }
           }))} />
         </div>
+
       )
     },
     {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <CommercialContactDetails onContactChange={handleContactChange} />
-        </div>
+
+        <CommercialContactDetails onContactChange={handleContactChange} />
+
       )
     },
     {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <CommercialMediaUpload onMediaChange={handleMediaChange} />
-        </div>
+        <MediaUploadforagriplot onMediaChange={handleMediaChange} />
+
       )
     }
   ];
@@ -755,4 +746,3 @@ const RentAgriculture = () => {
 };
 
 export default RentAgriculture;
-
