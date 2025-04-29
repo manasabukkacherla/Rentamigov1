@@ -481,7 +481,7 @@ const LeaseOthersMain = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
@@ -523,7 +523,7 @@ const LeaseOthersMain = () => {
       </div>
 
       {/* Form Content */}
-      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Other Commercial Property</h1>
         </div>
