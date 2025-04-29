@@ -10,7 +10,7 @@ export const LocationMap: React.FC = () => {
   ]
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 border border-gray-100 w-full">
       <h2 className="text-xl font-bold text-gray-900 mb-6">Location</h2>
 
       <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
@@ -33,7 +33,7 @@ export const LocationMap: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-col md:flex-row gap-6 w-full">
         <div className="flex-1">
           <div className="flex items-start gap-3 mb-4">
             <div className="bg-gray-100 p-2 rounded-full">

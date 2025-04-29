@@ -8,10 +8,10 @@ interface BasicInfoProps {
 
 export const BasicInfo: React.FC<BasicInfoProps> = ({ details }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 basic-info">
+    <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 basic-info w-full">
       <h2 className="text-xl font-bold text-gray-900 mb-4">Property Overview</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gray-50 px-4 py-4 rounded-xl flex flex-col items-center text-center transition-all hover:shadow-sm">
           <div className="bg-gray-100 p-2.5 rounded-full mb-2">
             <Home className="w-5 h-5 text-gray-700" />
