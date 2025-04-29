@@ -13,7 +13,7 @@ import MediaUpload from "../MediaUpload";
 import OtherCharges from "../residentialrent/OtherCharges";
 import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
-import { MapPin, Building2, DollarSign, Calendar, Image, Home, ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Building2, DollarSign, Calendar, Image, Home, ImageIcon, ChevronLeft, ChevronRight, IndianRupee } from 'lucide-react';
 
 // Add custom styles for inclusive/exclusive buttons
 const customStyles = `
@@ -28,15 +28,19 @@ interface FormData {
   propertyId: string;
   propertyName: string;
   propertyAddress: {
-    flatNo: string;
-    floor: string;
-    houseName: string;
-    address: string;
-    pinCode: string;
-    city: string;
-    street: string;
-    state: string;
-    zipCode: string;
+    flatNo?: number;
+    floor?: number;
+    houseName?: string;
+    street?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+    locationLabel?: string;
   };
   coordinates: {
     latitude: string;
@@ -79,13 +83,12 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
     propertyId,
     propertyName: "",
     propertyAddress: {
-      flatNo: "",
-      floor: "",
+      flatNo: undefined,
+      floor: undefined,
       houseName: "",
-      address: "",
-      pinCode: "",
-      city: "",
       street: "",
+      address: "",
+      city: "",
       state: "",
       zipCode: "",
     },
@@ -221,7 +224,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                   address={formData.propertyAddress}
                   onAddressChange={handleAddressChange}
                 />
-                <MapCoordinates
+                {/* <MapCoordinates
                   latitude={formData.coordinates.latitude}
                   longitude={formData.coordinates.longitude}
                   locationLabel={formData.coordinates.locationLabel}
@@ -238,7 +241,7 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                     }))
                   }
                   onLocationChange={handleLocationChange}
-                />
+                /> */}
               </div>
             </div>
           </div>
@@ -289,77 +292,148 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
                 <h3 className="text-2xl font-semibold text-black">Amenities</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <FlatAmenities
-                  onAmenitiesChange={(amenities) =>
-                    setFormData((prev) => ({ ...prev, flatAmenities: amenities }))
-                  }
-                />
-                <SocietyAmenities
-                  onAmenitiesChange={(amenities) =>
-                    setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
-                  }
-                />
+                <div className="space-y-12">
+                  <FlatAmenities
+                    onAmenitiesChange={(amenities) =>
+                      setFormData((prev) => ({ ...prev, flatAmenities: amenities }))
+                    }
+                  />
+                  <SocietyAmenities
+                    onAmenitiesChange={(amenities) =>
+                      setFormData((prev) => ({ ...prev, societyAmenities: amenities }))
+                    }
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       ),
     },
+    // {
+    //   title: "Pricing Details",
+    //   icon: <DollarSign className="w-6 h-6" />,
+    //   component: (
+    //     <div className="space-y-6">
+    //       <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+    //         <div className="space-y-8">
+    //           <div className="flex items-center mb-8">
+    //             <DollarSign className="text-black mr-3" size={28} />
+    //             <h3 className="text-2xl font-semibold text-black">Price Details</h3>
+    //           </div>
+    //           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+    //             <div className="space-y-12">
+    //               <Price
+    //                 onPriceChange={(price) =>
+    //                   setFormData((prev) => ({ ...prev, price: price.amount }))
+    //                 }
+    //               />
+                  
+    //               <PricePerSqft
+    //                 propertyPrice={parseFloat(formData.price) || 0}
+    //                 Area={{
+    //                   totalArea: parseFloat(formData.area.superBuiltUpAreaSqft) || 0,
+    //                   builtUpArea: parseFloat(formData.area.builtUpAreaSqft) || 0,
+    //                   carpetArea: parseFloat(formData.area.carpetAreaSqft) || 0
+    //                 }}
+    //               />
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+
+    //       <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+    //         <div className="space-y-8">
+    //           <div className="flex items-center mb-8">
+    //             <DollarSign className="text-black mr-3" size={28} />
+    //             <h3 className="text-2xl font-semibold text-black">Additional Charges</h3>
+    //           </div>
+    //           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+    //             <div className="space-y-12">
+    //               <RegistrationCharges
+    //                 onRegistrationChargesChange={(charges) =>
+    //                   setFormData((prev) => ({ ...prev, registrationCharges: charges }))
+    //                 }
+    //               />
+    //               <OtherCharges
+    //                 onOtherChargesChange={(charges) =>
+    //                   setFormData((prev) => ({ ...prev, otherCharges: charges }))
+    //                 }
+    //               />
+    //               <Brokerage
+    //                 onBrokerageChange={(brokerage) =>
+    //                   setFormData((prev) => ({ ...prev, brokerage }))
+    //                 }
+    //               />
+    //             </div>
+    //           </div>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
     {
       title: "Pricing Details",
-      icon: <DollarSign className="w-6 h-6" />,
+      icon: <IndianRupee className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <DollarSign className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Price Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <Price
-                  onPriceChange={(price) =>
-                    setFormData((prev) => ({ ...prev, price: price.amount }))
-                  }
-                />
-                <PricePerSqft
-                  propertyPrice={parseFloat(formData.price) || 0}
-                  Area={{
-                    totalArea: parseFloat(formData.area.superBuiltUpAreaSqft) || 0,
-                    builtUpArea: parseFloat(formData.area.builtUpAreaSqft) || 0,
-                    carpetArea: parseFloat(formData.area.carpetAreaSqft) || 0
-                  }}
-                />
-              </div>
+
+          <div className="space-y-8">
+
+            <div className="space-y-12">
+              <Price
+                onPriceChange={(price) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: { ...prev.features, price: price.amount },
+                  }))
+                }
+              />
+              <PricePerSqft
+                propertyPrice={parseFloat(formData.features.price) || 0}
+                Area={{
+                  totalArea: parseFloat(formData.size.superBuiltUpArea) || 0,
+                  builtUpArea: parseFloat(formData.size.builtUpArea) || 0,
+                  carpetArea: parseFloat(formData.size.carpetArea) || 0
+                }}
+              />
             </div>
+
           </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <DollarSign className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Additional Charges</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <RegistrationCharges
-                  onRegistrationChargesChange={(charges) =>
-                    setFormData((prev) => ({ ...prev, registrationCharges: charges }))
-                  }
-                />
-                <OtherCharges
-                  onOtherChargesChange={(charges) =>
-                    setFormData((prev) => ({ ...prev, otherCharges: charges }))
-                  }
-                />
-                <Brokerage
-                  onBrokerageChange={(brokerage) =>
-                    setFormData((prev) => ({ ...prev, brokerage }))
-                  }
-                />
-              </div>
+
+          <div className="space-y-8">
+
+            <div className="space-y-12">
+              <RegistrationCharges
+                onRegistrationChargesChange={(charges) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: { ...prev.features, registrationCharges: charges },
+                  }))
+                }
+              />
+              <OtherCharges
+                onOtherChargesChange={(charges) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: { ...prev.features, otherCharges: charges },
+                  }))
+                }
+              />
+              <Brokerage
+                onBrokerageChange={(brokerage) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: { ...prev.features, brokerage },
+                  }))
+                }
+              />
             </div>
           </div>
         </div>
+
+
       ),
     },
     {
@@ -440,11 +514,9 @@ const SellApartment = ({ propertyId, onSubmit }: SellApartmentProps) => {
               style={{ cursor: i < step ? "pointer" : "default" }}
             >
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  index <= step ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= step ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
               >
-                {stepObj.icon ? stepObj.icon : index + 1}
+                {s.icon}
               </div>
               <span className="text-xs font-medium">{s.title}</span>
             </div>
