@@ -198,17 +198,44 @@ const LeaseCoveredSpaceMain = () => {
     }
   ];
 
-  const handleNext = (e: React.MouseEvent) => {
-    preventDefault(e);
+  
+  const handleNext = () => {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
-  const handlePrevious = (e: React.MouseEvent) => {
-    preventDefault(e);
+  const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -411,7 +438,7 @@ const LeaseCoveredSpaceMain = () => {
 
     // If not on the last step, move to the next step instead of submitting
     if (currentStep < formSections.length - 1) {
-      handleNext(e as React.MouseEvent);
+      handleNext();
       return;
     }
 
