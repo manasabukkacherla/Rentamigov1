@@ -244,41 +244,52 @@ const SellPlot = ({ propertyId, onSubmit }: SellPlotProps) => {
   return (
     <form onSubmit={(e) => e.preventDefault()} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
       {/* Progress indicator */}
-      <div ref={formRef} className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {formSections.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-              onClick={() => {
-                if (i < currentStep) {
-                  setCurrentStep(i);
-                  setTimeout(() => {
-                    if (formRef.current) {
-                      window.scrollTo({
-                        top: formRef.current.offsetTop - 100,
-                        behavior: 'smooth'
-                      });
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((s, i) => (
+                <div
+                  key={i}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    if (i < currentStep) {
+                      setCurrentStep(i);
+                      setTimeout(() => {
+                        if (formRef.current) {
+                          window.scrollTo({
+                            top: formRef.current.offsetTop - 100,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }, 100);
                     }
-                  }, 100);
-                }
-              }}
-              style={{ cursor: i < currentStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
-              >
-                {s.icon}
-              </div>
-              <span className="text-xs font-medium">{s.title}</span>
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {s.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {s.title}
+                    </span>
+                  </div>
+                  {i < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
-          ></div>
+          </div>
         </div>
       </div>
 

@@ -69,14 +69,9 @@ const LeaseIndependent = ({ propertyId, onSubmit }: LeaseIndependentProps) => {
       title: "Basic Information",
       icon: <Building2 className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-              <PropertyName
+        <div className="space-y-8">
+            
+            <PropertyName
                 propertyName={formData.propertyName}
                 onPropertyNameChange={(name) =>
                   setFormData((prev) => ({ ...prev, propertyName: name }))
@@ -120,8 +115,6 @@ const LeaseIndependent = ({ propertyId, onSubmit }: LeaseIndependentProps) => {
                 }
               />
             </div>
-          </div>
-        </div>
       ),
     },
     {
@@ -226,10 +219,6 @@ const LeaseIndependent = ({ propertyId, onSubmit }: LeaseIndependentProps) => {
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
           <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
             <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
               <AvailabilityDate
                 onAvailabilityChange={(availability) =>
