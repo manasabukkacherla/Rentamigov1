@@ -169,9 +169,8 @@ const Headerr: React.FC = () => {
           scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
         }`}
       >
-        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex justify-between items-center min-h-[48px]">
-            {/* Logo - Responsive */}
+        <div className="w-full px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center min-h-[48px] w-full">
             <div
               className="flex items-center cursor-pointer flex-shrink-0"
               onClick={() => navigate("/Homepage")}
@@ -190,9 +189,9 @@ const Headerr: React.FC = () => {
               </span>
             </div>
 
-            {/* Desktop Navigation - Single line, no wrap */}
-            <nav className="hidden xl:flex items-center w-auto whitespace-nowrap">
-              <ul className="flex gap-x-1 md:gap-x-3 lg:gap-x-5 whitespace-nowrap">
+            {/* Desktop Navigation - Single line, width-responsive, scroll if needed */}
+            <nav className="hidden xl:flex items-center flex-nowrap min-w-0 w-0 xl:w-auto xl:overflow-x-auto">
+              <ul className="flex flex-nowrap gap-x-1 md:gap-x-3 lg:gap-x-5 min-w-0 whitespace-nowrap">
                 {navLinks.map((link, index) => (
                   <li key={index}>
                     <Link
