@@ -34,11 +34,11 @@ const LocationModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md overflow-hidden">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold">Select Your Location</h3>
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md sm:max-w-lg md:max-w-xl overflow-hidden mx-2 sm:mx-0">
+        <div className="p-4 sm:p-6">
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h3 className="text-xl sm:text-2xl font-bold">Select Your Location</h3>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
@@ -59,15 +59,15 @@ const LocationModal = ({
             </button>
           </div>
 
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-3 sm:mb-4 text-sm sm:text-base">
             Choose your city to find properties in your area
           </p>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 max-h-64 sm:max-h-80 overflow-y-auto">
             {locations.map((location) => (
               <button
                 key={location}
-                className="p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-left hover:border-black"
+                className="p-3 sm:p-4 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-left hover:border-black w-full text-sm sm:text-base"
                 onClick={() => onSelectLocation(location)}
               >
                 <div className="flex items-center">
