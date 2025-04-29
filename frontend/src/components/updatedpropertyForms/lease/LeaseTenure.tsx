@@ -24,7 +24,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto bg-gray-100 p-6 rounded-2xl">
+    <div className="bg-gray-100 p-6 rounded-2xl [forced-colors:active] border border-transparent">
       <div className="flex items-center gap-3 mb-8">
         <h3 className="text-2xl font-bold text-gray-800">Lease Tenure</h3>
         <ArrowRight className="text-blue-500" size={20} />
