@@ -214,7 +214,7 @@ const PropertySlider = () => {
               <div className="flex justify-between items-center">
                 <span className="text-2xl font-bold">{property.price}</span>
                 <Link
-                  to="/tenantProperties"
+                  to="/allproperties"
                   className="bg-white text-black px-6 py-2 rounded-lg hover:bg-gray-200 transition duration-300"
                 >
                   View Details
@@ -382,7 +382,7 @@ const Homepage: React.FC = () => {
     // Save selected location to session storage
     sessionStorage.setItem("selectedLocation", location);
     // Redirect to properties page with location parameter
-    navigate(`/tenantproperties`);
+    navigate(`/allproperties`);
   };
 
   // Animation variants for scroll animations
