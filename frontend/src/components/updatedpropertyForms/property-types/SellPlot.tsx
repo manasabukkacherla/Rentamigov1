@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropertyName from '../PropertyName';
 import PlotType from '../CommercialComponents/PlotType';
-import PropertyAddress from '../PropertyAddress';
+import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
 import Landmark from '../CommercialComponents/Landmark';
 import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
@@ -15,6 +15,7 @@ import CommercialAvailability from '../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import { Building2, Home, IndianRupee, Calendar, MapPin, Image, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 type MediaFileType = { url: string; file: File };
 
@@ -76,6 +77,22 @@ const SellPlot = ({ propertyId, onSubmit }: SellPlotProps) => {
   const [success, setSuccess] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
+  const handleChange = (key: string, value: any) => {
+    setFormData((prev) => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: Record<string, any> = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   // Define form steps
   const formSections = [
     {
@@ -89,18 +106,17 @@ const SellPlot = ({ propertyId, onSubmit }: SellPlotProps) => {
           <PlotType
             onPlotTypeChange={(types) => setFormData({ ...formData, plotType: types })}
           />
-          <PropertyAddress
+          <CommercialPropertyAddress
             onAddressChange={(address) => setFormData({ ...formData, address })}
           />
-          <Landmark
-            onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
+          <MapLocation
+            latitude={formData.coordinates.latitude.toString()}
+            longitude={formData.coordinates.longitude.toString()}
+            onLocationChange={(location) => handleChange('coordinates', location)}
+            onAddressChange={(address) => handleChange('address', address)} 
+            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
           />
-          {/* <MapCoordinates
-            latitude={formData.coordinates.latitude}
-            longitude={formData.coordinates.longitude}
-            onLatitudeChange={(lat) => setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })}
-            onLongitudeChange={(lng) => setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })}
-          /> */}
+
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
           />
