@@ -21,6 +21,7 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
+import MapLocation from "../CommercialComponents/MapLocation";
 
 interface FormData {
   title: string;
@@ -33,8 +34,8 @@ interface FormData {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   coordinates: {
     latitude: string;
@@ -85,8 +86,8 @@ const LeaseOthersMain = () => {
     },
     landmark: '',
     location: {
-      latitude: 0,
-      longitude: 0
+      latitude: '',
+      longitude: ''
     },
     coordinates: {
       latitude: '',
@@ -135,65 +136,43 @@ const LeaseOthersMain = () => {
       icon: <Store className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.title}
-                onPropertyNameChange={(name) => setFormData(prev => ({
-                  ...prev,
-                  title: name
-                }))}
-              />
-              <OtherCommercialType
-                onCommercialTypeChange={(types) => setFormData(prev => ({
-                  ...prev,
-                  commercialType: types
-                }))}
-              />
-            </div>
+
+          <div className="space-y-6">
+            <PropertyName
+              propertyName={formData.title}
+              onPropertyNameChange={(name) => setFormData(prev => ({
+                ...prev,
+                title: name
+              }))}
+            />
+            <OtherCommercialType
+              onCommercialTypeChange={(types) => setFormData(prev => ({
+                ...prev,
+                commercialType: types
+              }))}
+            />
           </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData(prev => ({
-                  ...prev,
-                  address
-                }))}
-              />
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData(prev => ({
-                  ...prev,
-                  landmark
-                }))}
-                onLocationSelect={(location) => setFormData(prev => ({
-                  ...prev,
-                  location: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
-                  },
-                  coordinates: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  }
-                }))}
-              />
+          <div className="space-y-6">
+            <CommercialPropertyAddress
+              onAddressChange={(address) => setFormData(prev => ({
+                ...prev,
+                address
+              }))}
+            />
+            <MapLocation
+              latitude={formData.location.latitude}
+              longitude={formData.location.longitude}
+              onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
+              onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
+            />
 
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData(prev => ({
-                  ...prev,
-                  isCornerProperty: isCorner
-                }))}
-              />
-            </div>
+            <CornerProperty
+              onCornerPropertyChange={(isCorner) => setFormData(prev => ({
+                ...prev,
+                isCornerProperty: isCorner
+              }))}
+            />
           </div>
         </div>
       ),
@@ -202,25 +181,19 @@ const LeaseOthersMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <OtherPropertyDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                otherDetails: { ...prev.otherDetails, ...details }
-              }))}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                propertyDetails: { ...prev.propertyDetails, ...details }
-              }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <OtherPropertyDetails
+            onDetailsChange={(details) => setFormData(prev => ({
+              ...prev,
+              otherDetails: { ...prev.otherDetails, ...details }
+            }))}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => setFormData(prev => ({
+              ...prev,
+              propertyDetails: { ...prev.propertyDetails, ...details }
+            }))}
+          />
         </div>
       ),
     },
@@ -228,69 +201,57 @@ const LeaseOthersMain = () => {
       title: "Lease Terms",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Lease Terms</h3>
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <LeaseAmount
+              onLeaseAmountChange={(amount) => setFormData(prev => ({
+                ...prev,
+                leaseAmount: { ...prev.leaseAmount, ...amount }
+              }))}
+            />
+            <LeaseTenure
+              onLeaseTenureChange={(tenure) => {
+                // Format the tenure data to match what the backend schema expects
+                const formattedTenure = {
+                  minimumTenure: tenure.minimumTenure.duration.toString(),
+                  minimumUnit: tenure.minimumTenure.durationType,
+                  maximumTenure: tenure.maximumTenure.duration.toString(),
+                  maximumUnit: tenure.maximumTenure.durationType,
+                  lockInPeriod: tenure.lockInPeriod.duration.toString(),
+                  lockInUnit: tenure.lockInPeriod.durationType,
+                  noticePeriod: tenure.noticePeriod.duration.toString(),
+                  noticePeriodUnit: tenure.noticePeriod.durationType
+                };
+
+                setFormData(prev => ({
+                  ...prev,
+                  leaseTenure: formattedTenure
+                }));
+              }}
+            />
           </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
-              <div className="space-y-4">
-                <LeaseAmount
-                  onLeaseAmountChange={(amount) => setFormData(prev => ({
-                    ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
-                  }))}
-                />
-                <LeaseTenure
-                  onLeaseTenureChange={(tenure) => {
-                    // Format the tenure data to match what the backend schema expects
-                    const formattedTenure = {
-                      minimumTenure: tenure.minimumTenure.duration.toString(),
-                      minimumUnit: tenure.minimumTenure.durationType,
-                      maximumTenure: tenure.maximumTenure.duration.toString(),
-                      maximumUnit: tenure.maximumTenure.durationType,
-                      lockInPeriod: tenure.lockInPeriod.duration.toString(),
-                      lockInUnit: tenure.lockInPeriod.durationType,
-                      noticePeriod: tenure.noticePeriod.duration.toString(),
-                      noticePeriodUnit: tenure.noticePeriod.durationType
-                    };
 
-                    setFormData(prev => ({
-                      ...prev,
-                      leaseTenure: formattedTenure
-                    }));
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4">
-                <MaintenanceAmount
-                  onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                    ...prev,
-                    maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges
-                  onOtherChargesChange={(charges) => setFormData(prev => ({
-                    ...prev,
-                    otherCharges: { ...prev.otherCharges, ...charges }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={(brokerage) => setFormData(prev => ({
-                    ...prev,
-                    brokerage: { ...prev.brokerage, ...brokerage }
-                  }))}
-                />
-              </div>
-            </div>
+          <div className="space-y-4">
+            <MaintenanceAmount
+              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                ...prev,
+                maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
+              }))}
+            />
+            <div className="border-t border-gray-200 my-4"></div>
+            <OtherCharges
+              onOtherChargesChange={(charges) => setFormData(prev => ({
+                ...prev,
+                otherCharges: { ...prev.otherCharges, ...charges }
+              }))}
+            />
+            <div className="border-t border-gray-200 my-4"></div>
+            <Brokerage
+              onBrokerageChange={(brokerage) => setFormData(prev => ({
+                ...prev,
+                brokerage: { ...prev.brokerage, ...brokerage }
+              }))}
+            />
           </div>
         </div>
       ),
@@ -299,19 +260,13 @@ const LeaseOthersMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability
-              onAvailabilityChange={(availability) => setFormData(prev => ({
-                ...prev,
-                availability: { ...prev.availability, ...availability }
-              }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability
+            onAvailabilityChange={(availability) => setFormData(prev => ({
+              ...prev,
+              availability: { ...prev.availability, ...availability }
+            }))}
+          />
         </div>
       ),
     },
@@ -319,19 +274,13 @@ const LeaseOthersMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData(prev => ({
-                ...prev,
-                contactDetails: { ...prev.contactDetails, ...contact }
-              }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData(prev => ({
+              ...prev,
+              contactDetails: { ...prev.contactDetails, ...contact }
+            }))}
+          />
         </div>
       ),
     },
@@ -339,34 +288,28 @@ const LeaseOthersMain = () => {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    ...prev.media,
-                    photos: {
-                      ...prev.media.photos,
-                      ...photos
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
-                }));
-              }}
-            />
-          </div>
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -581,6 +524,9 @@ const LeaseOthersMain = () => {
 
       {/* Form Content */}
       <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Other Commercial Property</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
