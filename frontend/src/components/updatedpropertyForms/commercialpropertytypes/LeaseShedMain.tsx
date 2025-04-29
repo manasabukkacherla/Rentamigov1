@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +17,8 @@ import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 interface MediaType {
   images: { category: string; files: { url: string; file: File; }[]; }[];
@@ -152,6 +153,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 
 const LeaseShedMain = () => {
   const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
     propertyName: '',
     shedType: [],
@@ -203,39 +205,26 @@ const LeaseShedMain = () => {
       icon: <MapPin className="w-6 h-6" />,
       component: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-            <div className="flex items-center mb-6">
-              <Store className="text-black mr-2" size={24} />
-              <h3 className="text-xl font-semibold text-gray-800">Basic Details</h3>
+          <div className="space-y-6">
+            <div className="relative">
+              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))} />
+              <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <div className="space-y-6">
-              <div className="relative">
-                <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))} />
-                <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-              </div>
-              <ShedType onShedTypeChange={(type) => setFormData((prev) => ({ ...prev, shedType: type }))} />
-            </div>
+            <ShedType onShedTypeChange={(type) => setFormData((prev) => ({ ...prev, shedType: type }))} />
           </div>
 
-          <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-            <div className="flex items-center mb-6">
-              <MapPin className="text-black mr-2" size={24} />
-              <h3 className="text-xl font-semibold text-gray-800">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
-              <div className="relative">
-                <Landmark
-                  onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
-                  onLocationSelect={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
-                />
-                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-              </div>
+          <div className="space-y-6">
+            <CommercialPropertyAddress onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
+            <MapLocation
+              latitude={formData.coordinates.latitude}
+              longitude={formData.coordinates.longitude}
+              onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+            />
 
-              <div className="flex items-center space-x-2 cursor-pointer">
-                <CornerProperty onCornerPropertyChange={(isCorner) => setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))} />
-                <span className="text-black">This is a corner property</span>
-              </div>
+            <div className="flex items-center space-x-2 cursor-pointer">
+              <CornerProperty onCornerPropertyChange={(isCorner) => setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))} />
             </div>
           </div>
         </div>
@@ -245,15 +234,9 @@ const LeaseShedMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-6 h-6" />,
       component: renderFormSection(
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Building2 className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <ShedDetails onDetailsChange={(details) => setFormData((prev) => ({ ...prev, shedDetails: details }))} />
-            <CommercialPropertyDetails onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))} />
-          </div>
+        <div className="space-y-6">
+          <ShedDetails onDetailsChange={(details) => setFormData((prev) => ({ ...prev, shedDetails: details }))} />
+          <CommercialPropertyDetails onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))} />
         </div>
       ),
     },
@@ -261,35 +244,29 @@ const LeaseShedMain = () => {
       title: "Lease Terms",
       icon: <DollarSign className="w-6 h-6" />,
       component: renderFormSection(
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <DollarSign className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Lease Terms</h3>
-          </div>
-          <div className="space-y-6">
-            <LeaseAmount onLeaseAmountChange={(amount) => setFormData((prev) => ({ ...prev, leaseAmount: amount }))} />
-            <LeaseTenure onLeaseTenureChange={(tenure) => {
-              console.log("Received tenure values:", tenure);
+        <div className="space-y-6">
+          <LeaseAmount onLeaseAmountChange={(amount) => setFormData((prev) => ({ ...prev, leaseAmount: amount }))} />
+          <LeaseTenure onLeaseTenureChange={(tenure) => {
+            console.log("Received tenure values:", tenure);
 
-              // Explicitly set min and max as numeric values
-              const updatedTenure = {
-                min: tenure.minimumTenure ? Number(tenure.minimumTenure) : tenure.min,
-                minUnit: tenure.minimumUnit || tenure.minUnit,
-                max: tenure.maximumTenure ? Number(tenure.maximumTenure) : tenure.max,
-                maxUnit: tenure.maximumUnit || tenure.maxUnit,
-                lockInPeriod: tenure.lockInPeriod,
-                lockInUnit: tenure.lockInUnit,
-                noticePeriod: tenure.noticePeriod,
-                noticePeriodUnit: tenure.noticePeriodUnit
-              };
+            // Explicitly set min and max as numeric values
+            const updatedTenure = {
+              min: tenure.minimumTenure ? Number(tenure.minimumTenure) : tenure.min,
+              minUnit: tenure.minimumUnit || tenure.minUnit,
+              max: tenure.maximumTenure ? Number(tenure.maximumTenure) : tenure.max,
+              maxUnit: tenure.maximumUnit || tenure.maxUnit,
+              lockInPeriod: tenure.lockInPeriod,
+              lockInUnit: tenure.lockInUnit,
+              noticePeriod: tenure.noticePeriod,
+              noticePeriodUnit: tenure.noticePeriodUnit
+            };
 
-              console.log("Setting tenure values:", updatedTenure);
-              setFormData((prev) => ({ ...prev, leaseTenure: updatedTenure }));
-            }} />
-            <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData((prev) => ({ ...prev, maintenanceAmount: maintenance }))} />
-            <OtherCharges onOtherChargesChange={(charges) => setFormData((prev) => ({ ...prev, otherCharges: charges }))} />
-            <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
-          </div>
+            console.log("Setting tenure values:", updatedTenure);
+            setFormData((prev) => ({ ...prev, leaseTenure: updatedTenure }));
+          }} />
+          <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData((prev) => ({ ...prev, maintenanceAmount: maintenance }))} />
+          <OtherCharges onOtherChargesChange={(charges) => setFormData((prev) => ({ ...prev, otherCharges: charges }))} />
+          <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
         </div>
       ),
     },
@@ -297,14 +274,8 @@ const LeaseShedMain = () => {
       title: "Availability",
       icon: <Calendar className="w-6 h-6" />,
       component: renderFormSection(
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Calendar className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))} />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))} />
         </div>
       ),
     },
@@ -312,14 +283,8 @@ const LeaseShedMain = () => {
       title: "Contact Information",
       icon: <User className="w-6 h-6" />,
       component: renderFormSection(
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <UserCircle className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))} />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))} />
         </div>
       ),
     },
@@ -327,14 +292,8 @@ const LeaseShedMain = () => {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: renderFormSection(
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <ImageIcon className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload onMediaChange={(media: MediaType) => setFormData((prev) => ({ ...prev, media }))} />
-          </div>
+        <div className="space-y-6">
+          <CommercialMediaUpload onMediaChange={(media: MediaType) => setFormData((prev) => ({ ...prev, media }))} />
         </div>
       ),
     },
@@ -413,21 +372,43 @@ const LeaseShedMain = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleNext = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent the default form submission behavior
-    e.preventDefault();
-
+  const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
-  const handlePrevious = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Prevent the default form submission behavior
-    e.preventDefault();
-
+  const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
@@ -727,35 +708,65 @@ const LeaseShedMain = () => {
   }
 
   return (
-    <form className="max-w-3xl mx-auto" onSubmit={(e) => e.preventDefault()}>
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {steps.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-              onClick={() => i < currentStep && setCurrentStep(i)}
-              style={{ cursor: i < currentStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                  }`}
-              >
-                {s.icon}
-              </div>
-              <span className="text-xs font-medium">{s.title}</span>
+    <div ref={formRef} className="min-h-screen bg-white">
+      {/* Progress indicator */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {steps.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black text-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-          ></div>
+          </div>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Commercial Shed</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -764,10 +775,10 @@ const LeaseShedMain = () => {
         {steps[currentStep].component}
       </div>
 
+      {/* Navigation Buttons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
             className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
@@ -778,29 +789,26 @@ const LeaseShedMain = () => {
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-          {currentStep === steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-              {!isSubmitting && <ChevronRight className="w-5 h-5 ml-2" />}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Next
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          )}
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
         </div>
       </div>
-    </form>
+    </div>
   );
 };
 
