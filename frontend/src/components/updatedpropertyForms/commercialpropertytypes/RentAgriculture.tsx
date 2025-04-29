@@ -15,7 +15,7 @@ import OtherCharges from '../residentialrent/OtherCharges';
 import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import MediaUploadforagriplot from '../Mediauploadforagriplot';
 import { ChevronLeft, ChevronRight, Store, Building2, Calendar, MapPin, DollarSign, ImageIcon, UserCircle } from 'lucide-react';
 import axios from 'axios';
 
@@ -541,7 +541,7 @@ const RentAgriculture = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <CommercialMediaUpload onMediaChange={handleMediaChange} />
+        <MediaUploadforagriplot onMediaChange={handleMediaChange} />
 
       )
     }

@@ -17,7 +17,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
@@ -460,7 +460,7 @@ const LeaseAgricultureMain = () => {
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
-            <CommercialMediaUpload
+            <MediaUploadforagriplot
               onMediaChange={(media) => {
                 const photos: Record<string, File[]> = {};
                 media.images.forEach(({ category, files }) => {

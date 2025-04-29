@@ -20,7 +20,7 @@ import RegistrationCharges from "../sell/RegistrationCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import MediaUploadforagriplot from "../Mediauploadforagriplot"
 
 interface FormData {
   basicInformation: {
@@ -264,16 +264,16 @@ const SellPlotMain = () => {
         (position) => {
           const lat = position.coords.latitude.toString();
           const lng = position.coords.longitude.toString();
-          
+
           // Update form data
           handleChange('basicInformation.coordinates', {
             latitude: lat,
             longitude: lng
           });
-          
+
           // Update map
           updateMapLocation(lat, lng);
-          
+
           // Attempt to reverse geocode for address
           reverseGeocode(lat, lng);
         },
@@ -290,13 +290,13 @@ const SellPlotMain = () => {
   // Reverse geocode to get address from coordinates
   const reverseGeocode = (lat: string, lng: string) => {
     const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
+
     fetch(geocodingUrl)
       .then(response => response.json())
       .then(data => {
         if (data.status === "OK" && data.results && data.results.length > 0) {
           const address = data.results[0];
-          
+
           // Extract address components
           const addressComponents = {
             street: '',
@@ -304,11 +304,11 @@ const SellPlotMain = () => {
             state: '',
             zipCode: ''
           };
-          
+
           // Map address components to our format
           address.address_components.forEach((component: any) => {
             const types = component.types;
-            
+
             if (types.includes('route')) {
               addressComponents.street = component.long_name;
             } else if (types.includes('locality')) {
@@ -319,7 +319,7 @@ const SellPlotMain = () => {
               addressComponents.zipCode = component.long_name;
             }
           });
-          
+
           // Check if we have a street address, if not use formatted address
           if (!addressComponents.street && address.formatted_address) {
             const formattedParts = address.formatted_address.split(',');
@@ -327,21 +327,21 @@ const SellPlotMain = () => {
               addressComponents.street = formattedParts[0];
             }
           }
-          
+
           // Update address in form data
           handleChange('basicInformation.address', addressComponents);
-          
+
           // Update landmark with nearby point of interest if available
-          const landmark = data.results.find((result: any) => 
-            result.types.some((type: string) => 
+          const landmark = data.results.find((result: any) =>
+            result.types.some((type: string) =>
               ['point_of_interest', 'establishment', 'premise'].includes(type)
             )
           );
-          
+
           if (landmark && landmark.name) {
             handleChange('basicInformation.landmark', landmark.name);
           }
-          
+
           toast.success("Location details updated successfully");
         } else {
           console.error("Geocoding failed:", data.status);
@@ -393,7 +393,7 @@ const SellPlotMain = () => {
           />
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
           <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} />
-          
+
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center mb-8">
               <MapPin className="text-black mr-3" size={28} />
@@ -418,9 +418,9 @@ const SellPlotMain = () => {
                     className="rounded-xl"
                     title="Property Location Map"
                   ></iframe>
-                  
+
                   <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                    <button 
+                    <button
                       onClick={() => getCurrentLocation()}
                       className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
                       aria-label="Get current location"
@@ -429,7 +429,7 @@ const SellPlotMain = () => {
                       <Locate className="w-5 h-5 text-blue-600" />
                       <span className="text-sm font-medium">My Location</span>
                     </button>
-                    
+
                     <button
                       onClick={() => openLocationPicker()}
                       className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
@@ -440,13 +440,13 @@ const SellPlotMain = () => {
                       <span className="text-sm font-medium">Select Location</span>
                     </button>
                   </div>
-                  
+
                   <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
                     Powered by Google Maps
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -466,10 +466,10 @@ const SellPlotMain = () => {
                               ...formData.basicInformation.coordinates,
                               latitude: value
                             });
-                            
+
                             // Update map when latitude changes
                             updateMapLocation(
-                              value, 
+                              value,
                               formData.basicInformation.coordinates.longitude || '78.9629'
                             );
                           }
@@ -496,7 +496,7 @@ const SellPlotMain = () => {
                               ...formData.basicInformation.coordinates,
                               longitude: value
                             });
-                            
+
                             // Update map when longitude changes
                             updateMapLocation(
                               formData.basicInformation.coordinates.latitude || '20.5937',
@@ -517,7 +517,7 @@ const SellPlotMain = () => {
               </div>
             </div>
           </div>
-          
+
           <Landmark
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
             onLocationSelect={(location) => {
@@ -695,7 +695,7 @@ const SellPlotMain = () => {
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
           </div>
-          <CommercialMediaUpload
+          <MediaUploadforagriplot
             onMediaChange={(mediaUpdate) => {
               const convertedPhotos: any = {};
 
