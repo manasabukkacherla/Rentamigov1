@@ -8,7 +8,7 @@ import Landmark from '../CommercialComponents/Landmark';
 import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
 import PlotDetails from '../CommercialComponents/PlotDetails';
-import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
+//import CommercialPropertyDetails from '../CommercialComponents/CommercialPropertyDetails';
 import Rent from '../residentialrent/Rent';
 import SecurityDeposit from '../residentialrent/SecurityDeposit';
 import MaintenanceAmount from '../residentialrent/MaintenanceAmount';
@@ -520,17 +520,15 @@ const RentPlot = () => {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <PropertyName
-              propertyName={formData.basicInformation.title}
-              onPropertyNameChange={handlePropertyNameChange}
-            />
-            <PlotType onPlotTypeChange={handlePlotTypeChange} />
-            <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-            <Landmark onLandmarkChange={handleLandmarkChange} />
-            <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
-          </div>
+        <div className="space-y-6">
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={handlePropertyNameChange}
+          />
+          <PlotType onPlotTypeChange={handlePlotTypeChange} />
+          <CommercialPropertyAddress onAddressChange={handleAddressChange} />
+          <Landmark onLandmarkChange={handleLandmarkChange} />
+          <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
         </div>
       )
     },
@@ -538,11 +536,8 @@ const RentPlot = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <PlotDetails onDetailsChange={handlePlotDetailsChange} />
-            <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
-          </div>
+        <div className="space-y-6">
+          <PlotDetails onDetailsChange={handlePlotDetailsChange} />
         </div>
       )
     },
@@ -550,26 +545,23 @@ const RentPlot = () => {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-                  <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-                )}
-                <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
-              </div>
-            </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage onBrokerageChange={handleBrokerageChange} />
-              </div>
+        <div>
+
+          <Rent onRentChange={handleRentChange} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+          )}
+          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+
+
+
+          <div>
+            {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
+            <div className="space-y-4 text-black">
+              {/* <OtherCharges onOtherChargesChange={handleOtherChargesChange} /> */}
+
+              {/* <Brokerage onBrokerageChange={handleBrokerageChange} /> */}
             </div>
           </div>
         </div>
@@ -579,7 +571,7 @@ const RentPlot = () => {
       title: 'Availability',
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate onAvailabilityChange={handleAvailabilityChange} />
         </div>
       )
@@ -607,12 +599,16 @@ const RentPlot = () => {
               media: {
                 ...prev.media,
                 photos: {
-                  ...prev.media.photos,
-                  ...photos
+                  exterior: photos.exterior || [],
+                  interior: photos.interior || [],
+                  floorPlan: photos.floorPlan || [],
+                  washrooms: photos.washrooms || [],
+                  lifts: photos.lifts || [],
+                  emergencyExits: photos.emergencyExits || [],
                 },
-                videoTour: media.video?.file || null,
-                documents: media.documents.map(d => d.file)
-              }
+                videoTour: media.video ? media.video.file : null,
+                documents: media.documents.map(d => d.file),
+              },
             }));
           }}
         />
@@ -823,4 +819,3 @@ const RentPlot = () => {
 };
 
 export default RentPlot;
-
