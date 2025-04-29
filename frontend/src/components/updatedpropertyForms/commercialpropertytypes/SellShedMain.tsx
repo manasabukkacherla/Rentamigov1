@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 
 import ShedType from "../CommercialComponents/ShedType"
+import MapLocation from "../CommercialComponents/MapLocation"
 // Interfaces
 interface IArea {
   totalArea?: number;
@@ -142,32 +143,24 @@ const SellShedMain = () => {
       icon: <Store className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => handleChange("propertyName", name)}
-              />
-              <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
-            </div>
-          </div>
+          <PropertyName
+            propertyName={formData.propertyName}
+            onPropertyNameChange={(name) => handleChange("propertyName", name)}
+          />
+          <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={(address) => handleChange("address", address)} />
-              <Landmark onLandmarkChange={(landmark) => handleChange("landmark", landmark)} />
 
-              <CornerProperty onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} />
-            </div>
-          </div>
+          <CommercialPropertyAddress onAddressChange={(address) => handleChange("address", address)} />
+          {/* <Landmark onLandmarkChange={(landmark) => handleChange("landmark", landmark)} /> */}
+          <MapLocation
+            latitude={formData.coordinates.latitude.toString()}
+            longitude={formData.coordinates.longitude.toString()}
+            onLocationChange={(location) => handleChange('coordinates', location)}
+            onAddressChange={(address) => handleChange('address', address)}
+            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+          />
+
+          <CornerProperty onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} />
         </div>
       ),
     },
@@ -175,15 +168,10 @@ const SellShedMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <ShedDetails onDetailsChange={(details) => handleChange("shedDetails", details)} />
-            <CommercialPropertyDetails onDetailsChange={(details) => handleChange("propertyDetails", details)} />
-          </div>
+
+        <div className="space-y-6">
+          <ShedDetails onDetailsChange={(details) => handleChange("shedDetails", details)} />
+          <CommercialPropertyDetails onDetailsChange={(details) => handleChange("propertyDetails", details)} />
         </div>
       ),
     },
@@ -191,33 +179,18 @@ const SellShedMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <Price onPriceChange={(price) => handleChange("price", price.amount)} />
           </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => handleChange("price", price.amount)} />
-              </div>
-            </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges
-                    onRegistrationChargesChange={(charges) => handleChange("registrationCharges", charges)}
-                  />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => handleChange("brokerage", brokerage)} />
-                </div>
-              </div>
-            </div>
+          <div className="text-black">
+            <RegistrationCharges
+              onRegistrationChargesChange={(charges) => handleChange("registrationCharges", charges)}
+            />
+          </div>
+          <div className="text-black">
+            <Brokerage onBrokerageChange={(brokerage) => handleChange("brokerage", brokerage)} />
           </div>
         </div>
       ),
@@ -226,14 +199,8 @@ const SellShedMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability onAvailabilityChange={(availability) => handleChange("availability", availability)} />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability onAvailabilityChange={(availability) => handleChange("availability", availability)} />
         </div>
       ),
     },
@@ -241,14 +208,8 @@ const SellShedMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails onContactChange={(contact) => handleChange("contactDetails", contact)} />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails onContactChange={(contact) => handleChange("contactDetails", contact)} />
         </div>
       ),
     },
@@ -256,14 +217,8 @@ const SellShedMain = () => {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload onMediaChange={(media) => handleChange("media", media)} />
-          </div>
+        <div className="space-y-6">
+          <CommercialMediaUpload onMediaChange={(media) => handleChange("media", media)} />
         </div>
       ),
     },
@@ -377,9 +332,9 @@ const SellShedMain = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
-      <div ref={formRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex justify-center">
             <div className="flex items-center space-x-2">
@@ -418,52 +373,54 @@ const SellShedMain = () => {
         </div>
       </div>
 
+
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Shed</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your shed property</p>
+          <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
 
-        <div>
-          {steps[currentStep].component}
+        {steps[currentStep].component}
+      </div>
 
-          {/* Navigation Buttons */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-              <button
-                type="button"
-                onClick={prevStep}
-                disabled={currentStep === 0}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-black hover:bg-black hover:text-white"
-                  }`}
-              >
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                Previous
-              </button>
-              {currentStep < steps.length - 1 ? (
-                <button
-                  type="button"
-                  onClick={nextStep}
-                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-                >
-                  Next
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleSubmit}
-                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-                >
-                  Submit
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </button>
-              )}
-            </div>
-          </div>
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            type="button"
+            onClick={prevStep}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          {currentStep < steps.length - 1 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              Next
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              Submit
+              <ChevronRight className="w-5 h-5 ml-2" />
+            </button>
+          )}
         </div>
       </div>
     </div>

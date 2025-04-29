@@ -27,11 +27,13 @@ import {
   ImageIcon,
   UserCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define interface that matches backend model structure
 interface FormData {
@@ -214,32 +216,21 @@ const SellOthersMain = () => {
       icon: <FileQuestion className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <FileQuestion className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
-              />
-              <OtherCommercialType
-                onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, commercialType: type as string[] }))}
-              />
-            </div>
+          <div className="space-y-6">
+            <PropertyName
+              propertyName={formData.propertyName}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+            />
+            <OtherCommercialType
+              onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, commercialType: type as string[] }))}
+            />
           </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              />
-              <Landmark
+          <div className="space-y-6">
+            <CommercialPropertyAddress
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+            />
+            {/* <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
                   ...prev,
@@ -248,14 +239,20 @@ const SellOthersMain = () => {
                     longitude: location.longitude
                   }
                 }))}
-              />
+              /> */}
+            <MapLocation
+              latitude={formData.coordinates.latitude.toString()}
+              longitude={formData.coordinates.longitude.toString()}
+              onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+            />
 
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) =>
-                  setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
-                }
-              />
-            </div>
+            <CornerProperty
+              onCornerPropertyChange={(isCorner) =>
+                setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+              }
+            />
           </div>
         </div>
       ),
@@ -264,36 +261,30 @@ const SellOthersMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <OtherPropertyDetails
-              onDetailsChange={(details) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  propertyDetails: {
-                    ...prev.propertyDetails,
-                    otherDetails: details as FormData['propertyDetails']['otherDetails']
-                  }
-                }));
-              }}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => {
-                const updatedDetails = { ...formData.propertyDetails };
-                // Merge the returned details with our existing propertyDetails
-                // This preserves the otherDetails structure
-                Object.assign(updatedDetails, details);
-                setFormData((prev) => ({
-                  ...prev,
-                  propertyDetails: updatedDetails
-                }));
-              }}
-            />
-          </div>
+        <div className="space-y-6">
+          <OtherPropertyDetails
+            onDetailsChange={(details) => {
+              setFormData((prev) => ({
+                ...prev,
+                propertyDetails: {
+                  ...prev.propertyDetails,
+                  otherDetails: details as FormData['propertyDetails']['otherDetails']
+                }
+              }));
+            }}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => {
+              const updatedDetails = { ...formData.propertyDetails };
+              // Merge the returned details with our existing propertyDetails
+              // This preserves the otherDetails structure
+              Object.assign(updatedDetails, details);
+              setFormData((prev) => ({
+                ...prev,
+                propertyDetails: updatedDetails
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -301,56 +292,41 @@ const SellOthersMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <Price onPriceChange={(price) =>
+              setFormData((prev) => ({
+                ...prev,
+                price: {
+                  expectedPrice: parseFloat(price.propertyPrice.toString()),
+                  isNegotiable: price.pricetype === 'negotiable'
+                }
+              }))
+            } />
           </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) =>
+
+          <div className="space-y-4 text-black">
+            <RegistrationCharges
+              onRegistrationChargesChange={(charges) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  registrationCharges: {
+                    included: charges.included,
+                    amount: charges.amount,
+                    stampDuty: charges.stampDuty
+                  }
+                }))
+              }
+            />
+            <div className="text-black">
+              <Brokerage
+                onBrokerageChange={(brokerage) =>
                   setFormData((prev) => ({
                     ...prev,
-                    price: {
-                      expectedPrice: parseFloat(price.propertyPrice.toString()),
-                      isNegotiable: price.pricetype === 'negotiable'
-                    }
+                    brokerage: brokerage as FormData['brokerage']
                   }))
-                } />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges
-                    onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        registrationCharges: {
-                          included: charges.included,
-                          amount: charges.amount,
-                          stampDuty: charges.stampDuty
-                        }
-                      }))
-                    }
-                  />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage
-                    onBrokerageChange={(brokerage) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        brokerage: brokerage as FormData['brokerage']
-                      }))
-                    }
-                  />
-                </div>
-              </div>
+                }
+              />
             </div>
           </div>
         </div>
@@ -360,28 +336,22 @@ const SellOthersMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability
-              onAvailabilityChange={(availability) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  availability: {
-                    type: availability.type,
-                    date: availability.date,
-                    preferredLeaseDuration: availability.preferredLeaseDuration,
-                    noticePeriod: availability.noticePeriod
-                  },
-                  petsAllowed: availability.petsAllowed || false,
-                  operatingHoursRestrictions: availability.operatingHoursRestrictions || false
-                }));
-              }}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability
+            onAvailabilityChange={(availability) => {
+              setFormData((prev) => ({
+                ...prev,
+                availability: {
+                  type: availability.type,
+                  date: availability.date,
+                  preferredLeaseDuration: availability.preferredLeaseDuration,
+                  noticePeriod: availability.noticePeriod
+                },
+                petsAllowed: availability.petsAllowed || false,
+                operatingHoursRestrictions: availability.operatingHoursRestrictions || false
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -389,19 +359,13 @@ const SellOthersMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({
-                ...prev,
-                contactDetails: contact as FormData['contactDetails']
-              }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData((prev) => ({
+              ...prev,
+              contactDetails: contact as FormData['contactDetails']
+            }))}
+          />
         </div>
       ),
     },
@@ -409,38 +373,32 @@ const SellOthersMain = () => {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photos.exterior || [],
-                      interior: photos.interior || [],
-                      floorPlan: photos.floorPlan || [],
-                      washrooms: photos.washrooms || [],
-                      lifts: photos.lifts || [],
-                      emergencyExits: photos.emergencyExits || [],
-                      others: photos.others || []
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
-                }));
-              }}
-            />
-          </div>
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photos.exterior || [],
+                    interior: photos.interior || [],
+                    floorPlan: photos.floorPlan || [],
+                    washrooms: photos.washrooms || [],
+                    lifts: photos.lifts || [],
+                    emergencyExits: photos.emergencyExits || [],
+                    others: photos.others || []
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -494,10 +452,12 @@ const SellOthersMain = () => {
       }, 100);
     }
   };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault()
     console.log("Form Data:", formData)
+    setIsSubmitting(true);
 
     try {
       const user = sessionStorage.getItem('user');
@@ -562,11 +522,13 @@ const SellOthersMain = () => {
     } catch (error: any) {
       console.error("Error submitting form:", error);
       toast.error(error.response?.data?.message || 'Failed to create property listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
@@ -610,6 +572,9 @@ const SellOthersMain = () => {
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Others</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
@@ -621,36 +586,33 @@ const SellOthersMain = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
             className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-white text-black hover:bg-black hover:text-white"
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-          {currentStep < steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Next
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Submit
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          )}
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>
