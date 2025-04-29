@@ -688,7 +688,6 @@ const RentShowroomMain = () => {
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">
-      <div className="max-w-4xl mx-auto text-black">
         <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
           <div className="max-w-5xl mx-auto px-4 py-4">
             <div className="flex justify-center">
@@ -778,7 +777,6 @@ const RentShowroomMain = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
