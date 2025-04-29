@@ -29,8 +29,8 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onClose }) =
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <div className="relative w-full max-w-6xl max-h-[90vh] overflow-hidden rounded-xl">
+    <div className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-2 sm:p-4 backdrop-blur-sm">
+  <div className="relative w-full max-w-6xl max-h-[95vh] overflow-hidden rounded-xl flex flex-col">
         {viewMode === "grid" ? (
           <div className="bg-white rounded-xl p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
@@ -64,29 +64,29 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onClose }) =
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              {filteredImages.slice(0, 8).map((image, index) => (
-                <div
-                  key={image.id}
-                  className="aspect-[4/3] cursor-pointer rounded-lg overflow-hidden group relative"
-                  onClick={() => {
-                    setCurrentImageIndex(index)
-                    setViewMode("fullscreen")
-                  }}
-                >
-                  <img
-                    src={image.url || "/placeholder.svg"}
-                    alt={image.category}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <span className="text-white font-medium px-3 py-1 bg-black bg-opacity-50 rounded-lg capitalize">
-                      {image.category}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[70vh] overflow-y-auto">
+  {filteredImages.map((image, index) => (
+    <div
+      key={image.id}
+      className="aspect-[4/3] cursor-pointer rounded-lg overflow-hidden group relative"
+      onClick={() => {
+        setCurrentImageIndex(index)
+        setViewMode("fullscreen")
+      }}
+    >
+      <img
+        src={image.url || "/placeholder.svg"}
+        alt={image.category}
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+      />
+      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
+        <span className="text-white font-medium px-3 py-1 bg-black bg-opacity-50 rounded-lg capitalize">
+          {image.category}
+        </span>
+      </div>
+    </div>
+  ))}
+</div>
           </div>
         ) : (
           <div className="relative">

@@ -74,10 +74,10 @@ export const NearbyPlaces: React.FC = () => {
     activeCategory === "all" ? nearbyCategories : nearbyCategories.filter((cat) => cat.title === activeCategory)
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
       <h2 className="text-xl font-bold text-gray-900 mb-6">Nearby Places</h2>
 
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 hide-scrollbar">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 flex-wrap hide-scrollbar">
         <button
           onClick={() => setActiveCategory("all")}
           className={`px-4 py-2 rounded-lg whitespace-nowrap transition-colors ${
@@ -106,7 +106,7 @@ export const NearbyPlaces: React.FC = () => {
         })}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {filteredCategories.map((category) => {
           const Icon = category.icon
           return (

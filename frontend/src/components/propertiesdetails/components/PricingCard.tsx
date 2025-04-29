@@ -31,7 +31,7 @@ export const PricingCard: React.FC = () => {
   }
 
   const PricingContent = () => (
-    <div className="space-y-4">
+    <div className="space-y-4 w-full">
       <div
         className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm"
         onClick={() => toggleSection("maintenance")}
