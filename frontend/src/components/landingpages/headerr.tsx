@@ -146,7 +146,7 @@ const Headerr: React.FC = () => {
 
   const navLinks = [
     { name: "Home", path: "/Homepage" },
-    { name: "Properties", path: "/TenantProperties" },
+    { name: "Properties", path: "/allproperties" },
     { name: "For Owners", path: "/owner-page" },
     { name: "Blogs", path: "/Blogs" },
     { name: "About", path: "/Aboutus" },
@@ -169,20 +169,20 @@ const Headerr: React.FC = () => {
           scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
         }`}
       >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            {/* Logo - Made more responsive */}
+        <div className="container mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center min-h-[48px]">
+            {/* Logo - Responsive */}
             <div
-              className="flex items-center cursor-pointer"
+              className="flex items-center cursor-pointer flex-shrink-0"
               onClick={() => navigate("/Homepage")}
             >
               <img
                 src="./images/rentamigologou.png"
                 alt="Rentamigo Logo"
-                className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
+                className="h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 object-contain"
               />
               <span
-                className={`text-xl sm:text-2xl font-bold ml-1 ${
+                className={`text-base xs:text-lg sm:text-xl font-bold ml-1 ${
                   scrolled ? "text-black" : "text-white"
                 }`}
               >
@@ -190,14 +190,14 @@ const Headerr: React.FC = () => {
               </span>
             </div>
 
-            {/* Desktop Navigation - Enhanced spacing */}
-            <nav className="hidden xl:flex items-center">
-              <ul className="flex space-x-2 lg:space-x-6">
+            {/* Desktop Navigation - Single line, no wrap */}
+            <nav className="hidden xl:flex items-center w-auto whitespace-nowrap">
+              <ul className="flex gap-x-1 md:gap-x-3 lg:gap-x-5 whitespace-nowrap">
                 {navLinks.map((link, index) => (
                   <li key={index}>
                     <Link
                       to={link.path}
-                      className={`font-medium transition-colors relative no-underline px-2 py-2 lg:px-3 rounded-md text-sm lg:text-base ${
+                      className={`font-medium transition-colors relative no-underline px-1.5 py-1 lg:px-2 rounded-md text-xs sm:text-xs md:text-sm lg:text-base ${
                         activeLink === link.path
                           ? scrolled
                             ? "text-white bg-black"
@@ -216,19 +216,20 @@ const Headerr: React.FC = () => {
             </nav>
 
             {/* Right Section: Notifications, Chat, Auth */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-1 xs:space-x-2 sm:space-x-4">
               {/* Chat Button - Always visible */}
               <button
                 onClick={toggleChatbot}
-                className={`p-2 rounded-full transition-colors relative ${
+                className={`p-2 rounded-full transition-colors relative focus:outline-none min-w-[40px] min-h-[40px] xs:min-w-[44px] xs:min-h-[44px] ${
                   scrolled
                     ? "text-black hover:bg-gray-100"
                     : "text-white hover:bg-gray-800"
                 }`}
+                aria-label="Open chat support"
               >
-                <MessageCircle className="w-5 h-5 lg:w-6 lg:h-6" />
+                <MessageCircle className="w-5 h-5 xs:w-6 xs:h-6 lg:w-6 lg:h-6" />
                 {totalRequests > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 lg:w-5 lg:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 xs:w-5 xs:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {totalRequests}
                   </span>
                 )}
@@ -238,7 +239,8 @@ const Headerr: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={toggleNotificationList}
-                  className="relative text-xl sm:text-2xl focus:outline-none text-gray-800 p-2"
+                  className="relative text-xl xs:text-2xl focus:outline-none text-gray-800 p-2 min-w-[40px] min-h-[40px] xs:min-w-[44px] xs:min-h-[44px]"
+                  aria-label="Show notifications"
                 >
                   🔔
                   {notifications.length > 0 && (
@@ -248,10 +250,10 @@ const Headerr: React.FC = () => {
                   )}
                 </button>
                 {showList && (
-                  <div className="absolute right-0 mt-2 w-screen sm:w-80 max-h-[80vh] sm:max-h-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden transform -translate-x-1/2 sm:translate-x-0 left-1/2 sm:left-auto">
+                  <div className="absolute right-0 mt-2 w-screen xs:w-72 sm:w-80 max-h-[80vh] sm:max-h-96 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden transform -translate-x-1/2 sm:translate-x-0 left-1/2 sm:left-auto">
                     <div className="max-h-[80vh] sm:max-h-96 overflow-y-auto custom-scrollbar">
                       <div className="sticky top-0 px-4 py-3 border-b border-gray-100 bg-gray-50">
-                        <h3 className="text-lg font-semibold text-gray-800">
+                        <h3 className="text-base xs:text-lg font-semibold text-gray-800">
                           Notifications
                         </h3>
                       </div>
@@ -267,7 +269,7 @@ const Headerr: React.FC = () => {
                               n.read ? "bg-white" : "bg-gray-100"
                             }`}
                           >
-                            <p className="text-sm text-gray-800">{n.message}</p>
+                            <p className="text-xs xs:text-sm text-gray-800">{n.message}</p>
                             <p className="text-xs text-gray-500 mt-1">
                               {new Date(n.createdAt).toLocaleString()}
                             </p>
@@ -293,7 +295,7 @@ const Headerr: React.FC = () => {
               <div className="hidden xl:block">
                 <Link
                   to="/Login"
-                  className={`font-medium transition-colors no-underline px-3 py-2 lg:px-4 text-sm lg:text-base rounded-md ${
+                  className={`font-medium transition-colors no-underline px-2 py-2 lg:px-4 text-xs xs:text-xs lg:text-sm rounded-md ${
                     scrolled
                       ? "text-white bg-black hover:bg-gray-800"
                       : "text-black bg-white hover:bg-gray-200"
@@ -305,8 +307,9 @@ const Headerr: React.FC = () => {
 
               {/* Mobile Menu Button */}
               <button
-                className="xl:hidden focus:outline-none p-2"
+                className="xl:hidden focus:outline-none p-2 min-w-[40px] min-h-[40px] xs:min-w-[44px] xs:min-h-[44px]"
                 onClick={toggleMenu}
+                aria-label="Open mobile menu"
               >
                 {isMenuOpen ? (
                   <svg
@@ -356,15 +359,15 @@ const Headerr: React.FC = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3 }}
-              className="xl:hidden bg-white shadow-lg absolute top-full left-0 w-full overflow-hidden"
+              className="xl:hidden bg-white shadow-lg absolute top-full left-0 w-full overflow-hidden z-50"
             >
-              <div className="container mx-auto px-4 py-2">
-                <nav className="flex flex-col space-y-2">
+              <div className="container mx-auto px-2 xs:px-4 py-2">
+                <nav className="flex flex-col space-y-1 xs:space-y-2">
                   {navLinks.map((link, index) => (
                     <Link
                       key={index}
                       to={link.path}
-                      className={`font-medium py-3 px-4 block transition-colors no-underline rounded-md text-sm ${
+                      className={`font-medium py-2 px-3 xs:px-4 block transition-colors no-underline rounded-md text-xs xs:text-sm md:text-base ${
                         activeLink === link.path
                           ? "bg-black text-white"
                           : "text-gray-800 hover:bg-gray-100"
@@ -378,12 +381,12 @@ const Headerr: React.FC = () => {
                     </Link>
                   ))}
                   <div className="border-t border-gray-200 my-2 pt-2">
-                    <p className="text-sm text-gray-500 mb-2 px-4">Legal</p>
+                    <p className="text-xs xs:text-sm text-gray-500 mb-2 px-3 xs:px-4">Legal</p>
                     {legalLinks.map((link, index) => (
                       <Link
                         key={index}
                         to={link.path}
-                        className="font-medium text-gray-800 hover:bg-gray-100 py-3 px-4 block transition-colors no-underline rounded-md text-sm"
+                        className="font-medium text-gray-800 hover:bg-gray-100 py-2 px-3 xs:px-4 block transition-colors no-underline rounded-md text-xs xs:text-xs md:text-sm"
                         onClick={() => setIsMenuOpen(false)}
                       >
                         {link.name}
@@ -394,7 +397,7 @@ const Headerr: React.FC = () => {
                   <div className="pt-2 border-t border-gray-200">
                     <Link
                       to="/Login"
-                      className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-3 px-4 block rounded-md text-sm"
+                      className="font-medium bg-black text-white hover:bg-gray-800 transition-colors no-underline py-2 px-3 xs:px-4 block rounded-md text-xs xs:text-xs md:text-sm"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Sign In
@@ -421,7 +424,7 @@ const Headerr: React.FC = () => {
               </button>
             </div>
             <div className="flex-1 overflow-y-auto">
-              <Chatbot onNewChatNotification={handleNewChatNotification} />
+              <Chatbot onNewChatNotification={handleNewChatNotification} currentChat={null} />
             </div>
           </div>
         </div>
@@ -431,3 +434,7 @@ const Headerr: React.FC = () => {
 };
 
 export default Headerr;
+function setCurrentChatId(id: string) {
+  throw new Error("Function not implemented.");
+}
+
