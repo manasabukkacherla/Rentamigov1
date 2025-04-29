@@ -28,7 +28,7 @@ const AgriculturalLandType = ({ onLandTypeChange }: AgriculturalLandTypeProps) =
   ];
 
   return (
-    <div className="bg-white border border-black/10 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
+    <div className="bg-gray-100 border border-black/10 p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="space-y-8">
         <div className="flex items-center gap-3 mb-8">
           <Sprout className="text-black" size={28} />
@@ -43,15 +43,15 @@ const AgriculturalLandType = ({ onLandTypeChange }: AgriculturalLandTypeProps) =
                 key={type.value} 
                 className={`flex items-center space-x-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
                   selectedTypes.includes(type.value)
-                    ? 'border-black bg-black/5'
-                    : 'border-black/10 hover:border-black/20'
+                    ? 'border-black bg-white'
+                    : 'border-black/10 hover:border-black/20 bg-white'
                 }`}
               >
                 <input
                   type="checkbox"
                   checked={selectedTypes.includes(type.value)}
                   onChange={(e) => handleTypeChange(type.value, e.target.checked)}
-                  className="w-5 h-5 text-black border-black/20 rounded focus:ring-black"
+                  className="w-5 h-5 text-black border-black/20 rounded focus:ring-black bg-white"
                 />
                 <div className="flex items-center space-x-2">
                   {type.icon}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Building2, MapPin, Bath, Square, Calendar, Users } from 'lucide-react';
+import { Building2, MapPin, Bath, Square, Calendar, Users, Home } from 'lucide-react';
 import { Property } from '../types';
 
 interface PropertyCardProps {
@@ -17,15 +17,48 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     ) : content;
   };
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Available':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'Rented':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Under Maintenance':
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
+  const getIntentColor = (intent: string) => {
+    switch (intent) {
+      case 'Rent':
+        return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'Sale':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      case 'Lease':
+        return 'bg-teal-50 text-teal-700 border-teal-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
   return (
     <div className="bg-white rounded border transition-all hover:shadow-lg border-gray-200 h-full flex flex-col">
       <div className="relative h-60">
         <img src={property.image} alt={property.title} className="w-full h-full object-cover rounded-t" />
-        <div className="absolute top-2 right-2">
+        <div className="absolute top-2 right-2 flex flex-col gap-2">
           <span className={`px-2 py-1 rounded text-sm font-medium ${
             property.listingType === 'RentAmigo' ? 'bg-black text-white' : 'bg-white text-black'
           }`}>
             {property.listingType}
+          </span>
+          <span className={`px-2 py-1 rounded text-sm font-medium border ${getStatusColor(property.status)}`}>
+            <Home size={14} className="inline-block mr-1" />
+            {property.status}
+          </span>
+          <span className={`px-2 py-1 rounded text-sm font-medium border ${getIntentColor(property.intent)}`}>
+            For {property.intent}
           </span>
         </div>
       </div>

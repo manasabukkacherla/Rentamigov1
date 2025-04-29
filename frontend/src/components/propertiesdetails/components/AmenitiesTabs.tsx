@@ -1,42 +1,14 @@
-"use client"
-
-import type React from "react"
-import { useState, useEffect } from "react"
-import type { PropertyDetails } from "../types"
+import React, { useState, useEffect } from "react";
+import type { PropertyDetails } from "../types";
 import {
-  AirVent,
-  Bed,
-  Utensils,
-  Flame,
-  Tv,
-  Box,
-  Refrigerator,
-  Sofa,
-  Microwave,
-  Gamepad,
-  WashingMachine,
-  Camera,
-  PlayCircle,
-  Building2,
-  Dumbbell,
-  Bath,
-  FileWarning,
-  School,
-  Tent,
-  Calculator,
-  BatteryCharging,
-  Shield,
-  Target,
-  AlertTriangle,
-  CheckCircle,
-  Sparkles,
-  Wifi,
-  Coffee,
-  Palette,
-} from "lucide-react"
+  AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, 
+  Gamepad, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath,
+  FileWarning, School, Tent, Calculator, BatteryCharging, Shield, Target,
+  AlertTriangle, CheckCircle, Sparkles, Wifi, Coffee, Palette,
+} from "lucide-react";
 
 interface AmenitiesTabsProps {
-  details: PropertyDetails
+  details: PropertyDetails;
 }
 
 const amenityIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
@@ -66,24 +38,23 @@ const amenityIcons: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   WiFi: Wifi,
   "Coffee Shop": Coffee,
   "Community Hall": Palette,
-}
+};
 
 const tabs = [
   { id: "flat", label: "Flat Amenities", icon: Home },
   { id: "society", label: "Society Amenities", icon: Building2 },
   { id: "features", label: "Features", icon: Sparkles },
   { id: "restrictions", label: "Restrictions", icon: AlertTriangle },
-] as const
+] as const;
 
-type TabType = (typeof tabs)[number]["id"]
+type TabType = (typeof tabs)[number]["id"];
 
 export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
-  const [activeTab, setActiveTab] = useState<TabType>("flat")
+  const [activeTab, setActiveTab] = useState<TabType>("flat");
   const [isManual, setIsManual] = useState(false);
 
   useEffect(() => {
     if (isManual) return;
-
     const interval = setInterval(() => {
       setActiveTab((prevTab) => {
         const currentIndex = tabs.findIndex((tab) => tab.id === prevTab);
@@ -91,7 +62,6 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
         return tabs[nextIndex].id;
       });
     }, 5000);
-
     return () => clearInterval(interval);
   }, [isManual]);
 
@@ -101,82 +71,82 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
   };
 
   const AmenityCard = ({ icon: Icon, label }: { icon: React.FC<React.SVGProps<SVGSVGElement>>; label: string }) => (
-    <div className="flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-sm transition-all duration-300 border border-gray-100">
-      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm">
-        <Icon className="w-5 h-5 text-gray-700" />
+    <div className="flex flex-col items-center p-0 bg-gray-50 rounded hover:bg-white hover:shadow-sm transition-all duration-300">
+      <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
+        <Icon className="w-2 h-2 text-gray-700" />
       </div>
-      <span className="text-center text-sm font-medium text-gray-800">{label}</span>
+      <span className="text-center text-[8px] font-medium text-gray-800">{label}</span>
     </div>
-  )
+  );
 
   const getTabContent = () => {
     switch (activeTab) {
       case "flat":
         return (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-0">
             {details.flatAmenities.map((amenity) => (
               <AmenityCard key={amenity} icon={amenityIcons[amenity] || Box} label={amenity} />
             ))}
           </div>
-        )
+        );
       case "society":
         return (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-0">
             {details.societyAmenities.map((amenity) => (
               <AmenityCard key={amenity} icon={amenityIcons[amenity] || Building2} label={amenity} />
             ))}
           </div>
-        )
+        );
       case "features":
         return (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-0">
             {details.features.map((feature) => (
               <AmenityCard key={feature} icon={CheckCircle} label={feature} />
             ))}
           </div>
-        )
+        );
       case "restrictions":
         return (
-          <div className="space-y-3">
+          <div className="space-y-0">
             {details.restrictions.map((restriction) => (
-              <div key={restriction} className="flex items-center gap-3 p-4 bg-red-50 rounded-xl border border-red-100">
-                <div className="flex-shrink-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-sm">
-                  <AlertTriangle className="w-4 h-4 text-red-500" />
+              <div key={restriction} className="flex items-center gap-0 p-0.5 bg-red-50 rounded">
+                <div className="flex-shrink-0 w-3 h-3 bg-white rounded-full flex items-center justify-center">
+                  <AlertTriangle className="w-1.5 h-1.5 text-red-500" />
                 </div>
-                <span className="text-sm font-medium text-red-700">{restriction}</span>
+                <span className="text-[8px] font-medium text-red-700 ml-0.5">{restriction}</span>
               </div>
             ))}
           </div>
-        )
+        );
     }
-  }
+  };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-900 mb-6">Amenities & Details</h2>
+    <div className="bg-white rounded border border-gray-100">
+      <h2 className="text-xs font-bold text-gray-900 m-0">Amenities & Details</h2>
 
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200 pb-4">
+      <div className="flex flex-wrap gap-0 border-b border-gray-200">
         {tabs.map((tab) => {
-          const Icon = tab.icon
+          const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => handleTabClick(tab.id)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all duration-200 ${
-                activeTab === tab.id ? "bg-gray-900 text-white shadow-sm" : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+              className={`flex items-center gap-0 px-1 py-0.5 rounded transition-all duration-200 ${
+                activeTab === tab.id ? "bg-gray-900 text-white" : "bg-gray-50 text-gray-700 hover:bg-gray-100"
               }`}
             >
-              <Icon className="w-4 h-4" />
-              <span className="font-medium text-sm">{tab.label}</span>
+              <Icon className="w-2 h-2" />
+              <span className="font-medium text-[8px] ml-0.5">{tab.label}</span>
             </button>
-          )
+          );
         })}
       </div>
 
-      <div className="min-h-[300px]">{getTabContent()}</div>
+      <div className="min-h-[60px] px-0">{getTabContent()}</div>
     </div>
-  )
-}
+  );
+};
 
 function Home(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -195,6 +165,5 @@ function Home(props: React.SVGProps<SVGSVGElement>) {
       <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <polyline points="9 22 9 12 15 12 15 22" />
     </svg>
-  )
+  );
 }
-

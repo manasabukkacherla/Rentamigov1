@@ -138,12 +138,12 @@ function Pgmain() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <style>{globalStyles}</style>
       
       {/* Progress Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-3">
+      <div className="sticky top-0 z-50 bg-white border-b border-white">
+        <div className="max-w-5xl mx-auto px-2 sm:px-4 py-3">
           <div className="flex justify-center">
             <div className="flex items-center space-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-nowrap w-full sm:w-auto">
               {formSections.map((section, index) => (
@@ -185,7 +185,7 @@ function Pgmain() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">List Your PG/Co-living Space</h1>

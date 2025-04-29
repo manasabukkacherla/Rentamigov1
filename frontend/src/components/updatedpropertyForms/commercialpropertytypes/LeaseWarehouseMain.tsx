@@ -19,6 +19,7 @@ import CommercialAvailability from '../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 interface MediaType {
   images: { category: string; files: { url: string; file: File; }[]; }[];
@@ -104,41 +105,25 @@ const LeaseWarehouseMain = () => {
       icon: <MapPin className="w-6 h-6" />,
       component: (
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-            <div className="flex items-center mb-6">
-              <Store className="text-black mr-2" size={24} />
-              <h3 className="text-xl font-semibold text-gray-800">Basic Details</h3>
+          <div className="space-y-6">
+            <div className="relative">
+              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+              <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <div className="space-y-6">
-              <div className="relative">
-                <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
-                <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-              </div>
-              <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev, warehouseType: type }))} />
-            </div>
+            <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev, warehouseType: type }))} />
           </div>
 
-          <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-            <div className="flex items-center mb-6">
-              <MapPin className="text-black mr-2" size={24} />
-              <h3 className="text-xl font-semibold text-gray-800">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
-              <div className="relative">
-                <Landmark onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))} />
-                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
-              </div>
-              <MapCoordinates
-                latitude={formData.coordinates.latitude}
-                longitude={formData.coordinates.longitude}
-                onLatitudeChange={(latitude) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude } }))}
-                onLongitudeChange={(longitude) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude } }))}
-              />
-              <div className="flex items-center space-x-2 cursor-pointer">
-                <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
-                <span className="text-black">This is a corner property</span>
-              </div>
+          <div className="space-y-6">
+            <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+            <MapLocation
+              latitude={formData.coordinates.latitude}
+              longitude={formData.coordinates.longitude}
+              onLocationChange={(location) => setFormData(prev => ({ ...prev, coordinates: location }))}
+              onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
+            />
+            <div className="flex items-center space-x-2 cursor-pointer">
+              <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
             </div>
           </div>
         </div>
@@ -148,15 +133,9 @@ const LeaseWarehouseMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Building2 className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <WarehouseDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, warehouseDetails: details }))} />
-            <CommercialPropertyDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, propertyDetails: details }))} />
-          </div>
+        <div className="space-y-6">
+          <WarehouseDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, warehouseDetails: details }))} />
+          <CommercialPropertyDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, propertyDetails: details }))} />
         </div>
       ),
     },
@@ -164,32 +143,26 @@ const LeaseWarehouseMain = () => {
       title: "Lease Terms",
       icon: <DollarSign className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <DollarSign className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Lease Terms</h3>
-          </div>
-          <div className="space-y-6">
-            <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
-            <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
-            <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
-            <OtherCharges onOtherChargesChange={(charges) => {
-              // Since the OtherCharges component sends the old state, wait for the component to update
-              // by deferring the formData update with setTimeout
-              setTimeout(() => {
-                setFormData(prev => ({
-                  ...prev,
-                  otherCharges: {
-                    water: charges.water || { amount: 0, type: 'inclusive' },
-                    electricity: charges.electricity || { amount: 0, type: 'inclusive' },
-                    gas: charges.gas || { amount: 0, type: 'inclusive' },
-                    others: charges.others || { amount: 0, type: 'inclusive' }
-                  }
-                }));
-              }, 0);
-            }} />
-            <Brokerage onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
-          </div>
+        <div className="space-y-6">
+          <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
+          <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
+          <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
+          <OtherCharges onOtherChargesChange={(charges) => {
+            // Since the OtherCharges component sends the old state, wait for the component to update
+            // by deferring the formData update with setTimeout
+            setTimeout(() => {
+              setFormData(prev => ({
+                ...prev,
+                otherCharges: {
+                  water: charges.water || { amount: 0, type: 'inclusive' },
+                  electricity: charges.electricity || { amount: 0, type: 'inclusive' },
+                  gas: charges.gas || { amount: 0, type: 'inclusive' },
+                  others: charges.others || { amount: 0, type: 'inclusive' }
+                }
+              }));
+            }, 0);
+          }} />
+          <Brokerage onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
         </div>
       ),
     },
@@ -197,14 +170,8 @@ const LeaseWarehouseMain = () => {
       title: "Availability",
       icon: <Calendar className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <Calendar className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
         </div>
       ),
     },
@@ -212,14 +179,8 @@ const LeaseWarehouseMain = () => {
       title: "Contact Information",
       icon: <User className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <UserCircle className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
         </div>
       ),
     },
@@ -227,19 +188,13 @@ const LeaseWarehouseMain = () => {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-lg p-6 shadow-sm">
-          <div className="flex items-center mb-6">
-            <ImageIcon className="text-black mr-2" size={24} />
-            <h3 className="text-xl font-semibold text-gray-800">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(media: MediaType) => {
-                setFormData(prev => ({ ...prev, media }));
-                console.log("Media changed:", media);
-              }}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media: MediaType) => {
+              setFormData(prev => ({ ...prev, media }));
+              console.log("Media changed:", media);
+            }}
+          />
         </div>
       ),
     },
@@ -570,87 +525,105 @@ const LeaseWarehouseMain = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
-      <div ref={formRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <form onSubmit={preventDefault} className="max-w-3xl mx-auto" noValidate>
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              {steps.map((s, i) => (
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {steps.map((section, index) => (
                 <div
-                  key={i}
-                  className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-                  onClick={() => i < currentStep && setCurrentStep(i)}
-                  style={{ cursor: i < currentStep ? "pointer" : "default" }}
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
                 >
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-400"
-                      }`}
-                  >
-                    {s.icon}
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
                   </div>
-                  <span className="text-xs font-medium">{s.title}</span>
+                  {index < steps.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
-            <div className="w-full bg-gray-200 h-1 rounded-full">
-              <div
-                className="bg-black text-black h-1 rounded-full transition-all duration-300"
-                style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-              ></div>
-            </div>
           </div>
+        </div>
+      </div>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800">{steps[currentStep].title}</h2>
-          </div>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Commercial Shop</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
 
-          {steps[currentStep].component}
+        {steps[currentStep].component}
+      </div>
 
-          <div className="mt-8 flex justify-between items-center">
-            {currentStep > 0 && (
-              <button
-                type="button"
-                onClick={handlePrevious}
-                className="flex items-center px-6 py-3 text-black border-2 border-gray-300 rounded-lg hover:border-black transition-colors duration-200"
-                disabled={isSubmitting}
-              >
-                <ChevronLeft className="mr-2" size={18} />
-                Previous
-              </button>
-            )}
-            {currentStep < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-                disabled={!validateCurrentStep() || isSubmitting}
-              >
-                Next
-                <ChevronRight className="ml-2" size={18} />
-              </button>
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
             ) : (
-              <button
-                type="button"
-                onClick={(e) => handleSubmit(e)}
-                className="flex items-center px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors duration-200 ml-auto"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    List Property
-                    <ChevronRight className="ml-2" size={18} />
-                  </>
-                )}
-              </button>
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
             )}
-          </div>
-        </form>
+          </button>
+        </div>
       </div>
     </div>
   );

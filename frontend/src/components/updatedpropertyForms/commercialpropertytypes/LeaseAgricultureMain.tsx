@@ -17,7 +17,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
@@ -292,10 +292,6 @@ const LeaseAgricultureMain = () => {
       component: (
         <div className="space-y-8">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
             <div className="space-y-6">
               <PropertyName
                 propertyName={formData.title}
@@ -314,10 +310,6 @@ const LeaseAgricultureMain = () => {
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
             <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData(prev => ({
@@ -354,10 +346,6 @@ const LeaseAgricultureMain = () => {
       icon: <Building2 className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
           <div className="space-y-6">
             <AgriculturalLandDetails
               onDetailsChange={(details) => setFormData(prev => ({
@@ -365,7 +353,7 @@ const LeaseAgricultureMain = () => {
                 landDetails: { ...prev.landDetails, ...details }
               }))}
             />
-            <CommercialPropertyDetails
+            {/* <CommercialPropertyDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
                 propertyDetails: {
@@ -378,7 +366,7 @@ const LeaseAgricultureMain = () => {
                   }
                 }
               }))}
-            />
+            /> */}
           </div>
         </div>
       ),
@@ -388,13 +376,9 @@ const LeaseAgricultureMain = () => {
       icon: <DollarSign className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Lease Terms</h3>
-          </div>
+
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Lease Information</h4>
               <div className="space-y-4">
                 <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
@@ -408,7 +392,7 @@ const LeaseAgricultureMain = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4">
                 <MaintenanceAmount
@@ -432,7 +416,7 @@ const LeaseAgricultureMain = () => {
                   }))}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       ),
@@ -442,10 +426,7 @@ const LeaseAgricultureMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
+
           <div className="space-y-6">
             <CommercialAvailability
               onAvailabilityChange={(availability) => setFormData(prev => ({
@@ -462,10 +443,6 @@ const LeaseAgricultureMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
           <div className="space-y-6">
             <CommercialContactDetails
               onContactChange={(contact) => setFormData(prev => ({
@@ -482,12 +459,8 @@ const LeaseAgricultureMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
           <div className="space-y-6">
-            <CommercialMediaUpload
+            <MediaUploadforagriplot
               onMediaChange={(media) => {
                 const photos: Record<string, File[]> = {};
                 media.images.forEach(({ category, files }) => {

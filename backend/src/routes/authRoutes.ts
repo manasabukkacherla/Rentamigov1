@@ -30,9 +30,16 @@ loginRouter.post("/google", async (req: Request, res: Response) => {
     }
 
     // 🔹 3️⃣ Generate JWT Token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, {
-      expiresIn: "2h",
-    });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        isEmployee: false, // Explicitly set for regular users
+      },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "2h",
+      }
+    );
 
     // 🔹 4️⃣ Send User Data & Token
     res.status(200).json({
@@ -69,9 +76,16 @@ loginRouter.post("/login", async (req: Request, res: Response) => {
     }
 
     // 🔹 3️⃣ Generate JWT Token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET as string, {
-      expiresIn: "2h", // 🔒 Securely setting expiration time
-    });
+    const token = jwt.sign(
+      {
+        id: user._id,
+        isEmployee: false, // Explicitly set for regular users
+      },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "2h", // 🔒 Securely setting expiration time
+      }
+    );
 
     // 🔹 4️⃣ Send response
     res.status(200).json({
@@ -112,7 +126,10 @@ loginRouter.post("/emp-login", async (req: Request, res: Response) => {
 
     // 🔹 3️⃣ Generate JWT Token
     const token = jwt.sign(
-      { id: employee._id },
+      {
+        id: employee._id,
+        isEmployee: true, // Set flag for employee tokens
+      },
       process.env.JWT_SECRET as string,
       {
         expiresIn: "2h", // 🔒 Securely setting expiration time

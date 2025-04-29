@@ -19,6 +19,7 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
 import axios from 'axios';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 const globalStyles = `
   input::placeholder,
@@ -62,8 +63,8 @@ interface FormData {
     };
     landmark: string;
     location: {
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
   };
@@ -204,8 +205,8 @@ const RentRetailStoreMain = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0
+        latitude: '',
+        longitude: ''
       },
       isCornerProperty: false
     },
@@ -333,6 +334,22 @@ const RentRetailStoreMain = () => {
     </div>
   );
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const formSections = [
     {
       title: 'Basic Information',
@@ -349,7 +366,7 @@ const RentRetailStoreMain = () => {
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
               />
-              <Landmark
+              {/* <Landmark
                 onLandmarkChange={(landmark) => setFormData(prev => ({
                   ...prev,
                   basicInformation: { ...prev.basicInformation, landmark }
@@ -364,6 +381,13 @@ const RentRetailStoreMain = () => {
                     }
                   }
                 }))}
+              /> */}
+              <MapLocation
+                latitude={formData.basicInformation.location.latitude.toString()}
+                longitude={formData.basicInformation.location.longitude.toString()}
+                onLocationChange={(location) => handleChange('basicInformation.location', location)}
+                onAddressChange={(address) => handleChange('basicInformation.address', address)}
+                onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
               />
 
               <CornerProperty

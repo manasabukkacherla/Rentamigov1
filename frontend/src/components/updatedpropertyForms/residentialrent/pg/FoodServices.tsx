@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Coffee, UtensilsCrossed, Copy, Check, X } from 'lucide-react';
 
 interface MealTime {
-  id: string;
+  id: keyof DayMeals;
   label: string;
   time: string;
 }
@@ -27,14 +27,39 @@ const FoodServices = () => {
   const [includeSnacks, setIncludeSnacks] = useState(false);
   const [snackItems, setSnackItems] = useState({ morning: '', evening: '' });
   const [weekMeals, setWeekMeals] = useState<WeekMeals>({
-  monday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  tuesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  wednesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  thursday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  friday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  saturday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  sunday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-});
+    monday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+    tuesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+    wednesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+    thursday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+    friday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+    saturday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+    sunday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
+  });
+  // One time value per meal type, shared across all days
+  const [mealTimesState, setMealTimesState] = useState<{ [key: string]: string }>({
+    breakfast: '',
+    lunch: '',
+    dinner: '',
+  });
+
+  // When a meal time changes, update all days for that meal type
+  const handleMealTimeChange = (mealId: keyof DayMeals, value: string) => {
+    setMealTimesState(prev => ({ ...prev, [mealId]: value }));
+    setWeekMeals(prev => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach(day => {
+        updated[day] = {
+          ...updated[day],
+          [mealId]: {
+            ...updated[day][mealId],
+            time: value,
+          },
+        };
+      });
+      return updated;
+    });
+  };
+
 
   const days = [
     'monday',
@@ -177,9 +202,22 @@ const FoodServices = () => {
                         <div>
                           <span>{meal.label}</span>
                           <div className="text-xs text-gray-500 font-normal">Default: {meal.time}</div>
-                          <div className="text-xs text-gray-400 font-normal">(Set time below)</div>
                         </div>
                       </th>
+                    ))}
+                  </tr>
+                  {/* Single Time Input Row */}
+                  <tr className="bg-gray-100">
+                    <td className="p-3 text-left font-medium text-gray-600">Time</td>
+                    {mealTimes.map((meal) => (
+                      <td key={meal.id + '-time'} className="p-3">
+                        <input
+                          type="time"
+                          value={mealTimesState[meal.id] || ''}
+                          onChange={(e) => handleMealTimeChange(meal.id, e.target.value)}
+                          className="w-full px-3 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-300 text-xs"
+                        />
+                      </td>
                     ))}
                   </tr>
                 </thead>
@@ -208,13 +246,6 @@ const FoodServices = () => {
                               </button>
                             )}
                           </div>
-                          <input
-                            type="time"
-                            value={weekMeals[day][meal.id as keyof DayMeals].time}
-                            onChange={(e) => handleMealChange(day, meal.id as keyof DayMeals, 'time', e.target.value)}
-                            placeholder="Set time"
-                            className="w-full px-3 py-1 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-300 text-xs"
-                          />
                         </td>
                       ))}
                     </tr>

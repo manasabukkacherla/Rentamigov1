@@ -29,6 +29,7 @@ import {
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 const SellCoveredSpaceMain = () => {
   const navigate = useNavigate()
@@ -65,39 +66,34 @@ const SellCoveredSpaceMain = () => {
       icon: <Warehouse className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Warehouse className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
-              />
-              <CoveredOpenSpaceType
-                onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, spaceType: type.toString() }))}
-              />
-            </div>
+          <div className="space-y-6">
+            <PropertyName
+              propertyName={formData.propertyName}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+            />
+            <CoveredOpenSpaceType
+              onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, spaceType: type.toString() }))}
+            />
           </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              />
-              <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} />
+          <div className="space-y-6">
+            <CommercialPropertyAddress
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+            />
+            {/* <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} /> */}
+            <MapLocation
+              latitude={formData.coordinates.latitude.toString()}
+              longitude={formData.coordinates.longitude.toString()}
+              onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+            />
 
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) =>
-                  setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
-                }
-              />
-            </div>
+            <CornerProperty
+              onCornerPropertyChange={(isCorner) =>
+                setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+              }
+            />
           </div>
         </div>
       ),
@@ -106,19 +102,13 @@ const SellCoveredSpaceMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CoveredOpenSpaceDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, spaceDetails: details }))}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CoveredOpenSpaceDetails
+            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, spaceDetails: details }))}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
+          />
         </div>
       ),
     },
@@ -126,35 +116,20 @@ const SellCoveredSpaceMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
           </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
-              </div>
-            </div>
+          <div className="text-black">
+            <RegistrationCharges
+              onRegistrationChargesChange={(charges) =>
+                setFormData((prev) => ({ ...prev, registrationCharges: charges }))
+              }
+            />
+          </div>
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges
-                    onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({ ...prev, registrationCharges: charges }))
-                    }
-                  />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
-                </div>
-              </div>
-            </div>
+          <div className="text-black">
+            <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
           </div>
         </div>
       ),
@@ -163,16 +138,10 @@ const SellCoveredSpaceMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability
-              onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability
+            onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
+          />
         </div>
       ),
     },
@@ -180,16 +149,10 @@ const SellCoveredSpaceMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
+          />
         </div>
       ),
     },
@@ -197,29 +160,23 @@ const SellCoveredSpaceMain = () => {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(mediaInput) => {
-                // Extract just the URLs from image files
-                const photoUrls = mediaInput.images.flatMap(img =>
-                  img.files.map(file => file.url)
-                );
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(mediaInput) => {
+              // Extract just the URLs from image files
+              const photoUrls = mediaInput.images.flatMap(img =>
+                img.files.map(file => file.url)
+              );
 
-                setFormData((prev) => ({
-                  ...prev,
-                  media: {
-                    photos: photoUrls,
-                    video: mediaInput.video?.url || null
-                  }
-                }));
-              }}
-            />
-          </div>
+              setFormData((prev) => ({
+                ...prev,
+                media: {
+                  photos: photoUrls,
+                  video: mediaInput.video?.url || null
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -400,7 +357,7 @@ const SellCoveredSpaceMain = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
@@ -442,22 +399,17 @@ const SellCoveredSpaceMain = () => {
       </div>
 
       {/* Form Content */}
-      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Covered Space</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
 
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center">
-            <AlertCircle className="w-5 h-5 mr-2" />
-            <span>{error}</span>
-          </div>
-        )}
-
         {steps[currentStep].component}
       </div>
-
       {/* Navigation Buttons */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">

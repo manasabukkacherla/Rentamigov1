@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define proper interface for form data
 interface FormData {
@@ -172,59 +173,66 @@ const SellOfficeSpaceMain = () => {
     }
   }, []);
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const steps = [
     {
       title: "Basic Information",
       icon: <Briefcase className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Briefcase className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.propertyName}
-                onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
-              />
-              <OfficeSpaceType
-                onOfficeTypeChange={(types) => {
-                  if (types && types.length > 0) {
-                    setFormData((prev) => ({ ...prev, officeType: types[0] }))
-                  }
-                }}
-              />
-            </div>
-          </div>
+          <PropertyName
+            propertyName={formData.propertyName}
+            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+          />
+          <OfficeSpaceType
+            onOfficeTypeChange={(types) => {
+              if (types && types.length > 0) {
+                setFormData((prev) => ({ ...prev, officeType: types[0] }))
+              }
+            }}
+          />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              />
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
-                onLocationSelect={(location) => setFormData((prev) => ({
-                  ...prev,
-                  coordinates: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  }
-                }))}
-              />
+          <CommercialPropertyAddress
+            onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+          />
+          {/* <Landmark
+            onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+            onLocationSelect={(location) => setFormData((prev) => ({
+              ...prev,
+              coordinates: {
+                latitude: location.latitude,
+                longitude: location.longitude
+              }
+            }))}
+          /> */}
+          <MapLocation
+            latitude={formData.coordinates.latitude.toString()}
+            longitude={formData.coordinates.longitude.toString()}
+            onLocationChange={(location) => handleChange('coordinates', location)}
+            onAddressChange={(address) => handleChange('address', address)}
+            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+          />
 
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) =>
-                  setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
-                }
-              />
-            </div>
-          </div>
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) =>
+              setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+            }
+          />
         </div>
       ),
     },
@@ -232,33 +240,27 @@ const SellOfficeSpaceMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <OfficeSpaceDetails
-              onDetailsChange={(details) => setFormData((prev) => ({ ...prev, officeDetails: details }))}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => {
-                setFormData((prev) => {
-                  // Extract area data for price per sqft calculations
-                  const area = {
-                    totalArea: Number(details.area?.totalArea || 0),
-                    builtUpArea: Number(details.area?.builtUpArea || 0),
-                    carpetArea: Number(details.area?.carpetArea || 0)
-                  };
-                  return {
-                    ...prev,
-                    propertyDetails: details,
-                    area
-                  };
-                });
-              }}
-            />
-          </div>
+        <div className="space-y-6">
+          <OfficeSpaceDetails
+            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, officeDetails: details }))}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => {
+              setFormData((prev) => {
+                // Extract area data for price per sqft calculations
+                const area = {
+                  totalArea: Number(details.area?.totalArea || 0),
+                  builtUpArea: Number(details.area?.builtUpArea || 0),
+                  carpetArea: Number(details.area?.carpetArea || 0)
+                };
+                return {
+                  ...prev,
+                  propertyDetails: details,
+                  area
+                };
+              });
+            }}
+          />
         </div>
       ),
     },
@@ -266,60 +268,47 @@ const SellOfficeSpaceMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <Price onPriceChange={(price) =>
+              setFormData((prev) => ({
+                ...prev,
+                price: {
+                  expectedPrice: parseFloat(price.propertyPrice.toString()),
+                  isNegotiable: price.pricetype === 'negotiable'
+                }
+              }))
+            } />
+
           </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) =>
+
+          <div className="space-y-4 text-black">
+            <div className="text-black">
+              <RegistrationCharges
+                onRegistrationChargesChange={(charges) =>
                   setFormData((prev) => ({
                     ...prev,
-                    price: {
-                      expectedPrice: parseFloat(price.propertyPrice.toString()),
-                      isNegotiable: price.pricetype === 'negotiable'
+                    registrationCharges: {
+                      included: charges.included,
+                      amount: charges.amount,
+                      stampDuty: charges.stampDuty
                     }
                   }))
-                } />
-
-              </div>
+                }
+              />
             </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges
-                    onRegistrationChargesChange={(charges) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        registrationCharges: {
-                          included: charges.included,
-                          amount: charges.amount,
-                          stampDuty: charges.stampDuty
-                        }
-                      }))
+            <div className="text-black">
+              <Brokerage
+                onBrokerageChange={(brokerage) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    brokerage: {
+                      required: brokerage.required,
+                      amount: brokerage.amount
                     }
-                  />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage
-                    onBrokerageChange={(brokerage) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        brokerage: {
-                          required: brokerage.required,
-                          amount: brokerage.amount
-                        }
-                      }))
-                    }
-                  />
-                </div>
-              </div>
+                  }))
+                }
+              />
             </div>
           </div>
         </div>
@@ -329,24 +318,18 @@ const SellOfficeSpaceMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialAvailability
-              onAvailabilityChange={(availability) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  availability: {
-                    type: availability.type,
-                    date: availability.date
-                  }
-                }));
-              }}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialAvailability
+            onAvailabilityChange={(availability) => {
+              setFormData((prev) => ({
+                ...prev,
+                availability: {
+                  type: availability.type,
+                  date: availability.date
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -354,25 +337,19 @@ const SellOfficeSpaceMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialContactDetails
-              onContactChange={(contact) => setFormData((prev) => ({
-                ...prev,
-                contactDetails: {
-                  name: contact.name,
-                  email: contact.email,
-                  phone: contact.phone,
-                  alternatePhone: contact.alternatePhone,
-                  bestTimeToContact: contact.bestTimeToContact
-                }
-              }))}
-            />
-          </div>
+        <div className="space-y-6">
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData((prev) => ({
+              ...prev,
+              contactDetails: {
+                name: contact.name,
+                email: contact.email,
+                phone: contact.phone,
+                alternatePhone: contact.alternatePhone,
+                bestTimeToContact: contact.bestTimeToContact
+              }
+            }))}
+          />
         </div>
       ),
     },
@@ -380,38 +357,32 @@ const SellOfficeSpaceMain = () => {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <div className="space-y-6">
-            <CommercialMediaUpload
-              onMediaChange={(media) => {
-                const photos: Record<string, File[]> = {};
-                media.images.forEach(({ category, files }) => {
-                  photos[category] = files.map(f => f.file);
-                });
+        <div className="space-y-6">
+          <CommercialMediaUpload
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.images.forEach(({ category, files }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photos.exterior || [],
-                      interior: photos.interior || [],
-                      floorPlan: photos.floorPlan || [],
-                      washrooms: photos.washrooms || [],
-                      lifts: photos.lifts || [],
-                      emergencyExits: photos.emergencyExits || [],
-                      others: photos.others || []
-                    },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
-                  }
-                }));
-              }}
-            />
-          </div>
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photos.exterior || [],
+                    interior: photos.interior || [],
+                    floorPlan: photos.floorPlan || [],
+                    washrooms: photos.washrooms || [],
+                    lifts: photos.lifts || [],
+                    emergencyExits: photos.emergencyExits || [],
+                    others: photos.others || []
+                  },
+                  videoTour: media.video?.file || null,
+                  documents: media.documents.map(d => d.file)
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -597,6 +568,9 @@ const SellOfficeSpaceMain = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Office Space</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>

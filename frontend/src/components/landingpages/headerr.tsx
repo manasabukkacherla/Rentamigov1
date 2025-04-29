@@ -151,6 +151,8 @@ const Headerr: React.FC = () => {
     { name: "Blogs", path: "/Blogs" },
     { name: "About", path: "/Aboutus" },
     { name: "Contact", path: "/Contactus" },
+    { name: "My Messages", path: "/messages" },
+    { name: "Find Employee", path: "/findEmployee" },
     { name: "Report Bug", path: "/report-bug" },
   ];
 

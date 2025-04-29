@@ -14,7 +14,7 @@ import AvailabilityDate from "../AvailabilityDate"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 
-import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation ,Loader2} from "lucide-react"
+import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, DollarSign, Calendar, Locate, Navigation, Loader2 } from "lucide-react"
 
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
@@ -23,6 +23,8 @@ import { useNavigate } from "react-router-dom"
 import PropertyName from "../PropertyName"
 import ShopType from "../CommercialComponents/ShopType"
 import CornerProperty from "../CommercialComponents/CornerProperty"
+import MapLocation from "../CommercialComponents/MapLocation"
+// import MapLocation from "../CommercialComponents/MapLocation"
 
 interface IBasicInformation {
   title: string;
@@ -35,8 +37,8 @@ interface IBasicInformation {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
 }
@@ -194,8 +196,8 @@ const RentShopMain = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0
+        latitude: '',
+        longitude: ''
       },
       isCornerProperty: false
     },
@@ -280,140 +282,156 @@ const RentShopMain = () => {
   };
 
   // Function to get current location
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude.toString();
-          const lng = position.coords.longitude.toString();
-          
-          // Update form data
-          setFormData(prev => ({
-            ...prev,
-            basicInformation: {
-              ...prev.basicInformation,
-              location: {
-                latitude: parseFloat(lat),
-                longitude: parseFloat(lng)
-              }
-            }
-          }));
-          
-          // Update map
-          updateMapLocation(lat, lng);
-          
-          // Attempt to reverse geocode for address
-          reverseGeocode(lat, lng);
-        },
-        (error) => {
-          console.error("Error getting location: ", error);
-          toast.error("Unable to get your current location. Please check your browser permissions.");
-        }
-      );
-    } else {
-      toast.error("Geolocation is not supported by your browser.");
-    }
-  };
+  // const getCurrentLocation = () => {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const lat = position.coords.latitude.toString();
+  //         const lng = position.coords.longitude.toString();
 
-  // Reverse geocode to get address from coordinates
-  const reverseGeocode = (lat: string, lng: string) => {
-    const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
-    fetch(geocodingUrl)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "OK" && data.results && data.results.length > 0) {
-          const address = data.results[0];
-          
-          // Extract address components
-          const addressComponents = {
-            street: '',
-            city: '',
-            state: '',
-            zipCode: ''
-          };
-          
-          // Map address components to our format
-          address.address_components.forEach((component: any) => {
-            const types = component.types;
-            
-            if (types.includes('route')) {
-              addressComponents.street = component.long_name;
-            } else if (types.includes('locality')) {
-              addressComponents.city = component.long_name;
-            } else if (types.includes('administrative_area_level_1')) {
-              addressComponents.state = component.long_name;
-            } else if (types.includes('postal_code')) {
-              addressComponents.zipCode = component.long_name;
-            }
-          });
-          
-          // Check if we have a street address, if not use formatted address
-          if (!addressComponents.street && address.formatted_address) {
-            const formattedParts = address.formatted_address.split(',');
-            if (formattedParts.length > 0) {
-              addressComponents.street = formattedParts[0];
-            }
-          }
-          
-          // Update address in form data
-          setFormData(prev => ({
-            ...prev,
-            basicInformation: {
-              ...prev.basicInformation,
-              address: addressComponents
-            }
-          }));
-          
-          // Update landmark with nearby point of interest if available
-          const landmark = data.results.find((result: any) => 
-            result.types.some((type: string) => 
-              ['point_of_interest', 'establishment', 'premise'].includes(type)
-            )
-          );
-          
-          if (landmark && landmark.name) {
-            setFormData(prev => ({
-              ...prev,
-              basicInformation: {
-                ...prev.basicInformation,
-                landmark: landmark.name
-              }
-            }));
-          }
-          
-          toast.success("Location details updated successfully");
-        } else {
-          console.error("Geocoding failed:", data.status);
-        }
-      })
-      .catch(error => {
-        console.error("Error during reverse geocoding:", error);
-      });
-  };
+  //         // Update form data
+  //         setFormData(prev => ({
+  //           ...prev,
+  //           basicInformation: {
+  //             ...prev.basicInformation,
+  //             location: {
+  //               latitude: parseFloat(lat),
+  //               longitude: parseFloat(lng)
+  //             }
+  //           }
+  //         }));
 
-  // Function to open location picker in Google Maps
-  const openLocationPicker = () => {
-    const lat = formData.basicInformation.location.latitude.toString() || "20.5937";
-    const lng = formData.basicInformation.location.longitude.toString() || "78.9629";
-    window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
-    toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
-  };
+  //         // Update map
+  //         updateMapLocation(lat, lng);
 
-  const handleLocationSelect = (latitude: string, longitude: string) => {
-    setFormData({
-      ...formData,
-      basicInformation: {
-        ...formData.basicInformation,
-        location: {
-          latitude: parseFloat(latitude),
-          longitude: parseFloat(longitude)
+  //         // Attempt to reverse geocode for address
+  //         reverseGeocode(lat, lng);
+  //       },
+  //       (error) => {
+  //         console.error("Error getting location: ", error);
+  //         toast.error("Unable to get your current location. Please check your browser permissions.");
+  //       }
+  //     );
+  //   } else {
+  //     toast.error("Geolocation is not supported by your browser.");
+  //   }
+  // };
+
+  // // Reverse geocode to get address from coordinates
+  // const reverseGeocode = (lat: string, lng: string) => {
+  //   const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
+
+  //   fetch(geocodingUrl)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       if (data.status === "OK" && data.results && data.results.length > 0) {
+  //         const address = data.results[0];
+
+  //         // Extract address components
+  //         const addressComponents = {
+  //           street: '',
+  //           city: '',
+  //           state: '',
+  //           zipCode: ''
+  //         };
+
+  //         // Map address components to our format
+  //         address.address_components.forEach((component: any) => {
+  //           const types = component.types;
+
+  //           if (types.includes('route')) {
+  //             addressComponents.street = component.long_name;
+  //           } else if (types.includes('locality')) {
+  //             addressComponents.city = component.long_name;
+  //           } else if (types.includes('administrative_area_level_1')) {
+  //             addressComponents.state = component.long_name;
+  //           } else if (types.includes('postal_code')) {
+  //             addressComponents.zipCode = component.long_name;
+  //           }
+  //         });
+
+  //         // Check if we have a street address, if not use formatted address
+  //         if (!addressComponents.street && address.formatted_address) {
+  //           const formattedParts = address.formatted_address.split(',');
+  //           if (formattedParts.length > 0) {
+  //             addressComponents.street = formattedParts[0];
+  //           }
+  //         }
+
+  //         // Update address in form data
+  //         setFormData(prev => ({
+  //           ...prev,
+  //           basicInformation: {
+  //             ...prev.basicInformation,
+  //             address: addressComponents
+  //           }
+  //         }));
+
+  //         // Update landmark with nearby point of interest if available
+  //         const landmark = data.results.find((result: any) =>
+  //           result.types.some((type: string) =>
+  //             ['point_of_interest', 'establishment', 'premise'].includes(type)
+  //           )
+  //         );
+
+  //         if (landmark && landmark.name) {
+  //           setFormData(prev => ({
+  //             ...prev,
+  //             basicInformation: {
+  //               ...prev.basicInformation,
+  //               landmark: landmark.name
+  //             }
+  //           }));
+  //         }
+
+  //         toast.success("Location details updated successfully");
+  //       } else {
+  //         console.error("Geocoding failed:", data.status);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error("Error during reverse geocoding:", error);
+  //     });
+  // };
+
+  // // Function to open location picker in Google Maps
+  // const openLocationPicker = () => {
+  //   const lat = formData.basicInformation.location.latitude.toString() || "20.5937";
+  //   const lng = formData.basicInformation.location.longitude.toString() || "78.9629";
+  //   window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
+  //   toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
+  // };
+
+  // const handleLocationSelect = (latitude: string, longitude: string) => {
+  //   setFormData({
+  //     ...formData,
+  //     basicInformation: {
+  //       ...formData.basicInformation,
+  //       location: {
+  //         latitude: parseFloat(latitude),
+  //         longitude: parseFloat(longitude)
+  //       }
+  //     }
+  //   });
+
+  //   // Update map when coordinates change
+  //   updateMapLocation(latitude, longitude);
+  // };
+
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
         }
+        current[keys[keys.length - 1]] = value;
+        return newData;
       }
+      return { ...prev, [key]: value };
     });
-    
-    // Update map when coordinates change
-    updateMapLocation(latitude, longitude);
   };
 
   const formSections = [
@@ -441,7 +459,7 @@ const RentShopMain = () => {
               basicInformation: { ...prev.basicInformation, address }
             }))}
           />
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center mb-8">
               <MapPin className="text-black mr-3" size={28} />
               <h3 className="text-2xl font-semibold text-black">Map Location</h3>
@@ -575,8 +593,15 @@ const RentShopMain = () => {
                 </p>
               </div>
             </div>
-          </div>
-          <Landmark
+          </div> */}
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+          />
+          {/* <Landmark
             onLandmarkChange={(landmark) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, landmark }
@@ -597,7 +622,7 @@ const RentShopMain = () => {
             }}
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
-          />
+          /> */}
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({
               ...prev,
@@ -949,13 +974,7 @@ const RentShopMain = () => {
           </div>
         </div>
       </div>
-      {/* <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> */}
-      {/* <div className="bg-white rounded-xl shadow-md overflow-hidden"> */}
-      {/* <div ref={formRef} className="p-6 sm:p-10"> */}
-      {/* <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
-          </div> */}
-
+      
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
@@ -967,6 +986,7 @@ const RentShopMain = () => {
 
         {formSections[currentStep].content}
       </div>
+      
       {/* Navigation Buttons */}
       {/* {!formSubmitted && ( */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
