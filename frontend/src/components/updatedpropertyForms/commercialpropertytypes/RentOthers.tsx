@@ -20,6 +20,7 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 
 import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
+import MapLocation from '../CommercialComponents/MapLocation';
 
 // Global styles for form elements
 const globalStyles = `
@@ -452,6 +453,22 @@ const RentOthers = () => {
     </div>
   );
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const formSections = [
     {
       title: 'Basic Information',
@@ -468,8 +485,15 @@ const RentOthers = () => {
           <CommercialPropertyAddress
             onAddressChange={handleAddressChange}
           />
-          <Landmark
+          {/* <Landmark
             onLandmarkChange={handleLandmarkChange}
+          /> */}
+          <MapLocation
+            latitude={formData.coordinates.latitude.toString()}
+            longitude={formData.coordinates.longitude.toString()}
+            onLocationChange={(location) => handleChange('coordinates', location)}
+            onAddressChange={(address) => handleChange('address', address)}
+            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
           />
           <CornerProperty
             onCornerPropertyChange={handleCornerPropertyChange}

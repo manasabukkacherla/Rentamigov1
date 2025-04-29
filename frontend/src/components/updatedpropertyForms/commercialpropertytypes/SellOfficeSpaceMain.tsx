@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from "lucide-react"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define proper interface for form data
 interface FormData {
@@ -172,6 +173,22 @@ const SellOfficeSpaceMain = () => {
     }
   }, []);
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const steps = [
     {
       title: "Basic Information",
@@ -193,7 +210,7 @@ const SellOfficeSpaceMain = () => {
           <CommercialPropertyAddress
             onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
           />
-          <Landmark
+          {/* <Landmark
             onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
             onLocationSelect={(location) => setFormData((prev) => ({
               ...prev,
@@ -202,6 +219,13 @@ const SellOfficeSpaceMain = () => {
                 longitude: location.longitude
               }
             }))}
+          /> */}
+          <MapLocation
+            latitude={formData.coordinates.latitude.toString()}
+            longitude={formData.coordinates.longitude.toString()}
+            onLocationChange={(location) => handleChange('coordinates', location)}
+            onAddressChange={(address) => handleChange('address', address)}
+            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
           />
 
           <CornerProperty
