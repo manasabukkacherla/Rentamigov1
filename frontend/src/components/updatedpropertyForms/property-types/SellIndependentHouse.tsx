@@ -172,22 +172,14 @@ const SellIndependentHouse = ({ propertyId, onSubmit }: SellIndependentHouseProp
       icon: <Home className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyName
+    
+               <PropertyName
                   propertyName={formData.propertyName}
                   onPropertyNameChange={(name) =>
                     setFormData((prev) => ({ ...prev, propertyName: name }))
                   }
                 />
-              </div>
-            </div>
-          </div>
+            
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -300,14 +292,7 @@ const SellIndependentHouse = ({ propertyId, onSubmit }: SellIndependentHouseProp
       icon: <IndianRupee className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Price Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <div className="space-y-12">
+             <div className="space-y-12">
                   <Price
                     onPriceChange={(price) =>
                       setFormData((prev) => ({
@@ -324,19 +309,11 @@ const SellIndependentHouse = ({ propertyId, onSubmit }: SellIndependentHouseProp
                       carpetArea: parseFloat(formData.size.carpetArea) || 0
                     }}
                   />
-                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Additional Charges</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <div className="space-y-12">
+              
+               <div className="space-y-12">
                   <RegistrationCharges
                     onRegistrationChargesChange={(charges) =>
                       setFormData((prev) => ({
@@ -364,8 +341,6 @@ const SellIndependentHouse = ({ propertyId, onSubmit }: SellIndependentHouseProp
                 </div>
               </div>
             </div>
-          </div>
-        </div>
       ),
     },
     {
@@ -374,10 +349,7 @@ const SellIndependentHouse = ({ propertyId, onSubmit }: SellIndependentHouseProp
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
+            
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <AvailabilityDate
                 onAvailabilityChange={(availability) =>
