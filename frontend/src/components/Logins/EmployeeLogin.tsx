@@ -74,6 +74,7 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
         userData.user.fullName || userData.user.name || ""
       );
       sessionStorage.setItem("username", userData.user.username);
+      sessionStorage.setItem("token", userData.token);
 
       console.log(
         "✅ Session Storage Updated:",
@@ -117,6 +118,7 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
         userData.employee.name || userData.employee.fullName || ""
       );
       sessionStorage.setItem("username", userData.employee.email);
+      sessionStorage.setItem("token", userData.token);
 
       console.log(
         "✅ Session Storage Updated:",

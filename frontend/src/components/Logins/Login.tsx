@@ -77,9 +77,10 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       sessionStorage.setItem("email", userData.user.email);
       sessionStorage.setItem(
         "fullName",
-        userData.user.fullName || userData.user.name || ""
+        userData.user.fullName || userData.username || ""
       );
       sessionStorage.setItem("username", userData.user.username);
+      sessionStorage.setItem("token", userData.token);
 
       console.log(
         "✅ Session Storage Updated:",
@@ -123,6 +124,7 @@ function Login({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
         userData.user.fullName || userData.user.name || ""
       );
       sessionStorage.setItem("username", userData.user.username);
+      sessionStorage.setItem("token", userData.token);
 
       console.log(
         "✅ Session Storage Updated:",

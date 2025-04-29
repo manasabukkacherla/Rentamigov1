@@ -39,20 +39,22 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const [showLogoutAnimation, setShowLogoutAnimation] = useState(false);
   const [showChatbot, setShowChatbot] = useState(false);
-  const [chatNotifications, setChatNotifications] = useState<ChatNotification[]>([]);
+  const [chatNotifications, setChatNotifications] = useState<
+    ChatNotification[]
+  >([]);
   const [totalRequests, setTotalRequests] = useState(0);
 
   // Update total requests whenever chat notifications change
   useEffect(() => {
     const activeAndPendingChats = chatNotifications.filter(
-      chat => chat.status === 'active' || chat.status === 'pending'
+      (chat) => chat.status === "active" || chat.status === "pending"
     ).length;
     setTotalRequests(activeAndPendingChats);
   }, [chatNotifications]);
 
   const handleNewChatNotification = (notification: ChatNotification) => {
-    setChatNotifications(prev => {
-      const existingIndex = prev.findIndex(n => n.id === notification.id);
+    setChatNotifications((prev) => {
+      const existingIndex = prev.findIndex((n) => n.id === notification.id);
       if (existingIndex >= 0) {
         const newNotifications = [...prev];
         newNotifications[existingIndex] = notification;
@@ -62,25 +64,32 @@ const Sidebar: React.FC<SidebarProps> = ({
     });
   };
 
-  const handleRespondToChat = (notification: ChatNotification, response: string) => {
-    const isResolved = response === '--- Chat marked as resolved ---';
-    
+  const handleRespondToChat = (
+    notification: ChatNotification,
+    response: string
+  ) => {
+    const isResolved = response === "--- Chat marked as resolved ---";
+
     const updatedNotification = {
       ...notification,
       messages: [
         ...notification.messages,
-        ...(isResolved ? [] : [{
-          id: Date.now().toString(),
-          content: response,
-          type: 'employee' as const,
-          timestamp: new Date(),
-        }]),
+        ...(isResolved
+          ? []
+          : [
+              {
+                id: Date.now().toString(),
+                content: response,
+                type: "employee" as const,
+                timestamp: new Date(),
+              },
+            ]),
       ],
-      status: isResolved ? 'resolved' as const : 'active' as const,
+      status: isResolved ? ("resolved" as const) : ("active" as const),
     };
 
-    setChatNotifications(prev =>
-      prev.map(n => (n.id === notification.id ? updatedNotification : n))
+    setChatNotifications((prev) =>
+      prev.map((n) => (n.id === notification.id ? updatedNotification : n))
     );
   };
 
@@ -91,6 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "users", icon: Users, label: "Users" },
     { id: "notifications", icon: Bell, label: "Notifications" },
     { id: "settings", icon: Settings, label: "Settings" },
+    { id: "messages", icon: MessageCircle, label: "My Messages" },
   ];
 
   const handleLogout = () => {
