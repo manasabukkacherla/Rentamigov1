@@ -19,6 +19,7 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import MediaUploadforagriplot from '../Mediauploadforagriplot';
 import { MapPin, Building2, DollarSign, Calendar, ChevronLeft, ChevronRight, Store, ImageIcon, UserCircle } from 'lucide-react';
 import axios from 'axios';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 const globalStyles = `
   input::placeholder,
@@ -83,8 +84,8 @@ interface FormData {
     };
     landmark: string;
     location: {
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
   };
@@ -203,8 +204,8 @@ const RentPlot = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0
+        latitude: '',
+        longitude: ''
       },
       isCornerProperty: false
     },
@@ -515,6 +516,22 @@ const RentPlot = () => {
     });
   };
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const formSections = [
     {
       title: 'Basic Information',
@@ -527,7 +544,14 @@ const RentPlot = () => {
           />
           <PlotType onPlotTypeChange={handlePlotTypeChange} />
           <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-          <Landmark onLandmarkChange={handleLandmarkChange} />
+          {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+          />
           <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
         </div>
       )
@@ -546,7 +570,7 @@ const RentPlot = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
 
-        <div>
+        <div className='space-y-6'>
 
           <Rent onRentChange={handleRentChange} />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
@@ -555,15 +579,6 @@ const RentPlot = () => {
           <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
 
 
-
-          <div>
-            {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
-            <div className="space-y-4 text-black">
-              {/* <OtherCharges onOtherChargesChange={handleOtherChargesChange} /> */}
-
-              {/* <Brokerage onBrokerageChange={handleBrokerageChange} /> */}
-            </div>
-          </div>
         </div>
       )
     },
@@ -739,7 +754,7 @@ const RentPlot = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -782,7 +797,10 @@ const RentPlot = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div ref={formRef} className="mb-8">
+      <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Plot</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
