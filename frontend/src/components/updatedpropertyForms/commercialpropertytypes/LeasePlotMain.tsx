@@ -20,7 +20,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
-import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
+import MediaUploadforagriplot from "../Mediauploadforagriplot"
 
 interface FormData {
   propertyId?: string;
@@ -541,7 +541,7 @@ const LeasePlotMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
 
-          <CommercialMediaUpload
+          <MediaUploadforagriplot
             onMediaChange={(mediaUpdate) => {
               const convertedPhotos: any = {};
 

@@ -16,7 +16,7 @@ import OtherCharges from '../residentialrent/OtherCharges';
 import Brokerage from '../residentialrent/Brokerage';
 import AvailabilityDate from '../AvailabilityDate';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
-import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
+import MediaUploadforagriplot from '../Mediauploadforagriplot';
 import { MapPin, Building2, DollarSign, Calendar, ChevronLeft, ChevronRight, Store, ImageIcon, UserCircle } from 'lucide-react';
 import axios from 'axios';
 
@@ -587,7 +587,7 @@ const RentPlot = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <CommercialMediaUpload
+        <MediaUploadforagriplot
           onMediaChange={(media) => {
             const photos: Record<string, File[]> = {};
             media.images.forEach(({ category, files }) => {
