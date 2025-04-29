@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MapPin, Users, IndianRupee, Wifi, Car, Dumbbell, Bed, Bath, DoorClosed, UtensilsCrossed, Tv, Fan, Snowflake, Sofa, Laptop, Lock, Zap, Clock, Calculator as Elevator, Coffee, Utensils, Stars as Stairs, Warehouse, Shirt, Droplets, Flame, Refrigerator, BookOpen, Cctv, Fingerprint, Phone, Loader2 } from 'lucide-react';
+import ContactModal from '../components/ContactModal';
 
 const pgData = {
   '1': {
@@ -134,7 +135,11 @@ const pgData = {
           { name: 'Indoor Games', icon: Users }
         ]
       }
-    ]
+    ],
+    coordinates: {
+      latitude: 12.9716,
+      longitude: 77.5946
+    },
   }
 };
 
@@ -142,6 +147,7 @@ const PGDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedSharing, setSelectedSharing] = useState<number | null>(null);
   const [selectedFacility, setSelectedFacility] = useState<string | null>(null);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const pg = pgData[id as keyof typeof pgData];
 
   if (!pg) {
@@ -154,25 +160,27 @@ const PGDetails: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 px-6 sm:px-8 lg:px-10 pt-10">
+      {/* Header with Name and Rating */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{pg.name}</h1>
+          <div className="flex items-center text-gray-600 mt-1">
+            <MapPin className="h-5 w-5 mr-1" />
+            <span>{pg.location}, {pg.area}</span>
+          </div>
+        </div>
 
-<div className="flex items-center justify-between flex-wrap gap-4">
-  <div>
-    <h1 className="text-3xl font-bold text-gray-900">{pg.name}</h1>
-    <div className="flex items-center text-gray-600 mt-1">
-      <MapPin className="h-5 w-5 mr-1" />
-      <span>{pg.location}, {pg.area}</span>
-    </div>
-  </div>
-
-  {/* Rating Section */}
-  <div className="flex items-center bg-gray-100 px-3 py-1 rounded-lg">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="orange" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 mr-1">
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l2.39 6.97H21l-5.8 4.22L16.6 21 12 16.97 7.4 21l1.4-7.81L3 8.97h6.61z" />
-    </svg>
-    <span className="font-semibold text-gray-900 mr-1">4.8</span>
-    <span className="text-gray-500">(42 reviews)</span>
-  </div>
-</div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center bg-gray-100 px-3 py-1 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="orange" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 mr-1">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l2.39 6.97H21l-5.8 4.22L16.6 21 12 16.97 7.4 21l1.4-7.81L3 8.97h6.61z" />
+            </svg>
+            <span className="font-semibold text-gray-900 mr-1">4.8</span>
+            <span className="text-gray-500">(42 reviews)</span>
+          </div>
+          
+        </div>
+      </div>
 
       {/* Main Image and Basic Info */}
       <div className="relative h-[400px] rounded-lg overflow-hidden">
@@ -191,6 +199,33 @@ const PGDetails: React.FC = () => {
         </div>
       </div>
 
+      {/* Location Map Section */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Location</h2>
+        <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.5965966906644!2d77.64163427473439!3d12.838572987455667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae6b2ef7f1c6f3%3A0x6c06e8c7dc1ac0e!2sElectronic%20City%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin"
+            width="100%"
+            height="100%"
+            style={{ border: 0 }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            className="rounded-xl"
+            title="PG Location Map"
+          ></iframe>
+        </div>
+        <div className="flex items-start gap-3 mb-4">
+          <div className="bg-gray-100 p-2 rounded-full">
+            <MapPin className="w-5 h-5 text-gray-700" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900 mb-1">PG Address</h3>
+            <p className="text-gray-600">{pg.address}</p>
+          </div>
+        </div>
+      </div>
+
       {/* Common Amenities */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="p-6 border-b border-gray-200">
@@ -203,7 +238,7 @@ const PGDetails: React.FC = () => {
               <div className="space-y-4">
                 {category.items.map((item, itemIndex) => (
                   <div key={itemIndex} className="flex items-center">
-                    <item.icon className="h-5 w-5 text-indigo-600 mr-3" />
+                    <item.icon className="h-5 w-5 text-gray-600 mr-3" />
                     <span className="text-gray-700">{item.name}</span>
                   </div>
                 ))}
@@ -224,8 +259,8 @@ const PGDetails: React.FC = () => {
               key={key}
               className={`rounded-lg border transition-all cursor-pointer ${
                 selectedFacility === key
-                  ? 'border-indigo-600 ring-2 ring-indigo-600'
-                  : 'border-gray-200 hover:border-indigo-600'
+                  ? 'border-gray-900 ring-2 ring-gray-900'
+                  : 'border-gray-200 hover:border-gray-900'
               }`}
               onClick={() => setSelectedFacility(selectedFacility === key ? null : key)}
             >
@@ -269,14 +304,14 @@ const PGDetails: React.FC = () => {
       )}
 
       {/* Sharing Types */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {pg.sharingTypes.map((sharing, index) => (
-          <div 
-            key={index} 
+          <div
+            key={index}
             className={`bg-white rounded-lg border transition-all cursor-pointer ${
-              selectedSharing === index 
-                ? 'border-indigo-600 ring-2 ring-indigo-600' 
-                : 'border-gray-200 hover:border-indigo-600'
+              selectedSharing === index
+                ? 'border-gray-900 ring-2 ring-gray-900'
+                : 'border-gray-200 hover:border-gray-900'
             }`}
             onClick={() => setSelectedSharing(selectedSharing === index ? null : index)}
           >
@@ -301,9 +336,17 @@ const PGDetails: React.FC = () => {
       {selectedSharing !== null && (
         <div className="bg-white rounded-lg border border-gray-200">
           <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {pg.sharingTypes[selectedSharing].type} Details
-            </h2>
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {pg.sharingTypes[selectedSharing].type} Details
+              </h2>
+              <button
+                onClick={() => setIsContactModalOpen(true)}
+                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+              >
+                Enquire Now
+              </button>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
@@ -328,17 +371,17 @@ const PGDetails: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 {pg.sharingTypes[selectedSharing].amenities.map((amenity, index) => (
                   <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    {amenity === 'AC' && <Snowflake className="h-5 w-5 text-blue-600 mr-3" />}
+                    {amenity === 'AC' && <Snowflake className="h-5 w-5 text-gray-600 mr-3" />}
                     {amenity === 'TV' && <Tv className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Study Table' && <Laptop className="h-5 w-5 text-indigo-600 mr-3" />}
-                    {amenity === 'Wardrobe' && <DoorClosed className="h-5 w-5 text-brown-600 mr-3" />}
-                    {amenity === 'Hot Water' && <Droplets className="h-5 w-5 text-blue-600 mr-3" />}
+                    {amenity === 'Study Table' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
+                    {amenity === 'Wardrobe' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+                    {amenity === 'Hot Water' && <Droplets className="h-5 w-5 text-gray-600 mr-3" />}
                     {amenity === 'Attached Bathroom' && <Bath className="h-5 w-5 text-gray-600 mr-3" />}
                     {amenity === 'Common Bathroom' && <Bath className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === '24/7 Power Backup' && <Zap className="h-5 w-5 text-yellow-600 mr-3" />}
-                    {amenity === 'Premium Furniture' && <Sofa className="h-5 w-5 text-purple-600 mr-3" />}
+                    {amenity === '24/7 Power Backup' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
+                    {amenity === 'Premium Furniture' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
                     {amenity === 'Basic Furniture' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Balcony' && <Sofa className="h-5 w-5 text-green-600 mr-3" />}
+                    {amenity === 'Balcony' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
                     <span className="text-gray-900">{amenity}</span>
                   </div>
                 ))}
@@ -347,6 +390,12 @@ const PGDetails: React.FC = () => {
           </div>
         </div>
       )}
+
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        pgName={pg.name}
+      />
     </div>
   );
 };

@@ -529,44 +529,21 @@ const RentOfficeSpace = () => {
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.basicInformation.title}
-                onPropertyNameChange={handlePropertyNameChange}
-              />
-              <OfficeSpaceType
-                onOfficeTypeChange={handleOfficeTypeChange}
-              />
-            </div>
-          </div>
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={handlePropertyNameChange}
+          />
+          <OfficeSpaceType
+            onOfficeTypeChange={handleOfficeTypeChange}
+          />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
-              <CommercialPropertyAddress
-                onAddressChange={handleAddressChange}
-              />
-              <Landmark onLandmarkChange={handleLandmarkChange} />
-              {/* {currentStep === 0 && (
-                <MapSelector
-                  latitude={formData.basicInformation.location.latitude}
-                  longitude={formData.basicInformation.location.longitude}
-                  onLocationSelect={(lat, lng, address) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      coordinates: {
-                        latitude: lat,
-                        longitude: lng
-                      }
-                    }));
-                  }}
-                />
-              )} */}
-              <CornerProperty
-                onCornerPropertyChange={handleCornerPropertyChange}
-              />
-            </div>
-          </div>
+          <CommercialPropertyAddress
+            onAddressChange={handleAddressChange}
+          />
+          <Landmark onLandmarkChange={handleLandmarkChange} />
+          <CornerProperty
+            onCornerPropertyChange={handleCornerPropertyChange}
+          />
         </div>
       )
     },
@@ -574,19 +551,13 @@ const RentOfficeSpace = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div> */}
-          <div className="space-y-6">
-            <OfficeSpaceDetails
-              onDetailsChange={handleOfficeDetailsChange}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={handlePropertyDetailsChange}
-            />
-          </div>
+        <div className="space-y-6">
+          <OfficeSpaceDetails
+            onDetailsChange={handleOfficeDetailsChange}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={handlePropertyDetailsChange}
+          />
         </div>
       )
     },
@@ -594,40 +565,22 @@ const RentOfficeSpace = () => {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Rental Terms</h3>
-          </div> */}
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
-              <div className="space-y-4 text-black">
-                <Rent onRentChange={handleRentChange} />
-                {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-                  <MaintenanceAmount
-                    onMaintenanceAmountChange={handleMaintenanceAmountChange}
-                  />
-                )}
-                <SecurityDeposit
-                  onSecurityDepositChange={handleSecurityDepositChange}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <OtherCharges
-                  onOtherChargesChange={handleOtherChargesChange}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={handleBrokerageChange}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-6">
+          <Rent onRentChange={handleRentChange} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+            <MaintenanceAmount
+              onMaintenanceAmountChange={handleMaintenanceAmountChange}
+            />
+          )}
+          <SecurityDeposit
+            onSecurityDepositChange={handleSecurityDepositChange}
+          />
+          <OtherCharges
+            onOtherChargesChange={handleOtherChargesChange}
+          />
+          <Brokerage
+            onBrokerageChange={handleBrokerageChange}
+          />
         </div>
       )
     },
@@ -636,10 +589,6 @@ const RentOfficeSpace = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div> */}
           <AvailabilityDate
             onAvailabilityChange={handleAvailabilityChange}
           />
@@ -650,11 +599,7 @@ const RentOfficeSpace = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div> */}
+        <div className="space-y-6">
           <CommercialContactDetails
             onContactChange={handleContactChange}
           />
@@ -665,11 +610,7 @@ const RentOfficeSpace = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          {/* <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div> */}
+        <div className="space-y-6">
           <CommercialMediaUpload
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
@@ -819,7 +760,7 @@ const RentOfficeSpace = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -831,7 +772,23 @@ const RentOfficeSpace = () => {
                 <div
                   key={index}
                   className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(index)}
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
                 >
                   <div className="flex flex-col items-center group">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
@@ -862,7 +819,7 @@ const RentOfficeSpace = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div ref={formRef} className="mb-8">
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

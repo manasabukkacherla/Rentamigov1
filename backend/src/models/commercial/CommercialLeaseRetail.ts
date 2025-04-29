@@ -276,7 +276,7 @@ const CommercialLeaseRetailStoreSchema = new Schema<ICommercialLeaseRetailStore>
 });
 
 // Indexes
-CommercialLeaseRetailStoreSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialLeaseRetailStoreSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialLeaseRetailStoreSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseRetailStoreSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseRetailStoreSchema.index({ 'metadata.createdAt': -1 });

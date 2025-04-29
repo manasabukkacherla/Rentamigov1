@@ -206,7 +206,7 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
 });
 
 // Add indexes for common query fields
-CommercialSellRetailStoreSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialSellRetailStoreSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialSellRetailStoreSchema.index({ 'basicInformation.city': 1 });
 CommercialSellRetailStoreSchema.index({ 'basicInformation.state': 1 });
 CommercialSellRetailStoreSchema.index({ 'metadata.createdAt': -1 });

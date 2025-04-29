@@ -4,40 +4,40 @@ import { Star, ThumbsUp, MessageSquare, Flag } from 'lucide-react';
 const ReviewsRatings: React.FC = () => {
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-800">Reviews & Ratings</h1>
+      <h1 className="text-2xl font-semibold text-gray-900">Reviews & Ratings</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-800">Average Rating</h2>
-            <Star className="h-6 w-6 text-yellow-500" />
+            <h2 className="text-lg font-medium text-gray-900">Average Rating</h2>
+            <Star className="h-6 w-6 text-gray-600" />
           </div>
-          <p className="text-3xl font-bold text-yellow-500">4.5/5</p>
+          <p className="text-3xl font-bold text-gray-900">4.5/5</p>
           <p className="text-sm text-gray-500 mt-2">Based on 234 reviews</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-800">Positive Reviews</h2>
-            <ThumbsUp className="h-6 w-6 text-green-500" />
+            <h2 className="text-lg font-medium text-gray-900">Positive Reviews</h2>
+            <ThumbsUp className="h-6 w-6 text-gray-600" />
           </div>
-          <p className="text-3xl font-bold text-green-600">92%</p>
+          <p className="text-3xl font-bold text-gray-900">92%</p>
           <p className="text-sm text-gray-500 mt-2">Last 30 days</p>
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-medium text-gray-800">Recent Reviews</h2>
-            <MessageSquare className="h-6 w-6 text-blue-500" />
+            <h2 className="text-lg font-medium text-gray-900">Recent Reviews</h2>
+            <MessageSquare className="h-6 w-6 text-gray-600" />
           </div>
-          <p className="text-3xl font-bold text-blue-600">28</p>
+          <p className="text-3xl font-bold text-gray-900">28</p>
           <p className="text-sm text-gray-500 mt-2">This week</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-medium text-gray-800 mb-4">Rating Distribution</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Rating Distribution</h2>
           <div className="space-y-4">
             {[
               { stars: 5, percentage: 65, count: 152 },
@@ -51,7 +51,7 @@ const ReviewsRatings: React.FC = () => {
                   <span className="w-12 text-sm text-gray-600">{rating.stars} star</span>
                   <div className="flex-1 h-2 mx-4 bg-gray-200 rounded-full">
                     <div
-                      className="h-2 bg-yellow-400 rounded-full"
+                      className="h-2 bg-gray-900 rounded-full"
                       style={{ width: `${rating.percentage}%` }}
                     ></div>
                   </div>
@@ -63,7 +63,7 @@ const ReviewsRatings: React.FC = () => {
         </div>
 
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-lg font-medium text-gray-800 mb-4">Review Categories</h2>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Review Categories</h2>
           <div className="space-y-4">
             {[
               { category: "Cleanliness", rating: 4.8 },
@@ -75,7 +75,7 @@ const ReviewsRatings: React.FC = () => {
               <div key={index} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
                 <span className="font-medium text-gray-700">{item.category}</span>
                 <div className="flex items-center">
-                  <Star className="h-4 w-4 text-yellow-400 mr-1" />
+                  <Star className="h-4 w-4 text-gray-600 mr-1" />
                   <span>{item.rating}</span>
                 </div>
               </div>
@@ -86,7 +86,7 @@ const ReviewsRatings: React.FC = () => {
 
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-medium text-gray-800">Recent Reviews</h2>
+          <h2 className="text-lg font-medium text-gray-900">Recent Reviews</h2>
           <select className="border border-gray-200 rounded-lg px-3 py-2 text-sm">
             <option>Most Recent</option>
             <option>Highest Rated</option>
@@ -123,12 +123,12 @@ const ReviewsRatings: React.FC = () => {
             <div key={index} className="border border-gray-100 rounded-lg p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-medium text-gray-800">{review.name}</h3>
+                  <h3 className="font-medium text-gray-900">{review.name}</h3>
                   <p className="text-sm text-gray-500">{review.pg}</p>
                 </div>
                 <div className="flex items-center">
                   {Array.from({ length: review.rating }).map((_, i) => (
-                    <Star key={i} className="h-4 w-4 text-yellow-400" fill="#FBBF24" />
+                    <Star key={i} className="h-4 w-4 text-gray-600" />
                   ))}
                 </div>
               </div>
@@ -136,11 +136,11 @@ const ReviewsRatings: React.FC = () => {
               <div className="mt-4 flex items-center justify-between text-sm text-gray-500">
                 <span>{review.date}</span>
                 <div className="flex items-center space-x-4">
-                  <button className="flex items-center text-gray-600 hover:text-gray-800">
+                  <button className="flex items-center text-gray-600 hover:text-gray-900">
                     <ThumbsUp className="h-4 w-4 mr-1" />
                     <span>Helpful ({review.helpful})</span>
                   </button>
-                  <button className="flex items-center text-gray-600 hover:text-gray-800">
+                  <button className="flex items-center text-gray-600 hover:text-gray-900">
                     <Flag className="h-4 w-4 mr-1" />
                     <span>Report</span>
                   </button>

@@ -56,7 +56,7 @@ const OfficeSpaceDetails: React.FC<OfficeSpaceDetailsProps> = ({ onDetailsChange
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <div className="bg-gray-100 rounded-xl shadow-sm border border-gray-100 p-6">
       <div className="flex items-center gap-3 mb-8">
         <h3 className="text-2xl font-semibold text-gray-900">Office Space Details</h3>
         <ArrowRight className="text-gray-400" size={20} />
@@ -65,7 +65,7 @@ const OfficeSpaceDetails: React.FC<OfficeSpaceDetailsProps> = ({ onDetailsChange
 
       <div className="space-y-8 max-w-4xl">
         {/* Seating and Cabins */}
-        <div className="bg-gray-50 p-6 rounded-lg space-y-6 border border-gray-100">
+        <div className="bg-white p-6 rounded-lg space-y-6 border border-gray-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Seating Capacity */}
             <div className="space-y-4">
@@ -126,7 +126,7 @@ const OfficeSpaceDetails: React.FC<OfficeSpaceDetailsProps> = ({ onDetailsChange
         </div>
 
         {/* Meeting Spaces */}
-        <div className="bg-gray-50 p-6 rounded-lg space-y-6 border border-gray-100">
+        <div className="bg-white p-6 rounded-lg space-y-6 border border-gray-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Conference Room */}
             <div className="space-y-4">
@@ -187,7 +187,7 @@ const OfficeSpaceDetails: React.FC<OfficeSpaceDetailsProps> = ({ onDetailsChange
         </div>
 
         {/* Additional Features */}
-        <div className="bg-gray-50 p-6 rounded-lg space-y-6 border border-gray-100">
+        <div className="bg-white p-6 rounded-lg space-y-6 border border-gray-100">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Reception Area */}
             <div className="space-y-4">

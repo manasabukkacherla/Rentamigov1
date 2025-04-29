@@ -288,7 +288,7 @@ CommercialSellCoveredSpaceSchema.pre('validate', function(next) {
 });
 
 // Indexes
-CommercialSellCoveredSpaceSchema.index({ propertyId: 1 }, { unique: true });
+// CommercialSellCoveredSpaceSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialSellCoveredSpaceSchema.index({ 'spaceDetails.totalArea': 1 });
 CommercialSellCoveredSpaceSchema.index({ 'propertyDetails.priceDetails.Price': 1 });
 

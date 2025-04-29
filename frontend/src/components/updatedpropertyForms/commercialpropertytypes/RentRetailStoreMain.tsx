@@ -339,8 +339,6 @@ const RentRetailStoreMain = () => {
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
               <PropertyName
                 propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
@@ -348,11 +346,6 @@ const RentRetailStoreMain = () => {
               <RetailStoreType
                 onRetailTypeChange={(type) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: type } })}
               />
-            </div>
-          </div>
-
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
               />
@@ -376,8 +369,6 @@ const RentRetailStoreMain = () => {
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
               />
-            </div>
-          </div>
         </div>
       )
     },
@@ -385,7 +376,7 @@ const RentRetailStoreMain = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        // <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
             <RetailStoreDetails
               onDetailsChange={(details) => {
@@ -432,17 +423,17 @@ const RentRetailStoreMain = () => {
               }}
             />
           </div>
-        </div>
+        // </div>
       )
     },
     {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        // <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4>
+            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"> */}
+              {/* <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4> */}
               <div className="space-y-4 text-black">
                 <Rent onRentChange={(rent) => {
                   setFormData({
@@ -472,10 +463,10 @@ const RentRetailStoreMain = () => {
                   });
                 }} />
               </div>
-            </div>
+            {/* </div> */}
 
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"> */}
+              {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
               <div className="space-y-4 text-black">
                 <OtherCharges onOtherChargesChange={(charges) => {
                   setFormData({
@@ -503,7 +494,7 @@ const RentRetailStoreMain = () => {
                     }
                   });
                 }} />
-                <div className="border-t border-gray-200 my-4"></div>
+                {/* <div className="border-t border-gray-200 my-4"></div> */}
                 <Brokerage onBrokerageChange={(brokerage) => {
                   setFormData({
                     ...formData,
@@ -517,9 +508,9 @@ const RentRetailStoreMain = () => {
                   });
                 }} />
               </div>
-            </div>
+            {/* </div> */}
           </div>
-        </div>
+        // </div>
       )
     },
     {
@@ -535,7 +526,7 @@ const RentRetailStoreMain = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
           <CommercialContactDetails
             onContactChange={(contact) => {
               setFormData({
@@ -557,7 +548,7 @@ const RentRetailStoreMain = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
           <CommercialMediaUpload
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
@@ -707,7 +698,7 @@ const RentRetailStoreMain = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -750,7 +741,10 @@ const RentRetailStoreMain = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div ref={formRef} className="mb-8">
+      <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Retail Store</h1>
+          </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

@@ -3,15 +3,22 @@
 import React, { useState } from 'react';
 import PgName from './PgName';
 import Configuration from './Configuration';
-import PgFor from './PgFor';
-import CommonAreaAmenities from './CommonAreaAmenities';
-import AdditionalServices from './AdditionalServices';
-import OtherFeatures from './OtherFeatures';
+import CommonAreaAmenitiesAndServices from './CommonAreaAmenitiesAndServices';
+import OtherFeaturesAndRestrictions from './OtherFeaturesAndRestrictions';
 import FoodServices from './FoodServices';
-import Restrictions from './Restrictions';
 import Pricing from './Pricing';
 import PgMedia from './PgMedia';
-import { Store, ChevronRight, ChevronLeft, Building2, UserCircle, ImageIcon, Calendar, DollarSign, CheckCircle, Loader2 } from "lucide-react";
+
+// Room share options for consistency
+const shareOptions = [
+  { id: 'single', label: 'Single Share' },
+  { id: 'double', label: 'Double Share' },
+  { id: 'triple', label: 'Triple Share' },
+  { id: 'four', label: 'Four Share' },
+  { id: 'five', label: 'Five Share' },
+  { id: 'more', label: 'More' },
+];
+import { Store, ChevronRight, ChevronLeft, Building2, UserCircle, ImageIcon, Calendar, DollarSign, Loader2, Star } from "lucide-react";
 
 const globalStyles = `
   input::placeholder,
@@ -47,6 +54,10 @@ function Pgmain() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Shared state for room configuration
+  const [selectedShares, setSelectedShares] = useState<string[]>([]);
+  const [customShare, setCustomShare] = useState<string>('');
+
   const formSections = [
     { 
       id: 'pgDetails',
@@ -54,35 +65,24 @@ function Pgmain() {
       icon: <Building2 className="h-5 w-5" />,
       component: <PgName />
     },
-    { 
-      id: 'pgType',
-      title: "PG Type", 
-      icon: <Building2 className="h-5 w-5" />,
-      component: <PgFor />
-    },
+
     { 
       id: 'roomConfiguration',
       title: "Room Configuration", 
       icon: <Building2 className="h-5 w-5" />,
-      component: <Configuration />
+      component: <Configuration selectedShares={selectedShares} setSelectedShares={setSelectedShares} customShare={customShare} setCustomShare={setCustomShare} />
     },
-    { 
-      id: 'commonAreaAmenities',
-      title: "Common Area Amenities", 
+    {
+      id: 'commonAreaAmenitiesAndServices',
+      title: 'Common Area Amenities and Services',
       icon: <Store className="h-5 w-5" />,
-      component: <CommonAreaAmenities />
+      component: <CommonAreaAmenitiesAndServices />
     },
-    { 
-      id: 'additionalServices',
-      title: "Additional Services", 
-      icon: <CheckCircle className="h-5 w-5" />,
-      component: <AdditionalServices />
-    },
-    { 
-      id: 'otherFeatures',
-      title: "Other Features", 
-      icon: <Store className="h-5 w-5" />,
-      component: <OtherFeatures />
+    {
+      id: 'otherFeaturesAndRestrictions',
+      title: 'Other Features & Rules',
+      icon: <Star className="h-5 w-5" />,
+      component: <OtherFeaturesAndRestrictions />
     },
     { 
       id: 'foodServices',
@@ -90,12 +90,7 @@ function Pgmain() {
       icon: <Store className="h-5 w-5" />,
       component: <FoodServices />
     },
-    { 
-      id: 'restrictions',
-      title: "Restrictions & Rules", 
-      icon: <CheckCircle className="h-5 w-5" />,
-      component: <Restrictions />
-    },
+
     { 
       id: 'pricing',
       title: "Pricing & Terms", 
@@ -106,7 +101,7 @@ function Pgmain() {
       id: 'media',
       title: "Photos & Videos", 
       icon: <ImageIcon className="h-5 w-5" />,
-      component: <PgMedia />
+      component: <PgMedia selectedShares={selectedShares} customShare={customShare} />
     }
   ];
 
@@ -143,32 +138,32 @@ function Pgmain() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <style>{globalStyles}</style>
       
       {/* Progress Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="sticky top-0 z-50 bg-white border-b border-white">
+        <div className="max-w-5xl mx-auto px-2 sm:px-4 py-3">
           <div className="flex justify-center">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-nowrap w-full sm:w-auto">
               {formSections.map((section, index) => (
                 <div
                   key={section.id}
-                  className="flex items-center cursor-pointer"
+                  className="flex items-center cursor-pointer min-w-[80px] sm:min-w-0"
                   onClick={() => {
                     setCurrentStep(index);
                     window.scrollTo(0, 0);
                   }}
                 >
                   <div className="flex flex-col items-center group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
                       index <= currentStep
                         ? 'bg-black text-white'
                         : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                     }`}>
                       {section.icon}
                     </div>
-                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${
+                    <span className={`text-[10px] sm:text-xs mt-1 font-medium transition-colors duration-200 text-center ${
                       index <= currentStep
                         ? 'text-black'
                         : 'text-gray-500 group-hover:text-gray-700'
@@ -178,7 +173,7 @@ function Pgmain() {
                   </div>
                   {index < formSections.length - 1 && (
                     <div className="flex items-center mx-1">
-                      <div className={`w-12 h-1 transition-colors duration-200 ${
+                      <div className={`w-8 h-1 sm:w-12 transition-colors duration-200 ${
                         index < currentStep ? 'bg-black' : 'bg-gray-200'
                       }`} />
                     </div>
@@ -190,13 +185,11 @@ function Pgmain() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">List Your PG/Co-living Space</h1>
-          <p className="text-gray-600 mt-2">Fill in the details below to list your PG property</p>
         </div>
-
         {/* Form Content */}
         <div className="space-y-8">
           {/* Current Section Title */}
@@ -262,5 +255,5 @@ function Pgmain() {
     </div>
   );
 }
-
+ 
 export default Pgmain;
