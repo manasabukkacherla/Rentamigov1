@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropertyName from '../PropertyName';
 import PlotType from '../CommercialComponents/PlotType';
-import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
+import PropertyAddress from '../PropertyAddress';
 import Landmark from '../CommercialComponents/Landmark';
 import MapCoordinates from '../MapCoordinates';
 import CornerProperty from '../CommercialComponents/CornerProperty';
@@ -14,8 +14,7 @@ import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { Building2, Home, IndianRupee, Calendar, MapPin, Image } from 'lucide-react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Building2, Home, IndianRupee, Calendar, MapPin, Image, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 
 type MediaFileType = { url: string; file: File };
 
@@ -25,7 +24,13 @@ type MediaType = {
   images: { category: string; files: MediaFileType[] }[];
   documents: { type: string; file: File }[];
 };
-const SellPlot = () => {
+
+type SellPlotProps = {
+  propertyId?: string;
+  onSubmit?: (formData: any) => void;
+};
+
+const SellPlot = ({ propertyId, onSubmit }: SellPlotProps) => {
   const [formData, setFormData] = useState({
     propertyName: '',
     plotType: [] as string[],
@@ -66,13 +71,16 @@ const SellPlot = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const formRef = useRef<HTMLDivElement>(null);
 
   // Define form steps
-  const steps = [
+  const formSections = [
     {
       title: 'Basic Information',
-      content: (
+      component: (
         <>
           <PropertyName
             propertyName={formData.propertyName}
@@ -81,27 +89,28 @@ const SellPlot = () => {
           <PlotType
             onPlotTypeChange={(types) => setFormData({ ...formData, plotType: types })}
           />
-          <CommercialPropertyAddress
+          <PropertyAddress
             onAddressChange={(address) => setFormData({ ...formData, address })}
           />
           <Landmark
             onLandmarkChange={(landmark) => setFormData({ ...formData, landmark })}
           />
-          <MapCoordinates
+          {/* <MapCoordinates
             latitude={formData.coordinates.latitude}
             longitude={formData.coordinates.longitude}
             onLatitudeChange={(lat) => setFormData({ ...formData, coordinates: { ...formData.coordinates, latitude: lat } })}
             onLongitudeChange={(lng) => setFormData({ ...formData, coordinates: { ...formData.coordinates, longitude: lng } })}
-          />
+          /> */}
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, isCornerProperty: isCorner })}
           />
         </>
-      )
+      ),
+      icon: <Building2 className="w-6 h-6" />
     },
     {
       title: 'Property Details',
-      content: (
+      component: (
         <>
           <PlotDetails
             onDetailsChange={(details) => setFormData({ ...formData, plotDetails: details })}
@@ -110,11 +119,12 @@ const SellPlot = () => {
             onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
           />
         </>
-      )
+      ),
+      icon: <Home className="w-6 h-6" />
     },
     {
       title: 'Pricing Details',
-      content: (
+      component: (
         <>
           <Price
             onPriceChange={(price) => setFormData({ ...formData, price: price.amount })}
@@ -130,27 +140,30 @@ const SellPlot = () => {
             onBrokerageChange={(brokerage) => setFormData({ ...formData, brokerage })}
           />
         </>
-      )
+      ),
+      icon: <IndianRupee className="w-6 h-6" />
     },
     {
       title: 'Availability',
-      content: (
+      component: (
         <CommercialAvailability
           onAvailabilityChange={(availability) => setFormData({ ...formData, availability })}
         />
-      )
+      ),
+      icon: <Calendar className="w-6 h-6" />
     },
     {
       title: 'Contact Information',
-      content: (
+      component: (
         <CommercialContactDetails
           onContactChange={(contact) => setFormData({ ...formData, contactDetails: contact })}
         />
-      )
+      ),
+      icon: <MapPin className="w-6 h-6" />
     },
     {
       title: 'Property Media',
-      content: (
+      component: (
         <CommercialMediaUpload
           onMediaChange={(mediaData) => {
             setFormData({
@@ -164,13 +177,14 @@ const SellPlot = () => {
             });
           }}
         />
-      )
+      ),
+      icon: <Image className="w-6 h-6" />
     }
   ];
 
   // Navigation handlers
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
+    if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
       // Scroll to top of the form
       setTimeout(() => {
@@ -186,6 +200,8 @@ const SellPlot = () => {
           });
         }
       }, 100);
+    } else {
+      onSubmit?.(formData);
     }
   };
 
@@ -209,53 +225,53 @@ const SellPlot = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form Data:', formData);
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-12">
-      {/* Stepper Scroll Bar UI */}
-      <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2 mb-8">
-        {steps.map((stepObj, index) => (
-          <div key={index} className="flex items-center">
-            <button
-              type="button"
-              onClick={() => setCurrentStep(index)}
-              className="flex items-center focus:outline-none"
+    <form onSubmit={(e) => e.preventDefault()} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
+      {/* Progress indicator */}
+      <div ref={formRef} className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          {formSections.map((s, i) => (
+            <div
+              key={i}
+              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
+              onClick={() => {
+                if (i < currentStep) {
+                  setCurrentStep(i);
+                  setTimeout(() => {
+                    if (formRef.current) {
+                      window.scrollTo({
+                        top: formRef.current.offsetTop - 100,
+                        behavior: 'smooth'
+                      });
+                    }
+                  }, 100);
+                }
+              }}
+              style={{ cursor: i < currentStep ? "pointer" : "default" }}
             >
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                }`}
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
               >
-                {index === 0 && <Building2 className="w-6 h-6" />} 
-                {index === 1 && <Home className="w-6 h-6" />} 
-                {index === 2 && <IndianRupee className="w-6 h-6" />} 
-                {index === 3 && <Calendar className="w-6 h-6" />} 
-                {index === 4 && <MapPin className="w-6 h-6" />} 
-                {index === 5 && <Image className="w-6 h-6" />} 
+                {s.icon}
               </div>
-              <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
-                index <= currentStep ? 'text-black' : 'text-black/70'
-              }`}>
-                {stepObj.title}
-              </span>
-            </button>
-            {index < steps.length - 1 && (
-              <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'}`} />
-            )}
-          </div>
-        ))}
+              <span className="text-xs font-medium">{s.title}</span>
+            </div>
+          ))}
+        </div>
+        <div className="w-full bg-gray-200 h-1 rounded-full">
+          <div
+            className="bg-black h-1 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
+          ></div>
+        </div>
       </div>
 
       <div className="space-y-12">
-      <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your plot property</p>
-        </div> 
-              <div className="space-y-8">{steps[currentStep].content}</div>
+        </div>
+        <div className="space-y-8">{formSections[currentStep].component}</div>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
@@ -263,8 +279,9 @@ const SellPlot = () => {
           {currentStep > 0 ? (
             <button
               type="button"
-              className="flex items-center px-6 py-2 rounded-lg border border-black/20 bg-white text-black hover:bg-black hover:text-white transition-all duration-200"
+              className="flex items-center px-6 py-2 rounded-lg border border-black/20 bg-white text-black transition-all duration-200"
               onClick={handlePrevious}
+              disabled={loading}
             >
               <ChevronLeft className="w-5 h-5 mr-2" />
               Previous
@@ -273,10 +290,10 @@ const SellPlot = () => {
             <div></div> /* Empty div to maintain layout when no Previous button */
           )}
 
-          {currentStep < steps.length - 1 ? (
+          {currentStep < formSections.length - 1 ? (
             <button
               type="button"
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
               onClick={handleNext}
             >
               Next
@@ -284,11 +301,21 @@ const SellPlot = () => {
             </button>
           ) : (
             <button
-              type="submit"
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+              type="button"
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
+              onClick={() => onSubmit?.(formData)}
             >
-              List Property
-              <ChevronRight className="w-5 h-5 ml-2" />
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  List Property
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </>
+              )}
             </button>
           )}
         </div>
