@@ -13,7 +13,7 @@ import Landmark from "../CommercialComponents/Landmark"
 import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import PlotDetails from "../CommercialComponents/PlotDetails"
-import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
+//import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
 import PricePerSqft from "../sell/PricePerSqft"
 import RegistrationCharges from "../sell/RegistrationCharges"
@@ -540,8 +540,8 @@ const SellPlotMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
+
+
           </div>
           <PlotDetails onDetailsChange={(details) => {
             // Make sure totalArea is properly set
@@ -577,9 +577,9 @@ const SellPlotMain = () => {
             </div>
           </div>
 
-          <CommercialPropertyDetails
+          {/* <CommercialPropertyDetails
             onDetailsChange={(details) => handleChange('propertyDetails', details)}
-          />
+          /> */}
         </div>
       ),
     },
@@ -588,10 +588,7 @@ const SellPlotMain = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
-          </div>
+
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
@@ -621,16 +618,16 @@ const SellPlotMain = () => {
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
               <div className="space-y-4 text-black">
-                <div className="text-black">
+                {/* <div className="text-black">
                   <RegistrationCharges
                     onRegistrationChargesChange={(charges) => handleChange('registration', charges)}
                   />
-                </div>
+                </div> */}
 
                 {/* Registration Type - Required field */}
-                <div className="border-t border-gray-200 my-4"></div>
+                {/* <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
                   <label className="block text-md font-medium mb-2 text-black">
                     Registration Type <span className="text-red-500">*</span>
@@ -662,7 +659,7 @@ const SellPlotMain = () => {
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
                   <Brokerage onBrokerageChange={(brokerage) => handleChange('brokerage', brokerage)} />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -674,10 +671,6 @@ const SellPlotMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
           <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
         </div>
       ),
@@ -688,8 +681,6 @@ const SellPlotMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
           </div>
           <CommercialContactDetails
             onContactChange={(contact) => handleChange('contactInformation', contact)}
@@ -703,8 +694,6 @@ const SellPlotMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
           </div>
           <CommercialMediaUpload
             onMediaChange={(mediaUpdate) => {

@@ -8,7 +8,7 @@ import Landmark from "../CommercialComponents/Landmark"
 import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import AgriculturalLandDetails from "../CommercialComponents/AgriculturalLandDetails"
-import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
+//import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
 import PricePerSqft from "../sell/PricePerSqft"
 import RegistrationCharges from "../sell/RegistrationCharges"
@@ -224,8 +224,7 @@ const SellAgricultureMain = () => {
         <div className="space-y-8">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center gap-3 mb-6">
-              <Tree className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
+
             </div>
             <div className="space-y-6">
               <PropertyName
@@ -239,10 +238,6 @@ const SellAgricultureMain = () => {
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
             <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
@@ -273,10 +268,6 @@ const SellAgricultureMain = () => {
       icon: <Building2 className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
           <div className="space-y-6">
             <AgriculturalLandDetails
               onDetailsChange={(details) => setFormData((prev) => ({
@@ -284,12 +275,12 @@ const SellAgricultureMain = () => {
                 Agriculturelanddetails: details as FormData['Agriculturelanddetails']
               }))}
             />
-            <CommercialPropertyDetails
+            {/* <CommercialPropertyDetails
               onDetailsChange={(details) => setFormData((prev) => ({
                 ...prev,
                 propertyDetails: details as FormData['propertyDetails']
               }))}
-            />
+            /> */}
           </div>
         </div>
       ),
@@ -299,10 +290,7 @@ const SellAgricultureMain = () => {
       icon: <DollarSign className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
-          </div>
+
           <div className="space-y-6">
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
               <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
@@ -324,10 +312,10 @@ const SellAgricultureMain = () => {
             </div>
 
             <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
+              {/* <h4  className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
               <div className="space-y-4 text-black">
                 <div className="text-black">
-                  <RegistrationCharges
+                  {/* <RegistrationCharges
                     onRegistrationChargesChange={(charges) =>
                       setFormData((prev) => ({
                         ...prev,
@@ -338,18 +326,18 @@ const SellAgricultureMain = () => {
                         }
                       }))
                     }
-                  />
+                  /> */}
                 </div>
                 <div className="border-t border-gray-200 my-4"></div>
                 <div className="text-black">
-                  <Brokerage
+                  {/* <Brokerage
                     onBrokerageChange={(brokerage) =>
                       setFormData((prev) => ({
                         ...prev,
                         brokerage: brokerage as FormData['brokerage']
                       }))
                     }
-                  />
+                  /> */}
                 </div>
               </div>
             </div>
@@ -362,10 +350,6 @@ const SellAgricultureMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
           <div className="space-y-6">
             <CommercialAvailability
               onAvailabilityChange={(availability) => {
@@ -391,10 +375,6 @@ const SellAgricultureMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
           <div className="space-y-6">
             <CommercialContactDetails
               onContactChange={(contact) => setFormData((prev) => ({
@@ -411,10 +391,6 @@ const SellAgricultureMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
           <div className="space-y-6">
             <CommercialMediaUpload
               onMediaChange={(media) => {
