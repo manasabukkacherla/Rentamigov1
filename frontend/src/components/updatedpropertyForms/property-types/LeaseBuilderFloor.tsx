@@ -371,6 +371,16 @@ const LeaseBuilderFloor = ({ propertyId, onSubmit }: LeaseBuilderFloorProps) => 
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <Restrictions
+              restrictions={formData.features.restrictions}
+              onChange={(restrictions: string[]) => setFormData(prev => ({
+                ...prev,
+                features: { ...prev.features, restrictions }
+              }))}
+            />
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
                 <Building2 className="text-black mr-3" size={28} />
