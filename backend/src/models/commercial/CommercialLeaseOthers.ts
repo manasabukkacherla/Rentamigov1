@@ -134,7 +134,8 @@ export interface ICommercialLeaseOthers extends Document {
   };
   
   metaData?: {
-    createdBy: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
   };
 }
@@ -151,8 +152,8 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   },
   landmark: { type: String },
   location: {
-    latitude: { type: String },
-    longitude: { type: String }
+    latitude: { type: String ,required:true},
+    longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
   
@@ -268,7 +269,8 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   },
   
   metaData: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userName: { type: String, default: "Not Specified" },
     createdAt: { type: Date, default: Date.now }
   }
 });

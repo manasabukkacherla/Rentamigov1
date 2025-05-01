@@ -18,8 +18,8 @@ interface IBasicInformation {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
 }
@@ -134,7 +134,8 @@ export interface ICommercialSellShed extends Document {
     documents: string[];
   };
   metaData: {
-    createdBy: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
   }
 }
@@ -152,8 +153,8 @@ const CommercialSellShedSchema: Schema = new Schema({
   },
   landmark: { type: String },
   coordinates: {
-    latitude: { type: String },
-    longitude: { type: String }
+    latitude: { type: String,required:true },
+    longitude: { type: String,required:true }
   },
   isCornerProperty: { type: Boolean, default: false },
   shedDetails: {
@@ -229,7 +230,8 @@ const CommercialSellShedSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userName:{type:String,default:"Not Specified"},
     createdAt: { type: Date, default: Date.now }
   }
 });

@@ -340,3 +340,63 @@ export const getLeasePlotById = async (req: Request, res: Response) => {
         });
     }
 }; 
+
+
+
+
+  export const updatePlotById = async (req: Request, res: Response) => {
+    try {
+      const propertyId = req.params.id;
+      const updateData = req.body;
+      
+      const leasePlots= await LeasePlot.findOneAndUpdate(
+        { propertyId },
+        { $set: updateData },
+        { new: true }
+      );
+      
+      if (!leasePlots) {
+        return res.status(404).json({ 
+          success: false,
+          error: 'lease plot property not found' 
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'lease plot property updated successfully',
+        data: leasePlots
+      });
+    } catch (error) {
+      console.error('Error updating lease plot property:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to update lease plot property' 
+      });
+    }
+  };
+  
+  export const deleteLeasePlotById = async (req: Request, res: Response) => {
+    try {
+      const propertyId = req.params.id;
+      const leasePlots = await LeasePlot.findOneAndDelete({ propertyId });
+      
+      if (!leasePlots) {
+        return res.status(404).json({ 
+          success: false,
+          error: 'lease plot property not found' 
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'lease plot property deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting lease plot property:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to delete lease plot property' 
+      });
+    }
+  }; 

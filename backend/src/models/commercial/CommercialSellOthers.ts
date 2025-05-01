@@ -91,7 +91,8 @@ export interface ICommercialSellOthers extends Document {
     documents: string[];
   };
   metaData?: {
-    createdBy: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
   };
 }
@@ -108,8 +109,8 @@ const CommercialSellOthersSchema: Schema = new Schema({
   },
   landmark: { type: String },
   coordinates: {
-    latitude: { type: String },
-    longitude: { type: String }
+    latitude: { type: String ,required:true},
+    longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
   propertyDetails: {
@@ -182,7 +183,8 @@ const CommercialSellOthersSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userName:{type:String,default:"Not Specified"},
     createdAt: { type: Date, default: Date.now }
   }
 });

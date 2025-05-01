@@ -8,8 +8,8 @@ interface IArea {
 }
 
 interface ICoordinates {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
 }
 
 interface IBasicInformation {
@@ -20,8 +20,8 @@ interface IBasicInformation {
     city: string;
     state: string;
     zipCode: string;
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
     isCornerProperty: boolean;
 }
 
@@ -114,7 +114,8 @@ interface IMedia {
 }
 
 interface IMetadata {
-    createdBy: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
 }
 
@@ -143,8 +144,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         city: { type: String, required: true },
         state: { type: String, required: true },
         zipCode: { type: String, required: true },
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: String, required: true },
+        longitude: { type: String, required: true },
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
@@ -232,7 +233,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         videoTour: { type: String }
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        userName:{type:String,default:"Not Specified"},
         createdAt: { type: Date, default: Date.now }
     }
 }, {

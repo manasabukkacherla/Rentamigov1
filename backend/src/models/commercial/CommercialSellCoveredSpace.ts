@@ -19,8 +19,8 @@ interface IBasicInformation {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
 }
@@ -68,7 +68,8 @@ interface IMedia {
 }
 
 interface IMetadata {
-  createdBy: Schema.Types.ObjectId | string;
+  userId: Schema.Types.ObjectId | null;
+  userName: string;
   createdAt: Date;
 }
 
@@ -132,8 +133,8 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     },
     landmark: { type: String, required: true },
     location: {
-      latitude: { type: Number, required: true },
-      longitude: { type: Number, required: true },
+      latitude: { type: String, required: true },
+      longitude: { type: String, required: true },
     },
     isCornerProperty: { type: Boolean, default: false },
   },
@@ -243,17 +244,8 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     documents: [{ type: String }],
   },
   metadata: {
-    createdBy: { 
-      type: Schema.Types.Mixed,
-      required: true,
-      ref: 'User',
-      set: function(v: string | Schema.Types.ObjectId) {
-        if (typeof v === 'string' && v.match(/^[0-9a-fA-F]{24}$/)) {
-          return new Types.ObjectId(v);
-        }
-        return v;
-      }
-    },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userName:{type:String,default:"Not Specified"},
     createdAt: { type: Date, default: Date.now },
   },
 });
