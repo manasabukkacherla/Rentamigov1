@@ -332,7 +332,7 @@ const RentAgriculture = () => {
             <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
             {/* <WaterSource onWaterSourceChange={handleWaterSourceChange} />
             <PowerSupply onPowerSupplyChange={handlePowerSupplyChange} /> */}
-          </div>
+          </div>     
 
           <div className="space-y-6">
             <CommercialPropertyAddress onAddressChange={handleAddressChange} />
@@ -367,9 +367,9 @@ const RentAgriculture = () => {
           <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
           <div className="space-y-4 text-black">
             <Rent onRentChange={handleRentChange} />
-            {formData.rent.maintenanceType === 'exclusive' && (
+            {/* {formData.rent.maintenanceType === 'exclusive' && (
               <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
-            )}
+            )} */}
             <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
           </div>
         </div>
@@ -388,6 +388,7 @@ const RentAgriculture = () => {
               date: availability.date
             }
           }))} />
+        </div>
         </div>
       )
     },
