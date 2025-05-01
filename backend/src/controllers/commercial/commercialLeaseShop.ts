@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialLeaseShop from '../../models/commercial/CommercialLeaseShop';
+import CommercialLeaseAgriculture from '../../models/commercial/CommercialLeaseAgriculture';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -86,4 +87,106 @@ export const createCommercialLeaseShop = async (req: Request, res: Response) => 
     });
   }
 };
+
+
+export const getAllCommercialLeaseShop = async (req: Request, res: Response) => {
+  try {
+    const properties = await CommercialLeaseShop.find().sort({ 'metadata.createdAt': -1 });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial lease shop listings retrieved successfully',
+      data: properties
+    });
+  } catch (error) {
+    console.error('Error fetching commercial lease shop listings:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch commercial lease shop listings' 
+    });
+  }
+};
+
+export const getCommercialLeaseShopById = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialLeaseShop.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial lease shop property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial lease shop property retrieved successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error fetching Commercial lease shop property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch Commercial lease shop property' 
+    });
+  }
+};
+
+  export const updateCommercialLeaseShop = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const updateData = req.body;
+    
+    const property = await CommercialLeaseShop.findOneAndUpdate(
+      { propertyId },
+      { $set: updateData },
+      { new: true }
+    );
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial lease shop property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial lease shop property updated successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error updating Commercial lease shop property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to update Commercial lease shop property' 
+    });
+  }
+};
+
+export const deleteCommercialLeaseShop = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialLeaseShop.findOneAndDelete({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial lease shop property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial lease shop property deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting commercial lease shop property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to delete commercial lease shop property' 
+    });
+  }
+}; 
 

@@ -2,7 +2,9 @@ import express from 'express';
 import {
     createLeasePlot,
     getAllLeasePlots,
-    getLeasePlotById
+    getLeasePlotById,
+    updatePlotById,
+    deleteLeasePlotById
 } from '../../controllers/commercial/commercialLeasePlotController';
 
 const router = express.Router();
@@ -15,5 +17,11 @@ router.get('/', getAllLeasePlots as express.RequestHandler);
 
 // Get a specific commercial lease plot by ID
 router.get('/:id', getLeasePlotById as express.RequestHandler);
+
+// Update a shed listing
+router.put('/:id', updatePlotById as express.RequestHandler);
+
+// Delete a shed listing
+router.delete('/:id', deleteLeasePlotById as express.RequestHandler);
 
 export default router; 

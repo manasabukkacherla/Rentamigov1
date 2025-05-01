@@ -23,8 +23,8 @@ export interface ICommercialLeaseAgriculture extends Document {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
   landDetails: {
@@ -125,7 +125,8 @@ export interface ICommercialLeaseAgriculture extends Document {
     documents: string[];
   };
   metadata: {
-    createdBy: Types.ObjectId;
+    userId: Types.ObjectId;
+    userName: string;
     createdAt: Date;
   }
 }
@@ -142,8 +143,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   },
   landmark: { type: String },
   location: {
-    latitude: { type: Number },
-    longitude: { type: Number }
+    latitude: { type: String },
+    longitude: { type: String }
   },
   isCornerProperty: { type: Boolean, default: false },
   landDetails: {
@@ -251,7 +252,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userName: { type: String, default: "Not Specified" },
     createdAt: { type: Date, default: Date.now }
   }
 });
