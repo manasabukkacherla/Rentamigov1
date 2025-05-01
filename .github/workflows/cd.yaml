@@ -1,111 +1,111 @@
-name: CD Pipeline
+# name: CD Pipeline
 
-on:
-  push:
-    branches:
-      - main # Change this if your main branch is different
+# on:
+#   push:
+#     branches:
+#       - main # Change this if your main branch is different
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
 
-    steps:
-      # Step 1: Checkout the repository code so all files are available.
-      - name: Checkout code
-        uses: actions/checkout@v2
+#     steps:
+#       # Step 1: Checkout the repository code so all files are available.
+#       - name: Checkout code
+#         uses: actions/checkout@v2
 
-      # Step 2: Filter changed paths to detect if frontend code changed.
-      - name: Filter changed paths
-        id: filter
-        uses: dorny/paths-filter@v2
-        with:
-          filters: |
-            frontend:
-              - 'frontend/**'
-            backend:
-              - 'backend/**'
+#       # Step 2: Filter changed paths to detect if frontend code changed.
+#       - name: Filter changed paths
+#         id: filter
+#         uses: dorny/paths-filter@v2
+#         with:
+#           filters: |
+#             frontend:
+#               - 'frontend/**'
+#             backend:
+#               - 'backend/**'
 
-      # Step 3: Setup Node.js (only needed for building the frontend)
-      - name: Setup Node.js for Frontend Build
-        if: steps.filter.outputs.frontend == 'true'
-        uses: actions/setup-node@v2
-        with:
-          node-version: "22.10.0"
+#       # Step 3: Setup Node.js (only needed for building the frontend)
+#       - name: Setup Node.js for Frontend Build
+#         if: steps.filter.outputs.frontend == 'true'
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: "22.10.0"
 
-      # Step 4: Build the Frontend if there are changes
-      - name: Build Frontend
-        if: steps.filter.outputs.frontend == 'true'
-        working-directory: ./frontend
-        run: |
-          npm install
-          npm run build
-        # This creates a production-ready build folder in the frontend directory
+#       # Step 4: Build the Frontend if there are changes
+#       - name: Build Frontend
+#         if: steps.filter.outputs.frontend == 'true'
+#         working-directory: ./frontend
+#         run: |
+#           npm install
+#           npm run build
+#         # This creates a production-ready build folder in the frontend directory
 
-      - name: Rename dist → build
-        if: steps.filter.outputs.frontend == 'true'
-        run: |
-          mv frontend/dist frontend/build
+#       - name: Rename dist → build
+#         if: steps.filter.outputs.frontend == 'true'
+#         run: |
+#           mv frontend/dist frontend/build
 
-        # Now you have a "build" folder
+#         # Now you have a "build" folder
 
-      # Step 5: Copy the Frontend build into the backend's src folder
-      - name: Copy Frontend Build to Backend Src
-        if: steps.filter.outputs.frontend == 'true'
-        run: |
-          cp -r frontend/build backend/src/
-        # This makes sure your backend gets the latest frontend assets
+#       # Step 5: Copy the Frontend build into the backend's src folder
+#       - name: Copy Frontend Build to Backend Src
+#         if: steps.filter.outputs.frontend == 'true'
+#         run: |
+#           cp -r frontend/build backend/src/
+#         # This makes sure your backend gets the latest frontend assets
 
-      # Step 6: Setup Node.js for Backend (if not already set; it's safe to run again)
-      - name: Setup Node.js for Backend
-        uses: actions/setup-node@v2
-        with:
-          node-version: "22.10.0"
+#       # Step 6: Setup Node.js for Backend (if not already set; it's safe to run again)
+#       - name: Setup Node.js for Backend
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: "22.10.0"
 
-      # Step 7: Install backend dependencies so tsc can run correctly
-      - name: Install Backend Dependencies
-        working-directory: ./backend
-        run: npm install
+#       # Step 7: Install backend dependencies so tsc can run correctly
+#       - name: Install Backend Dependencies
+#         working-directory: ./backend
+#         run: npm install
 
-      # Step 8: Compile TypeScript in the backend to generate JS files in dist folder
-      - name: Compile Backend TypeScript
-        working-directory: ./backend
-        run: npx tsc
-        # tsc compiles your TypeScript files (.ts) into JavaScript in the dist folder
+#       # Step 8: Compile TypeScript in the backend to generate JS files in dist folder
+#       - name: Compile Backend TypeScript
+#         working-directory: ./backend
+#         run: npx tsc
+#         # tsc compiles your TypeScript files (.ts) into JavaScript in the dist folder
 
-      # Step 9: Copy the static Frontend build files from src to dist in backend
-      - name: Copy Static Build from Src to Dist
-        if: steps.filter.outputs.frontend == 'true'
-        working-directory: ./backend
-        run: |
-          cp -r src/build dist/
-        # This step ensures that the built frontend assets are also present in the dist folder,
-        # since tsc doesn't handle non-TypeScript files.
+#       # Step 9: Copy the static Frontend build files from src to dist in backend
+#       - name: Copy Static Build from Src to Dist
+#         if: steps.filter.outputs.frontend == 'true'
+#         working-directory: ./backend
+#         run: |
+#           cp -r src/build dist/
+#         # This step ensures that the built frontend assets are also present in the dist folder,
+#         # since tsc doesn't handle non-TypeScript files.
 
-      # Step 10: Deploy the backend folder to your EC2 instance using SCP
-      - name: Deploy to EC2 via SCP
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }} # Your EC2 instance's public IP or DNS
-          username: ${{ secrets.EC2_USER }} # Your EC2 SSH username (like ubuntu or ec2-user)
-          key: ${{ secrets.EC2_SSH_KEY }} # Your private SSH key (set as a GitHub secret)
-          port: 22
-          source: "./backend/*"
-          target: "/home/ubuntu/Rentamigov1/backend" # Update this path as needed for your server
-          overwrite: true
-          strip_components: 1 # Remove the extra top-level folder
+#       # Step 10: Deploy the backend folder to your EC2 instance using SCP
+#       - name: Deploy to EC2 via SCP
+#         uses: appleboy/scp-action@master
+#         with:
+#           host: ${{ secrets.EC2_HOST }} # Your EC2 instance's public IP or DNS
+#           username: ${{ secrets.EC2_USER }} # Your EC2 SSH username (like ubuntu or ec2-user)
+#           key: ${{ secrets.EC2_SSH_KEY }} # Your private SSH key (set as a GitHub secret)
+#           port: 22
+#           source: "./backend/*"
+#           target: "/home/ubuntu/Rentamigov1/backend" # Update this path as needed for your server
+#           overwrite: true
+#           strip_components: 1 # Remove the extra top-level folder
 
-      # Step 11: Run deployment commands on your EC2 via SSH
-      - name: Run Deployment Script on EC2 via SSH
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: 22
-          script: |
-            export PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/bin:$PATH
-            cd /home/ubuntu/Rentamigov1/backend
-            echo "Installing production dependencies..."
-            npm install --production
-            echo "Restarting server..."
-            pm2 restart rentamigov1 || pm2 start dist/index.js --name rentamigov1
+#       # Step 11: Run deployment commands on your EC2 via SSH
+#       - name: Run Deployment Script on EC2 via SSH
+#         uses: appleboy/ssh-action@master
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_SSH_KEY }}
+#           port: 22
+#           script: |
+#             export PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/bin:$PATH
+#             cd /home/ubuntu/Rentamigov1/backend
+#             echo "Installing production dependencies..."
+#             npm install --production
+#             echo "Restarting server..."
+#             pm2 restart rentamigov1 || pm2 start dist/index.js --name rentamigov1
