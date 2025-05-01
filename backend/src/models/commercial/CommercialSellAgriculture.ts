@@ -15,6 +15,7 @@ export interface ICommercialSellAgriculture extends Document {
   propertyId?: string;
   propertyName: string;
   landType?: string[];
+  watersource?: string;
   powerSupply: boolean;
   address: {
     street: string;
@@ -37,32 +38,32 @@ export interface ICommercialSellAgriculture extends Document {
     waterSource: string;
     legalClearances: boolean;
   };
-  propertyDetails:{
-    area: IArea;
-    floor: IFloor;
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    waterAvailability: string;
-    propertyAge: number;
-    propertyCondition: string;
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
+  propertyDetails?: {
+    area?: IArea;
+    floor?: IFloor;
+    facingDirection?: string;
+    furnishingStatus?: string;
+    propertyAmenities?: string[];
+    wholeSpaceAmenities?: string[];
+    waterAvailability?: string;
+    propertyAge?: number;
+    propertyCondition?: string;
+    electricitySupply?: {
+      powerLoad?: number;
+      backup?: boolean;
     };
   };
   price: {
     expectedPrice: number;
     isNegotiable: boolean;
   };
-  registrationCharges: {
-    included: boolean;
+  registrationCharges?: {
+    included?: boolean;
     amount?: number;
     stampDuty?: number;
   };
-  brokerage: {
-    required: string;
+  brokerage?: {
+    required?: string;
     amount?: number;
   };
   availability: {
@@ -82,12 +83,12 @@ export interface ICommercialSellAgriculture extends Document {
   };
   media: {
     photos: {
-      exterior: string[];
-      interior: string[];
-      floorPlan: string[];
-      washrooms: string[];
-      lifts: string[];
-      emergencyExits: string[];
+      exterior?: string[];
+      interior?: string[];
+      floorPlan?: string[];
+      washrooms?: string[];
+      lifts?: string[];
+      emergencyExits?: string[];
     };
     videoTour?: string;
     documents: string[];
