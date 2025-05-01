@@ -25,13 +25,13 @@ const AgricultureLandDetails = ({ onDetailsChange }: AgricultureLandDetailsProps
 
   return (
     <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-      <div className="space-y-8">
+      <div className="space-y-8 bg-gray-100">
         <div className="flex items-center mb-8">
           <Building className="text-black mr-3" size={28} />
           <h3 className="text-2xl font-semibold text-black">Agriculture Land Details</h3>
         </div>
 
-        <div className="bg-white p-6 rounded-lg space-y-6">
+        <div className="bg-gray-100 p-6 rounded-lg space-y-6">
           {/* Plot Area */}
           <div>
             <label htmlFor="plotArea" className="block text-gray-800 font-medium mb-2">

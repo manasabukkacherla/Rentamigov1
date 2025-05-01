@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { Home, Search, Filter, X, AlertCircle, MapPin } from 'lucide-react';
+import { MapPin, ChevronDown, X, Home, Search, Filter, AlertCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Property, Filters } from './types';
 import { PropertyCard } from './components/PropertyCard';
 import { FiltersPanel } from './components/FiltersPanel';
 import { VoiceSearch } from './components/VoiceSearch';
 import { searchProperties, formatSearchSummary, formatNearbySuggestion, extractSearchCriteria } from './utils/searchUtils';
-import 'regenerator-runtime/runtime';
 
 const sampleProperties: Property[] = [
   {
@@ -206,6 +206,50 @@ const sampleProperties: Property[] = [
 ];
 
 function Allproperties() {
+  const navigate = useNavigate();
+  const [location, setLocation] = useState('Bangalore, Karnataka');
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [locationSearch, setLocationSearch] = useState('');
+  const [recentLocations, setRecentLocations] = useState<string[]>(() => {
+    const saved = localStorage.getItem('recentLocations');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const popularLocations = [
+    'Bangalore, Karnataka',
+    'Mumbai, Maharashtra',
+    'Delhi, NCR',
+    'Hyderabad, Telangana',
+    'Chennai, Tamil Nadu',
+    'Pune, Maharashtra',
+    'Kolkata, West Bengal',
+    'Ahmedabad, Gujarat',
+    'Jaipur, Rajasthan',
+    'Kochi, Kerala',
+    'Goa',
+    'Chandigarh',
+    'Lucknow, Uttar Pradesh',
+    'Bhubaneswar, Odisha',
+    'Indore, Madhya Pradesh',
+  ];
+
+  // Save recentLocations to localStorage
+  React.useEffect(() => {
+    localStorage.setItem('recentLocations', JSON.stringify(recentLocations));
+  }, [recentLocations]);
+
+  // Filtered locations for modal
+  const filteredLocations = popularLocations.filter((loc) =>
+    loc.toLowerCase().includes(locationSearch.toLowerCase())
+  );
+
+  // Update location and recent locations
+  const handleLocationChange = (newLocation: string) => {
+    setLocation(newLocation);
+    if (!recentLocations.includes(newLocation)) {
+      setRecentLocations([newLocation, ...recentLocations.slice(0, 4)]);
+    }
+    setShowLocationModal(false);
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [showSimilar, setShowSimilar] = useState(false);
@@ -222,6 +266,16 @@ function Allproperties() {
       max: null
     }
   });
+
+  const filteredProperties = useMemo(() => {
+    let filtered = sampleProperties;
+    if (location) {
+      filtered = filtered.filter((p) =>
+        p.location && p.location.toLowerCase().includes(location.toLowerCase())
+      );
+    }
+    return filtered;
+  }, [location]);
 
   const searchResults = useMemo(() => {
     const normalizedQuery = searchQuery.trim()
@@ -242,16 +296,14 @@ function Allproperties() {
         !activeFilters.furnishingTypes.length && !activeFilters.bhkTypes.length && !activeFilters.sharingTypes.length &&
         !activeFilters.priceRange.min && !activeFilters.priceRange.max) {
       return { 
-        exact: sampleProperties, 
+        exact: filteredProperties, 
         partial: [], 
         matchedFields: new Set<string>(),
         nearbyLocations: [],
         criteria: null 
       };
     }
-
     const criteria = extractSearchCriteria(normalizedQuery);
-    
     if (activeFilters.listingTypes.length) {
       criteria.listingTypes = activeFilters.listingTypes;
     }
@@ -275,14 +327,12 @@ function Allproperties() {
         strict: true
       };
     }
-
-    const results = searchProperties(sampleProperties, criteria);
-
+    const results = searchProperties(filteredProperties, criteria);
     return {
       ...results,
       criteria
     };
-  }, [searchQuery, activeFilters]);
+  }, [searchQuery, activeFilters, location]);
 
   const sortedResults = useMemo(() => {
     const results = showSimilar ? searchResults.partial : searchResults.exact;
@@ -331,10 +381,23 @@ function Allproperties() {
     <div className="min-h-screen bg-white">
       <header className="bg-black text-white py-3 sticky top-0 z-10">
         <div className="container mx-auto px-2">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
+            <div className="flex items-center gap-2 mb-2 md:mb-0">
               <Home size={20} />
               <span className="text-xl font-bold">RentAmigo</span>
+            </div>
+            {/* Responsive Location Selector */}
+            <div className="flex items-center justify-center w-full md:w-auto">
+              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 max-w-xs">
+                <MapPin className="h-5 w-5 text-gray-300" />
+                <span className="text-gray-100 truncate">{location}</span>
+                <button
+                  className="ml-2 p-1 hover:bg-white/10 rounded-full transition"
+                  onClick={() => setShowLocationModal(true)}
+                >
+                  <ChevronDown className="h-4 w-4 text-gray-300" />
+                </button>
+              </div>
             </div>
             <div className="flex-1">
               <form onSubmit={handleSearch} className="flex items-center gap-2">
@@ -368,6 +431,64 @@ function Allproperties() {
           </div>
         </div>
       </header>
+      {/* Location Modal */}
+      {showLocationModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Select Location</h2>
+              <button
+                onClick={() => setShowLocationModal(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="relative mb-4">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search for a city..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+              />
+            </div>
+            {recentLocations.length > 0 && (
+              <div className="mb-2">
+                <h3 className="text-sm font-semibold text-gray-700 mb-1">Recent</h3>
+                <div className="flex flex-wrap gap-2">
+                  {recentLocations.map((loc) => (
+                    <button
+                      key={loc}
+                      className={`px-3 py-1 rounded-full text-sm border ${loc === location ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      onClick={() => handleLocationChange(loc)}
+                    >
+                      {loc}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="max-h-60 overflow-y-auto">
+              {filteredLocations.map((loc) => (
+                <button
+                  key={loc}
+                  className={`w-full text-left px-3 py-2 rounded-lg mb-1 ${loc === location ? 'bg-black text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  onClick={() => handleLocationChange(loc)}
+                >
+                  {loc}
+                </button>
+              ))}
+              {filteredLocations.length === 0 && (
+                <div className="text-gray-400 text-center py-6">No locations found.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <main className="container mx-auto px-2">
         <div className="py-3">
@@ -417,13 +538,30 @@ function Allproperties() {
             </div>
           )}
 
+          {/* Previous (Unfiltered) Property Cards */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold mb-2">All Properties (Unfiltered)</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              {sampleProperties.map((property) => (
+                <div key={property.id} onClick={() => navigate(`/propertydetails/`)} className="cursor-pointer">
+                  <PropertyCard
+                    property={property}
+                    matchedFields={new Set()}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Filtered Property Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {sortedResults.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                matchedFields={searchResults.matchedFields}
-              />
+              <div key={property.id} onClick={() => navigate(`/propertydetails/${property.id}`)} className="cursor-pointer">
+                <PropertyCard
+                  property={property}
+                  matchedFields={searchResults.matchedFields}
+                />
+              </div>
             ))}
           </div>
 

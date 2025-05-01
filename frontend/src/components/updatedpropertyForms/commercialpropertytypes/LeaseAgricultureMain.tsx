@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
+import { useRef, useState } from "react"
+import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName"
 import AgriculturalLandType from "../CommercialComponents/AgriculturalLandType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -21,6 +21,7 @@ import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
   title: string;
@@ -34,8 +35,8 @@ interface FormData {
   landmark: string;
   powerSupply: boolean;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
   landDetails: {
@@ -156,8 +157,8 @@ const LeaseAgricultureMain = () => {
     },
     landmark: '',
     location: {
-      latitude: 0,
-      longitude: 0
+      latitude: '',
+      longitude: ''
     },
     powerSupply: false,
     isCornerProperty: false,
@@ -269,6 +270,8 @@ const LeaseAgricultureMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0)
   const navigate = useNavigate()
+  
+  const formRef = useRef<HTMLDivElement>(null);
 
   // Adapter function to convert from component output to FormData structure
   const handleLeaseTenureChange = (tenure: any) => {
@@ -293,8 +296,7 @@ const LeaseAgricultureMain = () => {
       icon: <Store className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
+          <div className="space-y-6">
               <PropertyName
                 propertyName={formData.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
@@ -309,28 +311,19 @@ const LeaseAgricultureMain = () => {
                 }))}
               />
             </div>
-          </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-6">
+          <div className="space-y-6">
               <CommercialPropertyAddress
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
                   address
                 }))}
               />
-              <Landmark
-                onLandmarkChange={(landmark) => setFormData(prev => ({
-                  ...prev,
-                  landmark
-                }))}
-                onLocationSelect={(location) => setFormData(prev => ({
-                  ...prev,
-                  location: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
-                  }
-                }))}
+              <MapLocation
+                latitude={formData.location.latitude}
+                longitude={formData.location.longitude}
+                onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
+                onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
               />
               <CornerProperty
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
@@ -340,15 +333,13 @@ const LeaseAgricultureMain = () => {
               />
             </div>
           </div>
-        </div>
       ),
     },
     {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
+        <div className="space-y-6">
             <AgriculturalLandDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
@@ -370,18 +361,14 @@ const LeaseAgricultureMain = () => {
               }))}
             /> */}
           </div>
-        </div>
       ),
     },
     {
       title: "Lease Terms",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <div className="space-y-4">
+        <div className="space-y-6">
+            <div className="space-y-4">
                 <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
@@ -393,43 +380,13 @@ const LeaseAgricultureMain = () => {
                 />
               </div>
             </div>
-
-            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4">
-                <MaintenanceAmount
-                  onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                    ...prev,
-                    maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges
-                  onOtherChargesChange={(charges) => setFormData(prev => ({
-                    ...prev,
-                    otherCharges: { ...prev.otherCharges, ...charges }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={(brokerage) => setFormData(prev => ({
-                    ...prev,
-                    brokerage: { ...prev.brokerage, ...brokerage }
-                  }))}
-                />
-              </div>
-            </div> */}
-          </div>
-        </div>
       ),
     },
     {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
-          <div className="space-y-6">
+        <div className="space-y-6">
             <CommercialAvailability
               onAvailabilityChange={(availability) => setFormData(prev => ({
                 ...prev,
@@ -437,15 +394,13 @@ const LeaseAgricultureMain = () => {
               }))}
             />
           </div>
-        </div>
       ),
     },
     {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
+        <div className="space-y-6">
             <CommercialContactDetails
               onContactChange={(contact) => setFormData(prev => ({
                 ...prev,
@@ -453,15 +408,13 @@ const LeaseAgricultureMain = () => {
               }))}
             />
           </div>
-        </div>
       ),
     },
     {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-6">
+        <div className="space-y-6">
             <MediaUploadforagriplot
               onMediaChange={(media) => {
                 const photos: Record<string, File[]> = {};
@@ -484,7 +437,6 @@ const LeaseAgricultureMain = () => {
               }}
             />
           </div>
-        </div>
       ),
     },
   ];
@@ -498,8 +450,11 @@ const LeaseAgricultureMain = () => {
     });
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -545,23 +500,53 @@ const LeaseAgricultureMain = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Failed to create agricultural land lease listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
@@ -605,6 +590,9 @@ const LeaseAgricultureMain = () => {
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Agricultural Land</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
@@ -616,36 +604,33 @@ const LeaseAgricultureMain = () => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            type="button"
             onClick={handlePrevious}
             disabled={currentStep === 0}
             className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-white text-black hover:bg-black hover:text-white"
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-          {currentStep < steps.length - 1 ? (
-            <button
-              type="button"
-              onClick={handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Next
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              List Property
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          )}
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

@@ -52,7 +52,7 @@ import Allprop from "./components/allpropertiespage/App";
 import ConversationListPage from "./components/chatapp/pages/ConversationListPage";
 import ChatPage from "./components/chatapp/pages/ChatPage";
 import FindEmployee from "./components/chatapp/FindEmployee";
-
+import Propdetail from "./components/detailproperty/App.tsx";
 const App = () => {
   const [isEmployee, setIsEmployee] = useState(false);
   const socket = useContext(SocketContext);
@@ -280,8 +280,8 @@ const App = () => {
 
 {/* Agriplot route */}
 <Route path="/agriplot" element={<Agriplot />} />
-
-
+{/* propdetailspage*/}
+<Route path="/detailprop" element={<Propdetail />} />
                 <Route path="/empdash" element={<Empapp />} />
                 <Route path="/propertypage" element={<Propertydetail />} />
                 {/* Logins Layout */}

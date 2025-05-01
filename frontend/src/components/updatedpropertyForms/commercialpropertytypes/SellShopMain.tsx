@@ -19,6 +19,7 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { Store, ChevronRight, ChevronLeft, Building2, UserCircle, ImageIcon, Calendar, DollarSign, CheckCircle, Loader2, MapPin, Locate, Navigation } from "lucide-react"
 import { toast } from 'react-toastify';
 import MapSelector from '../MapSelector';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 const globalStyles = `
   input::placeholder,
@@ -276,139 +277,134 @@ const SellShopMain = () => {
   );
 
   // Function to update map location based on latitude and longitude
-  const updateMapLocation = (lat: string, lng: string) => {
-    const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
-    if (iframe && lat && lng) {
-      // Use higher zoom level (18) and more precise marker for better accuracy
-      iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
-    }
-  };
+  // const updateMapLocation = (lat: string, lng: string) => {
+  //   const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
+  //   if (iframe && lat && lng) {
+  //     // Use higher zoom level (18) and more precise marker for better accuracy
+  //     iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
+  //   }
+  // };
 
   // Function to get current location
-  const getCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const lat = position.coords.latitude.toString();
-          const lng = position.coords.longitude.toString();
-          
-          // Update form data
-          handleChange('basicInformation.location', {
-            latitude: lat,
-            longitude: lng
-          });
-          
-          // Update map
-          updateMapLocation(lat, lng);
-          
-          // Attempt to reverse geocode for address
-          reverseGeocode(lat, lng);
-        },
-        (error) => {
-          console.error("Error getting location: ", error);
-          toast.error("Unable to get your current location. Please check your browser permissions.");
-        }
-      );
-    } else {
-      toast.error("Geolocation is not supported by your browser.");
-    }
-  };
+  // const getCurrentLocation = () => {
+  //   if (navigator.geolocation) {
+  //     navigator.geolocation.getCurrentPosition(
+  //       (position) => {
+  //         const lat = position.coords.latitude.toString();
+  //         const lng = position.coords.longitude.toString();
+
+  //         // Update form data
+  //         handleChange('basicInformation.location', {
+  //           latitude: lat,
+  //           longitude: lng
+  //         });
+
+  //         // Update map
+  //         updateMapLocation(lat, lng);
+
+  //         // Attempt to reverse geocode for address
+  //         reverseGeocode(lat, lng);
+  //       },
+  //       (error) => {
+  //         console.error("Error getting location: ", error);
+  //         toast.error("Unable to get your current location. Please check your browser permissions.");
+  //       }
+  //     );
+  //   } else {
+  //     toast.error("Geolocation is not supported by your browser.");
+  //   }
+  // };
 
   // Reverse geocode to get address from coordinates
-  const reverseGeocode = (lat: string, lng: string) => {
-    const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
-    fetch(geocodingUrl)
-      .then(response => response.json())
-      .then(data => {
-        if (data.status === "OK" && data.results && data.results.length > 0) {
-          const address = data.results[0];
-          
-          // Extract address components
-          const addressComponents = {
-            street: '',
-            city: '',
-            state: '',
-            zipCode: ''
-          };
-          
-          // Map address components to our format
-          address.address_components.forEach((component: any) => {
-            const types = component.types;
-            
-            if (types.includes('route')) {
-              addressComponents.street = component.long_name;
-            } else if (types.includes('locality')) {
-              addressComponents.city = component.long_name;
-            } else if (types.includes('administrative_area_level_1')) {
-              addressComponents.state = component.long_name;
-            } else if (types.includes('postal_code')) {
-              addressComponents.zipCode = component.long_name;
-            }
-          });
-          
-          // Check if we have a street address, if not use formatted address
-          if (!addressComponents.street && address.formatted_address) {
-            const formattedParts = address.formatted_address.split(',');
-            if (formattedParts.length > 0) {
-              addressComponents.street = formattedParts[0];
-            }
-          }
-          
-          // Update address in form data
-          handleChange('basicInformation.address', addressComponents);
-          
-          // Update landmark with nearby point of interest if available
-          const landmark = data.results.find((result: any) => 
-            result.types.some((type: string) => 
-              ['point_of_interest', 'establishment', 'premise'].includes(type)
-            )
-          );
-          
-          if (landmark && landmark.name) {
-            handleChange('basicInformation.landmark', landmark.name);
-          }
-          
-          toast.success("Location details updated successfully");
-        } else {
-          console.error("Geocoding failed:", data.status);
-        }
-      })
-      .catch(error => {
-        console.error("Error during reverse geocoding:", error);
-      });
-  };
+  // const reverseGeocode = (lat: string, lng: string) => {
+  //   const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
+
+  //   fetch(geocodingUrl)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       if (data.status === "OK" && data.results && data.results.length > 0) {
+  //         const address = data.results[0];
+
+  //         // Extract address components
+  //         const addressComponents = {
+  //           street: '',
+  //           city: '',
+  //           state: '',
+  //           zipCode: ''
+  //         };
+
+  //         // Map address components to our format
+  //         address.address_components.forEach((component: any) => {
+  //           const types = component.types;
+
+  //           if (types.includes('route')) {
+  //             addressComponents.street = component.long_name;
+  //           } else if (types.includes('locality')) {
+  //             addressComponents.city = component.long_name;
+  //           } else if (types.includes('administrative_area_level_1')) {
+  //             addressComponents.state = component.long_name;
+  //           } else if (types.includes('postal_code')) {
+  //             addressComponents.zipCode = component.long_name;
+  //           }
+  //         });
+
+  //         // Check if we have a street address, if not use formatted address
+  //         if (!addressComponents.street && address.formatted_address) {
+  //           const formattedParts = address.formatted_address.split(',');
+  //           if (formattedParts.length > 0) {
+  //             addressComponents.street = formattedParts[0];
+  //           }
+  //         }
+
+  //         // Update address in form data
+  //         handleChange('basicInformation.address', addressComponents);
+
+  //         // Update landmark with nearby point of interest if available
+  //         const landmark = data.results.find((result: any) =>
+  //           result.types.some((type: string) =>
+  //             ['point_of_interest', 'establishment', 'premise'].includes(type)
+  //           )
+  //         );
+
+  //         if (landmark && landmark.name) {
+  //           handleChange('basicInformation.landmark', landmark.name);
+  //         }
+
+  //         toast.success("Location details updated successfully");
+  //       } else {
+  //         console.error("Geocoding failed:", data.status);
+  //       }
+  //     })
+  //     .catch(error => {
+  //       console.error("Error during reverse geocoding:", error);
+  //     });
+  // };
 
   // Function to open location picker in Google Maps
-  const openLocationPicker = () => {
-    const lat = formData.basicInformation.location.latitude || "20.5937";
-    const lng = formData.basicInformation.location.longitude || "78.9629";
-    window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
-    toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
-  };
+  // const openLocationPicker = () => {
+  //   const lat = formData.basicInformation.location.latitude || "20.5937";
+  //   const lng = formData.basicInformation.location.longitude || "78.9629";
+  //   window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
+  //   toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
+  // };
 
   const formSections = [
     {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Store className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <PropertyName
-              propertyName={formData.basicInformation.title}
-              onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
-            />
-            <ShopType
-              onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
-            />
-            <CommercialPropertyAddress
-              onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            />
-            <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
+          />
+          <ShopType
+            onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
+          />
+          <CommercialPropertyAddress
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+          />
+          {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
               <div className="flex items-center mb-8">
                 <MapPin className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Map Location</h3>
@@ -432,9 +428,9 @@ const SellShopMain = () => {
                       className="rounded-xl"
                       title="Property Location Map"
                     ></iframe>
-                    
+
                     <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                      <button 
+                      <button
                         onClick={() => getCurrentLocation()}
                         className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
                         aria-label="Get current location"
@@ -443,7 +439,7 @@ const SellShopMain = () => {
                         <Locate className="w-5 h-5 text-blue-600" />
                         <span className="text-sm font-medium">My Location</span>
                       </button>
-                      
+
                       <button
                         onClick={() => openLocationPicker()}
                         className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
@@ -454,13 +450,13 @@ const SellShopMain = () => {
                         <span className="text-sm font-medium">Select Location</span>
                       </button>
                     </div>
-                    
+
                     <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
                       Powered by Google Maps
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -480,10 +476,10 @@ const SellShopMain = () => {
                                 ...formData.basicInformation.location,
                                 latitude: value
                               });
-                              
+
                               // Update iframe when latitude changes
                               updateMapLocation(
-                                value, 
+                                value,
                                 formData.basicInformation.location.longitude || '78.9629'
                               );
                             }
@@ -510,7 +506,7 @@ const SellShopMain = () => {
                                 ...formData.basicInformation.location,
                                 longitude: value
                               });
-                              
+
                               // Update iframe when longitude changes
                               updateMapLocation(
                                 formData.basicInformation.location.latitude || '20.5937',
@@ -530,17 +526,23 @@ const SellShopMain = () => {
                   </p>
                 </div>
               </div>
-            </div>
-            <Landmark
-              onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
-              onLocationSelect={(location) => handleChange('basicInformation.location', location)}
-              latitude={formData.basicInformation.location.latitude}
-              longitude={formData.basicInformation.location.longitude}
-            />
-            <CornerProperty
-              onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
-            />
-          </div>
+            </div> */}
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+          />
+          {/* <Landmark
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+            onLocationSelect={(location) => handleChange('basicInformation.location', location)}
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
+          /> */}
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
+          />
         </div>
       )
     },
@@ -548,19 +550,13 @@ const SellShopMain = () => {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <ShopDetails
-              onDetailsChange={(details) => handleChange('shopDetails', details)}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => handleChange('propertyDetails', details)}
-            />
-          </div>
+        <div className="space-y-6">
+          <ShopDetails
+            onDetailsChange={(details) => handleChange('shopDetails', details)}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => handleChange('propertyDetails', details)}
+          />
         </div>
       )
     },
@@ -568,78 +564,63 @@ const SellShopMain = () => {
       title: 'Pricing Details',
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
-          </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    pricingDetails: {
-                      ...prev.pricingDetails,
-                      propertyPrice: price.propertyPrice,
-                      pricetype: price.pricetype,
-                      pricecalculator: {
-                        area: price.area || 0,
-                        totalprice: price.totalprice || 0
-                      }
-                    }
-                  }));
-                }} />
-                <PricePerSqft
-                  propertyPrice={formData.pricingDetails.propertyPrice}
-                  Area={formData.propertyDetails.area}
-                  onPricePerSqftChange={(data) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      pricingDetails: {
-                        ...prev.pricingDetails,
-                        pricecalculator: {
-                          area: data.area || 0,
-                          totalprice: data.totalprice || 0
-                        }
-                      }
-                    }));
-                  }}
-                />
-              </div>
+        <div className="space-y-6">
+          <Price onPriceChange={(price) => {
+            setFormData(prev => ({
+              ...prev,
+              pricingDetails: {
+                ...prev.pricingDetails,
+                propertyPrice: price.propertyPrice,
+                pricetype: price.pricetype,
+                pricecalculator: {
+                  area: price.area || 0,
+                  totalprice: price.totalprice || 0
+                }
+              }
+            }));
+          }} />
+          <PricePerSqft
+            propertyPrice={formData.pricingDetails.propertyPrice}
+            Area={formData.propertyDetails.area}
+            onPricePerSqftChange={(data) => {
+              setFormData(prev => ({
+                ...prev,
+                pricingDetails: {
+                  ...prev.pricingDetails,
+                  pricecalculator: {
+                    area: data.area || 0,
+                    totalprice: data.totalprice || 0
+                  }
+                }
+              }));
+            }}
+          />
+          <div className="space-y-4 text-black">
+            <div className="text-black">
+              <RegistrationCharges onRegistrationChargesChange={(charges) => {
+                setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
+                    brokeragedetails: false,
+                    brokerageAmount: 0
+                  }
+                }));
+              }} />
             </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges onRegistrationChargesChange={(charges) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      registration: {
-                        chargestype: charges.chargestype,
-                        registrationAmount: charges.registrationAmount,
-                        stampDutyAmount: charges.stampDutyAmount,
-                        brokeragedetails: false,
-                        brokerageAmount: 0
-                      }
-                    }));
-                  }} />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      brokerage: {
-                        required: brokerage.required === 'yes',
-                        amount: brokerage.amount
-                      }
-                    }));
-                  }} />
-                </div>
-              </div>
+            <div className="border-t border-gray-200 my-4"></div>
+            <div className="text-black">
+              <Brokerage onBrokerageChange={(brokerage) => {
+                setFormData(prev => ({
+                  ...prev,
+                  brokerage: {
+                    required: brokerage.required === 'yes',
+                    amount: brokerage.amount
+                  }
+                }));
+              }} />
             </div>
           </div>
         </div>
@@ -649,11 +630,7 @@ const SellShopMain = () => {
       title: 'Availability',
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
+        <div className="space-y-6">
           <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
         </div>
       )
@@ -662,11 +639,7 @@ const SellShopMain = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Contact Information</h3>
-          </div>
+        <div className="space-y-6">
           <CommercialContactDetails onContactChange={(contact) => handleChange('contactInformation', contact)} />
         </div>
       )
@@ -675,11 +648,7 @@ const SellShopMain = () => {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
+        <div className="space-y-6">
           <CommercialMediaUpload
             onMediaChange={(mediaUpdate) => {
               const convertedPhotos: any = {};
@@ -979,7 +948,7 @@ const SellShopMain = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -1037,7 +1006,10 @@ const SellShopMain = () => {
       </div>
 
       {/* Form Content */}
-      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Shop</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -1094,11 +1066,11 @@ const SellShopMain = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                  Processing...
+                  Submitting...
                 </>
               ) : (
                 <>
-                  {currentStep === formSections.length - 1 ? 'Submit Listing' : 'Next'}
+                  {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
                   <ChevronRight className="w-5 h-5 ml-2" />
                 </>
               )}

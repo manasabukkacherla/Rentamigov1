@@ -1,344 +1,511 @@
-import React, { useState, useCallback } from "react";
-import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home } from "lucide-react";
-import PropertyName from "../PropertyName";
-import IndependentPropertyAddress from "../IndependentPropertyAddress";
-import MapCoordinates from "../MapCoordinates";
-import PropertySize from "../PropertySize";
-import IndependentPropertyFeatures from "../IndependentPropertyFeatures";
-import Rent from "../residentialrent/Rent";
-import Restrictions from "../Restrictions";
-import SecurityDeposit from "../residentialrent/SecurityDeposit";
-import MaintenanceAmount from "../residentialrent/MaintenanceAmount";
-import Brokerage from "../residentialrent/Brokerage";
-import AvailabilityDate from "../AvailabilityDate";
-import OtherCharges from "../residentialrent/OtherCharges";
-import MediaUpload from "../MediaUpload";
-import FlatAmenities from "../FlatAmenities";
-import SocietyAmenities from "../SocietyAmenities";
+"use client"
+
+import React, { useState, useCallback, useRef } from "react"
+import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2, Lock as LockIcon } from "lucide-react"
+import PropertyName from "../PropertyName"
+import IndependentPropertyAddress from "../IndependentPropertyAddress"
+import MapCoordinates from "../MapCoordinates"
+import PropertySize from "../PropertySize"
+import Restrictions from "../Restrictions"
+import IndependentPropertyFeatures from "../IndependentPropertyFeatures"
+import Rent from "../residentialrent/Rent"
+import SecurityDeposit from "../residentialrent/SecurityDeposit"
+import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
+import Brokerage from "../residentialrent/Brokerage"
+import AvailabilityDate from "../AvailabilityDate"
+import OtherCharges from "../residentialrent/OtherCharges"
+import MediaUpload from "../MediaUpload"
+import FlatAmenities from "../FlatAmenities"
+import SocietyAmenities from "../SocietyAmenities"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import axios from "axios"
+
+// Add custom styles for inclusive/exclusive buttons
+const customStyles = `
+  /* Target inclusive buttons when selected */
+  button.bg-blue-50.border-blue-500.text-blue-700 {
+    border-color: #DBEAFE !important; /* border-blue-100 */
+    background-color: #EFF6FF !important; /* bg-blue-50 */
+  }
+`;
 
 interface IndependentHouseProps {
-  propertyId: string;
-  onSubmit?: (formData: any) => void;
+  propertyId: string
+  onSubmit?: (formData: any) => void
 }
 
 const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
-  const [formData, setFormData] = useState({
+  const [currentStep, setCurrentStep] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const formRef = useRef<HTMLDivElement>(null)
+
+  const [formData, setFormData] = useState<FormData>({
     propertyName: "",
-    propertyAddress: {
-      flatNo: "",
-      floor: "",
-      houseName: "",
-      address: "",
-      pinCode: "",
-      city: "",
+    address: {
+      flatNo: 0,
+      floor: undefined,
+      apartmentName: "",
       street: "",
+      city: "",
       state: "",
       zipCode: "",
+      coordinates: {
+        lat: 0,
+        lng: 0
+      },
+      locationLabel: ""
     },
-    coordinates: { latitude: "", longitude: "" },
-    size: "",
-    features: {},
-    rent: {
-      expectedRent: "",
-      isNegotiable: false,
-      rentType: "",
+    coordinates: {
+      lat: 0,
+      lng: 0,
+      locationLabel: ""
     },
-    securityDeposit: {},
-    maintenanceAmount: {},
-    brokerage: {},
-    availability: {},
-    otherCharges: {},
-    media: { photos: [], video: null },
-    flatAmenities: {},
-    societyAmenities: {},
-    restrictions: {
-      foodPreference: "",
-      petsAllowed: "",
-      tenantType: "",
+    size: {
+      builtUpArea: "",
+      carpetArea: "",
+      superBuiltUpArea: "",
+      unit: "sq-ft"
     },
-  });
-
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-
-  const handleAddressChange = useCallback((addressData: any) => {
-    setFormData((prev) => ({
-      ...prev,
-      propertyAddress: { ...prev.propertyAddress, ...addressData },
-    }));
-  }, []);
-
-  const steps = [
-    {
-      title: "Basic Info",
-      icon: <Building2 className="w-6 h-6" />,
-      step: 1
+    features: {
+      bedrooms: "",
+      bathrooms: "",
+      balconies: "",
+      parking: "",
+      furnishing: "unfurnished",
+      floor: "",
+      totalFloors: "",
+      facing: "",
+      age: "",
+      rent: "",
+      securityDeposit: "",
+      maintenanceCharges: "",
+      maintenancePeriod: "monthly",
+      availableFrom: new Date(),
+      preferredTenants: [],
+      amenities: [],
+      propertyFeatures: [],
+      societyFeatures: [],
+      restrictions: []
     },
-    {
-      title: "Features",
-      icon: <Home className="w-6 h-6" />,
-      step: 2
-    },
-    {
-      title: "Amenities",
-      icon: <Building2 className="w-6 h-6" />,
-      step: 3
-    },
-    {
-      title: "Rental Terms",
-      icon: <IndianRupee className="w-6 h-6" />,
-      step: 4
-    },
-    {
-      title: "Availability",
-      icon: <Calendar className="w-6 h-6" />,
-      step: 5
-    },
-    {
-      title: "Media",
-      icon: <Image className="w-6 h-6" />,
-      step: 6
+    media: {
+      exterior: [],
+      interior: [],
+      floorPlan: [],
+      washrooms: [],
+      lifts: [],
+      emergencyExits: [],
+      legalDocuments: [],
+      videoTour: null
     }
-  ];
+  })
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+  const formSections = [
+    {
+      title: "Basic Information",
+      icon: <Home className="w-6 h-6" />,
+      component: (
+        <div className="space-y-8">
+          <div className="space-y-8">
+
+
+            <PropertyName
+              propertyName={formData.propertyName}
+              onPropertyNameChange={(name) =>
+                setFormData((prev) => ({ ...prev, propertyName: name }))
+              }
+            />
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <MapPin className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Location Details</h3>
+              </div>
+
+              <IndependentPropertyAddress
+                address={formData.address}
+                onAddressChange={(address) =>
+                  setFormData((prev) => ({ ...prev, address }))
+                }
+              />
+
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Property Details",
+      icon: <Building2 className="w-6 h-6" />,
+      component: (
+        <div className="space-y-8">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
                 <Building2 className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Property Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <PropertyName
-                  propertyName={formData.propertyName}
-                  onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))}
-                />
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_button]:border-black/20 [&_button]:text-black [&_button]:hover:bg-black [&_button]:hover:text-white [&_svg]:text-black">
-                <IndependentPropertyAddress
-                  onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))}
-                  onPropertyTypeSelect={(type) => setFormData(prev => ({ ...prev, propertyType: type }))}
-                  onLatitudeChange={(lat) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude: lat } }))}
-                  onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))}
-                  onAddressChange={handleAddressChange}
-                />
-                <MapCoordinates
-                  latitude={formData.coordinates.latitude}
-                  longitude={formData.coordinates.longitude}
-                  onLatitudeChange={(lat) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, latitude: lat } }))}
-                  onLongitudeChange={(lng) => setFormData(prev => ({ ...prev, coordinates: { ...prev.coordinates, longitude: lng } }))}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              
-              
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <Restrictions
-                  restrictions={formData.features.restrictions}
-                  onChange={(restrictions) => setFormData(prev => ({ ...prev, features: { ...prev.features, restrictions } }))}
-                />
-              </div>
-              {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-             */}
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_input[type=number]]:text-black [&_input[type=number]]:placeholder:text-black [&_input[type=number]]:bg-white [&_input[type=number]]:border-black/20 [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
-                
-              <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Property Features</h3>
-              </div>
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_input[type=number]]:text-black [&_input[type=number]]:placeholder:text-black [&_input[type=number]]:bg-white [&_input[type=number]]:border-black/20 [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
-              {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8"> */}
-              <div className="flex items-center mb-8">
-                <Ruler className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Size</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertySize
-                  onPropertySizeChange={(size) => setFormData(prev => ({ ...prev, size }))}
+                  onPropertySizeChange={(size) =>
+                    setFormData((prev) => ({ ...prev, size }))
+                  }
                 />
               </div>
             </div>
           </div>
-                
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Building2 className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Features</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <IndependentPropertyFeatures
-                  onFeaturesChange={(features) => setFormData(prev => ({ ...prev, features }))}
+                  onFeaturesChange={(features) =>
+                    setFormData((prev) => ({ ...prev, features }))
+                  }
                 />
               </div>
             </div>
           </div>
-        );
-      case 3:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <LockIcon className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Restrictions</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <Restrictions
+                  onRestrictionsChange={(restrictions) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      features: { ...prev.features, restrictions },
+                    }))
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
                 <Building2 className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Amenities</h3>
               </div>
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
-                <FlatAmenities
-                  onAmenitiesChange={(amenities) => setFormData(prev => ({ ...prev, flatAmenities: amenities }))}
-                />
-                <SocietyAmenities
-                  onAmenitiesChange={(amenities) => setFormData(prev => ({ ...prev, societyAmenities: amenities }))}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 4:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Rental Terms</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <Rent
-                  onRentChange={(rent) => setFormData(prev => ({ ...prev, rent }))}
-                />
-                {formData.rent.rentType === "exclusive" && (
-                  <MaintenanceAmount
-                    onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))}
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <div className="space-y-12">
+                  <FlatAmenities
+                    onAmenitiesChange={(amenities) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        features: { ...prev.features, amenities },
+                      }))
+                    }
                   />
-                )}
-                <SecurityDeposit
-                  onSecurityDepositChange={(deposit) => setFormData(prev => ({ ...prev, securityDeposit: deposit }))}
-                />
-                <OtherCharges
-                  onOtherChargesChange={(charges) => setFormData(prev => ({ ...prev, otherCharges: charges }))}
-                />
-                <Brokerage
-                  onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 5:
-        return (
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Calendar className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Availability & Restrictions</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <AvailabilityDate
-                  onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))}
-                />
-                
-              </div>
-            </div>
-          </div>
-        );
-        case 6:
-          return (
-            <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
-              <div className="space-y-8">
-                <div className="flex items-center mb-8">
-                  <Image className="text-black mr-3" size={28} />
-                  <h3 className="text-2xl font-semibold text-black">Media Upload</h3>
-                </div>
-                <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                  <MediaUpload
-                    onMediaChange={(media) => setFormData(prev => ({ ...prev, media }))}
+                  <SocietyAmenities
+                    onAmenitiesChange={(amenities) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        features: { ...prev.features, societyFeatures: amenities },
+                      }))
+                    }
                   />
                 </div>
               </div>
             </div>
-          );
-      default:
-        return null;
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Rental Terms",
+      icon: <IndianRupee className="w-6 h-6" />,
+      component: (
+        <div className="space-y-8">
+          <div className="space-y-8">
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <Rent
+                onRentChange={(rent) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      rent: rent.amount,
+                      maintenanceCharges: rent.maintenanceCharges,
+                      maintenancePeriod: rent.maintenancePeriod,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <SecurityDeposit
+                onSecurityDepositChange={(deposit) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      securityDeposit: deposit.amount,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <MaintenanceAmount
+                onMaintenanceAmountChange={(maintenance) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      maintenanceCharges: maintenance.amount,
+                      maintenancePeriod: maintenance.frequency,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <OtherCharges
+                onOtherChargesChange={(charges) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      otherCharges: charges,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <Brokerage
+                onBrokerageChange={(brokerage) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      brokerage,
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Availability",
+      icon: <Calendar className="w-6 h-6" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <AvailabilityDate
+                onAvailabilityChange={(availability) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      availableFrom: new Date(availability.date || ''),
+                    },
+                  }))
+                }
+              />
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Property Media",
+      icon: <Image className="w-6 h-6" />,
+      component: (
+        <div className="space-y-8">
+
+          <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <MediaUpload
+              onMediaChange={(media) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  media: {
+                    ...prev.media,
+                    ...media,
+                  },
+                }))
+              }
+            />
+          </div>
+        </div>
+      ),
+    },
+  ]
+
+  const handleNext = () => {
+    if (currentStep < formSections.length - 1) {
+      setCurrentStep((prev) => prev + 1)
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          })
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+    } else {
+      onSubmit?.(formData)
     }
-  };
+  }
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1)
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          })
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          })
+        }
+      }, 100)
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="flex items-center gap-2 mb-8">
-          <Building2 className="h-8 w-8 text-black" />
-          <h1 className="text-3xl font-bold text-black">List Your Independent House</h1>
-        </div>
-
-        {/* Stepper Scroll Bar UI */}
-        <div className="mt-6 flex items-center space-x-6 overflow-x-auto pb-2">
-          {steps.map((step, index) => (
-            <div key={index} className="flex items-center">
-              <button
-                onClick={() => setCurrentStep(step.step)}
-                className="flex items-center focus:outline-none"
-              >
+    <div ref={formRef} className="min-h-screen bg-white">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
                 <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    step.step <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
-                  }`}
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    if (index < currentStep) {
+                      setCurrentStep(index)
+                      setTimeout(() => {
+                        if (formRef.current) {
+                          window.scrollTo({
+                            top: formRef.current.offsetTop - 100,
+                            behavior: 'smooth'
+                          })
+                        }
+                      }, 100)
+                    }
+                  }}
                 >
-                  {step.icon}
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
                 </div>
-                <span className={`ml-3 text-sm font-medium whitespace-nowrap ${
-                  step.step <= currentStep ? 'text-black' : 'text-black/70'
-                }`}>
-                  {step.title}
-                </span>
-              </button>
-              {index < steps.length - 1 && (
-                <div className={`w-16 h-1 mx-3 ${index < currentStep ? 'bg-black' : 'bg-gray-200'}`} />
-              )}
+              ))}
             </div>
-          ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Independent House</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
 
-        {/* Form Content */}
-        <div className="bg-white rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg  mb-15">
-          {renderStep()}
-        </div>
+        {formSections[currentStep].component}
+      </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-end mt-8">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            onClick={() => {
-              if (currentStep === 7) {
-                onSubmit?.(formData);
-              } else {
-                setCurrentStep((prev) => Math.min(prev + 1, 7));
-              }
-            }}
-            disabled={loading}
-            className="px-6 py-3 bg-black text-white rounded-lg hover:bg-black/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
           >
-            {loading ? "Saving..." : currentStep === 7 ? "Submit" : "Next"}
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === formSections.length - 1 ? () => onSubmit?.(formData) : handleNext}
+            disabled={loading}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
           </button>
         </div>
-
-        {/* Messages */}
-        {error && (
-          <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
-            {success}
-          </div>
-        )}
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default IndependentHouse;
+export default IndependentHouse

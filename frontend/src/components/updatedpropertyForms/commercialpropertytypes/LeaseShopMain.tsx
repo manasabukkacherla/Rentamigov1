@@ -15,10 +15,11 @@ import Brokerage from '../residentialrent/Brokerage';
 import CommercialAvailability from '../CommercialComponents/CommercialAvailability';
 import CommercialContactDetails from '../CommercialComponents/CommercialContactDetails';
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
   // propertyId: string;
   basicInformation: {
@@ -32,8 +33,8 @@ interface FormData {
     };
     landmark: string;
     location: {
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
   };
@@ -161,8 +162,8 @@ const LeaseShopMain = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0
+        latitude: '',
+        longitude: ''
       },
       isCornerProperty: false
     },
@@ -295,49 +296,19 @@ const LeaseShopMain = () => {
       icon: <MapPin className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Store className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
-                <ShopType onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, shopType: type } }))} />
-              </div>
-            </div>
-          </div>
+          <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
+          <ShopType onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, shopType: type } }))} />
 
-          <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <MapPin className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Location Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
-                <div className="relative">
-                  <Landmark
-                    onLandmarkChange={(landmark) => setFormData(prev => ({
-                      ...prev,
-                      basicInformation: { ...prev.basicInformation, landmark }
-                    }))}
-                    onLocationSelect={(location) => setFormData(prev => ({
-                      ...prev,
-                      basicInformation: {
-                        ...prev.basicInformation,
-                        location: {
-                          latitude: parseFloat(location.latitude),
-                          longitude: parseFloat(location.longitude)
-                        }
-                      }
-                    }))}
-                  />
-                  <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                </div>
-                <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))} />
-              </div>
-            </div>
+          <div className="space-y-8">
+            <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
+            <MapLocation
+              latitude={formData.basicInformation.location.latitude}
+              longitude={formData.basicInformation.location.longitude}
+              onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
+              onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
+            />
+            <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))} />
           </div>
         </div>
       ),
@@ -346,58 +317,48 @@ const LeaseShopMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Building2 className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <div className="space-y-6">
-                <ShopDetails
-                  onDetailsChange={(details) => setFormData(prev => ({
-                    ...prev,
-                    shopDetails: {
-                      frontageWidth: details.frontageWidth || 0,
-                      heightOfShop: details.heightOfShop || 0,
-                      displayWindow: details.displayWindow || false,
-                      attachedStorageRoom: details.attachedStorageRoom || false,
-                      averageFootTraffic: details.averageFootTraffic || '',
-                      customerParking: details.customerParking || false,
-                      previousBusiness: details.previousBusiness || ''
-                    }
-                  }))}
-                />
-                <CommercialPropertyDetails
-                  onDetailsChange={(details) => setFormData(prev => ({
-                    ...prev,
-                    propertyDetails: {
-                      area: {
-                        totalArea: details.area?.totalArea || 0,
-                        builtUpArea: details.area?.builtUpArea || 0,
-                        carpetArea: details.area?.carpetArea || 0
-                      },
-                      floor: {
-                        floorNumber: details.floor?.floorNumber || 0,
-                        totalFloors: details.floor?.totalFloors || 0
-                      },
-                      facingDirection: details.facingDirection || '',
-                      furnishingStatus: details.furnishingStatus || '',
-                      propertyAmenities: details.propertyAmenities || [],
-                      wholeSpaceAmenities: details.wholeSpaceAmenities || [],
-                      electricitySupply: {
-                        powerLoad: details.electricitySupply?.powerLoad || 0,
-                        backup: details.electricitySupply?.backup || false
-                      },
-                      waterAvailability: details.waterAvailability || '',
-                      propertyAge: details.propertyAge || '',
-                      propertyCondition: details.propertyCondition || ''
-                    }
-                  }))}
-                />
-              </div>
-            </div>
-          </div>
+        <div className="space-y-8">
+          <ShopDetails
+            onDetailsChange={(details) => setFormData(prev => ({
+              ...prev,
+              shopDetails: {
+                frontageWidth: details.frontageWidth || 0,
+                heightOfShop: details.heightOfShop || 0,
+                displayWindow: details.displayWindow || false,
+                attachedStorageRoom: details.attachedStorageRoom || false,
+                averageFootTraffic: details.averageFootTraffic || '',
+                customerParking: details.customerParking || false,
+                previousBusiness: details.previousBusiness || ''
+              }
+            }))}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => setFormData(prev => ({
+              ...prev,
+              propertyDetails: {
+                area: {
+                  totalArea: details.area?.totalArea || 0,
+                  builtUpArea: details.area?.builtUpArea || 0,
+                  carpetArea: details.area?.carpetArea || 0
+                },
+                floor: {
+                  floorNumber: details.floor?.floorNumber || 0,
+                  totalFloors: details.floor?.totalFloors || 0
+                },
+                facingDirection: details.facingDirection || '',
+                furnishingStatus: details.furnishingStatus || '',
+                propertyAmenities: details.propertyAmenities || [],
+                wholeSpaceAmenities: details.wholeSpaceAmenities || [],
+                electricitySupply: {
+                  powerLoad: details.electricitySupply?.powerLoad || 0,
+                  backup: details.electricitySupply?.backup || false
+                },
+                waterAvailability: details.waterAvailability || '',
+                propertyAge: details.propertyAge || '',
+                propertyCondition: details.propertyCondition || ''
+              }
+            }))}
+          />
         </div>
       ),
     },
@@ -405,98 +366,85 @@ const LeaseShopMain = () => {
       title: "Lease Terms",
       icon: <DollarSign className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <DollarSign className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Lease Terms</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <div className="space-y-4">
-                <LeaseAmount
-                  onLeaseAmountChange={(amount) => setFormData(prev => ({
-                    ...prev,
-                    leaseTerms: {
-                      ...prev.leaseTerms,
-                      leaseDetails: {
-                        ...prev.leaseTerms.leaseDetails,
-                        leaseAmount: {
-                          amount: amount.amount || 0,
-                          type: amount.type || 'fixed',
-                          duration: amount.duration || 0,
-                          durationUnit: amount.durationUnit || 'years'
-                        },
+        <div className="space-y-8">
+          <LeaseAmount
+            onLeaseAmountChange={(amount) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                leaseDetails: {
+                  ...prev.leaseTerms.leaseDetails,
+                  leaseAmount: {
+                    amount: amount.amount || 0,
+                    type: amount.type || 'fixed',
+                    duration: amount.duration || 0,
+                    durationUnit: amount.durationUnit || 'years'
+                  },
 
-                      }
-                    }
-                  }))}
-                />
-                <LeaseTenure
-                  onLeaseTenureChange={(tenure) => setFormData(prev => ({
-                    ...prev,
-                    leaseTerms: {
-                      ...prev.leaseTerms,
-                      leaseDetails: {
-                        ...prev.leaseTerms.leaseDetails,
-                        // leaseDuration: tenure.leaseDuration || '',
-                      },
-                      tenureDetails: {
-                        minimumTenure: Number(tenure.minimumTenure) || 0,
-                        minimumUnit: tenure.minimumUnit || 'years',
-                        maximumTenure: Number(tenure.maximumTenure) || 0,
-                        maximumUnit: tenure.maximumUnit || 'years',
-                        lockInPeriod: Number(tenure.lockInPeriod) || 0,
-                        lockInUnit: tenure.lockInUnit || 'years',
-                        noticePeriod: Number(tenure.noticePeriod) || 0,
-                        noticePeriodUnit: tenure.noticePeriodUnit || 'months'
-                      }
-                    }
-                  }))}
-                />
-                <MaintenanceAmount
-                  onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                    ...prev,
-                    leaseTerms: {
-                      ...prev.leaseTerms,
-                      maintenanceAmount: {
-                        amount: Number(maintenance.amount) || 0,
-                        frequency: maintenance.frequency || 'monthly'
-                      }
-                    }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges
-                  onOtherChargesChange={(charges) => setFormData(prev => ({
-                    ...prev,
-                    leaseTerms: {
-                      ...prev.leaseTerms,
-                      otherCharges: {
-                        water: { type: charges.water.type, amount: charges.water.amount },
-                        electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                        gas: { type: charges.gas.type, amount: charges.gas.amount },
-                        others: { type: charges.others.type, amount: charges.others.amount }
-                      }
-                    }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={(brokerage) => setFormData(prev => ({
-                    ...prev,
-                    leaseTerms: {
-                      ...prev.leaseTerms,
-                      brokerage: {
-                        required: brokerage.required as 'yes' | 'no',
-                        amount: Number(brokerage.amount) || 0
-                      }
-                    }
-                  }))}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-              </div>
-            </div>
-          </div>
+                }
+              }
+            }))}
+          />
+          <LeaseTenure
+            onLeaseTenureChange={(tenure) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                leaseDetails: {
+                  ...prev.leaseTerms.leaseDetails,
+                  // leaseDuration: tenure.leaseDuration || '',
+                },
+                tenureDetails: {
+                  minimumTenure: Number(tenure.minimumTenure) || 0,
+                  minimumUnit: tenure.minimumUnit || 'years',
+                  maximumTenure: Number(tenure.maximumTenure) || 0,
+                  maximumUnit: tenure.maximumUnit || 'years',
+                  lockInPeriod: Number(tenure.lockInPeriod) || 0,
+                  lockInUnit: tenure.lockInUnit || 'years',
+                  noticePeriod: Number(tenure.noticePeriod) || 0,
+                  noticePeriodUnit: tenure.noticePeriodUnit || 'months'
+                }
+              }
+            }))}
+          />
+          <MaintenanceAmount
+            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                maintenanceAmount: {
+                  amount: Number(maintenance.amount) || 0,
+                  frequency: maintenance.frequency || 'monthly'
+                }
+              }
+            }))}
+          />
+          <OtherCharges
+            onOtherChargesChange={(charges) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                otherCharges: {
+                  water: { type: charges.water.type, amount: charges.water.amount },
+                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                  gas: { type: charges.gas.type, amount: charges.gas.amount },
+                  others: { type: charges.others.type, amount: charges.others.amount }
+                }
+              }
+            }))}
+          />
+          <Brokerage
+            onBrokerageChange={(brokerage) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                brokerage: {
+                  required: brokerage.required as 'yes' | 'no',
+                  amount: Number(brokerage.amount) || 0
+                }
+              }
+            }))}
+          />
         </div>
       ),
     },
@@ -504,37 +452,28 @@ const LeaseShopMain = () => {
       title: "Availability",
       icon: <Calendar className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialAvailability
-                onAvailabilityChange={(availability) => setFormData(prev => ({
-                  ...prev,
-                  leaseTerms: {
-                    ...prev.leaseTerms,
-                    availability: {
-                      // immediate: availability.immediate || false,
-                      date: availability.date || new Date(),
-                      // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
-                      availableImmediately: availability.availableImmediately || false,
-                      preferredSaleDuration: availability.preferredSaleDuration || '',
-                      noticePeriod: availability.noticePeriod || '',
-                      petsAllowed: availability.petsAllowed || false,
-                      operatingHours: {
-                        restricted: availability.operatingHours?.restricted || false,
-                        restrictions: availability.operatingHours?.restrictions || ''
-                      }
-                    }
+        <div className="space-y-8">
+          <CommercialAvailability
+            onAvailabilityChange={(availability) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                availability: {
+                  // immediate: availability.immediate || false,
+                  date: availability.date || new Date(),
+                  // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
+                  availableImmediately: availability.availableImmediately || false,
+                  preferredSaleDuration: availability.preferredSaleDuration || '',
+                  noticePeriod: availability.noticePeriod || '',
+                  petsAllowed: availability.petsAllowed || false,
+                  operatingHours: {
+                    restricted: availability.operatingHours?.restricted || false,
+                    restrictions: availability.operatingHours?.restrictions || ''
                   }
-                }))}
-              />
-              <div className="border-t border-gray-200 my-4"></div>
-            </div>
-          </div>
+                }
+              }
+            }))}
+          />
         </div>
       ),
     },
@@ -542,28 +481,20 @@ const LeaseShopMain = () => {
       title: "Contact Information",
       icon: <User className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <UserCircle className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Contact Details</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <CommercialContactDetails
-                onContactChange={(contact) => setFormData(prev => ({
-                  ...prev,
-                  contactInformation: {
-                    name: contact.name || '',
-                    email: contact.email || '',
-                    phone: contact.phone || '',
-                    alternatePhone: contact.alternatePhone,
-                    bestTimeToContact: contact.bestTimeToContact
-                  }
-                }))}
-              />
-              <div className="border-t border-gray-200 my-4"></div>
-            </div>
-          </div>
+        <div className="space-y-8">
+
+          <CommercialContactDetails
+            onContactChange={(contact) => setFormData(prev => ({
+              ...prev,
+              contactInformation: {
+                name: contact.name || '',
+                email: contact.email || '',
+                phone: contact.phone || '',
+                alternatePhone: contact.alternatePhone,
+                bestTimeToContact: contact.bestTimeToContact
+              }
+            }))}
+          />
         </div>
       ),
     },
@@ -571,51 +502,42 @@ const LeaseShopMain = () => {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <div className="bg-whitesmoke rounded-xl p-8 shadow-md border border-black/10 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <ImageIcon className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <div className="space-y-6">
-                <CommercialMediaUpload
-                  onMediaChange={(media) => {
-                    const photosByCategory: Record<string, File[]> = {
-                      exterior: [],
-                      interior: [],
-                      floorPlan: [],
-                      washrooms: [],
-                      lifts: [],
-                      emergencyExits: []
-                    };
+        <div className="space-y-8">
+          <div className="space-y-6">
+            <CommercialMediaUpload
+              onMediaChange={(media) => {
+                const photosByCategory: Record<string, File[]> = {
+                  exterior: [],
+                  interior: [],
+                  floorPlan: [],
+                  washrooms: [],
+                  lifts: [],
+                  emergencyExits: []
+                };
 
-                    media.images.forEach(({ category, files }) => {
-                      if (category in photosByCategory) {
-                        photosByCategory[category] = files.map(f => f.file);
-                      }
-                    });
+                media.images.forEach(({ category, files }) => {
+                  if (category in photosByCategory) {
+                    photosByCategory[category] = files.map(f => f.file);
+                  }
+                });
 
-                    setFormData(prev => ({
-                      ...prev,
-                      media: {
-                        photos: {
-                          exterior: photosByCategory.exterior,
-                          interior: photosByCategory.interior,
-                          floorPlan: photosByCategory.floorPlan,
-                          washrooms: photosByCategory.washrooms,
-                          lifts: photosByCategory.lifts,
-                          emergencyExits: photosByCategory.emergencyExits
-                        },
-                        videoTour: media.video?.file,
-                        documents: media.documents.map(d => d.file)
-                      }
-                    }));
-                  }}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-              </div>
-            </div>
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photosByCategory.exterior,
+                      interior: photosByCategory.interior,
+                      floorPlan: photosByCategory.floorPlan,
+                      washrooms: photosByCategory.washrooms,
+                      lifts: photosByCategory.lifts,
+                      emergencyExits: photosByCategory.emergencyExits
+                    },
+                    videoTour: media.video?.file,
+                    documents: media.documents.map(d => d.file)
+                  }
+                }));
+              }}
+            />
           </div>
         </div>
       ),
@@ -642,6 +564,8 @@ const LeaseShopMain = () => {
     }
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -664,6 +588,7 @@ const LeaseShopMain = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       const user = sessionStorage.getItem('user');
@@ -711,6 +636,8 @@ const LeaseShopMain = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Failed to create commercial shop listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
     // console.log(formData);
     // navigate('/');
@@ -718,38 +645,70 @@ const LeaseShopMain = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto text-black">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {steps.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-              onClick={() => i < currentStep && setCurrentStep(i)}
-              style={{ cursor: i < currentStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
-              >
-                {s.icon}
-              </div>
-              <span className="text-xs font-medium">{s.title}</span>
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {steps.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index);
+                    // Scroll to top of the form when clicking on progress indicators
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < steps.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
-          ></div>
+          </div>
         </div>
       </div>
 
-      <h2 className="text-3xl font-bold mb-8 text-black">{steps[currentStep].title}</h2>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Commercial Shop</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
 
-      {/* Form Content */}
-      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
         {steps[currentStep].component}
       </div>
 
@@ -769,10 +728,20 @@ const LeaseShopMain = () => {
           </button>
           <button
             onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
           >
-            {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
           </button>
         </div>
       </div>

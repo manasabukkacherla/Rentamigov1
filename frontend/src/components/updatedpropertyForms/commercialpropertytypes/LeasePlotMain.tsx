@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
-import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight } from "lucide-react"
+import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
@@ -21,6 +21,7 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import MediaUploadforagriplot from "../Mediauploadforagriplot"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
   propertyId?: string;
@@ -35,8 +36,8 @@ interface FormData {
     };
     landmark: string;
     coordinates: {
-      latitude: string | number;
-      longitude: string | number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
   };
@@ -343,7 +344,7 @@ const LeasePlotMain = () => {
       title: "Basic Information",
       icon: <Store className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
 
           <PropertyName
             propertyName={formData.basicInformation.title}
@@ -351,9 +352,11 @@ const LeasePlotMain = () => {
           />
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
           <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} />
-          <Landmark
-            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
-            onLocationSelect={(location) => handleChange('basicInformation.coordinates', location)}
+          <MapLocation
+            latitude={formData.basicInformation.coordinates.latitude}
+            longitude={formData.basicInformation.coordinates.longitude}
+            onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
           />
           <CornerProperty
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
@@ -365,7 +368,7 @@ const LeasePlotMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+        <div className="space-y-6">
 
           <PlotDetails onDetailsChange={(details) => {
             // Make sure totalArea is properly set
@@ -393,7 +396,7 @@ const LeasePlotMain = () => {
           }} />
 
           {/* Zoning Type - Required field */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
+          <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
             <h4 className="text-lg font-medium text-black mb-4">Zoning Information <span className="text-red-500">*</span></h4>
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3">
@@ -427,89 +430,43 @@ const LeasePlotMain = () => {
       title: "Lease Terms",
       icon: <DollarSign className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <div className="space-y-4 text-black">
-                <LeaseAmount
-                  onLeaseAmountChange={(amount) => handleChange('leaseDetails', {
-                    ...formData.leaseDetails,
-                    leaseAmount: amount.leaseAmount,
-                    leaseduration: {
-                      ...formData.leaseDetails.leaseduration,
-                      duration: amount.leaseTenure || 0,
-                      type: amount.leaseTermType || 'month',
-                      amountType: 'fixed'
-                    }
-                  })}
-                />
-                <LeaseTenure
-                  onLeaseTenureChange={(tenure) => handleChange('leaseDetails', {
-                    ...formData.leaseDetails,
-                    leasetenure: {
-                      minimumTenure: {
-                        duration: tenure.minimumTenure.duration || 0,
-                        type: tenure.minimumTenure.durationType || 'month'
-                      },
-                      maximumTenure: {
-                        duration: tenure.maximumTenure.duration || 0,
-                        type: tenure.maximumTenure.durationType || 'month'
-                      },
-                      lockInPeriod: {
-                        duration: tenure.lockInPeriod.duration || 0,
-                        type: tenure.lockInPeriod.durationType || 'month'
-                      },
-                      noticePeriod: {
-                        duration: tenure.noticePeriod.duration || 1,
-                        type: tenure.noticePeriod.durationType || 'month'
-                      }
-                    }
-                  })}
-                />
-              </div>
-            </div>
-
-            {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <MaintenanceAmount
-                  onMaintenanceAmountChange={(maintenance) => handleChange('leaseDetails', {
-                    ...formData.leaseDetails,
-                    maintenanceCharges: {
-                      amount: maintenance.maintenanceAmount || 0,
-                      frequency: maintenance.maintenanceType || 'monthly'
-                    }
-                  })}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <OtherCharges
-                  onOtherChargesChange={(charges) => handleChange('leaseDetails.otherCharges', {
-                    electricityCharges: {
-                      type: charges.electricityCharges === 'tenant' ? 'exclusive' : 'inclusive',
-                      amount: 0
-                    },
-                    waterCharges: {
-                      type: charges.waterCharges === 'tenant' ? 'exclusive' : 'inclusive',
-                      amount: 0
-                    },
-                    gasCharges: {
-                      type: 'inclusive',
-                      amount: 0
-                    },
-                    otherCharges: 'inclusive',
-                    amount: 0
-                  })}
-                />
-                <div className="border-t border-gray-200 my-4"></div>
-                <Brokerage
-                  onBrokerageChange={(brokerage) => handleChange('brokerage', {
-                    required: brokerage.required === 'yes',
-                    amount: brokerage.amount || 0
-                  })}
-                />
-              </div>
-            </div> */}
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <LeaseAmount
+              onLeaseAmountChange={(amount) => handleChange('leaseDetails', {
+                ...formData.leaseDetails,
+                leaseAmount: amount.leaseAmount,
+                leaseduration: {
+                  ...formData.leaseDetails.leaseduration,
+                  duration: amount.leaseTenure || 0,
+                  type: amount.leaseTermType || 'month',
+                  amountType: 'fixed'
+                }
+              })}
+            />
+            <LeaseTenure
+              onLeaseTenureChange={(tenure) => handleChange('leaseDetails', {
+                ...formData.leaseDetails,
+                leasetenure: {
+                  minimumTenure: {
+                    duration: tenure.minimumTenure.duration || 0,
+                    type: tenure.minimumTenure.durationType || 'month'
+                  },
+                  maximumTenure: {
+                    duration: tenure.maximumTenure.duration || 0,
+                    type: tenure.maximumTenure.durationType || 'month'
+                  },
+                  lockInPeriod: {
+                    duration: tenure.lockInPeriod.duration || 0,
+                    type: tenure.lockInPeriod.durationType || 'month'
+                  },
+                  noticePeriod: {
+                    duration: tenure.noticePeriod.duration || 1,
+                    type: tenure.noticePeriod.durationType || 'month'
+                  }
+                }
+              })}
+            />
           </div>
         </div>
       ),
@@ -518,30 +475,23 @@ const LeasePlotMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
-        </div>
-      ),
+        <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
+      )
     },
     {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
-          <CommercialContactDetails
+        <CommercialContactDetails
             onContactChange={(contact) => handleChange('contactInformation', contact)}
           />
-        </div>
       ),
     },
     {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
-          <MediaUploadforagriplot
+        <MediaUploadforagriplot
             onMediaChange={(mediaUpdate) => {
               const convertedPhotos: any = {};
 
@@ -559,7 +509,6 @@ const LeasePlotMain = () => {
               });
             }}
           />
-        </div>
       ),
     },
   ];
@@ -652,9 +601,11 @@ const LeasePlotMain = () => {
     return true;
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    setIsSubmitting(true);
     console.log("Form submission started...");
 
     // Run validation summary first
@@ -864,11 +815,13 @@ const LeasePlotMain = () => {
         console.error('Error details:', error.message);
         toast.error('Failed to create commercial plot lease listing. Please try again.');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -910,7 +863,10 @@ const LeasePlotMain = () => {
       </div>
 
       {/* Form Content */}
-      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Lease Commercial Plot</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -933,32 +889,23 @@ const LeasePlotMain = () => {
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
-
-          {currentStep === steps.length - 1 ? (
-            <button
-              onClick={(e) => {
-                const errors = validateFormData();
-                if (errors.length > 0) {
-                  e.preventDefault();
-                  toast.warning(`Please fix these required fields before submitting: ${errors.join(", ")}`);
-                  return;
-                }
-                handleSubmit(e);
-              }}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Submit
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          ) : (
-            <button
-              onClick={handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              Next
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </button>
-          )}
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </div>

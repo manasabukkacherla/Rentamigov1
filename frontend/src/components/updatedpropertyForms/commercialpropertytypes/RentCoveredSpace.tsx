@@ -19,6 +19,7 @@ import { DollarSign, Calendar, User, Image, ImageIcon, UserCircle, ChevronLeft, 
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 interface IFormData {
   basicInformation: {
@@ -32,8 +33,8 @@ interface IFormData {
     };
     landmark: string;
     location: {
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
   };
@@ -154,8 +155,8 @@ const RentCoveredSpace = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0,
+        latitude: '',
+        longitude: '',
       },
       isCornerProperty: false,
     },
@@ -634,6 +635,8 @@ const RentCoveredSpace = () => {
     });
   };
 
+  
+
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -664,7 +667,7 @@ const RentCoveredSpace = () => {
               basicInformation: { ...prev.basicInformation, address }
             }))}
           />
-          <Landmark
+          {/* <Landmark
             onLandmarkChange={(landmark) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, landmark }
@@ -679,6 +682,13 @@ const RentCoveredSpace = () => {
                 }
               }
             }))}
+          /> */}
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
           <CornerProperty
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({

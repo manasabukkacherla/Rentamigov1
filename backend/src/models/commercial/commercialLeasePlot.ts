@@ -20,8 +20,8 @@ interface IBasicInformation {
     };
     landmark: string;
     coordinates: {
-        latitude: number;
-        longitude: number;
+        latitude: string;
+        longitude: string;
     };
     isCornerProperty: boolean;
 }
@@ -133,7 +133,8 @@ interface IMedia {
 }
 
 interface IMetadata {
-    createdBy: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
 }
 interface IPlotDetails {
@@ -173,8 +174,8 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
         required: true },
         landmark: { type: String, required: true },
         coordinates: { type: {
-            latitude: { type: Number, required: true },
-            longitude: { type: Number, required: true },
+            latitude: { type: String, required: true },
+            longitude: { type: String, required: true },
         },
         required: true },
         isCornerProperty: { type: Boolean, default: false }
@@ -285,7 +286,8 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        userName:{type:String,default:"Not Specified"},
         createdAt: { type: Date, default: Date.now }
     }
 }, {

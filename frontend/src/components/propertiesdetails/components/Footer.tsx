@@ -4,8 +4,8 @@ import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from "luc
 export const Footer: React.FC = () => {
   return (
     <footer className="bg-white border-t border-gray-200 mt-16">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">About Us</h3>
             <p className="text-gray-600 mb-4">

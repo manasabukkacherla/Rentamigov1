@@ -16,10 +16,10 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
-import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronLeft, ChevronRight } from "lucide-react"
+import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import axios from "axios"
 import { toast } from "react-hot-toast"
-
+import MapLocation from "../CommercialComponents/MapLocation"
 interface MediaFile {
   url: string;
   file: File;
@@ -47,8 +47,8 @@ interface FormDataState {
     };
     landmark: string;
     location: {
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
     shopType?: string[];
@@ -79,7 +79,7 @@ interface FormDataState {
       powerLoad: number;
       backup: boolean;
     };
-    waterAvailability: string[];
+    waterAvailability: string;
     propertyAge: number;
     propertyCondition: string;
     ownershipType: string;
@@ -137,8 +137,8 @@ const SellRetailShopMain = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0
+        latitude: '',
+        longitude: ''
       },
       isCornerProperty: false
     },
@@ -168,7 +168,7 @@ const SellRetailShopMain = () => {
         powerLoad: 0,
         backup: false
       },
-      waterAvailability: [],
+      waterAvailability: '',
       propertyAge: 0,
       propertyCondition: '',
       ownershipType: 'Freehold',
@@ -228,6 +228,22 @@ const SellRetailShopMain = () => {
     }
   }, [navigate])
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   // Define form steps
   const steps = [
     {
@@ -235,34 +251,25 @@ const SellRetailShopMain = () => {
       icon: <Store className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <Store className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Basic Details</h3>
-            </div>
-            <div className="space-y-6">
-              <PropertyName
-                propertyName={formData.basicInformation.title}
-                onPropertyNameChange={(name: string) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
-              />
-              <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: types } })} />
-            </div>
-          </div>
+          <PropertyName
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
+          />
+          <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: types } })} />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center gap-3 mb-6">
-              <MapPin className="text-black w-6 h-6" />
-              <h3 className="text-xl font-semibold text-black">Location Details</h3>
-            </div>
-            <div className="space-y-6">
-              <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })} />
-              <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })} />
+          <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })} />
+          {/* <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })} /> */}
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+          />
 
-              <CornerProperty
-                onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
-              />
-            </div>
-          </div>
+          <CornerProperty
+            onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
+          />
         </div>
       ),
     },
@@ -270,54 +277,48 @@ const SellRetailShopMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Building2 className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
-          <div className="space-y-6">
-            <RetailStoreDetails
-              onDetailsChange={(details) => setFormData({
-                ...formData,
-                retailStoreDetails: {
-                  location: details.location || '',
-                  anchorStores: details.anchorStores || false,
-                  footfallData: details.footfallData || '',
-                  signageAllowed: details.signageAllowed || false,
-                  sharedWashrooms: details.sharedWashrooms || false,
-                  fireExit: details.fireExit || false
-                }
-              })}
-            />
-            <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData({
-                ...formData,
-                propertyDetails: {
-                  ...formData.propertyDetails,
-                  area: {
-                    totalArea: parseFloat(details.area?.totalArea?.toString() || '0'),
-                    carpetArea: parseFloat(details.area?.carpetArea?.toString() || '0'),
-                    builtUpArea: parseFloat(details.area?.builtUpArea?.toString() || '0')
-                  },
-                  floor: {
-                    floorNumber: parseInt(details.floor?.floorNumber?.toString() || '0'),
-                    totalFloors: parseInt(details.floor?.totalFloors?.toString() || '0')
-                  },
-                  facingDirection: details.facingDirection || '',
-                  furnishingStatus: details.furnishingStatus || '',
-                  propertyAmenities: details.propertyAmenities || [],
-                  wholeSpaceAmenities: details.wholeSpaceAmenities || [],
-                  electricitySupply: {
-                    powerLoad: parseFloat(details.electricitySupply?.powerLoad?.toString() || '0'),
-                    backup: details.electricitySupply?.backup || false
-                  },
-                  waterAvailability: details.waterAvailability || [],
-                  propertyAge: parseInt(details.propertyAge?.toString() || '0'),
-                  propertyCondition: details.propertyCondition || ''
-                }
-              })}
-            />
-          </div>
+        <div className="space-y-6">
+          <RetailStoreDetails
+            onDetailsChange={(details) => setFormData({
+              ...formData,
+              retailStoreDetails: {
+                location: details.location || '',
+                anchorStores: details.anchorStores || false,
+                footfallData: details.footfallData || '',
+                signageAllowed: details.signageAllowed || false,
+                sharedWashrooms: details.sharedWashrooms || false,
+                fireExit: details.fireExit || false
+              }
+            })}
+          />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => setFormData({
+              ...formData,
+              propertyDetails: {
+                ...formData.propertyDetails,
+                area: {
+                  totalArea: parseFloat(details.area?.totalArea?.toString() || '0'),
+                  carpetArea: parseFloat(details.area?.carpetArea?.toString() || '0'),
+                  builtUpArea: parseFloat(details.area?.builtUpArea?.toString() || '0')
+                },
+                floor: {
+                  floorNumber: parseInt(details.floor?.floorNumber?.toString() || '0'),
+                  totalFloors: parseInt(details.floor?.totalFloors?.toString() || '0')
+                },
+                facingDirection: details.facingDirection || '',
+                furnishingStatus: details.furnishingStatus || '',
+                propertyAmenities: details.propertyAmenities || [],
+                wholeSpaceAmenities: details.wholeSpaceAmenities || [],
+                electricitySupply: {
+                  powerLoad: parseFloat(details.electricitySupply?.powerLoad?.toString() || '0'),
+                  backup: details.electricitySupply?.backup || false
+                },
+                waterAvailability: details.waterAvailability,
+                propertyAge: parseInt(details.propertyAge?.toString() || '0'),
+                propertyCondition: details.propertyCondition || ''
+              }
+            })}
+          />
         </div>
       ),
     },
@@ -325,57 +326,45 @@ const SellRetailShopMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <DollarSign className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Pricing Details</h3>
+        <div className="space-y-6">
+          <div className="space-y-4 text-black">
+            <Price onPriceChange={(price) => setFormData({
+              ...formData,
+              priceDetails: {
+                ...formData.priceDetails,
+                price: parseFloat(price.amount.toString())
+              }
+            })} />
           </div>
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <Price onPriceChange={(price) => setFormData({
+
+
+          <div className="space-y-4 text-black">
+            <div className="text-black">
+              <RegistrationCharges
+                onRegistrationChargesChange={(charges) => setFormData({
                   ...formData,
                   priceDetails: {
                     ...formData.priceDetails,
-                    price: parseFloat(price.amount.toString())
-                  }
-                })} />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <RegistrationCharges
-                    onRegistrationChargesChange={(charges) => setFormData({
-                      ...formData,
-                      priceDetails: {
-                        ...formData.priceDetails,
-                        registrationCharges: {
-                          registrationAmount: parseFloat(charges.registrationAmount?.toString() || '0'),
-                          stampDuty: parseFloat(charges.stampDuty?.toString() || '0'),
-                          otherCharges: parseFloat(charges.otherCharges?.toString() || '0')
-                        }
-                      }
-                    })}
-                  />
-                </div>
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => setFormData({
-                    ...formData,
-                    priceDetails: {
-                      ...formData.priceDetails,
-                      brokerage: {
-                        required: brokerage.required || 'No',
-                        amount: parseFloat(brokerage.amount?.toString() || '0')
-                      }
+                    registrationCharges: {
+                      registrationAmount: parseFloat(charges.registrationAmount?.toString() || '0'),
+                      stampDuty: parseFloat(charges.stampDuty?.toString() || '0'),
+                      otherCharges: parseFloat(charges.otherCharges?.toString() || '0')
                     }
-                  })} />
-                </div>
-              </div>
+                  }
+                })}
+              />
+            </div>
+            <div className="text-black">
+              <Brokerage onBrokerageChange={(brokerage) => setFormData({
+                ...formData,
+                priceDetails: {
+                  ...formData.priceDetails,
+                  brokerage: {
+                    required: brokerage.required || 'No',
+                    amount: parseFloat(brokerage.amount?.toString() || '0')
+                  }
+                }
+              })} />
             </div>
           </div>
         </div>
@@ -385,11 +374,6 @@ const SellRetailShopMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Calendar className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Availability</h3>
-          </div>
           <div className="space-y-6">
             <CommercialAvailability onAvailabilityChange={(availability) => setFormData({
               ...formData,
@@ -402,18 +386,12 @@ const SellRetailShopMain = () => {
               }
             })} />
           </div>
-        </div>
       ),
     },
     {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <UserCircle className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Contact Details</h3>
-          </div>
           <div className="space-y-6">
             <CommercialContactDetails
               onContactChange={(contact) => setFormData({
@@ -428,19 +406,13 @@ const SellRetailShopMain = () => {
               })}
             />
           </div>
-        </div>
       ),
     },
     {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <ImageIcon className="text-black w-6 h-6" />
-            <h3 className="text-xl font-semibold text-black">Property Media</h3>
-          </div>
-          <div className="space-y-6">
+        <div className="space-y-6">
             <CommercialMediaUpload
               onMediaChange={(mediaData) => {
                 setFormData({
@@ -454,34 +426,33 @@ const SellRetailShopMain = () => {
               }}
             />
           </div>
-        </div>
       ),
     },
   ]
 
   // Navigation handlers
   const handleNext = () => {
-    if (validateCurrentStep()) {
-      if (currentStep < steps.length - 1) {
-        setCurrentStep(currentStep + 1);
-        // Scroll to top of the form
-        setTimeout(() => {
-          if (formRef.current) {
-            window.scrollTo({
-              top: formRef.current.offsetTop - 100,
-              behavior: 'smooth'
-            });
-          } else {
-            window.scrollTo({
-              top: 0,
-              behavior: 'smooth'
-            });
-          }
-        }, 100);
-      }
-    } else {
-      toast.error('Please fill in all required fields');
+    // if (validateCurrentStep()) {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }
+    // } else {
+    //   toast.error('Please fill in all required fields');
+    // }
   };
 
   const handlePrevious = () => {
@@ -757,7 +728,7 @@ const SellRetailShopMain = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4">
@@ -799,54 +770,51 @@ const SellRetailShopMain = () => {
       </div>
 
       {/* Form Content */}
-      <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          {steps[currentStep].component}
-
-          {/* Navigation Buttons */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-            <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-              <button
-                type="button"
-                onClick={handlePrevious}
-                disabled={currentStep === 0}
-                className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-white text-black hover:bg-black hover:text-white"
-                  }`}
-              >
-                <ChevronLeft className="w-5 h-5 mr-2" />
-                Previous
-              </button>
-              {currentStep < steps.length - 1 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-                >
-                  Next
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </button>
-              ) : (
-                <button
-                  type="submit"
-                  className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? "Submitting..." : "Submit"}
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </button>
-              )}
-            </div>
-          </div>
-        </form>
+        {steps[currentStep].component}
       </div>
-    </div>
+        
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+      </div>
   )
 }
 

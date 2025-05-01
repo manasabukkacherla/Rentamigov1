@@ -14,6 +14,7 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import MediaUploadforagriplot from '../Mediauploadforagriplot';
 import { ChevronLeft, ChevronRight, Store, Building2, Calendar, MapPin, DollarSign, ImageIcon, UserCircle } from 'lucide-react';
 import axios from 'axios';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 const globalStyles = `
   input::placeholder,
@@ -304,6 +305,22 @@ const RentAgriculture = () => {
     }));
   };
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const formSections = [
     {
       title: 'Basic Information',
@@ -319,7 +336,14 @@ const RentAgriculture = () => {
 
           <div className="space-y-6">
             <CommercialPropertyAddress onAddressChange={handleAddressChange} />
-            <Landmark onLandmarkChange={handleLandmarkChange} />
+            {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
+            <MapLocation 
+            latitude={formData.coordinates.latitude}
+            longitude={formData.coordinates.longitude}
+            onLocationChange={(location) => handleChange('coordinates', location)}
+            onAddressChange={(address) => handleChange('address', address)}
+            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            />
             <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
           </div>
         </div>
@@ -341,13 +365,22 @@ const RentAgriculture = () => {
         <div className="space-y-6">
           <Rent onRentChange={handleRentChange} />
           <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+          <div className="space-y-4 text-black">
+            <Rent onRentChange={handleRentChange} />
+            {formData.rent.maintenanceType === 'exclusive' && (
+              <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+            )}
+            <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+          </div>
         </div>
       )
     },
     {
       title: 'Availability',
+      icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="flex items-center gap-3 mb-6">
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate onAvailabilityChange={(availability) => setFormData(prev => ({
             ...prev,
             availability: {
@@ -489,7 +522,7 @@ const RentAgriculture = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div ref={formRef} className="min-h-screen bg-white">
       <style>{globalStyles}</style>
 
       {/* Progress Bar */}
@@ -531,8 +564,11 @@ const RentAgriculture = () => {
       </div>
 
       {/* Form Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div ref={formRef} className="mb-8">
+      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Agriculture</h1>
+        </div>
+        <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>

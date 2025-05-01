@@ -1,12 +1,13 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import { Building, MapPin, Navigation } from "lucide-react"
-import MapSelector from "./MapSelector"
+import React, { useState } from "react";
+import { Building, MapPin, Navigation, Locate } from "lucide-react";
+import toast from "react-hot-toast";
 
 interface PropertyAddressProps {
   address: {
     flatNo?: number;
+    showFlatNo?: boolean;
     floor?: number;
     apartmentName?: string;
     street?: string;
@@ -24,42 +25,63 @@ interface PropertyAddressProps {
 }
 
 const PropertyAddress: React.FC<PropertyAddressProps> = ({
-  address,
+  address = {}, // Default to an empty object to prevent errors if address is not provided
   onAddressChange,
   showFlatNo = true,
 }) => {
   const [showMap, setShowMap] = useState(false);
-  
+
+  // Function to handle changes in the address fields
   const handleChange = (field: string, value: any) => {
     onAddressChange({
       ...address,
       [field]: value,
-    })
-  }
-
-  const handleLocationSelect = (lat: string, lng: string, addressData?: any) => {
-    // Create a readable location label from coordinates or address data
-    let locationLabel = `${lat}, ${lng}`;
-    
-    if (addressData) {
-      const components = [];
-      if (addressData.route) components.push(addressData.route);
-      if (addressData.sublocality_level_1) components.push(addressData.sublocality_level_1);
-      if (addressData.locality) components.push(addressData.locality);
-      
-      if (components.length > 0) {
-        locationLabel = components.join(', ');
-      }
-    }
-    
-    onAddressChange({
-      ...address,
-      coordinates: { lat: Number(lat), lng: Number(lng) },
-      locationLabel: locationLabel
     });
-  }
+  };
 
-  const inputClasses = "w-full h-12 px-4 rounded-lg border border-black/10 bg-white text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black shadow-sm transition-all duration-200"
+  // Function to update map location based on latitude and longitude
+  const updateMapLocation = (lat: string, lng: string) => {
+    const iframe = document.getElementById("map-iframe") as HTMLIFrameElement;
+    if (iframe && lat && lng) {
+      iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
+    }
+  };
+
+  // Function to get current location
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toString();
+          const lng = position.coords.longitude.toString();
+
+          onAddressChange((prev) => ({
+            ...prev,
+            coordinates: { lat: Number(lat), lng: Number(lng) },
+          }));
+
+          updateMapLocation(lat, lng);
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+          toast.error("Unable to get your current location. Please check your browser permissions.");
+        }
+      );
+    } else {
+      toast.error("Geolocation is not supported by your browser.");
+    }
+  };
+
+  // Function to open location picker in Google Maps
+  const openLocationPicker = () => {
+    const lat = address.coordinates?.lat || "20.5937";
+    const lng = address.coordinates?.lng || "78.9629";
+    window.open(`https://www.google.com/maps/@${lat},${lng},18z`, "_blank");
+    toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
+  };
+
+  const inputClasses =
+    "w-full h-12 px-4 rounded-lg border border-black/10 bg-white text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black shadow-sm transition-all duration-200";
 
   return (
     <div className="bg-white rounded-xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-black/5 mb-8">
@@ -75,8 +97,10 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
           <label className="flex items-center gap-2.5 text-sm text-black/70 bg-black/5 px-4 py-3 rounded-lg w-fit">
             <input
               type="checkbox"
-              checked={!!address.flatNo}
-              onChange={(e) => handleChange("showFlatNo", e.target.checked ? true : false)}
+              checked={address.showFlatNo ?? false} // Use default value if showFlatNo is undefined
+              onChange={(e) =>
+                handleChange("showFlatNo", e.target.checked ? true : false)
+              }
               className="rounded border-black/10 text-black focus:ring-black/5"
             />
             Show Flat No. in the Listing
@@ -85,7 +109,6 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
 
         {/* Address Fields in Three Lines */}
         <div className="space-y-6">
-          {/* Line 1: Apartment Name, Flat No, Floor */}
           <div className="grid grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-black/70 mb-2.5">
@@ -112,9 +135,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-black/70 mb-2.5">
-                Floor
-              </label>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">Floor</label>
               <input
                 type="text"
                 value={address.floor || ""}
@@ -128,9 +149,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
           {/* Line 2: City, State, ZIP Code */}
           <div className="grid grid-cols-3 gap-6">
             <div>
-              <label className="block text-sm font-medium text-black/70 mb-2.5">
-                City
-              </label>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">City</label>
               <input
                 type="text"
                 value={address.city || ""}
@@ -140,9 +159,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-black/70 mb-2.5">
-                State
-              </label>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">State</label>
               <input
                 type="text"
                 value={address.state || ""}
@@ -152,9 +169,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-black/70 mb-2.5">
-                ZIP Code
-              </label>
+              <label className="block text-sm font-medium text-black/70 mb-2.5">ZIP Code</label>
               <input
                 type="text"
                 value={address.zipCode || ""}
@@ -165,11 +180,9 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
             </div>
           </div>
 
-          {/* Line 3: Street Address */}
+          {/* Street Address */}
           <div>
-            <label className="block text-sm font-medium text-black/70 mb-2.5">
-              Street Address
-            </label>
+            <label className="block text-sm font-medium text-black/70 mb-2.5">Street Address</label>
             <input
               type="text"
               value={address.street || ""}
@@ -178,56 +191,99 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
               className={inputClasses}
             />
           </div>
+        </div>
 
-          {/* Line 4: Location with Map */}
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-black/70 mb-2.5">
-                <span className="flex items-center gap-1.5">
-                  <Navigation className="h-4 w-4" />
-                  Location
-                </span>
-              </label>
-              <div className="relative">
+        {/* Map Embed and Coordinates */}
+        <div className="bg-white p-6 rounded-lg space-y-6">
+          <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
+          <p className="text-sm text-gray-500 mb-4">
+            Use the map below to set your property's location. Click on the map or search for an address.
+          </p>
+          <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
+            <iframe
+              id="map-iframe"
+              src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${address.coordinates?.lng || '78.9629'}!3d${address.coordinates?.lat || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${address.coordinates?.lat || '20.5937'},${address.coordinates?.lng || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="rounded-xl"
+              title="Property Location Map"
+            ></iframe>
+            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+              <button
+                onClick={() => getCurrentLocation()}
+                className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
+                aria-label="Get current location"
+                type="button"
+              >
+                <Locate className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium">My Location</span>
+              </button>
+
+              <button
+                onClick={() => openLocationPicker()}
+                className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
+                aria-label="Select location"
+                type="button"
+              >
+                <Navigation className="w-5 h-5 text-blue-600" />
+                <span className="text-sm font-medium">Select Location</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Coordinates Inputs */}
+          <div>
+            <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
+                  Latitude
+                </label>
                 <input
                   type="text"
-                  value={address.locationLabel || (address.coordinates ? `${address.coordinates.lat}, ${address.coordinates.lng}` : "")}
-                  readOnly
-                  onClick={() => setShowMap(true)}
-                  placeholder="Click to select location on map"
-                  className={`${inputClasses} cursor-pointer`}
+                  id="latitude"
+                  value={address.coordinates?.lat || ""}
+                  onChange={(e) =>
+                    handleChange("coordinates", {
+                      ...address.coordinates,
+                      lat: parseFloat(e.target.value),
+                    })
+                  }
+                  placeholder="Enter latitude"
+                  className={inputClasses}
                 />
-                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
               </div>
-              {address.coordinates && (
-                <p className="mt-2 text-xs text-gray-500">
-                  Coordinates: {address.coordinates.lat}, {address.coordinates.lng}
-                </p>
-              )}
+              <div>
+                <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
+                  Longitude
+                </label>
+                <input
+                  type="text"
+                  id="longitude"
+                  value={address.coordinates?.lng || ""}
+                  onChange={(e) =>
+                    handleChange("coordinates", {
+                      ...address.coordinates,
+                      lng: parseFloat(e.target.value),
+                    })
+                  }
+                  placeholder="Enter longitude"
+                  className={inputClasses}
+                />
+              </div>
             </div>
-
-            {showMap && (
-              <div className="mt-4 border border-gray-200 rounded-lg overflow-hidden">
-                <MapSelector
-                  latitude={address.coordinates?.lat.toString() || ""}
-                  longitude={address.coordinates?.lng.toString() || ""}
-                  onLocationSelect={handleLocationSelect}
-                />
-                <div className="bg-gray-50 p-2 text-right">
-                  <button 
-                    onClick={() => setShowMap(false)} 
-                    className="text-sm text-black/70 hover:text-black px-3 py-1 rounded-md hover:bg-gray-200 transition-colors"
-                  >
-                    Done
-                  </button>
-                </div>
-              </div>
-            )}
+            <p className="mt-2 text-xs text-gray-500">
+              Enter coordinates manually or use the map above to set the location.
+            </p>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PropertyAddress
+export default PropertyAddress;

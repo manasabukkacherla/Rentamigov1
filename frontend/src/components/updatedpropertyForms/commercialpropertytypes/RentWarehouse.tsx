@@ -19,6 +19,7 @@ import CommercialContactDetails from '../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload';
 import { MapPin, Building2, DollarSign, Calendar, User, Image, Warehouse, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
+import MapLocation from '../CommercialComponents/MapLocation';
 
 // Define the FormData interface to match the backend structure
 interface FormData {
@@ -33,8 +34,8 @@ interface FormData {
     };
     landmark: string;
     location: {
-      latitude: number;
-      longitude: number;
+      latitude: string;
+      longitude: string;
     };
     isCornerProperty: boolean;
   };
@@ -166,8 +167,8 @@ const RentWarehouse = () => {
       },
       landmark: '',
       location: {
-        latitude: 0,
-        longitude: 0,
+        latitude: '',
+        longitude: '',
       },
       isCornerProperty: false,
     },
@@ -318,18 +319,18 @@ const RentWarehouse = () => {
     });
   };
 
-  const handleLocationChange = (location: { latitude: string; longitude: string; }) => {
-    setFormData({
-      ...formData,
-      basicInformation: {
-        ...formData.basicInformation,
-        location: {
-          latitude: parseFloat(location.latitude),
-          longitude: parseFloat(location.longitude)
-        }
-      }
-    });
-  };
+  // const handleLocationChange = (location: { latitude: string; longitude: string; }) => {
+  //   setFormData({
+  //     ...formData,
+  //     basicInformation: {
+  //       ...formData.basicInformation,
+  //       location: {
+  //         latitude: parseFloat(location.latitude),
+  //         longitude: parseFloat(location.longitude)
+  //       }
+  //     }
+  //   });
+  // };
 
   const handleCornerPropertyChange = (isCorner: boolean) => {
     setFormData({
@@ -520,6 +521,22 @@ const RentWarehouse = () => {
     });
   };
 
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
+
   const formSections = [
     {
       title: 'Basic Information',
@@ -539,13 +556,20 @@ const RentWarehouse = () => {
           <CommercialPropertyAddress
             onAddressChange={handleAddressChange}
           />
-          <div className="relative">
+          <MapLocation
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+          />
+          {/* <div className="relative">
             <Landmark
               onLandmarkChange={handleLandmarkChange}
               onLocationSelect={handleLocationChange}
             />
             <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-          </div>
+          </div> */}
 
           <div className="flex items-center space-x-2 cursor-pointer">
             <CornerProperty

@@ -209,8 +209,28 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
     }
   };
 
+  const removeAllImages = (category: string) => {
+    const updatedImages = media.images.map(img => {
+      if (img.category === category) {
+        return {
+          ...img,
+          files: []
+        };
+      }
+      return img;
+    });
+
+    const updatedMedia = { ...media, images: updatedImages };
+    setMedia(updatedMedia);
+    onMediaChange?.({
+      images: updatedMedia.images,
+      video: updatedMedia.video || undefined,
+      documents: updatedMedia.documents
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 text-black">
+    <div className="bg-gray-50 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
       <div className="max-w-4xl mx-auto p-8">
         <h1 className="text-2xl font-bold mb-8">Media Upload</h1>
         <div className="space-y-8">
@@ -263,28 +283,40 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
 
               {/* Image Preview Grid */}
               {files.length > 0 && (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-4">
-                  {files.map((file, index) => (
-                    <div
-                      key={index}
-                      className="relative aspect-square rounded-lg overflow-hidden group"
+                <div className="mt-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-lg font-medium">Uploaded Images</h3>
+                    <button
+                      onClick={() => removeAllImages(category)}
+                      className="flex items-center gap-1 px-3 py-1 text-sm bg-black/10 text-black rounded-md hover:bg-black/20 transition-colors"
                     >
-                      <img
-                        src={file.url}
-                        alt={`${category} ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeImage(category, index);
-                        }}
-                        className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      Clear All
+                      <X size={14} />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="relative aspect-square rounded-lg overflow-hidden group"
                       >
-                        <X size={16} />
-                      </button>
-                    </div>
-                  ))}
+                        <img
+                          src={file.url}
+                          alt={`${category} ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeImage(category, index);
+                          }}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-white hover:bg-black transition-colors duration-200"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </section>

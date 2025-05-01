@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useRef } from "react"
-import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, MapPin, Locate, Navigation } from "lucide-react"
+import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, MapPin, Locate, Navigation, Loader2 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
@@ -21,6 +21,7 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import MediaUploadforagriplot from "../Mediauploadforagriplot"
+import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
   basicInformation: {
@@ -382,11 +383,7 @@ const SellPlotMain = () => {
       title: "Basic Information",
       icon: <Store className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-            <Store className="w-6 h-6 text-black" />
-            <h3 className="text-xl font-semibold text-black">Property Details</h3>
-          </div>
+        <div className="space-y-6">
           <PropertyName
             propertyName={formData.basicInformation.propertyName}
             onPropertyNameChange={(name) => handleChange('basicInformation.propertyName', name)}
@@ -394,7 +391,7 @@ const SellPlotMain = () => {
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
           <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} />
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+          {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center mb-8">
               <MapPin className="text-black mr-3" size={28} />
               <h3 className="text-2xl font-semibold text-black">Map Location</h3>
@@ -516,9 +513,17 @@ const SellPlotMain = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
 
-          <Landmark
+          <MapLocation
+            latitude={formData.basicInformation.coordinates.latitude}
+            longitude={formData.basicInformation.coordinates.longitude}
+            onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+          />
+
+          {/* <Landmark
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
             onLocationSelect={(location) => {
               handleChange('basicInformation.coordinates', location);
@@ -527,7 +532,7 @@ const SellPlotMain = () => {
             }}
             latitude={formData.basicInformation.coordinates.latitude}
             longitude={formData.basicInformation.coordinates.longitude}
-          />
+          /> */}
           <CornerProperty
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
           />
@@ -538,11 +543,7 @@ const SellPlotMain = () => {
       title: "Property Details",
       icon: <Building2 className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-
-
-          </div>
+        <div className="space-y-6">
           <PlotDetails onDetailsChange={(details) => {
             // Make sure totalArea is properly set
             const updatedDetails = {
@@ -553,7 +554,7 @@ const SellPlotMain = () => {
           }} />
 
           {/* Zoning Type - Required field */}
-          <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
+          <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
             <h4 className="text-lg font-medium text-black mb-4">Zoning Information <span className="text-red-500">*</span></h4>
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-3">
@@ -587,79 +588,29 @@ const SellPlotMain = () => {
       title: "Pricing Details",
       icon: <DollarSign className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-
+        <div className="space-y-6">
           <div className="space-y-6">
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              <h4 className="text-lg font-medium text-black mb-4">Price Information</h4>
-              <div className="space-y-4 text-black">
-                <div className="text-black">
-                  <Price onPriceChange={(price) => handleChange('pricingDetails', {
-                    ...formData.pricingDetails,
-                    propertyPrice: price.propertyPrice,
-                    priceType: price.pricetype
-                  })} />
-                </div>
-                <div className="text-black">
-                  <PricePerSqft
-                    propertyPrice={formData.pricingDetails.propertyPrice}
-                    Area={formData.propertyDetails.area}
-                    onPricePerSqftChange={(data) => {
-                      handleChange('pricingDetails', {
-                        ...formData.pricingDetails,
-                        area: data.area,
-                        totalPrice: data.totalprice,
-                        pricePerSqft: data.pricePerSqft
-                      });
-                    }}
-                  />
-                </div>
+            <div className="space-y-4 text-black">
+              <div className="text-black">
+                <Price onPriceChange={(price) => handleChange('pricingDetails', {
+                  ...formData.pricingDetails,
+                  propertyPrice: price.propertyPrice,
+                  priceType: price.pricetype
+                })} />
               </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-              {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
-              <div className="space-y-4 text-black">
-                {/* <div className="text-black">
-                  <RegistrationCharges
-                    onRegistrationChargesChange={(charges) => handleChange('registration', charges)}
-                  />
-                </div> */}
-
-                {/* Registration Type - Required field */}
-                {/* <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <label className="block text-md font-medium mb-2 text-black">
-                    Registration Type <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-1 gap-3">
-                    <select
-                      value={formData.registration.type}
-                      onChange={(e) => {
-                        // Set both type and chargesType for consistency
-                        handleChange('registration', {
-                          ...formData.registration,
-                          type: e.target.value,
-                          chargesType: e.target.value
-                        });
-                      }}
-                      className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
-                      required
-                    >
-                      <option value="" disabled className="text-black bg-white">Select Registration Type</option>
-                      <option value="inclusive" className="text-black bg-white">Inclusive</option>
-                      <option value="exclusive" className="text-black bg-white">Exclusive</option>
-                    </select>
-                    {!formData.registration.type && (
-                      <p className="text-red-500 text-sm">This field is required</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-200 my-4"></div>
-                <div className="text-black">
-                  <Brokerage onBrokerageChange={(brokerage) => handleChange('brokerage', brokerage)} />
-                </div> */}
+              <div className="text-black">
+                <PricePerSqft
+                  propertyPrice={formData.pricingDetails.propertyPrice}
+                  Area={formData.propertyDetails.area}
+                  onPricePerSqftChange={(data) => {
+                    handleChange('pricingDetails', {
+                      ...formData.pricingDetails,
+                      area: data.area,
+                      totalPrice: data.totalprice,
+                      pricePerSqft: data.pricePerSqft
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -670,50 +621,40 @@ const SellPlotMain = () => {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
-        </div>
+        <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
       ),
     },
     {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-          </div>
-          <CommercialContactDetails
-            onContactChange={(contact) => handleChange('contactInformation', contact)}
-          />
-        </div>
+        <CommercialContactDetails
+          onContactChange={(contact) => handleChange('contactInformation', contact)}
+        />
       ),
     },
     {
       title: "Property Media",
       icon: <ImageIcon className="w-5 h-5" />,
       content: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="flex items-center gap-3 mb-6">
-          </div>
-          <MediaUploadforagriplot
-            onMediaChange={(mediaUpdate) => {
-              const convertedPhotos: any = {};
+        <MediaUploadforagriplot
+          onMediaChange={(mediaUpdate) => {
+            const convertedPhotos: any = {};
 
-              mediaUpdate.images.forEach(({ category, files }) => {
-                convertedPhotos[category] = files.map(f => f.file);
-              });
+            mediaUpdate.images.forEach(({ category, files }) => {
+              convertedPhotos[category] = files.map(f => f.file);
+            });
 
-              handleChange('media', {
-                photos: {
-                  ...formData.media.photos,
-                  ...convertedPhotos
-                },
-                videoTour: mediaUpdate.video?.file || null,
-                documents: mediaUpdate.documents.map(d => d.file)
-              });
-            }}
-          />
-        </div>
+            handleChange('media', {
+              photos: {
+                ...formData.media.photos,
+                ...convertedPhotos
+              },
+              videoTour: mediaUpdate.video?.file || null,
+              documents: mediaUpdate.documents.map(d => d.file)
+            });
+          }}
+        />
       ),
     },
   ]
@@ -759,9 +700,11 @@ const SellPlotMain = () => {
     }
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
+    setIsSubmitting(true);
     console.log("Form submission started...")
 
     try {
@@ -929,6 +872,8 @@ const SellPlotMain = () => {
         console.error('Error details:', error.message);
         toast.error('Failed to create commercial plot listing. Please try again.');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -974,52 +919,10 @@ const SellPlotMain = () => {
         </div>
       </div>
 
-      {/* Form Content
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">Sell Commercial Plot</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
-        </div> */}
-
-      {/* <form onSubmit={handleSubmit} className="space-y-8">
-          {steps[currentStep].content}
-
-         
-          <div className="flex justify-between pt-4">
-            <button
-              type="button"
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`flex items-center px-6 py-2.5 rounded-lg border transition-all duration-200 ${currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "border-black/20 text-black hover:bg-black hover:text-white"
-                }`}
-            >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
-            </button>
-
-            {currentStep < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex items-center px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-              >
-                Next
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className="flex items-center px-6 py-2.5 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-              >
-                List Property
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </button>
-            )}
-          </div>
-        </form> */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sell Commercial Plot</h1>
+        </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
@@ -1044,10 +947,20 @@ const SellPlotMain = () => {
           </button>
           <button
             onClick={currentStep === steps.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
           >
-            {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
-            <ChevronRight className="w-5 h-5 ml-2" />
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
           </button>
         </div>
       </div>
