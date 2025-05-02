@@ -57,7 +57,7 @@ export const createCommercialWarehouse = async (req: Request, res: Response) => 
     
     // Add metadata and property ID
     warehouseData.metadata = {
-      createdBy: warehouseData.metadata?.createdBy,
+      userId: warehouseData.metadata?.userId,
       createdAt: new Date(),
     };
     

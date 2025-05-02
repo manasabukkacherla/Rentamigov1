@@ -83,3 +83,103 @@ export const createCommercialRentRetailStore = async (req: Request, res: Respons
   }
 };
 
+export const getAllCommercialRentRetail = async (req: Request, res: Response) => {
+  try {
+    const properties = await CommercialRentRetailStore.find().sort({ 'metadata.createdAt': -1 });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent retail listings retrieved successfully',
+      data: properties
+    });
+  } catch (error) {
+    console.error('Error fetching commercial Rent retail listings:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch commercial Rent retail listings' 
+    });
+  }
+};
+
+export const getCommercialRentRetailById = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialRentRetailStore.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial Rent retail property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent retail property retrieved successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error fetching commercial Rent retail property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch commercial Rent retail property' 
+    });
+  }
+};
+
+export const updateCommercialRentRetail = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const updateData = req.body;
+    
+    const property = await CommercialRentRetailStore.findOneAndUpdate(
+      { propertyId },
+      { $set: updateData },
+      { new: true }
+    );
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial Rent retail property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent retail property updated successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error updating commercial Rent retail property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to update commercial Rent retail property' 
+    });
+  }
+};
+
+export const deleteCommercialRentRetail = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialRentRetailStore.findOneAndDelete({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial Rent retail property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent retail property deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting commercial Rent retail property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to delete commercial Rent retail property' 
+    });
+  }
+}; 

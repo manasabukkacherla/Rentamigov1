@@ -75,15 +75,15 @@ export const createCommercialSellRetailStore = async (req: AuthenticatedRequest,
       ...formData.metadata
     };
 
-    // Set the createdBy field from the authenticated user if available
+    // Set the userId field from the authenticated user if available
     if (req.user && req.user._id) {
-      metadata.createdBy = req.user._id;
+      metadata.userId = req.user._id;
       console.log('Using authenticated user ID:', req.user._id);
-    } else if (formData.metadata && formData.metadata.createdBy) {
-      // Preserve the createdBy from the frontend if present
-      console.log('Using client-provided createdBy:', formData.metadata.createdBy);
+    } else if (formData.metadata && formData.metadata.userId) {
+      // Preserve the userId from the frontend if present
+      console.log('Using client-provided userId:', formData.metadata.userId);
     } else {
-      console.log('No user authentication or createdBy provided');
+      console.log('No user authentication or userId provided');
       return res.status(401).json({
         success: false,
         error: 'Authentication required - user information missing'
@@ -218,7 +218,7 @@ export const updateCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Check if user has permission to update this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user._id && shop.metadata?.userId?.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         error: 'You do not have permission to update this listing'
@@ -226,10 +226,10 @@ export const updateCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Update the shop with new data
-    // Don't allow changing propertyId or metadata.createdBy
+    // Don't allow changing propertyId or metadata.userId
     delete updateData.propertyId;
     if (updateData.metadata) {
-      delete updateData.metadata.createdBy;
+      delete updateData.metadata.userId;
       // Update modified time
       updateData.metadata.updatedAt = new Date();
     }
@@ -276,7 +276,7 @@ export const deleteCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Check if user has permission to delete this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user._id && shop.metadata.userId?.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         error: 'You do not have permission to delete this listing'

@@ -76,9 +76,13 @@ import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
 import commercialLeaseShowroomRoutes from "./routes/commercial/commercialLeaseShowroom";
+import commercialLeaseCoveredSpaceRoutes from "./routes/commercial/commercialLeaseCoveredSpaceRoutes";
 import conversationRoutes from "./routes/conversationRoutes";
 import messageRoutes from "./routes/messageRoutes";
 import socketHandler from "./sockets";
+import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
+import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
+import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 dotenv.config();
 
 // Validate required environment variables
@@ -224,9 +228,12 @@ app.use("/api/commercial/lease/plot", commercialLeasePlotRoutes);
 app.use("/api/commercial/lease/agriculture", commercialLeaseAgricultureRoutes);
 app.use("/api/commercial/lease/shops", commercialLeaseShopRoutes);
 app.use("/api/commercial/lease/others", commercialLeaseOthersRoutes);
-app.use("/api/commercial/lease-shops", commercialLeaseShopRoutes);
+app.use("/api/commercial/lease/covered-space", commercialLeaseCoveredSpaceRoutes);
 app.use("/api/commercial/lease/retail-store", commercialLeaseRetailRoutes);
 app.use("/api/commercial/lease/showrooms", commercialLeaseShowroomRoutes);
+app.use("/api/commercial/lease/warehouses",commercialLeaseWarehouseRoutes);
+app.use("/api/commercial/lease/office-space",CommercialLeaseOfficeSpace);
+app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 //rent routes
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);

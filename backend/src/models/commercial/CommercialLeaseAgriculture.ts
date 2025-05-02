@@ -126,7 +126,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     documents: string[];
   };
   metadata: {
-    userId: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
     userName: string;
     createdAt: Date;
   }
@@ -145,8 +145,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   },
   landmark: { type: String },
   location: {
-    latitude: { type: String },
-    longitude: { type: String }
+    latitude: { type: String ,required:true},
+    longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
   landDetails: {

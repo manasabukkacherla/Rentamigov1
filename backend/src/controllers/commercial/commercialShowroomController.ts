@@ -55,7 +55,7 @@ export const createShowroom = async (req: Request, res: Response) => {
 
     // // Add metadata
     showroomData.metadata = {
-      createdBy: showroomData.metadata.createdBy,
+      userId: showroomData.metadata.userId,
       createdAt: new Date(),
     };
     

@@ -1,11 +1,14 @@
 import express from 'express';
 import {
     createRentShowroom,
+    deleteCommercialRentShowroom,
+    getAllCommercialRentShowroom,
+    getCommercialRentShowroomById,
+    updateCommercialRentShowroom,
 } from '../../controllers/commercial/commercialRentShowroomController';
 import { authenticateUser } from '../../middleware/auth';
 import fileUpload from '../../middleware/fileUpload';
 
-const commercialRentShowroom = express.Router();
 
 // Configure multer for different file types
 const uploadFields = [
@@ -22,7 +25,13 @@ const uploadFields = [
 // Apply auth middleware to all routes
 //router.use(authenticateUser);
 
-// POST - Create a new rent showroom listing with file upload
-commercialRentShowroom.post('/', createRentShowroom);
+const router = express.Router();
 
-export default commercialRentShowroom; 
+
+router.post('/', createRentShowroom);
+router.get('/', getAllCommercialRentShowroom);
+router.get('/:id', getCommercialRentShowroomById);
+router.put('/:id', updateCommercialRentShowroom);
+router.delete('/:id', deleteCommercialRentShowroom);
+
+export default router; 

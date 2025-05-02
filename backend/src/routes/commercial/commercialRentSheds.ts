@@ -1,15 +1,16 @@
 import express from 'express';
 import upload, { convertToBase64 } from '../../middleware/fileUpload';
-import { createCommercialRentShed } from '../../controllers/commercial/commercialRentShed';
+import { createCommercialRentShed, getSheds, getShedsByFilters, getShedById, deleteShed, updateShed } from '../../controllers/commercial/commercialRentShed';
 const commercialRentSheds = express.Router();
 
-// Create a new commercial shop listing
-commercialRentSheds.post(
-  '/',
-  // auth,
-  // uploadFields,
-  // convertToBase64,
-  createCommercialRentShed
-);
+const router = express.Router();
 
-export default commercialRentSheds; 
+
+router.post('/', createCommercialRentShed);
+router.get('/', getSheds);
+router.get('/filter', getShedsByFilters);
+router.get('/:id', getShedById);
+router.put('/:id', updateShed);
+router.delete('/:id', deleteShed);
+
+export default router; 

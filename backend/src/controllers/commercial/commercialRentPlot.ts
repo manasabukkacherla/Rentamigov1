@@ -55,11 +55,11 @@ export const createCommercialRentPlot = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
-        if (!formData.metadata.createdBy) {
+        if (!formData.metadata.userId) {
             return res.status(400).json({
                 success: false,
                 error: 'Missing required field',
-                details: 'metadata.createdBy is required'
+                details: 'metadata.userId is required'
             });
         }
 
@@ -99,3 +99,114 @@ export const createCommercialRentPlot = async (req: Request, res: Response) => {
         });
     }
 };
+
+// Get all commercial Rent plots
+export const getAllRentPlots = async (req: Request, res: Response) => {
+    try {
+        const RentPlots = await CommercialRentPlot.find()
+            .populate('metadata.userId', 'name email')
+            .select('-__v')
+            .sort({ 'metadata.createdAt': -1 });
+
+        res.status(200).json({
+            success: true,
+            count: RentPlots.length,
+            data: RentPlots
+        });
+    } catch (error) {
+        console.error('Error fetching Rent plots:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve Rent plots',
+            message: (error as Error).message
+        });
+    }
+};
+
+// Get a specific commercial Rent plot by ID
+export const getRentPlotById = async (req: Request, res: Response) => {
+    try {
+        const RentPlot = await CommercialRentPlot.findById(req.params.id)
+            .populate('metadata.userId', 'name email')
+            .select('-__v');
+
+        if (!RentPlot) {
+            return res.status(404).json({
+                success: false,
+                error: 'Rent plot not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: RentPlot
+        });
+    } catch (error) {
+        console.error('Error fetching Rent plot:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to retrieve Rent plot',
+            message: (error as Error).message
+        });
+    }
+}; 
+
+
+
+
+  export const updatePlotById = async (req: Request, res: Response) => {
+    try {
+      const propertyId = req.params.id;
+      const updateData = req.body;
+      
+      const RentPlots= await CommercialRentPlot.findOneAndUpdate(
+        { propertyId },
+        { $set: updateData },
+        { new: true }
+      );
+      
+      if (!RentPlots) {
+        return res.status(404).json({ 
+          success: false,
+          error: 'Rent plot property not found' 
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Rent plot property updated successfully',
+        data: RentPlots
+      });
+    } catch (error) {
+      console.error('Error updating Rent plot property:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to update Rent plot property' 
+      });
+    }
+  };
+  
+  export const deleteRentPlotById = async (req: Request, res: Response) => {
+    try {
+      const propertyId = req.params.id;
+      const RentPlots = await CommercialRentPlot.findOneAndDelete({ propertyId });
+      
+      if (!RentPlots) {
+        return res.status(404).json({ 
+          success: false,
+          error: 'Rent plot property not found' 
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Rent plot property deleted successfully'
+      });
+    } catch (error) {
+      console.error('Error deleting Rent plot property:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to delete Rent plot property' 
+      });
+    }
+  }; 

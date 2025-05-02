@@ -1,16 +1,14 @@
 import express from 'express';
 import upload, { convertToBase64 } from '../../middleware/fileUpload';
-import { createCommercialRentPlot } from '../../controllers/commercial/commercialRentPlot';
+import { createCommercialRentPlot, deleteRentPlotById, getAllRentPlots, getRentPlotById, updatePlotById } from '../../controllers/commercial/commercialRentPlot';
 
-const commercialRentPlot = express.Router();
+const router = express.Router();
 
-// Create a new commercial shop listing
-commercialRentPlot.post(
-  '/',
-  // auth,
-  // uploadFields,
-  // convertToBase64,
-  createCommercialRentPlot
-);
+router.post('/', createCommercialRentPlot as express.RequestHandler);
+router.get('/', getAllRentPlots as express.RequestHandler);
+router.get('/:id', getRentPlotById as express.RequestHandler);
+router.put('/:id', updatePlotById as express.RequestHandler);
+router.delete('/:id', deleteRentPlotById as express.RequestHandler);
 
-export default commercialRentPlot; 
+
+export default router; 

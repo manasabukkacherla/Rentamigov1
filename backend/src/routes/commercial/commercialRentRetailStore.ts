@@ -1,15 +1,12 @@
 import express from 'express';
 import upload, { convertToBase64 } from '../../middleware/fileUpload';
-import { createCommercialRentRetailStore } from '../../controllers/commercial/commercialRentRetailStore';
-const commercialRentRetailStore = express.Router();
+import { createCommercialRentRetailStore, deleteCommercialRentRetail, getAllCommercialRentRetail, getCommercialRentRetailById, updateCommercialRentRetail } from '../../controllers/commercial/commercialRentRetailStore';
+const router = express.Router();
 
-// Create a new commercial shop listing
-commercialRentRetailStore.post(
-  '/',
-  // auth,
-  // uploadFields,
-  // convertToBase64,
-  createCommercialRentRetailStore
-);
+router.post('/', createCommercialRentRetailStore);
+router.get('/', getAllCommercialRentRetail);
+router.get('/:id', getCommercialRentRetailById);
+router.put('/:id', updateCommercialRentRetail);
+router.delete('/:id', deleteCommercialRentRetail);
 
-export default commercialRentRetailStore; 
+export default router; 

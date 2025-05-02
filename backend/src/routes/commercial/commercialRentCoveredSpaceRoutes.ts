@@ -1,9 +1,12 @@
 import express from 'express';
-import { createCommercialRentCoveredSpace } from '../../controllers/commercial/commercialRentCoveredSpace';
+import { createCommercialRentCoveredSpace, deleteCommercialRentCoveredSpace, getAllCommercialRentCoveredSpaces, getCommercialRentCoveredSpaceById, updateCommercialRentCoveredSpace } from '../../controllers/commercial/commercialRentCoveredSpace';
 
 const router = express.Router();
 
-// Create a new commercial covered space property
+router.get('/', getAllCommercialRentCoveredSpaces);
+router.get('/:id', getCommercialRentCoveredSpaceById);
 router.post('/', createCommercialRentCoveredSpace);
+router.put('/:id', updateCommercialRentCoveredSpace);
+router.delete('/:id', deleteCommercialRentCoveredSpace);
 
 export default router; 
