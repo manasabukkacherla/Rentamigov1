@@ -15,6 +15,7 @@ export interface ICommercialSellAgriculture extends Document {
   propertyId?: string;
   propertyName: string;
   landType?: string[];
+  watersource?: string;
   powerSupply: boolean;
   address: {
     street: string;
@@ -37,32 +38,32 @@ export interface ICommercialSellAgriculture extends Document {
     waterSource: string;
     legalClearances: boolean;
   };
-  propertyDetails:{
-    area: IArea;
-    floor: IFloor;
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    waterAvailability: string;
-    propertyAge: number;
-    propertyCondition: string;
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
+  propertyDetails?: {
+    area?: IArea;
+    floor?: IFloor;
+    facingDirection?: string;
+    furnishingStatus?: string;
+    propertyAmenities?: string[];
+    wholeSpaceAmenities?: string[];
+    waterAvailability?: string;
+    propertyAge?: number;
+    propertyCondition?: string;
+    electricitySupply?: {
+      powerLoad?: number;
+      backup?: boolean;
     };
   };
   price: {
     expectedPrice: number;
     isNegotiable: boolean;
   };
-  registrationCharges: {
-    included: boolean;
+  registrationCharges?: {
+    included?: boolean;
     amount?: number;
     stampDuty?: number;
   };
-  brokerage: {
-    required: string;
+  brokerage?: {
+    required?: string;
     amount?: number;
   };
   availability: {
@@ -82,18 +83,19 @@ export interface ICommercialSellAgriculture extends Document {
   };
   media: {
     photos: {
-      exterior: string[];
-      interior: string[];
-      floorPlan: string[];
-      washrooms: string[];
-      lifts: string[];
-      emergencyExits: string[];
+      exterior?: string[];
+      interior?: string[];
+      floorPlan?: string[];
+      washrooms?: string[];
+      lifts?: string[];
+      emergencyExits?: string[];
     };
     videoTour?: string;
     documents: string[];
   };
   metaData: {
-    createdBy: Types.ObjectId;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
   }
 }
@@ -111,8 +113,8 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
   },
   landmark: { type: String },
   coordinates: {
-    latitude: { type: String },
-    longitude: { type: String }
+    latitude: { type: String ,required:true},
+    longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
   Agriculturelanddetails: {
@@ -187,7 +189,9 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+   
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userName:{type:String,default:"Not Specified"},
     createdAt: { type: Date, default: Date.now }
   }
 });

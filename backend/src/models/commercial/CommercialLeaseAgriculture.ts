@@ -23,10 +23,11 @@ export interface ICommercialLeaseAgriculture extends Document {
   };
   landmark: string;
   location: {
-    latitude: number;
-    longitude: number;
+    latitude: string;
+    longitude: string;
   };
   isCornerProperty: boolean;
+  powerSupply: boolean;
   landDetails: {
     totalArea: number;
     soilType: string;
@@ -36,26 +37,26 @@ export interface ICommercialLeaseAgriculture extends Document {
     waterSource: string;
     legalClearances: boolean;
   };
-  propertyDetails: {
-    area: IArea;
-    floor: IFloor;
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    waterAvailability: string;
-    propertyAge: number;
-    propertyCondition: string;
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
+  propertyDetails?: {
+    area?: IArea;
+    floor?: IFloor;
+    facingDirection?: string;
+    furnishingStatus?: string;
+    propertyAmenities?: string[];
+    wholeSpaceAmenities?: string[];
+    waterAvailability?: string;
+    propertyAge?: number;
+    propertyCondition?: string;
+    electricitySupply?: {
+      powerLoad?: number;
+      backup?: boolean;
     };
   };
   leaseAmount: {
     amount: number;
     duration: number;
     durationType: string;
-    isNegotiable: boolean; 
+    isNegotiable: boolean;
   };
   leaseTenure: {
     minimumTenure: string;
@@ -67,30 +68,30 @@ export interface ICommercialLeaseAgriculture extends Document {
     noticePeriod: string;
     noticePeriodUnit: string;
   };
-  maintenanceAmount: {
+  maintenanceAmount?: {
     amount?: number;
     frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
-  otherCharges: {
-    waterCharges: {
-      type: "inclusive" | "exclusive";
+  otherCharges?: {
+    waterCharges?: {
+      type?: "inclusive" | "exclusive";
       amount?: number;
     };
-    electricityCharges: {
-      type: "inclusive" | "exclusive";
+    electricityCharges?: {
+      type?: "inclusive" | "exclusive";
       amount?: number;
     };
-    gasCharges: {
-      type: "inclusive" | "exclusive";
+    gasCharges?: {
+      type?: "inclusive" | "exclusive";
       amount?: number;
     };
-    otherCharges: {
-      type: "inclusive" | "exclusive";
+    otherCharges?: {
+      type?: "inclusive" | "exclusive";
       amount?: number;
     };
   };
-  brokerage: {
-    required: boolean;
+  brokerage?: {
+    required?: boolean;
     amount?: number;
   };
   availability: {
@@ -114,18 +115,19 @@ export interface ICommercialLeaseAgriculture extends Document {
   };
   media: {
     photos: {
-      exterior: string[];
-      interior: string[];
-      floorPlan: string[];
-      aerial: string[];
-      soil: string[];
-      irrigation: string[];
+      exterior?: string[];
+      interior?: string[];
+      floorPlan?: string[];
+      aerial?: string[];
+      soil?: string[];
+      irrigation?: string[];
     };
     videoTour?: string;
     documents: string[];
   };
   metadata: {
-    createdBy: Types.ObjectId;
+    userId: Types.ObjectId;
+    userName: string;
     createdAt: Date;
   }
 }
@@ -134,6 +136,7 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CLA-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   title: { type: String, default: "Unnamed Property" },
   landType: { type: [String], default: ["Agricultural"] },
+  powerSupply: { type: Boolean, default: false },
   address: {
     street: { type: String, default: "Not Specified" },
     city: { type: String, default: "Not Specified" },
@@ -142,8 +145,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   },
   landmark: { type: String },
   location: {
-    latitude: { type: Number },
-    longitude: { type: Number }
+    latitude: { type: String },
+    longitude: { type: String }
   },
   isCornerProperty: { type: Boolean, default: false },
   landDetails: {
@@ -251,7 +254,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userName: { type: String, default: "Not Specified" },
     createdAt: { type: Date, default: Date.now }
   }
 });
