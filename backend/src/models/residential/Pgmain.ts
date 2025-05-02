@@ -3,33 +3,49 @@ import mongoose, { Schema, Document } from 'mongoose';
 export interface IPgMain extends Document {
   pgDetails: {
     name: string;
+    accommodationType: "boys" | "girls" | "both boys and girls";
     address: string;
-    city: string;
-    state: string;
-    pincode: string;
-    ownerName: string;
-    contactNumber: string;
-    email: string;
+  };
+  location: {
+    latitude: number;
+    longitude: number;
   };
   roomConfiguration: {
     totalRooms: number;
     sharingTypes: string[];
     customShare?: string;
     roomSize?: number;
-    attachedWashroom?: boolean;
-    balcony?: boolean;
-    acAvailable?: boolean;
-    nonAcAvailable?: boolean;
+    // attachedWashroom?: boolean;
+    // balcony?: boolean;
+    // acAvailable?: boolean;
+    // nonAcAvailable?: boolean;
+    singleRoomAmenities?: string[];
+    doubleShareRoomAmenities?: string[];
+    tripleShareRoomAmenities?: string[];
+    fourShareRoomAmenities?: string[];
+    fiveShareRoomAmenities?: string[];
+    customShareRoomAmenities?: string[];
   };
   commonAreaAmenitiesAndServices: string[];
   otherFeaturesAndRestrictions: {
-    rules: string[];
+    otherFeatures: string[];
     restrictions: string[];
   };
   foodServices: {
     available: boolean;
-    type?: string;
-    details?: string;
+    includeSnacks?: boolean;
+    weekMeals?: {
+      [key: string]: {
+        breakfast: { name: string; time: string };
+        lunch: { name: string; time: string };
+        dinner: { name: string; time: string };
+      };
+    };
+    mealTimesState?: {
+      breakfast?: string;
+      lunch?: string;
+      dinner?: string;
+    };
   };
   pricing: {
     rent: number;
@@ -37,10 +53,57 @@ export interface IPgMain extends Document {
     maintenance?: number;
     includedUtilities?: string[];
     terms?: string;
+    roomSharePricing?: {
+      singleShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      doubleShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      tripleShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      fourShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      fiveShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      multiShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+        numberOfPersons?: string;
+      };
+    };
   };
   media: {
     photos: string[]; // URLs or base64
     videos?: string[];
+    mediaItems?: Array<{
+      id?: string;
+      type?: 'photo' | 'video';
+      url?: string;
+      title?: string;
+      tags?: string[];
+      roomType?: string;
+    }>;
   };
   metadata: {
     userId: any;
@@ -52,51 +115,113 @@ export interface IPgMain extends Document {
 const PgMainSchema: Schema = new Schema(
   {
     pgDetails: {
-      name: { type: String, required: true },
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      pincode: { type: String, required: true },
-      ownerName: { type: String, required: true },
-      contactNumber: { type: String, required: true },
-      email: { type: String, required: true },
+      name: { type: String, default: '' },
+      accommodationType: { type: String, enum: ["boys", "girls", "both boys and girls"], default: "both boys and girls" },
+      address: { type: String, default: '' },
+    },
+    location: {
+      latitude: { type: Number, default: 0 },
+      longitude: { type: Number, default: 0 },
     },
     roomConfiguration: {
-      totalRooms: { type: Number, required: true },
-      sharingTypes: { type: [String], required: true },
+      totalRooms: { type: Number, default: 0 },
+      sharingTypes: { type: [String], default: [] },
       customShare: { type: String },
       roomSize: { type: Number },
-      attachedWashroom: { type: Boolean },
-      balcony: { type: Boolean },
-      acAvailable: { type: Boolean },
-      nonAcAvailable: { type: Boolean },
+      singleRoomAmenities: { type: [String], default: [] },
+      doubleShareRoomAmenities: { type: [String], default: [] },
+      tripleShareRoomAmenities: { type: [String], default: [] },
+      fourShareRoomAmenities: { type: [String], default: [] },
+      fiveShareRoomAmenities: { type: [String], default: [] },
+      customShareRoomAmenities: { type: [String], default: [] },
     },
     commonAreaAmenitiesAndServices: { type: [String], default: [] },
     otherFeaturesAndRestrictions: {
-      rules: { type: [String], default: [] },
+      otherFeatures: { type: [String], default: [] },
       restrictions: { type: [String], default: [] },
     },
     foodServices: {
-      available: { type: Boolean, required: true },
-      type: { type: String },
-      details: { type: String },
+      available: { type: Boolean, default: false },
+      includeSnacks: { type: Boolean, default: false },
+      weekMeals: { type: Schema.Types.Mixed, default: {} },
+      mealTimesState: { type: Schema.Types.Mixed, default: {} },
     },
     pricing: {
-      rent: { type: Number, required: true },
+      rent: { type: Number, default: 0 },
       deposit: { type: Number },
       maintenance: { type: Number },
       includedUtilities: { type: [String], default: [] },
       terms: { type: String },
+      roomSharePricing: {
+        singleShare: {
+          monthlyRent: { type: String },
+          advancePaymentMonths: { type: String },
+          lockInPeriod: { type: String },
+          noticePeriod: { type: String },
+        },
+        doubleShare: {
+          monthlyRent: { type: String },
+          advancePaymentMonths: { type: String },
+          lockInPeriod: { type: String },
+          noticePeriod: { type: String },
+        },
+        tripleShare: {
+          monthlyRent: { type: String },
+          advancePaymentMonths: { type: String },
+          lockInPeriod: { type: String },
+          noticePeriod: { type: String },
+        },
+        fourShare: {
+          monthlyRent: { type: String },
+          advancePaymentMonths: { type: String },
+          lockInPeriod: { type: String },
+          noticePeriod: { type: String },
+        },
+        fiveShare: {
+          monthlyRent: { type: String },
+          advancePaymentMonths: { type: String },
+          lockInPeriod: { type: String },
+          noticePeriod: { type: String },
+        },
+        multiShare: {
+          monthlyRent: { type: String },
+          advancePaymentMonths: { type: String },
+          lockInPeriod: { type: String },
+          noticePeriod: { type: String },
+          numberOfPersons: { type: String },
+        },
+      },
     },
     media: {
       photos: { type: [String], default: [] },
       videos: { type: [String], default: [] },
+      mediaItems: [
+        {
+          id: { type: String },
+          type: { type: String, enum: ["photo", "video"] },
+          url: { type: String },
+          title: { type: String },
+          tags: { type: [String], default: [] },
+          roomType: { type: String },
+        }
+      ],
     },
     metadata: {
-      userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+      userId: { 
+  type: Schema.Types.ObjectId, 
+  ref: 'User', 
+  required: true,
+  validate: {
+    validator: function(v: any) {
+      // Only allow non-empty ObjectId strings or ObjectId objects
+      return v && (typeof v === 'object' || (typeof v === 'string' && v.match(/^[0-9a-fA-F]{24}$/)));
+    },
+    message: 'metadata.userId must be a valid ObjectId and not empty'
+  }
+},
       userName: { type: String, default: 'Not Specified' },
       createdAt: { type: Date, default: Date.now },
-    },
+    }
   },
   { timestamps: true }
 );

@@ -1,6 +1,9 @@
 "use client"
 
 import React, { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import PgName from './PgName';
 import Configuration from './Configuration';
 import CommonAreaAmenitiesAndServices from './CommonAreaAmenitiesAndServices';
@@ -18,6 +21,7 @@ const shareOptions = [
   { id: 'five', label: 'Five Share' },
   { id: 'more', label: 'More' },
 ];
+
 import { Store, ChevronRight, ChevronLeft, Building2, UserCircle, ImageIcon, Calendar, DollarSign, Loader2, Star } from "lucide-react";
 
 const globalStyles = `
@@ -25,23 +29,23 @@ const globalStyles = `
   textarea::placeholder {
     color: rgba(0, 0, 0, 0.6);
   }
-  
+
   /* Make radio button and checkbox text black */
   input[type="radio"] + label,
   input[type="checkbox"] + label {
     color: black;
   }
-  
+
   /* Make select placeholder text black */
   select {
     color: black;
   }
-  
+
   /* Make all form labels black */
   label {
     color: black;
   }
-  
+
   /* Make all input text black */
   input,
   textarea,
@@ -50,9 +54,193 @@ const globalStyles = `
   }
 `;
 
+// PgMainFormData interface matching backend PgMain schema
+export interface PgMainFormData {
+  pgDetails: {
+    name: string;
+    accommodationType: "boys" | "girls" | "both boys and girls";
+    address: string;
+  };
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  roomConfiguration: {
+    totalRooms: number;
+    sharingTypes: string[];
+    customShare?: string;
+    roomSize?: number;
+    singleRoomAmenities?: string[];
+    doubleShareRoomAmenities?: string[];
+    tripleShareRoomAmenities?: string[];
+    fourShareRoomAmenities?: string[];
+    fiveShareRoomAmenities?: string[];
+    customShareRoomAmenities?: string[];
+  };
+  commonAreaAmenitiesAndServices: string[];
+  otherFeaturesAndRestrictions: {
+    otherFeatures: string[];
+    restrictions: string[];
+  };
+  foodServices: {
+    available: boolean;
+    includeSnacks?: boolean;
+    weekMeals?: {
+      [key: string]: {
+        breakfast: { name: string; time: string };
+        lunch: { name: string; time: string };
+        dinner: { name: string; time: string };
+      };
+    };
+    mealTimesState?: {
+      breakfast?: string;
+      lunch?: string;
+      dinner?: string;
+    };
+  };
+  pricing: {
+    rent: number;
+    deposit?: number;
+    maintenance?: number;
+    includedUtilities?: string[];
+    terms?: string;
+    roomSharePricing?: {
+      singleShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      doubleShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      tripleShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      fourShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      fiveShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+      };
+      multiShare?: {
+        monthlyRent?: string;
+        advancePaymentMonths?: string;
+        lockInPeriod?: string;
+        noticePeriod?: string;
+        numberOfPersons?: string;
+      };
+    };
+  };
+  media: {
+    photos: string[];
+    videos?: string[];
+    mediaItems?: Array<{
+      id?: string;
+      type?: 'photo' | 'video';
+      url?: string;
+      title?: string;
+      tags?: string[];
+      roomType?: string;
+    }>;
+  };
+  metadata: {
+    userId: string;
+    userName: string;
+    createdAt: string;
+  };
+}
+
 function Pgmain() {
+  // State for PgMain form data
+  const [formData, setFormData] = React.useState<PgMainFormData>({
+    pgDetails: { name: '', accommodationType: 'both boys and girls', address: '' },
+    location: { latitude: 0, longitude: 0 },
+    roomConfiguration: {
+      totalRooms: 0,
+      sharingTypes: [],
+      customShare: '',
+      roomSize: undefined,
+      singleRoomAmenities: [],
+      doubleShareRoomAmenities: [],
+      tripleShareRoomAmenities: [],
+      fourShareRoomAmenities: [],
+      fiveShareRoomAmenities: [],
+      customShareRoomAmenities: [],
+    },
+    commonAreaAmenitiesAndServices: [],
+    otherFeaturesAndRestrictions: { otherFeatures: [], restrictions: [] },
+    foodServices: { available: false },
+    pricing: { rent: 0 },
+    media: { photos: [] },
+    metadata: { userId: '', userName: '', createdAt: '' },
+  });
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+
+  // Handle form submission to backend
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    console.log(formData);
+    try {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('You need to be logged in to create a listing');
+        navigate('/login');
+        setIsSubmitting(false);
+        return;
+      }
+      const userData = JSON.parse(user);
+      const author = userData.id || userData._id; // Ensure valid user id
+
+      if (!author) {
+        toast.error('Invalid user data');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const token = sessionStorage.getItem('token');
+
+      // Attach user info to the payload
+      const payload = {
+        ...formData,
+        metadata: {
+          ...formData.metadata,
+          userId: author, // Ensure 'author' contains a valid ObjectId
+          userName: userData.name,
+        }
+      };
+
+      await axios.post('/api/residential/pgmain', payload, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+
+      toast.success('PG listing created!');
+      setSubmitStatus('success');
+      // Optionally reset form or navigate
+    } catch (err: any) {
+      toast.error('Failed to create listing');
+      setSubmitStatus('Submission failed');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Shared state for room configuration
   const [selectedShares, setSelectedShares] = useState<string[]>([]);
@@ -142,18 +330,6 @@ function Pgmain() {
   };
 
 
-  const handleSubmit = () => {
-    setIsSubmitting(true);
-    // Here you would typically collect all the data from child components
-    // and submit it to your backend
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      alert('PG details submitted successfully!');
-    }, 1500);
-  };
-
   return (
     <div className="min-h-screen bg-white">
       <style>{globalStyles}</style>
@@ -202,6 +378,22 @@ function Pgmain() {
       </div>
 
       <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Submit Form Button and Feedback */}
+        <form onSubmit={handleSubmit} className="mb-8">
+          <button
+            type="submit"
+            className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit PG Details'}
+          </button>
+          {submitStatus === 'success' && (
+            <div className="mt-4 text-green-600">Submitted successfully!</div>
+          )}
+          {submitStatus && submitStatus !== 'success' && (
+            <div className="mt-4 text-red-600">{submitStatus}</div>
+          )}
+        </form>
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">List Your PG/Co-living Space</h1>

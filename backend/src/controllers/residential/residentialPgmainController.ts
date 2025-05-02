@@ -1,12 +1,52 @@
 import { Request, Response } from 'express';
-import PgMain from '../models/residential/Pgmain';
+import PgMain from '../../models/residential/Pgmain';
 
 export const createPg = async (req: Request, res: Response) => {
   try {
-    const pg = new PgMain(req.body);
+    console.log('Received PG data:', JSON.stringify(req.body, null, 2));
+    
+    // Ensure required fields have default values if missing
+    const body = req.body;
+    
+    // Ensure metadata is properly structured
+    const pgData = {
+      ...body,
+      pgDetails: {
+        name: body.pgDetails?.name || '',
+        accommodationType: body.pgDetails?.accommodationType || 'both boys and girls',
+        address: body.pgDetails?.address || '',
+        ...body.pgDetails
+      },
+      location: {
+        latitude: body.location?.latitude || 0,
+        longitude: body.location?.longitude || 0,
+        ...body.location
+      },
+      roomConfiguration: {
+        totalRooms: body.roomConfiguration?.totalRooms || 0,
+        sharingTypes: body.roomConfiguration?.sharingTypes || [],
+        ...body.roomConfiguration
+      },
+      foodServices: {
+        available: body.foodServices?.available === true,
+        ...body.foodServices
+      },
+      pricing: {
+        rent: body.pricing?.rent || 0,
+        ...body.pricing
+      },
+      metadata: {
+        ...body.metadata,
+        createdAt: body.metadata?.createdAt || new Date().toISOString(),
+      },
+    };
+    
+    const pg = new PgMain(pgData);
     await pg.save();
+    console.log('PG listing created successfully');
     res.status(201).json({ success: true, data: pg });
   } catch (err) {
+    console.error('Error creating PG listing:', err);
     const errorMsg = err instanceof Error ? err.message : String(err);
     res.status(400).json({ success: false, error: errorMsg });
   }

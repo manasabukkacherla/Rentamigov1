@@ -5,9 +5,12 @@ import {
   getPgById,
   updatePgById,
   deletePgById
-} from '../controllers/residentialPgmainController';
+} from '../../controllers/residential/residentialPgmainController';
 
 const router = express.Router();
+
+// Optionally add authentication middleware here, e.g.:
+// router.use(authMiddleware);
 
 // Create new PG listing
 router.post('/', createPg);
