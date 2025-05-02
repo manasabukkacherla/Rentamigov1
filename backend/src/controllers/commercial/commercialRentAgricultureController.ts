@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialRentAgriculture from '../../models/commercial/CommercialRentAgriculture';
+import User  from '../../models/signup';
 
 // Helper function to generate Property ID
 const generatePropertyId = async (): Promise<string> => {
@@ -47,24 +48,44 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
   try {
     const formData = req.body;
 
-    // Ensure user is authenticated and userId is provided
-    if (!req.user?._id) {
+    // Prefer authenticated user if available
+    let userId: string | undefined = undefined;
+    let user: any = undefined;
+    if (req.user && (req.user as any)._id) {
+      userId = (req.user as any)._id;
+      user = req.user;
+    } else if (formData.metaData && formData.metaData.userId) {
+      userId = formData.metaData.userId;
+      // Optionally: fetch user from DB if needed
+    } else if (formData.metadata && formData.metadata.userId) {
+      userId = formData.metadata.userId;
+      // Optionally: fetch user from DB if needed
+    }
+
+    if (!userId) {
       return res.status(400).json({
         success: false,
-        message: 'User is not authenticated, missing user ID.'
+        message: 'User is not authenticated or user ID is missing in request.'
       });
     }
 
     // Generate property ID
     const propertyId = await generatePropertyId();
+    if (!propertyId) {
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to generate property ID.'
+      });
+    }
 
-    // Add metadata with userId
+    // Add metadata with userId and user (like Sell controller)
     const agricultureData = {
-      propertyId,
       ...formData,
+      propertyId, // Ensure propertyId is at the root level
       metaData: {
-        ...formData.metaData,
-        userId: req.user._id,  // Assign the authenticated user's ID
+        ...(formData.metaData || formData.metadata),
+        userId: userId, // Always assign the resolved userId
+        user: user, // Attach user object if available
         createdAt: new Date()
       }
     };

@@ -12,7 +12,7 @@ export interface ICommercialRentAgriculture extends Document {
     state: string;
     zipCode: string;
   };
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
@@ -76,7 +76,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     state: { type: String, required: true },
     zipCode: { type: String, required: true }
   },
-  coordinates: {
+  location: {
     latitude: { type: String ,required:true},
     longitude: { type: String ,required:true}
   },

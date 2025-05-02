@@ -459,7 +459,6 @@ const LeaseAgricultureMain = () => {
       const user = sessionStorage.getItem('user');
       if (user) {
         const author = JSON.parse(user).id;
-
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -473,16 +472,16 @@ const LeaseAgricultureMain = () => {
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+        const metaData = {
+          userId: author,
+          createdAt: new Date()
+        };
+
         const transformedData = {
           ...formData,
           media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date()
-          }
+          metaData
         };
-
-        console.log('Sending data to backend:', JSON.stringify(transformedData, null, 2));
 
         const response = await axios.post('/api/commercial/lease/agriculture', transformedData, {
           headers: {
@@ -492,7 +491,6 @@ const LeaseAgricultureMain = () => {
 
         if (response.data.success) {
           toast.success('Agricultural land lease listing created successfully!');
-
         }
       } else {
         navigate('/login');
