@@ -138,6 +138,9 @@ interface IMetadata {
     // status: 'active' | 'inactive' | 'sold' | 'rented';
     // views: number;
     // favorites: number;
+
+
+    
     // isVerified: boolean;
 }
 

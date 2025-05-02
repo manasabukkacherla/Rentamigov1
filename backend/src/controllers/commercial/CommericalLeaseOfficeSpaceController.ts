@@ -197,12 +197,12 @@ export const createLeaseOfficeSpace = async (req: Request, res: Response) => {
                 documents: formData.media?.documents || []
             },
             metadata: {
-                createdBy: req.user?._id || null,
+                userId: req.user?._id || null,
                 createdAt: new Date(),
-                status: 'active',
-                views: 0,
-                favorites: 0,
-                isVerified: false
+                // status: 'active',
+                // views: 0,
+                // favorites: 0,
+                // isVerified: false
             }
         };
 

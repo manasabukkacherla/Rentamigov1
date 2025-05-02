@@ -99,3 +99,104 @@ export const createRentWarehouse = async (req: Request, res: Response) => {
   }
 };
 
+// Get all commercial Rent warehouse listings
+export const getAllRentWarehouses = async (req: Request, res: Response) => {
+  try {
+      const warehouses = await CommercialRentWarehouse.find();
+
+      res.status(200).json({
+          success: true,
+          count: warehouses.length,
+          data: warehouses
+      });
+  } catch (error: any) {
+      console.error('Error fetching commercial Rent warehouses:', error);
+      res.status(500).json({
+          error: 'Failed to fetch commercial Rent warehouse listings',
+          details: error.message
+      });
+  }
+};
+
+// Get a single commercial Rent warehouse by ID
+export const getRentWarehouseById = async (req: Request, res: Response) => {
+  try {
+      const warehouse = await CommercialRentWarehouse.findById(req.params.id);
+
+      if (!warehouse) {
+          return res.status(404).json({
+              success: false,
+              error: 'Commercial Rent warehouse not found'
+          });
+      }
+
+      res.status(200).json({
+          success: true,
+          data: warehouse
+      });
+  } catch (error: any) {
+      console.error('Error fetching commercial Rent warehouse:', error);
+      res.status(500).json({
+          error: 'Failed to fetch commercial Rent warehouse',
+          details: error.message
+      });
+  }
+};
+
+// Update a commercial Rent warehouse
+export const updateRentWarehouse = async (req: Request, res: Response) => {
+  try {
+      const warehouse = await CommercialRentWarehouse.findByIdAndUpdate(
+          req.params.id,
+          {
+              ...req.body,
+              'metadata.updatedAt': new Date()
+          },
+          { new: true, runValidators: true }
+      );
+
+      if (!warehouse) {
+          return res.status(404).json({
+              success: false,
+              error: 'Commercial Rent warehouse not found'
+          });
+      }
+
+      res.status(200).json({
+          success: true,
+          message: 'Commercial Rent warehouse updated successfully',
+          data: warehouse
+      });
+  } catch (error: any) {
+      console.error('Error updating commercial Rent warehouse:', error);
+      res.status(500).json({
+          error: 'Failed to update commercial Rent warehouse',
+          details: error.message
+      });
+  }
+};
+
+// Delete a commercial Rent warehouse
+export const deleteRentWarehouse = async (req: Request, res: Response) => {
+  try {
+      const warehouse = await CommercialRentWarehouse.findByIdAndDelete(req.params.id);
+
+      if (!warehouse) {
+          return res.status(404).json({
+              success: false,
+              error: 'Commercial Rent warehouse not found'
+          });
+      }
+
+      res.status(200).json({
+          success: true,
+          message: 'Commercial Rent warehouse deleted successfully'
+      });
+  } catch (error: any) {
+      console.error('Error deleting commercial Rent warehouse:', error);
+      res.status(500).json({
+          error: 'Failed to delete commercial Rent warehouse',
+          details: error.message
+      });
+  }
+}; 

@@ -231,7 +231,7 @@ const transformPlotData = (formData: any) => {
     // Metadata
     if (formData.metadata) {
         transformedData.metadata = {
-            createdBy: formData.metadata.createdBy,
+            userId: formData.metadata.userId,
             createdAt: formData.metadata.createdAt || new Date()
         };
     }
@@ -272,7 +272,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 
         // Return populated plot data with user information
         const populatedLeasePlot = await LeasePlot.findById(savedLeasePlot._id)
-            .populate('metadata.createdBy', 'name email')
+            .populate('metadata.userId', 'name email')
             .select('-__v');
 
         res.status(201).json({
@@ -294,7 +294,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 export const getAllLeasePlots = async (req: Request, res: Response) => {
     try {
         const leasePlots = await LeasePlot.find()
-            .populate('metadata.createdBy', 'name email')
+            .populate('metadata.userId', 'name email')
             .select('-__v')
             .sort({ 'metadata.createdAt': -1 });
 
@@ -317,7 +317,7 @@ export const getAllLeasePlots = async (req: Request, res: Response) => {
 export const getLeasePlotById = async (req: Request, res: Response) => {
     try {
         const leasePlot = await LeasePlot.findById(req.params.id)
-            .populate('metadata.createdBy', 'name email')
+            .populate('metadata.userId', 'name email')
             .select('-__v');
 
         if (!leasePlot) {

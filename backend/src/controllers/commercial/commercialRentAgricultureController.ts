@@ -53,7 +53,7 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
 
     // Add metadata
     // formData.metadata = {
-    //   createdBy: formData.metadata.createdBy,
+    //   userId: formData.metadata.userId,
     //   createdAt: new Date()
     // };
     const agricultureData = {
@@ -81,3 +81,105 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     res.status(500).json({ error: 'Failed to create commercial rent agriculture listing' });
   }
 }
+
+
+export const getAllCommercialRentAgriculture = async (req: Request, res: Response) => {
+  try {
+    const properties = await CommercialRentAgriculture.find().sort({ 'metadata.createdAt': -1 });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Agricultural land Rent listings retrieved successfully',
+      data: properties
+    });
+  } catch (error) {
+    console.error('Error fetching agricultural land Rent listings:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch agricultural land Rent listings' 
+    });
+  }
+};
+
+export const getCommercialRentAgricultureById = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialRentAgriculture.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Agricultural land Rent property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Agricultural land Rent property retrieved successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error fetching agricultural land Rent property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch agricultural land Rent property' 
+    });
+  }
+};
+
+export const updateCommercialRentAgriculture = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const updateData = req.body;
+    
+    const property = await CommercialRentAgriculture.findOneAndUpdate(
+      { propertyId },
+      { $set: updateData },
+      { new: true }
+    );
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Agricultural land Rent property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Agricultural land Rent property updated successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error updating agricultural land Rent property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to update agricultural land Rent property' 
+    });
+  }
+};
+
+export const deleteCommercialRentAgriculture = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialRentAgriculture.findOneAndDelete({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Agricultural land Rent property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Agricultural land Rent property deleted successfully'
+    });
+  } catch (error) {
+    console.error('Error deleting agricultural land Rent property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to delete agricultural land Rent property' 
+    });
+  }
+}; 
