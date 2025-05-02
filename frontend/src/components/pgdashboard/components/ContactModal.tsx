@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, User, Mail, Phone, MessageSquare } from 'lucide-react';
+import React, { useState } from "react";
+import axios from "axios";
+import { X } from "lucide-react";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -9,137 +10,153 @@ interface ContactModalProps {
 
 const ContactModal: React.FC<ContactModalProps> = ({ isOpen, onClose, pgName }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: ''
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
   });
+
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission here
-    console.log('Form submitted:', formData);
-    onClose();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.post("http://localhost:3000/api/enquirynew", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setTimeout(() => {
+        setIsSubmitted(true);
+        setIsSubmitting(false);
+      }, 800);
+    } catch (error) {
+      console.error("❌ Enquiry submission failed:", error);
+      setIsSubmitting(false);
+      alert("Submission failed. Please try again.");
+    }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/20 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative w-full max-w-md mx-4 bg-white rounded-lg shadow-xl">
-        <div className="sticky top-0 z-10 bg-white px-6 py-4 border-b border-gray-100 rounded-t-lg">
-          <button
-            onClick={onClose}
-            className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 focus:outline-none"
-          >
-            <X className="h-6 w-6" />
-          </button>
-          <h2 className="text-xl font-semibold text-gray-900">Enquire Now</h2>
-          <p className="text-sm text-gray-600 mt-1">Fill in your details to get more information about {pgName}.</p>
-        </div>
+    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md relative max-h-[80vh] overflow-y-auto">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </button>
 
-        <div className="px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        {!isSubmitted ? (
+          <>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Enquire Now</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Fill in your details to get more information about <strong>{pgName}</strong>.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                  Name
+                </label>
                 <input
                   type="text"
-                  name="name"
+                  id="name"
                   value={formData.name}
                   onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                   required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  placeholder="Enter your name"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
                 <input
                   type="email"
-                  name="email"
+                  id="email"
                   value={formData.email}
                   onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                   required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  placeholder="Enter your email"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
                 <input
                   type="tel"
-                  name="phone"
+                  id="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                   required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  placeholder="Enter your phone number"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Message
-              </label>
-              <div className="relative">
-                <MessageSquare className="absolute left-3 top-3 text-gray-400 h-5 w-5" />
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+                  Message
+                </label>
                 <textarea
-                  name="message"
+                  id="message"
                   value={formData.message}
                   onChange={handleChange}
-                  required
-                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  rows={4}
-                  placeholder="Write your message here..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
                 ></textarea>
               </div>
-            </div>
-          </form>
-        </div>
 
-        <div className="sticky bottom-0 z-10 bg-white px-6 py-4 border-t border-gray-100 rounded-b-lg">
-          <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Enquiry"}
+              </button>
+            </form>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Enquiry Sent!</h2>
+            <p className="text-gray-600 mb-6">
+              Thank you for your interest. Our team will get back to you within 24 hours.
+            </p>
             <button
-              type="button"
               onClick={onClose}
-              className="w-full sm:w-1/2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-900"
+              className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg transition"
             >
-              Cancel
-            </button>
-            <button
-              onClick={handleSubmit}
-              className="w-full sm:w-1/2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
-            >
-              Submit Enquiry
+              Close
             </button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -79,6 +79,8 @@ import commercialLeaseShowroomRoutes from "./routes/commercial/commercialLeaseSh
 import conversationRoutes from "./routes/conversationRoutes";
 import messageRoutes from "./routes/messageRoutes";
 import socketHandler from "./sockets";
+//enqiury form routes new
+import enquiryRoutesnew from "./routes/enquiryRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -239,6 +241,8 @@ app.use("/api/commercial/rent/retail-stores", commercialRentRetailStore);
 app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
+//enqiuryform routes new
+app.use("/api/enquirynew", commercialRentPlot);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

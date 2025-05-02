@@ -202,7 +202,7 @@ const PGDetails: React.FC = () => {
       {/* Location Map Section */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Location</h2>
-        <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
+        <div className="h-80 bg-gray-100 rounded-xl overflow-hidden relative mb-6">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.5965966906644!2d77.64163427473439!3d12.838572987455667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae6b2ef7f1c6f3%3A0x6c06e8c7dc1ac0e!2sElectronic%20City%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin"
             width="100%"

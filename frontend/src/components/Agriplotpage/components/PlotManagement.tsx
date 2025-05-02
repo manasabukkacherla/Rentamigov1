@@ -56,6 +56,7 @@ const PlotManagement: React.FC = () => {
       prev === plotDetails.images.length - 1 ? 0 : prev + 1
     );
   };
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   return (
     <div className="min-h-screen bg-white py-4 sm:py-8">
@@ -383,98 +384,127 @@ const PlotManagement: React.FC = () => {
 
       {/* Enquiry Form Modal */}
       {showEnquiryForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full relative animate-slide-up">
-            <button
-              onClick={() => setShowEnquiryForm(false)}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Close modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full relative animate-slide-up">
+      <button
+        onClick={() => {
+          setShowEnquiryForm(false);
+          setIsSubmitted(false); // reset on close
+        }}
+        className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
+        aria-label="Close modal"
+      >
+        <X className="h-5 w-5" />
+      </button>
 
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-black">Enquire Now</h3>
-              <p className="text-gray-600 text-sm mt-1">
-                Fill in your details to get more information about this property.
-              </p>
+      {!isSubmitted ? (
+        <>
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-black">Enquire Now</h3>
+            <p className="text-gray-600 text-sm mt-1">
+              Fill in your details to get more information about this property.
+            </p>
+          </div>
+
+          <form
+            className="space-y-4"
+            onSubmit={(e) => {
+              e.preventDefault();
+              setTimeout(() => setIsSubmitted(true), 1000); // Simulate submit
+            }}
+          >
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="text"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  placeholder="Enter your name"
+                  required
+                />
+              </div>
             </div>
 
-            <form className="space-y-4">
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    placeholder="Enter your name"
-                  />
-                </div>
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="email"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  placeholder="Enter your email"
+                  required
+                />
               </div>
+            </div>
 
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="email"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    placeholder="Enter your email"
-                  />
-                </div>
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                <input
+                  type="tel"
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  placeholder="Enter your phone number"
+                  required
+                />
               </div>
+            </div>
 
+            <div className="relative">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="tel"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
+                <MessageSquare className="absolute top-3 left-3 text-gray-400 h-5 w-5" />
+                <textarea
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  rows={4}
+                  placeholder="Enter your message"
+                  required
+                ></textarea>
               </div>
+            </div>
 
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <div className="relative">
-                  <div className="absolute top-3 left-3 pointer-events-none">
-                    <MessageSquare className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <textarea
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    rows={4}
-                    placeholder="Enter your message"
-                  ></textarea>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-              >
-                Submit Enquiry
-              </button>
-            </form>
+            <button
+              type="submit"
+              className="w-full bg-black hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+            >
+              Submit Enquiry
+            </button>
+          </form>
+        </>
+      ) : (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
           </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Enquiry Sent!</h2>
+          <p className="text-gray-600 mb-6">
+            Thank you for your interest. Our team will get back to you within 24 hours.
+          </p>
+          <button
+            onClick={() => {
+              setShowEnquiryForm(false);
+              setIsSubmitted(false);
+            }}
+            className="bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-6 rounded-lg transition"
+          >
+            Close
+          </button>
         </div>
       )}
+    </div>
+  </div>
+)}
+
     </div>
   );
 };
