@@ -72,6 +72,7 @@ const Media: React.FC<MediaProps> = ({ register, errors }) => {
                   accept="image/*"
                   className="sr-only"
                   {...register('images')}
+                  ref={firstFieldRef}
                   onChange={handleImageChange}
                 />
               </label>
