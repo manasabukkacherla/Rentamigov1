@@ -87,6 +87,7 @@ const Amenities: React.FC<AmenitiesProps> = ({ register, errors }) => {
                   id={item}
                   value={item}
                   {...register('amenities')}
+                  ref={index === 0 && firstFieldRef}
                   className="w-4 h-4 rounded border-gray-300 focus:ring-black text-black"
                 />
                 <label htmlFor={item} className="ml-2 text-sm text-black">

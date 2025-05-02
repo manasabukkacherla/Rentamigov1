@@ -111,19 +111,36 @@ function Pgmain() {
     </div>
   );
 
+  // Ref for progress bar
+  const progressBarRef = React.useRef<HTMLDivElement>(null);
+
+  const scrollToProgressBar = () => {
+    if (progressBarRef.current) {
+      const y = progressBarRef.current.getBoundingClientRect().top + window.scrollY - 8; // 8px offset
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  };
+
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo(0, 0);
+      setCurrentStep(prev => {
+        const next = prev + 1;
+        setTimeout(scrollToProgressBar, 0);
+        return next;
+      });
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      window.scrollTo(0, 0);
+      setCurrentStep(prev => {
+        const next = prev - 1;
+        setTimeout(scrollToProgressBar, 0);
+        return next;
+      });
     }
   };
+
 
   const handleSubmit = () => {
     setIsSubmitting(true);
@@ -140,16 +157,15 @@ function Pgmain() {
   return (
     <div className="min-h-screen bg-white">
       <style>{globalStyles}</style>
-      
       {/* Progress Bar */}
-      <div className="sticky top-0 z-50 bg-white border-b border-white">
-        <div className="max-w-5xl mx-auto px-2 sm:px-4 py-3">
+      <div ref={progressBarRef} className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex justify-center">
-            <div className="flex items-center space-x-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent flex-nowrap w-full sm:w-auto">
+            <div className="flex items-center space-x-2">
               {formSections.map((section, index) => (
                 <div
                   key={section.id}
-                  className="flex items-center cursor-pointer min-w-[80px] sm:min-w-0"
+                  className="flex items-center cursor-pointer"
                   onClick={() => {
                     setCurrentStep(index);
                     window.scrollTo(0, 0);
@@ -203,52 +219,57 @@ function Pgmain() {
           </div>
 
           {/* Form Section Content */}
-          {renderFormSection(formSections[currentStep].component)}
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+            {formSections[currentStep].component}
+          </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-4 border-t border-gray-200">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`
-                flex items-center gap-2 px-5 py-2 rounded-md text-sm font-medium transition-colors
-                ${currentStep === 0 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                }
-              `}
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Previous</span>
-            </button>
+          {/* Navigation Buttons - Fixed at bottom of screen */}
+          <div style={{ height: '96px' }} /> {/* Spacer to prevent content being hidden behind fixed bar */}
+          <div className="fixed left-0 right-0 bottom-0 w-full bg-white border-t border-gray-200 z-50">
+            <div className="max-w-5xl mx-auto px-4 flex flex-row items-center justify-between gap-4 py-4">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`
+                  flex items-center gap-2 px-5 py-2 rounded-md text-sm font-medium transition-colors
+                  ${currentStep === 0 
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                    : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  }
+                `}
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Previous</span>
+              </button>
 
-            {currentStep < formSections.length - 1 ? (
-              <button
-                onClick={handleNext}
-                className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
-              >
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Submitting...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Submit</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            )}
+              {currentStep < formSections.length - 1 ? (
+                <button
+                  onClick={handleNext}
+                  className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                  className="flex items-center gap-2 px-5 py-2 rounded-md bg-black text-white text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Submitting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>Submit</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

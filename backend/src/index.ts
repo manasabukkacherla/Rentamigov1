@@ -51,6 +51,7 @@ import { Document } from "mongoose";
 
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
+import residentialPgmainRoutes from "./routes/residentialPgmain"; // <-- PG main route
 import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
 import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
 import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
@@ -164,6 +165,9 @@ const timeout = (
 };
 
 app.use(timeout);
+
+// PG Main (residential) API route
+app.use('/api/residential/pgmain', residentialPgmainRoutes);
 
 // Initialize all Socket.IO event handlers
 socketHandler(io);
