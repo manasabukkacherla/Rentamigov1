@@ -33,6 +33,7 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
+  powerSupply: boolean;
   location: {
     latitude: string;
     longitude: string;
@@ -159,6 +160,7 @@ const LeaseAgricultureMain = () => {
       latitude: '',
       longitude: ''
     },
+    powerSupply: false,
     isCornerProperty: false,
     landDetails: {
       totalArea: 0,
