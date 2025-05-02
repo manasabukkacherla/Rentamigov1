@@ -77,6 +77,8 @@ const MapLocation: React.FC<MapLocationProps> = ({
                 if (data.status === "OK" && data.results && data.results.length > 0) {
                     const address = data.results[0];
                     const addressComponents = { street: '', city: '', state: '', zipCode: '' };
+                    
+                    // Extract address components
                     address.address_components.forEach((component: any) => {
                         const types = component.types;
                         if (types.includes('route')) addressComponents.street = component.long_name;
@@ -84,24 +86,53 @@ const MapLocation: React.FC<MapLocationProps> = ({
                         else if (types.includes('administrative_area_level_1')) addressComponents.state = component.long_name;
                         else if (types.includes('postal_code')) addressComponents.zipCode = component.long_name;
                     });
+
+                    // If street is empty, use the first part of formatted address
                     if (!addressComponents.street && address.formatted_address) {
                         const formattedParts = address.formatted_address.split(',');
                         if (formattedParts.length > 0) addressComponents.street = formattedParts[0];
                     }
+
+                    // Update address
                     onAddressChange?.(addressComponents);
-                    const landmark = data.results.find((result: any) =>
+                    console.log(addressComponents)
+
+                    // Find a suitable landmark
+                    let landmarkName = '';
+                    
+                    // First try to find a point of interest
+                    const poi = data.results.find((result: any) =>
                         result.types.some((type: string) =>
                             ['point_of_interest', 'establishment', 'premise'].includes(type)
                         )
                     );
-                    if (landmark && landmark.name && onLandmarkChange) {
-                        onLandmarkChange(landmark.name);
+                    
+                    if (poi && poi.name) {
+                        landmarkName = poi.name;
+                    } else {
+                        // If no POI found, use the locality or neighborhood
+                        const locality = address.address_components.find((component: any) =>
+                            component.types.includes('locality')
+                        );
+                        if (locality) {
+                            landmarkName = locality.long_name;
+                        } else {
+                            // If no locality, use the first part of the formatted address
+                            landmarkName = address.formatted_address.split(',')[0];
+                        }
                     }
+
+                    // Update landmark
+                    if (landmarkName && onLandmarkChange) {
+                        onLandmarkChange(landmarkName);
+                    }
+
                     toast.success("Location details updated successfully");
                 }
             })
             .catch(error => {
                 console.error("Error during reverse geocoding:", error);
+                toast.error("Failed to get address details. Please try again.");
             });
     };
 
@@ -246,4 +277,3 @@ const MapLocation: React.FC<MapLocationProps> = ({
 };
 
 export default MapLocation;
-
