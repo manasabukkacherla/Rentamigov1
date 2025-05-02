@@ -87,3 +87,114 @@ export const createCommercialRentOthers = async (req: Request, res: Response) =>
     res.status(500).json({ error: 'Failed to create commercial rent others listing' });
   }
 }; 
+
+
+// Get all commercial Rent others properties
+export const getAllCommercialRentOthers = async (req: Request, res: Response) => {
+  try {
+    const RentProperties = await CommercialRentOthers.find().sort({ 'metaData.createdAt': -1 });
+    
+    res.status(200).json({
+      success: true,
+      count: RentProperties.length,
+      data: RentProperties
+    });
+  } catch (error: any) {
+    console.error('Error fetching commercial Rent others properties:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch commercial Rent others properties',
+      error: error
+    });
+  }
+};
+
+// Get a single commercial Rent others property by ID
+export const getCommercialRentOthersById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    const RentProperty = await CommercialRentOthers.findOne({ propertyId: id });
+    
+    if (!RentProperty) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commercial Rent others property not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: RentProperty
+    });
+  } catch (error: any) {
+    console.error('Error fetching commercial Rent others property by ID:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch commercial Rent others property',
+      error: error
+    });
+  }
+};
+
+// Update a commercial Rent others property
+export const updateCommercialRentOthers = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    
+    const RentProperty = await CommercialRentOthers.findOneAndUpdate(
+      { propertyId: id },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+    
+    if (!RentProperty) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commercial Rent others property not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent others property updated successfully',
+      data: RentProperty
+    });
+  } catch (error: any) {
+    console.error('Error updating commercial Rent others property:', error);
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to update commercial Rent others property',
+      error: error
+    });
+  }
+};
+
+// Delete a commercial Rent others property
+export const deleteCommercialRentOthers = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    const RentProperty = await CommercialRentOthers.findOneAndDelete({ propertyId: id });
+    
+    if (!RentProperty) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commercial Rent others property not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent others property deleted successfully'
+    });
+  } catch (error: any) {
+    console.error('Error deleting commercial Rent others property:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to delete commercial Rent others property',
+      error: error
+    });
+  }
+}; 

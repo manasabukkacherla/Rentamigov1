@@ -260,12 +260,8 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
       icon: <Home className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
-              </div>
+          <div className="space-y-8">
+
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertyName
                   propertyName={formData.propertyName}
@@ -275,7 +271,6 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
                 />
               </div>
             </div>
-          </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -387,12 +382,8 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
       icon: <IndianRupee className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Rent Details</h3>
-              </div>
+          <div className="space-y-8">
+              
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <Rent
                   onRentChange={(rent) =>
@@ -409,14 +400,9 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
                 />
               </div>
             </div>
-          </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Security Deposit</h3>
-              </div>
+          <div className="space-y-8">
+              
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <SecurityDeposit
                   onSecurityDepositChange={(deposit) =>
@@ -431,14 +417,9 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
                 />
               </div>
             </div>
-          </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Maintenance Amount</h3>
-              </div>
+          <div className="space-y-8">
+              
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <MaintenanceAmount
                   onMaintenanceAmountChange={(maintenance) =>
@@ -454,14 +435,9 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
                 />
               </div>
             </div>
-          </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Other Charges</h3>
-              </div>
+          <div className="space-y-8">
+              
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <OtherCharges
                   onOtherChargesChange={(charges) =>
@@ -476,14 +452,9 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
                 />
               </div>
             </div>
-          </div>
 
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <IndianRupee className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Brokerage</h3>
-              </div>
+          <div className="space-y-8">
+              
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <Brokerage
                   onBrokerageChange={(brokerage) =>
@@ -499,7 +470,6 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
               </div>
             </div>
           </div>
-        </div>
       ),
     },
     {
@@ -508,10 +478,7 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
+            
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <AvailabilityDate
                 onAvailabilityChange={(availability) =>
@@ -533,12 +500,7 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Image className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-            </div>
+        <div className="space-y-8">
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <MediaUpload
                 onMediaChange={(media) =>
@@ -553,7 +515,6 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
               />
             </div>
           </div>
-        </div>
       ),
     },
   ]
@@ -700,6 +661,3 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
 }
 
 export default BuilderFloor
-
-
-

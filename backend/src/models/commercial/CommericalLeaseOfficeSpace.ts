@@ -12,8 +12,8 @@ interface IBasicInformation {
     };
     landmark: string;
     location: {
-        latitude: number;
-        longitude: number;
+        latitude: string;
+        longitude: string;
     };
     isCornerProperty: boolean;
 }
@@ -131,13 +131,17 @@ interface IMedia {
 }
 
 interface IMetadata {
-    createdBy: Types.ObjectId | null;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
-    updatedAt?: Date;
-    status: 'active' | 'inactive' | 'sold' | 'rented';
-    views: number;
-    favorites: number;
-    isVerified: boolean;
+    // updatedAt?: Date;
+    // status: 'active' | 'inactive' | 'sold' | 'rented';
+    // views: number;
+    // favorites: number;
+
+
+    
+    // isVerified: boolean;
 }
 
 interface ICommercialLeaseOfficeSpace extends Document {
@@ -163,8 +167,8 @@ const BasicInformationSchema = new Schema<IBasicInformation>({
     },
     landmark: { type: String },
     location: {
-        latitude: { type: Number, default: 0 },
-        longitude: { type: Number, default: 0 }
+        latitude: { type: String},
+        longitude: { type: String}
     },
     isCornerProperty: { type: Boolean, default: false }
 });
@@ -311,13 +315,14 @@ const MediaSchema = new Schema<IMedia>({
 });
 
 const MetadataSchema = new Schema<IMetadata>({
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    userName: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date },
-    status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
-    views: { type: Number, default: 0 },
-    favorites: { type: Number, default: 0 },
-    isVerified: { type: Boolean, default: false }
+    // updatedAt: { type: Date },
+    // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
+    // views: { type: Number, default: 0 },
+    // favorites: { type: Number, default: 0 },
+    // isVerified: { type: Boolean, default: false }
 });
 
 // Main schema

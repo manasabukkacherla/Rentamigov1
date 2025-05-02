@@ -109,11 +109,11 @@ export const createCommercialSellShop = async (req: AuthenticatedRequest, res: R
     // Set the propertyId
     shopData.propertyId = propertyId;
     
-    // Set the createdBy field if user is authenticated
+    // Set the userId field if user is authenticated
     if (req.user && req.user._id) {
       shopData.metadata = {
         ...shopData.metadata,
-        createdBy: req.user._id,
+        userId: req.user._id,
         status: 'active'
       };
     }
@@ -307,7 +307,7 @@ export const updateCommercialSellShop = async (req: AuthenticatedRequest, res: R
     }
     
     // Check if user has permission to update this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user._id && shop.metadata?.userId?.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         error: 'You do not have permission to update this listing'
@@ -378,7 +378,7 @@ export const deleteCommercialSellShop = async (req: AuthenticatedRequest, res: R
     }
     
     // Check if user has permission to delete this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user._id && shop.metadata?.userId?.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         error: 'You do not have permission to delete this listing'

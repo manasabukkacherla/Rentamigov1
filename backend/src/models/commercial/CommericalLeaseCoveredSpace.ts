@@ -11,8 +11,8 @@ interface IBasicInformation {
     };
     landmark: string;
     location: {
-        latitude: number;
-        longitude: number;
+        latitude: string;
+        longitude: string;
     };
     isCornerProperty: boolean;
 }
@@ -127,13 +127,14 @@ interface IMedia {
 }
 
 interface IMetadata {
-    createdBy: Schema.Types.ObjectId | null;
+    userId: Schema.Types.ObjectId | null;
+    userName: string;
     createdAt: Date;
-    updatedAt?: Date;
-    status: 'active' | 'inactive' | 'sold' | 'rented';
-    views: number;
-    favorites: number;
-    isVerified: boolean;
+    // updatedAt?: Date;
+    // status: 'active' | 'inactive' | 'sold' | 'rented';
+    // views: number;
+    // favorites: number;
+    // isVerified: boolean;
 }
 
 export interface ICommercialLeaseCoveredSpace extends Document {
@@ -160,8 +161,8 @@ const commercialLeaseCoveredSpaceSchema = new Schema<ICommercialLeaseCoveredSpac
         },
         landmark: { type: String },
         location: {
-            latitude: { type: Number },
-            longitude: { type: Number }
+            latitude: { type: String,required:true },
+            longitude: { type: String,required:true }
         },
         isCornerProperty: { type: Boolean, default: false }
     },
@@ -270,13 +271,14 @@ const commercialLeaseCoveredSpaceSchema = new Schema<ICommercialLeaseCoveredSpac
         documents: { type: [String] }
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+        userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+        userName: { type: String, required: true },
         createdAt: { type: Date, default: Date.now },
-        updatedAt: { type: Date },
-        status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
-        views: { type: Number, default: 0 },
-        favorites: { type: Number, default: 0 },
-        isVerified: { type: Boolean, default: false }
+        // updatedAt: { type: Date },
+        // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
+        // views: { type: Number, default: 0 },
+        // favorites: { type: Number, default: 0 },
+        // isVerified: { type: Boolean, default: false }
     }
 }, { timestamps: true });
 

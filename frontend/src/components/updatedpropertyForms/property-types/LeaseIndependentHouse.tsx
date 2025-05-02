@@ -153,12 +153,6 @@ const LeaseIndependentHouse = ({
     societyAmenities: [],
   });
 
-
-
-
- 
-
-
   const handleSizeChange = (size: string) => {
     setFormData((prev) => ({
       ...prev,
@@ -235,22 +229,13 @@ const LeaseIndependentHouse = ({
       icon: <Home className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Home className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Basic Details</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyName
+          
+              <PropertyName
                   propertyName={formData.propertyName}
                   onPropertyNameChange={(name) =>
                     setFormData((prev) => ({ ...prev, propertyName: name }))
                   }
                 />
-              </div>
-            </div>
-          </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -303,6 +288,16 @@ const LeaseIndependentHouse = ({
                 />
               </div>
             </div>
+          </div>
+
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <Restrictions
+              restrictions={formData.features.restrictions}
+              onChange={(restrictions: string[]) => setFormData(prev => ({
+                ...prev,
+                features: { ...prev.features, restrictions }
+              }))}
+            />
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
@@ -369,10 +364,7 @@ const LeaseIndependentHouse = ({
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Calendar className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Availability</h3>
-            </div>
+            
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <AvailabilityDate
                 onAvailabilityChange={handleAvailabilityChange}
@@ -386,14 +378,9 @@ const LeaseIndependentHouse = ({
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
       component: (
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <div className="space-y-8">
-            <div className="flex items-center mb-8">
-              <Image className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
-            </div>
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <MediaUpload
+         <div className="space-y-8">
+            
+             <MediaUpload
                 onMediaChange={(media) => setFormData((prev) => ({
                   ...prev,
                   media: {
@@ -403,8 +390,7 @@ const LeaseIndependentHouse = ({
                 }))}
               />
             </div>
-          </div>
-        </div>
+          
       ),
     },
   ];
@@ -466,41 +452,52 @@ const LeaseIndependentHouse = ({
     <form onSubmit={(e) => e.preventDefault()} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
       <style>{customStyles}</style>
       {/* Progress indicator */}
-      <div ref={formRef} className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          {formSections.map((s, i) => (
-            <div
-              key={i}
-              className={`flex flex-col items-center ${i <= currentStep ? "text-black" : "text-gray-400"}`}
-              onClick={() => {
-                if (i < currentStep) {
-                  setCurrentStep(i);
-                  setTimeout(() => {
-                    if (formRef.current) {
-                      window.scrollTo({
-                        top: formRef.current.offsetTop - 100,
-                        behavior: 'smooth'
-                      });
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    if (index < currentStep) {
+                      setCurrentStep(index);
+                      setTimeout(() => {
+                        if (formRef.current) {
+                          window.scrollTo({
+                            top: formRef.current.offsetTop - 100,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }, 100);
                     }
-                  }, 100);
-                }
-              }}
-              style={{ cursor: i < currentStep ? "pointer" : "default" }}
-            >
-              <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-500"}`}
-              >
-                {s.icon}
-              </div>
-              <span className="text-xs font-medium">{s.title}</span>
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
+                      ? 'bg-black text-white'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
+                      ? 'text-black'
+                      : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
+                  </div>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div className="w-full bg-gray-200 h-1 rounded-full">
-          <div
-            className="bg-black h-1 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / (formSections.length - 1)) * 100}%` }}
-          ></div>
+          </div>
         </div>
       </div>
 

@@ -55,11 +55,11 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
-        if (!formData.metadata.createdBy) {
+        if (!formData.metadata.userId) {
             return res.status(400).json({
                 success: false,
                 error: 'Missing required field',
-                details: 'metadata.createdBy is required'
+                details: 'metadata.userId is required'
             });
         }
 
@@ -99,3 +99,140 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const getSheds = async (req: Request, res: Response) => {
+    try {
+        const sheds = await CommercialRentShed.find();
+        res.status(200).json({
+            success: true,
+            count: sheds.length,
+            data: sheds
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+export const getShedById = async (req: Request, res: Response) => {
+    try {
+        const shed = await CommercialRentShed.findById(req.params.id);
+        if (!shed) {
+            return res.status(404).json({
+                success: false,
+                error: 'Shed not found'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            data: shed
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+export const updateShed = async (req: Request, res: Response) => {
+    try {
+        const shed = await CommercialRentShed.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+        if (!shed) {
+            return res.status(404).json({
+                success: false,
+                error: 'Shed not found'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Shed updated successfully',
+            data: shed
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+export const deleteShed = async (req: Request, res: Response) => {
+    try {
+        const shed = await CommercialRentShed.findByIdAndDelete(req.params.id);
+        if (!shed) {
+            return res.status(404).json({
+                success: false,
+                error: 'Shed not found'
+            });
+        }
+        res.status(200).json({
+            success: true,
+            message: 'Shed deleted successfully'
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+};
+
+// Advanced Filters
+export const getShedsByFilters = async (req: Request, res: Response) => {
+    try {
+        const {
+            city,
+            minAmount,
+            maxAmount,
+            minArea,
+            maxArea,
+            shedType,
+            furnishingStatus,
+            availability
+        } = req.query;
+
+        const filters: Record<string, any> = {};
+
+        // Apply filters if provided
+        if (city) filters['basicInformation.address.city'] = city;
+        if (shedType) filters['basicInformation.shedType'] = { $in: [shedType] };
+        if (furnishingStatus) filters['propertyDetails.furnishingStatus'] = furnishingStatus;
+
+        if (minAmount || maxAmount) {
+            filters['IRentalTerms.rentDetails.expectedRent'] = {};
+            if (minAmount) filters['IRentalTerms.rentDetails.expectedRent'].$gte = Number(minAmount);
+            if (maxAmount) filters['IRentalTerms.rentDetails.expectedRent'].$lte = Number(maxAmount);
+        }
+
+        if (minArea || maxArea) {
+            filters['shedDetails.totalArea'] = {};
+            if (minArea) filters['shedDetails.totalArea'].$gte = Number(minArea);
+            if (maxArea) filters['shedDetails.totalArea'].$lte = Number(maxArea);
+        }
+
+        if (availability === 'immediate') {
+            filters['RentalTerms.availability.type'] = 'immediate';
+        }
+
+        // Find sheds with applied filters
+        const sheds = await CommercialRentShed.find(filters);
+
+        res.status(200).json({
+            success: true,
+            count: sheds.length,
+            data: sheds
+        });
+    } catch (error: any) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+}; 

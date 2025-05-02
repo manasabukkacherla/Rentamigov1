@@ -55,7 +55,7 @@ interface Features {
   maintenanceCharges: string
   maintenancePeriod: string
   availableFrom: Date
-  
+
   preferredTenants: string[]
   amenities: string[]
   propertyFeatures: string[]
@@ -226,32 +226,22 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       icon: <Store className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
+          <PropertyName
+            propertyName={formData.propertyName}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, propertyName: name }))}
+          />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              
-              <div className="space-y-6">
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <PropertyName
-                  propertyName={formData.propertyName}
-                  onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, propertyName: name }))}
-                />
-              </div>
-              </div>
-              <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
                 <MapPin className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Location Details</h3>
               </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <PropertyAddress
-                  address={formData.propertyAddress}
-                  onAddressChange={handleAddressChange}
-                />
-                </div>
-              </div>
+
+              <PropertyAddress
+                address={formData.propertyAddress}
+                onAddressChange={handleAddressChange}
+              />
             </div>
-          </div>
           </div>
         </div>
       ),
@@ -287,54 +277,52 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
                 <Building2 className="text-black mr-3" size={28} />
                 <h3 className="text-2xl font-semibold text-black">Property Features</h3>
               </div>
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
-                <PropertyFeatures
-                  onFeaturesChange={(features: Record<string, any>) => {
-                    setFormData(prev => ({
-                      ...prev,
-                      features: {
-                        ...prev.features,
-                        ...features
-                      }
-                    }))
-                  }}
-                />
-              </div>
-              
+              <PropertyFeatures
+                onFeaturesChange={(features: Record<string, any>) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    features: {
+                      ...prev.features,
+                      ...features
+                    }
+                  }))
+                }}
+              />
             </div>
-            
+
+
           </div>
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-              <Restrictions
-                  restrictions={formData.features.restrictions}
-                  onChange={(restrictions: string[]) => setFormData(prev => ({ 
-                    ...prev, 
-                    features: { ...prev.features, restrictions } 
-                  }))}
-                />
-              </div>
+            <Restrictions
+              restrictions={formData.features.restrictions}
+              onChange={(restrictions: string[]) => setFormData(prev => ({
+                ...prev,
+                features: { ...prev.features, restrictions }
+              }))}
+            />
+          </div>
 
-              <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Building2 className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Amenities</h3>
-              </div>
-              <div className="[&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_label]:text-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:hover:bg-black [&_button]:hover:text-white [&_button]:border-black/20">
+          <div className="space-y-6">
+            <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+              <div className="space-y-8">
+                <div className="flex items-center mb-8">
+                  <Building2 className="text-black mr-3" size={28} />
+                  <h3 className="text-2xl font-semibold text-black">Amenities</h3>
+                </div>
+
                 <div className="space-y-12">
                   <FlatAmenities
                     amenities={formData.features.amenities}
-                    onChange={(amenities: string[]) => setFormData(prev => ({ 
-                      ...prev, 
-                      features: { ...prev.features, amenities } 
+                    onChange={(amenities: string[]) => setFormData(prev => ({
+                      ...prev,
+                      features: { ...prev.features, amenities }
                     }))}
                   />
                   <SocietyAmenities
                     amenities={formData.features.societyFeatures}
-                    onChange={(amenities: string[]) => setFormData(prev => ({ 
-                      ...prev, 
-                      features: { ...prev.features, societyFeatures: amenities } 
+                    onChange={(amenities: string[]) => setFormData(prev => ({
+                      ...prev,
+                      features: { ...prev.features, societyFeatures: amenities }
                     }))}
                   />
                 </div>
@@ -342,14 +330,13 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
             </div>
           </div>
         </div>
-        </div>
       ),
     },
     // {
     //   title: "Amenities",
     //   icon: <Building2 className="w-5 h-5" />,
     //   content: (
-        
+
     //   ),
     // },
     {
@@ -359,20 +346,15 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
         <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Calendar className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Availability</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <AvailabilityDate
-                  date={formData.features.availableFrom}
-                  onChange={(date: Date) => setFormData(prev => ({ 
-                    ...prev, 
-                    features: { ...prev.features, availableFrom: date } 
-                  }))}
-                />
-              </div>
-              
+
+              <AvailabilityDate
+                date={formData.features.availableFrom}
+                onChange={(date: Date) => setFormData(prev => ({
+                  ...prev,
+                  features: { ...prev.features, availableFrom: date }
+                }))}
+              />
+
             </div>
           </div>
         </div>
@@ -383,34 +365,27 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       icon: <Image className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
-          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="space-y-8">
-              <div className="flex items-center mb-8">
-                <Image className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Media Upload</h3>
-              </div>
-              <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
-                <MediaUpload
-                  images={formData.features.images}
-                  videos={formData.features.videos}
-                  onImagesChange={(images: string[]) => setFormData(prev => ({ 
-                    ...prev, 
-                    features: { ...prev.features, images } 
-                  }))}
-                  onVideosChange={(videos: string[]) => setFormData(prev => ({ 
-                    ...prev, 
-                    features: { ...prev.features, videos } 
-                  }))}
-                />
-              </div>
+          <div className="space-y-8">
+
+              <MediaUpload
+                images={formData.features.images}
+                videos={formData.features.videos}
+                onImagesChange={(images: string[]) => setFormData(prev => ({
+                  ...prev,
+                  features: { ...prev.features, images }
+                }))}
+                onVideosChange={(videos: string[]) => setFormData(prev => ({
+                  ...prev,
+                  features: { ...prev.features, videos }
+                }))}
+              />
             </div>
           </div>
-        </div>
       ),
     },
   ];
 
-  
+
   return (
     <div ref={formRef} className="min-h-screen bg-white">
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -439,22 +414,19 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
                   }}
                 >
                   <div className="flex flex-col items-center group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
-                      index + 1 <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index + 1 <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
                       {section.icon}
                     </div>
-                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${
-                      index + 1 <= currentStep ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'
-                    }`}>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index + 1 <= currentStep ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
                       {section.title}
                     </span>
                   </div>
                   {index < formSections.length - 1 && (
                     <div className="flex items-center mx-1">
-                      <div className={`w-12 h-1 transition-colors duration-200 ${
-                        index < currentStep - 1 ? 'bg-black' : 'bg-gray-200'
-                      }`} />
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep - 1 ? 'bg-black' : 'bg-gray-200'
+                        }`} />
                     </div>
                   )}
                 </div>
@@ -493,9 +465,8 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
               }
             }}
             disabled={currentStep === 1 || loading}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${
-              currentStep === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-black hover:bg-black hover:text-white'
-            }`}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
