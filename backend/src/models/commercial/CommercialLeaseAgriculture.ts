@@ -101,10 +101,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
-    operatingHours: {
-      restricted: boolean;
-      restrictions: string;
-    };
+    operatingHours: boolean;
   };
   contactDetails: {
     name: string;
@@ -229,10 +226,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     leaseDuration: { type: String },
     noticePeriod: { type: String },
     isPetsAllowed: { type: Boolean, default: false },
-    operatingHours: {
-      restricted: { type: Boolean, default: false },
-      restrictions: { type: String }
-    }
+    operatingHours: { type: Boolean, default: false },
+     
   },
   contactDetails: {
     name: { type: String, default: "Not Specified" },

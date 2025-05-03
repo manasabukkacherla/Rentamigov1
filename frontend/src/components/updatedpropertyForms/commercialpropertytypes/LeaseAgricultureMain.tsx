@@ -119,10 +119,7 @@ interface FormData {
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
-    operatingHours: {
-      restricted: boolean;
-      restrictions: string;
-    };
+    operatingHours: boolean;
   };
   contactDetails: {
     name: string;
@@ -242,10 +239,7 @@ const LeaseAgricultureMain = () => {
       leaseDuration: '',
       noticePeriod: '',
       isPetsAllowed: false,
-      operatingHours: {
-        restricted: false,
-        restrictions: ''
-      }
+      operatingHours: false,
     },
     contactDetails: {
       name: '',

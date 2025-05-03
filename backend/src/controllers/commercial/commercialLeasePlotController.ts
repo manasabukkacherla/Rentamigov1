@@ -179,10 +179,8 @@ const transformPlotData = (formData: any) => {
             leaseDuration: formData.availability.leaseDuration || '',
             noticePeriod: formData.availability.noticePeriod || '',
             isPetsAllowed: Boolean(formData.availability.isPetsAllowed),
-            operatingHours: {
-                restricted: Boolean(formData.availability.operatingHours?.restricted),
-                restrictions: formData.availability.operatingHours?.restrictions || ''
-            }
+            operatingHours: formData.availability.operatingHours || false
+            
         };
     }
 
@@ -232,7 +230,8 @@ const transformPlotData = (formData: any) => {
     if (formData.metadata) {
         transformedData.metadata = {
             userId: formData.metadata.userId,
-            createdAt: formData.metadata.createdAt || new Date()
+            createdAt: formData.metadata.createdAt || new Date(),
+            userName: formData.metadata.userName
         };
     }
 

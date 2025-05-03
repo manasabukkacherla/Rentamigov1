@@ -122,10 +122,7 @@ interface FormData {
     leaseDuration?: string;
     noticePeriod?: string;
     isPetsAllowed?: boolean;
-    operatingHours?: {
-      restricted: boolean;
-      restrictions: string;
-    };
+    operatingHours?: boolean;
   };
   contactInformation: {
     name: string;
@@ -150,6 +147,8 @@ interface FormData {
   metadata?: {
     createdBy: string;
     createdAt: Date;
+    userName: string;
+    userId: string;
   };
 }
 
@@ -292,10 +291,7 @@ const LeasePlotMain = () => {
       leaseDuration: "",
       noticePeriod: "",
       isPetsAllowed: false,
-      operatingHours: {
-        restricted: false,
-        restrictions: ""
-      }
+      operatingHours: false,
     },
     contactInformation: {
       name: "",
@@ -591,15 +587,15 @@ const LeasePlotMain = () => {
   };
 
   // Submit button will also show validation summary
-  const showValidationSummary = () => {
-    const errors = validateFormData();
-    if (errors.length > 0) {
-      console.warn("Form has missing required fields:", errors);
-      toast.warn(`Please fill in all required fields: ${errors.join(", ")}`);
-      return false;
-    }
-    return true;
-  };
+  // const showValidationSummary = () => {
+  //   const errors = validateFormData();
+  //   // if (errors.length > 0) {
+  //   //   console.warn("Form has missing required fields:", errors);
+  //   //   toast.warn(`Please fill in all required fields: ${errors.join(", ")}`);
+  //   //   return false;
+  //   // }
+  //   return true;
+  // };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -609,9 +605,9 @@ const LeasePlotMain = () => {
     console.log("Form submission started...");
 
     // Run validation summary first
-    if (!showValidationSummary()) {
-      return; // Stop if validation fails
-    }
+    // if (!showValidationSummary()) {
+    //   return; // Stop if validation fails
+    // }
 
     console.log("Form data being submitted:", formData);
 
@@ -621,7 +617,15 @@ const LeasePlotMain = () => {
         console.log("User not authenticated, redirecting to login");
         toast.error('You must be logged in to list a property.');
         return;
-      }
+      }// Validate required fields before submission
+      // if (
+      //   !formData.basicInformation.landmark ||
+      //   !formData.propertyDetails.area.carpetArea ||
+      //   !formData.propertyDetails.area.builtUpArea
+      // ) {
+      //   toast.error("Please fill in all required fields: Landmark, Carpet area, Built-up area");
+      //   return;
+      // }
 
       const author = JSON.parse(user).id;
       console.log("User authenticated, ID:", author);
@@ -731,10 +735,7 @@ const LeasePlotMain = () => {
           leaseDuration: formData.availability.leaseDuration || "",
           noticePeriod: formData.availability.noticePeriod || "",
           isPetsAllowed: formData.availability.isPetsAllowed || false,
-          operatingHours: formData.availability.operatingHours || {
-            restricted: false,
-            restrictions: ""
-          }
+          operatingHours: formData.availability.operatingHours || false,
         },
         contactInformation: {
           name: formData.contactInformation.name || "",
@@ -768,7 +769,9 @@ const LeasePlotMain = () => {
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          userName: author,
+          userId: author // Ensure userId is present for backend validation
         }
       };
 
