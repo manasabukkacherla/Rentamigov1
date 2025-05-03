@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import CommercialSellAgriculture from '../../models/commercial/CommercialSellAgriculture';
 import User from '../../models/signup';
-
+import _ from 'lodash';
 const generatePropertyId = async (): Promise<string> => {
   try {
     // Prefix for the commercial sell agriculture property ID
@@ -153,3 +153,79 @@ export const getCommercialSellAgricultureById = async (req: Request, res: Respon
     res.status(500).json({ error: 'Failed to fetch commercial sell agriculture property' });
   }
 }; 
+
+
+export const updateCommercialSellAgriculture = async (req: Request, res: Response) => {
+    try {
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
+          success: false,
+          message: "No data provided for update.",
+        });
+      }
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialSellAgriculture.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialSellAgriculture.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "SellAgriculture updated successfully.",
+        data: updatedDoc,
+      });
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown update error",
+      });
+    }
+  };
+  
+export const deleteCommercialSellAgriculture = async (req: Request, res: Response) => {
+        try {
+          const data = await CommercialSellAgriculture.findByIdAndDelete(req.params.id);
+  
+          if (!data) {
+              return res.status(404).json({
+                  success: false,
+                  message: 'SellAgriculture listing not found'
+              });
+          }
+  
+          res.status(200).json({
+              success: true,
+              message: 'SellAgriculture listing deleted successfully'
+          });
+      } catch (error) {
+          console.error('Error deleting SellAgriculture:', error);
+          res.status(500).json({
+              success: false,
+              error: 'Failed to delete SellAgriculture listing',
+              message: error instanceof Error ? error.message : 'Unknown error'
+          });
+      }
+  };
+  
