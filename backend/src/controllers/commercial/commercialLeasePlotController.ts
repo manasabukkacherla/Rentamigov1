@@ -231,7 +231,7 @@ const transformPlotData = (formData: any) => {
         transformedData.metadata = {
             userId: formData.metadata.userId,
             createdAt: formData.metadata.createdAt || new Date(),
-            userName: formData.metadata.userName
+            //userName: formData.metadata.userName
         };
     }
 

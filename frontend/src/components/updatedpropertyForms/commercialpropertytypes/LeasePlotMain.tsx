@@ -145,9 +145,9 @@ interface FormData {
     documents: File[];
   };
   metadata?: {
-    createdBy: string;
+    //createdBy: string;
     createdAt: Date;
-    userName: string;
+    //userName: string;
     userId: string;
   };
 }
@@ -768,9 +768,9 @@ const LeasePlotMain = () => {
         ...updatedFormData,
         media: convertedMedia,
         metadata: {
-          createdBy: author,
+          //createdBy: author,
           createdAt: new Date(),
-          userName: author,
+          //userName: author,
           userId: author // Ensure userId is present for backend validation
         }
       };

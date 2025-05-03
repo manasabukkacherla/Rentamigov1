@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -73,7 +71,7 @@ interface FormData {
   propertyId?: string;
   propertyName: string;
   landType: string[];
-  powerSupply: boolean;
+  powerSupply: 'Available' | 'Not Available';
   waterSource?: string;
   address: {
     street: string;
@@ -140,7 +138,7 @@ const RentAgriculture = () => {
     propertyId: '',
     propertyName: '',
     landType: [] as string[],
-    powerSupply: false,
+    powerSupply: 'Available',
     waterSource: '',
     address: {
       street: '',
@@ -251,12 +249,6 @@ const RentAgriculture = () => {
       location: { ...prev.location, longitude: lng }
     }));
   };
-  const handleWaterSourceChange = (waterSource: string) => {
-    setFormData(prev => ({ ...prev, waterSource }));
-  };
-  const handlePowerSupplyChange = (powerSupply: boolean) => {
-    setFormData(prev => ({ ...prev, powerSupply }));
-  };
 
   const handleCornerPropertyChange = (isCorner: boolean) => {
     setFormData(prev => ({ ...prev, isCornerProperty: isCorner }));
@@ -332,8 +324,6 @@ const RentAgriculture = () => {
           <div className="space-y-6">
             <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
             <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
-            {/* <WaterSource onWaterSourceChange={handleWaterSourceChange} />
-            <PowerSupply onPowerSupplyChange={handlePowerSupplyChange} /> */}
           </div>     
 
           <div className="space-y-6">
@@ -347,8 +337,16 @@ const RentAgriculture = () => {
             onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
             />
             <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
-          </div>
-        </div>
+            <label>
+              {/* Power Supply:
+                  <input
+                type="checkbox"
+                    checked={formData.powerSupply === 'Available'}
+                onChange={e => setFormData(prev => ({ ...prev, powerSupply: e.target.checked ? 'Available' : 'Not Available' }))}
+              /> */}
+                </label>
+              </div>
+            </div>
       )
     },
     {

@@ -99,7 +99,7 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
       metaData: {
         ...(formData.metaData || formData.metadata),
         userId: userId, // Always assign the resolved userId
-        user: user, // Attach user object if available
+        //user: user, // Attach user object if available
         createdAt: new Date()
       }
     };

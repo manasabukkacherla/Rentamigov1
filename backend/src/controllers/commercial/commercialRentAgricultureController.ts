@@ -69,6 +69,11 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
       });
     }
 
+    // Ensure powerSupply is explicitly set from the request body
+    // if (typeof formData.powerSupply !== 'boolean') {
+    //   return res.status(400).json({ success: false, message: 'powerSupply is required and must be boolean' });
+    // }
+
     // Generate property ID
     const propertyId = await generatePropertyId();
     if (!propertyId) {
