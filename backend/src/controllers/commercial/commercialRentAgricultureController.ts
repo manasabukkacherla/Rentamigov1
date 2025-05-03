@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialRentAgriculture from '../../models/commercial/CommercialRentAgriculture';
+import _ from 'lodash';
 
 // Helper function to generate Property ID
 const generatePropertyId = async (): Promise<string> => {
@@ -64,7 +65,7 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
       ...formData,
       metaData: {
         ...formData.metaData,
-        userId: req.user._id,  // Assign the authenticated user's ID
+        createdBy: req.user._id,  // Assign the authenticated user's ID
         createdAt: new Date()
       }
     };
@@ -133,32 +134,49 @@ export const getCommercialRentAgricultureById = async (req: Request, res: Respon
 // Update Commercial Rent Agriculture
 export const updateCommercialRentAgriculture = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const updateData = req.body;
-
-    const property = await CommercialRentAgriculture.findOneAndUpdate(
-      { propertyId },
-      { $set: updateData },
-      { new: true }
-    );
-
-    if (!property) {
-      return res.status(404).json({
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
         success: false,
-        error: 'Agricultural land Rent property not found'
+        message: "No data provided for update.",
       });
     }
 
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+   
+    const existingDoc = await CommercialRentAgriculture.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialRentAgriculture.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Agricultural land Rent property updated successfully',
-      data: property
+      message: "rent Agriculture updated successfully.",
+      data: updatedDoc,
     });
-  } catch (error) {
-    console.error('Error updating agricultural land Rent property:', error);
+  } catch (error: any) {
+    console.error("Update error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update agricultural land Rent property'
+      message: error instanceof Error ? error.message : "Unknown update error",
     });
   }
 };
@@ -166,25 +184,25 @@ export const updateCommercialRentAgriculture = async (req: Request, res: Respons
 // Delete Commercial Rent Agriculture
 export const deleteCommercialRentAgriculture = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const property = await CommercialRentAgriculture.findOneAndDelete({ propertyId });
+    const data = await CommercialRentAgriculture.findByIdAndDelete(req.params.id);
 
-    if (!property) {
-      return res.status(404).json({
-        success: false,
-        error: 'Agricultural land Rent property not found'
-      });
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'rent Agriculture listing not found'
+        });
     }
 
     res.status(200).json({
-      success: true,
-      message: 'Agricultural land Rent property deleted successfully'
+        success: true,
+        message: 'rent Agriculture listing deleted successfully'
     });
-  } catch (error) {
-    console.error('Error deleting agricultural land Rent property:', error);
+} catch (error) {
+    console.error('Error deleting rent Agriculture:', error);
     res.status(500).json({
-      success: false,
-      error: 'Failed to delete agricultural land Rent property'
+        success: false,
+        error: 'Failed to delete rent Agriculture listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
     });
-  }
+}
 };

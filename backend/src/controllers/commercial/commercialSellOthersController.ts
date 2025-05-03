@@ -70,6 +70,8 @@ export const createCommercialSellOthers = async (req: Request, res: Response) =>
       ...formData,
       metaData: {
         ...formData.metaData,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
       }
     };
     

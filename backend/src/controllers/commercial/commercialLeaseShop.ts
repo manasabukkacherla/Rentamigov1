@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialLeaseShop from '../../models/commercial/CommercialLeaseShop';
-import CommercialLeaseAgriculture from '../../models/commercial/CommercialLeaseAgriculture';
+import _ from 'lodash';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -65,7 +65,8 @@ export const createCommercialLeaseShop = async (req: Request, res: Response) => 
       media: formData.media,
       metadata: {
         ...formData.metadata,
-        // createdAt: new Date(),
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
         // updatedAt: new Date()
       }
     };
@@ -134,59 +135,75 @@ export const getCommercialLeaseShopById = async (req: Request, res: Response) =>
 };
 
   export const updateCommercialLeaseShop = async (req: Request, res: Response) => {
-  try {
-    const propertyId = req.params.id;
-    const updateData = req.body;
-    
-    const property = await CommercialLeaseShop.findOneAndUpdate(
-      { propertyId },
-      { $set: updateData },
-      { new: true }
-    );
-    
-    if (!property) {
-      return res.status(404).json({ 
+    try {
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
+          success: false,
+          message: "No data provided for update.",
+        });
+      }
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialLeaseShop.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialLeaseShop.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "Lease shop updated successfully.",
+        data: updatedDoc,
+      });
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
         success: false,
-        error: 'Commercial lease shop property not found' 
+        message: error instanceof Error ? error.message : "Unknown update error",
       });
     }
-    
-    res.status(200).json({
-      success: true,
-      message: 'Commercial lease shop property updated successfully',
-      data: property
-    });
-  } catch (error) {
-    console.error('Error updating Commercial lease shop property:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to update Commercial lease shop property' 
-    });
-  }
-};
+  };
 
 export const deleteCommercialLeaseShop = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const property = await CommercialLeaseShop.findOneAndDelete({ propertyId });
-    
-    if (!property) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Commercial lease shop property not found' 
-      });
-    }
-    
-    res.status(200).json({
-      success: true,
-      message: 'Commercial lease shop property deleted successfully'
-    });
-  } catch (error) {
-    console.error('Error deleting commercial lease shop property:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to delete commercial lease shop property' 
-    });
-  }
-}; 
+    const data = await CommercialLeaseShop.findByIdAndDelete(req.params.id);
 
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'Lease shop listing not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Lease shop listing deleted successfully'
+    });
+} catch (error) {
+    console.error('Error deleting lease shop:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete lease shop listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
+    });
+}
+};

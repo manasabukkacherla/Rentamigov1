@@ -69,7 +69,9 @@ export const createCommercialSellShed = async (req: Request, res: Response) => {
       ...formData,
       metaData: {
         ...formData.metaData,
-      }
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
+        }
     };
     
     // Create new shed listing

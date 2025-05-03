@@ -126,8 +126,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     documents: string[];
   };
   metadata: {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
   }
 }
@@ -254,8 +253,7 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata: {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    userName: { type: String, default: "Not Specified" },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now }
   }
 });

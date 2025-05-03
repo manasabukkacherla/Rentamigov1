@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialLeaseWarehouse from '../../models/commercial/CommericalLeaseWarehouse';
+import _ from 'lodash';
 
 // Generate property ID with format RA-COMLEWHXXXX
 const generatePropertyId = async (): Promise<string> => {
@@ -72,6 +73,7 @@ export const createLeaseWarehouse = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
+                createdBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };
@@ -141,57 +143,75 @@ export const getLeaseWarehouseById = async (req: Request, res: Response) => {
 // Update a commercial lease warehouse
 export const updateLeaseWarehouse = async (req: Request, res: Response) => {
     try {
-        const warehouse = await CommercialLeaseWarehouse.findByIdAndUpdate(
-            req.params.id,
-            {
-                ...req.body,
-                'metadata.updatedAt': new Date()
-            },
-            { new: true, runValidators: true }
-        );
-
-        if (!warehouse) {
-            return res.status(404).json({
-                success: false,
-                error: 'Commercial lease warehouse not found'
-            });
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
+            success: false,
+            message: "No data provided for update.",
+          });
         }
-
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await CommercialLeaseWarehouse.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await CommercialLeaseWarehouse.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
         res.status(200).json({
-            success: true,
-            message: 'Commercial lease warehouse updated successfully',
-            data: warehouse
+          success: true,
+          message: "Lease Warehouse updated successfully.",
+          data: updatedDoc,
         });
-    } catch (error: any) {
-        console.error('Error updating commercial lease warehouse:', error);
+      } catch (error: any) {
+        console.error("Update error:", error);
         res.status(500).json({
-            error: 'Failed to update commercial lease warehouse',
-            details: error.message
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
         });
-    }
-};
+      }
+    };
 
 // Delete a commercial lease warehouse
 export const deleteLeaseWarehouse = async (req: Request, res: Response) => {
     try {
-        const warehouse = await CommercialLeaseWarehouse.findByIdAndDelete(req.params.id);
+        const data = await CommercialLeaseWarehouse.findByIdAndDelete(req.params.id);
 
-        if (!warehouse) {
+        if (!data) {
             return res.status(404).json({
                 success: false,
-                error: 'Commercial lease warehouse not found'
+                message: 'Lease Warehouse listing not found'
             });
         }
 
         res.status(200).json({
             success: true,
-            message: 'Commercial lease warehouse deleted successfully'
+            message: 'Lease Warehouse listing deleted successfully'
         });
-    } catch (error: any) {
-        console.error('Error deleting commercial lease warehouse:', error);
+    } catch (error) {
+        console.error('Error deleting lease Warehouse:', error);
         res.status(500).json({
-            error: 'Failed to delete commercial lease warehouse',
-            details: error.message
+            success: false,
+            error: 'Failed to delete lease Warehouse listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
-}; 
+};

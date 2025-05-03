@@ -114,8 +114,7 @@ interface IMedia {
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
 }
 
@@ -233,8 +232,7 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         videoTour: { type: String }
     },
     metadata: {
-        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        userName:{type:String,default:"Not Specified"},
+        creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         createdAt: { type: Date, default: Date.now }
     }
 }, {

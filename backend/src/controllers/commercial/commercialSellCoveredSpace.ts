@@ -69,7 +69,12 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
     // Create a new commercial sell covered space document
     const newCoveredSpace = new CommercialSellCoveredSpace({
       propertyId,
-      ...req.body
+        ...req.body,
+      metadata: {
+        ...req.body.metadata,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
+      }
     });
 
     // Save the document to the database

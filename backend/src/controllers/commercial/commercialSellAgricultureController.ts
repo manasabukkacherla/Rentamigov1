@@ -69,6 +69,8 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
       ...formData,
       metaData: {
         ...formData.metaData,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
       }
     };
     
