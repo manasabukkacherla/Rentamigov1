@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialRentCoveredSpace from '../../models/commercial/CommercialRentCoveredSpace';
-
+import _ = require('lodash');
 
 interface AuthenticatedRequest extends Request {
   user?: {
@@ -43,7 +43,12 @@ export const createCommercialRentCoveredSpace = async (req: Request, res: Respon
     // Create a new commercial rent covered space document
     const newCoveredSpace = new CommercialRentCoveredSpace({
       propertyId,
-      ...req.body
+      ...req.body,
+      metadata: {
+        ...req.body.metadata,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
+      }
     });
 
     // Save the document to the database
@@ -70,68 +75,85 @@ export const createCommercialRentCoveredSpace = async (req: Request, res: Respon
 }; 
 
 // GET ALL with pagination and filters
-export const getAllCommercialRentCoveredSpaces = async (req: Request, res: Response) => {
+// export const getAllCommercialRentCoveredSpaces = async (req: Request, res: Response) => {
+//   try {
+//     const { page = 1, limit = 10, city, minPrice, maxPrice, minArea, maxArea, sort } = req.query;
+//     const pageNum = parseInt(page as string, 10);
+//     const limitNum = parseInt(limit as string, 10);
+//     const skip = (pageNum - 1) * limitNum;
+
+//     const query: any = {};
+
+//     if (city) query['basicInformation.address.city'] = city;
+//     if (minPrice) query['RentTerms.RentDetails.RentAmount.amount'] = { $gte: parseInt(minPrice as string, 10) };
+//     if (maxPrice) {
+//       query['RentTerms.RentDetails.RentAmount.amount'] = {
+//         ...(query['RentTerms.RentDetails.RentAmount.amount'] || {}),
+//         $lte: parseInt(maxPrice as string, 10)
+//       };
+//     }
+
+//     if (minArea) query['coveredSpaceDetails.totalArea'] = { $gte: parseInt(minArea as string, 10) };
+//     if (maxArea) {
+//       query['coveredSpaceDetails.totalArea'] = {
+//         ...(query['coveredSpaceDetails.totalArea'] || {}),
+//         $lte: parseInt(maxArea as string, 10)
+//       };
+//     }
+
+//     let sortQuery: any = { 'metadata.createdAt': -1 };
+//     if (sort === 'price-asc') sortQuery = { 'RentalTerms.rentDetails.expectedRent': 1 };
+//     if (sort === 'price-desc') sortQuery = { 'RentTerms.RentDetails.RentAmount.amount': -1 };
+//     if (sort === 'area-asc') sortQuery = { 'coveredSpaceDetails.totalArea': 1 };
+//     if (sort === 'area-desc') sortQuery = { 'coveredSpaceDetails.totalArea': -1 };
+
+//     const coveredSpaces = await CommercialRentCoveredSpace.find(query)
+//       .populate('metadata.userId', 'name email')
+//       .sort(sortQuery)
+//       .skip(skip)
+//       .limit(limitNum)
+//       .lean();
+
+//     const total = await CommercialRentCoveredSpace.countDocuments(query);
+
+//     res.status(200).json({
+//       success: true,
+//       count: coveredSpaces.length,
+//       data: coveredSpaces,
+//       pagination: {
+//         total,
+//         page: pageNum,
+//         limit: limitNum,
+//         pages: Math.ceil(total / limitNum)
+//       }
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: 'Get failed', message: (error as Error).message });
+//   }
+// };
+export const getAllCommercialRentCoveredSpaces= async (req: Request, res: Response) => {
   try {
-    const { page = 1, limit = 10, city, minPrice, maxPrice, minArea, maxArea, sort } = req.query;
-    const pageNum = parseInt(page as string, 10);
-    const limitNum = parseInt(limit as string, 10);
-    const skip = (pageNum - 1) * limitNum;
-
-    const query: any = {};
-
-    if (city) query['basicInformation.address.city'] = city;
-    if (minPrice) query['RentTerms.RentDetails.RentAmount.amount'] = { $gte: parseInt(minPrice as string, 10) };
-    if (maxPrice) {
-      query['RentTerms.RentDetails.RentAmount.amount'] = {
-        ...(query['RentTerms.RentDetails.RentAmount.amount'] || {}),
-        $lte: parseInt(maxPrice as string, 10)
-      };
-    }
-
-    if (minArea) query['coveredSpaceDetails.totalArea'] = { $gte: parseInt(minArea as string, 10) };
-    if (maxArea) {
-      query['coveredSpaceDetails.totalArea'] = {
-        ...(query['coveredSpaceDetails.totalArea'] || {}),
-        $lte: parseInt(maxArea as string, 10)
-      };
-    }
-
-    let sortQuery: any = { 'metadata.createdAt': -1 };
-    if (sort === 'price-asc') sortQuery = { 'RentTerms.RentDetails.RentAmount.amount': 1 };
-    if (sort === 'price-desc') sortQuery = { 'RentTerms.RentDetails.RentAmount.amount': -1 };
-    if (sort === 'area-asc') sortQuery = { 'coveredSpaceDetails.totalArea': 1 };
-    if (sort === 'area-desc') sortQuery = { 'coveredSpaceDetails.totalArea': -1 };
-
-    const coveredSpaces = await CommercialRentCoveredSpace.find(query)
-      .populate('metadata.userId', 'name email')
-      .sort(sortQuery)
-      .skip(skip)
-      .limit(limitNum)
-      .lean();
-
-    const total = await CommercialRentCoveredSpace.countDocuments(query);
-
+    const Properties = await CommercialRentCoveredSpace.find().sort({ 'metaData.createdAt': -1 });
+    
     res.status(200).json({
       success: true,
-      count: coveredSpaces.length,
-      data: coveredSpaces,
-      pagination: {
-        total,
-        page: pageNum,
-        limit: limitNum,
-        pages: Math.ceil(total / limitNum)
-      }
+      count: Properties.length,
+      data: Properties
     });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Get failed', message: (error as Error).message });
+  } catch (error: any) {
+    console.error('Error fetching commercial rent covered space properties:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch commercial rent covered space properties',
+      error: error
+    });
   }
 };
-
 // GET BY ID
 export const getCommercialRentCoveredSpaceById = async (req: Request, res: Response) => {
   try {
     const coveredSpace = await CommercialRentCoveredSpace.findById(req.params.id)
-      .populate('metadata.userId', 'name email');
+      .populate('metadata.createdBy', 'name email');
 
     if (!coveredSpace) return res.status(404).json({ success: false, error: 'Not found' });
 
@@ -144,46 +166,75 @@ export const getCommercialRentCoveredSpaceById = async (req: Request, res: Respo
 // UPDATE
 export const updateCommercialRentCoveredSpace = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const coveredSpace = await CommercialRentCoveredSpace.findById(req.params.id);
-    if (!coveredSpace) return res.status(404).json({ success: false, error: 'Not found' });
-
-    if (req.user && coveredSpace.metadata.userId?.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ success: false, error: 'Unauthorized' });
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
+        success: false,
+        message: "No data provided for update.",
+      });
     }
 
-    const updatedData = {
-      ...req.body,
-      metadata: {
-        ...coveredSpace.metadata,
-        updatedAt: new Date()
-      }
-    };
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
 
-    const updated = await CommercialRentCoveredSpace.findByIdAndUpdate(req.params.id, updatedData, {
-      new: true, runValidators: true
+   
+    const existingDoc = await CommercialRentCoveredSpace.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialRentCoveredSpace.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "rent covered space updated successfully.",
+      data: updatedDoc,
     });
-
-    res.status(200).json({ success: true, message: 'Updated successfully', data: updated });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Update failed', message: (error as Error).message });
+  } catch (error: any) {
+    console.error("Update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown update error",
+    });
   }
 };
 
 // DELETE
 export const deleteCommercialRentCoveredSpace = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const coveredSpace = await CommercialRentCoveredSpace.findById(req.params.id);
-    if (!coveredSpace) return res.status(404).json({ success: false, error: 'Not found' });
+    const data = await CommercialRentCoveredSpace.findByIdAndDelete(req.params.id);
 
-    if (req.user && coveredSpace.metadata.userId?.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ success: false, error: 'Unauthorized' });
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'rent covered space listing not found'
+        });
     }
 
-    await CommercialRentCoveredSpace.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true, message: 'Deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ success: false, error: 'Delete failed', message: (error as Error).message });
-  }
+    res.status(200).json({
+        success: true,
+        message: 'rent covered space listing deleted successfully'
+    });
+} catch (error) {
+    console.error('Error deleting rent covered space:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete rent covered space listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
+    });
+}
 };
-
-

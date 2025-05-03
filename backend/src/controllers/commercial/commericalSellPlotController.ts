@@ -270,7 +270,7 @@ const transformPlotData = (formData: any) => {
     // Metadata
     if (formData.metadata) {
         transformedData.metadata = {
-            userId: formData.metadata.userId,
+            createdBy: formData.metadata.createdBy,
             createdAt: formData.metadata.createdAt || new Date()
         };
     }
@@ -311,7 +311,7 @@ export const createPlot = async (req: Request, res: Response) => {
 
         // Return populated plot data with user information
         const populatedPlot = await SellPlot.findById(savedPlot._id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         res.status(201).json({
@@ -333,7 +333,7 @@ export const createPlot = async (req: Request, res: Response) => {
 export const getAllPlots = async (req: Request, res: Response) => {
     try {
         const plots = await SellPlot.find()
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v')
             .sort({ 'metadata.createdAt': -1 });
 
@@ -356,7 +356,7 @@ export const getAllPlots = async (req: Request, res: Response) => {
 export const getPlotById = async (req: Request, res: Response) => {
     try {
         const plot = await SellPlot.findById(req.params.id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         if (!plot) {

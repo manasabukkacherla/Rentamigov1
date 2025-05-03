@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentOthers from '../../models/commercial/CommercialRentOthers';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -70,6 +71,8 @@ export const createCommercialRentOthers = async (req: Request, res: Response) =>
       ...formData,
       metaData: {
         ...formData.metaData,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
       }
     };
     
@@ -140,33 +143,49 @@ export const getCommercialRentOthersById = async (req: Request, res: Response) =
 // Update a commercial Rent others property
 export const updateCommercialRentOthers = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
-    
-    const RentProperty = await CommercialRentOthers.findOneAndUpdate(
-      { propertyId: id },
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
-    
-    if (!RentProperty) {
-      return res.status(404).json({
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
         success: false,
-        message: 'Commercial Rent others property not found'
+        message: "No data provided for update.",
       });
     }
-    
+
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+   
+    const existingDoc = await CommercialRentOthers.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialRentOthers.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Commercial Rent others property updated successfully',
-      data: RentProperty
+      message: "rent others updated successfully.",
+      data: updatedDoc,
     });
   } catch (error: any) {
-    console.error('Error updating commercial Rent others property:', error);
-    res.status(400).json({
+    console.error("Update error:", error);
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update commercial Rent others property',
-      error: error
+      message: error instanceof Error ? error.message : "Unknown update error",
     });
   }
 };
@@ -174,27 +193,25 @@ export const updateCommercialRentOthers = async (req: Request, res: Response) =>
 // Delete a commercial Rent others property
 export const deleteCommercialRentOthers = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    
-    const RentProperty = await CommercialRentOthers.findOneAndDelete({ propertyId: id });
-    
-    if (!RentProperty) {
-      return res.status(404).json({
-        success: false,
-        message: 'Commercial Rent others property not found'
-      });
+    const data = await CommercialRentOthers.findByIdAndDelete(req.params.id);
+
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'rent others listing not found'
+        });
     }
-    
+
     res.status(200).json({
-      success: true,
-      message: 'Commercial Rent others property deleted successfully'
+        success: true,
+        message: 'rent others listing deleted successfully'
     });
-  } catch (error: any) {
-    console.error('Error deleting commercial Rent others property:', error);
+} catch (error) {
+    console.error('Error deleting rent others:', error);
     res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to delete commercial Rent others property',
-      error: error
+        success: false,
+        error: 'Failed to delete rent others listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
     });
-  }
-}; 
+}
+};

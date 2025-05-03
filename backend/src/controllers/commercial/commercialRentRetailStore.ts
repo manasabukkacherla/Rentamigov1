@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentRetailStore from '../../models/commercial/CommercialRentRetailStore';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
 
@@ -59,7 +60,8 @@ export const createCommercialRentRetailStore = async (req: Request, res: Respons
       metadata: {
         ...formData.metadata,
         // status: 'draft',
-        // createdAt: new Date(),
+        createdBy: req.user?._id || null,
+        createdAt: new Date(),
         // updatedAt: new Date(),
         // isVerified: false
       }
@@ -129,57 +131,74 @@ export const getCommercialRentRetailById = async (req: Request, res: Response) =
 
 export const updateCommercialRentRetail = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const updateData = req.body;
-    
-    const property = await CommercialRentRetailStore.findOneAndUpdate(
-      { propertyId },
-      { $set: updateData },
-      { new: true }
-    );
-    
-    if (!property) {
-      return res.status(404).json({ 
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
         success: false,
-        error: 'Commercial Rent retail property not found' 
+        message: "No data provided for update.",
       });
     }
-    
+
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+   
+    const existingDoc = await CommercialRentRetailStore.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialRentRetailStore.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Commercial Rent retail property updated successfully',
-      data: property
+      message: "rent retail store updated successfully.",
+      data: updatedDoc,
     });
-  } catch (error) {
-    console.error('Error updating commercial Rent retail property:', error);
-    res.status(500).json({ 
+  } catch (error: any) {
+    console.error("Update error:", error);
+    res.status(500).json({
       success: false,
-      error: 'Failed to update commercial Rent retail property' 
+      message: error instanceof Error ? error.message : "Unknown update error",
     });
   }
 };
 
 export const deleteCommercialRentRetail = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const property = await CommercialRentRetailStore.findOneAndDelete({ propertyId });
-    
-    if (!property) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Commercial Rent retail property not found' 
-      });
+    const data = await CommercialRentRetailStore.findByIdAndDelete(req.params.id);
+
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'rent retail store listing not found'
+        });
     }
-    
+
     res.status(200).json({
-      success: true,
-      message: 'Commercial Rent retail property deleted successfully'
+        success: true,
+        message: 'rent retail store listing deleted successfully'
     });
-  } catch (error) {
-    console.error('Error deleting commercial Rent retail property:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to delete commercial Rent retail property' 
+} catch (error) {
+    console.error('Error deleting rent retail store:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete rent retail store listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
     });
-  }
-}; 
+}
+};

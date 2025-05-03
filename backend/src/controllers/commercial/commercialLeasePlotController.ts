@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import LeasePlot from '../../models/commercial/commercialLeasePlot';
 import mongoose from 'mongoose';
+import _ = require('lodash');
 
 interface AuthenticatedRequest extends Request {
     user: {
@@ -229,9 +230,8 @@ const transformPlotData = (formData: any) => {
     // Metadata
     if (formData.metadata) {
         transformedData.metadata = {
-            userId: formData.metadata.userId,
-            createdAt: formData.metadata.createdAt || new Date(),
-            //userName: formData.metadata.userName
+            createdBy: formData.metadata.createdBy,
+            createdAt: formData.metadata.createdAt || new Date()
         };
     }
 
@@ -271,7 +271,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 
         // Return populated plot data with user information
         const populatedLeasePlot = await LeasePlot.findById(savedLeasePlot._id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         res.status(201).json({
@@ -293,7 +293,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 export const getAllLeasePlots = async (req: Request, res: Response) => {
     try {
         const leasePlots = await LeasePlot.find()
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v')
             .sort({ 'metadata.createdAt': -1 });
 
@@ -316,7 +316,7 @@ export const getAllLeasePlots = async (req: Request, res: Response) => {
 export const getLeasePlotById = async (req: Request, res: Response) => {
     try {
         const leasePlot = await LeasePlot.findById(req.params.id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         if (!leasePlot) {
@@ -345,57 +345,74 @@ export const getLeasePlotById = async (req: Request, res: Response) => {
 
   export const updatePlotById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
-      const updateData = req.body;
-      
-      const leasePlots= await LeasePlot.findOneAndUpdate(
-        { propertyId },
-        { $set: updateData },
-        { new: true }
-      );
-      
-      if (!leasePlots) {
-        return res.status(404).json({ 
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
+            success: false,
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await LeasePlot.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await LeasePlot.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "Lease plot updated successfully.",
+          data: updatedDoc,
+        });
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
           success: false,
-          error: 'lease plot property not found' 
+          message: error instanceof Error ? error.message : "Unknown update error",
         });
       }
-      
-      res.status(200).json({
-        success: true,
-        message: 'lease plot property updated successfully',
-        data: leasePlots
-      });
-    } catch (error) {
-      console.error('Error updating lease plot property:', error);
-      res.status(500).json({ 
-        success: false,
-        error: 'Failed to update lease plot property' 
-      });
-    }
-  };
+    };
   
   export const deleteLeasePlotById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
-      const leasePlots = await LeasePlot.findOneAndDelete({ propertyId });
-      
-      if (!leasePlots) {
-        return res.status(404).json({ 
-          success: false,
-          error: 'lease plot property not found' 
+        const data = await LeasePlot.findByIdAndDelete(req.params.id);
+
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'Lease plot listing not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Lease plot listing deleted successfully'
         });
-      }
-      
-      res.status(200).json({
-        success: true,
-        message: 'lease plot property deleted successfully'
-      });
     } catch (error) {
-      console.error('Error deleting lease plot property:', error);
-      res.status(500).json({ 
-        success: false,
-        error: 'Failed to delete lease plot property' 
-      });
+        console.error('Error deleting lease plot:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete lease plot listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
-  }; 
+};

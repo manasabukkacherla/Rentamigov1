@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentShowroom from '../../models/commercial/commericalRentShowroom';
 
 // Generate property ID with format RA-COMRSH####
@@ -81,12 +82,12 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
-        // Ensure userId is present
-        if (!formData.metadata.userId) {
+        // Ensure createdBy is present
+        if (!formData.metadata.createdBy) {
             return res.status(400).json({
                 success: false,
                 error: 'Missing required field',
-                details: 'metadata.userId is required'
+                details: 'metadata.createdBy is required'
             });
         }
 
@@ -96,6 +97,7 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
+                createdBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };
@@ -176,57 +178,74 @@ export const getAllCommercialRentShowroom = async (req: Request, res: Response) 
   
   export const updateCommercialRentShowroom = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
-      const updateData = req.body;
-      
-          const property = await CommercialRentShowroom.findOneAndUpdate(
-        { propertyId },
-        { $set: updateData },
-        { new: true }
-      );
-      
-      if (!property) {
-        return res.status(404).json({ 
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
           success: false,
-          error: 'Commercial Rent showroom property not found' 
+          message: "No data provided for update.",
         });
       }
-      
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialRentShowroom.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialRentShowroom.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
       res.status(200).json({
         success: true,
-        message: 'Commercial Rent showroom property updated successfully',
-        data: property
+        message: "Commercial RentShowroom updated successfully.",
+        data: updatedDoc,
       });
-    } catch (error) {
-      console.error('Error updating commercial Rent showroom property:', error);
-      res.status(500).json({ 
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
         success: false,
-        error: 'Failed to update commercial Rent showroom property' 
+        message: error instanceof Error ? error.message : "Unknown update error",
       });
     }
   };
   
   export const deleteCommercialRentShowroom = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
-      const property = await CommercialRentShowroom.findOneAndDelete({ propertyId });
-      
-      if (!property) {
-        return res.status(404).json({ 
-          success: false,
-          error: 'Commercial Rent showroom property not found' 
-        });
+      const data = await CommercialRentShowroom.findByIdAndDelete(req.params.id);
+
+      if (!data) {
+          return res.status(404).json({
+              success: false,
+              message: 'Commercial RentShowroom listing not found'
+          });
       }
-      
+
       res.status(200).json({
-        success: true,
-        message: 'Commercial Rent showroom property deleted successfully'
+          success: true,
+          message: 'Commercial RentShowroom listing deleted successfully'
       });
-    } catch (error) {
-      console.error('Error deleting commercial Rent showroom property:', error);
-      res.status(500).json({ 
-        success: false,
-        error: 'Failed to delete commercial Rent showroom property' 
+  } catch (error) {
+      console.error('Error deleting Commercial RentShowroom:', error);
+      res.status(500).json({
+          success: false,
+          error: 'Failed to delete Commercial RentShowroom listing',
+          message: error instanceof Error ? error.message : 'Unknown error'
       });
-    }
-  }; 
+  }
+};

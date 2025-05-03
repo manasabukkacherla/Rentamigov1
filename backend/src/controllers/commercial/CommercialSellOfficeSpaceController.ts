@@ -157,7 +157,7 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
                 documents: formData.media?.documents || []
             },
             metadata: {
-                userId: req.user?._id || null,
+                createdBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };

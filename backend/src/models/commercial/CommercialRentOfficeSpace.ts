@@ -65,8 +65,7 @@ interface IMedia {
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
 }
 
@@ -260,8 +259,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         documents: [{ type: String }]
     },
     metadata: {
-        userId: { type: Schema.Types.ObjectId, ref: 'User' },
-        userName:{type:String,default:"Not Specified"},
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
         createdAt: { type: Date, default: Date.now }
     }
 }, {

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialLeaseShowroom from '../../models/commercial/CommercialLeaseShowroom';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -69,6 +70,8 @@ export const createCommercialLeaseShowroom = async (req: Request, res: Response)
       ...formData,
       metadata: {
         ...formData.metadata,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
       }
     };
     
@@ -143,57 +146,74 @@ export const getCommercialLeaseShowroomById = async (req: Request, res: Response
 
 export const updateCommercialLeaseShowroom = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const updateData = req.body;
-    
-        const property = await CommercialLeaseShowroom.findOneAndUpdate(
-      { propertyId },
-      { $set: updateData },
-      { new: true }
-    );
-    
-    if (!property) {
-      return res.status(404).json({ 
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
         success: false,
-        error: 'Commercial lease showroom property not found' 
+        message: "No data provided for update.",
       });
     }
-    
+
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+   
+    const existingDoc = await CommercialLeaseShowroom.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialLeaseShowroom.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Commercial lease showroom property updated successfully',
-      data: property
+      message: "Lease showroom updated successfully.",
+      data: updatedDoc,
     });
-  } catch (error) {
-    console.error('Error updating commercial lease showroom property:', error);
-    res.status(500).json({ 
+  } catch (error: any) {
+    console.error("Update error:", error);
+    res.status(500).json({
       success: false,
-      error: 'Failed to update commercial lease showroom property' 
+      message: error instanceof Error ? error.message : "Unknown update error",
     });
   }
 };
 
 export const deleteCommercialLeaseShowroom = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
-    const property = await CommercialLeaseShowroom.findOneAndDelete({ propertyId });
-    
-    if (!property) {
-      return res.status(404).json({ 
-        success: false,
-        error: 'Commercial lease showroom property not found' 
-      });
+    const data = await CommercialLeaseShowroom.findByIdAndDelete(req.params.id);
+
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'Lease showroom listing not found'
+        });
     }
-    
+
     res.status(200).json({
-      success: true,
-      message: 'Commercial lease showroom property deleted successfully'
+        success: true,
+        message: 'Lease showroom listing deleted successfully'
     });
-  } catch (error) {
-    console.error('Error deleting commercial lease showroom property:', error);
-    res.status(500).json({ 
-      success: false,
-      error: 'Failed to delete commercial lease showroom property' 
+} catch (error) {
+    console.error('Error deleting lease showroom:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete lease showroom listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
     });
-  }
-}; 
+}
+};

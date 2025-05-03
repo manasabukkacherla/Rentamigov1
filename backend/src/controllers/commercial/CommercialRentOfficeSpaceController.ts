@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialOfficeSpace from '../../models/commercial/CommercialRentOfficeSpace';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -178,7 +179,7 @@ export const createOfficeSpace = async (req: Request, res: Response) => {
                 documents: formData.media?.documents || []
             },
             metadata: {
-                userId: req.user?._id || null,
+                creadtedBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };
@@ -256,68 +257,74 @@ export const getOfficeSpaceById = async (req: Request, res: Response) => {
 // Update office space listing
 export const updateOfficeSpace = async (req: Request, res: Response) => {
     try {
-        const officeSpace = await CommercialOfficeSpace.findById(req.params.id);
-
-        if (!officeSpace) {
-            return res.status(404).json({
-                success: false,
-                message: 'Office space listing not found'
-            });
-        }
-
-        // Update metadata
-        req.body.metadata = {
-            ...officeSpace.metadata,
-            updatedAt: new Date()
-        };
-
-        const updatedOfficeSpace = await CommercialOfficeSpace.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            {
-                new: true,
-                runValidators: true
-            }
-        );
-
-        res.status(200).json({
-            success: true,
-            message: 'Office space listing updated successfully',
-            data: updatedOfficeSpace
-        });
-    } catch (error) {
-        console.error('Error updating office space:', error);
-        res.status(500).json({
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
             success: false,
-            error: 'Failed to update office space listing',
-            message: error instanceof Error ? error.message : 'Unknown error'
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await CommercialOfficeSpace.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await CommercialOfficeSpace.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "rent office space updated successfully.",
+          data: updatedDoc,
         });
-    }
-};
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
+        });
+      }
+    };
 
 // Delete office space listing
 export const deleteOfficeSpace = async (req: Request, res: Response) => {
     try {
-        const officeSpace = await CommercialOfficeSpace.findById(req.params.id);
+        const data = await CommercialOfficeSpace.findByIdAndDelete(req.params.id);
 
-        if (!officeSpace) {
+        if (!data) {
             return res.status(404).json({
                 success: false,
-                message: 'Office space listing not found'
+                message: 'rent office space listing not found'
             });
         }
 
-        await officeSpace.deleteOne();
-
         res.status(200).json({
             success: true,
-            message: 'Office space listing deleted successfully'
+            message: 'rent office space listing deleted successfully'
         });
     } catch (error) {
-        console.error('Error deleting office space:', error);
+        console.error('Error deleting rent office space:', error);
         res.status(500).json({
             success: false,
-            error: 'Failed to delete office space listing',
+            error: 'Failed to delete rent office space listing',
             message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
