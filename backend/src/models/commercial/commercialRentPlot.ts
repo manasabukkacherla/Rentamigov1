@@ -157,7 +157,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         roadAccess: { type: String },
         securityRoom: { type: Boolean },
         previousConstruction: { type: String, required: true },
-        infrastructure: { type: [String], required: true },
+        infrastructure: [{type:String,required:true}]
     },
     propertyDetails: {
         area: { 
@@ -242,7 +242,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
     },
     metadata: {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        userName: { type: String, ref:"User"},
+        // userName: { type: String, ref:"User"},
         createdAt: { type: Date, default: Date.now }
     }
 }, {

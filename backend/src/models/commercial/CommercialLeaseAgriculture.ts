@@ -124,7 +124,7 @@ export interface ICommercialLeaseAgriculture extends Document {
   };
   metadata: {
     userId: Schema.Types.ObjectId | null;
-    userName: string;
+    //userName: string;
     createdAt: Date;
   }
 }
@@ -250,7 +250,7 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   },
   metadata: {
     userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    userName: { type: String, default: "Not Specified" },
+    //userName: { type: String, default: "Not Specified" },
     createdAt: { type: Date, default: Date.now }
   }
 });

@@ -86,7 +86,7 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
       metadata: { // Use 'metadata' to match schema
         ...(formData.metaData || formData.metadata),
         userId: userId, // Always assign the resolved userId
-        user: user, // Attach user object if available
+       // user: user, // Attach user object if available
         createdAt: new Date()
       }
     };

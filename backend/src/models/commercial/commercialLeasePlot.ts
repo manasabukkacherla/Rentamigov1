@@ -128,7 +128,7 @@ interface IMedia {
 
 interface IMetadata {
     userId: Schema.Types.ObjectId | null;
-    userName: string;
+    //userName: string;
     createdAt: Date;
 }
 interface IPlotDetails {
@@ -279,7 +279,7 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
     },
     metadata: {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        userName:{type:String,ref:'User'},
+       // userName:{type:String,ref:'User'},
         createdAt: { type: Date, default: Date.now }
     }
 }, {

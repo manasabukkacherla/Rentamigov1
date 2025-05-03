@@ -95,7 +95,7 @@ export interface ICommercialSellAgriculture extends Document {
   };
   metaData: {
     userId: Schema.Types.ObjectId | null;
-    userName: string;
+   // userName: string;
     createdAt: Date;
   }
 }
@@ -191,7 +191,7 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
   metaData: {
    
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    userName:{type:String,default:"Not Specified"},
+   /// userName:{type:String,default:"Not Specified"},
     createdAt: { type: Date, default: Date.now }
   }
 });
