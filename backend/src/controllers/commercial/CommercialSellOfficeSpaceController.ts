@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialSellOfficeSpace from '../../models/commercial/CommercialSellOfficeSpace';
 
 /**
@@ -185,3 +186,113 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
     }
 };
 
+
+export const getAllCommercialSellOfficeSpace = async (req: Request, res: Response) => {
+    try {
+      const officespace = await CommercialSellOfficeSpace.find({});
+      
+      res.status(200).json({
+        success: true,
+        count: officespace.length,
+        data: officespace
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        error: error.message || 'Failed to fetch commercial office space sale listings'
+      });
+    }
+  };
+  
+  export const getCommercialSellOfficeSpaceById = async (req: Request, res: Response) => {
+    try {
+      const propertyId = req.params.id;
+      const property = await CommercialSellOfficeSpace.findOne({ propertyId });
+      
+      if (!property) {
+        return res.status(404).json({ error: 'Commercial sell office space property not found' });
+      }
+      
+      res.status(200).json({
+        message: 'Commercial sell office space property retrieved successfully',
+        data: property
+      });
+    } catch (error) {
+      console.error('Error fetching commercial sell office space property:', error);
+      res.status(500).json({ error: 'Failed to fetch commercial sell office space property' });
+    }
+  }; 
+  
+  export const updateCommercialSellOfficeSpace = async (req: Request, res: Response) => {
+      try {
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
+            success: false,
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await CommercialSellOfficeSpace.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await CommercialSellOfficeSpace.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "Sell office space updated successfully.",
+          data: updatedDoc,
+        });
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
+        });
+      }
+    };
+    
+  export const deleteCommercialSellOfficeSpace = async (req: Request, res: Response) => {
+          try {
+            const data = await CommercialSellOfficeSpace.findByIdAndDelete(req.params.id);
+    
+            if (!data) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Sell office space listing not found'
+                });
+            }
+    
+            res.status(200).json({
+                success: true,
+                message: 'Sell office space listing deleted successfully'
+            });
+        } catch (error) {
+            console.error('Error deleting Sell office space:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to delete Sell office space listing',
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    };
