@@ -180,10 +180,8 @@ const transformPlotData = (formData: any) => {
             leaseDuration: formData.availability.leaseDuration || '',
             noticePeriod: formData.availability.noticePeriod || '',
             isPetsAllowed: Boolean(formData.availability.isPetsAllowed),
-            operatingHours: {
-                restricted: Boolean(formData.availability.operatingHours?.restricted),
-                restrictions: formData.availability.operatingHours?.restrictions || ''
-            }
+            operatingHours: formData.availability.operatingHours || false
+            
         };
     }
 

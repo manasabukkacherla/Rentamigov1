@@ -2,12 +2,10 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 // Interfaces
 interface IArea {
-    totalArea: number;
+    totalArea?: number;
     carpetArea: number;
     builtUpArea: number;
 }
-
-
 
 interface IBasicInformation {
     title: string;
@@ -18,7 +16,7 @@ interface IBasicInformation {
         state: string;
         zipCode: string;
     };
-    landmark: string;
+    landmark?: string;
     coordinates: {
         latitude: string;
         longitude: string;
@@ -32,8 +30,8 @@ interface IFloor {
 }
 
 interface IPropertyDetails {
-    area: IArea;
-    floor: IFloor;
+    area?: IArea;
+    floor?: IFloor;
     facingDirection?: string;
     furnishingStatus?: string;
     propertyAmenities?: string[];
@@ -44,7 +42,6 @@ interface IPropertyDetails {
     };
     waterAvailability?: string;
 }
-
 
 interface ILeaseDetails {
     leaseAmount: number;
@@ -71,30 +68,30 @@ interface ILeaseDetails {
             type: string;
         };
     };
-    maintenanceCharges: {
-        amount: number;
-        frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    maintenanceCharges?: {
+        amount? : number;
+        frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
     };
-    otherCharges: {
-        electricityCharges: {
-            type: "inclusive" | "exclusive";
+    otherCharges?: {
+        electricityCharges?: {
+            type?: "inclusive" | "exclusive";
             amount?: number;
         };
-        waterCharges: {
-            type: "inclusive" | "exclusive"; 
+        waterCharges?   : {
+            type?: "inclusive" | "exclusive"; 
             amount?: number;
         };
-        gasCharges: {
-            type: "inclusive" | "exclusive";
+        gasCharges?: {
+            type?: "inclusive" | "exclusive";
             amount?: number;
         };
-        otherCharges: "inclusive" | "exclusive";
+        otherCharges?: "inclusive" | "exclusive";
         amount?: number;
     };
 }
 
 interface IBrokerage {
-    required: boolean;
+    required?: boolean;
     amount?: number;
 }
 
@@ -105,10 +102,7 @@ interface IAvailability {
     leaseDuration?: string;
     noticePeriod?: string;
     isPetsAllowed?: boolean;
-    operatingHours?: {
-        restricted: boolean;
-        restrictions: string;
-    };
+    operatingHours?: boolean;
 }
 
 interface IContactInformation {
@@ -143,13 +137,14 @@ interface IPlotDetails {
     roadAccess: string;
     securityRoom: boolean;
     previousConstruction: string;  
+    zoningInformation: string;
 }
 
 interface ICommercialLeasePlot extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
-        propertyDetails: IPropertyDetails;
-        plotDetails: IPlotDetails;
+    propertyDetails: IPropertyDetails;
+    plotDetails: IPlotDetails;
     leaseDetails: ILeaseDetails;
     brokerage?: IBrokerage;
     availability: IAvailability;
@@ -171,7 +166,7 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
             zipCode: { type: String, required: true },
         },
         required: true },
-        landmark: { type: String, required: true },
+        landmark: { type: String },
         coordinates: { type: {
             latitude: { type: String, required: true },
             longitude: { type: String, required: true },
@@ -179,15 +174,15 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
         required: true },
         isCornerProperty: { type: Boolean, default: false }
     },
-        propertyDetails: {
+    propertyDetails: {
         area: {
-            totalArea: { type: Number, required: true },
-            carpetArea: { type: Number, required: true },
-            builtUpArea: { type: Number, required: true }
+            totalArea: { type: Number },
+            carpetArea: { type: Number },
+            builtUpArea: { type: Number}
         },
         floor: {
-            floorNumber: { type: Number, required: true },
-            totalFloors: { type: Number, required: true }
+            floorNumber: { type: Number },
+            totalFloors: { type: Number }
         },
         facingDirection: { type: String },
         furnishingStatus: { type: String },
@@ -229,19 +224,19 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
         },
         maintenanceCharges: {
             amount: { type: Number, required: true },
-            frequency: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly'], required: true }
+            frequency: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly']}
         },
         otherCharges: {
             electricityCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             waterCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             gasCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             otherCharges: { type: String, enum: ['inclusive', 'exclusive'] },
@@ -259,10 +254,7 @@ const CommercialLeasePlotSchema = new Schema<ICommercialLeasePlot>({
         leaseDuration: { type: String },
         noticePeriod: { type: String },
         isPetsAllowed: { type: Boolean, default: false },
-        operatingHours: {
-            restricted: { type: Boolean, default: false },
-            restrictions: { type: String }
-        }
+        operatingHours: {type:Boolean,default:false}
     },
     contactInformation: {
         name: { type: String, required: true },

@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -73,7 +71,7 @@ interface FormData {
   propertyId?: string;
   propertyName: string;
   landType: string[];
-  powerSupply: boolean;
+  powerSupply: 'Available' | 'Not Available';
   waterSource?: string;
   address: {
     street: string;
@@ -82,7 +80,7 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location  : {
     latitude: string;
     longitude: string;
   };
@@ -140,7 +138,7 @@ const RentAgriculture = () => {
     propertyId: '',
     propertyName: '',
     landType: [] as string[],
-    powerSupply: false,
+    powerSupply: 'Available',
     waterSource: '',
     address: {
       street: '',
@@ -149,7 +147,7 @@ const RentAgriculture = () => {
       zipCode: ''
     },
     landmark: '',
-    coordinates: {
+    location: {
       latitude: '',
       longitude: ''
     },
@@ -241,21 +239,15 @@ const RentAgriculture = () => {
   const handleLatitudeChange = (lat: string) => {
     setFormData(prev => ({
       ...prev,
-      coordinates: { ...prev.coordinates, latitude: lat }
+      location: { ...prev.location, latitude: lat }
     }));
   };
 
   const handleLongitudeChange = (lng: string) => {
     setFormData(prev => ({
       ...prev,
-      coordinates: { ...prev.coordinates, longitude: lng }
+      location: { ...prev.location, longitude: lng }
     }));
-  };
-  const handleWaterSourceChange = (waterSource: string) => {
-    setFormData(prev => ({ ...prev, waterSource }));
-  };
-  const handlePowerSupplyChange = (powerSupply: boolean) => {
-    setFormData(prev => ({ ...prev, powerSupply }));
   };
 
   const handleCornerPropertyChange = (isCorner: boolean) => {
@@ -332,23 +324,29 @@ const RentAgriculture = () => {
           <div className="space-y-6">
             <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
             <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
-            {/* <WaterSource onWaterSourceChange={handleWaterSourceChange} />
-            <PowerSupply onPowerSupplyChange={handlePowerSupplyChange} /> */}
           </div>     
 
           <div className="space-y-6">
             <CommercialPropertyAddress onAddressChange={handleAddressChange} />
             {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
             <MapLocation 
-            latitude={formData.coordinates.latitude}
-            longitude={formData.coordinates.longitude}
-            onLocationChange={(location) => handleChange('coordinates', location)}
+            latitude={formData.location.latitude}
+            longitude={formData.location.longitude}
+            onLocationChange={(location) => handleChange('location', location)}
             onAddressChange={(address) => handleChange('address', address)}
             onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
             />
             <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
-          </div>
-        </div>
+            <label>
+              {/* Power Supply:
+                  <input
+                type="checkbox"
+                    checked={formData.powerSupply === 'Available'}
+                onChange={e => setFormData(prev => ({ ...prev, powerSupply: e.target.checked ? 'Available' : 'Not Available' }))}
+              /> */}
+                </label>
+              </div>
+            </div>
       )
     },
     {
@@ -459,6 +457,7 @@ const RentAgriculture = () => {
     setIsSubmitting(true);
     try {
       const user = sessionStorage.getItem('user');
+  
       if (user) {
         const author = JSON.parse(user).id;
         const convertedMedia = {
@@ -476,7 +475,7 @@ const RentAgriculture = () => {
           waterSource: formData.waterSource,
           address: formData.address,
           landmark: formData.landmark,
-          coordinates: formData.coordinates,
+          location: formData.location,
           isCornerProperty: formData.isCornerProperty,
           Agriculturelanddetails: formData.Agriculturelanddetails,
           rent: formData.rent,
@@ -485,7 +484,7 @@ const RentAgriculture = () => {
           contactDetails: formData.contactDetails,
           media: convertedMedia,
           metaData: {
-            createdBy: author,
+            userId: author,
             createdAt: new Date()
           }
         };

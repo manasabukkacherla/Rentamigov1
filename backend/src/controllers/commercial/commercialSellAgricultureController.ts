@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialSellAgriculture from '../../models/commercial/CommercialSellAgriculture';
+import User from '../../models/signup';
 
 const generatePropertyId = async (): Promise<string> => {
   try {
@@ -63,6 +64,34 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
     // Generate property ID
     const propertyId = await generatePropertyId();
 
+    // Robustly ensure userId is always set for metaData
+    let userId: string | undefined = undefined;
+    let user: any = undefined;
+    if (req.user && (req.user as any)._id) {
+      userId = (req.user as any)._id;
+      user = req.user;
+    } else if (formData.metaData && formData.metaData.userId) {
+      userId = formData.metaData.userId;
+    } else if (formData.metadata && formData.metadata.userId) {
+      userId = formData.metadata.userId;
+    }
+
+    if (!userId) {
+      // Fallback: try createdBy (as seen in your sample data)
+      if (formData.metaData && formData.metaData.createdBy) {
+        userId = formData.metaData.createdBy;
+      } else if (formData.metadata && formData.metadata.createdBy) {
+        userId = formData.metadata.createdBy;
+      }
+    }
+
+    // if (!userId) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'User is not authenticated or user ID is missing in request.'
+    //   });
+    // }
+
     // Prepare agriculture data with property ID and metadata
     const agricultureData = {
       propertyId,
@@ -73,18 +102,22 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
         createdAt: new Date()
       }
     };
-    
-    // Create new agriculture listing
+
     const agriculture = new CommercialSellAgriculture(agricultureData);
     await agriculture.save();
 
     res.status(201).json({
+      success: true,
       message: 'Commercial sell agriculture listing created successfully',
       data: agriculture
     });
   } catch (error) {
     console.error('Error creating commercial sell agriculture:', error);
-    res.status(500).json({ error: 'Failed to create commercial sell agriculture listing' });
+    res.status(500).json({
+      success: false,
+      message: 'Failed to create commercial sell agriculture listing',
+      error: error instanceof Error ? error.message : error
+    });
   }
 };
 

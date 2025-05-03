@@ -67,8 +67,8 @@ const transformPlotData = (formData: any) => {
             city: formData.basicInformation.address.city,
             state: formData.basicInformation.address.state,
             zipCode: formData.basicInformation.address.zipCode,
-            latitude: parseFloat(formData.basicInformation.coordinates.latitude) || 0,
-            longitude: parseFloat(formData.basicInformation.coordinates.longitude) || 0,
+            latitude: (formData.basicInformation.location.latitude) || "",
+            longitude: (formData.basicInformation.location.longitude) || "",
             isCornerProperty: formData.basicInformation.isCornerProperty
         };
     }
@@ -379,5 +379,3 @@ export const getPlotById = async (req: Request, res: Response) => {
         });
     }
 };
-
-

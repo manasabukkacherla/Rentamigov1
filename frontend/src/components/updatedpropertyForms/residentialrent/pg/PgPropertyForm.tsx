@@ -68,8 +68,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+import { useRef } from 'react';
+
 const PgPropertyForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const firstFieldRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const totalSteps = 7; // Added Summary step
@@ -134,6 +137,7 @@ const PgPropertyForm: React.FC = () => {
   };
 
   const nextStep = async () => {
+    let stepChanged = false;
     setIsLoading(true);
     try {
       // Validate current step
@@ -141,12 +145,23 @@ const PgPropertyForm: React.FC = () => {
       if (isValid) {
         if (currentStep < totalSteps) {
           setCurrentStep(currentStep + 1);
+          stepChanged = true;
         }
       }
     } catch (error) {
       toast.error('Please fill all required fields correctly.');
     } finally {
       setIsLoading(false);
+      if (stepChanged && firstFieldRef.current) {
+        setTimeout(() => {
+          firstFieldRef.current?.focus();
+        }, 0);
+      }
+    if (stepChanged && firstFieldRef.current) {
+      setTimeout(() => {
+        firstFieldRef.current?.focus();
+      }, 0);
+    }
     }
   };
 
@@ -180,19 +195,22 @@ const PgPropertyForm: React.FC = () => {
   };
 
   const renderStep = () => {
+    // Pass the ref only to the first field of each section
+    const refProps = { firstFieldRef };
+
     switch (currentStep) {
       case 1:
-        return <BasicDetails register={register} errors={errors} />;
+        return <BasicDetails register={register} errors={errors} {...refProps} />;
       case 2:
-        return <LocationDetails register={register} errors={errors} />;
+        return <LocationDetails register={register} errors={errors} {...refProps} />;
       case 3:
-        return <RentDetails register={register} errors={errors} />;
+        return <RentDetails register={register} errors={errors} {...refProps} />;
       case 4:
-        return <RoomDetails register={register} errors={errors} />;
+        return <RoomDetails register={register} errors={errors} {...refProps} />;
       case 5:
-        return <Amenities register={register} errors={errors} />;
+        return <Amenities register={register} errors={errors} {...refProps} />;
       case 6:
-        return <Media register={register} errors={errors} />;
+        return <Media register={register} errors={errors} {...refProps} />;
       case 7:
         return <Summary watch={watch} />;
       default:
