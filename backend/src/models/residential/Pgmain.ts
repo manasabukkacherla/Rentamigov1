@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IPgMain extends Document {
+  propertyId: string;
   pgDetails: {
     name: string;
     accommodationType: "boys" | "girls" | "both boys and girls";
@@ -114,6 +115,7 @@ export interface IPgMain extends Document {
 
 const PgMainSchema: Schema = new Schema(
   {
+    propertyId: { type: String, required: true, unique: true },
     pgDetails: {
       name: { type: String, default: '' },
       accommodationType: { type: String, enum: ["boys", "girls", "both boys and girls"], default: "both boys and girls" },

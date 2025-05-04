@@ -436,7 +436,7 @@ const Headerr: React.FC = () => {
 };
 
 export default Headerr;
-function setCurrentChatId(id: string) {
+function setCurrentChatId(_id: string) {
   throw new Error("Function not implemented.");
 }
 
