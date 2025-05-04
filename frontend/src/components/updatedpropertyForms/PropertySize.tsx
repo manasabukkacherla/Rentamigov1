@@ -4,7 +4,7 @@ import type React from "react"
 import { Ruler } from "lucide-react"
 
 interface PropertySizeProps {
-  onPropertySizeChange: (size: string) => void
+  onPropertySizeChange: (propertySize: number) => void
 }
 
 const PropertySize: React.FC<PropertySizeProps> = ({ onPropertySizeChange }) => {
@@ -15,9 +15,9 @@ const PropertySize: React.FC<PropertySizeProps> = ({ onPropertySizeChange }) => 
       </label>
       <div className="relative">
         <input
-          type="text"
+          type="number"
           id="propertySize"
-          onChange={(e) => onPropertySizeChange(e.target.value)}
+          onChange={(e) => onPropertySizeChange(parseFloat(e.target.value))}
           placeholder="Enter property size"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-black outline-none transition-all duration-200"
         />

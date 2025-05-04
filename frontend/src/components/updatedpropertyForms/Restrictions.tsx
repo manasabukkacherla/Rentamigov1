@@ -1,24 +1,19 @@
-import { useState } from 'react';
-import { ArrowRight } from 'lucide-react';
+import React from 'react';
 
-interface RestrictionsProps {
-  onRestrictionsChange?: (restrictions: {
-    foodPreference: string;
-    petsAllowed: string;
-    tenantType: string;
-  }) => void;
+interface RestrictionsData {
+  foodPreference: string;
+  petsAllowed: string;
+  tenantType: string;
 }
 
-const Restrictions = ({ onRestrictionsChange }: RestrictionsProps) => {
-  const [restrictions, setRestrictions] = useState({
-    foodPreference: '',
-    petsAllowed: '',
-    tenantType: '',
-  });
+interface RestrictionsProps {
+  restrictions: RestrictionsData;
+  onRestrictionsChange?: (restrictions: RestrictionsData) => void;
+}
 
-  const handleChange = (field: string, value: string) => {
+const Restrictions: React.FC<RestrictionsProps> = ({ restrictions, onRestrictionsChange }) => {
+  const handleChange = (field: keyof RestrictionsData, value: string) => {
     const updatedRestrictions = { ...restrictions, [field]: value };
-    setRestrictions(updatedRestrictions);
     onRestrictionsChange?.(updatedRestrictions);
   };
 
@@ -28,6 +23,7 @@ const Restrictions = ({ onRestrictionsChange }: RestrictionsProps) => {
         <div className="flex items-center mb-8">
           <h3 className="text-2xl font-semibold text-black">Restrictions</h3>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Food Preference */}
           <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
@@ -57,6 +53,7 @@ const Restrictions = ({ onRestrictionsChange }: RestrictionsProps) => {
               </label>
             </div>
           </div>
+
           {/* Pets */}
           <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
             <h4 className="text-lg font-medium mb-4 text-black">Pets</h4>
@@ -86,6 +83,7 @@ const Restrictions = ({ onRestrictionsChange }: RestrictionsProps) => {
             </div>
           </div>
         </div>
+
         {/* Tenant Type */}
         <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
           <h4 className="text-lg font-medium mb-4 text-black">Tenant Type</h4>

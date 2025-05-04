@@ -38,8 +38,9 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
     propertyName: "",
     propertyAddress: {
       flatNo: 0,
+      showFlatNo:false,
       floor: 0,
-      houseName: "",
+      apartmentName:"",
       address: "",
       pinCode: "",
       city: "",
@@ -47,13 +48,19 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
       state: "",
       zipCode: "",
     },
-    coordinates: { latitude: "", longitude: "" },
+    location: {
+      latitude: "",
+      longitude: "",
+    },
     size: "",
-    restrictions: {},
     features: {},
+    restrictions: {},
+    flatAmenities: {},
+    societyAmenities: {},
     leaseAmount: {},
     leaseTenure: {},
     maintenanceAmount: {},
+    otherCharges: {},
     brokerage: {},
     availability: {},
     media: {
@@ -66,9 +73,6 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
       videoTour: null as File | null,
       legalDocuments: [] as File[]
     },
-    otherCharges: {},
-    flatAmenities: {},
-    societyAmenities: {},
   })
 
   // Function to update map location based on latitude and longitude
@@ -167,8 +171,8 @@ const LeaseApartment = ({ propertyId, onSubmit }: LeaseApartmentProps) => {
 
   // Function to open location picker in Google Maps
   const openLocationPicker = () => {
-    const lat = formData.coordinates.latitude || "20.5937";
-    const lng = formData.coordinates.longitude || "78.9629";
+    const lat = formData.location.latitude || "20.5937";
+    const lng = formData.location.longitude || "78.9629";
     window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
     toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
   };

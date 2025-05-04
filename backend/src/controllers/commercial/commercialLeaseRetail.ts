@@ -102,7 +102,7 @@ export const createCommercialLeaseRetail = async (req: Request, res: Response) =
 
 export const getAllCommercialLeaseRetail = async (req: Request, res: Response) => {
   try {
-    const properties = await CommercialLeaseRetail.find().sort({ 'metadata.createdAt': -1 });
+    const properties = await CommercialLeaseRetail.find({}).sort({ 'metadata.createdAt': -1 });
     
     res.status(200).json({
       success: true,
