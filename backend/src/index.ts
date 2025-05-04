@@ -51,6 +51,7 @@ import { Document } from "mongoose";
 
 import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
 import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
+import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main route
 import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
 import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
 import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
@@ -76,9 +77,13 @@ import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
 import commercialLeaseOthersRoutes from "./routes/commercial/commercialLeaseOthersRoutes";
 import commercialLeaseRetailRoutes from "./routes/commercial/commercialLeaseRetail";
 import commercialLeaseShowroomRoutes from "./routes/commercial/commercialLeaseShowroom";
+import commercialLeaseCoveredSpaceRoutes from "./routes/commercial/commercialLeaseCoveredSpaceRoutes";
 import conversationRoutes from "./routes/conversationRoutes";
 import messageRoutes from "./routes/messageRoutes";
 import socketHandler from "./sockets";
+import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
+import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
+import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 dotenv.config();
 
 // Validate required environment variables
@@ -165,6 +170,8 @@ const timeout = (
 
 app.use(timeout);
 
+
+
 // Initialize all Socket.IO event handlers
 socketHandler(io);
 // Routes
@@ -212,6 +219,8 @@ app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
 app.use("/api/commercial/sell/warehouses", commercialWarehouseRoutes);
 app.use("/api/commercial/sell/plots", commercialPlotRoutes);
 app.use("/api/commercial/sell/agriculture", commercialSellAgricultureRoutes);
+
+// Residential routes
 app.use("/api/commercial/sell/others", commercialSellOthersRoutes);
 app.use("/api/commercial/sell/office-space", commercialSellOfficeSpaceRoutes);
 app.use("/api/commercial/sell/retail-store", commercialSellRetailStore);
@@ -224,9 +233,12 @@ app.use("/api/commercial/lease/plot", commercialLeasePlotRoutes);
 app.use("/api/commercial/lease/agriculture", commercialLeaseAgricultureRoutes);
 app.use("/api/commercial/lease/shops", commercialLeaseShopRoutes);
 app.use("/api/commercial/lease/others", commercialLeaseOthersRoutes);
-app.use("/api/commercial/lease-shops", commercialLeaseShopRoutes);
+app.use("/api/commercial/lease/covered-space", commercialLeaseCoveredSpaceRoutes);
 app.use("/api/commercial/lease/retail-store", commercialLeaseRetailRoutes);
 app.use("/api/commercial/lease/showrooms", commercialLeaseShowroomRoutes);
+app.use("/api/commercial/lease/warehouses",commercialLeaseWarehouseRoutes);
+app.use("/api/commercial/lease/office-space",CommercialLeaseOfficeSpace);
+app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 //rent routes
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
@@ -239,6 +251,11 @@ app.use("/api/commercial/rent/retail-stores", commercialRentRetailStore);
 app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
+
+// PG Main (residential) API route
+app.use('/api/residential/pgmain', residentialPgmainRoutes);
+app.use("/api/residential/pgmain", residentialPgmainRoutes);
+
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

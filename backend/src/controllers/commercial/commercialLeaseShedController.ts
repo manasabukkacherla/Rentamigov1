@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { CommercialLeaseShed } from '../../models/commercial/CommericalLeaseShed';
+import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
@@ -72,10 +73,10 @@ export const createShed = async (req: Request, res: Response) => {
                 ...formData.metadata,
                 createdBy: req.user?.id || null,
                 createdAt: new Date(),
-                status: 'active',
-                views: 0,
-                favorites: 0,
-                isVerified: false
+                // status: 'active',
+                // views: 0,
+                // favorites: 0,
+                // isVerified: false
             }
         };
 
@@ -140,100 +141,127 @@ export const getShedById = async (req: Request, res: Response) => {
 
 export const updateShed = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialLeaseShed.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        if (!shed) {
-            return res.status(404).json({
-                success: false,
-                error: 'Shed not found'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            message: 'Shed updated successfully',
-            data: shed
-        });
-    } catch (error: any) {
-        res.status(500).json({
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
             success: false,
-            error: error.message
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await CommercialLeaseShed.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await CommercialLeaseShed.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "Lease shed updated successfully.",
+          data: updatedDoc,
         });
-    }
-};
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
+        });
+      }
+    };
 
 export const deleteShed = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialLeaseShed.findByIdAndDelete(req.params.id);
-        if (!shed) {
+        const data = await CommercialLeaseShed.findByIdAndDelete(req.params.id);
+
+        if (!data) {
             return res.status(404).json({
                 success: false,
-                error: 'Shed not found'
+                message: 'Lease shed listing not found'
             });
         }
+
         res.status(200).json({
             success: true,
-            message: 'Shed deleted successfully'
+            message: 'Lease shed listing deleted successfully'
         });
-    } catch (error: any) {
+    } catch (error) {
+        console.error('Error deleting lease shed:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: 'Failed to delete lease shed listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 };
 
 // Advanced Filters
-export const getShedsByFilters = async (req: Request, res: Response) => {
-    try {
-        const {
-            city,
-            minLeaseAmount,
-            maxLeaseAmount,
-            minArea,
-            maxArea,
-            shedType,
-            furnishingStatus,
-            availability
-        } = req.query;
+// export const getShedsByFilters = async (req: Request, res: Response) => {
+//     try {
+//         const {
+//             city,
+//             minLeaseAmount,
+//             maxLeaseAmount,
+//             minArea,
+//             maxArea,
+//             shedType,
+//             furnishingStatus,
+//             availability
+//         } = req.query;
 
-        const filters: Record<string, any> = {};
+//         const filters: Record<string, any> = {};
 
-        // Apply filters if provided
-        if (city) filters['basicInformation.address.city'] = city;
-        if (shedType) filters['basicInformation.shedType'] = { $in: [shedType] };
-        if (furnishingStatus) filters['propertyDetails.furnishingStatus'] = furnishingStatus;
+//         // Apply filters if provided
+//         if (city) filters['basicInformation.address.city'] = city;
+//         if (shedType) filters['basicInformation.shedType'] = { $in: [shedType] };
+//         if (furnishingStatus) filters['propertyDetails.furnishingStatus'] = furnishingStatus;
 
-        if (minLeaseAmount || maxLeaseAmount) {
-            filters['leaseTerms.leaseDetails.leaseAmount.amount'] = {};
-            if (minLeaseAmount) filters['leaseTerms.leaseDetails.leaseAmount.amount'].$gte = Number(minLeaseAmount);
-            if (maxLeaseAmount) filters['leaseTerms.leaseDetails.leaseAmount.amount'].$lte = Number(maxLeaseAmount);
-        }
+//         if (minLeaseAmount || maxLeaseAmount) {
+//             filters['leaseTerms.leaseDetails.leaseAmount.amount'] = {};
+//             if (minLeaseAmount) filters['leaseTerms.leaseDetails.leaseAmount.amount'].$gte = Number(minLeaseAmount);
+//             if (maxLeaseAmount) filters['leaseTerms.leaseDetails.leaseAmount.amount'].$lte = Number(maxLeaseAmount);
+//         }
 
-        if (minArea || maxArea) {
-            filters['shedDetails.totalArea'] = {};
-            if (minArea) filters['shedDetails.totalArea'].$gte = Number(minArea);
-            if (maxArea) filters['shedDetails.totalArea'].$lte = Number(maxArea);
-        }
+//         if (minArea || maxArea) {
+//             filters['shedDetails.totalArea'] = {};
+//             if (minArea) filters['shedDetails.totalArea'].$gte = Number(minArea);
+//             if (maxArea) filters['shedDetails.totalArea'].$lte = Number(maxArea);
+//         }
 
-        if (availability === 'immediate') {
-            filters['leaseTerms.availability.availableImmediately'] = true;
-        }
+//         if (availability === 'immediate') {
+//             filters['leaseTerms.availability.availableImmediately'] = true;
+//         }
 
-        // Find sheds with applied filters
-        const sheds = await CommercialLeaseShed.find(filters);
+//         // Find sheds with applied filters
+//         const sheds = await CommercialLeaseShed.find(filters);
 
-        res.status(200).json({
-            success: true,
-            count: sheds.length,
-            data: sheds
-        });
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-}; 
+//         res.status(200).json({
+//             success: true,
+//             count: sheds.length,
+//             data: sheds
+//         });
+//     } catch (error: any) {
+//         res.status(500).json({
+//             success: false,
+//             error: error.message
+//         });
+//     }
+// }; 

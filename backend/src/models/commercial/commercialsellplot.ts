@@ -7,11 +7,6 @@ interface IArea {
     builtUpArea: number;
 }
 
-interface ICoordinates {
-    latitude: string;
-    longitude: string;
-}
-
 interface IBasicInformation {
     title: string;
     plotType: string;
@@ -33,30 +28,29 @@ interface IPlotDetails {
     landmarkProximity?: string[];
     approvals?: string[];
     floorAreaRatio?: number;
-    infrastructure: {
-        boundaryWall: boolean;
-        waterConnection: boolean;
-        electricityConnection: boolean;
-    };
-    security: {
-        securityRoom: boolean;
-    };
-    previousConstruction: boolean;
+    infrastructure?: any[]; 
+    security?: any[];       
+    boundaryWall?: boolean;
+    waterConnection?: boolean;
+    electricityConnection?: boolean;
+    previousConstruction: string;
+    roadAccess: string;
+    zoninginformation: string;
 }
 
 interface IPropertyDetails {
-    area: IArea;
-    zoning: string;
+    area?: IArea;
+    zoning?: string;
     facingDirection?: string;
     waterAvailability?: string;
     ownershipType?: string;
     propertyCondition?: string;
-    permissibleFAR: number;
-    permissibleHeight: number;
-    groundCoverage: number;
-    setback: {
-        front: number;
-        rear: number;
+    permissibleFAR?: number;
+    permissibleHeight?: number;
+    groundCoverage?: number;
+    setback?: {
+        front?: number;
+        rear?: number;
         sides: number;
     };
 }
@@ -76,8 +70,8 @@ interface IRegistration {
 }
 
 interface IBrokerage {
-    required: string;
-    amount: number;
+    required?: string;
+    amount?: number;
 }
 
 interface IAvailability {
@@ -88,11 +82,8 @@ interface IAvailability {
     leaseDuration?: string;
     noticePeriod?: string;
     petsAllowed?: boolean;
-    operatingHours?: {
-        restricted: boolean;
-        restrictions: string;
-    };
-    bookingAmount: number;
+    operatingHours: any;
+    bookingAmount?: number;
 }
 
 interface IContactInformation {
@@ -114,8 +105,7 @@ interface IMedia {
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
 }
 
@@ -144,8 +134,9 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         city: { type: String, required: true },
         state: { type: String, required: true },
         zipCode: { type: String, required: true },
-        latitude: { type: String, required: true },
+         latitude: { type: String, required: true },
         longitude: { type: String, required: true },
+    
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
@@ -156,34 +147,33 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         landmarkProximity: [{ type: String }],
         approvals: [{ type: String }],
         floorAreaRatio: { type: Number },
-        infrastructure: {
-            boundaryWall: { type: Boolean, default: false },
-            waterConnection: { type: Boolean, default: false },
-            electricityConnection: { type: Boolean, default: false }
-        },
-        security: {
-            securityRoom: { type: Boolean, default: false }
-        },
-        previousConstruction: { type: Boolean, default: false }
+        infrastructure: [{ type: Schema.Types.Mixed }], 
+        security: [{ type: Schema.Types.Mixed }],       
+        boundaryWall: { type: Boolean },
+        waterConnection: { type: Boolean },
+        electricityConnection: { type: Boolean },
+        previousConstruction: [{type:String}],
+        roadAccess: { type: String },
+        zoninginformation: { type: String }
     },
     propertyDetails: {
         area: {
-            totalArea: { type: Number, required: true },
-            carpetArea: { type: Number, required: true },
-            builtUpArea: { type: Number, required: true }
+            totalArea: { type: Number},
+            carpetArea: { type: Number},
+            builtUpArea: { type: Number}
         },
-        zoning: { type: String, required: true },
+        zoning: { type: String },
         facingDirection: { type: String },
         waterAvailability: { type: String },
         ownershipType: { type: String },
         propertyCondition: { type: String },
-        permissibleFAR: { type: Number, required: true },
-        permissibleHeight: { type: Number, required: true },
-        groundCoverage: { type: Number, required: true },
+        permissibleFAR: { type: Number},
+        permissibleHeight: { type: Number},
+        groundCoverage: { type: Number},
         setback: {
-            front: { type: Number, required: true },
-            rear: { type: Number, required: true },
-            sides: { type: Number, required: true }
+            front: { type: Number },
+            rear: { type: Number },
+            sides: { type: Number }
         }
     },
     pricingDetails: {
@@ -210,11 +200,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         leaseDuration: { type: String },
         noticePeriod: { type: String },
         petsAllowed: { type: Boolean, default: false },
-        operatingHours: {
-            restricted: { type: Boolean, default: false },
-            restrictions: { type: String }
-        },
-        bookingAmount: { type: Number, required: true }
+        operatingHours: { type: Schema.Types.Mixed },
+        bookingAmount: { type: Number}
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -233,8 +220,7 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         videoTour: { type: String }
     },
     metadata: {
-        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        userName:{type:String,default:"Not Specified"},
+        creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         createdAt: { type: Date, default: Date.now }
     }
 }, {
@@ -256,7 +242,6 @@ export {
     IPlotDetails,
     IPropertyDetails,
     IArea,
-    ICoordinates,
     IPricingDetails,
     IRegistration,
     IBrokerage,

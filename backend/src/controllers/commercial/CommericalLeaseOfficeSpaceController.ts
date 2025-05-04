@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialLeaseOfficeSpace from '../../models/commercial/CommericalLeaseOfficeSpace';
+import _ from "lodash"; // install via: npm i lodash
 
 // Generate a unique property ID for new office space listings
 const generatePropertyId = async (): Promise<string> => {
@@ -62,14 +63,15 @@ export const createLeaseOfficeSpace = async (req: Request, res: Response) => {
         // Generate property ID
         const propertyId = await generatePropertyId();
 
-        // Handle cabins details if cabins are available
         let cabinsDetails = undefined;
         if (formData.officeSpaceDetails?.cabins === 'Available') {
-            cabinsDetails = {
-                count: parseInt(formData.officeSpaceDetails?.cabinsDetails?.count) || 0,
-                sizes: formData.officeSpaceDetails?.cabinsDetails?.sizes || [],
-                description: formData.officeSpaceDetails?.cabinsDetails?.description || ''
-            };
+          cabinsDetails = {
+            count: parseInt(formData.officeSpaceDetails?.cabinsDetails?.count) || 0,
+            sizes: typeof formData.officeSpaceDetails?.cabinsDetails?.sizes === 'string'
+              ? formData.officeSpaceDetails?.cabinsDetails?.sizes.split(',').map((s: string) => s.trim())
+              : formData.officeSpaceDetails?.cabinsDetails?.sizes || [],
+            description: formData.officeSpaceDetails?.cabinsDetails?.description || ''
+          };
         }
 
         // Prepare lease office space data with all required fields
@@ -199,10 +201,10 @@ export const createLeaseOfficeSpace = async (req: Request, res: Response) => {
             metadata: {
                 createdBy: req.user?._id || null,
                 createdAt: new Date(),
-                status: 'active',
-                views: 0,
-                favorites: 0,
-                isVerified: false
+                // status: 'active',
+                // views: 0,
+                // favorites: 0,
+                // isVerified: false
             }
         };
 
@@ -232,8 +234,7 @@ export const createLeaseOfficeSpace = async (req: Request, res: Response) => {
 // Get all lease office space listings
 export const getLeaseOfficeSpaces = async (req: Request, res: Response) => {
     try {
-        const leaseOfficeSpaces = await CommercialLeaseOfficeSpace.find()
-            .sort({ 'metadata.createdAt': -1 });
+        const leaseOfficeSpaces = await CommercialLeaseOfficeSpace.find({}).sort({ 'metadata.createdAt': -1 });
 
         res.status(200).json({
             success: true,
@@ -252,84 +253,91 @@ export const getLeaseOfficeSpaces = async (req: Request, res: Response) => {
 
 // Get single lease office space listing
 export const getLeaseOfficeSpaceById = async (req: Request, res: Response) => {
-    try {
-        const leaseOfficeSpace = await CommercialLeaseOfficeSpace.findById(req.params.id);
+  try {
+    const { id } = req.params;
 
-        if (!leaseOfficeSpace) {
-            return res.status(404).json({
-                success: false,
-                message: 'Lease office space listing not found'
-            });
-        }
+    const leaseOfficeSpace = await CommercialLeaseOfficeSpace.findById(id);
 
-        res.status(200).json({
-            success: true,
-            data: leaseOfficeSpace
-        });
-    } catch (error) {
-        console.error('Error fetching lease office space:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch lease office space listing',
-            message: error instanceof Error ? error.message : 'Unknown error'
-        });
+    if (!leaseOfficeSpace) {
+      return res.status(404).json({
+        success: false,
+        message: "Lease office space listing not found",
+      });
     }
+
+    return res.status(200).json({
+      success: true,
+      data: leaseOfficeSpace,
+    });
+  } catch (error) {
+    console.error("Error fetching lease office space by ID:", error);
+    return res.status(500).json({
+      success: false,
+      error: "Failed to fetch lease office space listing",
+      message: error instanceof Error ? error.message : String(error),
+    });
+  }
 };
 
-// Update a lease office space listing
+
+
+
+
 export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
-    try {
-        const formData = req.body;
-        console.log('Received update data:', formData);
+  try {
+    const documentId = req.params.id; // This is the _id of the document
 
-        // Handle cabins details if cabins are available
-        let cabinsDetails = undefined;
-        if (formData.officeSpaceDetails?.cabins === 'Available') {
-            cabinsDetails = {
-                count: parseInt(formData.officeSpaceDetails?.cabinsDetails?.count) || 0,
-                sizes: formData.officeSpaceDetails?.cabinsDetails?.sizes || [],
-                description: formData.officeSpaceDetails?.cabinsDetails?.description || ''
-            };
-
-            // Add cabinsDetails to the formData if it exists
-            if (formData.officeSpaceDetails) {
-                formData.officeSpaceDetails.cabinsDetails = cabinsDetails;
-            }
-        } else if (formData.officeSpaceDetails) {
-            // Remove cabinsDetails if cabins are not available
-            delete formData.officeSpaceDetails.cabinsDetails;
-        }
-
-        // Update the document with the new data
-        const updatedLeaseOfficeSpace = await CommercialLeaseOfficeSpace.findByIdAndUpdate(
-            req.params.id,
-            { $set: formData },
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedLeaseOfficeSpace) {
-            return res.status(404).json({
-                success: false,
-                message: 'Lease office space listing not found'
-            });
-        }
-
-        console.log('Lease office space updated successfully:', updatedLeaseOfficeSpace);
-
-        res.status(200).json({
-            success: true,
-            message: 'Lease office space listing updated successfully',
-            data: updatedLeaseOfficeSpace
-        });
-    } catch (error) {
-        console.error('Error updating lease office space:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to update lease office space listing',
-            message: error instanceof Error ? error.message : 'Unknown error'
-        });
+    // Validate request body
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
+        success: false,
+        message: "No data provided for update.",
+      });
     }
+
+    // Step 1: Clean the incoming data (remove all _id and __v fields)
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+    // Step 2: Fetch existing document using _id
+    const existingDoc = await CommercialLeaseOfficeSpace.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    // Step 3: Deep merge the existing document with cleaned incoming data
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    // Step 4: Perform the update
+    const updatedDoc = await CommercialLeaseOfficeSpace.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Lease office space updated successfully.",
+      data: updatedDoc,
+    });
+  } catch (error: any) {
+    console.error("Update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown update error",
+    });
+  }
 };
+
+
 
 // Delete a lease office space listing
 export const deleteLeaseOfficeSpace = async (req: Request, res: Response) => {
@@ -357,59 +365,115 @@ export const deleteLeaseOfficeSpace = async (req: Request, res: Response) => {
     }
 };
 
-// Search lease office spaces based on criteria
-export const searchLeaseOfficeSpaces = async (req: Request, res: Response) => {
-    try {
-        const {
-            city,
-            state,
-            minPrice,
-            maxPrice,
-            seatingCapacity,
-            hasCabins,
-            hasMeetingRooms,
-            hasConferenceRooms
-        } = req.query;
+// // Search lease office spaces based on criteria
+// export const searchLeaseOfficeSpaces = async (req: Request, res: Response) => {
+//     try {
+//         const {
+//             city,
+//             state,
+//             minPrice,
+//             maxPrice,
+//             seatingCapacity,
+//             hasCabins,
+//             hasMeetingRooms,
+//             hasConferenceRooms
+//         } = req.query;
 
-        // Build the query object
-        const query: any = {};
+//         // Build the query object
+//         const query: any = {};
 
-        // Location filters
-        if (city) query['basicInformation.address.city'] = { $regex: city, $options: 'i' };
-        if (state) query['basicInformation.address.state'] = { $regex: state, $options: 'i' };
+//         // Location filters
+//         if (city) query['basicInformation.address.city'] = { $regex: city, $options: 'i' };
+//         if (state) query['basicInformation.address.state'] = { $regex: state, $options: 'i' };
 
-        // Price range filter
-        if (minPrice || maxPrice) {
-            query['leaseTerms.leaseDetails.leaseAmount.amount'] = {};
-            if (minPrice) query['leaseTerms.leaseDetails.leaseAmount.amount'].$gte = parseInt(minPrice as string);
-            if (maxPrice) query['leaseTerms.leaseDetails.leaseAmount.amount'].$lte = parseInt(maxPrice as string);
-        }
+//         // Price range filter
+//         if (minPrice || maxPrice) {
+//             query['leaseTerms.leaseDetails.leaseAmount.amount'] = {};
+//             if (minPrice) query['leaseTerms.leaseDetails.leaseAmount.amount'].$gte = parseInt(minPrice as string);
+//             if (maxPrice) query['leaseTerms.leaseDetails.leaseAmount.amount'].$lte = parseInt(maxPrice as string);
+//         }
 
-        // Seating capacity filter
-        if (seatingCapacity) {
-            query['officeSpaceDetails.seatingcapacity'] = { $gte: parseInt(seatingCapacity as string) };
-        }
+//         // Seating capacity filter
+//         if (seatingCapacity) {
+//             query['officeSpaceDetails.seatingcapacity'] = { $gte: parseInt(seatingCapacity as string) };
+//         }
 
-        // Facility filters
-        if (hasCabins === 'true') query['officeSpaceDetails.cabins'] = 'Available';
-        if (hasMeetingRooms === 'true') query['officeSpaceDetails.meetingrooms'] = 'Available';
-        if (hasConferenceRooms === 'true') query['officeSpaceDetails.conferenceRooms'] = 'Available';
+//         // Facility filters
+//         if (hasCabins === 'true') query['officeSpaceDetails.cabins'] = 'Available';
+//         if (hasMeetingRooms === 'true') query['officeSpaceDetails.meetingrooms'] = 'Available';
+//         if (hasConferenceRooms === 'true') query['officeSpaceDetails.conferenceRooms'] = 'Available';
 
-        // Execute the query
-        const leaseOfficeSpaces = await CommercialLeaseOfficeSpace.find(query)
-            .sort({ 'metadata.createdAt': -1 });
+//         // Execute the query
+//         const leaseOfficeSpaces = await CommercialLeaseOfficeSpace.find(query)
+//             .sort({ 'metadata.createdAt': -1 });
 
-        res.status(200).json({
-            success: true,
-            count: leaseOfficeSpaces.length,
-            data: leaseOfficeSpaces
-        });
-    } catch (error) {
-        console.error('Error searching lease office spaces:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to search lease office space listings',
-            message: error instanceof Error ? error.message : 'Unknown error'
-        });
-    }
-}; 
+//         res.status(200).json({
+//             success: true,
+//             count: leaseOfficeSpaces.length,
+//             data: leaseOfficeSpaces
+//         });
+//     } catch (error) {
+//         console.error('Error searching lease office spaces:', error);
+//         res.status(500).json({
+//             success: false,
+//             error: 'Failed to search lease office space listings',
+//             message: error instanceof Error ? error.message : 'Unknown error'
+//         });
+//     }
+// }; 
+
+
+// Update a lease office space listing
+// export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
+//     try {
+//         const formData = req.body;
+//         console.log('Received update data:', formData);
+
+//         // Handle cabins details if cabins are available
+//         let cabinsDetails = undefined;
+//         if (formData.officeSpaceDetails?.cabins === 'Available') {
+//             cabinsDetails = {
+//                 count: parseInt(formData.officeSpaceDetails?.cabinsDetails?.count) || 0,
+//                 sizes: formData.officeSpaceDetails?.cabinsDetails?.sizes || [],
+//                 description: formData.officeSpaceDetails?.cabinsDetails?.description || ''
+//             };
+
+//             // Add cabinsDetails to the formData if it exists
+//             if (formData.officeSpaceDetails) {
+//                 formData.officeSpaceDetails.cabinsDetails = cabinsDetails;
+//             }
+//         } else if (formData.officeSpaceDetails) {
+//             // Remove cabinsDetails if cabins are not available
+//             delete formData.officeSpaceDetails.cabinsDetails;
+//         }
+
+//         // Update the document with the new data
+//         const updatedLeaseOfficeSpace = await CommercialLeaseOfficeSpace.findByIdAndUpdate(
+//             req.params.id,
+//             { $set: formData },
+//             { new: true, runValidators: true }
+//         );
+
+//         if (!updatedLeaseOfficeSpace) {
+//             return res.status(404).json({
+//                 success: false,
+//                 message: 'Lease office space listing not found'
+//             });
+//         }
+
+//         console.log('Lease office space updated successfully:', updatedLeaseOfficeSpace);
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Lease office space listing updated successfully',
+//             data: updatedLeaseOfficeSpace
+//         });
+//     } catch (error) {
+//         console.error('Error updating lease office space:', error);
+//         res.status(500).json({
+//             success: false,
+//             error: 'Failed to update lease office space listing',
+//             message: error instanceof Error ? error.message : 'Unknown error'
+//         });
+//     }
+// };

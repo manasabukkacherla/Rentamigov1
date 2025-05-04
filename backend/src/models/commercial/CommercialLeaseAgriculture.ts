@@ -101,10 +101,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
-    operatingHours: {
-      restricted: boolean;
-      restrictions: string;
-    };
+    operatingHours: boolean;
   };
   contactDetails: {
     name: string;
@@ -126,8 +123,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     documents: string[];
   };
   metadata: {
-    userId: Types.ObjectId;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
   }
 }
@@ -145,8 +141,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   },
   landmark: { type: String },
   location: {
-    latitude: { type: String },
-    longitude: { type: String }
+    latitude: { type: String ,required:true},
+    longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
   landDetails: {
@@ -229,10 +225,8 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     leaseDuration: { type: String },
     noticePeriod: { type: String },
     isPetsAllowed: { type: Boolean, default: false },
-    operatingHours: {
-      restricted: { type: Boolean, default: false },
-      restrictions: { type: String }
-    }
+    operatingHours: { type: Boolean, default: false },
+     
   },
   contactDetails: {
     name: { type: String, default: "Not Specified" },
@@ -254,8 +248,7 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata: {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    userName: { type: String, default: "Not Specified" },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now }
   }
 });

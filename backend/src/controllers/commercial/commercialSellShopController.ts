@@ -307,7 +307,7 @@ export const updateCommercialSellShop = async (req: AuthenticatedRequest, res: R
     }
     
     // Check if user has permission to update this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    if (req.user && req.user._id && shop.metadata?.createdBy?.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         error: 'You do not have permission to update this listing'
@@ -378,7 +378,7 @@ export const deleteCommercialSellShop = async (req: AuthenticatedRequest, res: R
     }
     
     // Check if user has permission to delete this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+      if (req.user && req.user._id && shop.metadata?.createdBy?.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         success: false,
         error: 'You do not have permission to delete this listing'

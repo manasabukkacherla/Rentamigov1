@@ -69,7 +69,9 @@ export const createCommercialSellShed = async (req: Request, res: Response) => {
       ...formData,
       metaData: {
         ...formData.metaData,
-      }
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
+        }
     };
     
     // Create new shed listing
@@ -86,7 +88,7 @@ export const createCommercialSellShed = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllCommercialSellShed = async (req: Request, res: Response) => {
+export const getAllSellShed = async (req: Request, res: Response) => {
   try {
     const properties = await CommercialSellShed.find().sort({ 'metaData.createdAt': -1 });
     
@@ -100,7 +102,7 @@ export const getAllCommercialSellShed = async (req: Request, res: Response) => {
   }
 };
 
-export const getCommercialSellShedById = async (req: Request, res: Response) => {
+export const getSellShedById = async (req: Request, res: Response) => {
   try {
     const propertyId = req.params.id;
     const property = await CommercialSellShed.findOne({ propertyId });
@@ -119,7 +121,7 @@ export const getCommercialSellShedById = async (req: Request, res: Response) => 
   }
 };
 
-export const updateCommercialSellShed = async (req: Request, res: Response) => {
+export const updateSellShed = async (req: Request, res: Response) => {
   try {
     const propertyId = req.params.id;
     const updateData = req.body;
@@ -145,7 +147,7 @@ export const updateCommercialSellShed = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteCommercialSellShed = async (req: Request, res: Response) => {
+export const deleteSellShed = async (req: Request, res: Response) => {
   try {
     const propertyId = req.params.id;
     

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentOthers from '../../models/commercial/CommercialRentOthers';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -70,6 +71,8 @@ export const createCommercialRentOthers = async (req: Request, res: Response) =>
       ...formData,
       metaData: {
         ...formData.metaData,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
       }
     };
     
@@ -87,3 +90,128 @@ export const createCommercialRentOthers = async (req: Request, res: Response) =>
     res.status(500).json({ error: 'Failed to create commercial rent others listing' });
   }
 }; 
+
+
+// Get all commercial Rent others properties
+export const getAllCommercialRentOthers = async (req: Request, res: Response) => {
+  try {
+    const RentProperties = await CommercialRentOthers.find().sort({ 'metaData.createdAt': -1 });
+    
+    res.status(200).json({
+      success: true,
+      count: RentProperties.length,
+      data: RentProperties
+    });
+  } catch (error: any) {
+    console.error('Error fetching commercial Rent others properties:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch commercial Rent others properties',
+      error: error
+    });
+  }
+};
+
+// Get a single commercial Rent others property by ID
+export const getCommercialRentOthersById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    const RentProperty = await CommercialRentOthers.findOne({ propertyId: id });
+    
+    if (!RentProperty) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commercial Rent others property not found'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      data: RentProperty
+    });
+  } catch (error: any) {
+    console.error('Error fetching commercial Rent others property by ID:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to fetch commercial Rent others property',
+      error: error
+    });
+  }
+};
+
+// Update a commercial Rent others property
+export const updateCommercialRentOthers = async (req: Request, res: Response) => {
+  try {
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
+        success: false,
+        message: "No data provided for update.",
+      });
+    }
+
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+   
+    const existingDoc = await CommercialRentOthers.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialRentOthers.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "rent others updated successfully.",
+      data: updatedDoc,
+    });
+  } catch (error: any) {
+    console.error("Update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown update error",
+    });
+  }
+};
+
+// Delete a commercial Rent others property
+export const deleteCommercialRentOthers = async (req: Request, res: Response) => {
+  try {
+    const data = await CommercialRentOthers.findByIdAndDelete(req.params.id);
+
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'rent others listing not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'rent others listing deleted successfully'
+    });
+} catch (error) {
+    console.error('Error deleting rent others:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete rent others listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
+    });
+}
+};

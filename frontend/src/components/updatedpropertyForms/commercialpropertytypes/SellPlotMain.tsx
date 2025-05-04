@@ -34,7 +34,7 @@ interface FormData {
       zipCode: string;
     };
     landmark: string;
-    coordinates: {
+    location: {
       latitude: string;
       longitude: string;
     };
@@ -52,7 +52,12 @@ interface FormData {
     landUseZoning: string;
     floorAreaRatio: number;
     landmarkProximity: string[];
-    zoningType: string; // Required by backend validation - must be set to avoid 400 errors
+    zoningType: string; 
+    infrastructure: string[];
+    security: string[];
+    previousConstruction: string;
+    roadAccess: string;
+    zoninginformation: string;
   };
   propertyDetails: {
     area: {
@@ -88,10 +93,9 @@ interface FormData {
     leaseDuration: string;
     noticePeriod: string;
     petsAllowed: boolean;
-    operatingHours: {
-      restricted: boolean;
-      restrictions: string;
-    };
+    operatingHours: boolean;
+    bookingAmount: number;
+     
   };
   contactInformation: {
     name: string;
@@ -167,7 +171,7 @@ const SellPlotMain = () => {
         zipCode: ""
       },
       landmark: "",
-      coordinates: {
+      location: {
         latitude: "",
         longitude: ""
       },
@@ -185,6 +189,11 @@ const SellPlotMain = () => {
       landUseZoning: "",
       floorAreaRatio: 0,
       landmarkProximity: [],
+      infrastructure: [],
+      security: [],
+      previousConstruction: "",
+      roadAccess: "",
+      zoninginformation: "",
       zoningType: "commercial"
     },
     propertyDetails: {
@@ -221,10 +230,8 @@ const SellPlotMain = () => {
       leaseDuration: "",
       noticePeriod: "",
       petsAllowed: false,
-      operatingHours: {
-        restricted: false,
-        restrictions: ""
-      }
+      operatingHours: false,
+      bookingAmount: 0
     },
     contactInformation: {
       name: "",
@@ -267,7 +274,7 @@ const SellPlotMain = () => {
           const lng = position.coords.longitude.toString();
 
           // Update form data
-          handleChange('basicInformation.coordinates', {
+          handleChange('basicInformation.location', {
             latitude: lat,
             longitude: lng
           });
@@ -355,8 +362,8 @@ const SellPlotMain = () => {
 
   // Function to open location picker in Google Maps
   const openLocationPicker = () => {
-    const lat = formData.basicInformation.coordinates.latitude || "20.5937";
-    const lng = formData.basicInformation.coordinates.longitude || "78.9629";
+    const lat = formData.basicInformation.location.latitude || "20.5937";
+    const lng = formData.basicInformation.location.longitude || "78.9629";
     window.open(`https://www.google.com/maps/@${lat},${lng},18z`, '_blank');
     toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
   };
@@ -516,9 +523,9 @@ const SellPlotMain = () => {
           </div> */}
 
           <MapLocation
-            latitude={formData.basicInformation.coordinates.latitude}
-            longitude={formData.basicInformation.coordinates.longitude}
-            onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
@@ -709,7 +716,7 @@ const SellPlotMain = () => {
 
     try {
       // Debug the location data to identify the IntersectionObserver issue
-      console.log("Location data being submitted:", formData.basicInformation.coordinates)
+      console.log("Location data being submitted:", formData.basicInformation)
 
       const user = sessionStorage.getItem('user');
       if (!user) {
@@ -724,13 +731,24 @@ const SellPlotMain = () => {
 
       // Ensure coordinates are valid strings to prevent Google Maps errors
       const safeCoordinates = {
-        latitude: typeof formData.basicInformation.coordinates.latitude === 'string'
-          ? formData.basicInformation.coordinates.latitude
-          : String(formData.basicInformation.coordinates.latitude || ""),
-        longitude: typeof formData.basicInformation.coordinates.longitude === 'string'
-          ? formData.basicInformation.coordinates.longitude
-          : String(formData.basicInformation.coordinates.longitude || "")
+        latitude: typeof formData.basicInformation.location.latitude === 'string'
+          ? formData.basicInformation.location.latitude
+          : String(formData.basicInformation.location.latitude || ""),
+        longitude: typeof formData.basicInformation.location.longitude === 'string'
+          ? formData.basicInformation.location.longitude
+          : String(formData.basicInformation.location.longitude || "")
       };
+
+      // Also ensure that coordinates fallback to empty string if undefined
+      if (!safeCoordinates.latitude) safeCoordinates.latitude = "";
+      if (!safeCoordinates.longitude) safeCoordinates.longitude = "";
+
+      // Defensive: Ensure location object always exists
+      // if (!formData.basicInformation) {
+      //   formData.basicInformation.latitude= "",
+      //   formData.basicInformation.longitude= "",
+  
+      // }
 
       // Ensure required fields are present
       if (!formData.plotDetails.zoningType) {
@@ -772,7 +790,7 @@ const SellPlotMain = () => {
         ...formData,
         basicInformation: {
           ...formData.basicInformation,
-          coordinates: safeCoordinates
+          location: safeCoordinates
         },
         plotDetails: {
           ...formData.plotDetails,
@@ -807,6 +825,7 @@ const SellPlotMain = () => {
         ...updatedFormData,
         media: convertedMedia,
         metadata: {
+          userId: author, // Ensure userId is included for backend validation
           createdBy: author,
           createdAt: new Date()
         }
@@ -969,4 +988,3 @@ const SellPlotMain = () => {
 }
 
 export default SellPlotMain
-

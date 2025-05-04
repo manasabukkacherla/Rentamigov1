@@ -27,20 +27,19 @@ interface IContactInformation {
 
 interface IMedia {
     photos: {
-        exterior: string[];
-        interior: string[];
-        floorPlan: string[];
-        washrooms: string[];
-        lifts: string[];
-        emergencyExits: string[];
+        exterior?: string[];
+        interior?: string[];
+        floorPlan?: string[];
+        washrooms?: string[];
+        lifts?: string[];
+        emergencyExits?: string[];
     };
     videoTour?: string;
     documents: string[];
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
 }
 
@@ -57,29 +56,29 @@ interface IRentalTerms {
         amount?: number;
         frequency?: string;
     }
-    otherCharges: {
-        water: {
+    otherCharges?: {
+        water?: {
             amount?: number;
-            type: string;
+            type?: string;
         }
-        electricity: {
+        electricity?: {
             amount?: number;
-            type: string;
+            type?: string;
         }
-        gas: {
+        gas?: {
             amount?: number;
-            type: string;
+            type?: string;
         }
-        others: {
+        others?: {
             amount?: number;
-            type: string;
+            type?: string;
         }
     }
-    brokerage: {
+    brokerage?: {
         required: string;
         amount?: number;
     }
-    availability: {
+    availability?: {
         type: string;
         date?: string;
     }
@@ -92,37 +91,36 @@ interface ICommercialRentPlot extends Document {
     plotDetails: {
         totalArea: number;
         zoningType: string;
-        boundaryWall: boolean;
-        waterSewer: boolean;
-        electricity: boolean;
+        boundaryWall?: boolean;
+        waterSewer?: boolean;
+        electricity?: boolean;
         roadAccess: string;
         securityRoom: boolean;  
-        previousConstruction: {
-            exists: boolean;
-            details?: string;
-        }
+        previousConstruction: string;
+        infrastructure: string[];
+        
     },
-    propertyDetails: {
-        area: {
-            totalArea: number;
-            carpetArea: number;
-            builtUpArea: number;
+    propertyDetails?: {
+        area?: {
+            totalArea?: number;
+            carpetArea?: number;
+            builtUpArea?: number;
         };
-        floor: {
-            floorNumber: number;
+        floor?: {
+            floorNumber?: number;
             totalFloors: number;
         };
-        facingDirection: string;
-        furnishingStatus: string;
-        propertyAmenities: string[];
-        wholeSpaceAmenities: string[];
-        electricitySupply: {
-          powerLoad: number;
-          backup: boolean;
+        facingDirection?: string;
+        furnishingStatus?: string;
+        propertyAmenities?: string[];
+        wholeSpaceAmenities?: string[];
+        electricitySupply?: {
+          powerLoad?: number;
+          backup?: boolean;
         };
-        waterAvailability: string;
-        propertyAge: string;
-        propertyCondition: string;
+        waterAvailability?: string;
+        propertyAge?: string;
+        propertyCondition?: string;
       };
     rentalTerms: IRentalTerms;
     contactInformation: IContactInformation;
@@ -150,43 +148,41 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         isCornerProperty: { type: Boolean }
     },
     plotDetails: {
-        totalArea: { type: Number, required: true },
-        zoningType: { type: String, required: true },
-        boundaryWall: { type: Boolean, required: true },
-        waterSewer: { type: Boolean, required: true },
-        electricity: { type: Boolean, required: true },
-        roadAccess: { type: String, required: true },
-        securityRoom: { type: Boolean, required: true },
-        previousConstruction: {
-            exists: { type: Boolean, required: true },
-            details: { type: String, required: false },
-        }
+        totalArea: { type: Number},
+        zoningType: { type: String },
+        boundaryWall: { type: Boolean },
+        waterSewer: { type: Boolean },
+        electricity: { type: Boolean },
+        roadAccess: { type: String },
+        securityRoom: { type: Boolean },
+        previousConstruction: { type: String, required: true },
+        infrastructure: [{type:String,required:true}]
     },
     propertyDetails: {
         area: { 
-          totalArea: { type: Number, required: true },
-          carpetArea: { type: Number, required: true },
-          builtUpArea: { type: Number, required: true },
+          totalArea: { type: Number},
+          carpetArea: { type: Number },
+          builtUpArea: { type: Number },
         },
         floor: { 
-          floorNumber: { type: Number, required: true },
-          totalFloors: { type: Number, required: true },
+          floorNumber: { type: Number },
+          totalFloors: { type: Number },
         },
-        facingDirection: { type: String, required: true },
-        furnishingStatus: { type: String, required: true },
-        propertyAmenities: { type: [String], required: true },
-        wholeSpaceAmenities: { type: [String], required: true },
+        facingDirection: { type: String },
+        furnishingStatus: { type: String },
+        propertyAmenities: { type: [String] },
+        wholeSpaceAmenities: { type: [String] },
         electricitySupply: { 
-          powerLoad: { type: Number, required: true },
-          backup: { type: Boolean, required: true },
+          powerLoad: { type: Number },
+          backup: { type: Boolean },
         },
-        waterAvailability: { type: String, required: true },
-        propertyAge: { type: String, required: true },
-        propertyCondition: { type: String, required: true },
+        waterAvailability: { type: String },
+        propertyAge: { type: String },
+        propertyCondition: { type: String },
       },  
     rentalTerms: {
         rentDetails: {
-            expectedRent: { type: Number, required: true },
+            expectedRent: { type: Number ,required:true},
             isNegotiable: { type: Boolean, default: false },
             rentType: { type: String, required: true },
         },
@@ -204,19 +200,19 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
             },
             electricity: {
                 amount: { type: Number },
-                type: { type: String, required: true },
+                type: { type: String },
             },
             gas: {
                 amount: { type: Number },
-                type: { type: String, required: true },
+                type: { type: String},
             },
             others: {
                 amount: { type: Number },
-                type: { type: String, required: true },
+                type: { type: String},
             }
         },
         brokerage: {
-            required: { type: String, required: true },
+            required: { type: String },
             amount: { type: Number },
         },
         availability: {
@@ -244,8 +240,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         documents: [{ type: String }]
     },
     metadata: {
-        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        userName:{type:String,default:"Not Specified"},
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         createdAt: { type: Date, default: Date.now }
     }
 }, {

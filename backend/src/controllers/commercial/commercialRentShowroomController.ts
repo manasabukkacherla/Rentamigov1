@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentShowroom from '../../models/commercial/commericalRentShowroom';
 
 // Generate property ID with format RA-COMRSH####
@@ -96,6 +97,7 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
+                createdBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };
@@ -128,4 +130,122 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             details: error.message
         });
     }
+};
+
+export const getAllCommercialRentShowroom = async (req: Request, res: Response) => {
+    try {
+      const properties = await CommercialRentShowroom.find().sort({ 'metadata.createdAt': -1 });
+      
+      res.status(200).json({
+        success: true,
+        message: 'Commercial Rent showroom listings retrieved successfully',
+        data: properties
+      });
+    } catch (error) {
+      console.error('Error fetching commercial Rent showroom listings:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to fetch commercial Rent showroom listings' 
+      });
+    }
+  };
+  
+  export const getCommercialRentShowroomById = async (req: Request, res: Response) => {
+    try {
+      const propertyId = req.params.id;
+      const property = await CommercialRentShowroom.findOne({ propertyId });
+      
+      if (!property) {
+        return res.status(404).json({ 
+          success: false,
+          error: 'Commercial Rent showroom property not found' 
+        });
+      }
+      
+      res.status(200).json({
+        success: true,
+        message: 'Commercial Rent showroom property retrieved successfully',
+        data: property
+      });
+    } catch (error) {
+      console.error('Error fetching commercial Rent showroom property:', error);
+      res.status(500).json({ 
+        success: false,
+        error: 'Failed to fetch commercial Rent showroom property' 
+      });
+    }
+  };
+  
+  export const updateCommercialRentShowroom = async (req: Request, res: Response) => {
+    try {
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
+          success: false,
+          message: "No data provided for update.",
+        });
+      }
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialRentShowroom.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialRentShowroom.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "Commercial RentShowroom updated successfully.",
+        data: updatedDoc,
+      });
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown update error",
+      });
+    }
+  };
+  
+  export const deleteCommercialRentShowroom = async (req: Request, res: Response) => {
+    try {
+      const data = await CommercialRentShowroom.findByIdAndDelete(req.params.id);
+
+      if (!data) {
+          return res.status(404).json({
+              success: false,
+              message: 'Commercial RentShowroom listing not found'
+          });
+      }
+
+      res.status(200).json({
+          success: true,
+          message: 'Commercial RentShowroom listing deleted successfully'
+      });
+  } catch (error) {
+      console.error('Error deleting Commercial RentShowroom:', error);
+      res.status(500).json({
+          success: false,
+          error: 'Failed to delete Commercial RentShowroom listing',
+          message: error instanceof Error ? error.message : 'Unknown error'
+      });
+  }
 };

@@ -97,10 +97,8 @@ interface FormData {
     electricity: boolean;
     roadAccess: string;
     securityRoom: boolean;
-    previousConstruction: {
-      exists: boolean;
-      details?: string;
-    };
+    previousConstruction: string;
+    infrastructure: string[];
   };
   propertyDetails: {
     area: {
@@ -184,7 +182,8 @@ interface FormData {
     documents: File[];
   };
   metadata: {
-    createdBy: string;
+    userId: string;
+    // userName: string;
     createdAt: Date;
   };
 }
@@ -217,10 +216,9 @@ const RentPlot = () => {
       electricity: false,
       roadAccess: '',
       securityRoom: false,
-      previousConstruction: {
-        exists: false,
-        details: ''
-      }
+      previousConstruction: '',
+      infrastructure: [],
+      
     },
     propertyDetails: {
       area: {
@@ -304,7 +302,7 @@ const RentPlot = () => {
       documents: []
     },
     metadata: {
-      createdBy: '',
+      userId: '',
       createdAt: new Date()
     }
   });
@@ -375,10 +373,9 @@ const RentPlot = () => {
         electricity: details.electricity || false,
         roadAccess: details.roadAccess || '',
         securityRoom: details.securityRoom || false,
-        previousConstruction: {
-          exists: details.previousConstruction?.exists || false,
-          details: details.previousConstruction?.details || ''
-        }
+        previousConstruction: details.previousConstruction || '',
+        infrastructure: details.infrastructure || []
+        
       }
     });
   };
@@ -712,7 +709,7 @@ const RentPlot = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            createdBy: author,
+            userId: author,
             createdAt: new Date()
           }
         };

@@ -72,14 +72,14 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     
     // Add metadata and property ID
     shedData.metaData = {
-      createdBy: shedData.metaData?.createdBy || "65f2d6f35714c7f89c4e7537", // Default or provided user ID
+      creadtedBy: shedData.metaData?.creadtedBy, 
       createdAt: new Date(),
-      status: 'pending',
-      isVerified: false,
-      isActive: true,
-      views: 0,
-      inquiries: 0,
-      favoriteCount: 0
+      // status: 'pending',
+      // isVerified: false,
+      // isActive: true,
+      // views: 0,
+      // inquiries: 0,
+      // favoriteCount: 0
     };
     
     // Add property ID to the shed data

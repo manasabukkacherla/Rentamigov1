@@ -127,8 +127,7 @@ interface IMedia {
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     // updatedAt?: Date;
     // status: 'active' | 'inactive' | 'sold' | 'rented';
@@ -271,8 +270,7 @@ const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
         documents: [{ type: String }]
     },
     metadata: {
-        userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-        userName: { type: String, required: true },
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
         createdAt: { type: Date, default: Date.now },
         // updatedAt: { type: Date },
         // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },

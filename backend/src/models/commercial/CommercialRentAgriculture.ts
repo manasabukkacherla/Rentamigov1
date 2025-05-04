@@ -5,14 +5,14 @@ export interface ICommercialRentAgriculture extends Document {
   propertyName: string;
   landType: string[];
   waterSource?: string;
-  powerSupply: boolean;
+  powerSupply: 'Available' | 'Not Available';
   address: {
     street: string;
     city: string;
     state: string;
     zipCode: string;
   };
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
@@ -58,8 +58,7 @@ export interface ICommercialRentAgriculture extends Document {
     documents: string[];
   };
   metaData : {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
   }
 }
@@ -69,14 +68,14 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   propertyName: { type: String, required: true },
   landType: { type: [String], required: true },
   waterSource: { type: String},
-  powerSupply: { type: Boolean, default: false },
+  powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
   address: {
     street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
     zipCode: { type: String, required: true }
   },
-  coordinates: {
+  location: {
     latitude: { type: String ,required:true},
     longitude: { type: String ,required:true}
   },
@@ -121,8 +120,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData : {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    userName:{type:String,default:"Not Specified"},
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now }
   }
 });

@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentShop from '../../models/commercial/commercialrentshop';
 import User from '../../models/signup';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
@@ -69,9 +70,9 @@ export const createCommercialRentShop = async (req: Request, res: Response) => {
       ...formData,
       metadata: {
         ...formData.metadata,
-        userName: userName,
+        createdBy: req.user._id,
         // status: 'draft',
-        // createdAt: new Date(),
+        createdAt: new Date(),
         // updatedAt: new Date(),
         // isVerified: false
       }
@@ -95,3 +96,121 @@ export const createCommercialRentShop = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getAllCommercialRentShop = async (req: Request, res: Response) => {
+  try {
+    const properties = await CommercialRentShop.find().sort({ 'metadata.createdAt': -1 });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent shop listings retrieved successfully',
+      data: properties
+    });
+  } catch (error) {
+    console.error('Error fetching commercial Rent shop listings:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch commercial Rent shop listings' 
+    });
+  }
+};
+
+export const getCommercialRentShopById = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialRentShop.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial Rent shop property not found' 
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Commercial Rent shop property retrieved successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error fetching Commercial Rent shop property:', error);
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch Commercial Rent shop property' 
+    });
+  }
+};
+
+  export const updateCommercialRentShop = async (req: Request, res: Response) => {
+    try {
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
+          success: false,
+          message: "No data provided for update.",
+        });
+      }
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialRentShop.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialRentShop.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "CommercialRentShop updated successfully.",
+        data: updatedDoc,
+      });
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown update error",
+      });
+    }
+  };
+
+export const deleteCommercialRentShop = async (req: Request, res: Response) => {
+  try {
+    const data = await CommercialRentShop.findByIdAndDelete(req.params.id);
+
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'Commercial RentShop listing not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Commercial RentShop listing deleted successfully'
+    });
+} catch (error) {
+    console.error('Error deleting Commercial RentShop:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete Commercial RentShop',
+        message: error instanceof Error ? error.message : 'Unknown error'
+    });
+}
+};

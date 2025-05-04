@@ -69,9 +69,9 @@ export const createCommercialSellRetailStore = async (req: AuthenticatedRequest,
 
     // Prepare metadata with defaults
     const metadata = {
-      status: 'draft',
-      createdAt: new Date(),
-      isVerified: false,
+      // status: 'draft',
+      // createdAt: new Date(),
+      // isVerified: false,
       ...formData.metadata
     };
 
@@ -93,7 +93,11 @@ export const createCommercialSellRetailStore = async (req: AuthenticatedRequest,
     const shopData = {
       propertyId,
       ...formData,
-      metadata
+      metadata: {
+        ...formData.metadata,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
+      }
     };
 
     console.log('Prepared shop data metadata:', shopData.metadata);
@@ -226,7 +230,7 @@ export const updateCommercialSellRetailStore = async (req: AuthenticatedRequest,
     // }
     
     // Update the shop with new data
-    // Don't allow changing propertyId or metadata.createdBy
+    // Don't allow changing propertyId or metadata.userId
     delete updateData.propertyId;
     if (updateData.metadata) {
       delete updateData.metadata.createdBy;

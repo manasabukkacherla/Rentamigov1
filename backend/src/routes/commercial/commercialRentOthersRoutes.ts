@@ -1,9 +1,13 @@
 import express from 'express';
-import { createCommercialRentOthers } from '../../controllers/commercial/commercialRentOthersController';
+import { createCommercialRentOthers, deleteCommercialRentOthers, getAllCommercialRentOthers, getCommercialRentOthersById, updateCommercialRentOthers } from '../../controllers/commercial/commercialRentOthersController';
 
 const router = express.Router();
 
-// Create a new commercial other property for rent
 router.post('/', createCommercialRentOthers);
+router.get('/', getAllCommercialRentOthers);
+router.get('/:id', getCommercialRentOthersById);
+router.put('/:id', updateCommercialRentOthers);
+router.delete('/:id', deleteCommercialRentOthers);
+
 
 export default router; 

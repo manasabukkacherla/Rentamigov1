@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import SellPlot from '../../models/commercial/commercialsellplot';
 import mongoose from 'mongoose';
 
@@ -67,8 +68,8 @@ const transformPlotData = (formData: any) => {
             city: formData.basicInformation.address.city,
             state: formData.basicInformation.address.state,
             zipCode: formData.basicInformation.address.zipCode,
-            latitude: parseFloat(formData.basicInformation.coordinates.latitude) || 0,
-            longitude: parseFloat(formData.basicInformation.coordinates.longitude) || 0,
+            latitude: (formData.basicInformation.location.latitude) || "",
+            longitude: (formData.basicInformation.location.longitude) || "",
             isCornerProperty: formData.basicInformation.isCornerProperty
         };
     }
@@ -381,3 +382,76 @@ export const getPlotById = async (req: Request, res: Response) => {
 };
 
 
+export const updatePlotById = async (req: Request, res: Response) => {
+    try {
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
+            success: false,
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await SellPlot.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await SellPlot.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "sell plot updated successfully.",
+          data: updatedDoc,
+        });
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
+        });
+      }
+    };
+  
+  export const deleteSellPlotById = async (req: Request, res: Response) => {
+    try {
+        const data = await SellPlot.findByIdAndDelete(req.params.id);
+
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'sell plot listing not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'sell plot listing deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting sell plot:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete sell plot listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
+    }
+};

@@ -3,6 +3,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import logo from '../../assets/logo.png';
 import { Socket } from "socket.io-client";
 import { SocketContext } from "../../socketContext";
 import { MessageCircle, X } from "lucide-react";
@@ -169,7 +170,7 @@ const Headerr: React.FC = () => {
           scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
         }`}
       >
-        <div className="w-full px-2 sm:px-4 lg:px-8">
+        <div className="w-[calc(100%-40px)] mx-auto px-2 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center min-h-[48px] w-full">
             <div
               className="flex items-center cursor-pointer flex-shrink-0"
@@ -308,31 +309,14 @@ const Headerr: React.FC = () => {
               <button
                 className="xl:hidden focus:outline-none p-2 min-w-[40px] min-h-[40px] xs:min-w-[44px] xs:min-h-[44px]"
                 onClick={toggleMenu}
-                aria-label="Open mobile menu"
+                aria-label={isMenuOpen ? "Close mobile menu" : "Open mobile menu"}
               >
                 {isMenuOpen ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-6 w-6 ${
-                      scrolled ? "text-black" : "text-white"
-                    }`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                  <X className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`} />
                 ) : (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className={`h-6 w-6 ${
-                      scrolled ? "text-black" : "text-white"
-                    }`}
+                    className={`h-6 w-6 ${scrolled ? "text-black" : "text-white"}`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -349,28 +333,48 @@ const Headerr: React.FC = () => {
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Menu - Enhanced animation and spacing */}
-        <AnimatePresence>
-          {isMenuOpen && (
+      {/* Mobile Menu - Enhanced animation and spacing */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)}>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="w-full h-full bg-black bg-opacity-30"
+              />
+            </div>
+            {/* Sidebar */}
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="xl:hidden bg-white shadow-lg absolute top-full left-0 w-full overflow-hidden z-50"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'tween', duration: 0.3 }}
+              className="fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-50 flex flex-col px-4 py-6 space-y-4 overflow-hidden"
+              style={{ minWidth: '16rem' }}
             >
-              <div className="container mx-auto px-2 xs:px-4 py-2">
+              {/* White overlay for fade effect */}
+              <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: 'white', opacity: 0.7 }} />
+              {/* Faded logo background */}
+              <div className="absolute inset-0 z-10 pointer-events-none" style={{ backgroundImage: `url(${logo})`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', opacity: 0.30 }} />
+              <div className="relative z-10">
+                <button
+                  className="self-end mb-4 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-black"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <X className="h-6 w-6" />
+                </button>
                 <nav className="flex flex-col space-y-1 xs:space-y-2">
                   {navLinks.map((link, index) => (
                     <Link
                       key={index}
                       to={link.path}
-                      className={`font-medium py-2 px-3 xs:px-4 block transition-colors no-underline rounded-md text-xs xs:text-sm md:text-base ${
-                        activeLink === link.path
-                          ? "bg-black text-white"
-                          : "text-gray-800 hover:bg-gray-100"
-                      }`}
+                      className={`font-medium py-2 px-3 xs:px-4 block transition-colors no-underline rounded-md text-xs xs:text-sm md:text-base ${activeLink === link.path ? "bg-black text-white" : "text-gray-800 hover:bg-gray-100"}`}
                       onClick={() => {
                         setActiveLink(link.path);
                         setIsMenuOpen(false);
@@ -392,7 +396,6 @@ const Headerr: React.FC = () => {
                       </Link>
                     ))}
                   </div>
-
                   <div className="pt-2 border-t border-gray-200">
                     <Link
                       to="/Login"
@@ -405,9 +408,9 @@ const Headerr: React.FC = () => {
                 </nav>
               </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </header>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Chatbot - Made fullscreen on mobile */}
       {showChatbot && (
@@ -433,7 +436,7 @@ const Headerr: React.FC = () => {
 };
 
 export default Headerr;
-function setCurrentChatId(id: string) {
+function setCurrentChatId(_id: string) {
   throw new Error("Function not implemented.");
 }
 

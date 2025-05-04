@@ -134,8 +134,7 @@ export interface ICommercialSellShed extends Document {
     documents: string[];
   };
   metaData: {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
   }
 }
@@ -230,8 +229,7 @@ const CommercialSellShedSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    userName:{type:String,default:"Not Specified"},
+    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now }
   }
 });

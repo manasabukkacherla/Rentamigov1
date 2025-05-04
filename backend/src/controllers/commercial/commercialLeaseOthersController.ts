@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialLeaseOthers from '../../models/commercial/CommercialLeaseOthers';
+import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
   try {
@@ -70,6 +71,8 @@ export const createCommercialLeaseOthers = async (req: Request, res: Response) =
       ...formData,
       metaData: {
         ...formData.metaData,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
       }
     };
     
@@ -95,7 +98,7 @@ export const createCommercialLeaseOthers = async (req: Request, res: Response) =
 // Get all commercial lease others properties
 export const getAllCommercialLeaseOthers = async (req: Request, res: Response) => {
   try {
-    const leaseProperties = await CommercialLeaseOthers.find().sort({ 'metaData.createdAt': -1 });
+    const leaseProperties = await CommercialLeaseOthers.find({}).sort({ 'metaData.createdAt': -1 });
     
     res.status(200).json({
       success: true,
@@ -142,62 +145,78 @@ export const getCommercialLeaseOthersById = async (req: Request, res: Response) 
 
 // Update a commercial lease others property
 export const updateCommercialLeaseOthers = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-    
-    const leaseProperty = await CommercialLeaseOthers.findOneAndUpdate(
-      { propertyId: id },
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
-    
-    if (!leaseProperty) {
-      return res.status(404).json({
+    try {
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
+          success: false,
+          message: "No data provided for update.",
+        });
+      }
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialLeaseOthers.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialLeaseOthers.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "Lease others updated successfully.",
+        data: updatedDoc,
+      });
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
         success: false,
-        message: 'Commercial lease others property not found'
+        message: error instanceof Error ? error.message : "Unknown update error",
       });
     }
-    
-    res.status(200).json({
-      success: true,
-      message: 'Commercial lease others property updated successfully',
-      data: leaseProperty
-    });
-  } catch (error: any) {
-    console.error('Error updating commercial lease others property:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message || 'Failed to update commercial lease others property',
-      error: error
-    });
-  }
-};
-
+  };
+  
+  
 // Delete a commercial lease others property
 export const deleteCommercialLeaseOthers = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    
-    const leaseProperty = await CommercialLeaseOthers.findOneAndDelete({ propertyId: id });
-    
-    if (!leaseProperty) {
-      return res.status(404).json({
-        success: false,
-        message: 'Commercial lease others property not found'
-      });
-    }
-    
-    res.status(200).json({
-      success: true,
-      message: 'Commercial lease others property deleted successfully'
-    });
-  } catch (error: any) {
-    console.error('Error deleting commercial lease others property:', error);
-    res.status(500).json({
-      success: false,
-      message: error.message || 'Failed to delete commercial lease others property',
-      error: error
-    });
-  }
-}; 
+        try {
+          const data = await CommercialLeaseOthers.findByIdAndDelete(req.params.id);
+  
+          if (!data) {
+              return res.status(404).json({
+                  success: false,
+                  message: 'Lease others listing not found'
+              });
+          }
+  
+          res.status(200).json({
+              success: true,
+              message: 'Lease others listing deleted successfully'
+          });
+      } catch (error) {
+          console.error('Error deleting lease others:', error);
+          res.status(500).json({
+              success: false,
+              error: 'Failed to delete lease others listing',
+              message: error instanceof Error ? error.message : 'Unknown error'
+          });
+      }
+  };
+  
