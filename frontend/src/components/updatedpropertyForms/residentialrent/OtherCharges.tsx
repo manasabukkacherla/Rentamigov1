@@ -1,7 +1,34 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, Droplets, Zap, Flame, Plus } from "lucide-react";
+import { useState } from "react"
+import { ArrowRight, Droplets, Zap, Flame, Plus } from "lucide-react"
+
+interface OtherChargesProps {
+  otherCharges: {
+    water: {
+      amount: number;
+      type: string;
+    };
+    electricity: {  
+      amount: number;
+      type: string;
+    };
+    gas: {
+      amount: number;
+      type: string;
+    };
+    others: {
+      amount: number;
+      type: string;
+    };
+  }
+  onOtherChargesChange?: (charges: {
+    water: { type: string; amount: number };
+    electricity: { type: string; amount: number };
+    gas: { type: string; amount: number };
+    others: { type: string; amount: number };
+  }) => void;
+}
 
 interface Charge {
   amount: number;
@@ -19,13 +46,8 @@ interface OtherChargesProps {
   onOtherChargesChange?: (charges: ChargesState) => void;
 }
 
-const OtherCharges: React.FC<OtherChargesProps> = ({ onOtherChargesChange }) => {
-  const [charges, setCharges] = useState<ChargesState>({
-    water: { amount: 0, type: "inclusive" },
-    electricity: { amount: 0, type: "inclusive" },
-    gas: { amount: 0, type: "inclusive" },
-    others: { amount: 0, type: "inclusive" },
-  });
+const OtherCharges: React.FC<OtherChargesProps> = ({ otherCharges, onOtherChargesChange }) => {
+  const [charges, setCharges] = useState<ChargesState>(otherCharges)  
 
   const handleChange = (field: keyof ChargesState, value: Charge) => {
     const updatedCharges = {

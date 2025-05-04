@@ -85,7 +85,7 @@ interface FormData {
   };
   brokerage: {
     required: string;
-    amount: number;
+    amount?: number;
   };
   availability: {
     availableFrom: Date;
@@ -396,7 +396,7 @@ const SellPlotMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.propertyName', name)}
           />
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
-          <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} />
+          <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => handleChange('basicInformation.address', address)} />
 
           {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center mb-8">
@@ -525,6 +525,7 @@ const SellPlotMain = () => {
           <MapLocation
             latitude={formData.basicInformation.location.latitude}
             longitude={formData.basicInformation.location.longitude}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
@@ -541,6 +542,7 @@ const SellPlotMain = () => {
             longitude={formData.basicInformation.coordinates.longitude}
           /> */}
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
           />
         </div>
@@ -636,6 +638,7 @@ const SellPlotMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: (
         <CommercialContactDetails
+          contactInformation={formData.contactInformation}
           onContactChange={(contact) => handleChange('contactInformation', contact)}
         />
       ),

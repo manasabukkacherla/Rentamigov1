@@ -55,19 +55,48 @@ interface FormData {
     noticePeriod: string;
     noticePeriodUnit: string;
   };
-  maintenanceAmount: Record<string, any>;
-  otherCharges: Record<string, any>;
-  brokerage: Record<string, any>;
+  maintenanceAmount: {
+    amount: number;
+    frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
+  };
+  otherCharges: {
+    water: {
+      type: string;
+      amount: number;
+    };
+    electricity: {
+      type: string;
+      amount: number;
+    };
+    gas: {
+      type: string;
+      amount: number;
+    };
+    others: {
+      type: string;
+      amount: number;
+    };
+  };
+  brokerage: {
+    amount?: number;
+    required: string;
+  };
   availability: Record<string, any>;
-  contactDetails: Record<string, any>;
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
   media: {
     photos: {
       exterior: File[];
       interior: File[];
       floorPlan: File[];
-      aerial: File[];
-      surroundings: File[];
-      documents: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
     };
     videoTour: File | null;
     documents: File[];
@@ -107,19 +136,48 @@ const LeaseOthersMain = () => {
       noticePeriod: '1',
       noticePeriodUnit: 'months'
     },
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
+    maintenanceAmount: {
+      amount: 0,
+      frequency: "monthly"
+    },
+    otherCharges: {
+      water: {
+        type: "inclusive",
+        amount: 0
+      },
+      electricity: {
+        type: "inclusive",
+        amount: 0
+      },
+      gas: {
+        type: "inclusive",
+        amount: 0
+      },
+      others: {
+        type: "inclusive",
+        amount: 0
+      }
+    },
+    brokerage: {
+      amount: 0,
+      required: "no"
+    },
     availability: {},
-    contactDetails: {},
+    contactInformation: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
     media: {
       photos: {
         exterior: [],
         interior: [],
         floorPlan: [],
-        aerial: [],
-        surroundings: [],
-        documents: []
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
       },
       videoTour: null,
       documents: []
@@ -155,6 +213,7 @@ const LeaseOthersMain = () => {
 
           <div className="space-y-6">
             <CommercialPropertyAddress
+              address={formData.address}
               onAddressChange={(address) => setFormData(prev => ({
                 ...prev,
                 address
@@ -163,11 +222,14 @@ const LeaseOthersMain = () => {
             <MapLocation
               latitude={formData.location.latitude}
               longitude={formData.location.longitude}
+              landmark={formData.landmark}
               onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
               onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
             />
 
             <CornerProperty
+              isCornerProperty={formData.isCornerProperty}
               onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                 ...prev,
                 isCornerProperty: isCorner
@@ -230,23 +292,36 @@ const LeaseOthersMain = () => {
               }}
             />
           </div>
-
           <div className="space-y-4">
-            <MaintenanceAmount
-              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                ...prev,
-                maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
-              }))}
-            />
+          <MaintenanceAmount 
+            maintenanceAmount={formData.maintenanceAmount} 
+            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ 
+              ...prev, 
+              maintenanceAmount: {
+                amount: maintenance.amount,
+                frequency: maintenance.frequency as "monthly" | "quarterly" | "half-yearly" | "yearly"
+              }
+            }))} 
+          />
             <div className="border-t border-gray-200 my-4"></div>
-            <OtherCharges
-              onOtherChargesChange={(charges) => setFormData(prev => ({
+            <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
+            // Since the OtherCharges component sends the old state, wait for the component to update
+            // by deferring the formData update with setTimeout
+            setTimeout(() => {
+              setFormData(prev => ({
                 ...prev,
-                otherCharges: { ...prev.otherCharges, ...charges }
-              }))}
-            />
+                otherCharges: {
+                  water: charges.water || { amount: 0, type: 'inclusive' },
+                  electricity: charges.electricity || { amount: 0, type: 'inclusive' },
+                  gas: charges.gas || { amount: 0, type: 'inclusive' },
+                  others: charges.others || { amount: 0, type: 'inclusive' }
+                }
+              }));
+            }, 0);
+          }} />
             <div className="border-t border-gray-200 my-4"></div>
             <Brokerage
+              bro={formData.brokerage}
               onBrokerageChange={(brokerage) => setFormData(prev => ({
                 ...prev,
                 brokerage: { ...prev.brokerage, ...brokerage }
@@ -276,9 +351,10 @@ const LeaseOthersMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
-              contactDetails: { ...prev.contactDetails, ...contact }
+              contactInformation: { ...prev.contactInformation, ...contact }
             }))}
           />
         </div>
@@ -289,27 +365,48 @@ const LeaseOthersMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-          <CommercialMediaUpload
-            onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
-                photos[category] = files.map(f => f.file);
-              });
-
-              setFormData(prev => ({
-                ...prev,
-                media: {
-                  ...prev.media,
-                  photos: {
-                    ...prev.media.photos,
-                    ...photos
-                  },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
-                }
-              }));
+<CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
             }}
-          />
+              onMediaChange={(media) => {
+                const photosByCategory: Record<string, File[]> = {
+                  exterior: [],
+                  interior: [],
+                  floorPlan: [],
+                  washrooms: [],
+                  lifts: [],
+                  emergencyExits: []
+                };
+
+                media.photos.forEach(({ category, files }) => {
+                  if (category in photosByCategory) {
+                    photosByCategory[category] = files.map(f => f.file);
+                  }
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photosByCategory.exterior,
+                      interior: photosByCategory.interior,
+                      floorPlan: photosByCategory.floorPlan,
+                      washrooms: photosByCategory.washrooms,
+                      lifts: photosByCategory.lifts,
+                      emergencyExits: photosByCategory.emergencyExits
+                    },
+                    videoTour: media.videoTour || null,
+                    documents: media.documents
+                  }
+                }));
+              }}
+            />
         </div>
       ),
     },
@@ -395,9 +492,9 @@ const LeaseOthersMain = () => {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
             interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
             floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            aerial: await Promise.all((formData.media?.photos?.aerial ?? []).map(convertFileToBase64)),
-            surroundings: await Promise.all((formData.media?.photos?.surroundings ?? []).map(convertFileToBase64)),
-            documents: await Promise.all((formData.media?.photos?.documents ?? []).map(convertFileToBase64))
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)), 
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
           },
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))

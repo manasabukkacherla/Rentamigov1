@@ -74,16 +74,17 @@ interface FormData {
     propertyCondition: string;
   };
   rentalTerms: {
-    expectedRent: number;
-    rentType: "inclusive" | "exclusive";
-    isNegotiable: boolean;
+    rentDetails: {
+      expectedRent: number;
+      rentType: "inclusive" | "exclusive";
+      isNegotiable: boolean;
+    };
     securityDeposit: {
       amount: number;
-      depositType: string;
     };
-    maintenanceCharges?: {
-      amount?: number;
-      frequency?: "monthly" | "quarterly" | "yearly" | "Half-yearly";
+    maintenanceCharges: {
+      amount: number;
+      frequency: "monthly" | "quarterly" | "yearly" | "Half-yearly";
     };
     otherCharges: {
       water: {
@@ -109,8 +110,8 @@ interface FormData {
     amount: number;
   };
   availability: {
-    immediate: boolean;
-    specificDate?: Date;
+    type: "immediate" | "specific";
+    date: string;
   };
   contactInformation: {
     name: string;
@@ -191,12 +192,13 @@ const RentShowroomMain = () => {
       propertyCondition: 'new'
     },
     rentalTerms: {
-      expectedRent: 0,
-      rentType: 'inclusive',
-      isNegotiable: false,
+      rentDetails: {
+        expectedRent: 0,
+        rentType: 'inclusive',
+        isNegotiable: false,
+      },
       securityDeposit: {
         amount: 0,
-        depositType: 'refundable'
       },
       maintenanceCharges: {
         amount: 0,
@@ -226,8 +228,8 @@ const RentShowroomMain = () => {
       amount: 0
     },
     availability: {
-      immediate: false,
-      specificDate: new Date(),
+      type: 'immediate',
+      date: ''
     },
     contactInformation: {
       name: '',
@@ -392,6 +394,7 @@ const RentShowroomMain = () => {
 
 
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
           />
           {/* <Landmark
@@ -400,11 +403,13 @@ const RentShowroomMain = () => {
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
           />
         </div>
@@ -444,13 +449,17 @@ const RentShowroomMain = () => {
       icon: <DollarSign className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          <Rent onRentChange={handleRentChange} />
-          {formData.rentalTerms.rentType === 'exclusive' && (
+          <Rent
+            rentDetails={formData.rentalTerms.rentDetails}
+           onRentChange={handleRentChange} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
             <MaintenanceAmount
+              maintenanceAmount={formData.rentalTerms.maintenanceCharges}
               onMaintenanceAmountChange={handleMaintenanceAmountChange}
             />
           )}
           <SecurityDeposit
+            deposit={formData.rentalTerms.securityDeposit}
             onSecurityDepositChange={(deposit: Record<string, any>) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -464,6 +473,7 @@ const RentShowroomMain = () => {
           />
 
           <OtherCharges
+            otherCharges={formData.rentalTerms.otherCharges}
             onOtherChargesChange={(charges) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -479,6 +489,7 @@ const RentShowroomMain = () => {
           />
           {/* <div className="border-t border-gray-200 my-4"></div> */}
           <Brokerage
+          bro={formData.brokerage}
             onBrokerageChange={(brokerage) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -499,6 +510,7 @@ const RentShowroomMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
+          availability={formData.availability}
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -519,6 +531,7 @@ const RentShowroomMain = () => {
       content: (
         <div className="space-y-6">
           <CommercialContactDetails
+          contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
               contactInformation: {
@@ -539,9 +552,17 @@ const RentShowroomMain = () => {
       content: (
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -553,8 +574,8 @@ const RentShowroomMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

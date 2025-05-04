@@ -235,6 +235,7 @@ const SellAgricultureMain = () => {
 
           <div className="space-y-6">
             <CommercialPropertyAddress
+              address={formData.address}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
             />
             {/* <Landmark
@@ -250,6 +251,7 @@ const SellAgricultureMain = () => {
             <MapLocation
               latitude={formData.coordinates?.latitude}
               longitude={formData.coordinates?.longitude}
+              landmark={formData.landmark}
               onLocationChange={(location) => setFormData(prev => ({
                 ...prev,
                 coordinates: location
@@ -265,6 +267,7 @@ const SellAgricultureMain = () => {
             />
 
             <CornerProperty
+              isCornerProperty={formData.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
                 setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
               }
@@ -345,6 +348,7 @@ const SellAgricultureMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactDetails}
             onContactChange={(contact) => setFormData((prev) => ({
               ...prev,
               contactDetails: contact as FormData['contactDetails']

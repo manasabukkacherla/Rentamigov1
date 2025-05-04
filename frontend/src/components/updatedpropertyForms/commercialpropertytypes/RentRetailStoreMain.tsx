@@ -108,24 +108,24 @@ interface FormData {
       amount: number;
     };
     maintenanceAmount?: {
-      amount?: number;
-      frequency?: string;
+      amount: number;
+      frequency: string;
     };
     otherCharges: {
       water: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       electricity: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       gas: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       others: {
-        amount?: number;
+        amount: number;
         type: string;
       };
     };
@@ -364,6 +364,7 @@ const RentRetailStoreMain = () => {
                 onRetailTypeChange={(type) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: type } })}
               />
               <CommercialPropertyAddress
+                address={formData.basicInformation.address}
                 onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
               />
               {/* <Landmark
@@ -385,12 +386,14 @@ const RentRetailStoreMain = () => {
               <MapLocation
                 latitude={formData.basicInformation.location.latitude.toString()}
                 longitude={formData.basicInformation.location.longitude.toString()}
+                landmark={formData.basicInformation.landmark}
                 onLocationChange={(location) => handleChange('basicInformation.location', location)}
                 onAddressChange={(address) => handleChange('basicInformation.address', address)}
                 onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
               />
 
               <CornerProperty
+                isCornerProperty={formData.basicInformation.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
               />
         </div>
@@ -459,7 +462,9 @@ const RentRetailStoreMain = () => {
             {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"> */}
               {/* <h4 className="text-lg font-medium text-black mb-4">Rent Information</h4> */}
               <div className="space-y-4 text-black">
-                <Rent onRentChange={(rent) => {
+                <Rent 
+                rentDetails={formData.rentalTerms.rentDetails}
+                onRentChange={(rent) => {
                   setFormData({
                     ...formData,
                     rentalTerms: {
@@ -473,9 +478,13 @@ const RentRetailStoreMain = () => {
                   })
                 }} />
                 {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-                  <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
+                  <MaintenanceAmount 
+                    maintenanceAmount={formData.rentalTerms.maintenanceAmount || {amount: 0, frequency: ''}}
+                    onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
                 )}
-                <SecurityDeposit onSecurityDepositChange={(deposit) => {
+                <SecurityDeposit 
+                deposit={formData.rentalTerms.securityDeposit}
+                onSecurityDepositChange={(deposit) => {
                   setFormData({
                     ...formData,
                     rentalTerms: {
@@ -492,7 +501,9 @@ const RentRetailStoreMain = () => {
             {/* <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200"> */}
               {/* <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4> */}
               <div className="space-y-4 text-black">
-                <OtherCharges onOtherChargesChange={(charges) => {
+                <OtherCharges 
+                otherCharges={formData.rentalTerms.otherCharges}
+                onOtherChargesChange={(charges) => {
                   setFormData({
                     ...formData,
                     rentalTerms: {
@@ -519,7 +530,9 @@ const RentRetailStoreMain = () => {
                   });
                 }} />
                 {/* <div className="border-t border-gray-200 my-4"></div> */}
-                <Brokerage onBrokerageChange={(brokerage) => {
+                <Brokerage
+                bro={formData.rentalTerms.brokerage}
+                onBrokerageChange={(brokerage) => {
                   setFormData({
                     ...formData,
                     rentalTerms: {
@@ -542,7 +555,9 @@ const RentRetailStoreMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <AvailabilityDate onAvailabilityChange={(availability) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, availability } })} />
+          <AvailabilityDate
+          availability={formData.rentalTerms.availability as { type: "immediate" | "specific"; date?: string }}
+           onAvailabilityChange={(availability) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, availability } })} />
         </div>
       )
     },
@@ -552,6 +567,7 @@ const RentRetailStoreMain = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => {
               setFormData({
                 ...formData,
@@ -574,9 +590,17 @@ const RentRetailStoreMain = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -588,8 +612,8 @@ const RentRetailStoreMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

@@ -13,64 +13,176 @@ import MediaUpload from "../MediaUpload"
 import AvailabilityDate from "../AvailabilityDate"
 import Restrictions from "../Restrictions"
 import FinalSteps from "../FinalSteps"
+import axios from "axios"
+import { toast } from "react-toastify"
+import { useNavigate } from "react-router-dom"
 
-interface ApartmentProps {
-  propertyId: string
-  onSubmit?: () => void
-}
+// interface ApartmentProps {
+//   propertyId: string
+//   onSubmit?: () => void
+// }
 
 interface Address {
-  street: string
-  city: string
-  state: string
-  country: string
-  pincode: string
-  flatNo: string
+  flatNo: number;
+  showFlatNo: boolean;
+  floor: number;
+  apartmentName: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  location: {
+    latitude: string;
+    longitude: string;
+  };
 }
 
-interface Coordinates {
-  lat: number
-  lng: number
+interface IBasicInformation {
+  propertyName: string;
+  address: {
+    flatNo: number;
+    showFlatNo: boolean;
+    floor: number;
+    apartmentName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+  };
 }
 
-interface Size {
-  builtUpArea: string
-  carpetArea: string
-  superBuiltUpArea: string
-  unit: string
+interface PropertyDetails {
+  bedrooms: number;
+  washrooms: number;
+  balconies: number;
+  hasParking: boolean;
+  parkingDetails: {
+    twoWheeler: number;
+    fourWheeler: number;
+  };
+  extraRooms: {
+    servant: boolean;
+    puja: boolean;
+    store: boolean;
+    others: boolean;
+  };
+  utilityArea: string;
+  furnishingStatus: string;
+  totalFloors: number;
+  propertyOnFloor: number;
+  facing: string;
+  propertyAge: string;
+  superBuiltUpAreaSqft: number;
+  superBuiltUpAreaSqmt: number;
+  builtUpAreaSqft: number;
+  builtUpAreaSqmt: number;
+  carpetAreaSqft: number;
+  carpetAreaSqmt: number;
+  electricityAvailability: string;
+  waterAvailability: {
+    borewell: boolean;
+    governmentSupply: boolean;
+    tankerSupply: boolean;
+  };
 }
 
-interface Features {
-  bedrooms: string
-  bathrooms: string
-  balconies: string
-  parking: string
-  furnishing: string
-  floor: string
-  totalFloors: string
-  facing: string
-  age: string
-  rent: string
-  securityDeposit: string
-  maintenanceCharges: string
-  maintenancePeriod: string
-  availableFrom: Date
+interface FlatAmenities {
+  lights: number;
+  ceilingFan: number;
+  geysers: number;
+  chimney: boolean;
+  callingBell: boolean;
+  wardrobes: number;
+  lofts: number;
+  kitchenCabinets: number;
+  clothHanger: number;
+  pipedGasConnection: boolean;
+  gasStoveWithCylinder: boolean;
+  ironingStand: boolean;
+  bathtub: boolean;
+  shower: boolean;
+  sofa: boolean;
+  coffeeTable: boolean;
+  tvUnit: boolean;
+  diningTableWithChairs: number;
+  cotWithMattress: number;
+  sideTable: number;
+  studyTableWithChair: number;
+  television: boolean;
+  refrigerator: boolean;
+  washingMachine: boolean;
+  dishwasher: boolean;
+  waterPurifier: boolean;
+  microwaveOven: boolean;
+  inductionCooktop: boolean;
+  gasStove: boolean;
+  airConditioner: number;
+  desertCooler: number;
+  ironBox: boolean;
+  exhaustFan: number;
+}
 
-  preferredTenants: string[]
-  amenities: string[]
-  propertyFeatures: string[]
-  societyFeatures: string[]
-  restrictions: string[]
-  images: string[]
-  videos: string[]
+interface SocietyAmenities {
+  powerutility: string[];
+  parkingtranspotation: string[];
+  recreationalsportsfacilities: string[];
+  childrenfamilyamenities: string[];
+  healthwellnessfacilities: string[];
+  shoppingconviencestores: string[];
+  ecofriendlysustainable: string[];
+  communityculturalspaces: string[];
+  smarthometechnology: string[];
+  otheritems: string[];
+}
+
+interface IMedia {
+  photos: {
+    exterior: (File | string)[];
+    interior: (File | string)[];
+    floorPlan: (File | string)[];
+    washrooms: (File | string)[];
+    lifts: (File | string)[];
+    emergencyExits: (File | string)[];
+    bedrooms: (File | string)[];
+    halls: (File | string)[];
+    storerooms: (File | string)[];
+    kitchen: (File | string)[];
+  };
+  videoTour?: File | string;
+  documents: (File | string)[];
+}
+
+interface PropertySize {
+  superBuiltUpAreaSqft: number;
+  superBuiltUpAreaSqmt: number;
+  builtUpAreaSqft: number;
+  builtUpAreaSqmt: number;
+  carpetAreaSqft: number;
+  carpetAreaSqmt: number;
+}
+
+interface Restrictions {
+  foodPreference: string;
+  petsAllowed: string;
+  tenantType: string;
 }
 
 interface FormData {
-  propertyName: string
-  address: Address
-  coordinates: Coordinates
-  size: Size
-  features: Features
+  basicInformation: IBasicInformation;
+  propertySize: number;
+  propertyDetails: PropertyDetails;
+  restrictions: Restrictions;
+  flatAmenities: FlatAmenities;
+  societyAmenities: SocietyAmenities;
+  availability: {
+    type: "immediate" | "specific";
+    date: string;
+  };
+  media: IMedia;
 }
 
 interface PropertyNameProps {
@@ -129,13 +241,19 @@ interface PropertyAddressType {
 }
 
 interface MediaUploadProps {
-  images: string[]
-  videos: string[]
-  onImagesChange: (images: string[]) => void
-  onVideosChange: (videos: string[]) => void
+  onMediaChange?: (media: {
+    exteriorViews: File[];
+    interiorViews: File[];
+    floorPlan: File[];
+    washrooms: File[];
+    lifts: File[];
+    emergencyExits: File[];
+    videoTour?: File;
+    legalDocuments: File[];
+  }) => void;
 }
 
-const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
+const Apartment = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -143,82 +261,179 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
   const formRef = useRef<HTMLDivElement>(null)
 
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
-    address: {
-      street: "",
-      city: "",
-      state: "",
-      country: "",
-      pincode: "",
-      flatNo: ""
+    basicInformation: {
+      propertyName: "",
+      address: {
+        flatNo: 0,
+        showFlatNo: false,
+        floor: 0,
+        apartmentName: "",
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        location: {
+          latitude: "",
+          longitude: ""
+        }
+      }
     },
-    coordinates: {
-      lat: 0,
-      lng: 0
-    },
-    size: {
-      builtUpArea: "",
-      carpetArea: "",
-      superBuiltUpArea: "",
-      unit: "sq-ft"
-    },
-    features: {
-      bedrooms: "",
-      bathrooms: "",
-      balconies: "",
-      parking: "",
-      furnishing: "unfurnished",
-      floor: "",
-      totalFloors: "",
+    propertySize: 0,
+    propertyDetails: {
+      bedrooms: 0,
+      washrooms: 0,
+      balconies: 0,
+      hasParking: false,
+      parkingDetails: {
+        twoWheeler: 0,
+        fourWheeler: 0
+      },
+      extraRooms: {
+        servant: false,
+        puja: false,
+        store: false,
+        others: false
+      },
+      utilityArea: "",
+      furnishingStatus: "",
+      totalFloors: 0,
+      propertyOnFloor: 0,
       facing: "",
-      age: "",
-      rent: "",
-      securityDeposit: "",
-      maintenanceCharges: "",
-      maintenancePeriod: "monthly",
-      availableFrom: new Date(),
-      preferredTenants: [],
-      amenities: [],
-      propertyFeatures: [],
-      societyFeatures: [],
-      restrictions: [],
-      images: [],
-      videos: []
+      propertyAge: "",
+      superBuiltUpAreaSqft: 0,
+      superBuiltUpAreaSqmt: 0,
+      builtUpAreaSqft: 0,
+      builtUpAreaSqmt: 0,
+      carpetAreaSqft: 0,
+      carpetAreaSqmt: 0,
+      electricityAvailability: "",
+      waterAvailability: {
+        borewell: false,
+        governmentSupply: false,
+        tankerSupply: false
+      }
+    },
+    restrictions: {
+      foodPreference: "",
+      petsAllowed: "",
+      tenantType: ""
+    },
+    flatAmenities: {
+      lights: 0,
+      ceilingFan: 0,
+      geysers: 0,
+      chimney: false,
+      callingBell: false,
+      wardrobes: 0,
+      lofts: 0,
+      kitchenCabinets: 0,
+      clothHanger: 0,
+      pipedGasConnection: false,
+      gasStoveWithCylinder: false,
+      ironingStand: false,
+      bathtub: false,
+      shower: false,
+      sofa: false,
+      coffeeTable: false,
+      tvUnit: false,
+      diningTableWithChairs: 0,
+      cotWithMattress: 0,
+      sideTable: 0,
+      studyTableWithChair: 0,
+      television: false,
+      refrigerator: false,
+      washingMachine: false,
+      dishwasher: false,
+      waterPurifier: false,
+      microwaveOven: false,
+      inductionCooktop: false,
+      gasStove: false,
+      airConditioner: 0,
+      desertCooler: 0,
+      ironBox: false,
+      exhaustFan: 0
+    },
+    societyAmenities: {
+      powerutility: [],
+      parkingtranspotation: [],
+      recreationalsportsfacilities: [],
+      childrenfamilyamenities: [],
+      healthwellnessfacilities: [],
+      shoppingconviencestores: [],
+      ecofriendlysustainable: [],
+      communityculturalspaces: [],
+      smarthometechnology: [],
+      otheritems: []
+    },
+    availability: {
+      type: "immediate",
+      date: "",
+    },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+        bedrooms: [],
+        halls: [],
+        storerooms: [],
+        kitchen: []
+      },
+      videoTour: undefined,
+      documents: []
     }
   })
 
-  const handleAddressChange = useCallback((newAddress: PropertyAddressType) => {
+  const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
       ...prev,
-      address: {
-        ...prev.address,
-        street: newAddress.street || '',
-        city: newAddress.city || '',
-        state: newAddress.state || '',
-        flatNo: newAddress.flatNo || '',
-        pincode: newAddress.zipCode || ''
+      basicInformation: {
+        ...prev.basicInformation,
+        address: {
+          ...prev.basicInformation.address,
+          ...newAddress,
+          location: {
+            ...prev.basicInformation.address.location,
+            ...newAddress.location // <-- This line ensures updated lat/lng are applied
+          }
+        }
       }
-    }))
-  }, [])
+    }));
+  }, []);
+
 
   const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
     setFormData(prev => ({
       ...prev,
-      coordinates: {
-        lat: parseFloat(lat),
-        lng: parseFloat(lng)
-      },
-      address: {
-        ...prev.address,
-        street: address?.address || prev.address.street,
-        city: address?.city || prev.address.city,
-        state: address?.state || prev.address.state,
-        country: address?.country || prev.address.country,
-        pincode: address?.pinCode || prev.address.pincode
+      basicInformation: {
+        ...prev.basicInformation,
+        address: {
+          ...prev.basicInformation.address,
+          street: address?.address || prev.basicInformation.address.street,
+          city: address?.city || prev.basicInformation.address.city,
+          state: address?.state || prev.basicInformation.address.state,
+          zipCode: address?.pinCode || prev.basicInformation.address.zipCode,
+          location: {
+            latitude: lat,
+            longitude: lng
+          },
+        }
       }
     }))
-  }, [])
+  }, []);
 
+  const handleAvailabilityChange = useCallback((newAvailability: { type: "immediate" | "specific", date?: string }) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        type: newAvailability.type,
+        date: newAvailability.date || ""
+      }
+    }))
+  }, []);
 
   const formSections = [
     {
@@ -227,8 +442,8 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       content: (
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, propertyName: name }))}
+            propertyName={formData.basicInformation.propertyName}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
           />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -238,7 +453,15 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
               </div>
 
               <PropertyAddress
-                address={formData.propertyAddress}
+                // latitude={formData.basicInformation.address.location.latitude}
+                // longitude={formData.basicInformation.address.location.longitude}
+                address={{
+                  ...formData.basicInformation.address,
+                  location: {
+                    latitude: formData.basicInformation.address.location.latitude,
+                    longitude: formData.basicInformation.address.location.longitude
+                  }
+                }}
                 onAddressChange={handleAddressChange}
               />
             </div>
@@ -259,13 +482,13 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
                 <PropertySize
-                  onPropertySizeChange={(size: string) => setFormData(prev => ({
-                    ...prev,
-                    size: {
-                      ...prev.size,
-                      builtUpArea: size
-                    }
-                  }))}
+                  propertySize={formData.propertySize}
+                  onPropertySizeChange={(size: number) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      propertySize: size
+                    }));
+                  }}
                 />
               </div>
             </div>
@@ -281,8 +504,8 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
                 onFeaturesChange={(features: Record<string, any>) => {
                   setFormData(prev => ({
                     ...prev,
-                    features: {
-                      ...prev.features,
+                    propertyDetails: {
+                      ...prev.propertyDetails,
                       ...features
                     }
                   }))
@@ -294,10 +517,14 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
           </div>
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <Restrictions
-              restrictions={formData.features.restrictions}
-              onChange={(restrictions: string[]) => setFormData(prev => ({
+              res={formData.restrictions}
+              onRestrictionsChange={(restrictions: {
+                foodPreference: string;
+                petsAllowed: string;
+                tenantType: string;
+              }) => setFormData(prev => ({
                 ...prev,
-                features: { ...prev.features, restrictions }
+                restrictions
               }))}
             />
           </div>
@@ -312,17 +539,23 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
 
                 <div className="space-y-12">
                   <FlatAmenities
-                    amenities={formData.features.amenities}
-                    onChange={(amenities: string[]) => setFormData(prev => ({
-                      ...prev,
-                      features: { ...prev.features, amenities }
-                    }))}
+                    amenities={formData.flatAmenities}
+                    onAmenitiesChange={(amenities) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        flatAmenities: {
+                          ...prev.flatAmenities,
+                          ...amenities
+                        }
+                      }))
+                    }
                   />
+
                   <SocietyAmenities
-                    amenities={formData.features.societyFeatures}
-                    onChange={(amenities: string[]) => setFormData(prev => ({
+                    amenities={formData.societyAmenities}
+                    onChange={(updatedAmenities) => setFormData((prev) => ({
                       ...prev,
-                      features: { ...prev.features, societyFeatures: amenities }
+                      societyAmenities: updatedAmenities
                     }))}
                   />
                 </div>
@@ -332,13 +565,6 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
         </div>
       ),
     },
-    // {
-    //   title: "Amenities",
-    //   icon: <Building2 className="w-5 h-5" />,
-    //   content: (
-
-    //   ),
-    // },
     {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
@@ -346,13 +572,12 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
         <div className="space-y-6">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
-
               <AvailabilityDate
-                date={formData.features.availableFrom}
-                onChange={(date: Date) => setFormData(prev => ({
-                  ...prev,
-                  features: { ...prev.features, availableFrom: date }
-                }))}
+                availability={{
+                  type: formData.availability.type === "immediate" ? "immediate" : "specific",
+                  date: formData.availability.date
+                }}
+                onAvailabilityChange={handleAvailabilityChange}
               />
 
             </div>
@@ -366,25 +591,163 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       content: (
         <div className="space-y-6">
           <div className="space-y-8">
+            <MediaUpload
+              initialMedia={formData.media}
+              onMediaChange={(media) => {
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: media.photos.exterior,
+                      interior: media.photos.interior,
+                      floorPlan: media.photos.floorPlan,
+                      washrooms: media.photos.washrooms,
+                      lifts: media.photos.lifts,
+                      emergencyExits: media.photos.emergencyExits,
+                      bedrooms: media.photos.bedrooms,
+                      halls: media.photos.halls,
+                      storerooms: media.photos.storerooms,
+                      kitchen: media.photos.kitchen
+                    },
+                    videoTour: media.videoTour,
+                    documents: media.documents
+                  }
+                }));
+              }}
+            />
 
-              <MediaUpload
-                images={formData.features.images}
-                videos={formData.features.videos}
-                onImagesChange={(images: string[]) => setFormData(prev => ({
-                  ...prev,
-                  features: { ...prev.features, images }
-                }))}
-                onVideosChange={(videos: string[]) => setFormData(prev => ({
-                  ...prev,
-                  features: { ...prev.features, videos }
-                }))}
-              />
-            </div>
           </div>
+        </div>
       ),
     },
   ];
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  // const navigate = useNavigate()
+
+  const handleNext = () => {
+    if (currentStep < formSections.length) {
+      setCurrentStep(currentStep + 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+      // Scroll to top of the form
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
+  const navigate = useNavigate()
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    console.log(formData)
+
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
+
+        // Helper function to convert array of files to base64
+        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+          const results: string[] = [];
+          for (const file of files) {
+            if (file instanceof File) {
+              const base64 = await convertFileToBase64(file);
+              results.push(base64);
+            } else {
+              results.push(file); // Already a string (URL)
+            }
+          }
+          return results;
+        };
+
+        const convertedMedia = {
+          photos: {
+            exterior: await convertFilesToBase64(formData.media.photos.exterior),
+            interior: await convertFilesToBase64(formData.media.photos.interior),
+            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+            lifts: await convertFilesToBase64(formData.media.photos.lifts),
+            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+            halls: await convertFilesToBase64(formData.media.photos.halls),
+            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
+          },
+          videoTour: formData.media.videoTour 
+            ? (formData.media.videoTour instanceof File 
+              ? await convertFileToBase64(formData.media.videoTour)
+              : formData.media.videoTour)
+            : undefined,
+          documents: await convertFilesToBase64(formData.media.documents)
+        };
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/residential/rent/apartment', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Apartment listing created successfully!');
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create apartment listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">
@@ -451,46 +814,22 @@ const Apartment = ({ propertyId, onSubmit }: ApartmentProps) => {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
-            onClick={() => {
-              if (currentStep > 1) {
-                setCurrentStep(currentStep - 1);
-                setTimeout(() => {
-                  if (formRef.current) {
-                    window.scrollTo({
-                      top: formRef.current.offsetTop - 100,
-                      behavior: 'smooth'
-                    });
-                  }
-                }, 100);
-              }
-            }}
-            disabled={currentStep === 1 || loading}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-black hover:bg-black hover:text-white'
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
           >
             <ChevronLeft className="w-5 h-5 mr-2" />
             Previous
           </button>
           <button
-            onClick={() => {
-              if (currentStep < formSections.length) {
-                setCurrentStep(currentStep + 1);
-                setTimeout(() => {
-                  if (formRef.current) {
-                    window.scrollTo({
-                      top: formRef.current.offsetTop - 100,
-                      behavior: 'smooth'
-                    });
-                  }
-                }, 100);
-              } else {
-                onSubmit?.();
-              }
-            }}
-            disabled={loading}
+            onClick={() => currentStep === formSections.length ? handleSubmit() : handleNext()}
+            disabled={isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
           >
-            {loading ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-5 w-5" />
                 Submitting...

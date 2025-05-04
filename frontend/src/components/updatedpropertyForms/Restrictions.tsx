@@ -1,18 +1,22 @@
 import React from 'react';
 
-interface RestrictionsData {
-  foodPreference: string;
-  petsAllowed: string;
-  tenantType: string;
-}
-
 interface RestrictionsProps {
-  restrictions: RestrictionsData;
-  onRestrictionsChange?: (restrictions: RestrictionsData) => void;
+  res: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  }
+  onRestrictionsChange?: (restrictions: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  }) => void;
 }
 
-const Restrictions: React.FC<RestrictionsProps> = ({ restrictions, onRestrictionsChange }) => {
-  const handleChange = (field: keyof RestrictionsData, value: string) => {
+const Restrictions = ({ res, onRestrictionsChange }: RestrictionsProps) => {
+  const [restrictions, setRestrictions] = useState(res);
+
+  const handleChange = (field: string, value: string) => {
     const updatedRestrictions = { ...restrictions, [field]: value };
     onRestrictionsChange?.(updatedRestrictions);
   };

@@ -84,6 +84,7 @@ import socketHandler from "./sockets";
 import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
 import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
+import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
 dotenv.config();
 
 // Validate required environment variables
@@ -256,6 +257,8 @@ app.use("/api/commercial/rent/plots", commercialRentPlot);
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 app.use("/api/residential/pgmain", residentialPgmainRoutes);
 
+//rent
+app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

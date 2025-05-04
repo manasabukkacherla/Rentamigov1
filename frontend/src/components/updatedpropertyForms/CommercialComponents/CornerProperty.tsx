@@ -1,11 +1,12 @@
 import { useState } from 'react';
 
 interface CornerPropertyProps {
+  isCornerProperty: boolean;
   onCornerPropertyChange?: (isCorner: boolean) => void;
 }
 
-const CornerProperty = ({ onCornerPropertyChange }: CornerPropertyProps) => {
-  const [isCorner, setIsCorner] = useState(false);
+const CornerProperty = ({ isCornerProperty, onCornerPropertyChange }: CornerPropertyProps) => {
+  const [isCorner, setIsCorner] = useState(isCornerProperty);
 
   const handleChange = (value: boolean) => {
     setIsCorner(value);

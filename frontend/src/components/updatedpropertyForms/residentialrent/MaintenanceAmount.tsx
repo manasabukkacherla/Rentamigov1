@@ -4,14 +4,15 @@ import { useState } from "react"
 import { ArrowRight, IndianRupee, Wrench } from "lucide-react"
 
 interface MaintenanceAmountProps {
-  onMaintenanceAmountChange?: (maintenance: Record<string, any>) => void
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  }
+  onMaintenanceAmountChange?: (maintenance: {amount: number, frequency: string}) => void
 }
 
-const MaintenanceAmount = ({ onMaintenanceAmountChange }: MaintenanceAmountProps) => {
-  const [maintenance, setMaintenance] = useState({
-    amount: 0,
-    frequency: "monthly",
-  })
+const MaintenanceAmount = ({ maintenanceAmount, onMaintenanceAmountChange }: MaintenanceAmountProps) => {
+  const [maintenance, setMaintenance] = useState(maintenanceAmount);
 
   const handleChange = (field: string, value: any) => {
     const updatedMaintenance = { ...maintenance, [field]: value }

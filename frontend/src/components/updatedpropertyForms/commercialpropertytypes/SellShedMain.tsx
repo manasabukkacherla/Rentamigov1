@@ -83,19 +83,14 @@ interface ContactDetailsType {
   bestTimeToContact?: string;
 }
 
-interface MediaType {
-  photos: (string | File)[];
-  video?: string | File;
-}
-
 interface FormDataType {
   propertyName: string;
   shedType: string;
   address: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
   };
   landmark: string;
   coordinates: {
@@ -107,12 +102,21 @@ interface FormDataType {
   propertyDetails: Partial<PropertyDetailsType>;
   price: string | number;
   registrationCharges: Partial<RegistrationChargesType>;
-  brokerage: Partial<BrokerageType>;
-  availability: Partial<AvailabilityType>;
-  contactDetails: Partial<ContactDetailsType>;
+  brokerage: BrokerageType;
+  availability: AvailabilityType;
+  contactDetails: ContactDetailsType;
   media: {
-    photos: (string | File)[];
-    video?: string | File;
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+
   };
 }
 
@@ -122,7 +126,12 @@ const SellShedMain = () => {
   const [formData, setFormData] = useState<FormDataType>({
     propertyName: "",
     shedType: "",
-    address: {},
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
@@ -130,10 +139,34 @@ const SellShedMain = () => {
     propertyDetails: {},
     price: "",
     registrationCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [] },
+    brokerage: {
+      required: "",
+      amount: 0
+    },
+    availability: {
+      type: "immediate",
+      isPetsAllowed: false,
+      operatingHours: false
+    },
+    contactDetails: {
+      name: "",
+      email: "",
+      phone: "",
+      alternatePhone: "",
+      bestTimeToContact: ""
+    },
+    media: { 
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
+      documents: []
+    }
   })
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -150,17 +183,24 @@ const SellShedMain = () => {
           <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
 
 
-          <CommercialPropertyAddress onAddressChange={(address) => handleChange("address", address)} />
+          <CommercialPropertyAddress 
+            address={formData.address}
+            onAddressChange={(address) => handleChange("address", address)} 
+          />
           {/* <Landmark onLandmarkChange={(landmark) => handleChange("landmark", landmark)} /> */}
           <MapLocation
             latitude={formData.coordinates.latitude.toString()}
             longitude={formData.coordinates.longitude.toString()}
+            landmark={formData.landmark}
             onLocationChange={(location) => handleChange('coordinates', location)}
             onAddressChange={(address) => handleChange('address', address)}
             onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
           />
 
-          <CornerProperty onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} />
+          <CornerProperty 
+            isCornerProperty={formData.isCornerProperty}
+            onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} 
+          />
         </div>
       ),
     },
@@ -190,7 +230,10 @@ const SellShedMain = () => {
             />
           </div>
           <div className="text-black">
-            <Brokerage onBrokerageChange={(brokerage) => handleChange("brokerage", brokerage)} />
+            <Brokerage 
+              bro={formData.brokerage}
+              onBrokerageChange={(brokerage) => handleChange("brokerage", brokerage)} 
+            />
           </div>
         </div>
       ),
@@ -209,7 +252,10 @@ const SellShedMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-          <CommercialContactDetails onContactChange={(contact) => handleChange("contactDetails", contact)} />
+          <CommercialContactDetails 
+            contactInformation={formData.contactDetails}
+            onContactChange={(contact) => handleChange("contactDetails", contact)} 
+          />
         </div>
       ),
     },
@@ -218,7 +264,35 @@ const SellShedMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-          <CommercialMediaUpload onMediaChange={(media) => handleChange("media", media)} />
+          <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+                photos[category] = files.map(f => f.file);
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -279,26 +353,23 @@ const SellShedMain = () => {
     console.log(formData);
     try {
       // Convert media files to base64 strings if they exist
-      let mediaData: Partial<MediaType> = { photos: [] };
-
-      if (formData.media.photos && formData.media.photos.length > 0) {
-        const photoPromises = formData.media.photos.map(async (photo: any) => {
-          if (photo instanceof File) {
-            return await convertFileToBase64(photo);
-          }
-          return photo;
-        });
-        mediaData.photos = await Promise.all(photoPromises);
-      }
-
-      if (formData.media.video && formData.media.video instanceof File) {
-        mediaData.video = await convertFileToBase64(formData.media.video);
-      }
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+        },
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+      };
 
       // Transform data for backend
       const transformedData = {
         ...formData,
-        media: mediaData,
+        media: convertedMedia,
         // Ensure availability data matches the schema
         availability: {
           type: formData.availability.type || 'immediate',

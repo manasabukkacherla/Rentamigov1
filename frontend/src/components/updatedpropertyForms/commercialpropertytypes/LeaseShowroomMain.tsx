@@ -100,19 +100,19 @@ interface FormData {
     };
     otherCharges: {
       water: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       electricity: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       gas: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       others: {
-        amount?: number;
+        amount: number;
         type: string;
       };
     };
@@ -145,7 +145,7 @@ interface FormData {
       lifts: File[];
       emergencyExits: File[];
     };
-    videoTour?: File;
+    videoTour: File | null;
     documents: File[];
   };
   metadata?: {
@@ -277,7 +277,7 @@ const LeaseShowroomMain = () => {
         lifts: [],
         emergencyExits: []
       },
-      videoTour: undefined,
+      videoTour: null,
       documents: []
     },
     metadata: undefined
@@ -310,20 +310,17 @@ const LeaseShowroomMain = () => {
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress
-              onAddressChange={(address) => setFormData(prev => ({
-                ...prev,
-                basicInformation: { ...prev.basicInformation, address }
-              }))}
-            />
+          <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
             <MapLocation
               latitude={formData.basicInformation.location.latitude}
               longitude={formData.basicInformation.location.longitude}
+              landmark={formData.basicInformation.landmark}
               onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
               onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
               onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
             />
             <CornerProperty
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                 ...prev,
                 basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
@@ -419,6 +416,7 @@ const LeaseShowroomMain = () => {
 
           <div className="space-y-4">
             <MaintenanceAmount
+              maintenanceAmount={formData.leaseTerms.maintenanceAmount}
               onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                 ...prev,
                 leaseTerms: {
@@ -432,6 +430,7 @@ const LeaseShowroomMain = () => {
             />
             <div className="border-t border-gray-200 my-4"></div>
             <OtherCharges
+              otherCharges={formData.leaseTerms.otherCharges}
               onOtherChargesChange={(charges) => setFormData(prev => ({
                 ...prev,
                 leaseTerms: {
@@ -444,6 +443,7 @@ const LeaseShowroomMain = () => {
               }))}
             />
             <Brokerage
+              bro={formData.leaseTerms.brokerage}
               onBrokerageChange={(brokerage) => setFormData(prev => ({
                 ...prev,
                 leaseTerms: {
@@ -491,6 +491,7 @@ const LeaseShowroomMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
               contactInformation: { ...prev.contactInformation, ...contact }
@@ -505,26 +506,47 @@ const LeaseShowroomMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialMediaUpload
-            onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
-                photos[category] = files.map(f => f.file);
-              });
-
-              setFormData(prev => ({
-                ...prev,
-                media: {
-                  ...prev.media,
-                  photos: {
-                    ...prev.media.photos,
-                    ...photos
-                  },
-                  videoTour: media.video?.file || undefined,
-                  documents: media.documents.map(d => d.file)
-                }
-              }));
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
             }}
-          />
+              onMediaChange={(media) => {
+                const photosByCategory: Record<string, File[]> = {
+                  exterior: [],
+                  interior: [],
+                  floorPlan: [],
+                  washrooms: [],
+                  lifts: [],
+                  emergencyExits: []
+                };
+
+                media.photos.forEach(({ category, files }) => {
+                  if (category in photosByCategory) {
+                    photosByCategory[category] = files.map(f => f.file);
+                  }
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photosByCategory.exterior,
+                      interior: photosByCategory.interior,
+                      floorPlan: photosByCategory.floorPlan,
+                      washrooms: photosByCategory.washrooms,
+                      lifts: photosByCategory.lifts,
+                      emergencyExits: photosByCategory.emergencyExits
+                    },
+                    videoTour: media.videoTour || null,
+                    documents: media.documents
+                  }
+                }));
+              }}
+            />
         </div>
       ),
     },
