@@ -187,7 +187,7 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
 };
 
 
-export const getAllCommercialSellOfficeSpace = async (req: Request, res: Response) => {
+export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
     try {
       const officespace = await CommercialSellOfficeSpace.find({});
       
@@ -204,7 +204,7 @@ export const getAllCommercialSellOfficeSpace = async (req: Request, res: Respons
     }
   };
   
-  export const getCommercialSellOfficeSpaceById = async (req: Request, res: Response) => {
+  export const getSellOfficeSpaceById = async (req: Request, res: Response) => {
     try {
       const propertyId = req.params.id;
       const property = await CommercialSellOfficeSpace.findOne({ propertyId });
@@ -223,7 +223,7 @@ export const getAllCommercialSellOfficeSpace = async (req: Request, res: Respons
     }
   }; 
   
-  export const updateCommercialSellOfficeSpace = async (req: Request, res: Response) => {
+  export const updateSellOfficeSpace = async (req: Request, res: Response) => {
       try {
         const documentId = req.params.id; 
         const incomingData = req.body?.data;
@@ -272,7 +272,7 @@ export const getAllCommercialSellOfficeSpace = async (req: Request, res: Respons
       }
     };
     
-  export const deleteCommercialSellOfficeSpace = async (req: Request, res: Response) => {
+  export const deleteSellOfficeSpace = async (req: Request, res: Response) => {
           try {
             const data = await CommercialSellOfficeSpace.findByIdAndDelete(req.params.id);
     

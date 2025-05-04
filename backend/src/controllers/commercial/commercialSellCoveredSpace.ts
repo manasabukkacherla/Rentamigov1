@@ -101,7 +101,7 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
   }
 };
 
-// Get all commercial sell covered space listings
+
 export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Response) => {
   try {
     const coveredSpaces = await CommercialSellCoveredSpace.find({});
@@ -119,7 +119,7 @@ export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Respo
   }
 };
 
-export const getCommercialSellAgricultureById = async (req: Request, res: Response) => {
+export const getCommercialSellCoveredSpaceById = async (req: Request, res: Response) => {
   try {
     const propertyId = req.params.id;
     const property = await CommercialSellCoveredSpace.findOne({ propertyId });
@@ -138,7 +138,7 @@ export const getCommercialSellAgricultureById = async (req: Request, res: Respon
   }
 }; 
 
-export const updateCommercialSellAgriculture = async (req: Request, res: Response) => {
+export const updateCommercialSellCoveredSpace = async (req: Request, res: Response) => {
     try {
       const documentId = req.params.id; 
       const incomingData = req.body?.data;
@@ -187,7 +187,7 @@ export const updateCommercialSellAgriculture = async (req: Request, res: Respons
     }
   };
   
-export const deleteCommercialSellAgriculture = async (req: Request, res: Response) => {
+export const deleteCommercialSellCoveredSpace = async (req: Request, res: Response) => {
         try {
           const data = await CommercialSellCoveredSpace.findByIdAndDelete(req.params.id);
   
