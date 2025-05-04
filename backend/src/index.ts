@@ -84,6 +84,7 @@ import socketHandler from "./sockets";
 import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
 import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
+import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -255,6 +256,9 @@ app.use("/api/commercial/rent/plots", commercialRentPlot);
 // PG Main (residential) API route
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 app.use("/api/residential/pgmain", residentialPgmainRoutes);
+
+//sell routes
+app.use("/api/residential/sell/apartments", residentialSellApartmentRoutes);
 
 
 app.get("/testing", (req: Request, res: Response) => {
