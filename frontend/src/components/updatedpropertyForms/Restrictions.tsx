@@ -2,6 +2,11 @@ import { useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 
 interface RestrictionsProps {
+  res: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  }
   onRestrictionsChange?: (restrictions: {
     foodPreference: string;
     petsAllowed: string;
@@ -9,12 +14,8 @@ interface RestrictionsProps {
   }) => void;
 }
 
-const Restrictions = ({ onRestrictionsChange }: RestrictionsProps) => {
-  const [restrictions, setRestrictions] = useState({
-    foodPreference: '',
-    petsAllowed: '',
-    tenantType: '',
-  });
+const Restrictions = ({ res, onRestrictionsChange }: RestrictionsProps) => {
+  const [restrictions, setRestrictions] = useState(res);
 
   const handleChange = (field: string, value: string) => {
     const updatedRestrictions = { ...restrictions, [field]: value };

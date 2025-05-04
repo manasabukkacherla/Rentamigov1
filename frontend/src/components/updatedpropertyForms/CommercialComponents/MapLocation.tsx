@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 interface MapLocationProps {
     latitude?: string;
     longitude?: string;
+    landmark: string;
     onLocationChange?: (location: { latitude: string; longitude: string }) => void;
     onAddressChange?: (address: { street: string; city: string; state: string; zipCode: string }) => void;
     onLandmarkChange?: (landmark: string) => void;
@@ -13,6 +14,7 @@ interface MapLocationProps {
 const MapLocation: React.FC<MapLocationProps> = ({
     latitude = '20.5937',
     longitude = '78.9629',
+    landmark = '',
     onLocationChange,
     onAddressChange,
     onLandmarkChange,
@@ -22,7 +24,7 @@ const MapLocation: React.FC<MapLocationProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [zoom, setZoom] = useState(5);
 
-    const [landmark, setLandmark] = useState('');
+    const [landmarkInput, setLandmark] = useState(landmark);
 
     const handleChange = (value: string) => {
         setLandmark(value);
@@ -77,7 +79,7 @@ const MapLocation: React.FC<MapLocationProps> = ({
                 if (data.status === "OK" && data.results && data.results.length > 0) {
                     const address = data.results[0];
                     const addressComponents = { street: '', city: '', state: '', zipCode: '' };
-                    
+
                     // Extract address components
                     address.address_components.forEach((component: any) => {
                         const types = component.types;
@@ -95,7 +97,7 @@ const MapLocation: React.FC<MapLocationProps> = ({
 
                     // Update address
                     onAddressChange?.(addressComponents);
-                    console.log(addressComponents)
+                    console.log(addressComponents);
 
                     // Find a suitable landmark
                     let landmarkName = '';
@@ -263,7 +265,7 @@ const MapLocation: React.FC<MapLocationProps> = ({
                     <div className="relative">
                         <input
                             type="text"
-                            value={landmark}
+                            value={landmarkInput}
                             onChange={(e) => handleChange(e.target.value)}
                             placeholder="Enter nearby landmark"
                             className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"

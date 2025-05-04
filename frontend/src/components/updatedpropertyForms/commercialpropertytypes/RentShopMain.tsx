@@ -68,19 +68,19 @@ interface IRentalTerms {
   };
   otherCharges: {
     water: {
-      amount?: number;
+      amount: number;
       type: string;
     };
     electricity: {
-      amount?: number;
+      amount: number;
       type: string;
     };
     gas: {
-      amount?: number;
+      amount: number;
       type: string;
     };
     others: {
-      amount?: number;
+      amount: number;
       type: string;
     };
   };
@@ -175,7 +175,7 @@ interface CommercialContactDetailsProps {
 
 interface CommercialMediaUploadProps {
   onMediaChange: (media: {
-    images: { category: string; files: { file: File }[] }[];
+    photos: { category: string; files: { file: File }[] }[];
     video?: { file: File };
     documents: { file: File }[];
   }) => void;
@@ -302,48 +302,26 @@ const RentShopMain = () => {
             }))}
           />
           <ShopType
+            shopType={formData.basicInformation.shopType}
             onShopTypeChange={(types) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, shopType: types }
             }))}
           />
           <CommercialPropertyAddress
-            onAddressChange={(address) => setFormData(prev => ({
-              ...prev,
-              basicInformation: { ...prev.basicInformation, address }
-            }))}
+            address={formData.basicInformation.address}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
           />
-          
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
-          {/* <Landmark
-            onLandmarkChange={(landmark) => setFormData(prev => ({
-              ...prev,
-              basicInformation: { ...prev.basicInformation, landmark }
-            }))}
-            onLocationSelect={(location) => {
-              setFormData(prev => ({
-                ...prev,
-                basicInformation: {
-                  ...prev.basicInformation,
-                  location: {
-                    latitude: parseFloat(location.latitude),
-                    longitude: parseFloat(location.longitude)
-                  }
-                }
-              }));
-              // Update map when location changes from Landmark component
-              updateMapLocation(location.latitude, location.longitude);
-            }}
-            latitude={formData.basicInformation.location.latitude.toString()}
-            longitude={formData.basicInformation.location.longitude.toString()}
-          /> */}
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
@@ -358,17 +336,10 @@ const RentShopMain = () => {
       content: (
         <div className="space-y-6">
           <ShopDetails
+            shopDetails={formData.shopDetails}
             onDetailsChange={(details) => setFormData(prev => ({
               ...prev,
-              shopDetails: {
-                frontageWidth: details.frontageWidth,
-                heightOfShop: details.heightOfShop,
-                displayWindow: details.displayWindow,
-                attachedStorageRoom: details.attachedStorageRoom,
-                averageFootTraffic: details.averageFootTraffic,
-                customerParking: details.customerParking,
-                previousBusiness: details.previousBusiness
-              }
+              shopDetails: { ...prev.shopDetails, ...details }
             }))}
           />
         </div>
@@ -380,6 +351,7 @@ const RentShopMain = () => {
       content: (
         <div className="space-y-6">
           <Rent
+            rentDetails={formData.rentalTerms.rentDetails}
             onRentChange={(rent) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -387,60 +359,42 @@ const RentShopMain = () => {
                 rentDetails: {
                   expectedRent: rent.expectedRent,
                   isNegotiable: rent.isNegotiable,
-                  rentType: rent.rentType
-                }
-              }
+                  rentType: rent.rentType,
+                },
+              },
+            }))}
+          />
+          <SecurityDeposit
+            deposit={formData.rentalTerms.securityDeposit}
+            onSecurityDepositChange={(deposit) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: { ...prev.rentalTerms, securityDeposit: deposit }
             }))}
           />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
             <MaintenanceAmount
-              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-                ...prev,
-                rentalTerms: {
-                  ...prev.rentalTerms,
-                  maintenanceAmount: {
-                    amount: maintenance.amount,
-                    frequency: maintenance.frequency
-                  }
-                }
-              }))}
-            />
+              maintenanceAmount={formData.rentalTerms.maintenanceAmount}
+              onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
           )}
-          <SecurityDeposit
-            onSecurityDepositChange={(deposit) => setFormData(prev => ({
+          {/* <MaintenanceAmount
+            maintenanceAmount={formData.rentalTerms.maintenanceAmount}
+            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
               ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                securityDeposit: {
-                  amount: deposit.amount
-                }
-              }
+              rentalTerms: { ...prev.rentalTerms, maintenanceAmount: maintenance }
             }))}
-          />
+          /> */}
           <OtherCharges
+            otherCharges={formData.rentalTerms.otherCharges}
             onOtherChargesChange={(charges) => setFormData(prev => ({
               ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                otherCharges: {
-                  water: { type: charges.water.type, amount: charges.water.amount },
-                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                  gas: { type: charges.gas.type, amount: charges.gas.amount },
-                  others: { type: charges.others.type, amount: charges.others.amount }
-                }
-              }
+              rentalTerms: { ...prev.rentalTerms, otherCharges: charges }
             }))}
           />
           <Brokerage
+            bro={formData.rentalTerms.brokerage}
             onBrokerageChange={(brokerage) => setFormData(prev => ({
               ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                brokerage: {
-                  required: brokerage.required,
-                  amount: brokerage.amount
-                }
-              }
+              rentalTerms: { ...prev.rentalTerms, brokerage: brokerage }
             }))}
           />
         </div>
@@ -452,15 +406,10 @@ const RentShopMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
+            availability={formData.rentalTerms.availability as { type: "immediate" | "specific"; date?: string }}
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                availability: {
-                  type: availability.type,
-                  date: availability.date
-                }
-              }
+              rentalTerms: { ...prev.rentalTerms, availability: availability }
             }))}
           />
         </div>
@@ -472,15 +421,10 @@ const RentShopMain = () => {
       content: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
-              contactInformation: {
-                name: contact.name,
-                email: contact.email,
-                phone: contact.phone,
-                alternatePhone: contact.alternatePhone,
-                bestTimeToContact: contact.bestTimeToContact
-              }
+              contactInformation: contact
             }))}
           />
         </div>
@@ -492,9 +436,17 @@ const RentShopMain = () => {
       content: (
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -506,8 +458,8 @@ const RentShopMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}
@@ -615,7 +567,7 @@ const RentShopMain = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            createdBy: author,
+            craetedBy: author,
             createdAt: new Date()
           }
         };
@@ -694,7 +646,7 @@ const RentShopMain = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Shop</h1>
@@ -706,7 +658,7 @@ const RentShopMain = () => {
 
         {formSections[currentStep].content}
       </div>
-      
+
       {/* Navigation Buttons */}
       {/* {!formSubmitted && ( */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">

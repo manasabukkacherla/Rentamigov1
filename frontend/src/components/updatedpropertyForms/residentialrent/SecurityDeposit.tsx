@@ -4,13 +4,14 @@ import { useState } from "react"
 import { ArrowRight, IndianRupee } from "lucide-react"
 
 interface SecurityDepositProps {
-  onSecurityDepositChange?: (deposit: Record<string, any>) => void
+  deposit: {
+    amount: number;
+  }
+  onSecurityDepositChange?: (deposit: { amount: number }) => void
 }
 
-const SecurityDeposit = ({ onSecurityDepositChange }: SecurityDepositProps) => {
-  const [securityDeposit, setSecurityDeposit] = useState({
-    amount: 0,
-  })
+const SecurityDeposit = ({ deposit, onSecurityDepositChange }: SecurityDepositProps) => {
+  const [securityDeposit, setSecurityDeposit] = useState(deposit);
 
   const handleChange = (value: any) => {
     const updatedDeposit = { amount: value }

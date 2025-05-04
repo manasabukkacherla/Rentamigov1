@@ -1,32 +1,22 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, Camera, Video, FileText, Clock, X } from 'lucide-react';
 import CameraCaptureModal from '../CameraCaptureModal';
+import { toast } from 'react-toastify';
 
-interface CommercialMediaUploadProps {
-  onMediaChange?: (media: {
-    images: { category: string; files: { url: string; file: File }[] }[];
-    video?: { url: string; file: File };
-    documents: { type: string; file: File }[];
-  }) => void;
+interface IMedia {
+  photos: { category: string; files: { url: string; file: File }[] }[]; // Array of objects with category and files
+  videoTour?: File | null; // Video file
+  documents: File[]; // Array of documents
 }
 
-const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) => {
-  const [media, setMedia] = useState<{
-    images: { category: string; files: { url: string; file: File }[] }[];
-    video: { url: string; file: File } | null;
-    documents: { type: string; file: File }[];
-  }>({
-    images: [
-      { category: 'exterior', files: [] },
-      { category: 'interior', files: [] },
-      { category: 'floorPlan', files: [] },
-      { category: 'washrooms', files: [] },
-      { category: 'lifts', files: [] },
-      { category: 'emergencyExits', files: [] }
-    ],
-    video: null,
-    documents: []
-  });
+
+interface CommercialMediaUploadProps {
+  Media: IMedia;
+  onMediaChange?: (media: IMedia) => void;
+}
+
+const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadProps) => {
+  const [media, setMedia] = useState<IMedia>(Media);
 
   const [dragActive, setDragActive] = useState(false);
   const imageInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -35,6 +25,10 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
 
   const [cameraModalOpen, setCameraModalOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMedia(Media);
+  }, [Media]);
 
   const handleImageClick = (category: string) => {
     imageInputRefs.current[category]?.click();
@@ -72,7 +66,7 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
       file
     }));
 
-    const updatedImages = media.images.map(img => {
+    const updatedImages = media.photos.map(img => {
       if (img.category === category) {
         return {
           ...img,
@@ -82,13 +76,9 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
       return img;
     });
 
-    const updatedMedia = { ...media, images: updatedImages };
+    const updatedMedia = { ...media, photos: updatedImages };
     setMedia(updatedMedia);
-    onMediaChange?.({
-      images: updatedMedia.images,
-      video: updatedMedia.video || undefined,
-      documents: updatedMedia.documents
-    });
+    onMediaChange?.(updatedMedia); // Notify parent component
   };
 
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,14 +86,9 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
       const file = e.target.files[0];
       const videoUrl = URL.createObjectURL(file);
       const newVideo = { url: videoUrl, file };
-      
-      const updatedMedia = { ...media, video: newVideo };
+      const updatedMedia = { ...media, videoTour: file };
       setMedia(updatedMedia);
-      onMediaChange?.({
-        images: updatedMedia.images,
-        video: newVideo,
-        documents: updatedMedia.documents
-      });
+      onMediaChange?.(updatedMedia); // Notify parent component
     }
   };
 
@@ -117,19 +102,15 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
 
       const updatedMedia = {
         ...media,
-        documents: [...media.documents, ...newDocuments]
+        documents: [...media.documents, ...newDocuments.map(doc => doc.file)]
       };
       setMedia(updatedMedia);
-      onMediaChange?.({
-        images: updatedMedia.images,
-        video: updatedMedia.video || undefined,
-        documents: updatedMedia.documents
-      });
+      onMediaChange?.(updatedMedia); // Notify parent component
     }
   };
 
   const removeImage = (category: string, index: number) => {
-    const updatedImages = media.images.map(img => {
+    const updatedImages = media.photos.map(img => {
       if (img.category === category) {
         return {
           ...img,
@@ -139,34 +120,22 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
       return img;
     });
 
-    const updatedMedia = { ...media, images: updatedImages };
+    const updatedMedia = { ...media, photos: updatedImages };
     setMedia(updatedMedia);
-    onMediaChange?.({
-      images: updatedMedia.images,
-      video: updatedMedia.video || undefined,
-      documents: updatedMedia.documents
-    });
+    onMediaChange?.(updatedMedia); // Notify parent component
   };
 
   const removeVideo = () => {
-    const updatedMedia = { ...media, video: null };
+    const updatedMedia = { ...media, videoTour: null };
     setMedia(updatedMedia);
-    onMediaChange?.({
-      images: updatedMedia.images,
-      video: undefined,
-      documents: updatedMedia.documents
-    });
+    onMediaChange?.(updatedMedia); // Notify parent component
   };
 
   const removeDocument = (index: number) => {
     const updatedDocuments = media.documents.filter((_, i) => i !== index);
     const updatedMedia = { ...media, documents: updatedDocuments };
     setMedia(updatedMedia);
-    onMediaChange?.({
-      images: updatedMedia.images,
-      video: updatedMedia.video || undefined,
-      documents: updatedDocuments
-    });
+    onMediaChange?.(updatedMedia); // Notify parent component
   };
 
   const handleDrag = (e: React.DragEvent) => {
@@ -189,7 +158,7 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
 
   const handleCameraCapture = (image: File) => {
     if (currentCategory) {
-      const updatedImages = media.images.map(img => {
+      const updatedImages = media.photos.map(img => {
         if (img.category === currentCategory) {
           return {
             ...img,
@@ -199,18 +168,14 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
         return img;
       });
 
-      const updatedMedia = { ...media, images: updatedImages };
+      const updatedMedia = { ...media, photos: updatedImages };
       setMedia(updatedMedia);
-      onMediaChange?.({
-        images: updatedMedia.images,
-        video: updatedMedia.video || undefined,
-        documents: updatedMedia.documents
-      });
+      onMediaChange?.(updatedMedia); // Notify parent component
     }
   };
 
   const removeAllImages = (category: string) => {
-    const updatedImages = media.images.map(img => {
+    const updatedImages = media.photos.map(img => {
       if (img.category === category) {
         return {
           ...img,
@@ -220,13 +185,9 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
       return img;
     });
 
-    const updatedMedia = { ...media, images: updatedImages };
+    const updatedMedia = { ...media, photos: updatedImages };
     setMedia(updatedMedia);
-    onMediaChange?.({
-      images: updatedMedia.images,
-      video: updatedMedia.video || undefined,
-      documents: updatedMedia.documents
-    });
+    onMediaChange?.(updatedMedia); // Notify parent component
   };
 
   return (
@@ -235,7 +196,7 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
         <h1 className="text-2xl font-bold mb-8">Media Upload</h1>
         <div className="space-y-8">
           {/* Property Images */}
-          {media.images.map(({ category, files }) => (
+          {media.photos.map(({ category, files }) => (
             <section key={category}>
               <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
                 <Upload className="w-5 h-5" />
@@ -327,10 +288,10 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
             <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
               <Video className="w-5 h-5" />
               Property Video Tour (Optional)
-              <span className="text-sm font-normal text-gray-500">{media.video ? '1/1 video uploaded' : '0/1 video uploaded'}</span>
+              <span className="text-sm font-normal text-gray-500">{media.videoTour ? '1/1 video uploaded' : '0/1 video uploaded'}</span>
             </h2>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
-              {!media.video ? (
+              {!media.videoTour ? (
                 <div className="flex flex-col items-center justify-center text-center">
                   <Video className="w-12 h-12 text-gray-400 mb-4" />
                   <p className="text-lg mb-4">Click to upload a video tour</p>
@@ -357,7 +318,7 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
               ) : (
                 <div className="relative rounded-lg overflow-hidden">
                   <video
-                    src={media.video.url}
+                    src={URL.createObjectURL(media.videoTour)}
                     controls
                     className="w-full aspect-video bg-black"
                   />
@@ -416,7 +377,7 @@ const CommercialMediaUpload = ({ onMediaChange }: CommercialMediaUploadProps) =>
                   >
                     <div className="flex items-center gap-3">
                       <FileText size={20} className="text-gray-600" />
-                      <span className="text-gray-800">{doc.file.name}</span>
+                      <span className="text-gray-800">{doc.name}</span>
                     </div>
                     <button
                       onClick={() => removeDocument(index)}

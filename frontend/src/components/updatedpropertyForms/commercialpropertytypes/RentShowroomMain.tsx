@@ -392,6 +392,7 @@ const RentShowroomMain = () => {
 
 
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
           />
           {/* <Landmark
@@ -400,6 +401,7 @@ const RentShowroomMain = () => {
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
