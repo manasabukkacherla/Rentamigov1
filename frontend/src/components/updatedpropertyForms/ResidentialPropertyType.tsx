@@ -172,13 +172,7 @@ const ResidentialPropertyType = ({
           name: "Builder Floor",
           icon: Building,
           description: "Individual floors in buildings",
-        },
-        {
-          id: "PG/Co-living",
-          name: "PG/Co-living",
-          icon: Users,
-          description: "Shared living spaces",
-        },
+        }
       ]
     } else if (listingType === "Sell") {
       return [
@@ -324,8 +318,8 @@ const ResidentialPropertyType = ({
             return <IndependentHouse propertyId={""} />
           case "Builder Floor":
             return <BuilderFloor propertyId={""} />
-          case "PG/Co-living":
-            return <SharedSpace propertyId={""} />
+          // case "PG/Co-living":
+          //   return <SharedSpace propertyId={""} />
         }
       } else if (listingType === "Lease") {
         switch (selectedType) {
