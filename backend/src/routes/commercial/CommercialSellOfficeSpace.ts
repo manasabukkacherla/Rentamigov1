@@ -1,13 +1,18 @@
 import express from 'express';
 import {
-    createSellOfficeSpace
-
+    createSellOfficeSpace,
+    getAllSellOfficeSpace,
+    getSellOfficeSpaceById,
+    updateSellOfficeSpace,
+    deleteSellOfficeSpace
 } from '../../controllers/commercial/CommercialSellOfficeSpaceController';
 
 const router = express.Router();
 
-// Create a new office space
 router.post('/', createSellOfficeSpace);
-
+router.get('/', getAllSellOfficeSpace);
+router.get('/:id', getSellOfficeSpaceById);
+router.put('/:id', updateSellOfficeSpace);
+router.delete('/:id', deleteSellOfficeSpace);
 
 export default router; 

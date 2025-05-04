@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialSellCoveredSpace from '../../models/commercial/CommercialSellCoveredSpace';
 
 // Helper function to generate a unique property ID
@@ -69,7 +70,12 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
     // Create a new commercial sell covered space document
     const newCoveredSpace = new CommercialSellCoveredSpace({
       propertyId,
-      ...req.body
+        ...req.body,
+      metadata: {
+        ...req.body.metadata,
+        createdBy: req.user?._id || null,
+        createdAt: new Date()
+      }
     });
 
     // Save the document to the database
@@ -95,7 +101,7 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
   }
 };
 
-// Get all commercial sell covered space listings
+
 export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Response) => {
   try {
     const coveredSpaces = await CommercialSellCoveredSpace.find({});
@@ -113,3 +119,95 @@ export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Respo
   }
 };
 
+export const getCommercialSellCoveredSpaceById = async (req: Request, res: Response) => {
+  try {
+    const propertyId = req.params.id;
+    const property = await CommercialSellCoveredSpace.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ error: 'Commercial sell covered space property not found' });
+    }
+    
+    res.status(200).json({
+      message: 'Commercial sell covered space property retrieved successfully',
+      data: property
+    });
+  } catch (error) {
+    console.error('Error fetching commercial sell covered space property:', error);
+    res.status(500).json({ error: 'Failed to fetch commercial sell covered space property' });
+  }
+}; 
+
+export const updateCommercialSellCoveredSpace = async (req: Request, res: Response) => {
+    try {
+      const documentId = req.params.id; 
+      const incomingData = req.body?.data;
+      if (!incomingData) {
+        return res.status(400).json({
+          success: false,
+          message: "No data provided for update.",
+        });
+      }
+  
+      const cleanedData = JSON.parse(
+        JSON.stringify(incomingData, (key, value) => {
+          if (key === "_id" || key === "__v") return undefined;
+          return value;
+        })
+      );
+  
+     
+      const existingDoc = await CommercialSellCoveredSpace.findById(documentId);
+      if (!existingDoc) {
+        return res.status(404).json({
+          success: false,
+          message: "Property not found",
+        });
+      }
+  
+      const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+      const updatedDoc = await CommercialSellCoveredSpace.findByIdAndUpdate(
+        documentId,
+        { $set: mergedData },
+        { new: true, runValidators: true }
+      );
+  
+      res.status(200).json({
+        success: true,
+        message: "Sell Covered space updated successfully.",
+        data: updatedDoc,
+      });
+    } catch (error: any) {
+      console.error("Update error:", error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : "Unknown update error",
+      });
+    }
+  };
+  
+export const deleteCommercialSellCoveredSpace = async (req: Request, res: Response) => {
+        try {
+          const data = await CommercialSellCoveredSpace.findByIdAndDelete(req.params.id);
+  
+          if (!data) {
+              return res.status(404).json({
+                  success: false,
+                  message: 'Sell covered space listing not found'
+              });
+          }
+  
+          res.status(200).json({
+              success: true,
+              message: 'Sell covered space listing deleted successfully'
+          });
+      } catch (error) {
+          console.error('Error deleting Sell covered space:', error);
+          res.status(500).json({
+              success: false,
+              error: 'Failed to delete Sell covered space listing',
+              message: error instanceof Error ? error.message : 'Unknown error'
+          });
+      }
+  };

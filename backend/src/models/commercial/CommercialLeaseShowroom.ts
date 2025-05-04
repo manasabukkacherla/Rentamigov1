@@ -144,8 +144,7 @@ interface IMedia {
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
 }
 
@@ -292,8 +291,7 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
             documents: [{ type: String }] 
           },
           metadata: {
-            userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-            userName:{type:String,default:"Not Specified"},
+            createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
             createdAt: { type: Date, default: Date.now }
           }
         }, {

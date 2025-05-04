@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialWarehouse from '../../models/commercial/CommercialSellWarehouse';
 import { ICommercialWarehouse } from '../../models/commercial/CommercialSellWarehouse';
 
@@ -57,7 +58,7 @@ export const createCommercialWarehouse = async (req: Request, res: Response) => 
     
     // Add metadata and property ID
     warehouseData.metadata = {
-      userId: warehouseData.metadata?.userId,
+      createdBy: warehouseData.metadata?.createdBy,
       createdAt: new Date(),
     };
     
@@ -109,3 +110,123 @@ export const createCommercialWarehouse = async (req: Request, res: Response) => 
     });
   }
 }; 
+
+
+
+export const getAllSellWarehouses = async (req: Request, res: Response) => {
+  try {
+      const warehouses = await CommercialWarehouse.find();
+
+      res.status(200).json({
+          success: true,
+          count: warehouses.length,
+          data: warehouses
+      });
+  } catch (error: any) {
+      console.error('Error fetching commercial Sell warehouses:', error);
+      res.status(500).json({
+          error: 'Failed to fetch commercial Sell warehouse listings',
+          details: error.message
+      });
+  }
+};
+
+
+export const getSellWarehouseById = async (req: Request, res: Response) => {
+  try {
+      const warehouse = await CommercialWarehouse.findById(req.params.id);
+
+      if (!warehouse) {
+          return res.status(404).json({
+              success: false,
+              error: 'Commercial Sell warehouse not found'
+          });
+      }
+
+      res.status(200).json({
+          success: true,
+          data: warehouse
+      });
+  } catch (error: any) {
+      console.error('Error fetching commercial Sell  warehouse:', error);
+      res.status(500).json({
+          error: 'Failed to fetch commercial Sell  warehouse',
+          details: error.message
+      });
+  }
+};
+
+
+export const updateSellWarehouse = async (req: Request, res: Response) => {
+  try {
+    const documentId = req.params.id; 
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
+        success: false,
+        message: "No data provided for update.",
+      });
+    }
+
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+   
+    const existingDoc = await CommercialWarehouse.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+
+    const updatedDoc = await CommercialWarehouse.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Commercial Sell Warehouse updated successfully.",
+      data: updatedDoc,
+    });
+  } catch (error: any) {
+    console.error("Update error:", error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown update error",
+    });
+  }
+};
+
+export const deleteSellWarehouse = async (req: Request, res: Response) => {
+  try {
+    const data = await CommercialWarehouse.findByIdAndDelete(req.params.id);
+
+    if (!data) {
+        return res.status(404).json({
+            success: false,
+            message: 'Commercial Sell Warehouse listing not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Commercial Sell Warehouse listing deleted successfully'
+    });
+} catch (error) {
+    console.error('Error deleting Commercial Sell Warehouse:', error);
+    res.status(500).json({
+        success: false,
+        error: 'Failed to delete Commercial Sell Warehouse listing',
+        message: error instanceof Error ? error.message : 'Unknown error'
+    });
+}
+};

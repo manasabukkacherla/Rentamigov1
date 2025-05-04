@@ -1,9 +1,18 @@
 import express from 'express';
-import { createCommercialSellOthers } from '../../controllers/commercial/commercialSellOthersController';
+import { createCommercialSellOthers ,
+  deleteCommercialSellOthers,
+  getAllCommercialSellOthers,
+  getCommercialSellOthersById,
+  updateCommercialSellOthers
+} from '../../controllers/commercial/commercialSellOthersController';
+
 
 const router = express.Router();
 
-// Only POST method is needed
 router.post('/', createCommercialSellOthers);
+router.get('/', getAllCommercialSellOthers);
+router.get('/:id', getCommercialSellOthersById);
+router.put('/:id', updateCommercialSellOthers); 
+router.delete('/:id', deleteCommercialSellOthers);
 
 export default router; 

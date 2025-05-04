@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentShed from '../../models/commercial/CommercialRentShed';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -55,11 +56,11 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
-        if (!formData.metadata.userId) {
+        if (!formData.metadata.createdBy) {
             return res.status(400).json({
                 success: false,
                 error: 'Missing required field',
-                details: 'metadata.userId is required'
+                details: 'metadata.createdBy is required'
             });
         }
 
@@ -68,6 +69,7 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
+                createdBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };
@@ -139,100 +141,127 @@ export const getShedById = async (req: Request, res: Response) => {
 
 export const updateShed = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialRentShed.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true, runValidators: true }
-        );
-        if (!shed) {
-            return res.status(404).json({
-                success: false,
-                error: 'Shed not found'
-            });
-        }
-        res.status(200).json({
-            success: true,
-            message: 'Shed updated successfully',
-            data: shed
-        });
-    } catch (error: any) {
-        res.status(500).json({
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
             success: false,
-            error: error.message
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await CommercialRentShed.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await CommercialRentShed.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "Commercial RentShed updated successfully.",
+          data: updatedDoc,
         });
-    }
-};
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
+        });
+      }
+    };
 
 export const deleteShed = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialRentShed.findByIdAndDelete(req.params.id);
-        if (!shed) {
+        const data = await CommercialRentShed.findByIdAndDelete(req.params.id);
+
+        if (!data) {
             return res.status(404).json({
                 success: false,
-                error: 'Shed not found'
+                message: 'Commercial RentShed listing not found'
             });
         }
+
         res.status(200).json({
             success: true,
-            message: 'Shed deleted successfully'
+            message: 'Commercial RentShed listing deleted successfully'
         });
-    } catch (error: any) {
+    } catch (error) {
+        console.error('Error deleting Commercial RentShed:', error);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: 'Failed to delete Commercial RentShed listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 };
 
 // Advanced Filters
-export const getShedsByFilters = async (req: Request, res: Response) => {
-    try {
-        const {
-            city,
-            minAmount,
-            maxAmount,
-            minArea,
-            maxArea,
-            shedType,
-            furnishingStatus,
-            availability
-        } = req.query;
+// export const getShedsByFilters = async (req: Request, res: Response) => {
+//     try {
+//         const {
+//             city,
+//             minAmount,
+//             maxAmount,
+//             minArea,
+//             maxArea,
+//             shedType,
+//             furnishingStatus,
+//             availability
+//         } = req.query;
 
-        const filters: Record<string, any> = {};
+//         const filters: Record<string, any> = {};
 
-        // Apply filters if provided
-        if (city) filters['basicInformation.address.city'] = city;
-        if (shedType) filters['basicInformation.shedType'] = { $in: [shedType] };
-        if (furnishingStatus) filters['propertyDetails.furnishingStatus'] = furnishingStatus;
+//         // Apply filters if provided
+//         if (city) filters['basicInformation.address.city'] = city;
+//         if (shedType) filters['basicInformation.shedType'] = { $in: [shedType] };
+//         if (furnishingStatus) filters['propertyDetails.furnishingStatus'] = furnishingStatus;
 
-        if (minAmount || maxAmount) {
-            filters['IRentalTerms.rentDetails.expectedRent'] = {};
-            if (minAmount) filters['IRentalTerms.rentDetails.expectedRent'].$gte = Number(minAmount);
-            if (maxAmount) filters['IRentalTerms.rentDetails.expectedRent'].$lte = Number(maxAmount);
-        }
+//         if (minAmount || maxAmount) {
+//             filters['IRentalTerms.rentDetails.expectedRent'] = {};
+//             if (minAmount) filters['IRentalTerms.rentDetails.expectedRent'].$gte = Number(minAmount);
+//             if (maxAmount) filters['IRentalTerms.rentDetails.expectedRent'].$lte = Number(maxAmount);
+//         }
 
-        if (minArea || maxArea) {
-            filters['shedDetails.totalArea'] = {};
-            if (minArea) filters['shedDetails.totalArea'].$gte = Number(minArea);
-            if (maxArea) filters['shedDetails.totalArea'].$lte = Number(maxArea);
-        }
+//         if (minArea || maxArea) {
+//             filters['shedDetails.totalArea'] = {};
+//             if (minArea) filters['shedDetails.totalArea'].$gte = Number(minArea);
+//             if (maxArea) filters['shedDetails.totalArea'].$lte = Number(maxArea);
+//         }
 
-        if (availability === 'immediate') {
-            filters['RentalTerms.availability.type'] = 'immediate';
-        }
+//         if (availability === 'immediate') {
+//             filters['RentalTerms.availability.type'] = 'immediate';
+//         }
 
-        // Find sheds with applied filters
-        const sheds = await CommercialRentShed.find(filters);
+//         // Find sheds with applied filters
+//         const sheds = await CommercialRentShed.find(filters);
 
-        res.status(200).json({
-            success: true,
-            count: sheds.length,
-            data: sheds
-        });
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            error: error.message
-        });
-    }
-}; 
+//         res.status(200).json({
+//             success: true,
+//             count: sheds.length,
+//             data: sheds
+//         });
+//     } catch (error: any) {
+//         res.status(500).json({
+//             success: false,
+//             error: error.message
+//         });
+//     }
+// }; 

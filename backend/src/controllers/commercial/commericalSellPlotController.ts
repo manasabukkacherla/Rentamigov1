@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import SellPlot from '../../models/commercial/commercialsellplot';
 import mongoose from 'mongoose';
 
@@ -270,7 +271,7 @@ const transformPlotData = (formData: any) => {
     // Metadata
     if (formData.metadata) {
         transformedData.metadata = {
-            userId: formData.metadata.userId,
+            createdBy: formData.metadata.createdBy,
             createdAt: formData.metadata.createdAt || new Date()
         };
     }
@@ -311,7 +312,7 @@ export const createPlot = async (req: Request, res: Response) => {
 
         // Return populated plot data with user information
         const populatedPlot = await SellPlot.findById(savedPlot._id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         res.status(201).json({
@@ -333,7 +334,7 @@ export const createPlot = async (req: Request, res: Response) => {
 export const getAllPlots = async (req: Request, res: Response) => {
     try {
         const plots = await SellPlot.find()
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v')
             .sort({ 'metadata.createdAt': -1 });
 
@@ -356,7 +357,7 @@ export const getAllPlots = async (req: Request, res: Response) => {
 export const getPlotById = async (req: Request, res: Response) => {
     try {
         const plot = await SellPlot.findById(req.params.id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         if (!plot) {
@@ -376,6 +377,81 @@ export const getPlotById = async (req: Request, res: Response) => {
             success: false,
             error: 'Failed to retrieve plot',
             message: (error as Error).message
+        });
+    }
+};
+
+
+export const updatePlotById = async (req: Request, res: Response) => {
+    try {
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
+            success: false,
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await SellPlot.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await SellPlot.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "sell plot updated successfully.",
+          data: updatedDoc,
+        });
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown update error",
+        });
+      }
+    };
+  
+  export const deleteSellPlotById = async (req: Request, res: Response) => {
+    try {
+        const data = await SellPlot.findByIdAndDelete(req.params.id);
+
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'sell plot listing not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'sell plot listing deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting sell plot:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete sell plot listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
         });
     }
 };

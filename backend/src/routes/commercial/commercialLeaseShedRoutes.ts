@@ -5,7 +5,7 @@ import {
     getShedById,
     updateShed,
     deleteShed,
-    getShedsByFilters
+    // getShedsByFilters
 } from '../../controllers/commercial/commercialLeaseShedController';
 
 const router = express.Router();
@@ -17,7 +17,7 @@ router.post('/', createShed);
 router.get('/', getSheds);
 
 // Get sheds by filters
-router.get('/filter', getShedsByFilters);
+// router.get('/filter', getShedsByFilters);
 
 // Get a single shed listing by ID
 router.get('/:id', getShedById);

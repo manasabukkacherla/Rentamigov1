@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import CommercialLeaseAgriculture from '../../models/commercial/CommercialLeaseAgriculture';
+import _ from 'lodash';
 import User  from '../../models/signup';
-
 
 // Helper function to generate Property ID
 const generatePropertyId = async (): Promise<string> => {
@@ -82,11 +82,9 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
     // Add metadata with userId and user (like Sell controller)
     const agricultureData = {
       ...formData,
-      propertyId, // Ensure propertyId is at the root level
-      metadata: { // Use 'metadata' to match schema
-        ...(formData.metaData || formData.metadata),
-        userId: userId, // Always assign the resolved userId
-       // user: user, // Attach user object if available
+      metadata: {
+        ...formData.metadata,
+        createdBy: req.user?._id || null,
         createdAt: new Date()
       }
     };
@@ -113,8 +111,8 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
 // Get all Commercial Rent Agriculture
 export const getAllCommercialLeaseAgriculture = async (req: Request, res: Response) => {
   try {
-    const properties = await CommercialLeaseAgriculture.find().sort({ 'metadata.createdAt': -1 });
-
+    const properties = await CommercialLeaseAgriculture.find({}).sort({ 'metadata.createdAt': -1 });
+    
     res.status(200).json({
       success: true,
       message: 'Agricultural land Rent listings retrieved successfully',
@@ -158,59 +156,80 @@ export const getCommercialLeaseAgricultureById = async (req: Request, res: Respo
 
 // Update Commercial Rent Agriculture
 export const updateCommercialLeaseAgriculture = async (req: Request, res: Response) => {
+ 
   try {
-    const propertyId = req.params.id;
-    const updateData = req.body;
+    const documentId = req.params.id; // This is the _id of the document
 
-    const property = await CommercialLeaseAgriculture.findOneAndUpdate(
-      { propertyId },
-      { $set: updateData },
-      { new: true }
-    );
-
-    if (!property) {
-      return res.status(404).json({
+    // Validate request body
+    const incomingData = req.body?.data;
+    if (!incomingData) {
+      return res.status(400).json({
         success: false,
-        error: 'Agricultural land Rent property not found'
+        message: "No data provided for update.",
       });
     }
 
+    // Step 1: Clean the incoming data (remove all _id and __v fields)
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+    // Step 2: Fetch existing document using _id
+    const existingDoc = await CommercialLeaseAgriculture.findById(documentId);
+    if (!existingDoc) {
+      return res.status(404).json({
+        success: false,
+        message: "Property not found",
+      });
+    }
+
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    const updatedDoc = await CommercialLeaseAgriculture.findByIdAndUpdate(
+      documentId,
+      { $set: mergedData },
+      { new: true, runValidators: true }
+    );
+
     res.status(200).json({
       success: true,
-      message: 'Agricultural land Rent property updated successfully',
-      data: property
+      message: "Lease Agriculture updated successfully.",
+      data: updatedDoc,
     });
-  } catch (error) {
-    console.error('Error updating agricultural land Rent property:', error);
+  } catch (error: any) {
+    console.error("Update error:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update agricultural land Rent property'
+      message: error instanceof Error ? error.message : "Unknown update error",
     });
   }
 };
 
-// Delete Commercial Rent Agriculture
+
+
 export const deleteCommercialLeaseAgriculture = async (req: Request, res: Response) => {
-  try {
-    const propertyId = req.params.id;
-    const property = await CommercialLeaseAgriculture.findOneAndDelete({ propertyId });
+    try {
+        const leaseAgriculture = await CommercialLeaseAgriculture.findByIdAndDelete(req.params.id);
 
-    if (!property) {
-      return res.status(404).json({
-        success: false,
-        error: 'Agricultural land Rent property not found'
-      });
+        if (!leaseAgriculture) {
+            return res.status(404).json({
+                success: false,
+                message: 'Lease Agriculture listing not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Lease Agriculture listing deleted successfully'
+        });
+    } catch (error) {
+        console.error('Error deleting lease Agriculture:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete lease Agriculture listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
-
-    res.status(200).json({
-      success: true,
-      message: 'Agricultural land Rent property deleted successfully'
-    });
-  } catch (error) {
-    console.error('Error deleting agricultural land Rent property:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to delete agricultural land Rent property'
-    });
-  }
 };

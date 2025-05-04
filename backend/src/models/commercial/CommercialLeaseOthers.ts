@@ -134,8 +134,7 @@ export interface ICommercialLeaseOthers extends Document {
   };
   
   metaData?: {
-    userId: Schema.Types.ObjectId | null;
-    userName: string;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
   };
 }
@@ -269,8 +268,7 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   },
   
   metaData: {
-    userId: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    userName: { type: String, default: "Not Specified" },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now }
   }
 });

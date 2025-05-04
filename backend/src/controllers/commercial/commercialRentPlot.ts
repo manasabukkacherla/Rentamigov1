@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import CommercialRentPlot from '../../models/commercial/commercialRentPlot';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -55,11 +56,11 @@ export const createCommercialRentPlot = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
-        if (!formData.metadata.userId) {
+        if (!formData.metadata.createdBy) {
             return res.status(400).json({
                 success: false,
                 error: 'Missing required field',
-                details: 'metadata.userId is required'
+                details: 'metadata.createdBy is required'
             });
         }
 
@@ -68,6 +69,7 @@ export const createCommercialRentPlot = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
+                createdBy: req.user?._id || null,
                 createdAt: new Date()
             }
         };
@@ -104,7 +106,7 @@ export const createCommercialRentPlot = async (req: Request, res: Response) => {
 export const getAllRentPlots = async (req: Request, res: Response) => {
     try {
         const RentPlots = await CommercialRentPlot.find()
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v')
             .sort({ 'metadata.createdAt': -1 });
 
@@ -127,7 +129,7 @@ export const getAllRentPlots = async (req: Request, res: Response) => {
 export const getRentPlotById = async (req: Request, res: Response) => {
     try {
         const RentPlot = await CommercialRentPlot.findById(req.params.id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         if (!RentPlot) {
@@ -156,57 +158,74 @@ export const getRentPlotById = async (req: Request, res: Response) => {
 
   export const updatePlotById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
-      const updateData = req.body;
-      
-      const RentPlots= await CommercialRentPlot.findOneAndUpdate(
-        { propertyId },
-        { $set: updateData },
-        { new: true }
-      );
-      
-      if (!RentPlots) {
-        return res.status(404).json({ 
+        const documentId = req.params.id; 
+        const incomingData = req.body?.data;
+        if (!incomingData) {
+          return res.status(400).json({
+            success: false,
+            message: "No data provided for update.",
+          });
+        }
+    
+        const cleanedData = JSON.parse(
+          JSON.stringify(incomingData, (key, value) => {
+            if (key === "_id" || key === "__v") return undefined;
+            return value;
+          })
+        );
+    
+       
+        const existingDoc = await CommercialRentPlot.findById(documentId);
+        if (!existingDoc) {
+          return res.status(404).json({
+            success: false,
+            message: "Property not found",
+          });
+        }
+    
+        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+    
+        const updatedDoc = await CommercialRentPlot.findByIdAndUpdate(
+          documentId,
+          { $set: mergedData },
+          { new: true, runValidators: true }
+        );
+    
+        res.status(200).json({
+          success: true,
+          message: "rent plot updated successfully.",
+          data: updatedDoc,
+        });
+      } catch (error: any) {
+        console.error("Update error:", error);
+        res.status(500).json({
           success: false,
-          error: 'Rent plot property not found' 
+          message: error instanceof Error ? error.message : "Unknown update error",
         });
       }
-      
-      res.status(200).json({
-        success: true,
-        message: 'Rent plot property updated successfully',
-        data: RentPlots
-      });
-    } catch (error) {
-      console.error('Error updating Rent plot property:', error);
-      res.status(500).json({ 
-        success: false,
-        error: 'Failed to update Rent plot property' 
-      });
-    }
-  };
+    };
   
   export const deleteRentPlotById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
-      const RentPlots = await CommercialRentPlot.findOneAndDelete({ propertyId });
-      
-      if (!RentPlots) {
-        return res.status(404).json({ 
-          success: false,
-          error: 'Rent plot property not found' 
+        const data = await CommercialRentPlot.findByIdAndDelete(req.params.id);
+
+        if (!data) {
+            return res.status(404).json({
+                success: false,
+                message: 'rent plot listing not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'rent plot listing deleted successfully'
         });
-      }
-      
-      res.status(200).json({
-        success: true,
-        message: 'Rent plot property deleted successfully'
-      });
     } catch (error) {
-      console.error('Error deleting Rent plot property:', error);
-      res.status(500).json({ 
-        success: false,
-        error: 'Failed to delete Rent plot property' 
-      });
+        console.error('Error deleting rent plot:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to delete rent plot listing',
+            message: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
-  }; 
+};
