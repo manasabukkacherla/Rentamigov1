@@ -170,7 +170,7 @@ const Headerr: React.FC = () => {
           scrolled ? "bg-white shadow-md py-2" : "bg-black py-3"
         }`}
       >
-        <div className="w-full px-2 sm:px-4 lg:px-8">
+        <div className="w-[calc(100%-40px)] mx-auto px-2 sm:px-4 lg:px-8">
           <div className="flex justify-between items-center min-h-[48px] w-full">
             <div
               className="flex items-center cursor-pointer flex-shrink-0"
@@ -436,7 +436,7 @@ const Headerr: React.FC = () => {
 };
 
 export default Headerr;
-function setCurrentChatId(id: string) {
+function setCurrentChatId(_id: string) {
   throw new Error("Function not implemented.");
 }
 

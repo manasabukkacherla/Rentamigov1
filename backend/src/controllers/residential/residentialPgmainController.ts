@@ -1,8 +1,47 @@
 import { Request, Response } from 'express';
 import PgMain from '../../models/residential/Pgmain';
 
+/**
+ * Generate a unique property ID for PGs
+ */
+const generatePropertyId = async (): Promise<string> => {
+  try {
+    // Prefix for PG property ID
+    const prefix = "RA-REPG";
+    // Find the PG with the highest property ID number
+    const highestPg = await PgMain.findOne({
+      propertyId: { $regex: `^${prefix}\\d+$` }
+    }).sort({ propertyId: -1 });
+    let nextNumber = 1;
+    if (highestPg && highestPg.propertyId) {
+      const match = highestPg.propertyId.match(/(\d+)$/);
+      if (match && match[1]) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
+    }
+    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+    const existingWithExactId = await PgMain.findOne({ propertyId });
+    if (existingWithExactId) {
+      const forcedNextNumber = nextNumber + 1;
+      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+      const forcedExisting = await PgMain.findOne({ propertyId: forcedPropertyId });
+      if (forcedExisting) {
+        return generatePropertyId();
+      }
+      return forcedPropertyId;
+    }
+    return propertyId;
+  } catch (error) {
+    console.error('Error generating property ID:', error);
+    const timestamp = Date.now().toString().slice(-8);
+    return `RA-PGMAIN${timestamp}`;
+  }
+}
+
 export const createPg = async (req: Request, res: Response) => {
   try {
+    // Generate propertyId for the new PG
+    const propertyId = await generatePropertyId();
     console.log('Received PG data:', JSON.stringify(req.body, null, 2));
     
     // Ensure required fields have default values if missing
@@ -11,6 +50,7 @@ export const createPg = async (req: Request, res: Response) => {
     // Ensure metadata is properly structured
     const pgData = {
       ...body,
+      propertyId,
       pgDetails: {
         name: body.pgDetails?.name || '',
         accommodationType: body.pgDetails?.accommodationType || 'both boys and girls',
