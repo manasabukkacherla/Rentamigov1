@@ -4,7 +4,6 @@ import { NumberListInstance } from 'twilio/lib/rest/pricing/v2/number';
 interface IBasicInformation {
   propertyId: string;
   propertyName: string;
-  showFlatNo: boolean;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -112,7 +111,7 @@ interface IMetadata {
 }
 
 interface availability {
-  availablefrom: string;
+  type: string;
   date?: string;
 }
 
@@ -124,6 +123,10 @@ interface IMedia {
     washrooms: string[];
     lifts: string[];
     emergencyExits: string[];
+    bedrooms: string[];
+    halls: string[];
+    storerooms: string[];
+    kitchen: string[];
   };
   videoTour?: string;
   documents: string[];
@@ -151,7 +154,6 @@ const ResidentailRentAppartmentSchema = new Schema<IResidentialRentAppartment>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     propertyName: { type: String, required: true },
-    showFlatNo: { type: Boolean, required: true },
     address: {
       flatNo: { type: Number, required: true },
       showFlatNo: { type: Boolean, required: true },
@@ -188,7 +190,7 @@ const ResidentailRentAppartmentSchema = new Schema<IResidentialRentAppartment>({
     totalFloors: { type: Number, required: true },
     propertyOnFloor: { type: Number, required: true },
     facing: { type: String, required: true },
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type: String, required: true },
     superBuiltUpAreaSqft: { type: Number, required: true },
     superBuiltUpAreaSqmt: { type: Number, required: true },
     builtUpAreaSqft: { type: Number, required: true },
@@ -255,25 +257,28 @@ const ResidentailRentAppartmentSchema = new Schema<IResidentialRentAppartment>({
     otheritems: { type: [String], required: true },
   },
   availability: {
-    availablefrom: { type: String, required: true },
+    type: { type: String, required: true },
     date: { type: String },
   },
   media: {
     photos: {
-      exterior: [{ type: String }],
-      interior: [{ type: String }],
-      floorPlan: [{ type: String }],
-      washrooms: [{ type: String }],
-      lifts: [{ type: String }],
-      emergencyExits: [{ type: String }]
+      exterior: [{ type: String, required: false }],
+        interior: [{ type: String, required: false }],
+        floorPlan: [{ type: String, required: false }],
+        washrooms: [{ type: String, required: false }],
+        lifts: [{ type: String, required: false }],
+        emergencyExits: [{ type: String, required: false }],
+        bedrooms: [{ type: String, required: false }],
+        halls: [{ type: String, required: false }],
+        storerooms: [{ type: String, required: false }],
+        kitchen: [{ type: String, required: false }]
     },
     videoTour: { type: String },
-    documents: [{ type: String }]
+    documents: [{ type: String, required: false }]
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
-
   }
 }, {
   timestamps: true

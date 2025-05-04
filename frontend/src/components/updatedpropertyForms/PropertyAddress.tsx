@@ -151,11 +151,6 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
 
   return (
     <div className="bg-white rounded-xl p-8 shadow-lg border border-black/5 mb-8 space-y-8">
-      <div className="flex items-center gap-3 border-b border-black/5 pb-6">
-        <Building className="h-6 w-6 text-black/70" />
-        <h2 className="text-xl font-medium text-black/80">Property Address</h2>
-      </div>
-      <div className="bg-white rounded-xl p-8 shadow-lg border border-black/5 mb-8 space-y-8">
         <div className="flex items-center gap-3 border-b border-black/5 pb-6">
           <Building className="h-6 w-6 text-black/70" />
           <h2 className="text-xl font-medium text-black/80">Property Address</h2>
@@ -170,15 +165,6 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
           />
           Show Flat No. in the Listing
         </label>
-        <label className="flex items-center gap-2.5 text-sm text-black/70 bg-black/5 px-4 py-3 rounded-lg w-fit">
-          <input
-            type="checkbox"
-            checked={address.showFlatNo ?? false}
-            onChange={(e) => handleChange("showFlatNo", e.target.checked)}
-            className="rounded border-black/10 text-black focus:ring-black/5"
-          />
-          Show Flat No. in the Listing
-        </label>
 
         <div className="grid grid-cols-3 gap-6">
           <input
@@ -203,53 +189,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
             className={inputClasses}
           />
         </div>
-        <div className="grid grid-cols-3 gap-6">
-          <input
-            type="text"
-            value={address.apartmentName}
-            onChange={(e) => handleChange("apartmentName", e.target.value)}
-            placeholder="Apartment Name"
-            className={inputClasses}
-          />
-          <input
-            type="number"
-            value={address.flatNo || ""}
-            onChange={(e) => handleChange("flatNo", parseInt(e.target.value))}
-            placeholder="Flat No"
-            className={inputClasses}
-          />
-          <input
-            type="number"
-            value={address.floor || ""}
-            onChange={(e) => handleChange("floor", parseInt(e.target.value))}
-            placeholder="Floor"
-            className={inputClasses}
-          />
-        </div>
 
-        <div className="grid grid-cols-3 gap-6">
-          <input
-            type="text"
-            value={address.city}
-            onChange={(e) => handleChange("city", e.target.value)}
-            placeholder="City"
-            className={inputClasses}
-          />
-          <input
-            type="text"
-            value={address.state}
-            onChange={(e) => handleChange("state", e.target.value)}
-            placeholder="State"
-            className={inputClasses}
-          />
-          <input
-            type="text"
-            value={address.zipCode}
-            onChange={(e) => handleChange("zipCode", e.target.value)}
-            placeholder="ZIP Code"
-            className={inputClasses}
-          />
-        </div>
         <div className="grid grid-cols-3 gap-6">
           <input
             type="text"
@@ -352,7 +292,6 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
 
         </div>
       </div>
-    </div>
   );
 }
 

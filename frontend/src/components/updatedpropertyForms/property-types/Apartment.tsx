@@ -724,12 +724,12 @@ const Apartment = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            craetedBy: author,
+            createdBy: author,
             createdAt: new Date()
           }
         };
 
-        const response = await axios.post('/api/properties/apartment', transformedData, {
+        const response = await axios.post('/api/residential/rent/apartment', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
