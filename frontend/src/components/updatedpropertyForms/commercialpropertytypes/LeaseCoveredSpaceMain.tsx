@@ -24,7 +24,12 @@ import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
   propertyName: string;
   spaceType: string[];
-  address: Record<string, string>;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
   landmark: string;
   coordinates: {
     latitude: string;
@@ -35,20 +40,45 @@ interface FormData {
   propertyDetails: Record<string, any>;
   leaseAmount: Record<string, any>;
   leaseTenure: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
   otherCharges: {
     water: { amount: number; type: string };
     electricity: { amount: number; type: string };
     gas: { amount: number; type: string };
     others: { amount: number; type: string };
   };
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, string>;
+  brokerage: {
+    amount?: number;
+    required: string;
+  };
+  availability: {
+    date: Date;
+    availableImmediately: boolean;
+    leaseDuration: string;
+    noticePeriod: string;
+    petsAllowed: boolean;
+  };
+  contactDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
   media: {
-    images: Array<{ category: string; files: Array<{ url: string; file: File }> }>;
-    video?: { url: string; file: File };
-    documents: Array<{ type: string; file: File }>;
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
   };
 }
 
@@ -58,7 +88,12 @@ const LeaseCoveredSpaceMain = () => {
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     spaceType: [],
-    address: {},
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: ''
+    },
     landmark: '',
     coordinates: { latitude: '', longitude: '' },
     isCornerProperty: false,
@@ -66,19 +101,44 @@ const LeaseCoveredSpaceMain = () => {
     propertyDetails: {},
     leaseAmount: {},
     leaseTenure: {},
-    maintenanceAmount: {},
+    maintenanceAmount: {
+      amount: 0,
+      frequency: 'monthly'
+    },
     otherCharges: {
       water: { amount: 0, type: 'inclusive' },
       electricity: { amount: 0, type: 'inclusive' },
       gas: { amount: 0, type: 'inclusive' },
       others: { amount: 0, type: 'inclusive' }
     },
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    brokerage: {
+      required: 'no',
+      amount: 0
+    },
+    availability: {
+      date: new Date(),
+      availableImmediately: false,
+      leaseDuration: '',
+      noticePeriod: '',
+      petsAllowed: false
+    },
+    contactDetails: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
     media: {
-      images: [],
-      video: undefined,
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
       documents: []
     }
   });
@@ -108,14 +168,16 @@ const LeaseCoveredSpaceMain = () => {
           <div className="space-y-8">
 
 
-            <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
             <MapLocation
               latitude={formData.coordinates.latitude}
               longitude={formData.coordinates.longitude}
+              landmark={formData.landmark}
               onLocationChange={(location) => setFormData(prev => ({ ...prev, coordinates: location }))}
               onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
             />
-            <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
+            <CornerProperty isCornerProperty={formData.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
           </div>
         </div>
       )
@@ -137,8 +199,8 @@ const LeaseCoveredSpaceMain = () => {
 
           <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
           <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
-          <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
-          <OtherCharges onOtherChargesChange={(charges) => {
+          <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
+          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
             // Since the OtherCharges component sends the old state, wait for the component to update
             // by deferring the formData update with setTimeout
             setTimeout(() => {
@@ -153,7 +215,7 @@ const LeaseCoveredSpaceMain = () => {
               }));
             }, 0);
           }} />
-          <Brokerage onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
+          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
         </div>
       )
     },
@@ -164,7 +226,16 @@ const LeaseCoveredSpaceMain = () => {
         <div className="space-y-8">
 
 
-          <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+          <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({
+            ...prev,
+            availability: {
+              date: availability.date || new Date(),
+              availableImmediately: availability.availableImmediately || false,
+              leaseDuration: availability.preferredSaleDuration || '',
+              noticePeriod: availability.noticePeriod || '',
+              petsAllowed: availability.petsAllowed || false
+            }
+          }))} />
         </div>
       )
     },
@@ -175,7 +246,7 @@ const LeaseCoveredSpaceMain = () => {
         <div className="space-y-8">
 
 
-          <CommercialContactDetails onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
+          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
         </div>
       )
     },
@@ -187,10 +258,45 @@ const LeaseCoveredSpaceMain = () => {
 
 
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
-              setFormData(prev => ({ ...prev, media }));
-              // Add console log for debugging
-              console.log("Media changed:", media);
+              const photosByCategory: Record<string, File[]> = {
+                exterior: [],
+                interior: [],
+                floorPlan: [],
+                washrooms: [],
+                lifts: [],
+                emergencyExits: []
+              };
+
+              media.photos.forEach(({ category, files }) => {
+                if (category in photosByCategory) {
+                  photosByCategory[category] = files.map(f => f.file);
+                }
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photosByCategory.exterior,
+                    interior: photosByCategory.interior,
+                    floorPlan: photosByCategory.floorPlan,
+                    washrooms: photosByCategory.washrooms,
+                    lifts: photosByCategory.lifts,
+                    emergencyExits: photosByCategory.emergencyExits
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
             }}
           />
         </div>
@@ -198,7 +304,7 @@ const LeaseCoveredSpaceMain = () => {
     }
   ];
 
-  
+
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -245,15 +351,15 @@ const LeaseCoveredSpaceMain = () => {
     // For this example, we'll return the URLs we have (even if they're blob URLs)
     const uploadedMedia = {
       photos: {
-        exterior: formData.media.images.find(img => img.category === 'exterior')?.files.map(f => f.url) || [],
-        interior: formData.media.images.find(img => img.category === 'interior')?.files.map(f => f.url) || [],
-        floorPlan: formData.media.images.find(img => img.category === 'floorPlan')?.files.map(f => f.url) || [],
-        washrooms: formData.media.images.find(img => img.category === 'washrooms')?.files.map(f => f.url) || [],
-        lifts: formData.media.images.find(img => img.category === 'lifts')?.files.map(f => f.url) || [],
-        emergencyExits: formData.media.images.find(img => img.category === 'emergencyExits')?.files.map(f => f.url) || []
+        exterior: formData.media.photos.exterior.map(f => URL.createObjectURL(f)) || [],
+        interior: formData.media.photos.interior.map(f => URL.createObjectURL(f)) || [],
+        floorPlan: formData.media.photos.floorPlan.map(f => URL.createObjectURL(f)) || [],
+        washrooms: formData.media.photos.washrooms.map(f => URL.createObjectURL(f)) || [],
+        lifts: formData.media.photos.lifts.map(f => URL.createObjectURL(f)) || [],
+        emergencyExits: formData.media.photos.emergencyExits.map(f => URL.createObjectURL(f)) || []
       },
-      videoTour: formData.media.video?.url || '',
-      documents: formData.media.documents.map(doc => doc.type) || []
+      videoTour: formData.media.videoTour ? URL.createObjectURL(formData.media.videoTour) : '',
+      documents: formData.media.documents.map(doc => doc.name) || []
     };
 
     return uploadedMedia;
@@ -397,12 +503,11 @@ const LeaseCoveredSpaceMain = () => {
           amount: Number(formData.brokerage?.amount) || 0
         },
         availability: {
-          availableFrom: formData.availability?.availableFrom || new Date(),
+          date: formData.availability?.date || new Date(),
           availableImmediately: Boolean(formData.availability?.availableImmediately),
           leaseDuration: formData.availability?.leaseDuration || '',
           noticePeriod: formData.availability?.noticePeriod || '',
-          petsAllowed: Boolean(formData.availability?.petsAllowed),
-          operatingHours: Boolean(formData.availability?.operatingHours)
+          petsAllowed: Boolean(formData.availability?.petsAllowed)
         }
       },
       contactInformation: {
@@ -515,10 +620,10 @@ const LeaseCoveredSpaceMain = () => {
 
   const validateFinalStep = () => {
     // Check if media uploads are required and validate accordingly
-    // You can add specific validation rules here
+    // Check if at least one photo category has files or documents are uploaded
     const hasRequiredMedia =
-      formData.media.images.some(category => category.files.length > 0) ||
-      formData.media.documents.some(doc => !!doc.file);
+      Object.values(formData.media.photos).some(files => files.length > 0) ||
+      formData.media.documents.length > 0;
 
     return hasRequiredMedia;
   };

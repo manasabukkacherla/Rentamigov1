@@ -20,20 +20,20 @@ import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon,
 import axios from "axios"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
-interface MediaFile {
-  url: string;
-  file: File;
-}
+// interface MediaFile {
+//   url: string;
+//   file: File;
+// }
 
-interface MediaCategory {
-  category: string;
-  files: MediaFile[];
-}
+// interface MediaCategory {
+//   category: string;
+//   files: MediaFile[];
+// }
 
-interface MediaDocument {
-  type: string;
-  file: File;
-}
+// interface MediaDocument {
+//   type: string;
+//   file: File;
+// }
 
 interface FormDataState {
   basicInformation: {
@@ -96,7 +96,7 @@ interface FormDataState {
     };
     brokerage: {
       required: string;
-      amount: number;
+      amount?: number;
     };
     availability: {
       type: string;
@@ -111,9 +111,16 @@ interface FormDataState {
     bestTimeToContact?: string;
   };
   media: {
-    images: MediaCategory[];
-    video: { url: string; file: File } | null;
-    documents: MediaDocument[];
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
   };
   metadata?: {
     createdBy?: string;
@@ -200,15 +207,15 @@ const SellRetailShopMain = () => {
       bestTimeToContact: ''
     },
     media: {
-      images: [
-        { category: 'exterior', files: [] },
-        { category: 'interior', files: [] },
-        { category: 'floorPlan', files: [] },
-        { category: 'washrooms', files: [] },
-        { category: 'lifts', files: [] },
-        { category: 'emergencyExits', files: [] }
-      ],
-      video: null,
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
       documents: []
     }
   });
@@ -257,17 +264,22 @@ const SellRetailShopMain = () => {
           />
           <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: types } })} />
 
-          <CommercialPropertyAddress onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })} />
+          <CommercialPropertyAddress 
+            address={formData.basicInformation.address}
+            onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })} 
+          />
           {/* <Landmark onLandmarkChange={(landmark) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, landmark } })} /> */}
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
           />
         </div>
@@ -355,7 +367,9 @@ const SellRetailShopMain = () => {
               />
             </div>
             <div className="text-black">
-              <Brokerage onBrokerageChange={(brokerage) => setFormData({
+              <Brokerage 
+              bro={formData.priceDetails.brokerage}
+              onBrokerageChange={(brokerage) => setFormData({
                 ...formData,
                 priceDetails: {
                   ...formData.priceDetails,
@@ -393,7 +407,8 @@ const SellRetailShopMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
           <div className="space-y-6">
-            <CommercialContactDetails
+            <CommercialContactDetails   
+              contactInformation={formData.contactInformation}
               onContactChange={(contact) => setFormData({
                 ...formData,
                 contactInformation: {
@@ -414,17 +429,34 @@ const SellRetailShopMain = () => {
       component: (
         <div className="space-y-6">
             <CommercialMediaUpload
-              onMediaChange={(mediaData) => {
-                setFormData({
-                  ...formData,
-                  media: {
-                    images: mediaData.images,
-                    video: mediaData.video || null,
-                    documents: mediaData.documents
-                  }
-                });
-              }}
-            />
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+                photos[category] = files.map(f => f.file);
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
           </div>
       ),
     },
@@ -527,33 +559,15 @@ const SellRetailShopMain = () => {
 
       const convertedMedia = {
         photos: {
-          exterior: await Promise.all(
-            (formData.media.images.find(img => img.category === 'exterior')?.files || [])
-              .map(fileObj => convertFileToBase64(fileObj.file))
-          ),
-          interior: await Promise.all(
-            (formData.media.images.find(img => img.category === 'interior')?.files || [])
-              .map(fileObj => convertFileToBase64(fileObj.file))
-          ),
-          floorPlan: await Promise.all(
-            (formData.media.images.find(img => img.category === 'floorPlan')?.files || [])
-              .map(fileObj => convertFileToBase64(fileObj.file))
-          ),
-          washrooms: await Promise.all(
-            (formData.media.images.find(img => img.category === 'washrooms')?.files || [])
-              .map(fileObj => convertFileToBase64(fileObj.file))
-          ),
-          lifts: await Promise.all(
-            (formData.media.images.find(img => img.category === 'lifts')?.files || [])
-              .map(fileObj => convertFileToBase64(fileObj.file))
-          ),
-          emergencyExits: await Promise.all(
-            (formData.media.images.find(img => img.category === 'emergencyExits')?.files || [])
-              .map(fileObj => convertFileToBase64(fileObj.file))
-          )
+          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
         },
-        videoTour: formData.media.video ? await convertFileToBase64(formData.media.video.file) : undefined,
-        documents: await Promise.all(formData.media.documents.map(doc => convertFileToBase64(doc.file)))
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
       };
 
       console.log('Sending data to backend with author ID:', author);
@@ -642,7 +656,7 @@ const SellRetailShopMain = () => {
           },
           brokerage: {
             required: formData.priceDetails.brokerage.required,
-            amount: parseFloat(formData.priceDetails.brokerage.amount.toString())
+            amount: formData.priceDetails.brokerage.amount ? parseFloat(formData.priceDetails.brokerage.amount.toString()) : undefined
           },
           availability: {
             type: formData.priceDetails.availability.type,

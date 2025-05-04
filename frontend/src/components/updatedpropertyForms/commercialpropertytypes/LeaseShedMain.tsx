@@ -31,10 +31,10 @@ interface FormDataType {
   propertyName: string;
   shedType: string[];
   address: {
-    street?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
   };
   landmark: string;
   coordinates: { latitude: string; longitude: string };
@@ -85,18 +85,18 @@ interface FormDataType {
     noticePeriodUnit?: string;
   };
   maintenanceAmount: {
-    amount?: number | null;
-    frequency?: string;
+    amount: number;
+    frequency: string;
   };
   otherCharges: {
-    waterCharges?: { type: string; amount: number | null } | null;
-    electricityCharges?: { type: string; amount: number | null } | null;
-    gasCharges?: { type: string; amount: number | null } | null;
-    otherCharges?: { type: string; amount: number | null } | null;
+    water: { type: string; amount: number };
+    electricity: { type: string; amount: number };
+    gas: { type: string; amount: number };
+    others: { type: string; amount: number };
   };
   brokerage: {
-    required?: string;
-    amount?: number | null;
+    required: string;
+    amount?: number;
   };
   availability: {
     availableImmediately?: boolean;
@@ -110,13 +110,24 @@ interface FormDataType {
     };
   };
   contactDetails: {
-    name?: string;
-    email?: string;
-    phone?: string;
+    name: string;
+    email: string;
+    phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
   };
-  media: MediaType;
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+  };
 }
 
 // Validation utility functions
@@ -157,7 +168,12 @@ const LeaseShedMain = () => {
   const [formData, setFormData] = useState<FormDataType>({
     propertyName: '',
     shedType: [],
-    address: {},
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: ''
+    },
     landmark: '',
     coordinates: { latitude: '', longitude: '' },
     isCornerProperty: false,
@@ -165,14 +181,35 @@ const LeaseShedMain = () => {
     propertyDetails: {},
     leaseAmount: {},
     leaseTenure: {},
-    maintenanceAmount: {},
-    otherCharges: {},
-    brokerage: {},
+    maintenanceAmount: {
+      amount: 0,
+      frequency: 'monthly'
+    },
+    otherCharges: {
+      water: { type: 'inclusive', amount: 0 },
+      electricity: { type: 'inclusive', amount: 0 },
+      gas: { type: 'inclusive', amount: 0 },
+      others: { type: 'inclusive', amount: 0 }
+    },
+    brokerage: { required: 'no', amount: 0 },
     availability: {},
-    contactDetails: {},
+    contactDetails: {
+      name: '',
+      email: '',
+      phone: '',
+      alternatePhone: '',
+      bestTimeToContact: ''
+    },
     media: {
-      images: [],
-      video: undefined,
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
       documents: []
     }
   });
@@ -214,17 +251,18 @@ const LeaseShedMain = () => {
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
             <MapLocation
               latitude={formData.coordinates.latitude}
               longitude={formData.coordinates.longitude}
+              landmark={formData.landmark}
               onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
             />
 
             <div className="flex items-center space-x-2 cursor-pointer">
-              <CornerProperty onCornerPropertyChange={(isCorner) => setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))} />
+              <CornerProperty isCornerProperty={formData.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))} />
             </div>
           </div>
         </div>
@@ -264,9 +302,9 @@ const LeaseShedMain = () => {
             console.log("Setting tenure values:", updatedTenure);
             setFormData((prev) => ({ ...prev, leaseTenure: updatedTenure }));
           }} />
-          <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData((prev) => ({ ...prev, maintenanceAmount: maintenance }))} />
-          <OtherCharges onOtherChargesChange={(charges) => setFormData((prev) => ({ ...prev, otherCharges: charges }))} />
-          <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
+          <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData((prev) => ({ ...prev, maintenanceAmount: maintenance }))} />
+          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => setFormData((prev) => ({ ...prev, otherCharges: charges }))} />
+          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
         </div>
       ),
     },
@@ -284,7 +322,7 @@ const LeaseShedMain = () => {
       icon: <User className="w-6 h-6" />,
       component: renderFormSection(
         <div className="space-y-6">
-          <CommercialContactDetails onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))} />
+          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))} />
         </div>
       ),
     },
@@ -293,7 +331,48 @@ const LeaseShedMain = () => {
       icon: <Image className="w-6 h-6" />,
       component: renderFormSection(
         <div className="space-y-6">
-          <CommercialMediaUpload onMediaChange={(media: MediaType) => setFormData((prev) => ({ ...prev, media }))} />
+          <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+              onMediaChange={(media) => {
+                const photosByCategory: Record<string, File[]> = {
+                  exterior: [],
+                  interior: [],
+                  floorPlan: [],
+                  washrooms: [],
+                  lifts: [],
+                  emergencyExits: []
+                };
+
+                media.photos.forEach(({ category, files }) => {
+                  if (category in photosByCategory) {
+                    photosByCategory[category] = files.map(f => f.file);
+                  }
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photosByCategory.exterior,
+                      interior: photosByCategory.interior,
+                      floorPlan: photosByCategory.floorPlan,
+                      washrooms: photosByCategory.washrooms,
+                      lifts: photosByCategory.lifts,
+                      emergencyExits: photosByCategory.emergencyExits
+                    },
+                    videoTour: media.videoTour || null,
+                    documents: media.documents
+                  }
+                }));
+              }}
+            />
         </div>
       ),
     },
@@ -440,249 +519,247 @@ const LeaseShedMain = () => {
       const author = JSON.parse(user).id;
 
       // Transform media data
-      const processMediaData = async () => {
-        const convertedPhotos: Record<string, string[]> = {
-          exterior: [],
-          interior: [],
-          floorPlan: [],
-          washrooms: [],
-          lifts: [],
-          emergencyExits: []
-        };
+      // const processMediaData = async () => {
+      //   const convertedPhotos: Record<string, string[]> = {
+      //     exterior: [],
+      //     interior: [],
+      //     floorPlan: [],
+      //     washrooms: [],
+      //     lifts: [],
+      //     emergencyExits: []
+      //   };
 
-        // Debug the media categories
-        console.log("Media images categories:", formData.media.images.map(cat => cat.category));
+      //   // Debug the media categories
+      //   // console.log("Media images categories:", formData.media.images.map(cat => cat.category));
 
-        // Helper function to normalize category names
-        const normalizeCategory = (category: string): string => {
-          // Map any variations of category names to the correct keys in convertedPhotos
-          const categoryMap: Record<string, string> = {
-            'exterior': 'exterior',
-            'interior': 'interior',
-            'floorplan': 'floorPlan',
-            'floorPlan': 'floorPlan',
-            'floor plan': 'floorPlan',
-            'washrooms': 'washrooms',
-            'lifts': 'lifts',
-            'emergencyexits': 'emergencyExits',
-            'emergencyExits': 'emergencyExits',
-            'emergency exits': 'emergencyExits'
-          };
+      //   // Helper function to normalize category names
+      //   const normalizeCategory = (category: string): string => {
+      //     // Map any variations of category names to the correct keys in convertedPhotos
+      //     const categoryMap: Record<string, string> = {
+      //       'exterior': 'exterior',
+      //       'interior': 'interior',
+      //       'floorplan': 'floorPlan',
+      //       'floorPlan': 'floorPlan',
+      //       'floor plan': 'floorPlan',
+      //       'washrooms': 'washrooms',
+      //       'lifts': 'lifts',
+      //       'emergencyexits': 'emergencyExits',
+      //       'emergencyExits': 'emergencyExits',
+      //       'emergency exits': 'emergencyExits'
+      //     };
 
-          return categoryMap[category.toLowerCase()] || category.toLowerCase();
-        };
+      //     return categoryMap[category.toLowerCase()] || category.toLowerCase();
+      //   };
+      //   // Process images
+      //   for (const category in formData.media.photos) {
+      //     const originalCategory = category;
+      //     const normalizedCategory = normalizeCategory(originalCategory);
 
-        // Process images
-        for (const imageCategory of formData.media.images) {
-          const originalCategory = imageCategory.category;
-          const normalizedCategory = normalizeCategory(originalCategory);
+      //     console.log(`Processing category: ${originalCategory} -> normalized to: ${normalizedCategory}`);
+      //     if (normalizedCategory in convertedPhotos) {
+      //       const filePromises = formData.media.photos[category].map((f: { file: File; url: string; }) =>
+      //         f.file ? convertFileToBase64(f.file) : f.url
+      //       );
+      //       convertedPhotos[normalizedCategory as keyof typeof convertedPhotos] = await Promise.all(filePromises);
+      //       console.log(`Converted ${convertedPhotos[normalizedCategory as keyof typeof convertedPhotos].length} files for ${normalizedCategory}`);
+      //     } else {
+      //       console.log(`Category not found: ${originalCategory} (normalized: ${normalizedCategory})`);
+      //     }
+      //   }
 
-          console.log(`Processing category: ${originalCategory} -> normalized to: ${normalizedCategory}`);
+      //   // Process video
+      //   let videoTour = '';
+      //   if (formData.media.videoTour?.file) {
+      //     videoTour = await convertFileToBase64(formData.media.videoTour.file);
+      //   } else if (formData.media.videoTour?.url) {
+      //     videoTour = formData.media.videoTour.url;
+      //   }
 
-          if (normalizedCategory in convertedPhotos) {
-            const filePromises = imageCategory.files.map(f =>
-              f.file ? convertFileToBase64(f.file) : f.url
-            );
-            convertedPhotos[normalizedCategory] = await Promise.all(filePromises);
-            console.log(`Converted ${convertedPhotos[normalizedCategory].length} files for ${normalizedCategory}`);
-          } else {
-            console.log(`Category not found: ${originalCategory} (normalized: ${normalizedCategory})`);
-          }
-        }
+      //   // Process documents
+      //   const documents = await Promise.all(
+      //     formData.media.documents.map(doc =>
+      //       doc.file ? convertFileToBase64(doc.file) : doc.type
+      //     )
+      //   );
 
-        // Process video
-        let videoTour = '';
-        if (formData.media.video?.file) {
-          videoTour = await convertFileToBase64(formData.media.video.file);
-        } else if (formData.media.video?.url) {
-          videoTour = formData.media.video.url;
-        }
+      //   return {
+      //     photos: convertedPhotos,
+      //     videoTour,
+      //     documents
+      //   };
+      // };
 
-        // Process documents
-        const documents = await Promise.all(
-          formData.media.documents.map(doc =>
-            doc.file ? convertFileToBase64(doc.file) : doc.type
-          )
-        );
+      // // Ensure proper capitalization for enum values
+      // const leaseAmountType = formData.leaseAmount.type ?
+      //   formData.leaseAmount.type.charAt(0).toUpperCase() + formData.leaseAmount.type.slice(1) : 'Fixed';
 
-        return {
-          photos: convertedPhotos,
-          videoTour,
-          documents
-        };
-      };
+      // // Fix maintenance frequency format to match backend expectations
+      // let maintenanceFrequency = '';
+      // if (formData.maintenanceAmount.frequency) {
+      //   // Convert frequencies to match backend enum exactly
+      //   const frequencyMap: Record<string, string> = {
+      //     'monthly': 'Monthly',
+      //     'quarterly': 'Quarterly',
+      //     'yearly': 'Yearly',
+      //     'half-yearly': 'Half-Yearly',
+      //     'half yearly': 'Half-Yearly'
+      //   };
+      //   maintenanceFrequency = frequencyMap[formData.maintenanceAmount.frequency.toLowerCase()] || 'Monthly';
+      // } else {
+      //   maintenanceFrequency = 'Monthly';
+      // }
 
-      // Ensure proper capitalization for enum values
-      const leaseAmountType = formData.leaseAmount.type ?
-        formData.leaseAmount.type.charAt(0).toUpperCase() + formData.leaseAmount.type.slice(1) : 'Fixed';
+      // console.log("Original frequency:", formData.maintenanceAmount.frequency);
+      // console.log("Mapped frequency:", maintenanceFrequency);
 
-      // Fix maintenance frequency format to match backend expectations
-      let maintenanceFrequency = '';
-      if (formData.maintenanceAmount.frequency) {
-        // Convert frequencies to match backend enum exactly
-        const frequencyMap: Record<string, string> = {
-          'monthly': 'Monthly',
-          'quarterly': 'Quarterly',
-          'yearly': 'Yearly',
-          'half-yearly': 'Half-Yearly',
-          'half yearly': 'Half-Yearly'
-        };
-        maintenanceFrequency = frequencyMap[formData.maintenanceAmount.frequency.toLowerCase()] || 'Monthly';
-      } else {
-        maintenanceFrequency = 'Monthly';
-      }
+      // const mediaData = await processMediaData();
 
-      console.log("Original frequency:", formData.maintenanceAmount.frequency);
-      console.log("Mapped frequency:", maintenanceFrequency);
+      // // Fix the additionaldetails field mapping
+      // const shedDetails = {
+      //   totalArea: formData.shedDetails.totalArea || 0,
+      //   carpetArea: formData.shedDetails.carpetArea || 0,
+      //   height: formData.shedDetails.height || 0,
+      //   entranceWidth: formData.shedDetails.entranceWidth || 0,
+      //   additionaldetails: formData.shedDetails.additionalDetails || '' // Map from additionalDetails to additionaldetails
+      // };
 
-      const mediaData = await processMediaData();
+      // // Check the leaseTenure values before creating the payload
+      // console.log("LeaseTenure values for payload:", {
+      //   min: formData.leaseTenure.min,
+      //   max: formData.leaseTenure.max,
+      //   minType: typeof formData.leaseTenure.min,
+      //   maxType: typeof formData.leaseTenure.max
+      // });
 
-      // Fix the additionaldetails field mapping
-      const shedDetails = {
-        totalArea: formData.shedDetails.totalArea || 0,
-        carpetArea: formData.shedDetails.carpetArea || 0,
-        height: formData.shedDetails.height || 0,
-        entranceWidth: formData.shedDetails.entranceWidth || 0,
-        additionaldetails: formData.shedDetails.additionalDetails || '' // Map from additionalDetails to additionaldetails
-      };
+      // // Convert form data to match backend model
+      // const payload = {
+      //   basicInformation: {
+      //     title: formData.propertyName,
+      //     shedType: formData.shedType,
+      //     address: {
+      //       street: formData.address.street || '',
+      //       city: formData.address.city || '',
+      //       state: formData.address.state || '',
+      //       zipCode: formData.address.zipCode || ''
+      //     },
+      //     landmark: formData.landmark,
+      //     location: {
+      //       latitude: parseFloat(formData.coordinates.latitude) || 0,
+      //       longitude: parseFloat(formData.coordinates.longitude) || 0
+      //     },
+      //     isCornerProperty: formData.isCornerProperty
+      //   },
+      //   shedDetails: shedDetails,
+      //   propertyDetails: {
+      //     area: {
+      //       totalArea: formData.propertyDetails.area?.totalArea || 0,
+      //       builtUpArea: formData.propertyDetails.area?.builtUpArea || 0,
+      //       carpetArea: formData.propertyDetails.area?.carpetArea || 0
+      //     },
+      //     floor: {
+      //       floorNumber: formData.propertyDetails.floor?.floorNumber || 0,
+      //       totalFloors: formData.propertyDetails.floor?.totalFloors || 0
+      //     },
+      //     facingDirection: formData.propertyDetails.facingDirection || '',
+      //     furnishingStatus: formData.propertyDetails.furnishingStatus || '',
+      //     propertyAmenities: formData.propertyDetails.propertyAmenities || [],
+      //     wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || [],
+      //     electricitySupply: {
+      //       powerLoad: formData.propertyDetails.electricitySupply?.powerLoad || 0,
+      //       backup: formData.propertyDetails.electricitySupply?.backup || false
+      //     },
+      //     waterAvailability: formData.propertyDetails.waterAvailability || '',
+      //     propertyAge: formData.propertyDetails.propertyAge ? Number(formData.propertyDetails.propertyAge) : 0,
+      //     propertyCondition: formData.propertyDetails.propertyCondition || ''
+      //   },
+      //   leaseTerms: {
+      //     leaseDetails: {
+      //       leaseAmount: {
+      //         amount: formData.leaseAmount.amount || 0,
+      //         type: leaseAmountType as 'Fixed' | 'Negotiable',
+      //         duration: formData.leaseAmount.duration || 1,
+      //         durationUnit: formData.leaseAmount.durationUnit || 'month'
+      //       }
+      //     },
+      //     tenureDetails: {
+      //       minimumTenure: formData.leaseTenure.min !== null && formData.leaseTenure.min !== undefined ? Number(formData.leaseTenure.min) : 1,
+      //       minimumUnit: formData.leaseTenure.minUnit || 'year',
+      //       maximumTenure: formData.leaseTenure.max !== null && formData.leaseTenure.max !== undefined ? Number(formData.leaseTenure.max) : 3,
+      //       maximumUnit: formData.leaseTenure.maxUnit || 'year',
+      //       lockInPeriod: formData.leaseTenure.lockInPeriod !== null && formData.leaseTenure.lockInPeriod !== undefined ? Number(formData.leaseTenure.lockInPeriod) : 1,
+      //       lockInUnit: formData.leaseTenure.lockInUnit || 'year',
+      //       noticePeriod: formData.leaseTenure.noticePeriod !== null && formData.leaseTenure.noticePeriod !== undefined ? Number(formData.leaseTenure.noticePeriod) : 1,
+      //       noticePeriodUnit: formData.leaseTenure.noticePeriodUnit || 'month'
+      //     },
+      //     maintenanceAmount: {
+      //       amount: formData.maintenanceAmount.amount || 0,
+      //       frequency: maintenanceFrequency as 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly'
+      //     },
+      //     otherCharges: {
+      //       waterCharges: {
+      //         type: formData.otherCharges.waterCharges?.type || 'inclusive',
+      //         amount: formData.otherCharges.waterCharges?.amount || 0
+      //       },
+      //       electricityCharges: {
+      //         type: formData.otherCharges.electricityCharges?.type || 'inclusive',
+      //         amount: formData.otherCharges.electricityCharges?.amount || 0
+      //       },
+      //       gasCharges: {
+      //         type: formData.otherCharges.gasCharges?.type || 'inclusive',
+      //         amount: formData.otherCharges.gasCharges?.amount || 0
+      //       },
+      //       otherCharges: {
+      //         type: formData.otherCharges.otherCharges?.type || 'inclusive',
+      //         amount: formData.otherCharges.otherCharges?.amount || 0
+      //       }
+      //     },
+      //     brokerage: {
+      //       required: formData.brokerage.required?.toLowerCase() || 'no',
+      //       amount: formData.brokerage.amount
+      //     },
+      //     availability: {
+      //       availableImmediately: formData.availability.availableImmediately || false,
+      //       availableFrom: formData.availability.availableFrom || new Date(),
+      //       leaseDuration: formData.availability.leaseDuration || '1 year',
+      //       noticePeriod: formData.availability.noticePeriod || '1 month',
+      //       petsAllowed: formData.availability.petsAllowed || false,
+      //       operatingHours: {
+      //         restricted: formData.availability.operatingHours?.restricted || false,
+      //         restrictions: formData.availability.operatingHours?.restrictions || ''
+      //       }
+      //     }
+      //   },
+      //   contactInformation: {
+      //     name: formData.contactDetails.name || '',
+      //     email: formData.contactDetails.email || '',
+      //     phone: formData.contactDetails.phone || '',
+      //     alternatePhone: formData.contactDetails.alternatePhone,
+      //     bestTimeToContact: formData.contactDetails.bestTimeToContact
+      //   },
+      //   media: mediaData,
+      //   metadata: {
+      //     createdBy: author,
+      //     createdAt: new Date(),
+      //     updatedAt: new Date(),
+      //     status: 'active',
+      //     views: 0,
+      //     favorites: 0,
+      //     isVerified: false
+      //   }
+      // };
 
-      // Check the leaseTenure values before creating the payload
-      console.log("LeaseTenure values for payload:", {
-        min: formData.leaseTenure.min,
-        max: formData.leaseTenure.max,
-        minType: typeof formData.leaseTenure.min,
-        maxType: typeof formData.leaseTenure.max
-      });
+      // console.log('Payload:', payload);
 
-      // Convert form data to match backend model
-      const payload = {
-        basicInformation: {
-          title: formData.propertyName,
-          shedType: formData.shedType,
-          address: {
-            street: formData.address.street || '',
-            city: formData.address.city || '',
-            state: formData.address.state || '',
-            zipCode: formData.address.zipCode || ''
-          },
-          landmark: formData.landmark,
-          location: {
-            latitude: parseFloat(formData.coordinates.latitude) || 0,
-            longitude: parseFloat(formData.coordinates.longitude) || 0
-          },
-          isCornerProperty: formData.isCornerProperty
-        },
-        shedDetails: shedDetails,
-        propertyDetails: {
-          area: {
-            totalArea: formData.propertyDetails.area?.totalArea || 0,
-            builtUpArea: formData.propertyDetails.area?.builtUpArea || 0,
-            carpetArea: formData.propertyDetails.area?.carpetArea || 0
-          },
-          floor: {
-            floorNumber: formData.propertyDetails.floor?.floorNumber || 0,
-            totalFloors: formData.propertyDetails.floor?.totalFloors || 0
-          },
-          facingDirection: formData.propertyDetails.facingDirection || '',
-          furnishingStatus: formData.propertyDetails.furnishingStatus || '',
-          propertyAmenities: formData.propertyDetails.propertyAmenities || [],
-          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || [],
-          electricitySupply: {
-            powerLoad: formData.propertyDetails.electricitySupply?.powerLoad || 0,
-            backup: formData.propertyDetails.electricitySupply?.backup || false
-          },
-          waterAvailability: formData.propertyDetails.waterAvailability || '',
-          propertyAge: formData.propertyDetails.propertyAge ? Number(formData.propertyDetails.propertyAge) : 0,
-          propertyCondition: formData.propertyDetails.propertyCondition || ''
-        },
-        leaseTerms: {
-          leaseDetails: {
-            leaseAmount: {
-              amount: formData.leaseAmount.amount || 0,
-              type: leaseAmountType as 'Fixed' | 'Negotiable',
-              duration: formData.leaseAmount.duration || 1,
-              durationUnit: formData.leaseAmount.durationUnit || 'month'
-            }
-          },
-          tenureDetails: {
-            minimumTenure: formData.leaseTenure.min !== null && formData.leaseTenure.min !== undefined ? Number(formData.leaseTenure.min) : 1,
-            minimumUnit: formData.leaseTenure.minUnit || 'year',
-            maximumTenure: formData.leaseTenure.max !== null && formData.leaseTenure.max !== undefined ? Number(formData.leaseTenure.max) : 3,
-            maximumUnit: formData.leaseTenure.maxUnit || 'year',
-            lockInPeriod: formData.leaseTenure.lockInPeriod !== null && formData.leaseTenure.lockInPeriod !== undefined ? Number(formData.leaseTenure.lockInPeriod) : 1,
-            lockInUnit: formData.leaseTenure.lockInUnit || 'year',
-            noticePeriod: formData.leaseTenure.noticePeriod !== null && formData.leaseTenure.noticePeriod !== undefined ? Number(formData.leaseTenure.noticePeriod) : 1,
-            noticePeriodUnit: formData.leaseTenure.noticePeriodUnit || 'month'
-          },
-          maintenanceAmount: {
-            amount: formData.maintenanceAmount.amount || 0,
-            frequency: maintenanceFrequency as 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly'
-          },
-          otherCharges: {
-            waterCharges: {
-              type: formData.otherCharges.waterCharges?.type || 'inclusive',
-              amount: formData.otherCharges.waterCharges?.amount || 0
-            },
-            electricityCharges: {
-              type: formData.otherCharges.electricityCharges?.type || 'inclusive',
-              amount: formData.otherCharges.electricityCharges?.amount || 0
-            },
-            gasCharges: {
-              type: formData.otherCharges.gasCharges?.type || 'inclusive',
-              amount: formData.otherCharges.gasCharges?.amount || 0
-            },
-            otherCharges: {
-              type: formData.otherCharges.otherCharges?.type || 'inclusive',
-              amount: formData.otherCharges.otherCharges?.amount || 0
-            }
-          },
-          brokerage: {
-            required: formData.brokerage.required?.toLowerCase() || 'no',
-            amount: formData.brokerage.amount
-          },
-          availability: {
-            availableImmediately: formData.availability.availableImmediately || false,
-            availableFrom: formData.availability.availableFrom || new Date(),
-            leaseDuration: formData.availability.leaseDuration || '1 year',
-            noticePeriod: formData.availability.noticePeriod || '1 month',
-            petsAllowed: formData.availability.petsAllowed || false,
-            operatingHours: {
-              restricted: formData.availability.operatingHours?.restricted || false,
-              restrictions: formData.availability.operatingHours?.restrictions || ''
-            }
-          }
-        },
-        contactInformation: {
-          name: formData.contactDetails.name || '',
-          email: formData.contactDetails.email || '',
-          phone: formData.contactDetails.phone || '',
-          alternatePhone: formData.contactDetails.alternatePhone,
-          bestTimeToContact: formData.contactDetails.bestTimeToContact
-        },
-        media: mediaData,
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          status: 'active',
-          views: 0,
-          favorites: 0,
-          isVerified: false
-        }
-      };
+      // // Using the correct API endpoint pattern based on other similar components
+      // // Looking at similar files, we'll use the plural form
+      // const response = await axios.post('/api/commercial/lease/sheds', payload);
 
-      console.log('Payload:', payload);
-
-      // Using the correct API endpoint pattern based on other similar components
-      // Looking at similar files, we'll use the plural form
-      const response = await axios.post('/api/commercial/lease/sheds', payload);
-
-      if (response.status === 201) {
-        toast.success('Property listed successfully!');
-        navigate('/dashboard');
-      } else {
-        toast.error('Failed to list property. Please try again.');
-      }
+      // if (response.status === 201) {
+      //   toast.success('Property listed successfully!');
+      //   navigate('/dashboard');
+      // } else {
+      //   toast.error('Failed to list property. Please try again.');
+      // }
     } catch (error) {
       console.error('Error submitting property:', error);
       toast.error('An error occurred. Please try again later.');

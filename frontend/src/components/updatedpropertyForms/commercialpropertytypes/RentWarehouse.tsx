@@ -89,19 +89,19 @@ interface FormData {
     };
     otherCharges: {
       water: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       electricity: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       gas: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       others: {
-        amount?: number;
+        amount: number;
         type: string;
       };
     };
@@ -115,8 +115,8 @@ interface FormData {
     };
   };
   availability: {
-    availableFrom?: string;
-    availableImmediately: boolean;
+    type: string;
+    date?: string;
   };
   contactInformation: {
     name: string;
@@ -248,8 +248,8 @@ const RentWarehouse = () => {
       },
     },
     availability: {
-      availableFrom: '',
-      availableImmediately: true,
+      type: 'immediate',
+      date: '',
     },
     contactInformation: {
       name: '',
@@ -479,8 +479,8 @@ const RentWarehouse = () => {
         }
       },
       availability: {
-        availableFrom: availability.type === 'immediate' ? new Date().toISOString() : availability.date || '',
-        availableImmediately: availability.type === 'immediate'
+        type: availability.type || 'immediate',
+        date: availability.date || new Date().toISOString()
       }
     });
   };
@@ -554,11 +554,13 @@ const RentWarehouse = () => {
             onWarehouseTypeChange={handleWarehouseTypeChange}
           />
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={handleAddressChange}
           />
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
@@ -573,6 +575,7 @@ const RentWarehouse = () => {
 
           <div className="flex items-center space-x-2 cursor-pointer">
             <CornerProperty
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={handleCornerPropertyChange}
             />
           </div>
@@ -599,17 +602,21 @@ const RentWarehouse = () => {
       content: (
         <div className="space-y-6">
           <Rent
+            rentDetails={formData.rentalTerms.rentDetails}
             onRentChange={handleRentChange}
           />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
             <MaintenanceAmount
+              maintenanceAmount={formData.rentalTerms.maintenanceAmount}
               onMaintenanceAmountChange={handleMaintenanceAmountChange}
             />
           )}
           <SecurityDeposit
+            deposit={formData.rentalTerms.securityDeposit}
             onSecurityDepositChange={handleSecurityDepositChange}
           />
           <OtherCharges
+            otherCharges={formData.rentalTerms.otherCharges}
             onOtherChargesChange={(charges) => setFormData(prev => ({
               ...prev,
               rentalTerms: {
@@ -624,6 +631,7 @@ const RentWarehouse = () => {
             }))}
           />
           <Brokerage
+            bro={formData.rentalTerms.brokerage}
             onBrokerageChange={handleBrokerageChange}
           />
         </div>
@@ -635,6 +643,10 @@ const RentWarehouse = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
+            availability={{
+              type: formData.availability.type as "immediate" | "specific",
+              date: formData.availability.date
+            }}
             onAvailabilityChange={handleAvailabilityChange}
           />
         </div>
@@ -646,6 +658,7 @@ const RentWarehouse = () => {
       content: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactInformation}
             onContactChange={handleContactChange}
           />
         </div>
@@ -657,9 +670,17 @@ const RentWarehouse = () => {
       content: (
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -671,8 +692,8 @@ const RentWarehouse = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

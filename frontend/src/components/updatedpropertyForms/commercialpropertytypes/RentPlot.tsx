@@ -131,9 +131,9 @@ interface FormData {
     securityDeposit: {
       amount: number;
     };
-    maintenanceAmount?: {
-      amount?: number;
-      frequency?: string;
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
     };
     otherCharges: {
       water: {
@@ -540,16 +540,23 @@ const RentPlot = () => {
             onPropertyNameChange={handlePropertyNameChange}
           />
           <PlotType onPlotTypeChange={handlePlotTypeChange} />
-          <CommercialPropertyAddress onAddressChange={handleAddressChange} />
+          <CommercialPropertyAddress
+            address={formData.basicInformation.address}
+            onAddressChange={handleAddressChange}
+          />
           {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
-          <CornerProperty onCornerPropertyChange={handleCornerPropertyChange} />
+          <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
+            onCornerPropertyChange={handleCornerPropertyChange}
+          />
         </div>
       )
     },
@@ -569,11 +576,11 @@ const RentPlot = () => {
 
         <div className='space-y-6'>
 
-          <Rent onRentChange={handleRentChange} />
+          <Rent onRentChange={handleRentChange} rentDetails={formData.rentalTerms.rentDetails} />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+            <MaintenanceAmount maintenanceAmount={formData.rentalTerms.maintenanceAmount} onMaintenanceAmountChange={handleMaintenanceAmountChange} />
           )}
-          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} deposit={formData.rentalTerms.securityDeposit} />
 
 
         </div>
@@ -584,7 +591,13 @@ const RentPlot = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md transition-all duration-300 hover:shadow-lg">
-          <AvailabilityDate onAvailabilityChange={handleAvailabilityChange} />
+          <AvailabilityDate
+            availability={{
+              type: formData.rentalTerms.availability.type as "immediate" | "specific",
+              date: formData.rentalTerms.availability.date
+            }}
+            onAvailabilityChange={handleAvailabilityChange}
+          />
         </div>
       )
     },
@@ -592,7 +605,10 @@ const RentPlot = () => {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
-        <CommercialContactDetails onContactChange={handleContactChange} />
+        <CommercialContactDetails
+          onContactChange={handleContactChange}
+          contactInformation={formData.contactInformation}
+        />
       )
     },
     {

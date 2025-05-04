@@ -9,14 +9,17 @@ interface IMedia {
   documents: File[]; // Array of documents
 }
 
-
 interface CommercialMediaUploadProps {
   Media: IMedia;
   onMediaChange?: (media: IMedia) => void;
 }
 
 const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadProps) => {
-  const [media, setMedia] = useState<IMedia>(Media);
+  const [media, setMedia] = useState<IMedia>(Media || {
+    photos: [],
+    videoTour: null,
+    documents: []
+  });
 
   const [dragActive, setDragActive] = useState(false);
   const imageInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
@@ -45,11 +48,16 @@ const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadPr
   const handleImageDrop = (e: React.DragEvent, category: string) => {
     e.preventDefault();
     setDragActive(false);
-    
-    const files = Array.from(e.dataTransfer.files).filter(file => 
+
+    const files = Array.from(e.dataTransfer.files).filter(file =>
       file.type.startsWith('image/')
     );
-    
+
+    if (files.length === 0) {
+      toast.error("Please upload only image files.");
+      return;
+    }
+
     handleImageFiles(files, category);
   };
 
@@ -84,8 +92,11 @@ const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadPr
   const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
+      if (file.size > 100 * 1024 * 1024) { // 100MB size limit
+        toast.error("Video size exceeds 100MB.");
+        return;
+      }
       const videoUrl = URL.createObjectURL(file);
-      const newVideo = { url: videoUrl, file };
       const updatedMedia = { ...media, videoTour: file };
       setMedia(updatedMedia);
       onMediaChange?.(updatedMedia); // Notify parent component
@@ -95,10 +106,18 @@ const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadPr
   const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      const newDocuments = files.map(file => ({
+      const validTypes = ['pdf', 'doc', 'docx'];
+      const newDocuments = files.filter(file =>
+        validTypes.includes(file.name.split('.').pop()?.toLowerCase() || '')
+      ).map(file => ({
         type: file.name.split('.').pop()?.toLowerCase() || 'unknown',
         file
       }));
+
+      if (newDocuments.length === 0) {
+        toast.error("Invalid document format. Only PDF, DOC, DOCX are allowed.");
+        return;
+      }
 
       const updatedMedia = {
         ...media,
@@ -206,7 +225,7 @@ const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadPr
               <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-white">
                 <div className="flex flex-col items-center justify-center text-center">
                   <Upload className="w-12 h-12 text-gray-400 mb-4" />
-                  <p className="text-lg mb-4">Add your {imageCategoryLabels[category].toLowerCase()} in any way you prefer</p>
+                  <p className="text-lg mb-4">Add your {imageCategoryLabels[category]} in any way you prefer</p>
                   <div className="flex gap-4 mb-4">
                     <button 
                       className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
