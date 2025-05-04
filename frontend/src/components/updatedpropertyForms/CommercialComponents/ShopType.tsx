@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { ArrowRight, Store } from 'lucide-react';
 
 interface ShopTypeProps {
+  shopType: string[],
   onShopTypeChange?: (types: string[]) => void;
 }
 
-const ShopType = ({ onShopTypeChange }: ShopTypeProps) => {
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+const ShopType = ({ shopType, onShopTypeChange }: ShopTypeProps) => {
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(shopType);
 
   const handleTypeChange = (type: string, checked: boolean) => {
     const updatedTypes = checked 

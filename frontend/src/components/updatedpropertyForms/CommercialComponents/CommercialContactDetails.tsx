@@ -2,17 +2,24 @@ import { useState } from 'react';
 import { ArrowRight, User, Phone, Mail, Clock } from 'lucide-react';
 
 interface CommercialContactDetailsProps {
-  onContactChange?: (contact: Record<string, any>) => void;
+  contactInformation: {
+    name: string;
+    phone: string;
+    email: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  }
+  onContactChange?: (contact: {
+    name: string;
+    phone: string;
+    email: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  }) => void;
 }
 
-const CommercialContactDetails = ({ onContactChange }: CommercialContactDetailsProps) => {
-  const [contact, setContact] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    alternatePhone: '',
-    bestTimeToContact: ''
-  });
+const CommercialContactDetails = ({ contactInformation, onContactChange }: CommercialContactDetailsProps) => {
+  const [contact, setContact] = useState(contactInformation);
 
   const handleChange = (field: string, value: string) => {
     const updatedContact = { ...contact, [field]: value };

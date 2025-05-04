@@ -208,6 +208,7 @@ const SellOfficeSpaceMain = () => {
           />
 
           <CommercialPropertyAddress
+            address={formData.address}
             onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
           />
           {/* <Landmark
@@ -223,12 +224,14 @@ const SellOfficeSpaceMain = () => {
           <MapLocation
             latitude={formData.coordinates.latitude.toString()}
             longitude={formData.coordinates.longitude.toString()}
+            landmark={formData.landmark}
             onLocationChange={(location) => handleChange('coordinates', location)}
             onAddressChange={(address) => handleChange('address', address)}
             onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
           />
 
           <CornerProperty
+            isCornerProperty={formData.isCornerProperty}
             onCornerPropertyChange={(isCorner) =>
               setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
             }
@@ -299,6 +302,7 @@ const SellOfficeSpaceMain = () => {
             </div>
             <div className="text-black">
               <Brokerage
+                bro={formData.brokerage}
                 onBrokerageChange={(brokerage) =>
                   setFormData((prev) => ({
                     ...prev,
@@ -339,6 +343,7 @@ const SellOfficeSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactDetails}
             onContactChange={(contact) => setFormData((prev) => ({
               ...prev,
               contactDetails: {
@@ -359,26 +364,30 @@ const SellOfficeSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
               setFormData(prev => ({
                 ...prev,
                 media: {
+                  ...prev.media,
                   photos: {
-                    exterior: photos.exterior || [],
-                    interior: photos.interior || [],
-                    floorPlan: photos.floorPlan || [],
-                    washrooms: photos.washrooms || [],
-                    lifts: photos.lifts || [],
-                    emergencyExits: photos.emergencyExits || [],
-                    others: photos.others || []
+                    ...prev.media.photos,
+                    ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

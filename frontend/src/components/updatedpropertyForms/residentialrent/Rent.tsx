@@ -4,15 +4,16 @@ import { useState } from "react"
 import { ArrowRight, IndianRupee } from "lucide-react"
 
 interface RentProps {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  }
   onRentChange?: (rent: Record<string, any>) => void
 }
 
-const Rent = ({ onRentChange }: RentProps) => {
-  const [rent, setRent] = useState({
-    expectedRent: 0,
-    isNegotiable: false,
-    rentType: "inclusive",
-  })
+const Rent = ({ rentDetails, onRentChange }: RentProps) => {
+  const [rent, setRent] = useState(rentDetails);
 
   const handleChange = (field: string, value: any) => {
     const updatedRent = { ...rent, [field]: value }

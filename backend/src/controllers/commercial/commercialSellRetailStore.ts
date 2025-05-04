@@ -76,19 +76,19 @@ export const createCommercialSellRetailStore = async (req: AuthenticatedRequest,
     };
 
     // Set the createdBy field from the authenticated user if available
-    if (req.user && req.user._id) {
-      metadata.createdBy = req.user._id;
-      console.log('Using authenticated user ID:', req.user._id);
-    } else if (formData.metadata && formData.metadata.createdBy) {
-      // Preserve the userId from the frontend if present
-      console.log('Using client-provided createdBy:', formData.metadata.createdBy);
-    } else {
-      console.log('No user authentication or createdBy provided');
-      return res.status(401).json({
-        success: false,
-        error: 'Authentication required - user information missing'
-      });
-    }
+    // if (req.user && req.user._id) {
+    //   metadata.createdBy = req.user._id;
+    //   console.log('Using authenticated user ID:', req.user._id);
+    // } else if (formData.metadata && formData.metadata.createdBy) {
+    //   // Preserve the createdBy from the frontend if present
+    //   console.log('Using client-provided createdBy:', formData.metadata.createdBy);
+    // } else {
+    //   console.log('No user authentication or createdBy provided');
+    //   return res.status(401).json({
+    //     success: false,
+    //     error: 'Authentication required - user information missing'
+    //   });
+    // }
 
     const shopData = {
       propertyId,
@@ -222,12 +222,12 @@ export const updateCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Check if user has permission to update this listing
-    if (req.user && req.user._id && shop.metadata?.createdBy?.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        error: 'You do not have permission to update this listing'
-      });
-    }
+    // if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: 'You do not have permission to update this listing'
+    //   });
+    // }
     
     // Update the shop with new data
     // Don't allow changing propertyId or metadata.userId
@@ -280,12 +280,12 @@ export const deleteCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Check if user has permission to delete this listing
-    if (req.user && req.user._id && shop.metadata.createdBy?.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        error: 'You do not have permission to delete this listing'
-      });
-    }
+    // if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: 'You do not have permission to delete this listing'
+    //   });
+    // }
     
     // Soft delete - update status to 'deleted'
     const deletedShop = await CommercialSellRetailStore.findByIdAndUpdate(

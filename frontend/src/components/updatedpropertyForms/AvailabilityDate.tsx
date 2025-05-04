@@ -6,15 +6,19 @@ import DatePicker from "react-datepicker"
 import "react-datepicker/dist/react-datepicker.css"
 
 interface AvailabilityDateProps {
+  availability: {
+    type: "immediate" | "specific"
+    date?: string
+  }
   onAvailabilityChange?: (availability: {
     type: "immediate" | "specific"
     date?: string
   }) => void
 }
 
-const AvailabilityDate = ({ onAvailabilityChange }: AvailabilityDateProps) => {
-  const [availabilityType, setAvailabilityType] = useState<"immediate" | "specific">("immediate")
-  const [specificDate, setSpecificDate] = useState<Date | null>(null)
+const AvailabilityDate = ({ availability, onAvailabilityChange }: AvailabilityDateProps) => {
+  const [availabilityType, setAvailabilityType] = useState<"immediate" | "specific">(availability.type)
+  const [specificDate, setSpecificDate] = useState<Date | null>(availability.date ? new Date(availability.date) : null)
 
   const handleTypeChange = (type: "immediate" | "specific") => {
     setAvailabilityType(type)

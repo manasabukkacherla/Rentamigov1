@@ -138,7 +138,7 @@ interface FormData {
   };
   brokerage: {
     required: "yes" | "no";
-    amount: number;
+    amount?: number;
   };
   availability: IAvailability;
   contactInformation: IContactInformation;
@@ -295,6 +295,7 @@ const SellShowroomMain = () => {
             />
           </div>
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={(address) => setFormData(prev => ({
               ...prev,
               address
@@ -309,11 +310,13 @@ const SellShowroomMain = () => {
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({
               ...prev,
               isCornerProperty: isCorner
@@ -392,10 +395,13 @@ const SellShowroomMain = () => {
             />
           </div>
           <div className="text-black">
-            <Brokerage
+            <Brokerage bro={formData.brokerage}
               onBrokerageChange={(brokerage) => setFormData(prev => ({
                 ...prev,
-                brokerage: { ...prev.brokerage, ...brokerage }
+                brokerage: {
+                  required: brokerage.required as "yes" | "no",
+                  amount: brokerage.amount
+                }
               }))}
             />
           </div>
@@ -421,7 +427,8 @@ const SellShowroomMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-          <CommercialContactDetails
+          <CommercialContactDetails 
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
               contactInformation: { ...prev.contactInformation, ...contact }
@@ -436,9 +443,17 @@ const SellShowroomMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -450,8 +465,8 @@ const SellShowroomMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

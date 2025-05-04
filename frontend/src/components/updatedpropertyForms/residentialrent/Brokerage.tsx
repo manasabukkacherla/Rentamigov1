@@ -4,14 +4,15 @@ import { useState } from "react"
 import { IndianRupee, Wallet } from "lucide-react"
 
 interface BrokerageProps {
-  onBrokerageChange?: (brokerage: Record<string, any>) => void
+  bro: {
+    required: string;
+    amount?: number;
+  }
+  onBrokerageChange?: (brokerage: { required: string; amount?: number }) => void
 }
 
-const Brokerage = ({ onBrokerageChange }: BrokerageProps) => {
-  const [brokerage, setBrokerage] = useState({
-    required: "no",
-    amount: 0
-  })
+const Brokerage = ({ bro, onBrokerageChange }: BrokerageProps) => {
+  const [brokerage, setBrokerage] = useState(bro)
 
   const handleChange = (field: string, value: any) => {
     const updatedBrokerage = { ...brokerage, [field]: value }

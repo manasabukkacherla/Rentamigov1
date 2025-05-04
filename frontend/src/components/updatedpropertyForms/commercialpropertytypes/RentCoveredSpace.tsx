@@ -92,19 +92,19 @@ interface IFormData {
     };
     otherCharges: {
       water: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       electricity: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       gas: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       others: {
-        amount?: number;
+        amount: number;
         type: string;
       };
     };
@@ -113,9 +113,8 @@ interface IFormData {
       amount?: number;
     };
     availability: {
-      type: 'immediate' | 'specific';
-      availableFrom?: string;
-      availableImmediately: boolean;
+      type: string;
+      date?: string;
     };
   };
 
@@ -123,10 +122,8 @@ interface IFormData {
     name: string;
     email: string;
     phone: string;
-    preferredContactMethod: string;
-    responseTime: string;
-    alternatePhone: string;
-    bestTimeToContact: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
   };
   media: {
     photos: {
@@ -234,8 +231,7 @@ const RentCoveredSpace = () => {
       },
       availability: {
         type: 'immediate',
-        availableFrom: '',
-        availableImmediately: true,
+        date: '',
       },
     },
 
@@ -243,8 +239,6 @@ const RentCoveredSpace = () => {
       name: '',
       email: '',
       phone: '',
-      preferredContactMethod: '',
-      responseTime: '',
       alternatePhone: '',
       bestTimeToContact: '',
     },
@@ -536,8 +530,8 @@ const RentCoveredSpace = () => {
         break;
 
       case 3: // Availability
-        if (!formData.rentalTerms.availability.availableFrom) {
-          errors.availableFrom = 'Available from date is required';
+        if (!formData.rentalTerms.availability.date) {
+          errors.date = 'Available from date is required';
         }
         break;
 
@@ -662,6 +656,7 @@ const RentCoveredSpace = () => {
             basicInformation: { ...prev.basicInformation, spaceType: types }
           }))} />
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={(address) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, address }
@@ -686,11 +681,13 @@ const RentCoveredSpace = () => {
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => setFormData(prev => ({
               ...prev,
               basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
@@ -717,21 +714,22 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <>
           <div className="space-y-6">
-            <Rent
-              onRentChange={(rent) => setFormData(prev => ({
-                ...prev,
-                rentalTerms: {
-                  ...prev.rentalTerms,
-                  rentDetails: {
-                    expectedRent: rent.expectedRent,
-                    isNegotiable: rent.isNegotiable,
-                    rentType: rent.rentType
-                  }
-                }
-              }))}
+            <Rent rentDetails={formData.rentalTerms.rentDetails} 
+             onRentChange={(rent) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: {
+                ...prev.rentalTerms,
+                rentDetails: {
+                  expectedRent: rent.expectedRent,
+                  isNegotiable: rent.isNegotiable,
+                  rentType: rent.rentType,
+                },
+              },
+            }))}
             />
             {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
               <MaintenanceAmount
+                maintenanceAmount={formData.rentalTerms.maintenanceAmount}
                 onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                   ...prev,
                   rentalTerms: {
@@ -745,6 +743,7 @@ const RentCoveredSpace = () => {
               />
             )}
             <SecurityDeposit
+              deposit={formData.rentalTerms.securityDeposit}
               onSecurityDepositChange={(deposit) => setFormData(prev => ({
                 ...prev,
                 rentalTerms: {
@@ -756,6 +755,7 @@ const RentCoveredSpace = () => {
               }))}
             />
             <OtherCharges
+              otherCharges={formData.rentalTerms.otherCharges}
               onOtherChargesChange={(charges) => setFormData(prev => ({
                 ...prev,
                 rentalTerms: {
@@ -770,6 +770,7 @@ const RentCoveredSpace = () => {
               }))}
             />
             <Brokerage
+              bro={formData.rentalTerms.brokerage}
               onBrokerageChange={(brokerage) => {
                 setFormData(prev => ({
                   ...prev,
@@ -793,40 +794,14 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
-            onAvailabilityChange={(availability) => {
-              // For immediate availability, set availableImmediately to true and availableFrom to current date
-              if (availability.type === 'immediate') {
-                const currentDate = new Date().toISOString();
-                // Update the rentalTerms.availability object
-                setFormData(prev => ({
-                  ...prev,
-                  rentalTerms: {
-                    ...prev.rentalTerms,
-                    availability: {
-                      type: 'immediate',
-                      availableFrom: currentDate,
-                      availableImmediately: true
-                    }
-                  }
-                }));
-              }
-              // For specific date, set availableImmediately to false and availableFrom to user's selected date
-              else {
-                const userDate = availability.date || '';
-                // Update the rentalTerms.availability object
-                setFormData(prev => ({
-                  ...prev,
-                  rentalTerms: {
-                    ...prev.rentalTerms,
-                    availability: {
-                      type: 'specific',
-                      availableFrom: userDate,
-                      availableImmediately: false
-                    }
-                  }
-                }));
-              }
+            availability={{
+              type: formData.rentalTerms.availability.type as "immediate" | "specific",
+              date: formData.rentalTerms.availability.date
             }}
+            onAvailabilityChange={(availability) => setFormData(prev => ({
+              ...prev,
+              rentalTerms: { ...prev.rentalTerms, availability: availability }
+            }))}
           />
         </div>
       )
@@ -837,7 +812,11 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <CommercialContactDetails
-            onContactChange={(contact) => handleChange('contactInformation', contact)}
+            contactInformation={formData.contactInformation}
+            onContactChange={(contact) => setFormData(prev => ({
+              ...prev,
+              contactInformation: contact
+            }))}
           />
         </div>
       )
@@ -848,9 +827,17 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -862,8 +849,8 @@ const RentCoveredSpace = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}
@@ -989,8 +976,7 @@ const RentCoveredSpace = () => {
           },
           rentalTerms: formData.rentalTerms,
           availability: {
-            availableFrom: formData.rentalTerms.availability.availableFrom,
-            availableImmediately: formData.rentalTerms.availability.availableImmediately,
+            date: formData.rentalTerms.availability.date,
             type: formData.rentalTerms.availability.type
           },
           contactInformation: formData.contactInformation,

@@ -1,7 +1,13 @@
-import { ArrowRight, MapPin, Building, Home } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { MapPin, Building, Home } from 'lucide-react';
 
 interface CommercialPropertyAddressProps {
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
   onAddressChange?: (address: {
     street: string;
     city: string;
@@ -10,18 +16,18 @@ interface CommercialPropertyAddressProps {
   }) => void;
 }
 
-const CommercialPropertyAddress = ({ onAddressChange }: CommercialPropertyAddressProps) => {
-  const [address, setAddress] = useState({
-    street: '',
-    city: '',
-    state: '',
-    zipCode: ''
-  });
+const CommercialPropertyAddress = ({ address, onAddressChange }: CommercialPropertyAddressProps) => {
+  const [localAddress, setLocalAddress] = useState(address);
+
+  // Update local state if the address prop changes
+  useEffect(() => {
+    setLocalAddress(address);
+  }, [address]);
 
   const handleChange = (field: string, value: string) => {
-    const updatedAddress = { ...address, [field]: value };
-    setAddress(updatedAddress);
-    onAddressChange?.(updatedAddress);
+    const updatedAddress = { ...localAddress, [field]: value };
+    setLocalAddress(updatedAddress);
+    onAddressChange?.(updatedAddress);  // Pass the updated address back to the parent
   };
 
   return (
@@ -40,7 +46,7 @@ const CommercialPropertyAddress = ({ onAddressChange }: CommercialPropertyAddres
             </div>
             <input
               type="text"
-              value={address.street}
+              value={localAddress.street}
               onChange={(e) => handleChange('street', e.target.value)}
               placeholder="Street Address"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -55,7 +61,7 @@ const CommercialPropertyAddress = ({ onAddressChange }: CommercialPropertyAddres
               </div>
               <input
                 type="text"
-                value={address.city}
+                value={localAddress.city}
                 onChange={(e) => handleChange('city', e.target.value)}
                 placeholder="City"
                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -69,7 +75,7 @@ const CommercialPropertyAddress = ({ onAddressChange }: CommercialPropertyAddres
               </div>
               <input
                 type="text"
-                value={address.state}
+                value={localAddress.state}
                 onChange={(e) => handleChange('state', e.target.value)}
                 placeholder="State"
                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -83,7 +89,7 @@ const CommercialPropertyAddress = ({ onAddressChange }: CommercialPropertyAddres
               </div>
               <input
                 type="text"
-                value={address.zipCode}
+                value={localAddress.zipCode}
                 onChange={(e) => handleChange('zipCode', e.target.value)}
                 placeholder="Zip Code"
                 className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
