@@ -154,7 +154,6 @@ export const getCommercialSellAgricultureById = async (req: Request, res: Respon
   }
 }; 
 
-
 export const updateCommercialSellAgriculture = async (req: Request, res: Response) => {
     try {
       const documentId = req.params.id; 

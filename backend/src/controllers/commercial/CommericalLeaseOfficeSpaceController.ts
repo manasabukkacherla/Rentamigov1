@@ -279,10 +279,6 @@ export const getLeaseOfficeSpaceById = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-
 export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
   try {
     const documentId = req.params.id; // This is the _id of the document
@@ -336,8 +332,6 @@ export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
     });
   }
 };
-
-
 
 // Delete a lease office space listing
 export const deleteLeaseOfficeSpace = async (req: Request, res: Response) => {
