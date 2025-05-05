@@ -38,7 +38,12 @@ const SellCoveredSpaceMain = () => {
   const [formData, setFormData] = useState({
     propertyName: "",
     spaceType: "",
-    address: {},
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: ""
+    },
     landmark: "",
     coordinates: { latitude: "", longitude: "" },
     isCornerProperty: false,
@@ -50,12 +55,58 @@ const SellCoveredSpaceMain = () => {
       builtUpAreaSqft: "",
       carpetAreaSqft: "",
     },
-    registrationCharges: {},
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
-    media: { photos: [] as string[], video: null as string | null },
+    registrationCharges: {
+      chargestype: "",
+      registrationAmount: 0,
+      stampDutyAmount: 0,
+      brokeragedetails: false,
+      brokerageAmount: 0
+    },
+    brokerage: {
+      required: "",
+      amount: 0
+    },
+    availability: {
+      type: "immediate",
+      isPetsAllowed: false,
+      operatingHours: false
+    },
+    contactDetails: {
+      name: "",
+      email: "",
+      phone: "",
+      alternatePhone: "",
+      bestTimeToContact: ""
+    },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
+      documents: []
+    }
   })
+
+  const handleChange = (key: string, value: any) => {
+    setFormData(prev => {
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
+      }
+      return { ...prev, [key]: value };
+    });
+  };
 
   const [currentStep, setCurrentStep] = useState(0)
   const formRef = useRef<HTMLDivElement>(null)
@@ -77,19 +128,22 @@ const SellCoveredSpaceMain = () => {
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress
+            <CommercialPropertyAddress 
+              address={formData.address}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
             />
             {/* <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} /> */}
-            <MapLocation
+            <MapLocation  
               latitude={formData.coordinates.latitude.toString()}
               longitude={formData.coordinates.longitude.toString()}
+              landmark={formData.landmark}
               onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
             />
 
             <CornerProperty
+              isCornerProperty={formData.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
                 setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
               }
@@ -121,15 +175,27 @@ const SellCoveredSpaceMain = () => {
             <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
           </div>
           <div className="text-black">
-            <RegistrationCharges
-              onRegistrationChargesChange={(charges) =>
-                setFormData((prev) => ({ ...prev, registrationCharges: charges }))
-              }
-            />
+          <RegistrationCharges onRegistrationChargesChange={(charges) => {
+                setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
+                    brokeragedetails: false,
+                    brokerageAmount: 0
+                  }
+                }));
+              }} />
           </div>
-
           <div className="text-black">
-            <Brokerage onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
+            <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({
+                ...prev,
+                brokerage: {
+                  required: brokerage.required,
+                  amount: brokerage.amount || 0
+                }
+              }))} />
           </div>
         </div>
       ),
@@ -139,9 +205,7 @@ const SellCoveredSpaceMain = () => {
       icon: <Calendar className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-          <CommercialAvailability
-            onAvailabilityChange={(availability) => setFormData((prev) => ({ ...prev, availability }))}
-          />
+          <CommercialAvailability onAvailabilityChange={(availability) => handleChange('availability', availability)} />
         </div>
       ),
     },
@@ -150,9 +214,9 @@ const SellCoveredSpaceMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-          <CommercialContactDetails
-            onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))}
-          />
+         <CommercialContactDetails 
+            contactInformation={formData.contactDetails}
+            onContactChange={(contact) => handleChange('contactDetails', contact)} />
         </div>
       ),
     },
@@ -162,17 +226,30 @@ const SellCoveredSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialMediaUpload
-            onMediaChange={(mediaInput) => {
-              // Extract just the URLs from image files
-              const photoUrls = mediaInput.images.flatMap(img =>
-                img.files.map(file => file.url)
-              );
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+                photos[category] = files.map(f => f.file);
+              });
 
-              setFormData((prev) => ({
+              setFormData(prev => ({
                 ...prev,
                 media: {
-                  photos: photoUrls,
-                  video: mediaInput.video?.url || null
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

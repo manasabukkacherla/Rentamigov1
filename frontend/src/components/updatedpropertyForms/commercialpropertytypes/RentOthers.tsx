@@ -105,26 +105,26 @@ interface FormData {
   securityDeposit: {
     amount: number;
   };
-  maintenanceAmount?: {
+  maintenanceAmount: {
     amount: number;
     frequency: 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
   };
   otherCharges: {
     water: {
       type: 'inclusive' | 'exclusive';
-      amount?: number;
+      amount: number;
     };
     electricity: {
       type: 'inclusive' | 'exclusive';
-      amount?: number;
+      amount: number;
     };
     gas: {
       type: 'inclusive' | 'exclusive';
-      amount?: number;
+      amount: number;
     };
     others: {
       type: 'inclusive' | 'exclusive';
-      amount?: number;
+      amount: number;
     };
   };
   brokerage: {
@@ -152,7 +152,7 @@ interface FormData {
       emergencyExits: File[];
       others: File[];
     };
-    videoTour?: File;
+    videoTour: File | null;
     documents: File[];
   };
 }
@@ -284,7 +284,7 @@ const RentOthers = () => {
         emergencyExits: [],
         others: []
       },
-      videoTour: undefined,
+      videoTour: null,
       documents: []
     }
   });
@@ -415,28 +415,28 @@ const RentOthers = () => {
     }));
   };
 
-  const handleMediaChange = (media: {
-    images: { category: string; files: { url: string; file: File; }[]; }[];
-    video?: { url: string; file: File; } | undefined;
-    documents: { type: string; file: File; }[];
-  }) => {
-    setFormData(prev => ({
-      ...prev,
-      media: {
-        photos: {
-          exterior: media.images.find(img => img.category === 'exterior')?.files.map(f => f.file) || [],
-          interior: media.images.find(img => img.category === 'interior')?.files.map(f => f.file) || [],
-          floorPlan: media.images.find(img => img.category === 'floorPlan')?.files.map(f => f.file) || [],
-          washrooms: media.images.find(img => img.category === 'washrooms')?.files.map(f => f.file) || [],
-          lifts: media.images.find(img => img.category === 'lifts')?.files.map(f => f.file) || [],
-          emergencyExits: media.images.find(img => img.category === 'emergencyExits')?.files.map(f => f.file) || [],
-          others: media.images.find(img => img.category === 'others')?.files.map(f => f.file) || []
-        },
-        videoTour: media.video?.file,
-        documents: media.documents.map(doc => doc.file)
-      }
-    }));
-  };
+  // const handleMediaChange = (media: {
+  //   images: { category: string; files: { url: string; file: File; }[]; }[];
+  //   video?: { url: string; file: File; } | undefined;
+  //   documents: { type: string; file: File; }[];
+  // }) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     media: {
+  //       photos: {
+  //         exterior: media.images.find(img => img.category === 'exterior')?.files.map(f => f.file) || [],
+  //         interior: media.images.find(img => img.category === 'interior')?.files.map(f => f.file) || [],
+  //         floorPlan: media.images.find(img => img.category === 'floorPlan')?.files.map(f => f.file) || [],
+  //         washrooms: media.images.find(img => img.category === 'washrooms')?.files.map(f => f.file) || [],
+  //         lifts: media.images.find(img => img.category === 'lifts')?.files.map(f => f.file) || [],
+  //         emergencyExits: media.images.find(img => img.category === 'emergencyExits')?.files.map(f => f.file) || [],
+  //         others: media.images.find(img => img.category === 'others')?.files.map(f => f.file) || []
+  //       },
+  //       videoTour: media.video?.file,
+  //       documents: media.documents.map(doc => doc.file)
+  //     }
+  //   }));
+  // };
 
   // Validation for current step
   const validateCurrentStep = () => {
@@ -483,6 +483,7 @@ const RentOthers = () => {
             onCommercialTypeChange={handleCommercialTypeChange}
           />
           <CommercialPropertyAddress
+            address={formData.address}
             onAddressChange={handleAddressChange}
           />
           {/* <Landmark
@@ -491,11 +492,13 @@ const RentOthers = () => {
           <MapLocation
             latitude={formData.coordinates.latitude.toString()}
             longitude={formData.coordinates.longitude.toString()}
+            landmark={formData.landmark}
             onLocationChange={(location) => handleChange('coordinates', location)}
             onAddressChange={(address) => handleChange('address', address)}
             onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
           />
           <CornerProperty
+            isCornerProperty={formData.isCornerProperty}
             onCornerPropertyChange={handleCornerPropertyChange}
           />
         </div>
@@ -517,15 +520,15 @@ const RentOthers = () => {
       content: renderFormSection(
         <div className="space-y-6">
 
-          <Rent onRentChange={handleRentChange} />
+          <Rent onRentChange={handleRentChange} rentDetails={formData.rent} />
           {formData.rent.rentType === 'exclusive' && (
-            <MaintenanceAmount onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+            <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={handleMaintenanceAmountChange} />
           )}
-          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} />
+          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} deposit={formData.securityDeposit} />
 
 
-          <OtherCharges onOtherChargesChange={handleOtherChargesChange} />
-          <Brokerage onBrokerageChange={handleBrokerageChange} />
+          <OtherCharges onOtherChargesChange={handleOtherChargesChange} otherCharges={formData.otherCharges} />
+          <Brokerage onBrokerageChange={handleBrokerageChange} bro={formData.brokerage} />
         </div>
       )
     },
@@ -534,7 +537,7 @@ const RentOthers = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <AvailabilityDate onAvailabilityChange={handleAvailabilityChange} />
+          <AvailabilityDate availability={formData.availability} onAvailabilityChange={handleAvailabilityChange} />
         </div>
       )
     },
@@ -543,7 +546,7 @@ const RentOthers = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <CommercialContactDetails onContactChange={handleContactChange} />
+          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={handleContactChange} />
         </div>
       )
     },
@@ -552,7 +555,39 @@ const RentOthers = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <CommercialMediaUpload onMediaChange={handleMediaChange} />
+          <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+                photos[category] = files.map(f => f.file);
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photos['exterior'] || [],  // Fallback to empty array if no files
+                    interior: photos['interior'] || [],
+                    floorPlan: photos['floorPlan'] || [], 
+                    washrooms: photos['washrooms'] || [],
+                    lifts: photos['lifts'] || [],
+                    emergencyExits: photos['emergencyExits'] || [],
+                    others: photos['others'] || []
+                  },
+                  videoTour: media.videoTour || null,  // Make sure videoTour can be null
+                  documents: media.documents || []     // Ensure documents is initialized as empty
+                }
+              }));
+            }}
+          />
         </div>
       )
     }

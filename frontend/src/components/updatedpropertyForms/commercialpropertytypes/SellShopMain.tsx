@@ -115,8 +115,8 @@ interface FormData {
     brokerageAmount: number;
   };
   brokerage: {
-    required: boolean;
-    amount: number;
+    required: string;
+    amount?: number;
   };
   availability: {
     availableFrom: string;
@@ -216,7 +216,7 @@ const SellShopMain = () => {
       brokerageAmount: 0
     },
     brokerage: {
-      required: false,
+      required: 'no',
       amount: 0
     },
     availability: {
@@ -399,9 +399,11 @@ const SellShopMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <ShopType
+            shopType={formData.basicInformation.shopType}
             onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
           />
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
           />
           {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
@@ -530,6 +532,7 @@ const SellShopMain = () => {
           <MapLocation
             latitude={formData.basicInformation.location.latitude}
             longitude={formData.basicInformation.location.longitude}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
@@ -541,6 +544,7 @@ const SellShopMain = () => {
             longitude={formData.basicInformation.location.longitude}
           /> */}
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
           />
         </div>
@@ -552,6 +556,7 @@ const SellShopMain = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <ShopDetails
+            shopDetails={formData.shopDetails}
             onDetailsChange={(details) => handleChange('shopDetails', details)}
           />
           <CommercialPropertyDetails
@@ -612,15 +617,12 @@ const SellShopMain = () => {
             </div>
             <div className="border-t border-gray-200 my-4"></div>
             <div className="text-black">
-              <Brokerage onBrokerageChange={(brokerage) => {
-                setFormData(prev => ({
-                  ...prev,
-                  brokerage: {
-                    required: brokerage.required === 'yes',
-                    amount: brokerage.amount
-                  }
-                }));
-              }} />
+              <Brokerage bro={formData.brokerage} 
+              onBrokerageChange={(brokerage) => setFormData(prev => ({
+                ...prev,
+                brokerage: brokerage
+              }))}
+              />
             </div>
           </div>
         </div>
@@ -640,7 +642,9 @@ const SellShopMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <CommercialContactDetails onContactChange={(contact) => handleChange('contactInformation', contact)} />
+          <CommercialContactDetails 
+            contactInformation={formData.contactInformation}
+            onContactChange={(contact) => handleChange('contactInformation', contact)} />
         </div>
       )
     },
@@ -650,21 +654,32 @@ const SellShopMain = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <CommercialMediaUpload
-            onMediaChange={(mediaUpdate) => {
-              const convertedPhotos: any = {};
-
-              mediaUpdate.images.forEach(({ category, files }) => {
-                convertedPhotos[category] = files.map(f => f.file);
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+            onMediaChange={(media) => {
+              const photos: Record<string, File[]> = {};
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+                photos[category] = files.map(f => f.file);
               });
 
-              handleChange('media', {
-                photos: {
-                  ...formData.media.photos,
-                  ...convertedPhotos
-                },
-                videoTour: mediaUpdate.video?.file || null,
-                documents: mediaUpdate.documents.map(d => d.file)
-              });
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    ...prev.media.photos,
+                    ...photos
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
             }}
           />
         </div>

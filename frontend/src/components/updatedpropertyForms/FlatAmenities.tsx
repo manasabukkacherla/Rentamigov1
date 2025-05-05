@@ -2,55 +2,56 @@ import { useState } from 'react';
 import { ArrowRight, CheckSquare } from 'lucide-react';
 
 interface FlatAmenitiesProps {
+  amenities: {
+    lights: number;
+    ceilingFan: number;
+    geysers: number;
+    chimney: boolean;
+    callingBell: boolean;
+    wardrobes: number;
+    lofts: number;
+    kitchenCabinets: number;
+    clothHanger: number;
+    pipedGasConnection: boolean;
+    gasStoveWithCylinder: boolean;
+    ironingStand: boolean;
+    bathtub: boolean;
+    shower: boolean;
+    sofa: boolean;
+    coffeeTable: boolean;
+    tvUnit: boolean;
+    diningTableWithChairs: number;
+    cotWithMattress: number;
+    sideTable: number;
+    studyTableWithChair: number;
+    television: boolean;
+    refrigerator: boolean;
+    washingMachine: boolean;
+    dishwasher: boolean;
+    waterPurifier: boolean;
+    microwaveOven: boolean;
+    inductionCooktop: boolean;
+    gasStove: boolean;
+    airConditioner: number;
+    desertCooler: number;
+    ironBox: boolean;
+    exhaustFan: number;
+  }
   onAmenitiesChange?: (amenities: Record<string, number | boolean>) => void;
 }
 
-const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
-  const [amenities, setAmenities] = useState<Record<string, number | boolean>>({
-    lights: 0,
-    ceilingFan: 0,
-    geysers: 0,
-    chimney: false,
-    callingBell: false,
-    wardrobes: 0,
-    lofts: 0,
-    kitchenCabinets: 0,
-    clothHanger: 0,
-    pipedGasConnection: false,
-    gasStoveWithCylinder: false,
-    ironingStand: false,
-    bathtub: false,
-    shower: false,
-    sofa: false,
-    coffeeTable: false,
-    tvUnit: false,
-    diningTableWithChairs: 0,
-    cotWithMattress: 0,
-    sideTable: 0,
-    studyTableWithChair: 0,
-    television: false,
-    refrigerator: false,
-    washingMachine: false,
-    dishwasher: false,
-    waterPurifier: false,
-    microwaveOven: false,
-    inductionCooktop: false,
-    gasStove: false,
-    airConditioner: 0,
-    desertCooler: 0,
-    ironBox: false,
-    exhaustFan: 0,
-  });
+const FlatAmenities = ({ amenities, onAmenitiesChange }: FlatAmenitiesProps) => {
+  const [localAmenities, setAmenities] = useState<Record<string, number | boolean>>(amenities);
 
   const handleNumberChange = (key: string, value: string) => {
     const newValue = value === '' ? 0 : parseInt(value, 10);
     setAmenities(prev => ({ ...prev, [key]: newValue }));
-    onAmenitiesChange?.({ ...amenities, [key]: newValue });
+    onAmenitiesChange?.({ ...localAmenities, [key]: newValue });
   };
 
   const handleBooleanChange = (key: string, value: boolean) => {
     setAmenities(prev => ({ ...prev, [key]: value }));
-    onAmenitiesChange?.({ ...amenities, [key]: value });
+    onAmenitiesChange?.({ ...localAmenities, [key]: value });
   };
 
   const numberInputs = [
@@ -109,7 +110,7 @@ const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
                 <input
                   type="number"
                   min="0"
-                  value={typeof amenities[key] === 'number' ? amenities[key] : ''}
+                  value={typeof localAmenities[key] === 'number' ? localAmenities[key] : ''}
                   onChange={(e) => handleNumberChange(key, e.target.value)}
                   className="w-16 px-3 py-2 rounded-lg bg-white border border-black/30 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
                 />
@@ -126,7 +127,7 @@ const FlatAmenities = ({ onAmenitiesChange }: FlatAmenitiesProps) => {
               <label key={key} className="flex items-center gap-2 p-3 bg-white rounded-lg text-black border border-black/30 hover:border-black/50 transition-colors duration-200">
                 <input
                   type="checkbox"
-                  checked={!!amenities[key]}
+                  checked={!!localAmenities[key]}
                   onChange={(e) => handleBooleanChange(key, e.target.checked)}
                   className="rounded border-black/30 bg-white focus:ring-black text-black"
                 />

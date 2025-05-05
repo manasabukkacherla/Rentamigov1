@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 interface MapLocationProps {
     latitude?: string;
     longitude?: string;
+    landmark: string;
     onLocationChange?: (location: { latitude: string; longitude: string }) => void;
     onAddressChange?: (address: { street: string; city: string; state: string; zipCode: string }) => void;
     onLandmarkChange?: (landmark: string) => void;
@@ -13,6 +14,7 @@ interface MapLocationProps {
 const MapLocation: React.FC<MapLocationProps> = ({
     latitude = '20.5937',
     longitude = '78.9629',
+    landmark = '',
     onLocationChange,
     onAddressChange,
     onLandmarkChange,
@@ -22,7 +24,7 @@ const MapLocation: React.FC<MapLocationProps> = ({
     const [isLoading, setIsLoading] = useState(false);
     const [zoom, setZoom] = useState(5);
 
-    const [landmark, setLandmark] = useState('');
+    const [landmarkInput, setLandmark] = useState(landmark);
 
     const handleChange = (value: string) => {
         setLandmark(value);
@@ -77,6 +79,8 @@ const MapLocation: React.FC<MapLocationProps> = ({
                 if (data.status === "OK" && data.results && data.results.length > 0) {
                     const address = data.results[0];
                     const addressComponents = { street: '', city: '', state: '', zipCode: '' };
+
+                    // Extract address components
                     address.address_components.forEach((component: any) => {
                         const types = component.types;
                         if (types.includes('route')) addressComponents.street = component.long_name;
@@ -84,24 +88,53 @@ const MapLocation: React.FC<MapLocationProps> = ({
                         else if (types.includes('administrative_area_level_1')) addressComponents.state = component.long_name;
                         else if (types.includes('postal_code')) addressComponents.zipCode = component.long_name;
                     });
+
+                    // If street is empty, use the first part of formatted address
                     if (!addressComponents.street && address.formatted_address) {
                         const formattedParts = address.formatted_address.split(',');
                         if (formattedParts.length > 0) addressComponents.street = formattedParts[0];
                     }
+
+                    // Update address
                     onAddressChange?.(addressComponents);
-                    const landmark = data.results.find((result: any) =>
+                    console.log(addressComponents);
+
+                    // Find a suitable landmark
+                    let landmarkName = '';
+                    
+                    // First try to find a point of interest
+                    const poi = data.results.find((result: any) =>
                         result.types.some((type: string) =>
                             ['point_of_interest', 'establishment', 'premise'].includes(type)
                         )
                     );
-                    if (landmark && landmark.name && onLandmarkChange) {
-                        onLandmarkChange(landmark.name);
+                    
+                    if (poi && poi.name) {
+                        landmarkName = poi.name;
+                    } else {
+                        // If no POI found, use the locality or neighborhood
+                        const locality = address.address_components.find((component: any) =>
+                            component.types.includes('locality')
+                        );
+                        if (locality) {
+                            landmarkName = locality.long_name;
+                        } else {
+                            // If no locality, use the first part of the formatted address
+                            landmarkName = address.formatted_address.split(',')[0];
+                        }
                     }
+
+                    // Update landmark
+                    if (landmarkName && onLandmarkChange) {
+                        onLandmarkChange(landmarkName);
+                    }
+
                     toast.success("Location details updated successfully");
                 }
             })
             .catch(error => {
                 console.error("Error during reverse geocoding:", error);
+                toast.error("Failed to get address details. Please try again.");
             });
     };
 
@@ -232,7 +265,7 @@ const MapLocation: React.FC<MapLocationProps> = ({
                     <div className="relative">
                         <input
                             type="text"
-                            value={landmark}
+                            value={landmarkInput}
                             onChange={(e) => handleChange(e.target.value)}
                             placeholder="Enter nearby landmark"
                             className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
@@ -246,4 +279,3 @@ const MapLocation: React.FC<MapLocationProps> = ({
 };
 
 export default MapLocation;
-

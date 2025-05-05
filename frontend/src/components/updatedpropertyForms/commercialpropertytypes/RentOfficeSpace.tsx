@@ -109,9 +109,9 @@ interface IOfficeDetails {
   coworkingFriendly: boolean;
 }
 
-interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
+  interface IAvailability {
+    type: string;
+    date?: string;
 }
 
 interface IContactInformation {
@@ -155,19 +155,19 @@ interface IRentalTerms {
   };
   otherCharges: {
     water: {
-      amount?: number;
+      amount: number;
       type: string;
     };
     electricity: {
-      amount?: number;
+      amount: number;
       type: string;
     };
     gas: {
-      amount?: number;
+      amount: number;
       type: string;
     };
     others: {
-      amount?: number;
+      amount: number;
       type: string;
     };
   };
@@ -304,8 +304,8 @@ const RentOfficeSpace = () => {
       },
     },
     availability: {
-      availableFrom: '',
-      availableImmediately: false,
+      type: '',
+      date: '',
     },
     contactInformation: {
       name: '',
@@ -505,8 +505,8 @@ const RentOfficeSpace = () => {
         }
       },
       availability: {
-        availableFrom: availability.type === 'immediate' ? new Date().toISOString() : availability.date || '',
-        availableImmediately: availability.type === 'immediate'
+        type: availability.type || 'immediate',
+        date: availability.date || new Date().toISOString()
       }
     });
   };
@@ -555,17 +555,20 @@ const RentOfficeSpace = () => {
           />
 
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={handleAddressChange}
           />
           {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={handleCornerPropertyChange}
           />
         </div>
@@ -590,20 +593,24 @@ const RentOfficeSpace = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: renderFormSection(
         <div className="space-y-6">
-          <Rent onRentChange={handleRentChange} />
+          <Rent onRentChange={handleRentChange} rentDetails={formData.rentalTerms.rentDetails} />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
             <MaintenanceAmount
               onMaintenanceAmountChange={handleMaintenanceAmountChange}
+              maintenanceAmount={formData.rentalTerms.maintenanceAmount}
             />
           )}
           <SecurityDeposit
             onSecurityDepositChange={handleSecurityDepositChange}
+            deposit={formData.rentalTerms.securityDeposit}
           />
           <OtherCharges
             onOtherChargesChange={handleOtherChargesChange}
+            otherCharges={formData.rentalTerms.otherCharges}
           />
           <Brokerage
             onBrokerageChange={handleBrokerageChange}
+            bro={formData.rentalTerms.brokerage}
           />
         </div>
       )
@@ -614,6 +621,10 @@ const RentOfficeSpace = () => {
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
+            availability={{
+              type: formData.availability.type as "immediate" | "specific",
+              date: formData.availability.date
+            }}
             onAvailabilityChange={handleAvailabilityChange}
           />
         </div>
@@ -626,6 +637,7 @@ const RentOfficeSpace = () => {
         <div className="space-y-6">
           <CommercialContactDetails
             onContactChange={handleContactChange}
+            contactInformation={formData.contactInformation}
           />
         </div>
       )
@@ -636,9 +648,17 @@ const RentOfficeSpace = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -650,8 +670,8 @@ const RentOfficeSpace = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}

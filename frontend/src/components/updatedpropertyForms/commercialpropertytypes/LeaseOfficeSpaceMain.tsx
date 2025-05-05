@@ -23,12 +23,6 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2, Locate, Navigation } from 'lucide-react';
 import MapLocation from '../CommercialComponents/MapLocation';
 
-interface MediaType {
-  images: { category: string; files: { url: string; file: File; }[]; }[];
-  video?: { url: string; file: File; };
-  documents: { type: string; file: File; }[];
-}
-
 interface OfficeDetails {
   seatingCapacity: string | number;
   cabins: {
@@ -46,7 +40,12 @@ interface OfficeDetails {
 interface FormData {
   propertyName: string;
   officeType: string[];
-  address: Record<string, string>;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
   landmark: string;
   coordinates: {
     latitude: string;
@@ -57,17 +56,46 @@ interface FormData {
   propertyDetails: Record<string, any>;
   leaseAmount: Record<string, any>;
   leaseTenure: Record<string, any>;
-  maintenanceAmount: Record<string, any>;
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
   otherCharges: {
     water: { amount: number; type: string };
     electricity: { amount: number; type: string };
     gas: { amount: number; type: string };
     others: { amount: number; type: string };
   };
-  brokerage: Record<string, any>;
-  availability: Record<string, any>;
-  contactDetails: Record<string, string>;
-  media: MediaType;
+  brokerage: {
+    amount?: number;
+    required: string;
+  };
+  availability: {
+    date: Date;
+    availableImmediately: boolean;
+    leaseDuration: string;
+    noticePeriod: string;
+    isPetsAllowed: boolean;
+  };
+  contactDetails: {
+    name: string;
+    email: string;
+    phone: string;
+    bestTimeToContact?: string;
+    alternatePhone?: string;
+  };
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+  };
 }
 
 const LeaseOfficeSpaceMain = () => {
@@ -76,7 +104,12 @@ const LeaseOfficeSpaceMain = () => {
   const [formData, setFormData] = useState<FormData>({
     propertyName: '',
     officeType: [] as string[],
-    address: {},
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: ''
+    },
     landmark: '',
     coordinates: { latitude: '', longitude: '' },
     isCornerProperty: false,
@@ -96,20 +129,45 @@ const LeaseOfficeSpaceMain = () => {
     propertyDetails: {},
     leaseAmount: {},
     leaseTenure: {},
-    maintenanceAmount: {},
+    maintenanceAmount: {
+      amount: 0,
+      frequency: 'monthly'
+    },
     otherCharges: {
       water: { amount: 0, type: 'inclusive' },
       electricity: { amount: 0, type: 'inclusive' },
       gas: { amount: 0, type: 'inclusive' },
       others: { amount: 0, type: 'inclusive' }
     },
-    brokerage: {},
-    availability: {},
-    contactDetails: {},
+    brokerage: {
+      amount: 0,
+      required: 'no'
+    },
+    availability: {
+      date: new Date(),
+      availableImmediately: false,
+      leaseDuration: '',
+      noticePeriod: '',
+      isPetsAllowed: false
+    },
+    contactDetails: {
+      name: '',
+      email: '',
+      phone: '',
+      bestTimeToContact: '',
+      alternatePhone: ''
+    },
     media: {
-      images: [] as { category: string; files: { url: string; file: File; }[]; }[],
-      video: undefined,
-      documents: [] as { type: string; file: File; }[]
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
+      },
+      videoTour: null,
+      documents: []
     }
   });
 
@@ -140,17 +198,18 @@ const LeaseOfficeSpaceMain = () => {
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
 
-            <MapLocation
+            <MapLocation  
               latitude={formData.coordinates.latitude}
               longitude={formData.coordinates.longitude}
+              landmark={formData.landmark}
               onLocationChange={(location) => setFormData(prev => ({ ...prev, coordinates: location }))}
               onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
             />
 
             <div className="flex items-center space-x-2 cursor-pointer">
-              <CornerProperty onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
+              <CornerProperty isCornerProperty={formData.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
             </div>
           </div>
         </div>
@@ -177,8 +236,8 @@ const LeaseOfficeSpaceMain = () => {
         <div className="space-y-6">
           <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
           <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
-          <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
-          <OtherCharges onOtherChargesChange={(charges) => {
+          <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
+          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
             // Since the OtherCharges component sends the old state, wait for the component to update
             // by deferring the formData update with setTimeout
             setTimeout(() => {
@@ -193,7 +252,7 @@ const LeaseOfficeSpaceMain = () => {
               }));
             }, 0);
           }} />
-          <Brokerage onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
+          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
         </div>
       ),
     },
@@ -202,7 +261,16 @@ const LeaseOfficeSpaceMain = () => {
       icon: <Calendar className="w-6 h-6" />,
       component: (
         <div className="space-y-6">
-          <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({ ...prev, availability }))} />
+          <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({
+            ...prev,
+            availability: {
+              date: availability.date || new Date(),
+              availableImmediately: availability.availableImmediately || false,
+              leaseDuration: availability.preferredSaleDuration || '',
+              noticePeriod: availability.noticePeriod || '',
+              isPetsAllowed: availability.petsAllowed || false
+            }
+          }))} />
         </div>
       ),
     },
@@ -211,7 +279,7 @@ const LeaseOfficeSpaceMain = () => {
       icon: <User className="w-6 h-6" />,
       component: (
         <div className="space-y-6">
-          <CommercialContactDetails onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
+          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
         </div>
       ),
     },
@@ -221,11 +289,47 @@ const LeaseOfficeSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialMediaUpload
-            onMediaChange={(media: MediaType) => {
-              setFormData(prev => ({ ...prev, media }));
-              console.log("Media changed:", media);
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
             }}
-          />
+              onMediaChange={(media) => {
+                const photosByCategory: Record<string, File[]> = {
+                  exterior: [],
+                  interior: [],
+                  floorPlan: [],
+                  washrooms: [],
+                  lifts: [],
+                  emergencyExits: []
+                };
+
+                media.photos.forEach(({ category, files }) => {
+                  if (category in photosByCategory) {
+                    photosByCategory[category] = files.map(f => f.file);
+                  }
+                });
+
+                setFormData(prev => ({
+                  ...prev,
+                  media: {
+                    photos: {
+                      exterior: photosByCategory.exterior,
+                      interior: photosByCategory.interior,
+                      floorPlan: photosByCategory.floorPlan,
+                      washrooms: photosByCategory.washrooms,
+                      lifts: photosByCategory.lifts,
+                      emergencyExits: photosByCategory.emergencyExits
+                    },
+                    videoTour: media.videoTour || null,
+                    documents: media.documents
+                  }
+                }));
+              }}
+            />
         </div>
       ),
     },
@@ -259,14 +363,14 @@ const LeaseOfficeSpaceMain = () => {
     }
   };
 
-  const validateFinalStep = () => {
-    // Check if media uploads are required and validate accordingly
-    const hasRequiredMedia =
-      formData.media.images.some(category => category.files.length > 0) ||
-      formData.media.documents.some(doc => !!doc.file);
+  // const validateFinalStep = () => {
+  //   // Check if media uploads are required and validate accordingly
+  //   const hasRequiredMedia =
+  //     formData.media.photos.some(category => category.files.length > 0) ||
+  //     formData.media.documents.some(doc => !!doc.file);
 
-    return hasRequiredMedia;
-  };
+  //   return hasRequiredMedia;
+  // };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) {
@@ -280,10 +384,10 @@ const LeaseOfficeSpaceMain = () => {
     }
 
     // Validate the final step before submitting
-    if (!validateFinalStep()) {
-      toast.error("Please add at least one image or document");
-      return;
-    }
+    // if (!validateFinalStep()) {
+    //   toast.error("Please add at least one image or document");
+    //   return;
+    // }
 
     try {
       setIsSubmitting(true);
@@ -406,15 +510,15 @@ const LeaseOfficeSpaceMain = () => {
     // For this example, we'll return the URLs we have (even if they're blob URLs)
     const uploadedMedia = {
       photos: {
-        exterior: formData.media.images.find(img => img.category === 'exterior')?.files.map(f => f.url) || [],
-        interior: formData.media.images.find(img => img.category === 'interior')?.files.map(f => f.url) || [],
-        floorPlan: formData.media.images.find(img => img.category === 'floorPlan')?.files.map(f => f.url) || [],
-        washrooms: formData.media.images.find(img => img.category === 'washrooms')?.files.map(f => f.url) || [],
-        lifts: formData.media.images.find(img => img.category === 'lifts')?.files.map(f => f.url) || [],
-        emergencyExits: formData.media.images.find(img => img.category === 'emergencyExits')?.files.map(f => f.url) || []
+        exterior: formData.media.photos.exterior.map(f => URL.createObjectURL(f)) || [],
+        interior: formData.media.photos.interior.map(f => URL.createObjectURL(f)) || [],
+        floorPlan: formData.media.photos.floorPlan.map(f => URL.createObjectURL(f)) || [],
+        washrooms: formData.media.photos.washrooms.map(f => URL.createObjectURL(f)) || [],
+        lifts: formData.media.photos.lifts.map(f => URL.createObjectURL(f)) || [],
+        emergencyExits: formData.media.photos.emergencyExits.map(f => URL.createObjectURL(f)) || []
       },
-      videoTour: formData.media.video?.url || '',
-      documents: formData.media.documents.map(doc => doc.type) || []
+      videoTour: formData.media.videoTour ? URL.createObjectURL(formData.media.videoTour) : '',
+      documents: formData.media.documents.map(doc => doc.name) || []
     };
 
     return uploadedMedia;
@@ -584,12 +688,11 @@ const LeaseOfficeSpaceMain = () => {
           amount: Number(formData.brokerage?.amount) || 0
         },
         availability: {
-          availableFrom: formData.availability?.availableFrom || new Date(),
+          date: formData.availability?.date || new Date(),
           availableImmediately: Boolean(formData.availability?.availableImmediately),
           leaseDuration: formData.availability?.leaseDuration || '',
           noticePeriod: formData.availability?.noticePeriod || '',
-          petsAllowed: Boolean(formData.availability?.petsAllowed),
-          operatingHours: Boolean(formData.availability?.operatingHours)
+          isPetsAllowed: Boolean(formData.availability?.isPetsAllowed)
         }
       },
       contactInformation: {

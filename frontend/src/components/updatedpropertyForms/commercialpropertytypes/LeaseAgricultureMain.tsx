@@ -87,29 +87,29 @@ interface FormData {
     noticePeriodUnit: string;
   };
   maintenanceAmount: {
-    amount?: number;
-    frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    amount: number;
+    frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
   otherCharges: {
-    waterCharges: {
+    water: {
       type: "inclusive" | "exclusive";
-      amount?: number;
+      amount: number;
     };
-    electricityCharges: {
+    electricity: {
       type: "inclusive" | "exclusive";
-      amount?: number;
+      amount: number;
     };
-    gasCharges: {
+    gas: {
       type: "inclusive" | "exclusive";
-      amount?: number;
+      amount: number;
     };
-    otherCharges: {
+    others: {
       type: "inclusive" | "exclusive";
-      amount?: number;
+      amount: number;
     };
   };
   brokerage: {
-    required: boolean;
+    required: string;
     amount?: number;
   };
   availability: {
@@ -211,25 +211,25 @@ const LeaseAgricultureMain = () => {
       frequency: 'monthly'
     },
     otherCharges: {
-      waterCharges: {
+      water: {
         type: 'inclusive',
         amount: 0
       },
-      electricityCharges: {
+      electricity: {
         type: 'inclusive',
         amount: 0
       },
-      gasCharges: {
+      gas: {
         type: 'inclusive',
         amount: 0
       },
-      otherCharges: {
+      others: {
         type: 'inclusive',
         amount: 0
       }
     },
     brokerage: {
-      required: false,
+      required: "no",
       amount: 0
     },
     availability: {
@@ -308,6 +308,7 @@ const LeaseAgricultureMain = () => {
 
           <div className="space-y-6">
               <CommercialPropertyAddress
+                address={formData.address}
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
                   address
@@ -316,10 +317,13 @@ const LeaseAgricultureMain = () => {
               <MapLocation
                 latitude={formData.location.latitude}
                 longitude={formData.location.longitude}
+                landmark={formData.landmark}
                 onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
                 onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
+                onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
               />
               <CornerProperty
+                isCornerProperty={formData.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
                   isCornerProperty: isCorner
@@ -396,6 +400,7 @@ const LeaseAgricultureMain = () => {
       component: (
         <div className="space-y-6">
             <CommercialContactDetails
+              contactInformation={formData.contactDetails}
               onContactChange={(contact) => setFormData(prev => ({
                 ...prev,
                 contactDetails: { ...prev.contactDetails, ...contact }

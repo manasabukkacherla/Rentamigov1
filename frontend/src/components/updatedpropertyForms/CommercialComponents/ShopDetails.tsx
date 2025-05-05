@@ -2,19 +2,20 @@ import { useState } from 'react';
 import { ArrowRight, Ruler, ArrowUpDown, Store, Car, History } from 'lucide-react';
 
 interface ShopDetailsProps {
+  shopDetails: {
+    frontageWidth: number;
+    heightOfShop: number;
+    displayWindow: boolean;
+    attachedStorageRoom: boolean;
+    averageFootTraffic: string;
+    customerParking: boolean;
+    previousBusiness: string;
+  }
   onDetailsChange?: (details: Record<string, any>) => void;
 }
 
-const ShopDetails = ({ onDetailsChange }: ShopDetailsProps) => {
-  const [details, setDetails] = useState({
-    frontageWidth: 0,
-    heightOfShop: 0,
-    displayWindow: false,
-    attachedStorageRoom: false,
-    averageFootTraffic: '',
-    customerParking: false,
-    previousBusiness: ''
-  });
+const ShopDetails = ({ shopDetails, onDetailsChange }: ShopDetailsProps) => {
+  const [details, setDetails] = useState(shopDetails);
 
   const handleChange = (field: string, value: any) => {
     const updatedDetails = { ...details, [field]: value };

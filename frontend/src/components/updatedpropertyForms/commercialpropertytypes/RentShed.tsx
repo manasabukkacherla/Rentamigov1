@@ -89,25 +89,25 @@ interface FormData {
     securityDeposit: {
       amount: number;
     };
-    maintenanceAmount?: {
-      amount?: number;
-      frequency?: string;
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
     };
     otherCharges: {
       water: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       electricity: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       gas: {
-        amount?: number;
+        amount: number;
         type: string;
       };
       others: {
-        amount?: number;
+        amount: number;
         type: string;
       };
     };
@@ -369,17 +369,20 @@ const RentShed = () => {
             onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
           />
           <CommercialPropertyAddress
+            address={formData.basicInformation.address}
             onAddressChange={(address) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, address } })}
           />
           <MapLocation
             latitude={formData.basicInformation.location.latitude.toString()}
             longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, isCornerProperty: isCorner } })}
           />
         </div>
@@ -391,6 +394,7 @@ const RentShed = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <PropertySize
+            propertySize={formData.propertyDetails.propertySize}
             onPropertySizeChange={(value) => setFormData({ ...formData, propertyDetails: { ...formData.propertyDetails, propertySize: Number(value) } })}
           />
           <PropertyFeatures
@@ -451,7 +455,7 @@ const RentShed = () => {
         <div className="space-y-6">
 
 
-          <Rent onRentChange={(rent) => {
+          <Rent rentDetails={formData.rentalTerms.rentDetails} onRentChange={(rent) => {
             setFormData({
               ...formData,
               rentalTerms: {
@@ -466,9 +470,9 @@ const RentShed = () => {
             });
           }} />
           {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
-            <MaintenanceAmount onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
+            <MaintenanceAmount maintenanceAmount={formData.rentalTerms.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
           )}
-          <SecurityDeposit onSecurityDepositChange={(deposit) => {
+          <SecurityDeposit deposit={formData.rentalTerms.securityDeposit} onSecurityDepositChange={(deposit) => {
             setFormData({
               ...formData,
               rentalTerms: {
@@ -481,7 +485,7 @@ const RentShed = () => {
           }} />
 
 
-          <OtherCharges onOtherChargesChange={(charges) => {
+          <OtherCharges otherCharges={formData.rentalTerms.otherCharges} onOtherChargesChange={(charges) => {
             setFormData({
               ...formData,
               rentalTerms: {
@@ -508,7 +512,7 @@ const RentShed = () => {
             });
           }} />
 
-          <Brokerage onBrokerageChange={(brokerage) => {
+          <Brokerage bro={formData.rentalTerms.brokerage} onBrokerageChange={(brokerage) => {
             setFormData({
               ...formData,
               rentalTerms: {
@@ -528,7 +532,7 @@ const RentShed = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <AvailabilityDate onAvailabilityChange={(availability) => setFormData({
+          <AvailabilityDate availability={formData.rentalTerms.availability as { type: "immediate" | "specific"; date?: string }} onAvailabilityChange={(availability) => setFormData({
             ...formData,
             rentalTerms: {
               ...formData.rentalTerms,
@@ -547,6 +551,7 @@ const RentShed = () => {
       content: (
         <div className="space-y-6">
           <CommercialContactDetails
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => {
               setFormData({
                 ...formData,
@@ -569,9 +574,17 @@ const RentShed = () => {
       content: (
         <div className="space-y-6">
           <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -583,8 +596,8 @@ const RentShed = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
                 }
               }));
             }}
