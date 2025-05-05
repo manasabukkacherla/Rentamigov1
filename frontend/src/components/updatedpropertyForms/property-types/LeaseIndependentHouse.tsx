@@ -180,42 +180,42 @@ interface Restrictions {
 interface ILeaseTerms {
   leaseAmount: {
     amount: number;
-    amountType: "fixed" | "negotiable";
+    amountType: string;
   };
   leaseTenure: {
     minimumTenure: number;
-    minimumUnit: "months" | "years";
+    minimumUnit: string;
     maximumTenure: number;
-    maximumUnit: "months" | "years";
+    maximumUnit: string;
     lockInPeriod: number;
-    lockInUnit: "months" | "years";
+    lockInUnit:string;
     noticePeriod: number;
-    noticePeriodUnit: "months" | "years";
+    noticePeriodUnit: string;
   };
   maintenanceAmount: {
     amount: number;
-    frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    frequency: string;
   };
   otherCharges: {
     water: {
       amount: number;
-      type: "inclusive" | "exclusive";
+      type: string;
     };
     electricity: {
       amount: number;
-      type: "inclusive" | "exclusive";
+      type:string;
     };
     gas: {
       amount: number;
-      type: "inclusive" | "exclusive";
+      type: string;
     };
     others: {
       amount: number;
-      type: "inclusive" | "exclusive";
+      type: string;
     };
   };
   brokerage: {
-    required: "yes" | "no";
+    required: string;
     amount: number;
   };
  
@@ -235,7 +235,49 @@ interface formData {
   restrictions: Restrictions;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
-  leaseTerms:ILeaseTerms;
+  // leaseTerms:ILeaseTerms;
+  leaseAmount: {
+    amount: number;    
+    type: string;
+    duration: number,
+    durationUnit: string;
+  };
+  leaseTenure: {
+    minimumTenure: number;
+    minimumUnit: string;
+    maximumTenure: number;
+    maximumUnit: string;
+    lockInPeriod: number;
+    lockInUnit:string;
+    noticePeriod: number;
+    noticePeriodUnit: string;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount: number;
+      type: string;
+    };
+    electricity: {
+      amount: number;
+      type:string;
+    };
+    gas: {
+      amount: number;
+      type: string;
+    };
+    others: {
+      amount: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
   availability: {
     type: "immediate" | "specific";
     date: string;
@@ -303,7 +345,7 @@ interface MediaUploadProps {
 }
 
 const LeaseIndependentHouse = () => {
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -412,10 +454,12 @@ const LeaseIndependentHouse = () => {
       smarthometechnology: [],
       otheritems: []
     },
-    leaseTerms:{
+    
       leaseAmount: {
         amount: 0,
-        amountType: "fixed",
+        type: 'fixed',
+    duration: 0,
+    durationUnit: 'years'
       },
       leaseTenure: {
         minimumTenure: 0,
@@ -441,14 +485,11 @@ const LeaseIndependentHouse = () => {
         required: "no",
         amount: 0,
       },
-    },
+   
       availability: {
         date: new Date().toISOString(),
         type: "immediate",
       },
-   
-   
-    
     media: {
       photos: {
         exterior: [],
@@ -602,7 +643,7 @@ const LeaseIndependentHouse = () => {
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <Restrictions
-  restrictions={formData.restrictions}
+  res={formData.restrictions}
   onRestrictionsChange={(restrictions: {
     foodPreference: string;
     petsAllowed: string;
@@ -658,34 +699,33 @@ const LeaseIndependentHouse = () => {
       component: (
         <div className="space-y-8">
           
-            <div className="space-y-8">
-              
-               <LeaseAmount
-                  onLeaseAmountChange={(amount) =>
-                    setFormData((prev) => ({ ...prev, leaseAmount: amount }))
-                  }
+          <div className="space-y-8">
+          <LeaseAmount
+                  onLeaseAmountChange={(amount) => setFormData(prev => ({
+                    ...prev,
+                    leaseAmount: { ...prev.leaseAmount, ...amount }
+                  }))}
                 />
-                <LeaseTenure
-                  onLeaseTenureChange={(tenure) =>
-                    setFormData((prev) => ({ ...prev, leaseTenure: tenure }))
-                  }
-                />
-                <MaintenanceAmount
-                  onMaintenanceAmountChange={(amount) =>
-                    setFormData((prev) => ({ ...prev, maintenanceAmount: amount }))
-                  }
-                />
-                <OtherCharges
-                  onOtherChargesChange={(charges) =>
-                    setFormData((prev) => ({ ...prev, otherCharges: charges }))
-                  }
-                />
-                <Brokerage
-                  onBrokerageChange={(brokerage) =>
-                    setFormData((prev) => ({ ...prev, brokerage }))
-                  }
-                />
-              </div>
+          <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
+          
+                <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev,maintenanceAmount: maintenance }))} />
+          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
+            // Since the OtherCharges component sends the old state, wait for the component to update
+            // by deferring the formData update with setTimeout
+            setTimeout(() => {
+              setFormData(prev => ({
+                ...prev,
+                otherCharges: {
+                  water: charges.water || { amount: 0, type: 'inclusive' },
+                  electricity: charges.electricity || { amount: 0, type: 'inclusive' },
+                  gas: charges.gas || { amount: 0, type: 'inclusive' },
+                  others: charges.others || { amount: 0, type: 'inclusive' }
+                }
+              }));
+            }, 0);
+          }} />
+          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
+        </div>
             </div>
       ),
     },
@@ -709,17 +749,20 @@ const LeaseIndependentHouse = () => {
         </div>
       ),
     },
-     {
+    {
       title: "Property Media",
-      icon: <Image className="w-5 h-5" />,
-      content: (
-        <div className="space-y-6">
+      icon: <Image className="w-6 h-6" />,
+      component: (
+        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg text-black">
           <div className="space-y-8">
-            <MediaUpload
+            <div className="flex items-center mb-8">
+              <Image className="text-black mr-3" size={28} />
+              <h3 className="text-2xl font-semibold text-black">Property Media</h3>
+            </div>
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
+              <MediaUpload
               initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
-                  ...prev,
+                onMediaChange={(media) => setFormData((prev) => ({ ...prev,
                   media: {
                     photos: {
                       exterior: media.photos.exterior,
@@ -735,15 +778,48 @@ const LeaseIndependentHouse = () => {
                     },
                     videoTour: media.videoTour,
                     documents: media.documents
-                  }
-                }));
-              }}
-            />
-
+                  } }))}
+              />
+            </div>
           </div>
         </div>
       ),
     },
+    //  {
+    //   title: "Property Media",
+    //   icon: <Image className="w-5 h-5" />,
+    //   content: (
+    //     <div className="space-y-6">
+    //       <div className="space-y-8">
+    //         <MediaUpload
+    //           initialMedia={formData.media}
+    //           onMediaChange={(media) => {
+    //             setFormData(prev => ({
+    //               ...prev,
+    //               media: {
+    //                 photos: {
+    //                   exterior: media.photos.exterior,
+    //                   interior: media.photos.interior,
+    //                   floorPlan: media.photos.floorPlan,
+    //                   washrooms: media.photos.washrooms,
+    //                   lifts: media.photos.lifts,
+    //                   emergencyExits: media.photos.emergencyExits,
+    //                   bedrooms: media.photos.bedrooms,
+    //                   halls: media.photos.halls,
+    //                   storerooms: media.photos.storerooms,
+    //                   kitchen: media.photos.kitchen
+    //                 },
+    //                 videoTour: media.videoTour,
+    //                 documents: media.documents
+    //               }
+    //             }));
+    //           }}
+    //         />
+
+    //       </div>
+    //     </div>
+    //   ),
+    // },
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
