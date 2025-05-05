@@ -22,11 +22,23 @@ type WeekMeals = {
   [key: string]: DayMeals;
 };
 
-const FoodServices = () => {
-  const [isEnabled, setIsEnabled] = useState(false);
-  const [includeSnacks, setIncludeSnacks] = useState(false);
-  const [snackItems, setSnackItems] = useState({ morning: '', evening: '' });
-  const [weekMeals, setWeekMeals] = useState<WeekMeals>({
+interface FoodServicesProps {
+  foodServices: {
+    available: boolean;
+    includeSnacks?: boolean;
+    weekMeals?: WeekMeals;
+    mealTimesState?: { [key: string]: string };
+    snackItems?: { morning: string; evening: string };
+  };
+  onFoodServicesChange: (val: any) => void;
+}
+
+const FoodServices: React.FC<FoodServicesProps> = ({ foodServices, onFoodServicesChange }) => {
+  // Use props for all form data
+  const isEnabled = foodServices.available;
+  const includeSnacks = foodServices.includeSnacks || false;
+  const snackItems = foodServices.snackItems || { morning: '', evening: '' };
+  const weekMeals = foodServices.weekMeals || {
     monday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
     tuesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
     wednesday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
@@ -34,29 +46,27 @@ const FoodServices = () => {
     friday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
     saturday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
     sunday: { breakfast: { name: '', time: '' }, lunch: { name: '', time: '' }, dinner: { name: '', time: '' } },
-  });
-  // One time value per meal type, shared across all days
-  const [mealTimesState, setMealTimesState] = useState<{ [key: string]: string }>({
-    breakfast: '',
-    lunch: '',
-    dinner: '',
-  });
+  };
+  const mealTimesState = foodServices.mealTimesState || { breakfast: '', lunch: '', dinner: '' };
+
 
   // When a meal time changes, update all days for that meal type
   const handleMealTimeChange = (mealId: keyof DayMeals, value: string) => {
-    setMealTimesState(prev => ({ ...prev, [mealId]: value }));
-    setWeekMeals(prev => {
-      const updated = { ...prev };
-      Object.keys(updated).forEach(day => {
-        updated[day] = {
-          ...updated[day],
-          [mealId]: {
-            ...updated[day][mealId],
-            time: value,
-          },
-        };
-      });
-      return updated;
+    const newMealTimesState = { ...mealTimesState, [mealId]: value };
+    const updatedWeekMeals = { ...weekMeals };
+    Object.keys(updatedWeekMeals).forEach(day => {
+      updatedWeekMeals[day] = {
+        ...updatedWeekMeals[day],
+        [mealId]: {
+          ...updatedWeekMeals[day][mealId],
+          time: value,
+        },
+      };
+    });
+    onFoodServicesChange({
+      ...foodServices,
+      mealTimesState: newMealTimesState,
+      weekMeals: updatedWeekMeals
     });
   };
 
@@ -78,31 +88,36 @@ const FoodServices = () => {
   ];
 
   const handleMealChange = (day: string, meal: keyof DayMeals, field: 'name' | 'time', value: string) => {
-  setWeekMeals((prev) => ({
-    ...prev,
-    [day]: {
-      ...prev[day],
+    const updatedWeekMeals = { ...weekMeals };
+    updatedWeekMeals[day] = {
+      ...updatedWeekMeals[day],
       [meal]: {
-        ...prev[day][meal],
+        ...updatedWeekMeals[day][meal],
         [field]: value,
       },
-    },
-  }));
-};
+    };
+    onFoodServicesChange({
+      ...foodServices,
+      weekMeals: updatedWeekMeals
+    });
+  };
+
 
   const copyMealToAllDays = (meal: keyof DayMeals, sourceDay: string) => {
     const mealValue = weekMeals[sourceDay][meal];
-    setWeekMeals((prev) => {
-      const newWeekMeals = { ...prev };
-      days.forEach((day) => {
-        newWeekMeals[day] = {
-          ...newWeekMeals[day],
-          [meal]: mealValue,
-        };
-      });
-      return newWeekMeals;
+    const newWeekMeals = { ...weekMeals };
+    days.forEach((day) => {
+      newWeekMeals[day] = {
+        ...newWeekMeals[day],
+        [meal]: mealValue,
+      };
+    });
+    onFoodServicesChange({
+      ...foodServices,
+      weekMeals: newWeekMeals
     });
   };
+
 
   return (
     <div className="space-y-6">
@@ -120,7 +135,10 @@ const FoodServices = () => {
             type="checkbox"
             className="sr-only peer"
             checked={isEnabled}
-            onChange={() => setIsEnabled(!isEnabled)}
+            onChange={() => onFoodServicesChange({
+              ...foodServices,
+              available: !isEnabled
+            })}
           />
           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
         </label>
@@ -149,7 +167,10 @@ const FoodServices = () => {
                       type="checkbox"
                       className="sr-only peer"
                       checked={includeSnacks}
-                      onChange={() => setIncludeSnacks(!includeSnacks)}
+                      onChange={() => onFoodServicesChange({
+                        ...foodServices,
+                        includeSnacks: !includeSnacks
+                      })}
                     />
                     <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-black/20 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
                   </label>
@@ -164,7 +185,10 @@ const FoodServices = () => {
                   <input
                     type="text"
                     value={snackItems.morning}
-                    onChange={(e) => setSnackItems(prev => ({ ...prev, morning: e.target.value }))}
+                    onChange={(e) => onFoodServicesChange({
+                      ...foodServices,
+                      snackItems: { ...snackItems, morning: e.target.value }
+                    })}
                     placeholder="Tea, coffee, biscuits, etc."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400"
                   />
@@ -174,7 +198,10 @@ const FoodServices = () => {
                   <input
                     type="text"
                     value={snackItems.evening}
-                    onChange={(e) => setSnackItems(prev => ({ ...prev, evening: e.target.value }))}
+                    onChange={(e) => onFoodServicesChange({
+                      ...foodServices,
+                      snackItems: { ...snackItems, evening: e.target.value }
+                    })}
                     placeholder="Cookies, sandwiches, etc."
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black placeholder-gray-400"
                   />

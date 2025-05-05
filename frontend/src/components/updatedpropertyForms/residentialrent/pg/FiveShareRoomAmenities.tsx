@@ -1,43 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Bed, Users, Share2 } from 'lucide-react';
 
-interface Amenity {
+interface AmenityItem {
   id: string;
   label: string;
   isOptional?: boolean;
   isShared?: boolean;
 }
 
-const FiveShareRoomAmenities = () => {
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
+interface FiveShareRoomAmenitiesProps {
+  amenities: string[];
+  onAmenitiesChange: (amenities: string[]) => void;
+}
 
-  const amenities: Amenity[] = [
-    { id: 'bunk-beds', label: 'Multiple bunk beds', isShared: true },
-    { id: 'lockers', label: 'Lockers or individual storage shelves', isShared: true },
-    { id: 'study-desk', label: 'Shared long study desk', isShared: true },
-    { id: 'charging-station', label: 'Shared charging station', isShared: true },
-    { id: 'fan', label: 'Fan', isShared: true },
-    { id: 'ac', label: 'Air Conditioning (AC)', isShared: true }
-  ];
+const allAmenities: AmenityItem[] = [
+  { id: 'bunk-beds', label: 'Multiple bunk beds', isShared: true },
+  { id: 'lockers', label: 'Lockers or individual storage shelves', isShared: true },
+  { id: 'study-desk', label: 'Shared long study desk', isShared: true },
+  { id: 'charging-station', label: 'Shared charging station', isShared: true },
+  { id: 'fan', label: 'Fan', isShared: true },
+  { id: 'ac', label: 'Air Conditioning (AC)', isShared: true }
+];
 
-  const handleAmenityChange = (amenityId: string) => {
-    const newSelectedAmenities = new Set(selectedAmenities);
-    if (newSelectedAmenities.has(amenityId)) {
-      newSelectedAmenities.delete(amenityId);
+const FiveShareRoomAmenities: React.FC<FiveShareRoomAmenitiesProps> = ({ 
+  amenities = [], 
+  onAmenitiesChange 
+}) => {
+
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set(amenities));
+
+  // Update local state when props change
+  useEffect(() => {
+    setSelectedAmenities(new Set(amenities));
+  }, [amenities]);
+
+  const toggleAmenity = (amenityId: string) => {
+    const newSelected = new Set(selectedAmenities);
+    if (newSelected.has(amenityId)) {
+      newSelected.delete(amenityId);
     } else {
-      newSelectedAmenities.add(amenityId);
+      newSelected.add(amenityId);
     }
-    setSelectedAmenities(newSelectedAmenities);
+    setSelectedAmenities(newSelected);
+    onAmenitiesChange(Array.from(newSelected));
   };
 
-  const personalAmenities = amenities.filter(a => !a.isShared);
-  const sharedAmenities = amenities.filter(a => a.isShared);
+  const personalAmenities = allAmenities.filter(a => !a.isShared);
+  const sharedAmenities = allAmenities.filter(a => a.isShared);
+
+  // Find amenity by ID
+  const findAmenityById = (id: string): AmenityItem | undefined => {
+    return allAmenities.find(a => a.id === id);
+  };
 
   // Render a single amenity item
-  const renderAmenityItem = (amenity: Amenity) => (
+  const renderAmenityItem = (amenity: AmenityItem) => (
     <div 
       key={amenity.id} 
-      onClick={() => handleAmenityChange(amenity.id)}
+      onClick={() => toggleAmenity(amenity.id)}
       className={`
         flex items-center p-3 rounded-md border cursor-pointer transition-colors
         ${selectedAmenities.has(amenity.id) 
@@ -104,16 +124,18 @@ const FiveShareRoomAmenities = () => {
           <h3 className="text-sm font-medium text-gray-900 mb-3">Selected Amenities</h3>
           <div className="flex flex-wrap gap-2">
             {Array.from(selectedAmenities).map(amenityId => {
-              const amenity = amenities.find(a => a.id === amenityId);
+              const amenity = findAmenityById(amenityId);
+              if (!amenity) return null;
+              
               return (
                 <div key={amenityId} 
                   className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black"
                 >
-                  {amenity?.isShared ? 
+                  {amenity.isShared ? 
                     <Share2 className="w-3 h-3 mr-1 text-blue-500" /> : 
                     <Check className="w-3 h-3 mr-1" />
                   }
-                  <span>{amenity?.label}</span>
+                  <span>{amenity.label}</span>
                 </div>
               );
             })}

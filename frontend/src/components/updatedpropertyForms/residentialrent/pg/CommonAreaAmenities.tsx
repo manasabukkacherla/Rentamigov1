@@ -9,8 +9,17 @@ interface Amenity {
   isOptional?: boolean;
 }
 
-const CommonAreaAmenities = () => {
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
+interface CommonAreaAmenitiesProps {
+  selectedAmenities: string[];
+  onChange: (selected: string[]) => void;
+}
+
+const CommonAreaAmenities: React.FC<CommonAreaAmenitiesProps> = ({ selectedAmenities, onChange }) => {
+  const [localSelected, setLocalSelected] = useState<Set<string>>(new Set(selectedAmenities));
+
+  React.useEffect(() => {
+    setLocalSelected(new Set(selectedAmenities));
+  }, [selectedAmenities]);
 
   const amenities: Amenity[] = [
     {
@@ -60,13 +69,14 @@ const CommonAreaAmenities = () => {
   ];
 
   const handleAmenityChange = (amenityId: string) => {
-    const newSelectedAmenities = new Set(selectedAmenities);
-    if (newSelectedAmenities.has(amenityId)) {
-      newSelectedAmenities.delete(amenityId);
+    const newSelected = new Set(localSelected);
+    if (newSelected.has(amenityId)) {
+      newSelected.delete(amenityId);
     } else {
-      newSelectedAmenities.add(amenityId);
+      newSelected.add(amenityId);
     }
-    setSelectedAmenities(newSelectedAmenities);
+    setLocalSelected(newSelected);
+    onChange(Array.from(newSelected));
   };
 
   return (
@@ -76,27 +86,24 @@ const CommonAreaAmenities = () => {
           Select the amenities available in common areas of your PG accommodation
         </p>
       </div>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {amenities.map((amenity) => (
-          <div 
-            key={amenity.id} 
+          <div
+            key={amenity.id}
             onClick={() => handleAmenityChange(amenity.id)}
             className={`
               flex items-start p-4 rounded-lg border cursor-pointer transition-colors
-              ${selectedAmenities.has(amenity.id) 
-                ? 'border-black bg-black/5 hover:bg-black/10' 
-                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }
+              ${localSelected.has(amenity.id)
+                ? 'border-black bg-black/5 hover:bg-black/10'
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}
             `}
           >
             <div className={`
               flex-shrink-0 p-1.5 rounded-md mr-3
-              ${selectedAmenities.has(amenity.id) ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}
+              ${localSelected.has(amenity.id) ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}
             `}>
               {amenity.icon}
             </div>
-            
             <div className="flex-grow">
               <div className="flex items-center justify-between">
                 <label htmlFor={amenity.id} className="text-sm font-medium text-gray-900 cursor-pointer">
@@ -107,12 +114,11 @@ const CommonAreaAmenities = () => {
                 </label>
                 <div className={`
                   w-5 h-5 flex items-center justify-center rounded-md border
-                  ${selectedAmenities.has(amenity.id) 
-                    ? 'bg-black border-black text-white' 
-                    : 'border-gray-300'
-                  }
+                  ${localSelected.has(amenity.id)
+                    ? 'bg-black border-black text-white'
+                    : 'border-gray-300'}
                 `}>
-                  {selectedAmenities.has(amenity.id) && <Check className="w-3.5 h-3.5" />}
+                  {localSelected.has(amenity.id) && <Check className="w-3.5 h-3.5" />}
                 </div>
               </div>
               <p className="text-xs text-gray-500 mt-1">{amenity.description}</p>
@@ -120,12 +126,11 @@ const CommonAreaAmenities = () => {
           </div>
         ))}
       </div>
-
-      {selectedAmenities.size > 0 && (
+      {localSelected.size > 0 && (
         <div className="mt-6 pt-4 border-t border-gray-200">
           <h3 className="text-sm font-medium text-gray-900 mb-3">Selected Amenities</h3>
           <div className="flex flex-wrap gap-2">
-            {Array.from(selectedAmenities).map(amenityId => {
+            {Array.from(localSelected).map(amenityId => {
               const amenity = amenities.find(a => a.id === amenityId);
               return (
                 <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-gray-800">

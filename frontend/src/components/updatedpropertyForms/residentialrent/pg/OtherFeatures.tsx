@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Users, Droplet, Wrench, Lamp } from 'lucide-react';
 
 interface Feature {
@@ -10,10 +10,14 @@ interface Feature {
   isOptional?: boolean;
 }
 
-const OtherFeatures = () => {
-  const [selectedFeatures, setSelectedFeatures] = useState<Set<string>>(new Set());
-  const [visitorPolicies, setVisitorPolicies] = useState<Set<string>>(new Set());
-  
+interface OtherFeaturesProps {
+  selectedFeatures: string[];
+  onFeaturesChange: (features: string[]) => void;
+  visitorPolicies: string[];
+  onVisitorPoliciesChange: (policies: string[]) => void;
+}
+
+const OtherFeatures: React.FC<OtherFeaturesProps> = ({ selectedFeatures, onFeaturesChange, visitorPolicies, onVisitorPoliciesChange }) => {
   // Common checkbox style
   const checkboxClassName = "h-5 w-5 border-gray-300 rounded";
 
@@ -53,26 +57,23 @@ const OtherFeatures = () => {
   ];
 
   const handleFeatureChange = (featureId: string) => {
-    const newSelectedFeatures = new Set(selectedFeatures);
-    if (newSelectedFeatures.has(featureId)) {
-      newSelectedFeatures.delete(featureId);
-      if (featureId === 'visitor-access') {
-        setVisitorPolicies(new Set());
-      }
+    let newSelectedFeatures = [...selectedFeatures];
+    if (newSelectedFeatures.includes(featureId)) {
+      newSelectedFeatures = newSelectedFeatures.filter(f => f !== featureId);
     } else {
-      newSelectedFeatures.add(featureId);
+      newSelectedFeatures.push(featureId);
     }
-    setSelectedFeatures(newSelectedFeatures);
+    onFeaturesChange(newSelectedFeatures);
   };
 
   const handleVisitorPolicyChange = (policy: string) => {
-    const newVisitorPolicies = new Set(visitorPolicies);
-    if (newVisitorPolicies.has(policy)) {
-      newVisitorPolicies.delete(policy);
+    let newVisitorPolicies = [...visitorPolicies];
+    if (newVisitorPolicies.includes(policy)) {
+      newVisitorPolicies = newVisitorPolicies.filter(p => p !== policy);
     } else {
-      newVisitorPolicies.add(policy);
+      newVisitorPolicies.push(policy);
     }
-    setVisitorPolicies(newVisitorPolicies);
+    onVisitorPoliciesChange(newVisitorPolicies);
   };
 
   return (
@@ -99,7 +100,7 @@ const OtherFeatures = () => {
                 <input
                   type="checkbox"
                   id={feature.id}
-                  checked={selectedFeatures.has(feature.id)}
+                  checked={selectedFeatures.includes(feature.id)}
                   onChange={() => handleFeatureChange(feature.id)}
                   className={checkboxClassName}
                 />
@@ -108,7 +109,7 @@ const OtherFeatures = () => {
 
               {/* Visitor Policy Options */}
               {feature.id === 'visitor-access' && 
-               selectedFeatures.has('visitor-access') && 
+               selectedFeatures.includes('visitor-access') && 
                feature.options && (
                 <div className="mt-4 border-t border-gray-800 pt-4">
                   <h3 className="text-sm font-semibold mb-3">Select Visitor Policy (Multiple):</h3>
@@ -119,7 +120,7 @@ const OtherFeatures = () => {
                           type="checkbox"
                           name="visitorPolicy"
                           value={option}
-                          checked={visitorPolicies.has(option)}
+                          checked={visitorPolicies.includes(option)}
                           onChange={() => handleVisitorPolicyChange(option)}
                           className={checkboxClassName}
                         />
@@ -143,9 +144,9 @@ const OtherFeatures = () => {
               return (
                 <li key={featureId} className="text-black-300">
                   {feature?.label}
-                  {featureId === 'visitor-access' && visitorPolicies.size > 0 && (
+                  {featureId === 'visitor-access' && visitorPolicies.length > 0 && (
                     <span className="text-black-400 ml-2">
-                      - {Array.from(visitorPolicies).join(', ')}
+                      - {visitorPolicies.join(', ')}
                     </span>
                   )}
                 </li>
