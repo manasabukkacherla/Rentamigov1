@@ -15,8 +15,18 @@ interface ParkingOption {
   vehicle: '2wheeler' | '4wheeler';
 }
 
-const AdditionalServices = () => {
-  const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
+interface AdditionalServicesProps {
+  selectedServices: string[];
+  onChange: (selected: string[]) => void;
+}
+
+const AdditionalServices: React.FC<AdditionalServicesProps> = ({ selectedServices, onChange }) => {
+  const [localSelected, setLocalSelected] = useState<Set<string>>(new Set(selectedServices));
+
+  React.useEffect(() => {
+    setLocalSelected(new Set(selectedServices));
+  }, [selectedServices]);
+
   const [parkingOptions, setParkingOptions] = useState<ParkingOption[]>([]);
 
   const services: Service[] = [
@@ -66,16 +76,17 @@ const AdditionalServices = () => {
   ];
 
   const handleServiceChange = (serviceId: string) => {
-    const newSelectedServices = new Set(selectedServices);
-    if (newSelectedServices.has(serviceId)) {
-      newSelectedServices.delete(serviceId);
+    const newSelected = new Set(localSelected);
+    if (newSelected.has(serviceId)) {
+      newSelected.delete(serviceId);
       if (serviceId === 'parking') {
         setParkingOptions([]);
       }
     } else {
-      newSelectedServices.add(serviceId);
+      newSelected.add(serviceId);
     }
-    setSelectedServices(newSelectedServices);
+    setLocalSelected(newSelected);
+    onChange(Array.from(newSelected));
   };
 
   const handleParkingOptionChange = (type: 'covered' | 'open', vehicle: '2wheeler' | '4wheeler') => {
@@ -122,7 +133,7 @@ const AdditionalServices = () => {
                 <input
                   type="checkbox"
                   id={service.id}
-                  checked={selectedServices.has(service.id)}
+                  checked={localSelected.has(service.id)}
                   onChange={() => handleServiceChange(service.id)}
                   className="h-5 w-5 border-white rounded bg-white checked:bg-white checked:border-white focus:ring-white focus:ring-2"
                 />
@@ -135,7 +146,7 @@ const AdditionalServices = () => {
               )}
 
               {/* Parking Options */}
-              {service.id === 'parking' && selectedServices.has('parking') && (
+              {service.id === 'parking' && localSelected.has('parking') && (
                 <div className="mt-4 border-t border-gray-800 pt-4">
                   <h3 className="text-sm font-semibold mb-3">Parking Options:</h3>
                   <div className="space-y-4">

@@ -194,10 +194,20 @@ function Pgmain() {
   // Handle form submission to backend
   const navigate = useNavigate();
 
+  // Function to convert file to base64
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    console.log(formData);
+    console.log('Original form data:', formData);
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
@@ -216,20 +226,60 @@ function Pgmain() {
       }
 
       const token = sessionStorage.getItem('token');
-
-      // Attach user info to the payload
+      
+      // Convert media items to base64 if they exist
+      let processedMedia = { ...formData.media };
+      
+      if (formData.media && formData.media.mediaItems && formData.media.mediaItems.length > 0) {
+        console.log('Processing media items for base64 conversion...');
+        const convertedMediaItems = await Promise.all(
+          formData.media.mediaItems.map(async (item: any) => {
+            if (item.file) {
+              const base64Data = await convertFileToBase64(item.file);
+              return {
+                ...item,
+                url: base64Data, // Replace file with base64 data
+                file: undefined // Remove the file object as it can't be serialized
+              };
+            }
+            return item;
+          })
+        );
+        
+        // Update the media object with converted items
+        processedMedia = {
+          ...processedMedia,
+          mediaItems: convertedMediaItems,
+          photos: convertedMediaItems
+            .filter((item: any) => item.type === 'photo')
+            .map((item: any) => item.url)
+        };
+        
+        if (convertedMediaItems.some((item: any) => item.type === 'video')) {
+          processedMedia.videos = convertedMediaItems
+            .filter((item: any) => item.type === 'video')
+            .map((item: any) => item.url);
+        }
+      }
+      
+      // Attach user info to the payload with processed media
       const payload = {
         ...formData,
+        media: processedMedia,
         metadata: {
           ...formData.metadata,
           userId: author, // Ensure 'author' contains a valid ObjectId
           userName: userData.name,
         }
       };
-
+      
+      console.log('OtherFeaturesAndRestrictions before POST:', formData.otherFeaturesAndRestrictions);
+      console.log('Sending payload with processed media');
+      
       await axios.post('/api/residential/pgmain', payload, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+
 
       toast.success('PG listing created!');
       setSubmitStatus('success');
@@ -251,53 +301,144 @@ function Pgmain() {
       id: 'pgDetails',
       title: "PG Details", 
       icon: <Building2 className="h-5 w-5" />,
-      component: <PgName />
+      component: <PgName 
+        pgName={formData.pgDetails.name} 
+        onPgNameChange={(name) => setFormData(prev => ({
+          ...prev,
+          pgDetails: { ...prev.pgDetails, name }
+        }))} 
+        accommodationType={formData.pgDetails.accommodationType}
+        onAccommodationTypeChange={(type) => setFormData(prev => ({
+          ...prev,
+          pgDetails: { ...prev.pgDetails, accommodationType: type as "boys" | "girls" | "both boys and girls" }
+        }))}
+        address={formData.pgDetails.address}
+        onAddressChange={(address) => setFormData(prev => ({
+          ...prev,
+          pgDetails: { ...prev.pgDetails, address }
+        }))}
+        location={formData.location}
+        onLocationChange={(location) => setFormData(prev => ({
+          ...prev,
+          location
+        }))}
+      />
     },
 
     { 
       id: 'roomConfiguration',
       title: "Room Configuration", 
       icon: <Building2 className="h-5 w-5" />,
-      component: <Configuration selectedShares={selectedShares} setSelectedShares={setSelectedShares} customShare={customShare} setCustomShare={setCustomShare} />
+      component: <Configuration 
+        selectedShares={selectedShares} 
+        setSelectedShares={(shares) => {
+          setSelectedShares(shares);
+          setFormData(prev => ({
+            ...prev,
+            roomConfiguration: { 
+              ...prev.roomConfiguration, 
+              sharingTypes: Array.isArray(shares) ? shares : [] // Ensure it's an array
+            }
+          }));
+        }} 
+        customShare={customShare} 
+        setCustomShare={(share: React.SetStateAction<string>) => {
+          const newShare = typeof share === 'function' ? share(customShare) : share;
+          setCustomShare(newShare);
+          setFormData(prev => ({
+            ...prev,
+            roomConfiguration: { ...prev.roomConfiguration, customShare: newShare }
+          }));
+        }}
+        // @ts-ignore - The component accepts these props even though they're not in the type definition
+        roomConfiguration={formData.roomConfiguration}
+        onRoomConfigurationChange={(config: Partial<PgMainFormData['roomConfiguration']>) => setFormData(prev => ({
+          ...prev,
+          roomConfiguration: { ...prev.roomConfiguration, ...config }
+        }))}
+      />
     },
     {
       id: 'commonAreaAmenitiesAndServices',
       title: 'Common Area Amenities and Services',
       icon: <Store className="h-5 w-5" />,
-      component: <CommonAreaAmenitiesAndServices />
+      component: <CommonAreaAmenitiesAndServices 
+        // @ts-ignore - The component accepts these props even though they're not in the type definition
+        amenities={formData.commonAreaAmenitiesAndServices}
+        onAmenitiesChange={(amenities: string[]) => setFormData(prev => ({
+          ...prev,
+          commonAreaAmenitiesAndServices: amenities
+        }))}
+      />
     },
     {
       id: 'otherFeaturesAndRestrictions',
       title: 'Other Features & Rules',
       icon: <Star className="h-5 w-5" />,
-      component: <OtherFeaturesAndRestrictions />
+      component: <OtherFeaturesAndRestrictions
+        value={formData.otherFeaturesAndRestrictions}
+        onChange={({ otherFeatures, restrictions }) => setFormData(prev => ({
+          ...prev,
+          otherFeaturesAndRestrictions: {
+            otherFeatures,
+            restrictions
+          }
+        }))}
+      />
     },
     { 
       id: 'foodServices',
       title: "Food Services", 
       icon: <Store className="h-5 w-5" />,
-      component: <FoodServices />
+      component: <FoodServices 
+        // @ts-ignore - The component accepts these props even though they're not in the type definition
+        foodServices={formData.foodServices}
+        onFoodServicesChange={(foodServices: PgMainFormData['foodServices']) => setFormData(prev => ({
+          ...prev,
+          foodServices
+        }))}
+      />
     },
 
     { 
       id: 'pricing',
       title: "Pricing & Terms", 
       icon: <DollarSign className="h-5 w-5" />,
-      component: <Pricing />
+      component: <Pricing 
+        // @ts-ignore - The component accepts these props even though they're not in the type definition
+        pricing={formData.pricing}
+        onPricingChange={(pricing: any) => setFormData(prev => ({
+          ...prev,
+          pricing
+        }))}
+        selectedShares={selectedShares}
+        customShare={customShare}
+      />
     },
     { 
       id: 'media',
       title: "Photos & Videos", 
       icon: <ImageIcon className="h-5 w-5" />,
-      component: <PgMedia selectedShares={selectedShares} customShare={customShare} />
+      component: <PgMedia 
+        selectedShares={selectedShares} 
+        customShare={customShare} 
+        // @ts-ignore - The component accepts these props even though they're not in the type definition
+        mediaItems={formData.media.mediaItems || []}
+        onMediaItemsChange={(mediaItems: any) => setFormData(prev => ({
+          ...prev,
+          media: { ...prev.media, mediaItems: mediaItems }
+        }))}
+      />
     }
   ];
 
-  const renderFormSection = (content: React.ReactNode) => (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-      {content}
-    </div>
-  );
+  // Function for rendering form sections if needed elsewhere
+  // Currently using inline rendering in the JSX below
+  // const renderFormSection = (content: React.ReactNode) => (
+  //   <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+  //     {content}
+  //   </div>
+  // );
 
   // Ref for progress bar
   const progressBarRef = React.useRef<HTMLDivElement>(null);
