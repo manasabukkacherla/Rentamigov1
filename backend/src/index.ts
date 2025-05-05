@@ -17,6 +17,7 @@ import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
+import _ from 'lodash';
 
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
@@ -85,6 +86,7 @@ import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseW
 import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
+import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 dotenv.config();
 
 // Validate required environment variables
@@ -259,6 +261,7 @@ app.use("/api/residential/pgmain", residentialPgmainRoutes);
 
 //sell routes
 app.use("/api/residential/sell/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
 
 
 app.get("/testing", (req: Request, res: Response) => {

@@ -135,15 +135,21 @@ interface availability {
 
 interface IMedia {
   photos: {
-    exterior: string[];
-    interior: string[];
-    floorPlan: string[];
-    washrooms: string[];
-    lifts: string[];
-    emergencyExits: string[];
+    exterior?: string[],
+    interior?: string[],
+    floorPlan?: string[],
+    washrooms?: string[],
+    lifts?: string[],
+    emergencyExits?: string[],
+    bedrooms?: string[],
+    halls?: string[],
+    storerooms?: string[],
+    kitchen?: string[]
+    
+    
   };
   videoTour?: string;
-  documents: string[];
+  documents: string[];   
 }
 
 
@@ -156,6 +162,7 @@ interface IResidentialSaleApartment extends Document {
   priceDetails: pricedetails;
   media: IMedia;
   metadata: IMetadata;
+  availability: availability;
 }
 const ResidentailRentApartmentSchema = new Schema<IResidentialSaleApartment>({
   propertyId: { type: String, required: true, unique: true },
@@ -179,80 +186,81 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialSaleApartment>({
     },
   },
   propertyDetails: {
-    propertysize: { type: Number, required: true },
-    bedrooms: { type: Number, required: true },
-    washrooms: { type: Number, required: true },
-    bathrooms: { type: Number, required: true },
-    balconies: { type: Number, required: true },
-    parkingdetails: { type: String, required: true },
-    ExtraRooms: [{ type: String, required: true }],
-    utility: { type: String, required: true },
-    Furnishingstatus: { type: String, required: true },
-    totalfloors: { type: Number, required: true },
-    propertyonfloor: { type: Number, required: true },
-    propertyfacing: { type: String, required: true },
-    propertyage: { type: String, required: true },
-    superareasqft: { type: Number, required: true },
-    superareasqmt: { type: Number, required: true },
-    builtupareasqft: { type: Number, required: true },
-    builtupareasqmt: { type: Number, required: true },
-    carpetareasqft: { type: Number, required: true },
-    carpetareasqmt: { type: Number, required: true },
-    electricityavailability: { type: String, required: true },
-    wateravailability: [{ type: String, required: true }],
+    propertysize: { type: Number },
+    bedrooms: { type: Number },
+    washrooms: { type: Number },
+    bathrooms: { type: Number },
+    balconies: { type: Number },
+    parkingdetails: { type: String },
+    ExtraRooms: [{ type: String }],
+    utility: { type: String },
+    Furnishingstatus: { type: String },
+    totalfloors: { type: Number },
+    propertyonfloor: { type: Number },
+    propertyfacing: { type: String },
+    propertyage: { type: String },
+    superareasqft: { type: Number },
+    superareasqmt: { type: Number },
+    builtupareasqft: { type: Number },
+    builtupareasqmt: { type: Number },
+    carpetareasqft: { type: Number },
+    carpetareasqmt: { type: Number },
+    electricityavailability: { type: String },
+    wateravailability: [{ type: String }],
   },
 
   availableitems: {
-    availableitems: [{ type: String, required: true }], 
-    securityandsafety: [{ type: String, required: true }],
-    powerutility: [{ type: String, required: true }],
-    parkingtranspotation: [{ type: String, required: true }],
-    recreationalsportsfacilities: [{ type: String, required: true }],
-    childrenfamilyamenities: [{ type: String, required: true }],
-    healthwellnessfacilities:  [{ type: String, required: true }],
-    shoppingconviencestores: [{ type: String, required: true }],
-    ecofriendlysustainable: [{ type: String, required: true }],
-    communityculturalspaces: [{ type: String, required: true }],
-    smarthometechnology: [{ type: String, required: true }],
+    availableitems: [{ type: String }], 
+    securityandsafety: [{ type: String }],
+    powerutility: [{ type: String }],
+    parkingtranspotation: [{ type: String }],
+    recreationalsportsfacilities: [{ type: String }],
+    childrenfamilyamenities: [{ type: String }],
+    healthwellnessfacilities:  [{ type: String }],
+    shoppingconviencestores: [{ type: String }],
+    ecofriendlysustainable: [{ type: String }],
+    communityculturalspaces: [{ type: String }],
+    smarthometechnology: [{ type: String }],
   },
 
 
   priceDetails: {
-    propertyprice: { type: Number, required: true },
-    pricetype: { type: String, required: true },
+    propertyprice: { type: Number },
+    pricetype: { type: String },
     stampcharges:
     {
       chargestype: { type: String },
-      registrationcharges: { type: Number},
+      registrationcharges: { type: Number },
       stampdutycharges: { type: Number },
-
       othercharges: {
         water: {
           amount: { type: Number },
-          type: { type: String, required: true },
+          type: { type: String },
         },
         electricity: {
           amount: { type: Number },
-          type: { type: String, required: true },
+          type: { type: String },
         },
         gas: {
           amount: { type: Number },
-          type: { type: String, required: true },
+          type: { type: String },
         },
         others: {
           amount: { type: Number },
-          type: { type: String, required: true },
+          type: { type: String },
         }
       },
-
       brokerage: {
-        required: { type: String, required: true },
+        required: { type: String },
         amount: { type: Number }
       },
-    
     },
   },
 
+  availability: {
+    availablefrom: { type: String },
+    date: { type: String },
+  },
   media: {
     photos: {
       exterior: [{ type: String }],
@@ -260,13 +268,17 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialSaleApartment>({
       floorPlan: [{ type: String }],
       washrooms: [{ type: String }],
       lifts: [{ type: String }],
-      emergencyExits: [{ type: String }]
+      emergencyExits: [{ type: String }],
+      bedrooms: [{ type: String }],
+      halls: [{ type: String }],
+      storerooms: [{ type: String }],
+      kitchen: [{ type: String }]
     },
     videoTour: { type: String },
     documents: [{ type: String }]
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
 
   }
