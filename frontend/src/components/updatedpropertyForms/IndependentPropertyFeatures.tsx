@@ -7,9 +7,9 @@ interface IndependentPropertyFeaturesProps {
 
 const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFeaturesProps) => {
   const [features, setFeatures] = useState({
-    bedrooms: '',
-    washrooms: '',
-    balconies: '',
+    bedrooms: 0,
+    washrooms: 0,
+    balconies: 0,
     hasParking: false,
     parkingDetails: {
       twoWheeler: '',
@@ -25,13 +25,13 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
     furnishingStatus: '',
     flooring: '',
     facing: '',
-    propertyAge: '',
-    superBuiltUpAreaSqft: '',
-    superBuiltUpAreaSqmt: '',
-    builtUpAreaSqft: '',
-    builtUpAreaSqmt: '',
-    carpetAreaSqft: '',
-    carpetAreaSqmt: '',
+    propertyAge: 0,
+    superBuiltUpAreaSqft: 0,
+    superBuiltUpAreaSqmt: 0,
+    builtUpAreaSqft: 0,
+    builtUpAreaSqmt: 0,
+    carpetAreaSqft: 0,
+    carpetAreaSqmt: 0,
     electricityAvailability: '',
     waterAvailability: {
       borewell: false,
@@ -143,7 +143,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
               type="number"
               min="0"
               value={features.bedrooms}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
+              onChange={(e) => handleChange('bedrooms', parseFloat(e.target.value))}
               placeholder="No. of Bedrooms"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
             />
@@ -157,7 +157,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
               type="number"
               min="0"
               value={features.washrooms}
-              onChange={(e) => handleChange('washrooms', e.target.value)}
+              onChange={(e) => handleChange('washrooms', parseFloat(e.target.value))}
               placeholder="No. of Washrooms"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
             />
@@ -171,7 +171,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
               type="number"
               min="0"
               value={features.balconies}
-              onChange={(e) => handleChange('balconies', e.target.value)}
+              onChange={(e) => handleChange('balconies', parseFloat(e.target.value) )}
               placeholder="No. of Balconies"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
             />
@@ -359,7 +359,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
           </h4>
           <select
             value={features.propertyAge}
-            onChange={(e) => handleChange('propertyAge', e.target.value)}
+            onChange={(e) => handleChange('propertyAge', parseFloat(e.target.value))}
             className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black hover:bg-black hover:text-white [&_option]:text-black [&_option]:bg-white"
           >
             <option value="" disabled>Select Property Age</option>
@@ -385,7 +385,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                   type="number"
                   min="0"
                   value={features.superBuiltUpAreaSqft}
-                  onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqft')}
+                    onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqft')}
                   placeholder="Area in sq.ft"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
                 />

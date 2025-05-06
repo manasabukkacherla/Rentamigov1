@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 interface RestrictionsProps {
   res: {
@@ -18,6 +19,7 @@ const Restrictions = ({ res, onRestrictionsChange }: RestrictionsProps) => {
 
   const handleChange = (field: string, value: string) => {
     const updatedRestrictions = { ...restrictions, [field]: value };
+    setRestrictions(updatedRestrictions);
     onRestrictionsChange?.(updatedRestrictions);
   };
 
@@ -27,7 +29,6 @@ const Restrictions = ({ res, onRestrictionsChange }: RestrictionsProps) => {
         <div className="flex items-center mb-8">
           <h3 className="text-2xl font-semibold text-black">Restrictions</h3>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Food Preference */}
           <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
@@ -57,7 +58,6 @@ const Restrictions = ({ res, onRestrictionsChange }: RestrictionsProps) => {
               </label>
             </div>
           </div>
-
           {/* Pets */}
           <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
             <h4 className="text-lg font-medium mb-4 text-black">Pets</h4>
@@ -87,7 +87,6 @@ const Restrictions = ({ res, onRestrictionsChange }: RestrictionsProps) => {
             </div>
           </div>
         </div>
-
         {/* Tenant Type */}
         <div className="bg-gray-50 p-6 rounded-lg border border-black/10">
           <h4 className="text-lg font-medium mb-4 text-black">Tenant Type</h4>

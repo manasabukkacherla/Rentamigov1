@@ -43,7 +43,7 @@ interface Address {
 
 interface IBasicInformation {
   propertyName: string;
-  address: {
+  propertyAddress: {
     houseName: string;
     street: string;
     city: string;
@@ -158,14 +158,14 @@ interface IMedia {
   documents: (File | string)[];
 }
 
-interface PropertySize {
-  superBuiltUpAreaSqft: number;
-  superBuiltUpAreaSqmt: number;
-  builtUpAreaSqft: number;
-  builtUpAreaSqmt: number;
-  carpetAreaSqft: number;
-  carpetAreaSqmt: number;
-}
+// interface PropertySize {
+//   superBuiltUpAreaSqft: number;
+//   superBuiltUpAreaSqmt: number;
+//   builtUpAreaSqft: number;
+//   builtUpAreaSqmt: number;
+//   carpetAreaSqft: number;
+//   carpetAreaSqmt: number;
+// }
 
 interface Restrictions {
   foodPreference: string;
@@ -178,17 +178,20 @@ interface Restrictions {
 
 
 interface ILeaseTerms {
-  leaseAmount: {
+  leaseDetails: {
     amount: number;
-    amountType: string;
+    type: string;
+    duration: number;
+    durationUnit: string;
+
   };
-  leaseTenure: {
+  tenureDetails: {
     minimumTenure: number;
     minimumUnit: string;
     maximumTenure: number;
     maximumUnit: string;
     lockInPeriod: number;
-    lockInUnit:string;
+    lockInUnit: string;
     noticePeriod: number;
     noticePeriodUnit: string;
   };
@@ -203,7 +206,7 @@ interface ILeaseTerms {
     };
     electricity: {
       amount: number;
-      type:string;
+      type: string;
     };
     gas: {
       amount: number;
@@ -212,11 +215,11 @@ interface ILeaseTerms {
     others: {
       amount: number;
       type: string;
-    };
+    }
   };
   brokerage: {
     required: string;
-    amount: number;
+    amount?: number;
   };
  
 }
@@ -235,51 +238,51 @@ interface formData {
   restrictions: Restrictions;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
-  // leaseTerms:ILeaseTerms;
-  leaseAmount: {
-    amount: number;    
-    type: string;
-    duration: number,
-    durationUnit: string;
-  };
-  leaseTenure: {
-    minimumTenure: number;
-    minimumUnit: string;
-    maximumTenure: number;
-    maximumUnit: string;
-    lockInPeriod: number;
-    lockInUnit:string;
-    noticePeriod: number;
-    noticePeriodUnit: string;
-  };
-  maintenanceAmount: {
-    amount: number;
-    frequency: string;
-  };
-  otherCharges: {
-    water: {
-      amount: number;
-      type: string;
-    };
-    electricity: {
-      amount: number;
-      type:string;
-    };
-    gas: {
-      amount: number;
-      type: string;
-    };
-    others: {
-      amount: number;
-      type: string;
-    };
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
+  leaseTerms:ILeaseTerms;
+  // leaseAmount: {
+  //   amount: number;    
+  //   type: string;
+  //   duration: number,
+  //   durationUnit: string;
+  // };
+  // leaseTenure: {
+  //   minimumTenure: number;
+  //   minimumUnit: string;
+  //   maximumTenure: number;
+  //   maximumUnit: string;
+  //   lockInPeriod: number;
+  //   lockInUnit:string;
+  //   noticePeriod: number;
+  //   noticePeriodUnit: string;
+  // };
+  // maintenanceAmount: {
+  //   amount: number;
+  //   frequency: string;
+  // };
+  // otherCharges: {
+  //   water: {
+  //     amount: number;
+  //     type: string;
+  //   };
+  //   electricity: {
+  //     amount: number;
+  //     type:string;
+  //   };
+  //   gas: {
+  //     amount: number;
+  //     type: string;
+  //   };
+  //   others: {
+  //     amount: number;
+  //     type: string;
+  //   };
+  // };
+  // brokerage: {
+  //   required: string;
+  //   amount?: number;
+  // };
   availability: {
-    type: "immediate" | "specific";
+    type: string;
     date: string;
   };
   media: IMedia;
@@ -344,17 +347,18 @@ interface MediaUploadProps {
   }) => void;
 }
 
+
+
 const LeaseIndependentHouse = () => {
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
-
-  const [formData, setFormData] = useState<formData>({
+  const initialData={
     basicInformation: {
       propertyName: "",
-      address: {
+      propertyAddress: {
         houseName: "",
         street: "",
         city: "",
@@ -454,38 +458,220 @@ const LeaseIndependentHouse = () => {
       smarthometechnology: [],
       otheritems: []
     },
-    
-      leaseAmount: {
+    leaseTerms: {
+      leaseDetails: {
         amount: 0,
         type: 'fixed',
-    duration: 0,
-    durationUnit: 'years'
+        duration: 0,
+        durationUnit: 'years'
+
       },
-      leaseTenure: {
+      tenureDetails: {
         minimumTenure: 0,
-        minimumUnit: "years",
+        minimumUnit: 'years',
         maximumTenure: 0,
-        maximumUnit: "years",
+        maximumUnit: 'years',
         lockInPeriod: 0,
-        lockInUnit: "years",
+        lockInUnit: 'years',
         noticePeriod: 0,
-        noticePeriodUnit: "months",
+        noticePeriodUnit: 'months'
       },
       maintenanceAmount: {
         amount: 0,
-        frequency: "monthly",
+        frequency: 'monthly'
       },
       otherCharges: {
-        water: { amount: 0, type: "inclusive" },
-        electricity: { amount: 0, type: "inclusive" },
-        gas: { amount: 0, type: "inclusive" },
-        others: { amount: 0, type: "inclusive" },
+        water: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        electricity: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        gas: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        others: {
+          amount: 0,
+          type: 'inclusive',
+        },
       },
       brokerage: {
-        required: "no",
+        required: 'no',
         amount: 0,
       },
-   
+    },
+      availability: {
+        date: new Date().toISOString(),
+        type: "immediate",
+      },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+        bedrooms: [],
+        halls: [],
+        storerooms: [],
+        kitchen: []
+      },
+      videoTour: undefined,
+      documents: [],
+    },
+  }
+  const [formData, setFormData] = useState<formData>({
+    basicInformation: {
+      propertyName: "",
+      propertyAddress: {
+        houseName: "",
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        pinCode:"",
+        location: {
+          latitude: "",
+          longitude: ""
+        }
+      }
+    },
+    propertySize: 0,
+    propertyDetails: {
+      bedrooms: 0,
+      washrooms: 0,
+      balconies: 0,
+      hasParking: false,
+      parkingDetails: {
+        twoWheeler: 0,
+        fourWheeler: 0
+      },
+      extraRooms: {
+        servant: false,
+        puja: false,
+        store: false,
+        others: false
+      },
+      utilityArea: "",
+      furnishingStatus: "",
+      totalFloors: 0,
+      propertyOnFloor: 0,
+      facing: "",
+      propertyAge: "",
+      superBuiltUpAreaSqft: 0,
+      superBuiltUpAreaSqmt: 0,
+      builtUpAreaSqft: 0,
+      builtUpAreaSqmt: 0,
+      carpetAreaSqft: 0,
+      carpetAreaSqmt: 0,
+      electricityAvailability: "",
+      waterAvailability: {
+        borewell: false,
+        governmentSupply: false,
+        tankerSupply: false
+      }
+    },
+    restrictions: {
+      foodPreference: "",
+      petsAllowed: "",
+      tenantType: ""
+    },
+    flatAmenities: {
+      lights: 0,
+      ceilingFan: 0,
+      geysers: 0,
+      chimney: false,
+      callingBell: false,
+      wardrobes: 0,
+      lofts: 0,
+      kitchenCabinets: 0,
+      clothHanger: 0,
+      pipedGasConnection: false,
+      gasStoveWithCylinder: false,
+      ironingStand: false,
+      bathtub: false,
+      shower: false,
+      sofa: false,
+      coffeeTable: false,
+      tvUnit: false,
+      diningTableWithChairs: 0,
+      cotWithMattress: 0,
+      sideTable: 0,
+      studyTableWithChair: 0,
+      television: false,
+      refrigerator: false,
+      washingMachine: false,
+      dishwasher: false,
+      waterPurifier: false,
+      microwaveOven: false,
+      inductionCooktop: false,
+      gasStove: false,
+      airConditioner: 0,
+      desertCooler: 0,
+      ironBox: false,
+      exhaustFan: 0
+    },
+    societyAmenities: {
+      powerutility: [],
+      parkingtranspotation: [],
+      recreationalsportsfacilities: [],
+      childrenfamilyamenities: [],
+      healthwellnessfacilities: [],
+      shoppingconviencestores: [],
+      ecofriendlysustainable: [],
+      communityculturalspaces: [],
+      smarthometechnology: [],
+      otheritems: []
+    },
+    leaseTerms: {
+      leaseDetails: {
+        amount: 0,
+        type: 'fixed',
+        duration: 0,
+        durationUnit: 'years'
+
+      },
+      tenureDetails: {
+        minimumTenure: 0,
+        minimumUnit: 'years',
+        maximumTenure: 0,
+        maximumUnit: 'years',
+        lockInPeriod: 0,
+        lockInUnit: 'years',
+        noticePeriod: 0,
+        noticePeriodUnit: 'months'
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: 'monthly'
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        electricity: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        gas: {
+          amount: 0,
+          type: 'inclusive',
+        },
+        others: {
+          amount: 0,
+          type: 'inclusive',
+        },
+      },
+      brokerage: {
+        required: 'no',
+        amount: 0,
+      },
+    },
       availability: {
         date: new Date().toISOString(),
         type: "immediate",
@@ -514,10 +700,10 @@ const LeaseIndependentHouse = () => {
       basicInformation: {
         ...prev.basicInformation,
         address: {
-          ...prev.basicInformation.address,
+          ...prev.basicInformation.propertyAddress,
           ...newAddress,
           location: {
-            ...prev.basicInformation.address.location,
+            ...prev.basicInformation.propertyAddress.location,
             ...newAddress.location // <-- This line ensures updated lat/lng are applied
           }
         }
@@ -526,25 +712,25 @@ const LeaseIndependentHouse = () => {
   }, []);
 
 
-  const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        address: {
-          ...prev.basicInformation.address,
-          street: address?.address || prev.basicInformation.address.street,
-          city: address?.city || prev.basicInformation.address.city,
-          state: address?.state || prev.basicInformation.address.state,
-          zipCode: address?.pinCode || prev.basicInformation.address.zipCode,
-          location: {
-            latitude: lat,
-            longitude: lng
-          },
-        }
-      }
-    }))
-  }, []);
+  // const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     basicInformation: {
+  //       ...prev.basicInformation,
+  //       address: {
+  //         ...prev.basicInformation.address,
+  //         street: address?.address || prev.basicInformation.address.street,
+  //         city: address?.city || prev.basicInformation.address.city,
+  //         state: address?.state || prev.basicInformation.address.state,
+  //         zipCode: address?.pinCode || prev.basicInformation.address.zipCode,
+  //         location: {
+  //           latitude: lat,
+  //           longitude: lng
+  //         },
+  //       }
+  //     }
+  //   }))
+  // }, []);
 
   const handleAvailabilityChange = useCallback((newAvailability: { type: "immediate" | "specific", date?: string }) => {
     setFormData(prev => ({
@@ -566,13 +752,10 @@ const LeaseIndependentHouse = () => {
       component: (
         <div className="space-y-8">
           
-              <PropertyName
-                  propertyName={formData.basicInformation.propertyName}
-                  onPropertyNameChange={(name) =>
-                    setFormData((prev) => ({ ...prev, propertyName: name }))
-                  }
-                />
-
+          <PropertyName
+            propertyName={formData.basicInformation.propertyName}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+          />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
@@ -580,11 +763,11 @@ const LeaseIndependentHouse = () => {
                 <h3 className="text-2xl font-semibold text-black">Location Details</h3>
               </div>
               <IndependentPropertyAddress
-                  address={{
-                    ...formData.basicInformation.address,
+                  propertyAddress={{
+                    ...formData.basicInformation.propertyAddress,
                     location: {
-                      latitude: formData.basicInformation.address.location.latitude,
-                      longitude: formData.basicInformation.address.location.longitude
+                      latitude: formData.basicInformation.propertyAddress.location.latitude,
+                      longitude: formData.basicInformation.propertyAddress.location.longitude
                     }
                   }}
                   onAddressChange={handleAddressChange}
@@ -701,31 +884,87 @@ const LeaseIndependentHouse = () => {
           
           <div className="space-y-8">
           <LeaseAmount
-                  onLeaseAmountChange={(amount) => setFormData(prev => ({
-                    ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
-                  }))}
-                />
-          <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
-          
-                <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev,maintenanceAmount: maintenance }))} />
-          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
-            // Since the OtherCharges component sends the old state, wait for the component to update
-            // by deferring the formData update with setTimeout
-            setTimeout(() => {
-              setFormData(prev => ({
-                ...prev,
-                otherCharges: {
-                  water: charges.water || { amount: 0, type: 'inclusive' },
-                  electricity: charges.electricity || { amount: 0, type: 'inclusive' },
-                  gas: charges.gas || { amount: 0, type: 'inclusive' },
-                  others: charges.others || { amount: 0, type: 'inclusive' }
+            onLeaseAmountChange={(amount) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                leaseDetails: {
+                  ...prev.leaseTerms.leaseDetails,
+                  leaseAmount: {
+                    amount: amount.amount || 0,
+                    type: amount.type || 'fixed',
+                    duration: amount.duration || 0,
+                    durationUnit: amount.durationUnit || 'years'
+                  },
+
                 }
-              }));
-            }, 0);
-          }} />
-          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({ ...prev, brokerage }))} />
-        </div>
+              }
+            }))}
+          />
+          <LeaseTenure
+            onLeaseTenureChange={(tenure) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                leaseDetails: {
+                  ...prev.leaseTerms.leaseDetails,
+                  // leaseDuration: tenure.leaseDuration || '',
+                },
+                tenureDetails: {
+                  minimumTenure: Number(tenure.minimumTenure) || 0,
+                  minimumUnit: tenure.minimumUnit || 'years',
+                  maximumTenure: Number(tenure.maximumTenure) || 0,
+                  maximumUnit: tenure.maximumUnit || 'years',
+                  lockInPeriod: Number(tenure.lockInPeriod) || 0,
+                  lockInUnit: tenure.lockInUnit || 'years',
+                  noticePeriod: Number(tenure.noticePeriod) || 0,
+                  noticePeriodUnit: tenure.noticePeriodUnit || 'months'
+                }
+              }
+            }))}
+          />
+          <MaintenanceAmount
+            maintenanceAmount={formData.leaseTerms.maintenanceAmount}
+            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                maintenanceAmount: {
+                  amount: Number(maintenance.amount) || 0,
+                  frequency: maintenance.frequency || 'monthly'
+                }
+              }
+            }))}
+          />
+          <OtherCharges
+            otherCharges={formData.leaseTerms.otherCharges}
+            onOtherChargesChange={(charges) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                otherCharges: {
+                  water: { type: charges.water.type, amount: charges.water.amount },
+                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                  gas: { type: charges.gas.type, amount: charges.gas.amount },
+                  others: { type: charges.others.type, amount: charges.others.amount }
+                }
+              }
+            }))}
+          />
+          <Brokerage
+            bro={formData.leaseTerms.brokerage}
+            onBrokerageChange={(brokerage) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                brokerage: {
+                  required: brokerage.required as 'yes' | 'no',
+                  amount: Number(brokerage.amount) || 0
+                }
+              }
+            }))}
+          />
+           </div>
             </div>
       ),
     },
@@ -937,6 +1176,7 @@ const LeaseIndependentHouse = () => {
 
         if (response.data.success) {
           toast.success('Independent house listing created successfully!');
+          setFormData({...initialData} as formData);
         }
       } else {
         navigate('/login');

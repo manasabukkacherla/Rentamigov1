@@ -4,7 +4,7 @@ import { NumberListInstance } from 'twilio/lib/rest/pricing/v2/number';
 interface IBasicInformation {
   propertyId: string;
   propertyName: string;
-  address: {
+  propertyAddress: {
     houseName: string;
     street: string;
     city: string;
@@ -111,35 +111,52 @@ interface IOtherCharge {
   }
   
   interface ILeaseTerms {
-    leaseAmount: {
-        amount: number;
-        amountType: string;
-    };
-    leaseTenure: {
-      minimumTenure: number;
-      minimumUnit: string;
-      maximumTenure: number;
-      maximumUnit: string;
-      lockInPeriod: number;
-      lockInUnit: string;
-      noticePeriod: number;
-      noticePeriodUnit: string;
-    };
-    maintenanceAmount: {
-      amount: number;
-      frequency: string;
-    };
-    otherCharges: {
-      water: IOtherCharge;
-      electricity: IOtherCharge;
-      gas: IOtherCharge;
-      others: IOtherCharge;
-    };
-    brokerage: {
-      required: string;
-      amount: number;
-    };
-  }
+        leaseDetails: {
+            leaseAmount:{
+                amount: number,
+                type: string,
+                duration: number,
+                durationUnit: string,
+              },
+        },
+        tenureDetails: {
+          minimumTenure: number;
+          minimumUnit: string;
+          maximumTenure: number;
+          maximumUnit: string;
+          lockInPeriod: number;
+          lockInUnit: string;
+          noticePeriod: number;
+          noticePeriodUnit: string;
+        },
+        maintenanceAmount: {
+            amount: number,
+            frequency: string,
+        },
+        otherCharges: {
+            water: {
+                amount?: number,
+                type: string,
+            },
+            electricity: {
+                amount?: number,
+                type: string,
+            },
+            gas: {
+                amount?: number,
+                type: string,
+            },
+            others: {
+                amount?: number,
+                type: string,
+            }
+        },
+        brokerage: {
+            required: string,
+            amount?: number,
+        },
+    
+}
 
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
@@ -182,34 +199,35 @@ export interface ILeaseIndependentHouse extends Document {
     }
     flatAmenities: flatamenities;
     societyAmenities: societyAmenities;
-    leaseAmount: {
-        amount: number;
-        amountType: string;
-    };
-    leaseTenure: {
-      minimumTenure: number;
-      minimumUnit: string;
-      maximumTenure: number;
-      maximumUnit: string;
-      lockInPeriod: number;
-      lockInUnit: string;
-      noticePeriod: number;
-      noticePeriodUnit: string;
-    };
-    maintenanceAmount: {
-      amount: number;
-      frequency: string;
-    };
-    otherCharges: {
-      water: IOtherCharge;
-      electricity: IOtherCharge;
-      gas: IOtherCharge;
-      others: IOtherCharge;
-    };
-    brokerage: {
-      required: string;
-      amount: number;
-    };
+    leaseTerms: ILeaseTerms;
+    // leaseAmount: {
+    //     amount: number;
+    //     amountType: string;
+    // };
+    // leaseTenure: {
+    //   minimumTenure: number;
+    //   minimumUnit: string;
+    //   maximumTenure: number;
+    //   maximumUnit: string;
+    //   lockInPeriod: number;
+    //   lockInUnit: string;
+    //   noticePeriod: number;
+    //   noticePeriodUnit: string;
+    // };
+    // maintenanceAmount: {
+    //   amount: number;
+    //   frequency: string;
+    // };
+    // otherCharges: {
+    //   water: IOtherCharge;
+    //   electricity: IOtherCharge;
+    //   gas: IOtherCharge;
+    //   others: IOtherCharge;
+    // };
+    // brokerage: {
+    //   required: string;
+    //   amount: number;
+    // };
     availability: availability;
     media: IMedia;
     metadata: IMetadata;
@@ -219,7 +237,7 @@ const LeaseIndependentHouseSchema = new Schema<ILeaseIndependentHouse>({
         propertyId: { type: String, required: true, unique: true },
         basicInformation: {
           propertyName: { type: String, required: true },
-          address: {
+          propertyAddress: {
             houseName: { type: String, required: true },
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -319,48 +337,53 @@ const LeaseIndependentHouseSchema = new Schema<ILeaseIndependentHouse>({
           smarthometechnology: { type: [String], required: true },
           otheritems: { type: [String], required: true },
         },
-        // leaseTerms:{
-            leaseAmount: {
-                amount: { type: Number, required: true },
-                amountType: { type: String, required: true },
-              },
-              leaseTenure: {
-                minimumTenure: { type: Number, required: true },
-                minimumUnit: { type: String, required: true },
-                maximumTenure: { type: Number, required: true },
-                maximumUnit: { type: String, required: true },
-                lockInPeriod: { type: Number, required: true },
-                lockInUnit: { type: String, required: true },
-                noticePeriod: { type: Number, required: true },
-                noticePeriodUnit: { type: String, required: true },
-              },
-              maintenanceAmount: {
-                amount: { type: Number, required: true },
-                frequency: { type: String, required: true },
-              },
-              otherCharges: {
-                water: {
+        leaseTerms: {
+          leaseDetails: {
+              leaseAmount: { 
                   amount: { type: Number, required: true },
                   type: { type: String, required: true },
-                },
-                electricity: {
-                  amount: { type: Number, required: true },
-                  type: { type: String, required: true },
-                },
-                gas: {
-                  amount: { type: Number, required: true },
-                  type: { type: String, required: true },
-                },
-                others: {
-                  amount: { type: Number, required: true },
-                  type: { type: String, required: true },
-                },
+                  duration: { type: Number, required: true },
+                  durationUnit: { type: String, required: true },
               },
-              brokerage: {
-                required: { type: String, required: true },
-                amount: { type: Number, required: true },
+          },
+          tenureDetails: {
+              minimumTenure: {type: String, required: true },
+              minimumUnit: {type: String, required: true },
+              maximumTenure: {type: String, required: true },
+              maximumUnit: {type: String, required: true },
+              lockInPeriod: {type: String, required: true },
+              lockInUnit: {type: String, required: true },
+              noticePeriod: {type: String, required: true },
+              noticePeriodUnit: {type: String, required: true },
+          },
+          maintenanceAmount: {
+              amount: { type: Number ,required: true},
+              frequency: { type: String ,required: true},
+          },
+          otherCharges: {
+              water: {
+                  amount: { type: Number },
+                  type: { type: String, required: true},
               },
-        // },
+              electricity: {
+                  amount: { type: Number },
+                  type: { type: String, required: true},
+              },
+              gas: {
+                  amount: { type: Number },
+                  type: { type: String, required: true},
+              },
+              others: {
+                  amount: { type: Number },
+                  type: { type: String, required: true},
+              }
+          },
+          brokerage: {
+              required: { type: String, required: true },
+              amount: { type: Number }
+          },
+          
+        },
         availability: {
           type: { type: String, required: true },
           date: { type: String },
@@ -390,10 +413,13 @@ const LeaseIndependentHouseSchema = new Schema<ILeaseIndependentHouse>({
       }
       );
  
+      // LeaseIndependentHouseSchema.index({ propertyId: 1 }, { unique: true });
+      // LeaseIndependentHouseSchema.index({ 'basicInformation.propertyAddress.city': 1 });
+      // LeaseIndependentHouseSchema.index({ 'leaseTerms.leaseDetails.leaseAmount': 1 });
+      
 
-// Indexes
-LeaseIndependentHouseSchema.index({ propertyId: 1 }, { unique: true });
-LeaseIndependentHouseSchema.index({ 'propertyAddress.city': 1 });
-LeaseIndependentHouseSchema.index({ 'leaseTerms.leaseAmount': 1 });
+// export default model<ILeaseIndependentHouse>('LeaseIndependentHouse', LeaseIndependentHouseSchema);
 
-export default model<ILeaseIndependentHouse>('LeaseIndependentHouse', LeaseIndependentHouseSchema);
+
+const LeaseIndependentHouse = mongoose.models.LeaseIndependentHouse || model<ILeaseIndependentHouse>('LeaseIndependentHouse', LeaseIndependentHouseSchema);
+export default LeaseIndependentHouse;
