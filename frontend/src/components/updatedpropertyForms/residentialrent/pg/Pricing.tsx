@@ -19,6 +19,20 @@ interface RoomSharePricing {
   };
 }
 
+interface PricingProps {
+  pricing: {
+    rent: number;
+    deposit?: number;
+    maintenance?: number;
+    includedUtilities?: string[];
+    terms?: string;
+    roomSharePricing?: any;
+  };
+  onPricingChange: (pricing: any) => void;
+  selectedShares: string[];
+  customShare: string;
+}
+
 const defaultRoomShareDetails: RoomShareDetails = {
   monthlyRent: '',
   advancePaymentMonths: '1',
@@ -26,28 +40,50 @@ const defaultRoomShareDetails: RoomShareDetails = {
   noticePeriod: '1',
 };
 
-const Pricing = () => {
+const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedShares, customShare }) => {
+  // Initialize roomSharePricing from props or default values
   const [roomSharePricing, setRoomSharePricing] = useState<RoomSharePricing>({
-    singleShare: { ...defaultRoomShareDetails },
-    doubleShare: { ...defaultRoomShareDetails },
-    tripleShare: { ...defaultRoomShareDetails },
-    fourShare: { ...defaultRoomShareDetails },
-    fiveShare: { ...defaultRoomShareDetails },
-    multiShare: { ...defaultRoomShareDetails, capacity: '6' },
+    singleShare: pricing.roomSharePricing?.singleShare || { ...defaultRoomShareDetails },
+    doubleShare: pricing.roomSharePricing?.doubleShare || { ...defaultRoomShareDetails },
+    tripleShare: pricing.roomSharePricing?.tripleShare || { ...defaultRoomShareDetails },
+    fourShare: pricing.roomSharePricing?.fourShare || { ...defaultRoomShareDetails },
+    fiveShare: pricing.roomSharePricing?.fiveShare || { ...defaultRoomShareDetails },
+    multiShare: pricing.roomSharePricing?.multiShare || { ...defaultRoomShareDetails, capacity: '6' },
   });
+  
+  // Additional pricing state
+  const [deposit, setDeposit] = useState<string>(pricing.deposit?.toString() || '');
+  const [maintenance, setMaintenance] = useState<string>(pricing.maintenance?.toString() || '');
+  const [includedUtilities, setIncludedUtilities] = useState<string[]>(pricing.includedUtilities || []);
+  const [terms, setTerms] = useState<string>(pricing.terms || '');
+
+  // Update parent component when pricing changes
+  React.useEffect(() => {
+    onPricingChange({
+      ...pricing,
+      roomSharePricing,
+      deposit: deposit ? Number(deposit) : undefined,
+      maintenance: maintenance ? Number(maintenance) : undefined,
+      includedUtilities,
+      terms
+    });
+  }, [roomSharePricing, deposit, maintenance, includedUtilities, terms]);
 
   const handleRoomSharePricingChange = (
     shareType: keyof RoomSharePricing,
     field: keyof RoomShareDetails,
     value: string
   ) => {
-    setRoomSharePricing(prev => ({
-      ...prev,
-      [shareType]: {
-        ...prev[shareType],
-        [field]: value,
-      },
-    }));
+    setRoomSharePricing(prev => {
+      const updated = {
+        ...prev,
+        [shareType]: {
+          ...prev[shareType],
+          [field]: value,
+        },
+      };
+      return updated;
+    });
   };
 
   const getShareDisplayName = (shareType: keyof RoomSharePricing): string => {
@@ -62,12 +98,113 @@ const Pricing = () => {
     }
   };
 
+  // Filter share types based on selected shares
+  const getFilteredShareTypes = () => {
+    const shareTypeMap: Record<string, keyof RoomSharePricing> = {
+      'single': 'singleShare',
+      'double': 'doubleShare',
+      'triple': 'tripleShare',
+      'four': 'fourShare',
+      'five': 'fiveShare',
+      'more': 'multiShare'
+    };
+    
+    // Always include selected share types
+    return Object.keys(roomSharePricing).filter(shareType => {
+      const shareId = Object.entries(shareTypeMap).find(([_, value]) => value === shareType)?.[0];
+      return shareId ? selectedShares.includes(shareId) : false;
+    });
+  };
+
+  // Utility options
+  const utilityOptions = [
+    { id: 'electricity', label: 'Electricity' },
+    { id: 'water', label: 'Water' },
+    { id: 'internet', label: 'Internet/WiFi' },
+    { id: 'gas', label: 'Gas' },
+    { id: 'cleaning', label: 'Cleaning' },
+    { id: 'laundry', label: 'Laundry' },
+  ];
+
   return (
     <div className="space-y-6">
+      {/* General Pricing */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h2 className="text-xl font-bold mb-6">General Pricing Details</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit</label>
+            <div className="relative">
+              <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="number"
+                value={deposit}
+                onChange={(e) => setDeposit(e.target.value)}
+                placeholder="Enter amount"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Maintenance</label>
+            <div className="relative">
+              <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input
+                type="number"
+                value={maintenance}
+                onChange={(e) => setMaintenance(e.target.value)}
+                placeholder="Enter amount"
+                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
+              />
+            </div>
+          </div>
+        </div>
+        
+        {/* Included Utilities */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Included Utilities</label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {utilityOptions.map(utility => (
+              <div key={utility.id} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`utility-${utility.id}`}
+                  checked={includedUtilities.includes(utility.id)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setIncludedUtilities([...includedUtilities, utility.id]);
+                    } else {
+                      setIncludedUtilities(includedUtilities.filter(id => id !== utility.id));
+                    }
+                  }}
+                  className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded"
+                />
+                <label htmlFor={`utility-${utility.id}`} className="ml-2 text-sm text-gray-700">
+                  {utility.label}
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Terms */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Additional Terms & Conditions</label>
+          <textarea
+            value={terms}
+            onChange={(e) => setTerms(e.target.value)}
+            placeholder="Enter any additional terms or conditions"
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
+          />
+        </div>
+      </div>
+      
+      {/* Room Pricing Details */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold mb-6">Room Pricing Details</h2>
         <div className="space-y-10">
-          {Object.keys(roomSharePricing).map((shareType) => (
+          {getFilteredShareTypes().map((shareType) => (
             <div key={shareType} className="mb-8 border-b border-gray-100 pb-8">
               <h3 className="text-lg font-semibold mb-4">{getShareDisplayName(shareType as keyof RoomSharePricing)}</h3>
               {shareType === 'multiShare' && (

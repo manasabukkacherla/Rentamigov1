@@ -185,74 +185,6 @@ interface FormData {
   media: IMedia;
 }
 
-interface PropertyNameProps {
-  propertyName: string
-  onPropertyNameChange: (name: string) => void
-}
-
-interface MapSelectorProps {
-  latitude: string
-  longitude: string
-  onLocationSelect: (lat: string, lng: string, address?: any) => void
-  initialShowMap?: boolean
-}
-
-interface PropertySizeProps {
-  onPropertySizeChange: (size: string) => void
-}
-
-interface PropertyFeaturesProps {
-  onFeaturesChange?: (features: Record<string, any>) => void
-}
-
-interface FlatAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
-}
-
-interface SocietyAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
-}
-
-interface RestrictionsProps {
-  restrictions: string[]
-  onChange: (restrictions: string[]) => void
-}
-
-interface AvailabilityDateProps {
-  date: Date
-  onChange: (date: Date) => void
-}
-
-interface PropertyAddressType {
-  flatNo?: string
-  floor?: string
-  apartmentName?: string
-  street?: string
-  city?: string
-  state?: string
-  zipCode?: string
-  coordinates?: {
-    lat: number
-    lng: number
-  }
-  locationLabel?: string
-}
-
-interface MediaUploadProps {
-  onMediaChange?: (media: {
-    exteriorViews: File[];
-    interiorViews: File[];
-    floorPlan: File[];
-    washrooms: File[];
-    lifts: File[];
-    emergencyExits: File[];
-    videoTour?: File;
-    legalDocuments: File[];
-  }) => void;
-}
-
 const Apartment = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -260,6 +192,132 @@ const Apartment = () => {
   const [success, setSuccess] = useState<string | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
 
+  const initialFormData= {
+    basicInformation: {
+      propertyName: "",
+      address: {
+        flatNo: 0,
+        showFlatNo: false,
+        floor: 0,
+        apartmentName: "",
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        location: {
+          latitude: "",
+          longitude: ""
+        }
+      }
+    },
+    propertySize: 0,
+    propertyDetails: {
+      bedrooms: 0,
+      washrooms: 0,
+      balconies: 0,
+      hasParking: false,
+      parkingDetails: {
+        twoWheeler: 0,
+        fourWheeler: 0
+      },
+      extraRooms: {
+        servant: false,
+        puja: false,
+        store: false,
+        others: false
+      },
+      utilityArea: "",
+      furnishingStatus: "",
+      totalFloors: 0,
+      propertyOnFloor: 0,
+      facing: "",
+      propertyAge: "",
+      superBuiltUpAreaSqft: 0,
+      superBuiltUpAreaSqmt: 0,
+      builtUpAreaSqft: 0,
+      builtUpAreaSqmt: 0,
+      carpetAreaSqft: 0,
+      carpetAreaSqmt: 0,
+      electricityAvailability: "",
+      waterAvailability: {
+        borewell: false,
+        governmentSupply: false,
+        tankerSupply: false
+      }
+    },
+    restrictions: {
+      foodPreference: "",
+      petsAllowed: "",
+      tenantType: ""
+    },
+    flatAmenities: {
+      lights: 0,
+      ceilingFan: 0,
+      geysers: 0,
+      chimney: false,
+      callingBell: false,
+      wardrobes: 0,
+      lofts: 0,
+      kitchenCabinets: 0,
+      clothHanger: 0,
+      pipedGasConnection: false,
+      gasStoveWithCylinder: false,
+      ironingStand: false,
+      bathtub: false,
+      shower: false,
+      sofa: false,
+      coffeeTable: false,
+      tvUnit: false,
+      diningTableWithChairs: 0,
+      cotWithMattress: 0,
+      sideTable: 0,
+      studyTableWithChair: 0,
+      television: false,
+      refrigerator: false,
+      washingMachine: false,
+      dishwasher: false,
+      waterPurifier: false,
+      microwaveOven: false,
+      inductionCooktop: false,
+      gasStove: false,
+      airConditioner: 0,
+      desertCooler: 0,
+      ironBox: false,
+      exhaustFan: 0
+    },
+    societyAmenities: {
+      powerutility: [],
+      parkingtranspotation: [],
+      recreationalsportsfacilities: [],
+      childrenfamilyamenities: [],
+      healthwellnessfacilities: [],
+      shoppingconviencestores: [],
+      ecofriendlysustainable: [],
+      communityculturalspaces: [],
+      smarthometechnology: [],
+      otheritems: []
+    },
+    availability: {
+      type: "immediate",
+      date: "",
+    },
+    media: {
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+        bedrooms: [],
+        halls: [],
+        storerooms: [],
+        kitchen: []
+      },
+      videoTour: undefined,
+      documents: []
+    }
+  }
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       propertyName: "",
@@ -737,6 +795,7 @@ const Apartment = () => {
 
         if (response.data.success) {
           toast.success('Apartment listing created successfully!');
+          setFormData({...initialFormData} as FormData);
         }
       } else {
         navigate('/login');

@@ -83,36 +83,36 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ otherCharges, onOtherCharge
                 <h4 className="text-lg font-medium text-gray-800">{label}</h4>
               </div>
 
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleChange(key as keyof ChargesState, {
-                      ...currentCharge,
-                      type: "inclusive",
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() =>
+                  handleChange(key as keyof typeof charges, {
+                    ...(charges[key as keyof typeof charges] as Charge),
+                    type: 'inclusive',
+                  })
+                }
+                className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
+                  (charges[key as keyof typeof charges] as Charge).type === 'inclusive'
+                    ? "bg-gray-50 border-black text-black-700"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                }`}
+              >
+                Inclusive
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                    handleChange(key as keyof typeof charges, {
+                      ...(charges[key as keyof typeof charges] as Charge),
+                    type: 'exclusive',
                     })
                   }
-                  className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
-                    currentCharge.type === "inclusive"
-                      ? "bg-gray-50 border-black text-black"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  Inclusive
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    handleChange(key as keyof ChargesState, {
-                      ...currentCharge,
-                      type: "exclusive",
-                    })
-                  }
-                  className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
-                    currentCharge.type === "exclusive"
-                      ? "bg-gray-50 border-black text-black"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
-                  }`}
+                className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
+                  (charges[key as keyof typeof charges] as Charge).type === 'exclusive'
+                    ? "bg-gray-50 border-black text-black-700"
+                    : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                }`}
                 >
                   Exclusive
                 </button>
