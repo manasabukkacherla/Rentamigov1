@@ -34,7 +34,7 @@ interface Address {
   city: string;
   state: string;
   zipCode: string;
-  pinCode:string,
+  pinCode: string,
   location: {
     latitude: string;
     longitude: string;
@@ -49,7 +49,7 @@ interface IBasicInformation {
     city: string;
     state: string;
     zipCode: string;
-    pinCode:string;
+    pinCode: string;
     location: {
       latitude: string;
       longitude: string;
@@ -74,8 +74,7 @@ interface PropertyDetails {
   };
   utilityArea: string;
   furnishingStatus: string;
-  totalFloors: number;
-  propertyOnFloor: number;
+  flooring: string;
   facing: string;
   propertyAge: string;
   superBuiltUpAreaSqft: number;
@@ -179,11 +178,11 @@ interface Restrictions {
 
 interface ILeaseTerms {
   leaseDetails: {
-    leaseAmount:{
-    amount: number;
-    type: string;
-    duration: number;
-    durationUnit: string;
+    leaseAmount: {
+      amount: number;
+      type: string;
+      duration: number;
+      durationUnit: string;
     },
   };
   tenureDetails: {
@@ -222,7 +221,7 @@ interface ILeaseTerms {
     required: string;
     amount?: number;
   };
- 
+
 }
 
 
@@ -239,7 +238,7 @@ interface formData {
   restrictions: Restrictions;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
-  leaseTerms:ILeaseTerms;
+  leaseTerms: ILeaseTerms;
   // leaseAmount: {
   //   amount: number;    
   //   type: string;
@@ -356,176 +355,7 @@ const LeaseIndependentHouse = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
-  const initialData={
-    basicInformation: {
-      propertyName: "",
-      propertyAddress: {
-        houseName: "",
-        street: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        pinCode:"",
-        location: {
-          latitude: "",
-          longitude: ""
-        }
-      }
-    },
-    propertySize: 0,
-    propertyDetails: {
-      bedrooms: 0,
-      washrooms: 0,
-      balconies: 0,
-      hasParking: false,
-      parkingDetails: {
-        twoWheeler: 0,
-        fourWheeler: 0
-      },
-      extraRooms: {
-        servant: false,
-        puja: false,
-        store: false,
-        others: false
-      },
-      utilityArea: "",
-      furnishingStatus: "",
-      totalFloors: 0,
-      propertyOnFloor: 0,
-      facing: "",
-      propertyAge: "",
-      superBuiltUpAreaSqft: 0,
-      superBuiltUpAreaSqmt: 0,
-      builtUpAreaSqft: 0,
-      builtUpAreaSqmt: 0,
-      carpetAreaSqft: 0,
-      carpetAreaSqmt: 0,
-      electricityAvailability: "",
-      waterAvailability: {
-        borewell: false,
-        governmentSupply: false,
-        tankerSupply: false
-      }
-    },
-    restrictions: {
-      foodPreference: "",
-      petsAllowed: "",
-      tenantType: ""
-    },
-    flatAmenities: {
-      lights: 0,
-      ceilingFan: 0,
-      geysers: 0,
-      chimney: false,
-      callingBell: false,
-      wardrobes: 0,
-      lofts: 0,
-      kitchenCabinets: 0,
-      clothHanger: 0,
-      pipedGasConnection: false,
-      gasStoveWithCylinder: false,
-      ironingStand: false,
-      bathtub: false,
-      shower: false,
-      sofa: false,
-      coffeeTable: false,
-      tvUnit: false,
-      diningTableWithChairs: 0,
-      cotWithMattress: 0,
-      sideTable: 0,
-      studyTableWithChair: 0,
-      television: false,
-      refrigerator: false,
-      washingMachine: false,
-      dishwasher: false,
-      waterPurifier: false,
-      microwaveOven: false,
-      inductionCooktop: false,
-      gasStove: false,
-      airConditioner: 0,
-      desertCooler: 0,
-      ironBox: false,
-      exhaustFan: 0
-    },
-    societyAmenities: {
-      powerutility: [],
-      parkingtranspotation: [],
-      recreationalsportsfacilities: [],
-      childrenfamilyamenities: [],
-      healthwellnessfacilities: [],
-      shoppingconviencestores: [],
-      ecofriendlysustainable: [],
-      communityculturalspaces: [],
-      smarthometechnology: [],
-      otheritems: []
-    },
-    leaseTerms: {
-      leaseDetails: {
-        leaseAmount:{
-        amount: 0,
-        type: 'fixed',
-        duration: 0,
-        durationUnit: 'years'
-        },
-      },
-      tenureDetails: {
-        minimumTenure: 0,
-        minimumUnit: 'years',
-        maximumTenure: 0,
-        maximumUnit: 'years',
-        lockInPeriod: 0,
-        lockInUnit: 'years',
-        noticePeriod: 0,
-        noticePeriodUnit: 'months'
-      },
-      maintenanceAmount: {
-        amount: 0,
-        frequency: 'monthly'
-      },
-      otherCharges: {
-        water: {
-          amount: 0,
-          type: 'inclusive',
-        },
-        electricity: {
-          amount: 0,
-          type: 'inclusive',
-        },
-        gas: {
-          amount: 0,
-          type: 'inclusive',
-        },
-        others: {
-          amount: 0,
-          type: 'inclusive',
-        },
-      },
-      brokerage: {
-        required: 'no',
-        amount: 0,
-      },
-    },
-      availability: {
-        date: new Date().toISOString(),
-        type: "immediate",
-      },
-    media: {
-      photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: [],
-        bedrooms: [],
-        halls: [],
-        storerooms: [],
-        kitchen: []
-      },
-      videoTour: undefined,
-      documents: [],
-    },
-  }
+
   const [formData, setFormData] = useState<formData>({
     basicInformation: {
       propertyName: "",
@@ -535,7 +365,7 @@ const LeaseIndependentHouse = () => {
         city: "",
         state: "",
         zipCode: "",
-        pinCode:"",
+        pinCode: "",
         location: {
           latitude: "",
           longitude: ""
@@ -558,19 +388,18 @@ const LeaseIndependentHouse = () => {
         store: false,
         others: false
       },
-      utilityArea: "",
-      furnishingStatus: "",
-      totalFloors: 0,
-      propertyOnFloor: 0,
-      facing: "",
-      propertyAge: "",
+      utilityArea: 'no',
+      furnishingStatus: '',
+      flooring: '',
+      facing: '',
+      propertyAge: '',
       superBuiltUpAreaSqft: 0,
       superBuiltUpAreaSqmt: 0,
       builtUpAreaSqft: 0,
       builtUpAreaSqmt: 0,
       carpetAreaSqft: 0,
       carpetAreaSqmt: 0,
-      electricityAvailability: "",
+      electricityAvailability: '',
       waterAvailability: {
         borewell: false,
         governmentSupply: false,
@@ -631,11 +460,11 @@ const LeaseIndependentHouse = () => {
     },
     leaseTerms: {
       leaseDetails: {
-        leaseAmount:{
-        amount: 0,
-        type: 'fixed',
-        duration: 0,
-        durationUnit: 'years'
+        leaseAmount: {
+          amount: 0,
+          type: 'fixed',
+          duration: 0,
+          durationUnit: 'years'
         },
       },
       tenureDetails: {
@@ -675,10 +504,10 @@ const LeaseIndependentHouse = () => {
         amount: 0,
       },
     },
-      availability: {
-        date: new Date().toISOString(),
-        type: "immediate",
-      },
+    availability: {
+      date: new Date().toISOString(),
+      type: "immediate",
+    },
     media: {
       photos: {
         exterior: [],
@@ -696,6 +525,8 @@ const LeaseIndependentHouse = () => {
       documents: [],
     },
   })
+
+  const initialData = formData;
 
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
@@ -754,7 +585,7 @@ const LeaseIndependentHouse = () => {
       icon: <Home className="w-5 h-5" />,
       component: (
         <div className="space-y-8">
-          
+
           <PropertyName
             propertyName={formData.basicInformation.propertyName}
             onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
@@ -766,15 +597,11 @@ const LeaseIndependentHouse = () => {
                 <h3 className="text-2xl font-semibold text-black">Location Details</h3>
               </div>
               <IndependentPropertyAddress
-                  propertyAddress={{
-                    ...formData.basicInformation.propertyAddress,
-                    location: {
-                      latitude: formData.basicInformation.propertyAddress.location.latitude,
-                      longitude: formData.basicInformation.propertyAddress.location.longitude
-                    }
-                  }}
-                  onAddressChange={handleAddressChange}
-                />
+                propertyAddress={formData.basicInformation.propertyAddress}
+                onAddressChange={(address) =>
+                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyAddress: address } }))
+                }
+              />
             </div>
           </div>
         </div>
@@ -792,7 +619,7 @@ const LeaseIndependentHouse = () => {
                 <h3 className="text-2xl font-semibold text-black">Property Size</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertySize
+                <PropertySize
                   propertySize={formData.propertySize}
                   onPropertySizeChange={(size: number) => {
                     setFormData(prev => ({
@@ -813,7 +640,8 @@ const LeaseIndependentHouse = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <IndependentPropertyFeatures
-                  onFeaturesChange={(features: Record<string, any>) => {
+                  propertyFeatures={formData.propertyDetails}
+                  onFeaturesChange={(features) =>
                     setFormData(prev => ({
                       ...prev,
                       propertyDetails: {
@@ -821,24 +649,24 @@ const LeaseIndependentHouse = () => {
                         ...features
                       }
                     }))
-                  }}
+                  }
                 />
               </div>
             </div>
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <Restrictions
-  res={formData.restrictions}
-  onRestrictionsChange={(restrictions: {
-    foodPreference: string;
-    petsAllowed: string;
-    tenantType: string;
-  }) => setFormData(prev => ({
-    ...prev,
-    restrictions
-  }))}
-/>
+            <Restrictions
+              res={formData.restrictions}
+              onRestrictionsChange={(restrictions: {
+                foodPreference: string;
+                petsAllowed: string;
+                tenantType: string;
+              }) => setFormData(prev => ({
+                ...prev,
+                restrictions
+              }))}
+            />
 
           </div>
 
@@ -850,7 +678,7 @@ const LeaseIndependentHouse = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <div className="space-y-12">
-                <FlatAmenities
+                  <FlatAmenities
                     amenities={formData.flatAmenities}
                     onAmenitiesChange={(amenities) =>
                       setFormData((prev) => ({
@@ -869,7 +697,8 @@ const LeaseIndependentHouse = () => {
                       ...prev,
                       societyAmenities: {
                         ...prev.societyAmenities,
-                        ...updatedAmenities}
+                        ...updatedAmenities
+                      }
                     }))}
                   />
                 </div>
@@ -884,91 +713,91 @@ const LeaseIndependentHouse = () => {
       icon: <IndianRupee className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-          
-          <div className="space-y-8">
-          <LeaseAmount
-            onLeaseAmountChange={(amount) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                leaseDetails: {
-                  ...prev.leaseTerms.leaseDetails,
-                  leaseAmount: {
-                    amount: amount.amount || 0,
-                    type: amount.type || 'fixed',
-                    duration: amount.duration || 0,
-                    durationUnit: amount.durationUnit || 'years'
-                  },
 
+          <div className="space-y-8">
+            <LeaseAmount
+              onLeaseAmountChange={(amount) => setFormData(prev => ({
+                ...prev,
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  leaseDetails: {
+                    ...prev.leaseTerms.leaseDetails,
+                    leaseAmount: {
+                      amount: amount.amount || 0,
+                      type: amount.type || 'fixed',
+                      duration: amount.duration || 0,
+                      durationUnit: amount.durationUnit || 'years'
+                    },
+
+                  }
                 }
-              }
-            }))}
-          />
-          <LeaseTenure
-            onLeaseTenureChange={(tenure) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                leaseDetails: {
-                  ...prev.leaseTerms.leaseDetails,
-                  // leaseDuration: tenure.leaseDuration || '',
-                },
-                tenureDetails: {
-                  minimumTenure: Number(tenure.minimumTenure) || 0,
-                  minimumUnit: tenure.minimumUnit || 'years',
-                  maximumTenure: Number(tenure.maximumTenure) || 0,
-                  maximumUnit: tenure.maximumUnit || 'years',
-                  lockInPeriod: Number(tenure.lockInPeriod) || 0,
-                  lockInUnit: tenure.lockInUnit || 'years',
-                  noticePeriod: Number(tenure.noticePeriod) || 0,
-                  noticePeriodUnit: tenure.noticePeriodUnit || 'months'
+              }))}
+            />
+            <LeaseTenure
+              onLeaseTenureChange={(tenure) => setFormData(prev => ({
+                ...prev,
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  leaseDetails: {
+                    ...prev.leaseTerms.leaseDetails,
+                    // leaseDuration: tenure.leaseDuration || '',
+                  },
+                  tenureDetails: {
+                    minimumTenure: Number(tenure.minimumTenure) || 0,
+                    minimumUnit: tenure.minimumUnit || 'years',
+                    maximumTenure: Number(tenure.maximumTenure) || 0,
+                    maximumUnit: tenure.maximumUnit || 'years',
+                    lockInPeriod: Number(tenure.lockInPeriod) || 0,
+                    lockInUnit: tenure.lockInUnit || 'years',
+                    noticePeriod: Number(tenure.noticePeriod) || 0,
+                    noticePeriodUnit: tenure.noticePeriodUnit || 'months'
+                  }
                 }
-              }
-            }))}
-          />
-          <MaintenanceAmount
-            maintenanceAmount={formData.leaseTerms.maintenanceAmount}
-            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                maintenanceAmount: {
-                  amount: Number(maintenance.amount) || 0,
-                  frequency: maintenance.frequency || 'monthly'
+              }))}
+            />
+            <MaintenanceAmount
+              maintenanceAmount={formData.leaseTerms.maintenanceAmount}
+              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+                ...prev,
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  maintenanceAmount: {
+                    amount: Number(maintenance.amount) || 0,
+                    frequency: maintenance.frequency || 'monthly'
+                  }
                 }
-              }
-            }))}
-          />
-          <OtherCharges
-            otherCharges={formData.leaseTerms.otherCharges}
-            onOtherChargesChange={(charges) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                otherCharges: {
-                  water: { type: charges.water.type, amount: charges.water.amount },
-                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                  gas: { type: charges.gas.type, amount: charges.gas.amount },
-                  others: { type: charges.others.type, amount: charges.others.amount }
+              }))}
+            />
+            <OtherCharges
+              otherCharges={formData.leaseTerms.otherCharges}
+              onOtherChargesChange={(charges) => setFormData(prev => ({
+                ...prev,
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  otherCharges: {
+                    water: { type: charges.water.type, amount: charges.water.amount },
+                    electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
+                    gas: { type: charges.gas.type, amount: charges.gas.amount },
+                    others: { type: charges.others.type, amount: charges.others.amount }
+                  }
                 }
-              }
-            }))}
-          />
-          <Brokerage
-            bro={formData.leaseTerms.brokerage}
-            onBrokerageChange={(brokerage) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                brokerage: {
-                  required: brokerage.required as 'yes' | 'no',
-                  amount: Number(brokerage.amount) || 0
+              }))}
+            />
+            <Brokerage
+              bro={formData.leaseTerms.brokerage}
+              onBrokerageChange={(brokerage) => setFormData(prev => ({
+                ...prev,
+                leaseTerms: {
+                  ...prev.leaseTerms,
+                  brokerage: {
+                    required: brokerage.required as 'yes' | 'no',
+                    amount: Number(brokerage.amount) || 0
+                  }
                 }
-              }
-            }))}
-          />
-           </div>
-            </div>
+              }))}
+            />
+          </div>
+        </div>
       ),
     },
     {
@@ -977,9 +806,9 @@ const LeaseIndependentHouse = () => {
       component: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-8">
-            
+
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-            <AvailabilityDate
+              <AvailabilityDate
                 availability={{
                   type: formData.availability.type === "immediate" ? "immediate" : "specific",
                   date: formData.availability.date
@@ -1003,8 +832,9 @@ const LeaseIndependentHouse = () => {
             </div>
             <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
               <MediaUpload
-              initialMedia={formData.media}
-                onMediaChange={(media) => setFormData((prev) => ({ ...prev,
+                initialMedia={formData.media}
+                onMediaChange={(media) => setFormData((prev) => ({
+                  ...prev,
                   media: {
                     photos: {
                       exterior: media.photos.exterior,
@@ -1020,7 +850,8 @@ const LeaseIndependentHouse = () => {
                     },
                     videoTour: media.videoTour,
                     documents: media.documents
-                  } }))}
+                  }
+                }))}
               />
             </div>
           </div>
@@ -1154,8 +985,8 @@ const LeaseIndependentHouse = () => {
             storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
             kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
           },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
+          videoTour: formData.media.videoTour
+            ? (formData.media.videoTour instanceof File
               ? await convertFileToBase64(formData.media.videoTour)
               : formData.media.videoTour)
             : undefined,
@@ -1179,7 +1010,7 @@ const LeaseIndependentHouse = () => {
 
         if (response.data.success) {
           toast.success('Independent house listing created successfully!');
-          setFormData({...initialData} as formData);
+          setFormData({ ...initialData } as formData);
         }
       } else {
         navigate('/login');
@@ -1280,22 +1111,22 @@ const LeaseIndependentHouse = () => {
             </button>
           ) : (
             <button
-            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-            disabled={isSubmitting}
-            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                Submitting...
-              </>
-            ) : (
-              <>
-                {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </>
-            )}
-          </button>
+              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+              disabled={isSubmitting}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </>
+              )}
+            </button>
           )}
         </div>
       </div>

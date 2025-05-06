@@ -66,7 +66,7 @@ interface FormData {
     furnishingStatus: string;
     flooring: string;
     facing: string;
-    propertyAge: number;
+    propertyAge: string;
     superBuiltUpAreaSqft: number;
     superBuiltUpAreaSqmt: number;
     builtUpAreaSqft: number;
@@ -238,7 +238,7 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
       furnishingStatus: '',
       flooring: '',
       facing: '',
-      propertyAge: 0,
+      propertyAge: '',
       superBuiltUpAreaSqft: 0,
       superBuiltUpAreaSqmt: 0,
       builtUpAreaSqft: 0,

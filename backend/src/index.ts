@@ -87,7 +87,7 @@ import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRo
 
 
 import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
-import residentialLeaseIndependentHouse from "./routes/residential/rentIndependentHouse";
+import residentialLeaseIndependentHouse from "./routes/residential/leaseIndependent";
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";

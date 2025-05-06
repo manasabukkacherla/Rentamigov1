@@ -5,9 +5,9 @@ import _ from 'lodash';
 // Generate Property ID for Lease Builder Floor
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-RESLEBF";
+    const propertyPrefix = "RA-RESLEBF";
     const highest = await LeaseBuilderFloor.findOne({
-      propertyId: { $regex: `^${prefix}\d+$` },
+      propertyId: { $regex: `^${propertyPrefix}\\d+$` },
     }).sort({ propertyId: -1 });
 
     let nextNumber = 1;
@@ -18,7 +18,7 @@ const generatePropertyId = async (): Promise<string> => {
       }
     }
 
-    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+    const propertyId = `${propertyPrefix}${nextNumber.toString().padStart(4, '0')}`;
     const existing = await LeaseBuilderFloor.findOne({ propertyId });
     if (existing) {
       return generatePropertyId();
@@ -117,7 +117,7 @@ export const updateLeaseBuilderFloor = async (req: Request, res: Response) => {
     }
 
     const cleanedData = JSON.parse(
-      JSON.stringify(incomingData, (key, value) => (['_id', '__v'].includes(key) ? undefined : value))
+      JSON.stringify(incomingData, (key, value) => (['id', '_v'].includes(key) ? undefined : value))
     );
 
     const existing = await LeaseBuilderFloor.findById(id);
