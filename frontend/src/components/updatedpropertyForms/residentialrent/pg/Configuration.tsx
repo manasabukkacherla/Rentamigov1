@@ -18,9 +18,28 @@ interface ConfigurationProps {
   setSelectedShares: React.Dispatch<React.SetStateAction<string[]>>;
   customShare: string;
   setCustomShare: React.Dispatch<React.SetStateAction<string>>;
+  roomConfiguration?: {
+    totalRooms?: number;
+    sharingTypes?: string[];
+    customShare?: string;
+    singleRoomAmenities?: string[];
+    doubleShareRoomAmenities?: string[];
+    tripleShareRoomAmenities?: string[];
+    fourShareRoomAmenities?: string[];
+    fiveShareRoomAmenities?: string[];
+    customShareRoomAmenities?: string[];
+  };
+  onRoomConfigurationChange?: (config: any) => void;
 }
 
-const Configuration: React.FC<ConfigurationProps> = ({ selectedShares, setSelectedShares, customShare, setCustomShare }) => {
+const Configuration: React.FC<ConfigurationProps> = ({ 
+  selectedShares, 
+  setSelectedShares, 
+  customShare, 
+  setCustomShare,
+  roomConfiguration = {},
+  onRoomConfigurationChange
+}) => {
 
   const shareOptions: ShareOption[] = [
     { id: 'single', label: 'Single Share', value: 1 },
@@ -45,24 +64,67 @@ const Configuration: React.FC<ConfigurationProps> = ({ selectedShares, setSelect
     }
   };
 
+  const updateRoomConfig = (field: string, value: any) => {
+    if (onRoomConfigurationChange) {
+      onRoomConfigurationChange({
+        ...roomConfiguration,
+        [field]: value
+      });
+    }
+  };
+
   const renderAmenitiesComponent = (shareType: string) => {
+    const roomConfig = roomConfiguration || {}; // Ensure roomConfiguration is not undefined
+  
     switch (shareType) {
       case 'single':
-        return <SingleRoomAmenities />;
+        return (
+          <SingleRoomAmenities
+            amenities={roomConfig.singleRoomAmenities || []}
+            onAmenitiesChange={(amenities) => updateRoomConfig('singleRoomAmenities', amenities)}
+          />
+        );
       case 'double':
-        return <TwoShareRoomAmenities />;
+        return (
+          <TwoShareRoomAmenities
+            amenities={roomConfig.doubleShareRoomAmenities || []}
+            onAmenitiesChange={(amenities) => updateRoomConfig('doubleShareRoomAmenities', amenities)}
+          />
+        );
       case 'triple':
-        return <ThreeShareRoomAmenities />;
+        return (
+          <ThreeShareRoomAmenities
+            amenities={roomConfig.tripleShareRoomAmenities || []}
+            onAmenitiesChange={(amenities) => updateRoomConfig('tripleShareRoomAmenities', amenities)}
+          />
+        );
       case 'four':
-        return <FourShareRoomAmenities />;
+        return (
+          <FourShareRoomAmenities
+            amenities={roomConfig.fourShareRoomAmenities || []}
+            onAmenitiesChange={(amenities) => updateRoomConfig('fourShareRoomAmenities', amenities)}
+          />
+        );
       case 'five':
-        return <FiveShareRoomAmenities />;
+        return (
+          <FiveShareRoomAmenities
+            amenities={roomConfig.fiveShareRoomAmenities || []}
+            onAmenitiesChange={(amenities: any) => updateRoomConfig('fiveShareRoomAmenities', amenities)}
+          />
+        );
       case 'more':
-        return customShare ? <CustomShareRoomAmenities occupantCount={parseInt(customShare, 10)} /> : null;
+        return customShare ? (
+          <CustomShareRoomAmenities
+            occupantCount={parseInt(customShare, 10)}
+            amenities={roomConfig.customShareRoomAmenities || []}
+            onAmenitiesChange={(amenities) => updateRoomConfig('customShareRoomAmenities', amenities)}
+          />
+        ) : null;
       default:
         return null;
     }
   };
+  
 
   return (
     <div className="space-y-6">

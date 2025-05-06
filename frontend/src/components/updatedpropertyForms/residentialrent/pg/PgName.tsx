@@ -22,15 +22,38 @@ interface PgDetails {
   };
 }
 
-type AccommodationType = 'boys' | 'girls' | 'both';
+type AccommodationType = 'boys' | 'girls' | 'both boys and girls';
 
-const PgName = () => {
+interface PgNameProps {
+  pgName?: string;
+  onPgNameChange?: (name: string) => void;
+  accommodationType?: AccommodationType;
+  onAccommodationTypeChange?: (type: AccommodationType) => void;
+  address?: string;
+  onAddressChange?: (address: string) => void;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  onLocationChange?: (location: { latitude: number; longitude: number }) => void;
+}
+
+const PgName: React.FC<PgNameProps> = ({
+  pgName = '',
+  onPgNameChange,
+  accommodationType = 'both boys and girls',
+  onAccommodationTypeChange,
+  address = '',
+  onAddressChange,
+  location = { latitude: 0, longitude: 0 },
+  onLocationChange
+}) => {
   const [details, setDetails] = useState<PgDetails>({
-    name: '',
-    address: '',
+    name: pgName,
+    address: address,
     coordinates: {
-      latitude: '',
-      longitude: ''
+      latitude: location.latitude.toString(),
+      longitude: location.longitude.toString()
     },
     propertyAddress: {
       flatNo: '',
@@ -44,13 +67,34 @@ const PgName = () => {
       zipCode: ''
     }
   });
-  const [selectedType, setSelectedType] = useState<AccommodationType>('both');
+  
+  // Update local state when props change
+  useEffect(() => {
+    setDetails(prev => ({
+      ...prev,
+      name: pgName,
+      address: address,
+      coordinates: {
+        latitude: location.latitude.toString(),
+        longitude: location.longitude.toString()
+      }
+    }));
+  }, [pgName, address, location]);
+  
+  const [selectedType, setSelectedType] = useState<AccommodationType>(accommodationType);
 
   const handleChange = (field: keyof Pick<PgDetails, 'name' | 'address'>, value: string) => {
     setDetails(prev => ({
       ...prev,
       [field]: value
     }));
+    
+    // Update parent component state
+    if (field === 'name' && onPgNameChange) {
+      onPgNameChange(value);
+    } else if (field === 'address' && onAddressChange) {
+      onAddressChange(value);
+    }
   };
 
   // Function to update property address details
@@ -79,8 +123,30 @@ const PgName = () => {
         state: addressData.state || addressData.administrative_area_level_1 || prev.propertyAddress.state,
         street: addressData.street || addressData.route || prev.propertyAddress.street,
       } : prev.propertyAddress,
-    }))
-  }, []);
+    }));
+    
+    // Update parent component state
+    if (onLocationChange) {
+      onLocationChange({
+        latitude: parseFloat(latitude) || 0,
+        longitude: parseFloat(longitude) || 0
+      });
+    }
+    
+    // If we have address data and onAddressChange is provided, update the address
+    if (addressData && onAddressChange) {
+      const formattedAddress = [
+        addressData.street || addressData.route,
+        addressData.city || addressData.locality,
+        addressData.state || addressData.administrative_area_level_1,
+        addressData.postal_code || addressData.pinCode
+      ].filter(Boolean).join(', ');
+      
+      if (formattedAddress) {
+        onAddressChange(formattedAddress);
+      }
+    }
+  }, [onLocationChange, onAddressChange]);
 
   // Function to get current location
   const getCurrentLocation = () => {
@@ -143,7 +209,7 @@ const PgName = () => {
             {[
               { id: 'boys', label: 'Boys Only' },
               { id: 'girls', label: 'Girls Only' },
-              { id: 'both', label: 'Both Boys & Girls' },
+              { id: 'both boys and girls', label: 'Both Boys & Girls' },
             ].map((option) => (
               <div key={option.id} className="flex items-center">
                 <input
@@ -152,7 +218,13 @@ const PgName = () => {
                   name="pgType"
                   value={option.id}
                   checked={selectedType === option.id}
-                  onChange={(e) => setSelectedType(e.target.value as AccommodationType)}
+                  onChange={(e) => {
+                    const newType = e.target.value as AccommodationType;
+                    setSelectedType(newType);
+                    if (onAccommodationTypeChange) {
+                      onAccommodationTypeChange(newType);
+                    }
+                  }}
                   className="h-5 w-5 border-black bg-white checked:bg-black focus:ring-black focus:ring-2"
                 />
                 <label htmlFor={option.id} className="ml-3 text-lg">
@@ -165,7 +237,7 @@ const PgName = () => {
             <span className="text-sm">Selected accommodation type: <span className="font-semibold">{[
               { id: 'boys', label: 'Boys Only' },
               { id: 'girls', label: 'Girls Only' },
-              { id: 'both', label: 'Both Boys & Girls' },
+              { id: 'both boys and girls', label: 'Both Boys & Girls' },
             ].find(opt => opt.id === selectedType)?.label}</span></span>
           </div>
         </div>

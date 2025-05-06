@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import ResidentialRentApartment from '../../models/residential/residentialRentApartment';
+import ResidentialRentBuilderFloor from '../../models/residential/residentialRentBuilderFloor';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-RESREAP";
+        const prefix = "RA-RESREBF";
 
-        const highestShowroom = await ResidentialRentApartment.findOne({
+        const highestShowroom = await ResidentialRentBuilderFloor.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
         }).sort({ propertyId: -1 });
 
@@ -20,7 +20,7 @@ const generatePropertyId = async (): Promise<string> => {
 
         const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
 
-        const existingWithExactId = await ResidentialRentApartment.findOne({ propertyId });
+        const existingWithExactId = await ResidentialRentBuilderFloor.findOne({ propertyId });
 
         if (existingWithExactId) {
             console.log(`Property ID ${propertyId} already exists, trying next number`);
@@ -28,7 +28,7 @@ const generatePropertyId = async (): Promise<string> => {
             const forcedNextNumber = nextNumber + 1;
             const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
 
-            const forcedExisting = await ResidentialRentApartment.findOne({ propertyId: forcedPropertyId });
+            const forcedExisting = await ResidentialRentBuilderFloor.findOne({ propertyId: forcedPropertyId });
 
             if (forcedExisting) {
                 return generatePropertyId();
@@ -46,10 +46,10 @@ const generatePropertyId = async (): Promise<string> => {
 };
 
 // Create a new apartment listing
-export const createRentApartment = async (req: Request, res: Response) => {
+export const createRentBuilderFloor = async (req: Request, res: Response) => {
   try {
     const propertyId = await generatePropertyId();
-    const apartmentData = {
+    const builderFloorData = {
       ...req.body,
       propertyId,
       metadata: {
@@ -58,25 +58,25 @@ export const createRentApartment = async (req: Request, res: Response) => {
       }
     };
 
-    const apartment = new ResidentialRentApartment(apartmentData);
-    await apartment.save();
+    const builderFloor = new ResidentialRentBuilderFloor(builderFloorData);
+    await builderFloor.save();
 
     res.status(201).json({
       success: true,
-      message: 'Apartment listing created successfully',
-      data: apartment
+      message: 'Builder Floor listing created successfully',
+      data: builderFloor
     });
   } catch (error) {
-    console.error('Error creating apartment listing:', error);
+    console.error('Error creating builder floor listing:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create apartment listing',
+      message: 'Failed to create builder floor listing',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const getAllRentApartments = async (req: Request, res: Response) => {
+export const getAllRentBuilderFloors = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -92,16 +92,16 @@ export const getAllRentApartments = async (req: Request, res: Response) => {
     if (req.query.bedrooms) filters['propertyDetails.bedrooms'] = parseInt(req.query.bedrooms as string);
     if (req.query.propertyType) filters.propertyType = req.query.propertyType;
 
-    const apartments = await ResidentialRentApartment.find(filters)
+    const builderFloors = await ResidentialRentBuilderFloor.find(filters)
       .skip(skip)
       .limit(limit)
       .sort({ 'metadata.createdAt': -1 });
 
-    const total = await ResidentialRentApartment.countDocuments(filters);
+    const total = await ResidentialRentBuilderFloor.countDocuments(filters);
 
     res.status(200).json({
       success: true,
-      data: apartments,
+      data: builderFloors,
       pagination: {
         current: page,
         total: Math.ceil(total / limit),
@@ -109,65 +109,65 @@ export const getAllRentApartments = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching apartments:', error);
+    console.error('Error fetching builder floors:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch apartments',
+      message: 'Failed to fetch builder floors',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const getRentApartmentById = async (req: Request, res: Response) => {
+export const getRentBuilderFloorById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.id);
+    const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);
     
-    if (!apartment) {
+    if (!builderFloor) {
       return res.status(404).json({
         success: false,
-        message: 'Apartment not found'
+        message: 'Builder Floor not found'
       });
     }
 
     res.status(200).json({
       success: true,
-      data: apartment
+      data: builderFloor
     });
   } catch (error) {
-    console.error('Error fetching apartment:', error);
+    console.error('Error fetching builder floor:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch apartment',
+      message: 'Failed to fetch builder floor',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const updateRentApartment = async (req: Request, res: Response) => {
+export const updateRentBuilderFloor = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.id);
+    const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);
     const userId = req.body.userId;
     
-    if (!apartment) {
+    if (!builderFloor) {
       return res.status(404).json({
         success: false,
-        message: 'Apartment not found'
+        message: 'Builder Floor not found'
       });
     }
 
-    if (apartment.metadata.createdBy.toString() !== userId) {
+    if (builderFloor.metadata?.createdBy.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
       });
     }
 
-    const updatedApartment = await ResidentialRentApartment.findByIdAndUpdate(
+    const updatedBuilderFloor = await ResidentialRentBuilderFloor.findByIdAndUpdate(
       req.params.id,
       {
         ...req.body,
         metadata: {
-          ...apartment.metadata,
+          ...builderFloor.metadata,
           updatedAt: new Date()
         }
       },
@@ -176,76 +176,76 @@ export const updateRentApartment = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: 'Apartment listing updated successfully',
-      data: updatedApartment
+      message: 'Builder Floor listing updated successfully',
+      data: updatedBuilderFloor
     });
   } catch (error) {
-    console.error('Error updating apartment:', error);
+    console.error('Error updating builder floor:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update apartment',
+      message: 'Failed to update builder floor',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const deleteRentApartment = async (req: Request, res: Response) => {
+export const deleteRentBuilderFloor = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.id);
+    const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);
     const userId = req.body.userId;
     
-    if (!apartment) {
+    if (!builderFloor) {
       return res.status(404).json({
         success: false,
-        message: 'Apartment not found'
+        message: 'Builder Floor not found'
       });
     }
 
-    if (apartment.metadata.createdBy.toString() !== userId) {
+    if (builderFloor.metadata?.createdBy.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this listing'
       });
     }
 
-    await apartment.deleteOne();
+    await builderFloor.deleteOne();
 
     res.status(200).json({
       success: true,
-      message: 'Apartment listing deleted successfully'
+      message: 'Builder Floor listing deleted successfully'
     });
   } catch (error) {
     console.error('Error deleting apartment:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete apartment',
+      message: 'Failed to delete builder floor',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
 // Get apartments by user
-export const getUserApartments = async (req: Request, res: Response) => {
+export const getUserBuilderFloors = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     const userId = req.body.userId;
 
-    const apartments = await ResidentialRentApartment.find({
+    const builderFloors = await ResidentialRentBuilderFloor.find({
       'metadata.createdBy': userId
     })
       .skip(skip)
       .limit(limit)
       .sort({ 'metadata.createdAt': -1 });
 
-    const total = await ResidentialRentApartment.countDocuments({
+    const total = await ResidentialRentBuilderFloor.countDocuments({
       'metadata.createdBy': userId
     });
 
     res.status(200).json({
       success: true,
-      data: apartments,
+      data: builderFloors,
       pagination: {
         current: page,
         total: Math.ceil(total / limit),
@@ -253,10 +253,10 @@ export const getUserApartments = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching user apartments:', error);
+    console.error('Error fetching user builder floors:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch user apartments',
+      message: 'Failed to fetch user builder floors',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }

@@ -195,13 +195,13 @@ const PgMainSchema: Schema = new Schema(
       },
     },
     media: {
-      photos: { type: [String], default: [] },
-      videos: { type: [String], default: [] },
+      photos: { type: [String], default: [] }, // Base64 encoded strings or URLs
+      videos: { type: [String], default: [] }, // Base64 encoded strings or URLs
       mediaItems: [
         {
           id: { type: String },
           type: { type: String, enum: ["photo", "video"] },
-          url: { type: String },
+          url: { type: String }, // Base64 encoded string or URL
           title: { type: String },
           tags: { type: [String], default: [] },
           roomType: { type: String },

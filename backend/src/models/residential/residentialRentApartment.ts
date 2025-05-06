@@ -132,8 +132,15 @@ interface IMedia {
   documents: string[];
 }
 
+interface IContactInformation {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+}
 
-interface IResidentialRentAppartment extends Document {
+interface IResidentialRentApartment extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   propertySize: number;
@@ -150,7 +157,7 @@ interface IResidentialRentAppartment extends Document {
   metadata: IMetadata;
 }
 
-const ResidentailRentAppartmentSchema = new Schema<IResidentialRentAppartment>({
+const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     propertyName: { type: String, required: true },
@@ -285,6 +292,6 @@ const ResidentailRentAppartmentSchema = new Schema<IResidentialRentAppartment>({
 }
 );
 
-const ResidentialRentAppartment = mongoose.model<IResidentialRentAppartment>('ResidentialRentAppartment', ResidentailRentAppartmentSchema);
+const ResidentialRentApartment = mongoose.model<IResidentialRentApartment>('ResidentialRentApartment', ResidentailRentApartmentSchema);
 
-export default ResidentialRentAppartment;
+export default ResidentialRentApartment;
