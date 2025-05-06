@@ -17,6 +17,7 @@ import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
+import _ from 'lodash';
 
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
@@ -85,7 +86,10 @@ import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseW
 import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
+import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
+import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
+
 dotenv.config();
 
 // Validate required environment variables
@@ -257,6 +261,14 @@ app.use("/api/commercial/rent/plots", commercialRentPlot);
 // PG Main (residential) API route
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 app.use("/api/residential/pgmain", residentialPgmainRoutes);
+
+//sell routes
+app.use("/api/residential/sell/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
+
+//sell routes
+app.use("/api/residential/sell/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
 
 //rent
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
