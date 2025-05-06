@@ -30,6 +30,12 @@ const customStyles = `
   }
 `;
 
+interface FormData {
+  basicInformation: {
+    propertyName: string
+  }
+}
+
 interface IndependentHouseProps {
   propertyId: string
   onSubmit?: (formData: any) => void
@@ -43,62 +49,8 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
   const formRef = useRef<HTMLDivElement>(null)
 
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
-    address: {
-      flatNo: 0,
-      floor: undefined,
-      apartmentName: "",
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      coordinates: {
-        lat: 0,
-        lng: 0
-      },
-      locationLabel: ""
-    },
-    coordinates: {
-      lat: 0,
-      lng: 0,
-      locationLabel: ""
-    },
-    size: {
-      builtUpArea: "",
-      carpetArea: "",
-      superBuiltUpArea: "",
-      unit: "sq-ft"
-    },
-    features: {
-      bedrooms: "",
-      bathrooms: "",
-      balconies: "",
-      parking: "",
-      furnishing: "unfurnished",
-      floor: "",
-      totalFloors: "",
-      facing: "",
-      age: "",
-      rent: "",
-      securityDeposit: "",
-      maintenanceCharges: "",
-      maintenancePeriod: "monthly",
-      availableFrom: new Date(),
-      preferredTenants: [],
-      amenities: [],
-      propertyFeatures: [],
-      societyFeatures: [],
-      restrictions: []
-    },
-    media: {
-      exterior: [],
-      interior: [],
-      floorPlan: [],
-      washrooms: [],
-      lifts: [],
-      emergencyExits: [],
-      legalDocuments: [],
-      videoTour: null
+    basicInformation: {
+      propertyName: ""
     }
   })
 
@@ -112,9 +64,9 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
 
 
             <PropertyName
-              propertyName={formData.propertyName}
+              propertyName={formData.basicInformation.propertyName}
               onPropertyNameChange={(name) =>
-                setFormData((prev) => ({ ...prev, propertyName: name }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))
               }
             />
           </div>
