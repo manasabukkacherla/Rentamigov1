@@ -5,14 +5,12 @@ interface IBasicInformation {
   propertyId: string;
   propertyName: string;
   address: {
-    flatNo: number;
-    showFlatNo: boolean;
-    floor: number;
-    apartmentName: string;
+    houseNo: string;
     street: string;
     city: string;
     state: string;
     zipCode: string;
+    pinCode: string;
     location: {
       latitude: number;
       longitude: number;
@@ -132,23 +130,16 @@ interface IMedia {
   documents: string[];
 }
 
-interface IContactInformation {
-  name: string;
-  email: string;
-  phone: string;
-  alternatePhone?: string;
-  bestTimeToContact?: string;
-}
 
-interface IResidentialSaleApartment extends Document {
+interface IResidentialSaleIndependentHouse extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: propertyDetails;
-  restrictions: {
-    foodPreference: string;
-    petsAllowed: string;
-    tenantType: string;
+  restrictions?: {
+    foodPreference?: string;
+    petsAllowed?: string;
+    tenantType?: string;
   }
   flatAmenities: flatamenities;
   societyAmenities: societyAmenities;
@@ -157,22 +148,20 @@ interface IResidentialSaleApartment extends Document {
   metadata: IMetadata;
 }
 
-const ResidentailSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
+const ResidentailsaleIndependentHouseSchema = new Schema<IResidentialSaleIndependentHouse>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     propertyName: { type: String, required: true },
     address: {
-      flatNo: { type: Number, required: true },
-      showFlatNo: { type: Boolean, required: true },
-      floor: { type: Number, required: true },
-      apartmentName: { type: String, required: true },
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      zipCode: { type: String, required: true },
+      houseNo: { type: String },
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zipCode: { type: String },
+      pinCode: { type: String },
       location: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
+        latitude: { type: String },
+        longitude: { type: String },
       },
     },
   },
@@ -212,9 +201,9 @@ const ResidentailSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
     },
   },
   restrictions: {
-    foodPreference: { type: String, required: true },
-    petsAllowed: { type: String, required: true },
-    tenantType: { type: String, required: true },
+    foodPreference: { type: String },
+    petsAllowed: { type: String },
+    tenantType: { type: String },
   },
   flatAmenities: {
     lights: { type: Number, required: true },
@@ -292,6 +281,6 @@ const ResidentailSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
 }
 );
 
-const ResidentialSaleApartment = mongoose.model<IResidentialSaleApartment>('ResidentialSaleApartment', ResidentailSaleApartmentSchema);
+const ResidentialSaleIndependentHouse = mongoose.model<IResidentialSaleIndependentHouse>('ResidentialSaleIndependentHouse', ResidentailsaleIndependentHouseSchema);
 
-export default ResidentialSaleApartment;
+export default ResidentialSaleIndependentHouse;

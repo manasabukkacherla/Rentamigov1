@@ -188,7 +188,7 @@ const globalStyles = `
   }
 `;
 
-const LeasePlotMain = () => {
+const SellPlot = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -348,14 +348,16 @@ const LeasePlotMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
-          <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} />
-          <MapLocation
+          <CommercialPropertyAddress address={formData.basicInformation.address}  onAddressChange={(address) => handleChange('basicInformation.address', address)} />
+          <MapLocation 
             latitude={formData.basicInformation.coordinates.latitude}
             longitude={formData.basicInformation.coordinates.longitude}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
           />
           <CornerProperty
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
           />
         </div>
@@ -479,7 +481,8 @@ const LeasePlotMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       content: (
-        <CommercialContactDetails
+        <CommercialContactDetails 
+            contactInformation={formData.contactInformation}
             onContactChange={(contact) => handleChange('contactInformation', contact)}
           />
       ),
@@ -915,4 +918,4 @@ const LeasePlotMain = () => {
   );
 };
 
-export default SellPlotMain;
+export default SellPlot;
