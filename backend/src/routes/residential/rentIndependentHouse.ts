@@ -1,18 +1,20 @@
 import express from 'express';
 import {
-    createLeaseIndependentHouse,
-    getLeaseIndependentHouseById,
-    updateLeaseIndependentHouse ,
-    deleteLeaseIndependentHouse,
-  getAllLeaseIndependentHouses
-} from '../../controllers/residential/residentialLeaseIndependenthouse';
+  getUserIndependentHouses,
+  createRentIndependentHouse,
+  getRentIndependentHouseById,
+  getAllRentIndependentHouses,
+  updateRentIndependentHouse,
+  deleteRentIndependentHouse
+} from '../../controllers/residential/rentIndependentHouse';
 
-const Router = express.Router();
+const residentialRentIndependentHouseRoutes = express.Router();
 
-Router.post('/', createLeaseIndependentHouse);
-Router.get('/', getAllLeaseIndependentHouses);
-Router.get('/:id', getLeaseIndependentHouseById);
-Router.put('/:id', updateLeaseIndependentHouse );
-Router.delete('/:id', deleteLeaseIndependentHouse);
+residentialRentIndependentHouseRoutes.post('/', createRentIndependentHouse);
+residentialRentIndependentHouseRoutes.get('/', getAllRentIndependentHouses);
+residentialRentIndependentHouseRoutes.get('/:id', getRentIndependentHouseById);
+residentialRentIndependentHouseRoutes.put('/:id', updateRentIndependentHouse);
+residentialRentIndependentHouseRoutes.delete('/:id', deleteRentIndependentHouse);
+residentialRentIndependentHouseRoutes.get('/:userId', getUserIndependentHouses);
 
-export default Router;
+export default residentialRentIndependentHouseRoutes;

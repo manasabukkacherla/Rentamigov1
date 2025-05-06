@@ -93,6 +93,10 @@ import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotR
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
 import residentialLeaseApartmentRoutes from "./routes/residential/leaseAppartment";
 import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilderFloor";
+import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
+import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
+import residentialRentIndependentHouseRoutes from "./routes/residential/rentIndependentHouse";
+
 dotenv.config();
 
 // Validate required environment variables
@@ -265,14 +269,16 @@ app.use("/api/commercial/rent/plots", commercialRentPlot);
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 app.use("/api/residential/pgmain", residentialPgmainRoutes);
 
-
 //sell routes
-app.use("/api/residential/sell/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/apartments", residentialSellApartmentRoutes);
 app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
+app.use("/api/residential/sale/independent-house", residentialSaleIndependentHouseRoutes);
+app.use("/api/residential/sale/builder-floor", residentialSaleBuilderFloorRoutes);
 
 //rent
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
 app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes);
+app.use('/api/residential/rent/independent-house', residentialRentIndependentHouseRoutes);
 
 //lease
 app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);

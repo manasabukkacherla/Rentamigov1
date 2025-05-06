@@ -30,6 +30,166 @@ const customStyles = `
   }
 `;
 
+interface FormData {
+  basicInformation: {
+    propertyName: string
+    propertyAddress: {
+      houseName: string;
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      pinCode: string;
+      location: {
+        latitude: string;
+        longitude: string;
+      };
+    };
+  };
+  propertySize: number;
+  propertyDetails: {
+    bedrooms: number;
+    washrooms: number;
+    balconies: number;
+    hasParking: boolean;
+    parkingDetails: {
+      twoWheeler: number;
+      fourWheeler: number;
+    };
+    extraRooms: {
+      servant: boolean;
+      puja: boolean;
+      store: boolean;
+      others: boolean;
+    };
+    utilityArea: string;
+    furnishingStatus: string;
+    flooring: string;
+    facing: string;
+    propertyAge: number;
+    superBuiltUpAreaSqft: number;
+    superBuiltUpAreaSqmt: number;
+    builtUpAreaSqft: number;
+    builtUpAreaSqmt: number;
+    carpetAreaSqft: number;
+    carpetAreaSqmt: number;
+    electricityAvailability: string;
+    waterAvailability: {
+      borewell: boolean;
+      governmentSupply: boolean;
+      tankerSupply: boolean;
+    };
+  }
+  restrictions: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  };
+  flatAmenities: {
+    lights: number;
+    ceilingFan: number;
+    geysers: number;
+    chimney: boolean;
+    callingBell: boolean;
+    wardrobes: number;
+    lofts: number;
+    kitchenCabinets: number;
+    clothHanger: number;
+    pipedGasConnection: boolean;
+    gasStoveWithCylinder: boolean;
+    ironingStand: boolean;
+    bathtub: boolean;
+    shower: boolean;
+    sofa: boolean;
+    coffeeTable: boolean;
+    tvUnit: boolean;
+    diningTableWithChairs: number;
+    cotWithMattress: number;
+    sideTable: number;
+    studyTableWithChair: number;
+    television: boolean;
+    refrigerator: boolean;
+    washingMachine: boolean;
+    dishwasher: boolean;
+    waterPurifier: boolean;
+    microwaveOven: boolean;
+    inductionCooktop: boolean;
+    gasStove: boolean;
+    airConditioner: number;
+    desertCooler: number;
+    ironBox: boolean;
+    exhaustFan: number;
+  }
+  societyAmenities: {
+    powerutility: string[];
+    parkingtranspotation: string[];
+    recreationalsportsfacilities: string[];
+    childrenfamilyamenities: string[];
+    healthwellnessfacilities: string[];
+    shoppingconviencestores: string[];
+    ecofriendlysustainable: string[];
+    communityculturalspaces: string[];
+    smarthometechnology: string[];
+    otheritems: string[];
+  }
+  rentalTerms: {
+    rentDetails: {
+      expectedRent: number;
+      isNegotiable: boolean;
+      rentType: string;
+    };
+    securityDeposit: {
+      amount: number;
+    };
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
+    };
+    otherCharges: {
+      water: {
+        amount: number;
+        type: string;
+      };
+      electricity: {
+        amount: number;
+        type: string;
+      };
+      gas: {
+        amount: number;
+        type: string;
+      };
+      others: {
+        amount: number;
+        type: string;
+      };
+    };
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
+  }
+  availability: {
+    type: string;
+    date?: string;
+  };
+  media: {
+    photos: {
+      exterior: (File | string)[];
+      interior: (File | string)[];
+      floorPlan: (File | string)[];
+      washrooms: (File | string)[];
+      lifts: (File | string)[];
+      emergencyExits: (File | string)[];
+      bedrooms: (File | string)[];
+      halls: (File | string)[];
+      storerooms: (File | string)[];
+      kitchen: (File | string)[];
+    };
+    videoTour?: File | string;
+    documents: (File | string)[];
+  }
+}
+
 interface IndependentHouseProps {
   propertyId: string
   onSubmit?: (formData: any) => void
@@ -43,62 +203,162 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
   const formRef = useRef<HTMLDivElement>(null)
 
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
-    address: {
-      flatNo: 0,
-      floor: undefined,
-      apartmentName: "",
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      coordinates: {
-        lat: 0,
-        lng: 0
+    basicInformation: {
+      propertyName: "",
+      propertyAddress: {
+        houseName: "",
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        pinCode: "",
+        location: {
+          latitude: "",
+          longitude: ""
+        }
+      }
+    },
+    propertySize: 0,
+    propertyDetails: {
+      bedrooms: 0,
+      washrooms: 0,
+      balconies: 0,
+      hasParking: false,
+      parkingDetails: {
+        twoWheeler: 0,
+        fourWheeler: 0
       },
-      locationLabel: ""
+      extraRooms: {
+        servant: false,
+        puja: false,
+        store: false,
+        others: false
+      },
+      utilityArea: 'no',
+      furnishingStatus: '',
+      flooring: '',
+      facing: '',
+      propertyAge: 0,
+      superBuiltUpAreaSqft: 0,
+      superBuiltUpAreaSqmt: 0,
+      builtUpAreaSqft: 0,
+      builtUpAreaSqmt: 0,
+      carpetAreaSqft: 0,
+      carpetAreaSqmt: 0,
+      electricityAvailability: '',
+      waterAvailability: {
+        borewell: false,
+        governmentSupply: false,
+        tankerSupply: false
+      }
     },
-    coordinates: {
-      lat: 0,
-      lng: 0,
-      locationLabel: ""
+    restrictions: {
+      foodPreference: '',
+      petsAllowed: '',
+      tenantType: ''
     },
-    size: {
-      builtUpArea: "",
-      carpetArea: "",
-      superBuiltUpArea: "",
-      unit: "sq-ft"
+    flatAmenities: {
+      lights: 0,
+      ceilingFan: 0,
+      geysers: 0,
+      chimney: false,
+      callingBell: false,
+      wardrobes: 0,
+      lofts: 0,
+      kitchenCabinets: 0,
+      clothHanger: 0,
+      pipedGasConnection: false,
+      gasStoveWithCylinder: false,
+      ironingStand: false,
+      bathtub: false,
+      shower: false,
+      sofa: false,
+      coffeeTable: false,
+      tvUnit: false,
+      diningTableWithChairs: 0,
+      cotWithMattress: 0,
+      sideTable: 0,
+      studyTableWithChair: 0,
+      television: false,
+      refrigerator: false,
+      washingMachine: false,
+      dishwasher: false,
+      waterPurifier: false,
+      microwaveOven: false,
+      inductionCooktop: false,
+      gasStove: false,
+      airConditioner: 0,
+      desertCooler: 0,
+      ironBox: false,
+      exhaustFan: 0
     },
-    features: {
-      bedrooms: "",
-      bathrooms: "",
-      balconies: "",
-      parking: "",
-      furnishing: "unfurnished",
-      floor: "",
-      totalFloors: "",
-      facing: "",
-      age: "",
-      rent: "",
-      securityDeposit: "",
-      maintenanceCharges: "",
-      maintenancePeriod: "monthly",
-      availableFrom: new Date(),
-      preferredTenants: [],
-      amenities: [],
-      propertyFeatures: [],
-      societyFeatures: [],
-      restrictions: []
+    societyAmenities: {
+      powerutility: [],
+      parkingtranspotation: [],
+      recreationalsportsfacilities: [],
+      childrenfamilyamenities: [],
+      healthwellnessfacilities: [],
+      shoppingconviencestores: [],
+      ecofriendlysustainable: [],
+      communityculturalspaces: [],
+      smarthometechnology: [],
+      otheritems: []
+    },
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: "inclusive"
+      },
+      securityDeposit: {
+        amount: 0
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: "monthly"
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: "inclusive"
+        },
+        electricity: {
+          amount: 0,
+          type: "inclusive"
+        },
+        gas: {
+          amount: 0,
+          type: "inclusive"
+        },
+        others: {
+          amount: 0,
+          type: "inclusive"
+        }
+      },
+      brokerage: {
+        required: "no",
+        amount: 0
+      },
+    },
+    availability: {
+      type: "immediate",
+      date: ""
     },
     media: {
-      exterior: [],
-      interior: [],
-      floorPlan: [],
-      washrooms: [],
-      lifts: [],
-      emergencyExits: [],
-      legalDocuments: [],
-      videoTour: null
+      photos: {
+        exterior: [],
+        interior: [],
+        floorPlan: [],
+        washrooms: [],
+        lifts: [],
+        emergencyExits: [],
+        bedrooms: [],
+        halls: [],
+        storerooms: [],
+        kitchen: []
+      },
+      videoTour: undefined,
+      documents: []
     }
   })
 
@@ -112,9 +372,9 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
 
 
             <PropertyName
-              propertyName={formData.propertyName}
+              propertyName={formData.basicInformation.propertyName}
               onPropertyNameChange={(name) =>
-                setFormData((prev) => ({ ...prev, propertyName: name }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))
               }
             />
           </div>
@@ -127,9 +387,9 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
               </div>
 
               <IndependentPropertyAddress
-                address={formData.address}
+                propertyAddress={formData.basicInformation.propertyAddress}
                 onAddressChange={(address) =>
-                  setFormData((prev) => ({ ...prev, address }))
+                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyAddress: address } }))
                 }
               />
 
@@ -151,8 +411,9 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <PropertySize
+                  propertySize={formData.propertySize}
                   onPropertySizeChange={(size) =>
-                    setFormData((prev) => ({ ...prev, size }))
+                    setFormData((prev) => ({ ...prev, propertySize: size }))
                   }
                 />
               </div>
@@ -167,8 +428,15 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <IndependentPropertyFeatures
+                  propertyFeatures={formData.propertyDetails}
                   onFeaturesChange={(features) =>
-                    setFormData((prev) => ({ ...prev, features }))
+                    setFormData(prev => ({
+                      ...prev,
+                      propertyDetails: {
+                        ...prev.propertyDetails,
+                        ...features
+                      }
+                    }))
                   }
                 />
               </div>
@@ -182,14 +450,17 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
                 <h3 className="text-2xl font-semibold text-black">Restrictions</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-                <Restrictions
-                  onRestrictionsChange={(restrictions) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      features: { ...prev.features, restrictions },
-                    }))
-                  }
-                />
+              <Restrictions
+              res={formData.restrictions}
+              onRestrictionsChange={(restrictions: {
+                foodPreference: string;
+                petsAllowed: string;
+                tenantType: string;
+              }) => setFormData(prev => ({
+                ...prev,
+                restrictions
+              }))}
+            />
               </div>
             </div>
           </div>
@@ -203,20 +474,20 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <div className="space-y-12">
                   <FlatAmenities
+                    amenities={formData.flatAmenities}
                     onAmenitiesChange={(amenities) =>
                       setFormData((prev) => ({
                         ...prev,
-                        features: { ...prev.features, amenities },
+                        flatAmenities: { ...prev.flatAmenities, amenities },
                       }))
                     }
                   />
                   <SocietyAmenities
-                    onAmenitiesChange={(amenities) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        features: { ...prev.features, societyFeatures: amenities },
-                      }))
-                    }
+                    amenities={formData.societyAmenities}
+                    onChange={(updatedAmenities) => setFormData((prev) => ({
+                      ...prev,
+                      societyAmenities: updatedAmenities
+                    }))}
                   />
                 </div>
               </div>
@@ -233,17 +504,18 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
           <div className="space-y-8">
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <Rent
-                onRentChange={(rent) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    features: {
-                      ...prev.features,
-                      rent: rent.amount,
-                      maintenanceCharges: rent.maintenanceCharges,
-                      maintenancePeriod: rent.maintenancePeriod,
+                rentDetails={formData.rentalTerms.rentDetails}
+                onRentChange={(rent) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    rentDetails: {
+                      expectedRent: rent.expectedRent,
+                      isNegotiable: rent.isNegotiable,
+                      rentType: rent.rentType,
                     },
-                  }))
-                }
+                  },
+                }))}
               />
             </div>
           </div>
@@ -252,15 +524,11 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
 
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <SecurityDeposit
-                onSecurityDepositChange={(deposit) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    features: {
-                      ...prev.features,
-                      securityDeposit: deposit.amount,
-                    },
-                  }))
-                }
+                deposit={formData.rentalTerms.securityDeposit}
+                onSecurityDepositChange={(deposit) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: { ...prev.rentalTerms, securityDeposit: deposit }
+                }))}
               />
             </div>
           </div>
@@ -269,16 +537,8 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
 
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <MaintenanceAmount
-                onMaintenanceAmountChange={(maintenance) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    features: {
-                      ...prev.features,
-                      maintenanceCharges: maintenance.amount,
-                      maintenancePeriod: maintenance.frequency,
-                    },
-                  }))
-                }
+                maintenanceAmount={formData.rentalTerms.maintenanceAmount}
+                onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })}
               />
             </div>
           </div>
@@ -286,16 +546,12 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
           <div className="space-y-8">
 
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <OtherCharges
-                onOtherChargesChange={(charges) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    features: {
-                      ...prev.features,
-                      otherCharges: charges,
-                    },
-                  }))
-                }
+            <OtherCharges
+                otherCharges={formData.rentalTerms.otherCharges}
+                onOtherChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: { ...prev.rentalTerms, otherCharges: charges }
+                }))}
               />
             </div>
           </div>
@@ -303,16 +559,12 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
           <div className="space-y-8">
 
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <Brokerage
-                onBrokerageChange={(brokerage) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    features: {
-                      ...prev.features,
-                      brokerage,
-                    },
-                  }))
-                }
+            <Brokerage
+                bro={formData.rentalTerms.brokerage}
+                onBrokerageChange={(brokerage) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: { ...prev.rentalTerms, brokerage: brokerage }
+                }))}
               />
             </div>
           </div>
@@ -327,16 +579,15 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
           <div className="space-y-8">
 
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <AvailabilityDate
-                onAvailabilityChange={(availability) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    features: {
-                      ...prev.features,
-                      availableFrom: new Date(availability.date || ''),
-                    },
-                  }))
-                }
+            <AvailabilityDate
+                availability={{
+                  type: formData.availability.type === "immediate" ? "immediate" : "specific",
+                  date: formData.availability.date
+                }}
+                onAvailabilityChange={(availability) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: { ...prev.rentalTerms, availability: availability }
+                }))}
               />
             </div>
           </div>
@@ -350,16 +601,29 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
         <div className="space-y-8">
 
           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-            <MediaUpload
-              onMediaChange={(media) =>
-                setFormData((prev) => ({
+          <MediaUpload
+              initialMedia={formData.media}
+              onMediaChange={(media) => {
+                setFormData(prev => ({
                   ...prev,
                   media: {
-                    ...prev.media,
-                    ...media,
-                  },
-                }))
-              }
+                    photos: {
+                      exterior: media.photos.exterior,
+                      interior: media.photos.interior,
+                      floorPlan: media.photos.floorPlan,
+                      washrooms: media.photos.washrooms,
+                      lifts: media.photos.lifts,
+                      emergencyExits: media.photos.emergencyExits,
+                      bedrooms: media.photos.bedrooms,
+                      halls: media.photos.halls,
+                      storerooms: media.photos.storerooms,
+                      kitchen: media.photos.kitchen
+                    },
+                    videoTour: media.videoTour,
+                    documents: media.documents
+                  }
+                }));
+              }}
             />
           </div>
         </div>
@@ -409,6 +673,95 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
     }
   }
 
+  const initialFormData = formData
+
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate()
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    console.log(formData)
+
+    try {
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+
+        // Convert media files to base64
+        const convertFileToBase64 = (file: File): Promise<string> => {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        };
+
+        // Helper function to convert array of files to base64
+        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+          const results: string[] = [];
+          for (const file of files) {
+            if (file instanceof File) {
+              const base64 = await convertFileToBase64(file);
+              results.push(base64);
+            } else {
+              results.push(file); // Already a string (URL)
+            }
+          }
+          return results;
+        };
+
+        const convertedMedia = {
+          photos: {
+            exterior: await convertFilesToBase64(formData.media.photos.exterior),
+            interior: await convertFilesToBase64(formData.media.photos.interior),
+            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+            lifts: await convertFilesToBase64(formData.media.photos.lifts),
+            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+            halls: await convertFilesToBase64(formData.media.photos.halls),
+            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
+          },
+          videoTour: formData.media.videoTour 
+            ? (formData.media.videoTour instanceof File 
+              ? await convertFileToBase64(formData.media.videoTour)
+              : formData.media.videoTour)
+            : undefined,
+          documents: await convertFilesToBase64(formData.media.documents)
+        };
+
+        const transformedData = {
+          ...formData,
+          media: convertedMedia,
+          metadata: {
+            createdBy: author,
+            createdAt: new Date()
+          }
+        };
+
+        const response = await axios.post('/api/residential/rent/independent-house', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.data.success) {
+          toast.success('Independent House listing created successfully!');
+          setFormData({...initialFormData} as FormData);
+        }
+      } else {
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to create independent house listing. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+
   return (
     <div ref={formRef} className="min-h-screen bg-white">
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
@@ -420,17 +773,20 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
                   key={index}
                   className="flex items-center cursor-pointer"
                   onClick={() => {
-                    if (index < currentStep) {
-                      setCurrentStep(index)
-                      setTimeout(() => {
-                        if (formRef.current) {
-                          window.scrollTo({
-                            top: formRef.current.offsetTop - 100,
-                            behavior: 'smooth'
-                          })
-                        }
-                      }, 100)
-                    }
+                    setCurrentStep(index);
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
                   }}
                 >
                   <div className="flex flex-col items-center group">
@@ -486,11 +842,11 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
             Previous
           </button>
           <button
-            onClick={currentStep === formSections.length - 1 ? () => onSubmit?.(formData) : handleNext}
-            disabled={loading}
+            onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+            disabled={isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
           >
-            {loading ? (
+            {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-5 w-5" />
                 Submitting...

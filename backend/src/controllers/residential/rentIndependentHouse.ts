@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import ResidentialSaleApartment from '../../models/residential/saleApartment';
+import ResidentialRentIndependentHouse from '../../models/residential/residentialRentIndependent';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-RESREAP";
+        const prefix = "RA-RESREIH";
 
-        const highestShowroom = await ResidentialSaleApartment.findOne({
+        const highestShowroom = await ResidentialRentIndependentHouse.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
         }).sort({ propertyId: -1 });
 
@@ -20,7 +20,7 @@ const generatePropertyId = async (): Promise<string> => {
 
         const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
 
-        const existingWithExactId = await ResidentialSaleApartment.findOne({ propertyId });
+        const existingWithExactId = await ResidentialRentIndependentHouse.findOne({ propertyId });
 
         if (existingWithExactId) {
             console.log(`Property ID ${propertyId} already exists, trying next number`);
@@ -28,7 +28,7 @@ const generatePropertyId = async (): Promise<string> => {
             const forcedNextNumber = nextNumber + 1;
             const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
 
-            const forcedExisting = await ResidentialSaleApartment.findOne({ propertyId: forcedPropertyId });
+            const forcedExisting = await ResidentialRentIndependentHouse.findOne({ propertyId: forcedPropertyId });
 
             if (forcedExisting) {
                 return generatePropertyId();
@@ -46,10 +46,10 @@ const generatePropertyId = async (): Promise<string> => {
 };
 
 // Create a new apartment listing
-export const createSaleApartment = async (req: Request, res: Response) => {
+export const createRentIndependentHouse = async (req: Request, res: Response) => {
   try {
     const propertyId = await generatePropertyId();
-    const apartmentData = {
+    const independentHouseData = {
       ...req.body,
       propertyId,
       metadata: {
@@ -58,25 +58,25 @@ export const createSaleApartment = async (req: Request, res: Response) => {
       }
     };
 
-    const apartment = new ResidentialSaleApartment(apartmentData);
-    await apartment.save();
+    const independentHouse = new ResidentialRentIndependentHouse(independentHouseData);
+    await independentHouse.save();
 
     res.status(201).json({
       success: true,
-      message: 'Apartment listing created successfully',
-      data: apartment
+      message: 'Independent House listing created successfully',
+      data: independentHouse
     });
   } catch (error) {
-    console.error('Error creating apartment listing:', error);
+    console.error('Error creating independent house listing:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to create apartment listing',
+      message: 'Failed to create independent house listing',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const getAllSaleApartments = async (req: Request, res: Response) => {
+export const getAllRentIndependentHouses = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -92,16 +92,16 @@ export const getAllSaleApartments = async (req: Request, res: Response) => {
     if (req.query.bedrooms) filters['propertyDetails.bedrooms'] = parseInt(req.query.bedrooms as string);
     if (req.query.propertyType) filters.propertyType = req.query.propertyType;
 
-    const apartments = await ResidentialSaleApartment.find(filters)
+    const builderFloors = await ResidentialRentIndependentHouse.find(filters)
       .skip(skip)
       .limit(limit)
       .sort({ 'metadata.createdAt': -1 });
 
-    const total = await ResidentialSaleApartment.countDocuments(filters);
+    const total = await ResidentialRentIndependentHouse.countDocuments(filters);
 
     res.status(200).json({
       success: true,
-      data: apartments,
+      data: builderFloors,
       pagination: {
         current: page,
         total: Math.ceil(total / limit),
@@ -109,65 +109,65 @@ export const getAllSaleApartments = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching apartments:', error);
+    console.error('Error fetching independent houses:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch apartments',
+      message: 'Failed to fetch independent houses',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const getSaleApartmentById = async (req: Request, res: Response) => {
+export const getRentIndependentHouseById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const independentHouse = await ResidentialRentIndependentHouse.findById(req.params.id);
     
-    if (!apartment) {
+    if (!independentHouse) {
       return res.status(404).json({
         success: false,
-        message: 'Apartment not found'
+        message: 'Independent House not found'
       });
     }
 
     res.status(200).json({
       success: true,
-      data: apartment
+      data: independentHouse
     });
   } catch (error) {
-    console.error('Error fetching apartment:', error);
+    console.error('Error fetching independent house:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch apartment',
+      message: 'Failed to fetch independent house',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const updateSaleApartment = async (req: Request, res: Response) => {
+export const updateRentIndependentHouse = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const independentHouse = await ResidentialRentIndependentHouse.findById(req.params.id);
     const userId = req.body.userId;
     
-    if (!apartment) {
+    if (!independentHouse) {
       return res.status(404).json({
         success: false,
-        message: 'Apartment not found'
+        message: 'Independent House not found'
       });
     }
 
-    if (apartment.metadata.createdBy.toString() !== userId) {
+    if (independentHouse.metadata?.createdBy.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
       });
     }
 
-    const updatedApartment = await ResidentialSaleApartment.findByIdAndUpdate(
+    const updatedIndependentHouse = await ResidentialRentIndependentHouse.findByIdAndUpdate(
       req.params.id,
       {
         ...req.body,
         metadata: {
-          ...apartment.metadata,
+          ...independentHouse.metadata,
           updatedAt: new Date()
         }
       },
@@ -176,76 +176,76 @@ export const updateSaleApartment = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      message: 'Apartment listing updated successfully',
-      data: updatedApartment
+      message: 'Independent House listing updated successfully',
+      data: updatedIndependentHouse
     });
   } catch (error) {
-    console.error('Error updating apartment:', error);
+    console.error('Error updating independent house:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to update apartment',
+      message: 'Failed to update independent house',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-export const deleteSaleApartment = async (req: Request, res: Response) => {
+export const deleteRentIndependentHouse = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const independentHouse = await ResidentialRentIndependentHouse.findById(req.params.id);
     const userId = req.body.userId;
     
-    if (!apartment) {
+    if (!independentHouse) {
       return res.status(404).json({
         success: false,
-        message: 'Apartment not found'
+        message: 'Independent House not found'
       });
     }
 
-    if (apartment.metadata.createdBy.toString() !== userId) {
+    if (independentHouse.metadata?.createdBy.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this listing'
       });
     }
 
-    await apartment.deleteOne();
+    await independentHouse.deleteOne();
 
     res.status(200).json({
       success: true,
-      message: 'Apartment listing deleted successfully'
+      message: 'Independent House listing deleted successfully'
     });
   } catch (error) {
     console.error('Error deleting apartment:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete apartment',
+      message: 'Failed to delete independent house',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
 // Get apartments by user
-export const getUserApartments = async (req: Request, res: Response) => {
+export const getUserIndependentHouses = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     const userId = req.body.userId;
 
-    const apartments = await ResidentialSaleApartment.find({
+    const independentHouses = await ResidentialRentIndependentHouse.find({
       'metadata.createdBy': userId
     })
       .skip(skip)
       .limit(limit)
       .sort({ 'metadata.createdAt': -1 });
 
-    const total = await ResidentialSaleApartment.countDocuments({
+    const total = await ResidentialRentIndependentHouse.countDocuments({
       'metadata.createdBy': userId
     });
 
     res.status(200).json({
       success: true,
-      data: apartments,
+      data: independentHouses,
       pagination: {
         current: page,
         total: Math.ceil(total / limit),
@@ -253,10 +253,10 @@ export const getUserApartments = async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching user apartments:', error);
+    console.error('Error fetching user independent houses:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch user apartments',
+      message: 'Failed to fetch user independent houses',
       error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
