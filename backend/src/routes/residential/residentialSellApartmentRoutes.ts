@@ -1,23 +1,18 @@
-import { Router } from 'express';
+import express from 'express';
 import {
-  createResidentialSaleApartment,
-  getAllResidentialSaleApartments,
-  getResidentialSaleApartmentById,
-  updateResidentialSaleApartment,
-  deleteResidentialSaleApartment
+  createSaleApartment,
+  getSaleApartmentById,
+  updateSaleApartment,
+  deleteSaleApartment,
+  getAllSaleApartments
 } from '../../controllers/residential/residentialSaleApartmentController';
 
-const router = Router();
+const residentialSaleApartmentRoutes = express.Router();
 
-// Create
-router.post('/', createResidentialSaleApartment);
-// Read all
-router.get('/', getAllResidentialSaleApartments);
-// Read one
-router.get('/:id', getResidentialSaleApartmentById);
-// Update
-router.put('/:id', updateResidentialSaleApartment);
-// Delete
-router.delete('/:id', deleteResidentialSaleApartment);
+residentialSaleApartmentRoutes.post('/', createSaleApartment as express.RequestHandler);
+residentialSaleApartmentRoutes.get('/', getAllSaleApartments as express.RequestHandler);
+residentialSaleApartmentRoutes.get('/:id', getSaleApartmentById as express.RequestHandler);
+residentialSaleApartmentRoutes.put('/:id', updateSaleApartment as express.RequestHandler);
+residentialSaleApartmentRoutes.delete('/:id', deleteSaleApartment as express.RequestHandler);
 
-export default router;
+export default residentialSaleApartmentRoutes;
