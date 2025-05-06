@@ -179,11 +179,12 @@ interface Restrictions {
 
 interface ILeaseTerms {
   leaseDetails: {
+    leaseAmount:{
     amount: number;
     type: string;
     duration: number;
     durationUnit: string;
-
+    },
   };
   tenureDetails: {
     minimumTenure: number;
@@ -460,11 +461,12 @@ const LeaseIndependentHouse = () => {
     },
     leaseTerms: {
       leaseDetails: {
+        leaseAmount:{
         amount: 0,
         type: 'fixed',
         duration: 0,
         durationUnit: 'years'
-
+        },
       },
       tenureDetails: {
         minimumTenure: 0,
@@ -629,11 +631,12 @@ const LeaseIndependentHouse = () => {
     },
     leaseTerms: {
       leaseDetails: {
+        leaseAmount:{
         amount: 0,
         type: 'fixed',
         duration: 0,
         durationUnit: 'years'
-
+        },
       },
       tenureDetails: {
         minimumTenure: 0,

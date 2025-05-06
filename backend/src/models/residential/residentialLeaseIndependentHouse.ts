@@ -110,7 +110,7 @@ interface IOtherCharge {
     type: string;
   }
   
-  interface ILeaseTerms {
+interface ILeaseTerms {
         leaseDetails: {
             leaseAmount:{
                 amount: number,

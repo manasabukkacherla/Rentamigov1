@@ -174,11 +174,12 @@ interface Restrictions {
 
 interface ILeaseTerms {
   leaseDetails: {
+    leaseAmount:{
     amount: number;
     type: string;
     duration: number;
     durationUnit: string;
-
+    },
   };
   tenureDetails: {
     minimumTenure: number;
@@ -299,7 +300,7 @@ interface MediaUploadProps {
 
 
 const LeaseApartment  = () => {
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -411,10 +412,12 @@ const LeaseApartment  = () => {
     },
     leaseTerms:{
       leaseDetails: {
+        leaseAmount:{
         amount: 0,
         type: 'fixed',
     duration: 0,
     durationUnit: 'years'
+        },
       },
       tenureDetails: {
         minimumTenure: 0,
@@ -569,11 +572,13 @@ const LeaseApartment  = () => {
     },
     leaseTerms:{
       leaseDetails: {
+        leaseAmount:{
         amount: 0,
         type: 'fixed',
     duration: 0,
     durationUnit: 'years'
       },
+    },
       tenureDetails: {
         minimumTenure: 0,
         minimumUnit: "years",
@@ -1149,7 +1154,7 @@ const LeaseApartment  = () => {
           }
         };
 
-        const response = await axios.post('/api/residential/rent/apartment', transformedData, {
+        const response = await axios.post('/api/residential/lease/appartment', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
