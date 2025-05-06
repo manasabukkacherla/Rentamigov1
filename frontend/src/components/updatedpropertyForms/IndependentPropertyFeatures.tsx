@@ -2,43 +2,44 @@ import { useState } from 'react';
 import { ArrowRight, Home, Bath, BanIcon as Balcony, Car, DoorOpen, Grid, Boxes, Calendar, Ruler, Compass, Zap, Droplets } from 'lucide-react';
 
 interface IndependentPropertyFeaturesProps {
+  propertyFeatures: {
+    bedrooms: number;
+    washrooms: number;
+    balconies: number;
+    hasParking: boolean;
+    parkingDetails: {
+      twoWheeler: number;
+      fourWheeler: number;
+    };
+    extraRooms: {
+      servant: boolean;
+      puja: boolean;
+      store: boolean;
+      others: boolean;
+    };
+    utilityArea: string;
+    furnishingStatus: string;
+    flooring: string;
+    facing: string;
+    propertyAge: number;
+    superBuiltUpAreaSqft: number;
+    superBuiltUpAreaSqmt: number;
+    builtUpAreaSqft: number;
+    builtUpAreaSqmt: number;
+    carpetAreaSqft: number;
+    carpetAreaSqmt: number;
+    electricityAvailability: string;
+    waterAvailability: {
+      borewell: boolean;
+      governmentSupply: boolean;
+      tankerSupply: boolean;
+    };
+  }
   onFeaturesChange?: (features: Record<string, any>) => void;
 }
 
-const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFeaturesProps) => {
-  const [features, setFeatures] = useState({
-    bedrooms: '',
-    washrooms: '',
-    balconies: '',
-    hasParking: false,
-    parkingDetails: {
-      twoWheeler: '',
-      fourWheeler: ''
-    },
-    extraRooms: {
-      servant: false,
-      puja: false,
-      store: false,
-      others: false
-    },
-    utilityArea: 'no',
-    furnishingStatus: '',
-    flooring: '',
-    facing: '',
-    propertyAge: '',
-    superBuiltUpAreaSqft: '',
-    superBuiltUpAreaSqmt: '',
-    builtUpAreaSqft: '',
-    builtUpAreaSqmt: '',
-    carpetAreaSqft: '',
-    carpetAreaSqmt: '',
-    electricityAvailability: '',
-    waterAvailability: {
-      borewell: false,
-      governmentSupply: false,
-      tankerSupply: false
-    }
-  });
+const IndependentPropertyFeatures = ({ propertyFeatures, onFeaturesChange }: IndependentPropertyFeaturesProps) => {
+  const [features, setFeatures] = useState(propertyFeatures);
 
   const propertyAgeRanges = [
     { value: '0-5', label: '0-5 years' },
@@ -142,8 +143,8 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
             <input
               type="number"
               min="0"
-              value={features.bedrooms}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
+              value={features.bedrooms || ''}
+              onChange={(e) => handleChange('bedrooms', parseFloat(e.target.value))}
               placeholder="No. of Bedrooms"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
             />
@@ -156,8 +157,8 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
             <input
               type="number"
               min="0"
-              value={features.washrooms}
-              onChange={(e) => handleChange('washrooms', e.target.value)}
+              value={features.washrooms || ''}
+              onChange={(e) => handleChange('washrooms', parseFloat(e.target.value))}
               placeholder="No. of Washrooms"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
             />
@@ -170,8 +171,8 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
             <input
               type="number"
               min="0"
-              value={features.balconies}
-              onChange={(e) => handleChange('balconies', e.target.value)}
+              value={features.balconies || ''}
+              onChange={(e) => handleChange('balconies', parseFloat(e.target.value) )}
               placeholder="No. of Balconies"
               className="w-full pl-10 pr-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
             />
@@ -213,7 +214,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                   <input
                     type="number"
                     min="0"
-                    value={features.parkingDetails.twoWheeler}
+                    value={features.parkingDetails.twoWheeler || ''}
                     onChange={(e) => handleParkingChange('twoWheeler', e.target.value)}
                     placeholder="Number of 2 wheeler parking"
                     className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
@@ -224,7 +225,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                   <input
                     type="number"
                     min="0"
-                    value={features.parkingDetails.fourWheeler}
+                    value={features.parkingDetails.fourWheeler || ''}
                     onChange={(e) => handleParkingChange('fourWheeler', e.target.value)}
                     placeholder="Number of 4 wheeler parking"
                     className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
@@ -359,7 +360,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
           </h4>
           <select
             value={features.propertyAge}
-            onChange={(e) => handleChange('propertyAge', e.target.value)}
+            onChange={(e) => handleChange('propertyAge', parseFloat(e.target.value))}
             className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black hover:bg-black hover:text-white [&_option]:text-black [&_option]:bg-white"
           >
             <option value="" disabled>Select Property Age</option>
@@ -384,15 +385,15 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                 <input
                   type="number"
                   min="0"
-                  value={features.superBuiltUpAreaSqft}
-                  onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqft')}
+                  value={features.superBuiltUpAreaSqft || ''}
+                    onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqft')}
                   placeholder="Area in sq.ft"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
                 />
                 <input
                   type="number"
                   min="0"
-                  value={features.superBuiltUpAreaSqmt}
+                  value={features.superBuiltUpAreaSqmt || ''}
                   onChange={(e) => handleAreaChange('superBuiltUpArea', e.target.value, 'sqmt')}
                   placeholder="Area in sq.mt"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
@@ -406,7 +407,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                 <input
                   type="number"
                   min="0"
-                  value={features.builtUpAreaSqft}
+                  value={features.builtUpAreaSqft || ''}
                   onChange={(e) => handleAreaChange('builtUpArea', e.target.value, 'sqft')}
                   placeholder="Area in sq.ft"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
@@ -414,7 +415,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                 <input
                   type="number"
                   min="0"
-                  value={features.builtUpAreaSqmt}
+                  value={features.builtUpAreaSqmt || ''}
                   onChange={(e) => handleAreaChange('builtUpArea', e.target.value, 'sqmt')}
                   placeholder="Area in sq.mt"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
@@ -428,7 +429,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                 <input
                   type="number"
                   min="0"
-                  value={features.carpetAreaSqft}
+                  value={features.carpetAreaSqft || ''}
                   onChange={(e) => handleAreaChange('carpetArea', e.target.value, 'sqft')}
                   placeholder="Area in sq.ft"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"
@@ -436,7 +437,7 @@ const IndependentPropertyFeatures = ({ onFeaturesChange }: IndependentPropertyFe
                 <input
                   type="number"
                   min="0"
-                  value={features.carpetAreaSqmt}
+                  value={features.carpetAreaSqmt || ''}
                   onChange={(e) => handleAreaChange('carpetArea', e.target.value, 'sqmt')}
                   placeholder="Area in sq.mt"
                   className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/60"

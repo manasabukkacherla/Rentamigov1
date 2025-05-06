@@ -15,5 +15,6 @@ residentialRentBuilderFloorRoutes.get('/', getAllRentBuilderFloors);
 residentialRentBuilderFloorRoutes.get('/:id', getRentBuilderFloorById);
 residentialRentBuilderFloorRoutes.put('/:id', updateRentBuilderFloor);
 residentialRentBuilderFloorRoutes.delete('/:id', deleteRentBuilderFloor);
+residentialRentBuilderFloorRoutes.get('/:userId', getUserBuilderFloors);
 
 export default residentialRentBuilderFloorRoutes;
