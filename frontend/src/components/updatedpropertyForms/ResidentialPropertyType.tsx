@@ -46,6 +46,7 @@ import SellShopMain from "./commercialpropertytypes/SellShopMain"
 import SellShowroomMain from "./commercialpropertytypes/SellShowroomMain"
 import SellWarehouseMain from "./commercialpropertytypes/SellWarehouseMain"
 
+
 interface ResidentialPropertyTypeProps {
   listingType: string
   selectedType: string | null

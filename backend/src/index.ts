@@ -89,7 +89,6 @@ import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
-
 dotenv.config();
 
 // Validate required environment variables
