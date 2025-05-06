@@ -1,196 +1,263 @@
 import { Request, Response } from 'express';
-import ResidentialSaleApartment from '../../models/residential/residentialSaleApartment';
+import ResidentialSaleApartment from '../../models/residential/saleApartment';
 
-// Generate Property ID for Residential Sale Apartment
 const generatePropertyId = async (): Promise<string> => {
-  try {
-    // Prefix for the residential sale apartment property ID
-    const prefix = "RA-RESSA";
-    
-    // Find the property with the highest property ID number
-    const highestProperty = await ResidentialSaleApartment.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
-    }).sort({ propertyId: -1 });
-    
-    let nextNumber = 1; // Default start number
-    
-    if (highestProperty && highestProperty.propertyId) {
-      // Extract the numeric part from the existing highest property ID
-      const match = highestProperty.propertyId.match(/(\d+)$/);
-      if (match && match[1]) {
-        // Convert to number and increment by 1
-        nextNumber = parseInt(match[1], 10) + 1;
-      }
+    try {
+        const prefix = "RA-RESREAP";
+
+        const highestShowroom = await ResidentialSaleApartment.findOne({
+            propertyId: { $regex: `^${prefix}\\d+$` }
+        }).sort({ propertyId: -1 });
+
+        let nextNumber = 1;
+
+        if (highestShowroom) {
+            const match = highestShowroom.propertyId.match(/(\d+)$/);
+            if (match && match[1]) {
+                nextNumber = parseInt(match[1], 10) + 1;
+            }
+        }
+
+        const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+
+        const existingWithExactId = await ResidentialSaleApartment.findOne({ propertyId });
+
+        if (existingWithExactId) {
+            console.log(`Property ID ${propertyId} already exists, trying next number`);
+
+            const forcedNextNumber = nextNumber + 1;
+            const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+
+            const forcedExisting = await ResidentialSaleApartment.findOne({ propertyId: forcedPropertyId });
+
+            if (forcedExisting) {
+                return generatePropertyId();
+            }
+
+            return forcedPropertyId;
+        }
+
+        return propertyId;
+    } catch (error) {
+        console.error('Error generating property ID:', error);
+        const timestamp = Date.now().toString().slice(-8);
+        return `RA-RESREAP${timestamp}`;
     }
-    
-    // Create the property ID with the sequence number
-    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-    
-    // Check if this exact ID somehow exists (should be rare but possible with manual entries)
-    const existingWithExactId = await ResidentialSaleApartment.findOne({ propertyId });
-    
-    if (existingWithExactId) {
-      // In case of collision (e.g., if IDs were manually entered), recursively try the next number
-      console.log(`Property ID ${propertyId} already exists, trying next number`);
-      
-      // Force increment the next number and try again
-      const forcedNextNumber = nextNumber + 1;
-      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
-      
-      // Double-check this new ID
-      const forcedExisting = await ResidentialSaleApartment.findOne({ propertyId: forcedPropertyId });
-      
-      if (forcedExisting) {
-        // If still colliding, recursively generate a new ID
-        return generatePropertyId();
-      }
-      
-      return forcedPropertyId;
-    }
-    
-    return propertyId;
-  } catch (error) {
-    console.error('Error generating property ID:', error);
-    // Fallback to timestamp-based ID if there's an error
-    const timestamp = Date.now().toString().slice(-8);
-    return `RA-RESSA${timestamp}`;
-  }
 };
 
-// Create a new Residential Sale Apartment
-export const createResidentialSaleApartment = async (req: Request, res: Response) => {
+// Create a new apartment listing
+export const createSaleApartment = async (req: Request, res: Response) => {
   try {
-    const apartment = new ResidentialSaleApartment(req.body);
-    
-    // Generate property ID
     const propertyId = await generatePropertyId();
-    
-    // Set the generated property ID to the apartment data
-    apartment.propertyId = propertyId;
+    const apartmentData = {
+      ...req.body,
+      propertyId,
+      metadata: {
+        ...req.body.metadata,
+        createdAt: new Date()
+      }
+    };
 
-    // Save the new apartment
-    const savedApartment = await apartment.save();
+    const apartment = new ResidentialSaleApartment(apartmentData);
+    await apartment.save();
 
     res.status(201).json({
       success: true,
-      message: 'Residential sale apartment created successfully',
-      data: savedApartment
+      message: 'Apartment listing created successfully',
+      data: apartment
     });
-  } catch (error: any) {
-    console.error('Error creating residential sale apartment:', error);
-    res.status(400).json({
-      success: false,
-      message: error.message || 'Failed to create residential sale apartment',
-      error: error
-    });
-  }
-};
-
-// Get all Residential Sale Apartments
-export const getAllResidentialSaleApartments = async (req: Request, res: Response) => {
-  try {
-    const apartments = await ResidentialSaleApartment.find();
-    res.status(200).json({
-      success: true,
-      count: apartments.length,
-      data: apartments
-    });
-  } catch (error: any) {
-    console.error('Error fetching residential sale apartments:', error);
+  } catch (error) {
+    console.error('Error creating apartment listing:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch residential sale apartments',
-      error: error
+      message: 'Failed to create apartment listing',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-// Get a single Residential Sale Apartment by ID
-export const getResidentialSaleApartmentById = async (req: Request, res: Response) => {
+export const getAllSaleApartments = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+
+    // Build filter object based on query parameters
+    const filters: any = {};
     
-    const apartment = await ResidentialSaleApartment.findOne({ propertyId: id });
+    if (req.query.city) filters['basicInformation.address.city'] = req.query.city;
+    if (req.query.state) filters['basicInformation.address.state'] = req.query.state;
+    if (req.query.minPrice) filters.price = { $gte: parseInt(req.query.minPrice as string) };
+    if (req.query.maxPrice) filters.price = { ...filters.price, $lte: parseInt(req.query.maxPrice as string) };
+    if (req.query.bedrooms) filters['propertyDetails.bedrooms'] = parseInt(req.query.bedrooms as string);
+    if (req.query.propertyType) filters.propertyType = req.query.propertyType;
+
+    const apartments = await ResidentialSaleApartment.find(filters)
+      .skip(skip)
+      .limit(limit)
+      .sort({ 'metadata.createdAt': -1 });
+
+    const total = await ResidentialSaleApartment.countDocuments(filters);
+
+    res.status(200).json({
+      success: true,
+      data: apartments,
+      pagination: {
+        current: page,
+        total: Math.ceil(total / limit),
+        totalRecords: total
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching apartments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch apartments',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    });
+  }
+};
+
+export const getSaleApartmentById = async (req: Request, res: Response) => {
+  try {
+    const apartment = await ResidentialSaleApartment.findById(req.params.id);
     
     if (!apartment) {
       return res.status(404).json({
         success: false,
-        message: 'Residential sale apartment not found'
+        message: 'Apartment not found'
       });
     }
-    
+
     res.status(200).json({
       success: true,
       data: apartment
     });
-  } catch (error: any) {
-    console.error('Error fetching residential sale apartment by ID:', error);
+  } catch (error) {
+    console.error('Error fetching apartment:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to fetch residential sale apartment',
-      error: error
+      message: 'Failed to fetch apartment',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-// Update a Residential Sale Apartment by ID
-export const updateResidentialSaleApartment = async (req: Request, res: Response) => {
+export const updateSaleApartment = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const updateData = req.body;
+    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const userId = req.body.userId;
     
-    const apartment = await ResidentialSaleApartment.findOneAndUpdate(
-      { propertyId: id },
-      { $set: updateData },
+    if (!apartment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Apartment not found'
+      });
+    }
+
+    if (apartment.metadata.createdBy.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this listing'
+      });
+    }
+
+    const updatedApartment = await ResidentialSaleApartment.findByIdAndUpdate(
+      req.params.id,
+      {
+        ...req.body,
+        metadata: {
+          ...apartment.metadata,
+          updatedAt: new Date()
+        }
+      },
       { new: true, runValidators: true }
     );
-    
-    if (!apartment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Residential sale apartment not found'
-      });
-    }
-    
+
     res.status(200).json({
       success: true,
-      message: 'Residential sale apartment updated successfully',
-      data: apartment
+      message: 'Apartment listing updated successfully',
+      data: updatedApartment
     });
-  } catch (error: any) {
-    console.error('Error updating residential sale apartment:', error);
-    res.status(400).json({
+  } catch (error) {
+    console.error('Error updating apartment:', error);
+    res.status(500).json({
       success: false,
-      message: error.message || 'Failed to update residential sale apartment',
-      error: error
+      message: 'Failed to update apartment',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
 
-// Delete a Residential Sale Apartment by ID
-export const deleteResidentialSaleApartment = async (req: Request, res: Response) => {
+export const deleteSaleApartment = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    
-    const apartment = await ResidentialSaleApartment.findOneAndDelete({ propertyId: id });
+    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const userId = req.body.userId;
     
     if (!apartment) {
       return res.status(404).json({
         success: false,
-        message: 'Residential sale apartment not found'
+        message: 'Apartment not found'
       });
     }
-    
+
+    if (apartment.metadata.createdBy.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this listing'
+      });
+    }
+
+    await apartment.deleteOne();
+
     res.status(200).json({
       success: true,
-      message: 'Residential sale apartment deleted successfully'
+      message: 'Apartment listing deleted successfully'
     });
-  } catch (error: any) {
-    console.error('Error deleting residential sale apartment:', error);
+  } catch (error) {
+    console.error('Error deleting apartment:', error);
     res.status(500).json({
       success: false,
-      message: error.message || 'Failed to delete residential sale apartment',
-      error: error
+      message: 'Failed to delete apartment',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
+    });
+  }
+};
+
+// Get apartments by user
+export const getUserApartments = async (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    const userId = req.body.userId;
+
+    const apartments = await ResidentialSaleApartment.find({
+      'metadata.createdBy': userId
+    })
+      .skip(skip)
+      .limit(limit)
+      .sort({ 'metadata.createdAt': -1 });
+
+    const total = await ResidentialSaleApartment.countDocuments({
+      'metadata.createdBy': userId
+    });
+
+    res.status(200).json({
+      success: true,
+      data: apartments,
+      pagination: {
+        current: page,
+        total: Math.ceil(total / limit),
+        totalRecords: total
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching user apartments:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch user apartments',
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
     });
   }
 };
