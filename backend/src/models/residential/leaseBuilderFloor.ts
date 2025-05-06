@@ -375,5 +375,5 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
 }, { timestamps: true });
 
 // Create or get model
-const LeaseBuilderFloor = mongoose.models.LeaseBuilderFloor || model<ILeaseBuilderFloor>('LeaseBuilderFloor', LeaseBuilderFloorSchema);
+const LeaseBuilderFloor = model<ILeaseBuilderFloor>('residentialLeaseBuilderFloor', LeaseBuilderFloorSchema);
 export default LeaseBuilderFloor;

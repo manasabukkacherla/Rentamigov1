@@ -381,5 +381,5 @@ const LeaseApartmentSchema = new Schema<ILeaseApartment>({
 // LeaseApartmentSchema.index({ 'basicInformation.address.city': 1 });
 // LeaseApartmentSchema.index({ 'leaseAmount.amount': 1 });
 
-const LeaseApartment = mongoose.models.LeaseApartment || model<ILeaseApartment>('LeaseApartment', LeaseApartmentSchema);
+const LeaseApartment = model<ILeaseApartment>('residentialLeaseApartment', LeaseApartmentSchema);
 export default LeaseApartment;
