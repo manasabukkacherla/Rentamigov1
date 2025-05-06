@@ -87,7 +87,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ otherCharges, onOtherCharge
                 }
                 className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
                   (charges[key as keyof typeof charges] as Charge).type === 'inclusive'
-                    ? "bg-gray-50 border-black-500 text-black-700"
+                    ? "bg-gray-50 border-black text-black-700"
                     : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
                 }`}
               >
@@ -103,7 +103,7 @@ const OtherCharges: React.FC<OtherChargesProps> = ({ otherCharges, onOtherCharge
                   }
                 className={`flex-1 py-3 px-4 rounded-xl border transition-all duration-200 ${
                   (charges[key as keyof typeof charges] as Charge).type === 'exclusive'
-                    ? "bg-gray-50 border-black-500 text-black-700"
+                    ? "bg-gray-50 border-black text-black-700"
                     : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
                 }`}
                 >

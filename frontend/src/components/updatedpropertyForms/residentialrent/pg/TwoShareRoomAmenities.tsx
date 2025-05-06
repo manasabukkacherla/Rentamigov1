@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Bed, Users, Share2 } from 'lucide-react';
 
 interface Amenity {
@@ -8,10 +8,23 @@ interface Amenity {
   isShared?: boolean;
 }
 
-const TwoShareRoomAmenities = () => {
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
+interface TwoShareRoomAmenitiesProps {
+  amenities?: string[];
+  onAmenitiesChange?: (amenities: string[]) => void;
+}
 
-  const amenities: Amenity[] = [
+const TwoShareRoomAmenities: React.FC<TwoShareRoomAmenitiesProps> = ({
+  amenities = [],
+  onAmenitiesChange
+}) => {
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set(amenities));
+  
+  // Update local state when props change
+  useEffect(() => {
+    setSelectedAmenities(new Set(amenities));
+  }, [amenities]);
+
+  const amenitiesList: Amenity[] = [
     { id: 'beds', label: 'Two single beds or one bunk bed', isShared: true },
     { id: 'wardrobe-1', label: 'Separate wardrobe (Occupant 1)' },
     { id: 'wardrobe-2', label: 'Separate wardrobe (Occupant 2)' },
@@ -32,11 +45,16 @@ const TwoShareRoomAmenities = () => {
       newSelectedAmenities.add(amenityId);
     }
     setSelectedAmenities(newSelectedAmenities);
+    
+    // Notify parent component of changes
+    if (onAmenitiesChange) {
+      onAmenitiesChange(Array.from(newSelectedAmenities));
+    }
   };
 
   // Group amenities by category
-  const personalAmenities = amenities.filter(a => !a.isShared);
-  const sharedAmenities = amenities.filter(a => a.isShared);
+  const personalAmenities = amenitiesList.filter(a => !a.isShared);
+  const sharedAmenities = amenitiesList.filter(a => a.isShared);
 
   // Render a single amenity item
   const renderAmenityItem = (amenity: Amenity) => (
@@ -108,7 +126,7 @@ const TwoShareRoomAmenities = () => {
           <h3 className="text-sm font-medium text-gray-900 mb-3">Selected Amenities</h3>
           <div className="flex flex-wrap gap-2">
             {Array.from(selectedAmenities).map(amenityId => {
-              const amenity = amenities.find(a => a.id === amenityId);
+              const amenity = amenitiesList.find(a => a.id === amenityId);
               return (
                 <div key={amenityId} 
                   className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black"

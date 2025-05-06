@@ -1,44 +1,55 @@
-import React, { useState } from 'react';
-import { Check, Bed, Users, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Check, Share2, Users } from 'lucide-react';
 
-interface Amenity {
+interface AmenityItem {
   id: string;
   label: string;
   isOptional?: boolean;
   isShared?: boolean;
 }
 
-interface Props {
+interface CustomShareRoomAmenitiesProps {
+  amenities: string[];
+  onAmenitiesChange: (amenities: string[]) => void;
   occupantCount: number;
 }
 
-const CustomShareRoomAmenities: React.FC<Props> = ({ occupantCount }) => {
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
+const allAmenities: AmenityItem[] = [
+  { id: 'bunk-beds', label: 'Multiple bunk beds', isShared: true },
+  { id: 'lockers', label: 'Lockers or individual storage shelves', isShared: true },
+  { id: 'study-desk', label: 'Shared long study desk', isShared: true },
+  { id: 'charging-station', label: 'Shared charging station', isShared: true },
+  { id: 'fan', label: 'Fan', isShared: true },
+  { id: 'ac', label: 'Air Conditioning (AC)', isShared: true }
+];
 
-  const amenities: Amenity[] = [
-    { id: 'bunk-beds', label: 'Multiple bunk beds', isShared: true },
-    { id: 'lockers', label: 'Lockers or individual storage shelves', isShared: true },
-    { id: 'study-desk', label: 'Shared long study desk', isShared: true },
-    { id: 'charging-station', label: 'Shared charging station', isShared: true },
-    { id: 'fan', label: 'Fan', isShared: true },
-    { id: 'ac', label: 'Air Conditioning (AC)', isShared: true }
-  ];
+const CustomShareRoomAmenities: React.FC<CustomShareRoomAmenitiesProps> = ({
+  amenities = [],
+  onAmenitiesChange,
+  occupantCount
+}) => {
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set(amenities));
+
+  useEffect(() => {
+    setSelectedAmenities(new Set(amenities));
+  }, [amenities]);
 
   const handleAmenityChange = (amenityId: string) => {
-    const newSelectedAmenities = new Set(selectedAmenities);
-    if (newSelectedAmenities.has(amenityId)) {
-      newSelectedAmenities.delete(amenityId);
+    const newSelected = new Set(selectedAmenities);
+    if (newSelected.has(amenityId)) {
+      newSelected.delete(amenityId);
     } else {
-      newSelectedAmenities.add(amenityId);
+      newSelected.add(amenityId);
     }
-    setSelectedAmenities(newSelectedAmenities);
+    setSelectedAmenities(newSelected);
+    onAmenitiesChange(Array.from(newSelected));
   };
 
-  const personalAmenities = amenities.filter(a => !a.isShared);
-  const sharedAmenities = amenities.filter(a => a.isShared);
+  const findAmenityById = (id: string): AmenityItem | undefined => {
+    return allAmenities.find(a => a.id === id);
+  };
 
-  // Render a single amenity item
-  const renderAmenityItem = (amenity: Amenity) => (
+  const renderAmenityItem = (amenity: AmenityItem) => (
     <div 
       key={amenity.id} 
       onClick={() => handleAmenityChange(amenity.id)}
@@ -79,18 +90,6 @@ const CustomShareRoomAmenities: React.FC<Props> = ({ occupantCount }) => {
       </div>
       
       <div className="space-y-5">
-        {personalAmenities.length > 0 && (
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <div className="flex items-center mb-3">
-              <Bed className="w-4 h-4 text-gray-700 mr-2" />
-              <h3 className="text-sm font-medium text-gray-900">Personal Amenities</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {personalAmenities.map(renderAmenityItem)}
-            </div>
-          </div>
-        )}
-
         {/* Shared Amenities */}
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="flex items-center mb-3">
@@ -98,7 +97,7 @@ const CustomShareRoomAmenities: React.FC<Props> = ({ occupantCount }) => {
             <h3 className="text-sm font-medium text-gray-900">Shared Amenities</h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {sharedAmenities.map(renderAmenityItem)}
+            {allAmenities.map(renderAmenityItem)}
           </div>
         </div>
       </div>
@@ -108,16 +107,18 @@ const CustomShareRoomAmenities: React.FC<Props> = ({ occupantCount }) => {
           <h3 className="text-sm font-medium text-gray-900 mb-3">Selected Amenities</h3>
           <div className="flex flex-wrap gap-2">
             {Array.from(selectedAmenities).map(amenityId => {
-              const amenity = amenities.find(a => a.id === amenityId);
+              const amenity = findAmenityById(amenityId);
+              if (!amenity) return null;
+              
               return (
                 <div key={amenityId} 
                   className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black"
                 >
-                  {amenity?.isShared ? 
+                  {amenity.isShared ? 
                     <Share2 className="w-3 h-3 mr-1 text-blue-500" /> : 
                     <Check className="w-3 h-3 mr-1" />
                   }
-                  <span>{amenity?.label}</span>
+                  <span>{amenity.label}</span>
                 </div>
               );
             })}

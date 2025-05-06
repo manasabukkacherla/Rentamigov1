@@ -9,6 +9,8 @@ interface MediaItem {
   title: string;
   tags: string[];
   roomType?: string;
+  base64?: string; // Store the base64 encoded data
+  category?: string; // For categorizing common areas
 }
 
 interface RoomTypeOption {
@@ -20,10 +22,57 @@ interface RoomTypeOption {
 interface PgMediaProps {
   selectedShares: string[];
   customShare: string;
+  mediaItems: any[];
+  onMediaItemsChange: (mediaItems: any[]) => void;
 }
 
-const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
+const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaItems: propMediaItems, onMediaItemsChange }) => {
+  // Initialize state from props or empty array
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+  
+  // Convert file to base64
+  const convertToBase64 = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+  
+  // Process media items and update parent component
+  const processAndUpdateMediaItems = async (items: MediaItem[]) => {
+    try {
+      // Process each media item to add base64 data if not already present
+      const processedItems = await Promise.all(items.map(async (item) => {
+        if (!item.base64 && item.file) {
+          const base64Data = await convertToBase64(item.file);
+          return { ...item, base64: base64Data };
+        }
+        return item;
+      }));
+      
+      // Update local state
+      setMediaItems(processedItems);
+      
+      // Update parent component with processed items
+      // Convert to format expected by parent component
+      const parentFormatItems = processedItems.map(item => ({
+        id: item.id,
+        type: item.type,
+        url: item.base64 || item.preview,
+        title: item.title,
+        tags: item.tags,
+        roomType: item.roomType,
+        category: item.category
+      }));
+      
+      onMediaItemsChange(parentFormatItems);
+    } catch (error) {
+      console.error('Error processing media items:', error);
+      setError('Failed to process media items');
+    }
+  };
   const [batchTitle, setBatchTitle] = useState('');
   const [selectedType, setSelectedType] = useState<'photo' | 'video'>('photo');
   const [error, setError] = useState('');
@@ -105,24 +154,33 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         
-        // Convert canvas to file
+        // Get base64 data directly from canvas
+        const base64Data = canvas.toDataURL('image/jpeg', 0.9);
+        
+        // Convert canvas to file for preview
         canvas.toBlob((blob) => {
           if (blob) {
             const capturedFileName = `captured-photo-${Date.now()}.jpg`;
             const file = new File([blob], capturedFileName, { type: 'image/jpeg' });
             
-            // Create media item for the captured photo
+            // Create media item for the captured photo with base64 data
             const newMediaItem: MediaItem = {
               id: `captured-${Date.now()}`,
               type: 'photo',
               file: file,
               preview: URL.createObjectURL(blob),
+              base64: base64Data,
               title: batchTitle || `${getRoomTypeLabel(selectedRoomType)} Photo`,
               tags: [],
-              roomType: selectedRoomType || undefined
+              roomType: selectedRoomType || undefined,
+              category: selectedRoomType === 'lifts' || selectedRoomType === 'dining' || 
+                       selectedRoomType === 'staircases' || selectedRoomType === 'kitchen' ? 
+                       selectedRoomType : undefined
             };
             
-            setMediaItems(prev => [...prev, newMediaItem]);
+            const updatedItems = [...mediaItems, newMediaItem];
+            setMediaItems(updatedItems);
+            processAndUpdateMediaItems(updatedItems);
             stopCamera();
           }
         }, 'image/jpeg', 0.9);
@@ -145,7 +203,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
     }
   }, [cameraActive, cameraStream]);
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>, roomType?: string) => {
+  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>, roomType?: string, category?: string) => {
     setError('');
     const files = Array.from(e.target.files || []);
     
@@ -154,7 +212,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
       return;
     }
 
-    const title = batchTitle || `${getRoomTypeLabel(roomType || selectedRoomType)} ${selectedType === 'photo' ? 'Photo' : 'Video'}`;
+    const title = batchTitle || `${category || getRoomTypeLabel(roomType || selectedRoomType)} ${selectedType === 'photo' ? 'Photo' : 'Video'}`;
     
     // Validate file types
     const invalidFiles = files.filter(file => {
@@ -170,7 +228,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
       return;
     }
 
-    // Create object URLs for previews
+    // Create object URLs for previews and prepare for base64 conversion
     const newMediaItems = files.map((file, index) => {
       const preview = URL.createObjectURL(file);
       return {
@@ -180,11 +238,16 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
         preview,
         title: files.length === 1 ? title : `${title} ${index + 1}`,
         tags: [],
-        roomType: roomType || selectedRoomType || undefined
+        roomType: roomType || selectedRoomType || undefined,
+        category: category
       };
     });
 
-    setMediaItems(prev => [...prev, ...newMediaItems]);
+    // Update state with new items and process them for base64
+    const updatedItems = [...mediaItems, ...newMediaItems];
+    setMediaItems(updatedItems);
+    await processAndUpdateMediaItems(updatedItems);
+    
     setBatchTitle('');
     if (e.target) {
       e.target.value = '';
@@ -197,7 +260,10 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
       if (itemToRemove) {
         URL.revokeObjectURL(itemToRemove.preview);
       }
-      return prev.filter(item => item.id !== id);
+      const updatedItems = prev.filter(item => item.id !== id);
+      // Update parent component
+      processAndUpdateMediaItems(updatedItems);
+      return updatedItems;
     });
   };
 
@@ -236,11 +302,37 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
     return option ? option.label : 'Unknown';
   };
 
+  // Initialize from props when component mounts or props change
+  React.useEffect(() => {
+    if (propMediaItems && propMediaItems.length > 0) {
+      // Convert from parent format to local format if needed
+      const convertedItems = propMediaItems.map(item => {
+        // If the item already has a preview and file, use it as is
+        if (item.preview && item.file) return item;
+        
+        // Otherwise, create a MediaItem from the parent format
+        return {
+          id: item.id || `imported-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          type: item.type || 'photo',
+          // We don't have the original file, but we can use the URL as preview
+          preview: item.url,
+          base64: item.url,
+          title: item.title || 'Imported Media',
+          tags: item.tags || [],
+          roomType: item.roomType,
+          category: item.category
+        };
+      });
+      
+      setMediaItems(convertedItems);
+    }
+  }, []);
+  
   // Cleanup previews when component unmounts
   React.useEffect(() => {
     return () => {
       mediaItems.forEach(item => {
-        URL.revokeObjectURL(item.preview);
+        if (item.preview) URL.revokeObjectURL(item.preview);
       });
     };
   }, []);
@@ -440,14 +532,14 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
         </div>
       </div>
 
-      {/* Facility Upload Sections */}
+      {/* Common Area Facility Upload Sections */}
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4">Other Facility Photos</h2>
+        <h2 className="text-lg font-semibold mb-4">Common Area Photos</h2>
         {[
-          { id: 'lifts', label: 'Lifts' },
-          { id: 'dining', label: 'Dining Hall' },
-          { id: 'staircases', label: 'Staircases' },
-          { id: 'kitchen', label: 'Kitchen Area' }
+          { id: 'lifts', label: 'Lifts', icon: <Lightbulb className="h-4 w-4" /> },
+          { id: 'dining', label: 'Dining Hall', icon: <Users className="h-4 w-4" /> },
+          { id: 'staircases', label: 'Staircases', icon: <Home className="h-4 w-4" /> },
+          { id: 'kitchen', label: 'Kitchen Area', icon: <Key className="h-4 w-4" /> }
         ].map(facility => (
           <div key={facility.id} className="mb-6">
             <label className="block font-medium mb-2">{facility.label} Photos</label>
@@ -457,7 +549,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
                   type="file"
                   accept="image/*"
                   multiple
-                  onChange={e => handleFileSelect(e, facility.id)}
+                  onChange={e => handleFileSelect(e, facility.id, facility.label)}
                   className="mb-2"
                 />
               </div>
@@ -473,7 +565,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare }) => {
             </div>
             {/* Preview grid */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {mediaItems.filter(item => item.roomType === facility.id).map(item => (
+              {mediaItems.filter(item => item.roomType === facility.id || item.category === facility.label).map(item => (
                 <div key={item.id} className="relative aspect-square rounded-md overflow-hidden">
                   <img src={item.preview} alt={item.title} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
