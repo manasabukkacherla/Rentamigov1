@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Bed, Armchair } from 'lucide-react';
 
 interface Amenity {
@@ -7,10 +7,23 @@ interface Amenity {
   isOptional?: boolean;
 }
 
-const SingleRoomAmenities = () => {
-  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set());
+interface SingleRoomAmenitiesProps {
+  amenities?: string[];
+  onAmenitiesChange?: (amenities: string[]) => void;
+}
 
-  const amenities: Amenity[] = [
+const SingleRoomAmenities: React.FC<SingleRoomAmenitiesProps> = ({ 
+  amenities = [], 
+  onAmenitiesChange 
+}) => {
+  const [selectedAmenities, setSelectedAmenities] = useState<Set<string>>(new Set(amenities));
+
+  // Update local state when props change
+  useEffect(() => {
+    setSelectedAmenities(new Set(amenities));
+  }, [amenities]);
+
+  const amenityOptions: Amenity[] = [
     { id: 'premium-mattress', label: 'Personal bed with premium mattress' },
     { id: 'private-wardrobe', label: 'Private wardrobe' },
     { id: 'study-set', label: 'Individual study table and chair' },
@@ -28,6 +41,11 @@ const SingleRoomAmenities = () => {
       newSelectedAmenities.add(amenityId);
     }
     setSelectedAmenities(newSelectedAmenities);
+    
+    // Notify parent component of changes
+    if (onAmenitiesChange) {
+      onAmenitiesChange(Array.from(newSelectedAmenities));
+    }
   };
 
   return (
@@ -40,7 +58,7 @@ const SingleRoomAmenities = () => {
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-        {amenities.map((amenity) => (
+        {amenityOptions.map((amenity) => (
           <div 
             key={amenity.id} 
             onClick={() => handleAmenityChange(amenity.id)}
@@ -81,7 +99,7 @@ const SingleRoomAmenities = () => {
           
           <div className="flex flex-wrap gap-2">
             {Array.from(selectedAmenities).map(amenityId => {
-              const amenity = amenities.find(a => a.id === amenityId);
+              const amenity = amenityOptions.find(a => a.id === amenityId);
               return (
                 <div key={amenityId} className="inline-flex items-center px-2.5 py-1 rounded-full bg-black/5 text-sm text-black">
                   <Check className="w-3 h-3 mr-1" />

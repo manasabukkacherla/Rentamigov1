@@ -46,6 +46,7 @@ export const createPg = async (req: Request, res: Response) => {
     
     // Ensure required fields have default values if missing
     const body = req.body;
+    console.log('Received media data:', body.media);
     
     // Ensure metadata is properly structured
     const pgData = {
@@ -74,6 +75,13 @@ export const createPg = async (req: Request, res: Response) => {
       pricing: {
         rent: body.pricing?.rent || 0,
         ...body.pricing
+      },
+      // Ensure media is properly structured
+      media: {
+        photos: body.media?.photos || [],
+        videos: body.media?.videos || [],
+        mediaItems: body.media?.mediaItems || [],
+        ...body.media
       },
       metadata: {
         ...body.metadata,

@@ -10,8 +10,12 @@ interface Restriction {
   options?: string[];
 }
 
-const Restrictions = () => {
-  const [selectedRestrictions, setSelectedRestrictions] = useState<Set<string>>(new Set());
+interface RestrictionsProps {
+  selectedRestrictions: string[];
+  onRestrictionsChange: (restrictions: string[]) => void;
+}
+
+const Restrictions: React.FC<RestrictionsProps> = ({ selectedRestrictions, onRestrictionsChange }) => {
   const [customTimes, setCustomTimes] = useState({
     inTime: '',
     outTime: '',
@@ -76,13 +80,27 @@ const Restrictions = () => {
   ];
 
   const handleRestrictionChange = (restrictionId: string) => {
-    const newSelectedRestrictions = new Set(selectedRestrictions);
-    if (newSelectedRestrictions.has(restrictionId)) {
-      newSelectedRestrictions.delete(restrictionId);
+    let newSelectedRestrictions = [...selectedRestrictions];
+    if (newSelectedRestrictions.includes(restrictionId)) {
+      newSelectedRestrictions = newSelectedRestrictions.filter(r => r !== restrictionId);
     } else {
-      newSelectedRestrictions.add(restrictionId);
+      newSelectedRestrictions.push(restrictionId);
     }
-    setSelectedRestrictions(newSelectedRestrictions);
+    onRestrictionsChange(newSelectedRestrictions);
+  };
+
+  // If you want to auto-add/remove 'timing' restriction based on has24HourAccess, do it here and call onRestrictionsChange
+  const handle24HourAccessChange = () => {
+    setHas24HourAccess((prev) => {
+      const next = !prev;
+      let newSelectedRestrictions = [...selectedRestrictions];
+      if (next) {
+        // Remove 'timing' if enabling 24hr access
+        newSelectedRestrictions = newSelectedRestrictions.filter(r => r !== 'timing');
+      }
+      onRestrictionsChange(newSelectedRestrictions);
+      return next;
+    });
   };
 
   const handleTimeChange = (field: keyof typeof customTimes, value: string) => {
@@ -115,7 +133,7 @@ const Restrictions = () => {
                   type="checkbox"
                   id="fingerprint-access"
                   checked={has24HourAccess}
-                  onChange={() => setHas24HourAccess(!has24HourAccess)}
+                  onChange={handle24HourAccessChange}
                   className="h-5 w-5 border-white rounded bg-black checked:bg-white checked:border-white focus:ring-white focus:ring-2"
                 />
               </div>
@@ -144,7 +162,7 @@ const Restrictions = () => {
                   <input
                     type="checkbox"
                     id={restriction.id}
-                    checked={selectedRestrictions.has(restriction.id)}
+                    checked={selectedRestrictions.includes(restriction.id)}
                     onChange={() => handleRestrictionChange(restriction.id)}
                     className="h-5 w-5 border-white rounded bg-black checked:bg-white checked:border-white focus:ring-white focus:ring-2"
                     disabled={restriction.id === 'timing' && has24HourAccess}
@@ -158,7 +176,7 @@ const Restrictions = () => {
                 )}
 
                 {/* Custom Time Inputs */}
-                {restriction.customInput && selectedRestrictions.has(restriction.id) && !has24HourAccess && (
+                {restriction.customInput && selectedRestrictions.includes(restriction.id) && !has24HourAccess && (
                   <div className="mt-4 space-y-3">
                     {restriction.id === 'timing' && (
                       <>
@@ -208,7 +226,7 @@ const Restrictions = () => {
                 )}
 
                 {/* Options Selection */}
-                {restriction.options && selectedRestrictions.has(restriction.id) && (
+                {restriction.options && selectedRestrictions.includes(restriction.id) && (
                   <div className="mt-4 space-y-2">
                     {restriction.options.map((option, index) => (
                       <label key={index} className="flex items-center space-x-2">
@@ -228,7 +246,7 @@ const Restrictions = () => {
       </div>
 
       {/* Summary Section */}
-      {(selectedRestrictions.size > 0 || has24HourAccess) && (
+      {(selectedRestrictions.length > 0 || has24HourAccess) && (
         <div className="mt-8 pt-6 border-t border-gray-800">
           <h2 className="text-lg font-semibold mb-4">Active Restrictions:</h2>
           <div className="space-y-4">
