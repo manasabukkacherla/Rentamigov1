@@ -5,31 +5,33 @@ import { Building, MapPin, Navigation, Locate } from "lucide-react";
 import toast from 'react-hot-toast';
 
 interface IndependentPropertyAddressProps {
-  address?: {
-    houseName?: string;
-    street?: string;
-    city?: string;
-    state?: string;
-    zipCode?: string;
-    pinCode?: string;
-    coordinates?: { lat: number; lng: number };
-    locationLabel?: string;
+  propertyAddress: {
+    houseName: string;    
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    pinCode: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
   };
-  onAddressChange: (address: any) => void;
+  onAddressChange: (propertyAddress: any) => void;
 }
 
 const inputClasses =
   "w-full h-12 px-4 rounded-lg border border-black/10 bg-white text-black placeholder:text-black/30 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black shadow-sm transition-all duration-200";
 
 const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
-  address = {},
+  propertyAddress,
   onAddressChange,
 }) => {
   const [showMap, setShowMap] = useState(false);
 
   const handleChange = (field: string, value: any) => {
     onAddressChange({
-      ...address,
+      ...propertyAddress,
       [field]: value,
     });
   };
@@ -51,8 +53,8 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
           const lng = position.coords.longitude.toString();
 
           onAddressChange({
-            ...address,
-            coordinates: { lat: Number(lat), lng: Number(lng) },
+            ...propertyAddress,
+            location: { latitude: lat, longitude: lng },
           });
 
           updateMapLocation(lat, lng);
@@ -69,27 +71,26 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
 
   // Function to open location picker in Google Maps
   const openLocationPicker = () => {
-    const lat = address.coordinates?.lat || "20.5937";
-    const lng = address.coordinates?.lng || "78.9629";
+    const lat = propertyAddress.location.latitude || "20.5937";
+    const lng = propertyAddress.location.longitude || "78.9629";
     window.open(`https://www.google.com/maps/@${lat},${lng},18z`, "_blank");
-    toast.success("After selecting a location in Google Maps, please manually input the coordinates here.");
+    toast.success("Select location in Maps, then manually enter coordinates.");
   };
 
   const handleLocationSelect = (lat: string, lng: string, addressData?: any) => {
-    let locationLabel = `${lat}, ${lng}`;
+    // let locationLabel = `${lat}, ${lng}`;
     if (addressData) {
       const components = [];
       if (addressData.route) components.push(addressData.route);
       if (addressData.sublocality_level_1) components.push(addressData.sublocality_level_1);
       if (addressData.locality) components.push(addressData.locality);
-      if (components.length > 0) {
-        locationLabel = components.join(", ");
-      }
+      // if (components.length > 0) {
+      //   locationLabel = components.join(", ");
+      // }
     }
     onAddressChange({
-      ...address,
-      coordinates: { lat: Number(lat), lng: Number(lng) },
-      locationLabel,
+      ...propertyAddress,
+      location: { latitude: lat, longitude: lng },
     });
   };
 
@@ -109,7 +110,7 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
               <label className="block text-sm font-medium text-black/70 mb-2.5">House Name</label>
               <input
                 type="text"
-                value={address.houseName || ""}
+                value={propertyAddress.houseName || ""}
                 onChange={(e) => handleChange("houseName", e.target.value)}
                 placeholder="Enter house name"
                 className={inputClasses}
@@ -119,7 +120,7 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
               <label className="block text-sm font-medium text-black/70 mb-2.5">Pin Code</label>
               <input
                 type="text"
-                value={address.pinCode || ""}
+                value={propertyAddress.pinCode || ""}
                 onChange={(e) => handleChange("pinCode", e.target.value)}
                 placeholder="Enter pin code"
                 className={inputClasses}
@@ -129,7 +130,7 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
               <label className="block text-sm font-medium text-black/70 mb-2.5">ZIP Code</label>
               <input
                 type="text"
-                value={address.zipCode || ""}
+                value={propertyAddress.zipCode || ""}
                 onChange={(e) => handleChange("zipCode", e.target.value)}
                 placeholder="Enter ZIP code"
                 className={inputClasses}
@@ -142,7 +143,7 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
               <label className="block text-sm font-medium text-black/70 mb-2.5">City</label>
               <input
                 type="text"
-                value={address.city || ""}
+                value={propertyAddress.city || ""}
                 onChange={(e) => handleChange("city", e.target.value)}
                 placeholder="Enter city"
                 className={inputClasses}
@@ -152,7 +153,7 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
               <label className="block text-sm font-medium text-black/70 mb-2.5">State</label>
               <input
                 type="text"
-                value={address.state || ""}
+                value={propertyAddress.state || ""}
                 onChange={(e) => handleChange("state", e.target.value)}
                 placeholder="Enter state"
                 className={inputClasses}
@@ -162,7 +163,7 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
               <label className="block text-sm font-medium text-black/70 mb-2.5">Street Address</label>
               <input
                 type="text"
-                value={address.street || ""}
+                value={propertyAddress.street || ""}
                 onChange={(e) => handleChange("street", e.target.value)}
                 placeholder="Enter street address"
                 className={inputClasses}
@@ -171,91 +172,68 @@ const IndependentPropertyAddress: React.FC<IndependentPropertyAddressProps> = ({
           </div>
 
           {/* Map Embed and Coordinates */}
-          <div className="bg-white p-6 rounded-lg space-y-6">
-            <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
-            <p className="text-sm text-gray-500 mb-4">
-              Use the map below to set your property's location. Click on the map or search for an address.
-            </p>
-            <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
-              <iframe
-                id="map-iframe"
-                src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${address.coordinates?.lng || "78.9629"}!3d${address.coordinates?.lat || "20.5937"}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${address.coordinates?.lat || "20.5937"},${address.coordinates?.lng || "78.9629"}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="rounded-xl"
-                title="Property Location Map"
-              ></iframe>
-              <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                <button
-                  onClick={() => getCurrentLocation()}
-                  className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                  aria-label="Get current location"
-                  type="button"
-                >
-                  <Locate className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm font-medium">My Location</span>
-                </button>
+          <div className="relative aspect-video bg-gray-100 rounded-xl overflow-hidden mb-4">
+        <iframe
+          id="map-iframe"
+          width="100%"
+          height="100%"
+          className="rounded-xl"
+          title="Property Location Map"
+          style={{ border: 0 }}
+          loading="lazy"
+          allowFullScreen
+          src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${propertyAddress.location.longitude || '78.9629'}!3d${propertyAddress.location.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${propertyAddress.location.latitude},${propertyAddress.location.longitude}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
+        ></iframe>
 
-                <button
-                  onClick={() => openLocationPicker()}
-                  className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                  aria-label="Select location"
-                  type="button"
-                >
-                  <Navigation className="w-5 h-5 text-blue-600" />
-                  <span className="text-sm font-medium">Select Location</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Coordinates Inputs */}
-            <div>
-              <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
-                    Latitude
-                  </label>
-                  <input
-                    type="text"
-                    id="latitude"
-                    value={address.coordinates?.lat || ""}
-                    onChange={(e) =>
-                      handleChange("coordinates", { ...address.coordinates, lat: parseFloat(e.target.value) })
-                    }
-                    placeholder="Enter latitude"
-                    className={inputClasses}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
-                    Longitude
-                  </label>
-                  <input
-                    type="text"
-                    id="longitude"
-                    value={address.coordinates?.lng || ""}
-                    onChange={(e) =>
-                      handleChange("coordinates", { ...address.coordinates, lng: parseFloat(e.target.value) })
-                    }
-                    placeholder="Enter longitude"
-                    className={inputClasses}
-                  />
-                </div>
-              </div>
-              <p className="mt-2 text-xs text-gray-500">
-                Enter coordinates manually or use the map above to set the location.
-              </p>
-            </div>
-          </div>
+        <div className="absolute top-4 right-4 flex flex-col gap-2">
+          <button
+            onClick={getCurrentLocation}
+            className="bg-white p-2 rounded-md shadow hover:bg-gray-100 text-sm flex items-center gap-2"
+          >
+            <Locate className="w-4 h-4 text-blue-600" />
+            My Location
+          </button>
+          <button
+            onClick={openLocationPicker}
+            className="bg-white p-2 rounded-md shadow hover:bg-gray-100 text-sm flex items-center gap-2"
+          >
+            <Navigation className="w-4 h-4 text-blue-600" />
+            Select Location
+          </button>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-6">
+      <input
+          type="number"
+          value={propertyAddress.location.latitude}
+          onChange={(e) =>
+            handleChange("location", {
+              ...propertyAddress.location,
+              latitude: parseFloat(e.target.value),
+            })
+          }
+          placeholder="Latitude"
+          className={inputClasses}
+        />
+        <input
+          type="number"
+          value={propertyAddress.location.longitude}
+          onChange={(e) =>
+            handleChange("location", {
+              ...propertyAddress.location,
+              longitude: parseFloat(e.target.value),
+            })
+          }
+          placeholder="Longitude"
+          className={inputClasses}
+        />
+      </div>
+    </div>
+    </div>
     </div>
   );
 };
+
 
 export default IndependentPropertyAddress;

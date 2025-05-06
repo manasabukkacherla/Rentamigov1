@@ -89,6 +89,7 @@ import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
+import residentialRentIndependentHouseRoutes from "./routes/residential/rentIndependentHouse";
 
 dotenv.config();
 
@@ -273,6 +274,7 @@ app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
 //rent
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
 app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes);
+app.use('/api/residential/rent/independent-house', residentialRentIndependentHouseRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
