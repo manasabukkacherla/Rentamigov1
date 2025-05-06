@@ -92,6 +92,7 @@ import residentialSellApartmentRoutes from "./routes/residential/residentialSell
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
 import residentialLeaseApartmentRoutes from "./routes/residential/leaseAppartment";
+import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilderFloor";
 dotenv.config();
 
 // Validate required environment variables
@@ -276,6 +277,7 @@ app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes
 //lease
 app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
 app.use('/api/residential/lease/apartment',residentialLeaseApartmentRoutes);
+app.use('/api/residential/lease/builder-floor',residentialLeaseBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

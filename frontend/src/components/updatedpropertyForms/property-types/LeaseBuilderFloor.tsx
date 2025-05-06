@@ -1288,7 +1288,7 @@ const LeaseBuilderFloor  = () => {
           }
         };
 
-        const response = await axios.post('/api/residential/lease/builderfloor', transformedData, {
+        const response = await axios.post('/api/residential/lease/builder-floor', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
