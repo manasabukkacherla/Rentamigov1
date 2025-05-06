@@ -313,7 +313,7 @@ const ResidentialPropertyType = ({
       if (listingType === "Rent") {
         switch (selectedType) {
           case "Apartment":
-            return <Apartment propertyId={""} />
+            return <Apartment />
           case "Independent House":
             return <IndependentHouse propertyId={""} />
           case "Builder Floor":

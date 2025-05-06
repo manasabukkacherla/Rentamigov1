@@ -85,6 +85,7 @@ import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseW
 import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
+import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
 dotenv.config();
 
 // Validate required environment variables
@@ -259,6 +260,7 @@ app.use("/api/residential/pgmain", residentialPgmainRoutes);
 
 //rent
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
+app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
