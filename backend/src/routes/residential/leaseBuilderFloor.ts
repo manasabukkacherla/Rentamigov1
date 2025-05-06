@@ -1,9 +1,9 @@
 import express from 'express';
 import {
   createLeaseBuilderFloor,
+  getAllLeaseBuilderFloors,
   getLeaseBuilderFloorById,
   updateLeaseBuilderFloor,
-  getAllLeaseBuilderFloors,
   deleteLeaseBuilderFloor
 } from '../../controllers/residential/leaseBuilderFloor';
 

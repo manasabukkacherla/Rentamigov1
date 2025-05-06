@@ -21,7 +21,7 @@ interface IndependentPropertyFeaturesProps {
     furnishingStatus: string;
     flooring: string;
     facing: string;
-    propertyAge: number;
+    propertyAge: string;
     superBuiltUpAreaSqft: number;
     superBuiltUpAreaSqmt: number;
     builtUpAreaSqft: number;
@@ -360,7 +360,7 @@ const IndependentPropertyFeatures = ({ propertyFeatures, onFeaturesChange }: Ind
           </h4>
           <select
             value={features.propertyAge}
-            onChange={(e) => handleChange('propertyAge', parseFloat(e.target.value))}
+            onChange={(e) => handleChange('propertyAge', e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-white border border-black/20 focus:border-black outline-none transition-colors duration-200 text-black hover:bg-black hover:text-white [&_option]:text-black [&_option]:bg-white"
           >
             <option value="" disabled>Select Property Age</option>
