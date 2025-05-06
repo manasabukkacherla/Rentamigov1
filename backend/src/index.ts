@@ -17,6 +17,7 @@ import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
+import _ from 'lodash';
 
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
@@ -88,6 +89,8 @@ import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRo
 
 import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
 import residentialLeaseIndependentHouse from "./routes/residential/rentIndependentHouse";
+import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
+import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
 dotenv.config();
 
@@ -261,10 +264,17 @@ app.use("/api/commercial/rent/plots", commercialRentPlot);
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 app.use("/api/residential/pgmain", residentialPgmainRoutes);
 
+
+//sell routes
+app.use("/api/residential/sell/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
+
 //rent
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
-app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
 app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes);
+
+//lease
+app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
