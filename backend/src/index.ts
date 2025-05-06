@@ -17,7 +17,6 @@ import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
 import ownerIntrstrouter from "./routes/ownerIntrst";
-import _ from 'lodash';
 
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
@@ -85,10 +84,15 @@ import socketHandler from "./sockets";
 import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
 import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
+
+
 import residentialRentApartmentRoutes from "./routes/residential/rentApartment";
+import residentialLeaseIndependentHouse from "./routes/residential/rentIndependentHouse";
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
+import residentialLeaseApartmentRoutes from "./routes/residential/leaseAppartment";
+import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilderFloor";
 import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
 import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
 import residentialRentIndependentHouseRoutes from "./routes/residential/rentIndependentHouse";
@@ -275,6 +279,11 @@ app.use("/api/residential/sale/builder-floor", residentialSaleBuilderFloorRoutes
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
 app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes);
 app.use('/api/residential/rent/independent-house', residentialRentIndependentHouseRoutes);
+
+//lease
+app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
+app.use('/api/residential/lease/apartment',residentialLeaseApartmentRoutes);
+app.use('/api/residential/lease/builder-floor',residentialLeaseBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

@@ -43,7 +43,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
               type="number"
               min="0"
               value={tenure.minimumTenure || ''}
-              onChange={(e) => handleChange('minimumTenure', e.target.value)}
+              onChange={(e) => handleChange('minimumTenure', parseFloat(e.target.value))}
               placeholder="Enter minimum tenure"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black-300"
             />
@@ -69,7 +69,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
               type="number"
               min="0"
               value={tenure.maximumTenure || ''}
-              onChange={(e) => handleChange('maximumTenure', e.target.value)}
+              onChange={(e) => handleChange('maximumTenure',parseFloat(e.target.value))}
               placeholder="Enter maximum tenure"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black-300"
             />
@@ -95,7 +95,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
               type="number"
               min="0"
               value={tenure.lockInPeriod || ''}
-              onChange={(e) => handleChange('lockInPeriod', e.target.value)}
+              onChange={(e) => handleChange('lockInPeriod',parseFloat(e.target.value))}
               placeholder="Enter lock-in period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black-300"
             />
@@ -121,7 +121,7 @@ const LeaseTenure = ({ onLeaseTenureChange }: LeaseTenureProps) => {
               type="number"
               min="0"
               value={tenure.noticePeriod || ''}
-              onChange={(e) => handleChange('noticePeriod', e.target.value)}
+              onChange={(e) => handleChange('noticePeriod', parseFloat(e.target.value))}
               placeholder="Enter notice period"
               className="w-full px-4 py-4 rounded-xl bg-gray-50 border border-gray-200 focus:border-black-500 focus:ring-2 focus:ring-black-100 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400 hover:border-black-300"
             />

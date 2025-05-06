@@ -1,22 +1,24 @@
-
 import mongoose, { Schema, Document, model } from 'mongoose';
 
+// Schema Interfaces for the Property and Lease Details
+
 interface IBasicInformation {
-    propertyId: string;
-    propertyName: string;
-    propertyAddress: {
-      houseName: string;
-      street: string;
-      city: string;
-      state: string;
-      zipCode: string;
-      pinCode:String;
-      location: {
-        latitude: number;
-        longitude: number;
-      };
+  propertyName: string;
+  address: {
+    flatNo: number;
+    showFlatNo: boolean;
+    floor: number;
+    apartmentName: string;
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    location: {
+      latitude: string;
+      longitude: string;
     };
-  }
+  };
+}
 
 interface PropertyDetails {
   bedrooms: number;
@@ -102,106 +104,100 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
-interface IOtherCharge {
-  amount: number;
-  type: string;
+interface IMedia {
+  photos: {
+    exterior: (File | string)[];
+    interior: (File | string)[];
+    floorPlan: (File | string)[];
+    washrooms: (File | string)[];
+    lifts: (File | string)[];
+    emergencyExits: (File | string)[];
+    bedrooms: (File | string)[];
+    halls: (File | string)[];
+    storerooms: (File | string)[];
+    kitchen: (File | string)[];
+  };
+  videoTour?: File | string;
+  documents: (File | string)[];
+}
+
+interface Restrictions {
+  foodPreference: string;
+  petsAllowed: string;
+  tenantType: string;
 }
 
 interface ILeaseTerms {
-    leaseDetails: {
-        leaseAmount:{
-            amount: number,
-            type: string,
-            duration: number,
-            durationUnit: string,
-          },
-    },
-    tenureDetails: {
-      minimumTenure: number;
-      minimumUnit: string;
-      maximumTenure: number;
-      maximumUnit: string;
-      lockInPeriod: number;
-      lockInUnit: string;
-      noticePeriod: number;
-      noticePeriodUnit: string;
-    },
-    maintenanceAmount: {
-        amount: number,
-        frequency: string,
-    },
-    otherCharges: {
-        water: {
-            amount?: number,
-            type: string,
-        },
-        electricity: {
-            amount?: number,
-            type: string,
-        },
-        gas: {
-            amount?: number,
-            type: string,
-        },
-        others: {
-            amount?: number,
-            type: string,
-        }
-    },
-    brokerage: {
-        required: string,
-        amount?: number,
-    },
-
+  leaseDetails: {
+    leaseAmount: {
+      amount: number;
+      type: string;
+      duration: number;
+      durationUnit: string;
+    };
+  };
+  tenureDetails: {
+    minimumTenure: number;
+    minimumUnit: string;
+    maximumTenure: number;
+    maximumUnit: string;
+    lockInPeriod: number;
+    lockInUnit: string;
+    noticePeriod: number;
+    noticePeriodUnit: string;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount: number;
+      type: string;
+    };
+    electricity: {
+      amount: number;
+      type: string;
+    };
+    gas: {
+      amount: number;
+      type: string;
+    };
+    others: {
+      amount: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
 }
 
-interface IMetadata {
-  createdBy: Schema.Types.ObjectId | string;
-  createdAt: Date;
-}
-
-interface Availability {
+interface IAvailability {
   type: string;
   date?: string;
 }
 
-interface IMedia {
-  photos: {
-    exterior: string[];
-    interior: string[];
-    floorPlan: string[];
-    washrooms: string[];
-    lifts: string[];
-    emergencyExits: string[];
-    bedrooms: string[];
-    halls: string[];
-    storerooms: string[];
-    kitchen: string[];
-  };
-  videoTour?: string;
-  documents: string[];
+interface IMetadata {
+  createdBy: string;
+  createdAt: string;
 }
 
-export interface ILeaseApartment extends Document {
-  propertyId: string;
+export interface ILeaseBuilderFloor extends Document {
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
-  restrictions: {
-    foodPreference: string;
-    petsAllowed: string;
-    tenantType: string;
-  };
+  restrictions: Restrictions;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
   leaseTerms: ILeaseTerms;
-  availability: Availability;
+  availability: IAvailability;
   media: IMedia;
   metadata: IMetadata;
 }
 
-const LeaseApartmentSchema = new Schema<ILeaseApartment>({
-  propertyId: { type: String, required: true, unique: true },
+const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
   basicInformation: {
     propertyName: { type: String, required: true },
     address: {
@@ -214,10 +210,10 @@ const LeaseApartmentSchema = new Schema<ILeaseApartment>({
       state: { type: String, required: true },
       zipCode: { type: String, required: true },
       location: {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
-      },
-    },
+        latitude: { type: String, required: true },
+        longitude: { type: String, required: true },
+      }
+    }
   },
   propertySize: { type: Number, required: true },
   propertyDetails: {
@@ -310,76 +306,74 @@ const LeaseApartmentSchema = new Schema<ILeaseApartment>({
     leaseDetails: {
       leaseAmount: {
         amount: { type: Number, required: true },
-        amountType: { type: String, required: true },
+        type: { type: String, required: true },
+        duration: { type: Number, required: true },
+        durationUnit: { type: String, required: true },
       },
     },
-  
-  tenureDetails: {
-    minimumTenure: { type: Number, required: true },
-    minimumUnit: { type: String, required: true },
-    maximumTenure: { type: Number, required: true },
-    maximumUnit: { type: String, required: true },
-    lockInPeriod: { type: Number, required: true },
-    lockInUnit: { type: String, required: true },
-    noticePeriod: { type: Number, required: true },
-    noticePeriodUnit: { type: String, required: true },
-  },
-  maintenanceAmount: {
-    amount: { type: Number, required: true },
-    frequency: { type: String, required: true },
-  },
-  otherCharges: {
-    water: {
-      amount: { type: Number, required: true },
-      type: { type: String, required: true },
+    tenureDetails: {
+      minimumTenure: { type: Number, required: true },
+      minimumUnit: { type: String, required: true },
+      maximumTenure: { type: Number, required: true },
+      maximumUnit: { type: String, required: true },
+      lockInPeriod: { type: Number, required: true },
+      lockInUnit: { type: String, required: true },
+      noticePeriod: { type: Number, required: true },
+      noticePeriodUnit: { type: String, required: true },
     },
-    electricity: {
+    maintenanceAmount: {
       amount: { type: Number, required: true },
-      type: { type: String, required: true },
+      frequency: { type: String, required: true },
     },
-    gas: {
-      amount: { type: Number, required: true },
-      type: { type: String, required: true },
+    otherCharges: {
+      water: {
+        amount: { type: Number, required: true },
+        type: { type: String, required: true },
+      },
+      electricity: {
+        amount: { type: Number, required: true },
+        type: { type: String, required: true },
+      },
+      gas: {
+        amount: { type: Number, required: true },
+        type: { type: String, required: true },
+      },
+      others: {
+        amount: { type: Number, required: true },
+        type: { type: String, required: true },
+      },
     },
-    others: {
-      amount: { type: Number, required: true },
-      type: { type: String, required: true },
+    brokerage: {
+      required: { type: String, required: true },
+      amount: { type: Number },
     },
   },
-  brokerage: {
-    required: { type: String, required: true },
-    amount: { type: Number, required: true },
-  },
-},
   availability: {
     type: { type: String, required: true },
     date: { type: String },
   },
   media: {
     photos: {
-      exterior: [{ type: String }],
-      interior: [{ type: String }],
-      floorPlan: [{ type: String }],
-      washrooms: [{ type: String }],
-      lifts: [{ type: String }],
-      emergencyExits: [{ type: String }],
-      bedrooms: [{ type: String }],
-      halls: [{ type: String }],
-      storerooms: [{ type: String }],
-      kitchen: [{ type: String }],
+      exterior: { type: [String], required: true },
+      interior: { type: [String], required: true },
+      floorPlan: { type: [String], required: true },
+      washrooms: { type: [String], required: true },
+      lifts: { type: [String], required: true },
+      emergencyExits: { type: [String], required: true },
+      bedrooms: { type: [String], required: true },
+      halls: { type: [String], required: true },
+      storerooms: { type: [String], required: true },
+      kitchen: { type: [String], required: true },
     },
     videoTour: { type: String },
-    documents: [{ type: String }],
+    documents: { type: [String], required: true },
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now },
+    createdBy: { type: String, required: true },
+    createdAt: { type: String, required: true },
   },
 }, { timestamps: true });
 
-// LeaseApartmentSchema.index({ propertyId: 1 }, { unique: true });
-// LeaseApartmentSchema.index({ 'basicInformation.address.city': 1 });
-// LeaseApartmentSchema.index({ 'leaseAmount.amount': 1 });
-
-const LeaseApartment = mongoose.models.LeaseApartment || model<ILeaseApartment>('LeaseApartment', LeaseApartmentSchema);
-export default LeaseApartment;
+// Create or get model
+const LeaseBuilderFloor = mongoose.models.LeaseBuilderFloor || model<ILeaseBuilderFloor>('LeaseBuilderFloor', LeaseBuilderFloorSchema);
+export default LeaseBuilderFloor;

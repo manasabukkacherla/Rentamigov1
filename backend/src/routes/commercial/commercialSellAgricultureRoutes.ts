@@ -9,5 +9,4 @@ router.get('/:id', getCommercialSellAgricultureById);
 router.put('/:id', updateCommercialSellAgriculture);
 router.delete('/:id', deleteCommercialSellAgriculture);
 
-
 export default router; 

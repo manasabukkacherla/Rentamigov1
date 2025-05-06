@@ -69,47 +69,43 @@ interface FormData {
   };
   
   leaseAmount: {
-    amount: number;
-    duration: number;
-    durationType: string;
-    isNegotiable: boolean;
+    amount: number;    
+    type: string;
+    duration: number,
+    durationUnit: string;
   };
-  
   leaseTenure: {
-    minimumTenure: string;
+    minimumTenure: number;
     minimumUnit: string;
-    maximumTenure: string;
+    maximumTenure: number;
     maximumUnit: string;
-    lockInPeriod: string;
-    lockInUnit: string;
-    noticePeriod: string;
+    lockInPeriod: number;
+    lockInUnit:string;
+    noticePeriod: number;
     noticePeriodUnit: string;
   };
-  
   maintenanceAmount: {
-    amount?: number;
-    frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    amount: number;
+    frequency: string;
   };
-  
   otherCharges: {
-    electricityCharges: {
-      type: "inclusive" | "exclusive";
-      amount?: number;
+    water: {
+      amount: number;
+      type: string;
     };
-    waterCharges: { 
-      type: "inclusive" | "exclusive";
-      amount?: number;
+    electricity: {
+      amount: number;
+      type:string;
     };
-    gasCharges: {
-      type: "inclusive" | "exclusive";
-      amount?: number;
-    };  
-    otherCharges: {
-      type: "inclusive" | "exclusive";
-      amount?: number;
+    gas: {
+      amount: number;
+      type: string;
+    };
+    others: {
+      amount: number;
+      type: string;
     };
   };
-  
   brokerage: {
     required: string;
     amount?: number;
@@ -196,45 +192,33 @@ const CommercialLeaseOthersForm = () => {
     },
     leaseAmount: {
       amount: 0,
-      duration: 1,
-      durationType: 'years',
-      isNegotiable: false
+      type: 'fixed',
+  duration: 0,
+  durationUnit: 'years'
     },
     leaseTenure: {
-      minimumTenure: '1',
-      minimumUnit: 'years',
-      maximumTenure: '1',
-      maximumUnit: 'years',
-      lockInPeriod: '1',
-      lockInUnit: 'years',
-      noticePeriod: '1',
-      noticePeriodUnit: 'months'
+      minimumTenure: 0,
+      minimumUnit: "years",
+      maximumTenure: 0,
+      maximumUnit: "years",
+      lockInPeriod: 0,
+      lockInUnit: "years",
+      noticePeriod: 0,
+      noticePeriodUnit: "months",
     },
     maintenanceAmount: {
       amount: 0,
-      frequency: "monthly"
+      frequency: "monthly",
     },
     otherCharges: {
-      electricityCharges: {
-        type: "exclusive",
-        amount: 0
-      },
-      waterCharges: {
-        type: "exclusive",
-        amount: 0
-      },
-      gasCharges: {
-        type: "exclusive",
-        amount: 0
-      },
-      otherCharges: {
-        type: "exclusive",
-        amount: 0
-      }
+      water: { amount: 0, type: "inclusive" },
+      electricity: { amount: 0, type: "inclusive" },
+      gas: { amount: 0, type: "inclusive" },
+      others: { amount: 0, type: "inclusive" },
     },
     brokerage: {
-      required: 'No',
-      amount: 0
+      required: "no",
+      amount: 0,
     },
     availability: {
       availableFrom: null,
@@ -391,22 +375,22 @@ const CommercialLeaseOthersForm = () => {
                     
                     // Map complex values to the expected string format
                     if (tenure.minimumTenure) {
-                      updatedTenure.minimumTenure = String(tenure.minimumTenure.duration || '1');
+                      updatedTenure.minimumTenure = tenure.minimumTenure.duration || 0;
                       updatedTenure.minimumUnit = tenure.minimumTenure.durationType || 'years';
                     }
                     
                     if (tenure.maximumTenure) {
-                      updatedTenure.maximumTenure = String(tenure.maximumTenure.duration || '1');
+                      updatedTenure.maximumTenure = tenure.maximumTenure.duration || 0;
                       updatedTenure.maximumUnit = tenure.maximumTenure.durationType || 'years';
                     }
                     
                     if (tenure.lockInPeriod) {
-                      updatedTenure.lockInPeriod = String(tenure.lockInPeriod.duration || '1');
+                      updatedTenure.lockInPeriod = tenure.lockInPeriod.duration || 0;
                       updatedTenure.lockInUnit = tenure.lockInPeriod.durationType || 'years';
                     }
                     
                     if (tenure.noticePeriod) {
-                      updatedTenure.noticePeriod = String(tenure.noticePeriod.duration || '1');
+                      updatedTenure.noticePeriod = tenure.noticePeriod.duration || 0;
                       updatedTenure.noticePeriodUnit = tenure.noticePeriod.durationType || 'months';
                     }
                     

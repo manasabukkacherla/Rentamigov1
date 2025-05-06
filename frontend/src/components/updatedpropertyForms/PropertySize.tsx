@@ -16,7 +16,7 @@ const PropertySize: React.FC<PropertySizeProps> = ({ propertySize, onPropertySiz
       </label>
       <div className="relative">
         <input
-          type="text"
+          type="number"
           id="propertySize"
           onChange={(e) => onPropertySizeChange(parseFloat(e.target.value))}
           value={propertySize || ""}
