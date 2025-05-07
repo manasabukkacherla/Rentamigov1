@@ -5,61 +5,79 @@ import _ from 'lodash';
 // Generate Property ID for Lease Builder Floor
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const propertyPrefix = "RA-RESLEBF";
-    const highest = await LeaseBuilderFloor.findOne({
-      propertyId: { $regex: `^${propertyPrefix}\\d+$` },
-    }).sort({ propertyId: -1 });
+    const prefix = "RA-RESLEBF";
 
-    let nextNumber = 1;
-    if (highest) {
-      const match = highest.propertyId.match(/(\d+)$/);
-      if (match && match[1]) {
-        nextNumber = parseInt(match[1], 10) + 1;
+      const highestBuilderFloor = await LeaseBuilderFloor.findOne({
+          propertyId: { $regex: `^${prefix}\\d+$` }
+      }).sort({ propertyId: -1 });
+
+      let nextNumber = 1;
+
+      if (highestBuilderFloor) {
+          const match = highestBuilderFloor.propertyId.match(/(\d+)$/);
+          if (match && match[1]) {
+              nextNumber = parseInt(match[1], 10) + 1;
+          }
       }
-    }
 
-    const propertyId = `${propertyPrefix}${nextNumber.toString().padStart(4, '0')}`;
-    const existing = await LeaseBuilderFloor.findOne({ propertyId });
-    if (existing) {
-      return generatePropertyId();
-    }
-    return propertyId;
+      const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+
+      const existingWithExactId = await LeaseBuilderFloor.findOne({ propertyId });
+
+      if (existingWithExactId) {
+          console.log(`Property ID ${propertyId} already exists, trying next number`);
+
+          const forcedNextNumber = nextNumber + 1;
+          const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+
+          const forcedExisting = await LeaseBuilderFloor.findOne({ propertyId: forcedPropertyId });
+
+          if (forcedExisting) {
+              return generatePropertyId();
+          }
+
+          return forcedPropertyId;
+      }
+
+      return propertyId;
   } catch (error) {
-    console.error('Error generating property ID:', error);
-    const timestamp = Date.now().toString().slice(-8);
-    return `RA-RESLEBF${timestamp}`;
+      console.error('Error generating property ID:', error);
+      const timestamp = Date.now().toString().slice(-8);
+      return `RA-RESREAP${timestamp}`;
   }
 };
 
-// Create Lease Builder Floor
 export const createLeaseBuilderFloor = async (req: Request, res: Response) => {
-  try {
-    const formData = req.body;
-    const propertyId = await generatePropertyId();
-    console.log(formData);
-    const property = new LeaseBuilderFloor({
-      ...req.body,
-      propertyId,
-      metadata: {
-        ...req.body.metadata,
-        createdAt: new Date()
-      }
-    });
+try {
+  const propertyId = await generatePropertyId();
+  const builderFloorData = {
+    ...req.body,
+    propertyId,
+    metadata: {
+      ...req.body.metadata,
+      createdAt: new Date()
+    }
+  };
 
-    await property.save();
-    res.status(201).json({
-      success: true,
-      message: 'Lease Builder Floor created successfully',
-      data: property,
-    });
-  } catch (error) {
-    console.error('Error creating lease builder floor:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create lease builder floor',
-    });
-  }
+  const builderFloor = new LeaseBuilderFloor(builderFloorData);
+  await builderFloor.save();
+
+  res.status(201).json({
+    success: true,
+    message: 'Builder Floor listing created successfully',
+    data: builderFloor
+  });
+} catch (error) {
+  console.error('Error creating builder floor listing:', error);
+  res.status(500).json({
+    success: false,
+    message: 'Failed to create builder floor listing',
+    error: error instanceof Error ? error.message : 'Unknown error occurred'
+  });
+}
 };
+
+
 
 // Get All Lease Builder Floors
 export const getAllLeaseBuilderFloors = async (req: Request, res: Response) => {

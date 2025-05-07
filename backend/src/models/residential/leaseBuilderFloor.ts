@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, model } from 'mongoose';
 // Schema Interfaces for the Property and Lease Details
 
 interface IBasicInformation {
+    // propertyId: string;
   propertyName: string;
   address: {
     flatNo: number;
@@ -185,6 +186,7 @@ interface IMetadata {
 }
 
 export interface ILeaseBuilderFloor extends Document {
+  propertyId: string;
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
@@ -198,6 +200,7 @@ export interface ILeaseBuilderFloor extends Document {
 }
 
 const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
+  propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     propertyName: { type: String, required: true },
     address: {
