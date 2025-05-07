@@ -282,7 +282,7 @@ app.use('/api/residential/rent/independent-house', residentialRentIndependentHou
 
 //lease
 app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
-app.use('/api/residential/lease/apartment',residentialLeaseApartmentRoutes);
+app.use('/api/residential/lease/appartment',residentialLeaseApartmentRoutes);
 app.use('/api/residential/lease/builder-floor',residentialLeaseBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {

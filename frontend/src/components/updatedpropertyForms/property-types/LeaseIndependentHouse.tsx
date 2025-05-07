@@ -239,48 +239,6 @@ interface formData {
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
   leaseTerms: ILeaseTerms;
-  // leaseAmount: {
-  //   amount: number;    
-  //   type: string;
-  //   duration: number,
-  //   durationUnit: string;
-  // };
-  // leaseTenure: {
-  //   minimumTenure: number;
-  //   minimumUnit: string;
-  //   maximumTenure: number;
-  //   maximumUnit: string;
-  //   lockInPeriod: number;
-  //   lockInUnit:string;
-  //   noticePeriod: number;
-  //   noticePeriodUnit: string;
-  // };
-  // maintenanceAmount: {
-  //   amount: number;
-  //   frequency: string;
-  // };
-  // otherCharges: {
-  //   water: {
-  //     amount: number;
-  //     type: string;
-  //   };
-  //   electricity: {
-  //     amount: number;
-  //     type:string;
-  //   };
-  //   gas: {
-  //     amount: number;
-  //     type: string;
-  //   };
-  //   others: {
-  //     amount: number;
-  //     type: string;
-  //   };
-  // };
-  // brokerage: {
-  //   required: string;
-  //   amount?: number;
-  // };
   availability: {
     type: string;
     date: string;
