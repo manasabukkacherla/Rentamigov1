@@ -218,12 +218,12 @@ export const updateCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Check if user has permission to update this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        error: 'You do not have permission to update this listing'
-      });
-    }
+    // if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: 'You do not have permission to update this listing'
+    //   });
+    // }
     
     // Update the shop with new data
     // Don't allow changing propertyId or metadata.createdBy
@@ -276,12 +276,12 @@ export const deleteCommercialSellRetailStore = async (req: AuthenticatedRequest,
     }
     
     // Check if user has permission to delete this listing
-    if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        error: 'You do not have permission to delete this listing'
-      });
-    }
+    // if (req.user && req.user._id && shop.metadata.createdBy.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     error: 'You do not have permission to delete this listing'
+    //   });
+    // }
     
     // Soft delete - update status to 'deleted'
     const deletedShop = await CommercialSellRetailStore.findByIdAndUpdate(

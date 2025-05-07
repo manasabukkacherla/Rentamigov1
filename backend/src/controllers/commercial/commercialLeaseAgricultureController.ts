@@ -29,6 +29,7 @@ const generatePropertyId = async (): Promise<string> => {
     const existingWithExactId = await CommercialLeaseAgriculture.findOne({ propertyId });
     
     if (existingWithExactId) {
+      
       // In case of collision (e.g., if IDs were manually entered), recursively try the next number
       console.log(`Property ID ${propertyId} already exists, trying next number`);
       
