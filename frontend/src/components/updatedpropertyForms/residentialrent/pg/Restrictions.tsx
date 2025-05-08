@@ -186,7 +186,7 @@ const Restrictions: React.FC<RestrictionsProps> = ({ selectedRestrictions, onRes
                             type="time"
                             value={customTimes.inTime}
                             onChange={(e) => handleTimeChange('inTime', e.target.value)}
-                            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-black focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                           />
                         </div>
                         <div>
@@ -195,7 +195,7 @@ const Restrictions: React.FC<RestrictionsProps> = ({ selectedRestrictions, onRes
                             type="time"
                             value={customTimes.outTime}
                             onChange={(e) => handleTimeChange('outTime', e.target.value)}
-                            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-black focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                           />
                         </div>
                       </>
@@ -208,7 +208,7 @@ const Restrictions: React.FC<RestrictionsProps> = ({ selectedRestrictions, onRes
                             type="time"
                             value={customTimes.quietHoursStart}
                             onChange={(e) => handleTimeChange('quietHoursStart', e.target.value)}
-                            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-black focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                           />
                         </div>
                         <div>
@@ -217,7 +217,7 @@ const Restrictions: React.FC<RestrictionsProps> = ({ selectedRestrictions, onRes
                             type="time"
                             value={customTimes.quietHoursEnd}
                             onChange={(e) => handleTimeChange('quietHoursEnd', e.target.value)}
-                            className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-white focus:outline-none focus:border-white"
+                            className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-black focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                           />
                         </div>
                       </>
@@ -266,18 +266,18 @@ const Restrictions: React.FC<RestrictionsProps> = ({ selectedRestrictions, onRes
               if (!restriction || (restriction.id === 'timing' && has24HourAccess)) return null;
 
               return (
-                <div key={restrictionId} className="bg-gray-900 p-4 rounded-lg">
+                <div key={restrictionId} className="bg-white border border-gray-300 p-4 rounded-lg">
                   <div className="flex items-center space-x-2 mb-2">
                     {restriction.icon}
-                    <span className="font-medium">{restriction.label}</span>
+                    <span className="font-medium text-black">{restriction.label}</span>
                   </div>
                   {restrictionId === 'timing' && customTimes.inTime && customTimes.outTime && (
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-black">
                       In Time: {customTimes.inTime} | Out Time: {customTimes.outTime}
                     </p>
                   )}
                   {restrictionId === 'quiet-hours' && customTimes.quietHoursStart && customTimes.quietHoursEnd && (
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-600">
                       Quiet Hours: {customTimes.quietHoursStart} to {customTimes.quietHoursEnd}
                     </p>
                   )}
