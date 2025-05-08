@@ -1,22 +1,24 @@
 import React, { useState } from 'react';
 import { IndianRupee, Calendar, Shield, Receipt, Wallet, Building2, Percent, Clock, Lock, Users } from 'lucide-react';
 
-interface RoomShareDetails {
-  monthlyRent: string;
-  advancePaymentMonths: string;
-  lockInPeriod: string;
-  noticePeriod: string;
+interface ShareDetails {
+  monthlyRent?: string;
+  advancePaymentMonths?: string;
+  lockInPeriod?: string;
+  noticePeriod?: string;
+}
+
+interface MultiShareDetails extends ShareDetails {
+  numberOfPersons?: string;
 }
 
 interface RoomSharePricing {
-  singleShare: RoomShareDetails;
-  doubleShare: RoomShareDetails;
-  tripleShare: RoomShareDetails;
-  fourShare: RoomShareDetails;
-  fiveShare: RoomShareDetails;
-  multiShare: RoomShareDetails & {
-    capacity: string;
-  };
+  singleShare?: ShareDetails;
+  doubleShare?: ShareDetails;
+  tripleShare?: ShareDetails;
+  fourShare?: ShareDetails;
+  fiveShare?: ShareDetails;
+  multiShare?: MultiShareDetails;
 }
 
 interface PricingProps {
@@ -26,29 +28,34 @@ interface PricingProps {
     maintenance?: number;
     includedUtilities?: string[];
     terms?: string;
-    roomSharePricing?: any;
+    roomSharePricing?: RoomSharePricing;
   };
   onPricingChange: (pricing: any) => void;
   selectedShares: string[];
   customShare: string;
 }
 
-const defaultRoomShareDetails: RoomShareDetails = {
+const defaultShareDetails: ShareDetails = {
   monthlyRent: '',
   advancePaymentMonths: '1',
   lockInPeriod: '6',
   noticePeriod: '1',
 };
 
+const defaultMultiShareDetails: MultiShareDetails = {
+  ...defaultShareDetails,
+  numberOfPersons: '6',
+};
+
 const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedShares, customShare }) => {
   // Initialize roomSharePricing from props or default values
   const [roomSharePricing, setRoomSharePricing] = useState<RoomSharePricing>({
-    singleShare: pricing.roomSharePricing?.singleShare || { ...defaultRoomShareDetails },
-    doubleShare: pricing.roomSharePricing?.doubleShare || { ...defaultRoomShareDetails },
-    tripleShare: pricing.roomSharePricing?.tripleShare || { ...defaultRoomShareDetails },
-    fourShare: pricing.roomSharePricing?.fourShare || { ...defaultRoomShareDetails },
-    fiveShare: pricing.roomSharePricing?.fiveShare || { ...defaultRoomShareDetails },
-    multiShare: pricing.roomSharePricing?.multiShare || { ...defaultRoomShareDetails, capacity: '6' },
+    singleShare: pricing.roomSharePricing?.singleShare || { ...defaultShareDetails },
+    doubleShare: pricing.roomSharePricing?.doubleShare || { ...defaultShareDetails },
+    tripleShare: pricing.roomSharePricing?.tripleShare || { ...defaultShareDetails },
+    fourShare: pricing.roomSharePricing?.fourShare || { ...defaultShareDetails },
+    fiveShare: pricing.roomSharePricing?.fiveShare || { ...defaultShareDetails },
+    multiShare: pricing.roomSharePricing?.multiShare || { ...defaultMultiShareDetails },
   });
   
   // Additional pricing state
@@ -57,34 +64,46 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
   const [includedUtilities, setIncludedUtilities] = useState<string[]>(pricing.includedUtilities || []);
   const [terms, setTerms] = useState<string>(pricing.terms || '');
 
-  // Update parent component when pricing changes
+  // Update parent component when pricing changes - debounced for better performance
   React.useEffect(() => {
-    onPricingChange({
-      ...pricing,
-      roomSharePricing,
-      deposit: deposit ? Number(deposit) : undefined,
-      maintenance: maintenance ? Number(maintenance) : undefined,
-      includedUtilities,
-      terms
-    });
-  }, [roomSharePricing, deposit, maintenance, includedUtilities, terms]);
+    const timer = setTimeout(() => {
+      // Filter out empty share types to keep the data clean
+      const cleanedRoomSharePricing: RoomSharePricing = {};
+      
+      // Only include share types that are selected and have at least one value set
+      Object.entries(roomSharePricing).forEach(([key, value]) => {
+        const shareType = key as keyof RoomSharePricing;
+        if (value && Object.values(value).some(v => v !== '' && v !== undefined)) {
+          cleanedRoomSharePricing[shareType] = value;
+        }
+      });
+      
+      onPricingChange({
+        ...pricing,
+        roomSharePricing: Object.keys(cleanedRoomSharePricing).length > 0 ? cleanedRoomSharePricing : undefined,
+        deposit: deposit ? Number(deposit) : undefined,
+        maintenance: maintenance ? Number(maintenance) : undefined,
+        includedUtilities: includedUtilities.length > 0 ? includedUtilities : undefined,
+        terms: terms || undefined
+      });
+    }, 300); // 300ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [roomSharePricing, deposit, maintenance, includedUtilities, terms, pricing, onPricingChange]);
 
-  const handleRoomSharePricingChange = (
-    shareType: keyof RoomSharePricing,
-    field: keyof RoomShareDetails,
-    value: string
-  ) => {
-    setRoomSharePricing(prev => {
-      const updated = {
+  // Memoized handler for better performance
+  const handleRoomSharePricingChange = React.useCallback(
+    (shareType: keyof RoomSharePricing, field: string, value: string) => {
+      setRoomSharePricing(prev => ({
         ...prev,
         [shareType]: {
           ...prev[shareType],
           [field]: value,
         },
-      };
-      return updated;
-    });
-  };
+      }));
+    },
+    []
+  );
 
   const getShareDisplayName = (shareType: keyof RoomSharePricing): string => {
     switch (shareType) {
@@ -93,28 +112,35 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
       case 'tripleShare': return 'Triple Share (3 Persons)';
       case 'fourShare': return 'Four Share (4 Persons)';
       case 'fiveShare': return 'Five Share (5 Persons)';
-      case 'multiShare': return `Multi Share (${roomSharePricing.multiShare.capacity || '6+'} Persons)`;
+      case 'multiShare': return `Multi Share (${roomSharePricing.multiShare?.numberOfPersons || '6+'} Persons)`;
       default: return '';
     }
   };
 
-  // Filter share types based on selected shares
-  const getFilteredShareTypes = () => {
-    const shareTypeMap: Record<string, keyof RoomSharePricing> = {
-      'single': 'singleShare',
-      'double': 'doubleShare',
-      'triple': 'tripleShare',
-      'four': 'fourShare',
-      'five': 'fiveShare',
-      'more': 'multiShare'
-    };
+  // Memoized filter function for better performance
+  const shareTypeMap = React.useMemo<Record<string, keyof RoomSharePricing>>(() => ({
+    'single': 'singleShare',
+    'double': 'doubleShare',
+    'triple': 'tripleShare',
+    'four': 'fourShare',
+    'five': 'fiveShare',
+    'more': 'multiShare'
+  }), []);
+  
+  // Filter share types based on selected shares - memoized for performance
+  const filteredShareTypes = React.useMemo(() => {
+    // If no shares are selected, show all available share types
+    if (!selectedShares || selectedShares.length === 0) {
+      return Object.keys(roomSharePricing);
+    }
     
-    // Always include selected share types
-    return Object.keys(roomSharePricing).filter(shareType => {
-      const shareId = Object.entries(shareTypeMap).find(([_, value]) => value === shareType)?.[0];
-      return shareId ? selectedShares.includes(shareId) : false;
-    });
-  };
+    // Map the selected shares to their corresponding share types
+    return selectedShares.map(shareId => {
+      // Find the corresponding share type for this shareId
+      const shareType = Object.entries(shareTypeMap).find(([id, _]) => id === shareId)?.[1];
+      return shareType;
+    }).filter(Boolean) as string[];
+  }, [roomSharePricing, selectedShares, shareTypeMap]);
 
   // Utility options
   const utilityOptions = [
@@ -204,7 +230,7 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-bold mb-6">Room Pricing Details</h2>
         <div className="space-y-10">
-          {getFilteredShareTypes().map((shareType) => (
+          {filteredShareTypes.map((shareType) => (
             <div key={shareType} className="mb-8 border-b border-gray-100 pb-8">
               <h3 className="text-lg font-semibold mb-4">{getShareDisplayName(shareType as keyof RoomSharePricing)}</h3>
               {shareType === 'multiShare' && (
@@ -214,12 +240,12 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
                     <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <input
                       type="number"
-                      value={roomSharePricing.multiShare.capacity}
+                      value={roomSharePricing.multiShare?.numberOfPersons}
                       onChange={(e) => setRoomSharePricing(prev => ({
                         ...prev,
                         multiShare: {
                           ...prev.multiShare,
-                          capacity: e.target.value,
+                          numberOfPersons: e.target.value,
                         },
                       }))}
                       min="6"
@@ -236,7 +262,7 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
                     <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
                     <input
                       type="number"
-                      value={roomSharePricing[shareType as keyof RoomSharePricing].monthlyRent}
+                      value={roomSharePricing[shareType as keyof RoomSharePricing]?.monthlyRent || ''}
                       onChange={(e) => handleRoomSharePricingChange(shareType as keyof RoomSharePricing, 'monthlyRent', e.target.value)}
                       placeholder="Enter amount"
                       className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
@@ -245,49 +271,46 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Advance Months Required</label>
-                  <select
-                    value={roomSharePricing[shareType as keyof RoomSharePricing].advancePaymentMonths}
-                    onChange={(e) => handleRoomSharePricingChange(shareType as keyof RoomSharePricing, 'advancePaymentMonths', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
-                  >
-                    <option value="1">1 Month</option>
-                    <option value="2">2 Months</option>
-                    <option value="3">3 Months</option>
-                    <option value="6">6 Months</option>
-                    <option value="12">12 Months</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Notice Period</label>
                   <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                      value={roomSharePricing[shareType as keyof RoomSharePricing].noticePeriod}
-                      onChange={(e) => handleRoomSharePricingChange(shareType as keyof RoomSharePricing, 'noticePeriod', e.target.value)}
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="number"
+                      value={roomSharePricing[shareType as keyof RoomSharePricing]?.advancePaymentMonths || '1'}
+                      onChange={(e) => handleRoomSharePricingChange(shareType as keyof RoomSharePricing, 'advancePaymentMonths', e.target.value)}
+                      placeholder="Enter months"
+                      min="1"
+                      max="12"
                       className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
-                    >
-                      <option value="0.5">15 Days</option>
-                      <option value="1">1 Month</option>
-                      <option value="2">2 Months</option>
-                      <option value="3">3 Months</option>
-                    </select>
+                    />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Advance Return (Lock-in Period)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Notice Period (Months)</label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+                    <input
+                      type="number"
+                      value={roomSharePricing[shareType as keyof RoomSharePricing]?.noticePeriod || '1'}
+                      onChange={(e) => handleRoomSharePricingChange(shareType as keyof RoomSharePricing, 'noticePeriod', e.target.value)}
+                      placeholder="Enter months"
+                      min="0.5"
+                      step="0.5"
+                      className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Lock-in Period (Months)</label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <select
-                      value={roomSharePricing[shareType as keyof RoomSharePricing].lockInPeriod}
+                    <input
+                      type="number"
+                      value={roomSharePricing[shareType as keyof RoomSharePricing]?.lockInPeriod || '6'}
                       onChange={(e) => handleRoomSharePricingChange(shareType as keyof RoomSharePricing, 'lockInPeriod', e.target.value)}
+                      placeholder="Enter months"
+                      min="1"
                       className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-black focus:border-black text-gray-900"
-                    >
-                      <option value="1">1 Month</option>
-                      <option value="3">3 Months</option>
-                      <option value="6">6 Months</option>
-                      <option value="9">9 Months</option>
-                      <option value="12">12 Months</option>
-                    </select>
+                    />
                   </div>
                 </div>
               </div>
@@ -297,35 +320,63 @@ const Pricing: React.FC<PricingProps> = ({ pricing, onPricingChange, selectedSha
       </div>
 
       {/* Summary */}
-      <div className="text-black rounded-lg shadow-sm p-6">
-        <h3 className="text-lg font-medium mb-4">Pricing Summary</h3>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h3 className="text-xl font-bold mb-4">Pricing Summary</h3>
         <div className="space-y-3">
           {/* Room Sharing Options Summary */}
-          <div className="pb-3 mb-3 border-b border-black/20">
-            <div className="text-black/70 mb-2">Room Sharing Options:</div>
-            {Object.entries(roomSharePricing).map(([shareType, details]) => {
-              if (details.monthlyRent) {
-                const formattedRent = parseInt(details.monthlyRent).toLocaleString();
-                const displayName = shareType === 'multiShare' 
-                  ? `${details.capacity} Person Share`
-                  : getShareDisplayName(shareType as keyof RoomSharePricing).split(' ')[0];
-                return (
-                  <div key={shareType} className="ml-4 mb-2">
-                    <div className="flex justify-between">
-                      <span>{displayName}:</span>
-                      <span>₹{formattedRent}/month</span>
+          <div className="pb-3 mb-3 border-b border-gray-200">
+            <div className="text-gray-700 font-medium mb-2">Room Sharing Options:</div>
+            {filteredShareTypes.length > 0 ? (
+              filteredShareTypes.map(shareType => {
+                const details = roomSharePricing[shareType as keyof RoomSharePricing];
+                if (details?.monthlyRent) {
+                  const formattedRent = parseInt(details.monthlyRent).toLocaleString();
+                  const displayName = shareType === 'multiShare' 
+                    ? `${(details as MultiShareDetails).numberOfPersons || '6+'} Person Share`
+                    : getShareDisplayName(shareType as keyof RoomSharePricing).split(' ')[0];
+                  return (
+                    <div key={shareType} className="ml-4 mb-2">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{displayName}:</span>
+                        <span className="font-medium">₹{formattedRent}/month</span>
+                      </div>
+                      <div className="flex flex-wrap gap-4 text-gray-600 text-xs mt-1">
+                        <div>Advance: {details.advancePaymentMonths || '1'} month(s)</div>
+                        <div>Notice: {details.noticePeriod === '0.5' ? '15 Days' : `${details.noticePeriod || '1'} Month(s)`}</div>
+                        <div>Lock-in: {details.lockInPeriod || '6'} month(s)</div>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-4 text-white/80 text-xs mt-1">
-                      <div>Advance: {details.advancePaymentMonths} month(s)</div>
-                      <div>Notice: {details.noticePeriod === '0.5' ? '15 Days' : `${details.noticePeriod} Month(s)`}</div>
-                      <div>Lock-in: {details.lockInPeriod} month(s)</div>
+                  );
+                }
+                return null;
+              })
+            ) : (
+              <div className="text-gray-500 italic ml-4">No room sharing options selected</div>
+            )}
+          </div>
+          
+          {/* General Pricing Summary */}
+          {(deposit || maintenance || includedUtilities.length > 0) && (
+            <div className="pb-3 mb-3 border-b border-gray-200">
+              <div className="text-gray-700 font-medium mb-2">General Pricing:</div>
+              <div className="ml-4 space-y-2">
+                {deposit && <div className="flex justify-between"><span>Security Deposit:</span><span>₹{parseInt(deposit).toLocaleString()}</span></div>}
+                {maintenance && <div className="flex justify-between"><span>Monthly Maintenance:</span><span>₹{parseInt(maintenance).toLocaleString()}</span></div>}
+                {includedUtilities.length > 0 && (
+                  <div>
+                    <div className="mb-1">Included Utilities:</div>
+                    <div className="flex flex-wrap gap-2">
+                      {includedUtilities.map(util => (
+                        <span key={util} className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md text-xs">
+                          {utilityOptions.find(option => option.id === util)?.label || util}
+                        </span>
+                      ))}
                     </div>
                   </div>
-                );
-              }
-              return null;
-            })}
-          </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

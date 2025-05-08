@@ -194,6 +194,10 @@ function Pgmain() {
   // Handle form submission to backend
   const navigate = useNavigate();
 
+  // Refs for elements
+  const progressBarRef = React.useRef<HTMLDivElement>(null);
+  const titleRef = React.useRef<HTMLHeadingElement>(null);
+
   // Function to convert file to base64
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -440,36 +444,19 @@ function Pgmain() {
   //   </div>
   // );
 
-  // Ref for progress bar
-  const progressBarRef = React.useRef<HTMLDivElement>(null);
-
-  const scrollToProgressBar = () => {
-    if (progressBarRef.current) {
-      const y = progressBarRef.current.getBoundingClientRect().top + window.scrollY - 8; // 8px offset
-      window.scrollTo({ top: y, behavior: 'smooth' });
+  const handlePrevious = () => {
+    setCurrentStep(currentStep - 1);
+    if (titleRef.current) {
+      titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
   const handleNext = () => {
-    if (currentStep < formSections.length - 1) {
-      setCurrentStep(prev => {
-        const next = prev + 1;
-        setTimeout(scrollToProgressBar, 0);
-        return next;
-      });
+    setCurrentStep(currentStep + 1);
+    if (titleRef.current) {
+      titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(prev => {
-        const next = prev - 1;
-        setTimeout(scrollToProgressBar, 0);
-        return next;
-      });
-    }
-  };
-
 
   return (
     <div className="min-h-screen bg-white">
@@ -484,8 +471,13 @@ function Pgmain() {
                   key={section.id}
                   className="flex items-center cursor-pointer"
                   onClick={() => {
+                    // Set the current step
                     setCurrentStep(index);
-                    window.scrollTo(0, 0);
+                    
+                    // Scroll to the title
+                    if (titleRef.current) {
+                      titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                   }}
                 >
                   <div className="flex flex-col items-center group">
@@ -537,7 +529,7 @@ function Pgmain() {
         </form>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">List Your PG/Co-living Space</h1>
+          <h1 ref={titleRef} className="text-3xl font-bold text-gray-900">List Your PG/Co-living Space</h1>
         </div>
         {/* Form Content */}
         <div className="space-y-8">
