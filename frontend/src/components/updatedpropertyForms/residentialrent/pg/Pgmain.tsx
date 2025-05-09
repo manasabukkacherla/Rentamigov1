@@ -236,33 +236,58 @@ function Pgmain() {
       
       if (formData.media && formData.media.mediaItems && formData.media.mediaItems.length > 0) {
         console.log('Processing media items for base64 conversion...');
-        const convertedMediaItems = await Promise.all(
-          formData.media.mediaItems.map(async (item: any) => {
-            if (item.file) {
-              const base64Data = await convertFileToBase64(item.file);
-              return {
-                ...item,
-                url: base64Data, // Replace file with base64 data
-                file: undefined // Remove the file object as it can't be serialized
-              };
-            }
-            return item;
-          })
-        );
-        
-        // Update the media object with converted items
-        processedMedia = {
-          ...processedMedia,
-          mediaItems: convertedMediaItems,
-          photos: convertedMediaItems
-            .filter((item: any) => item.type === 'photo')
-            .map((item: any) => item.url)
-        };
-        
-        if (convertedMediaItems.some((item: any) => item.type === 'video')) {
-          processedMedia.videos = convertedMediaItems
-            .filter((item: any) => item.type === 'video')
-            .map((item: any) => item.url);
+        try {
+          const convertedMediaItems = await Promise.all(
+            formData.media.mediaItems.map(async (item: any) => {
+              // Check if the item has a file or if it already has a base64 url
+              if (item.file) {
+                console.log(`Converting ${item.type} file to base64: ${item.title}`);
+                const base64Data = await convertFileToBase64(item.file);
+                return {
+                  ...item,
+                  url: base64Data, // Replace file with base64 data
+                  file: undefined // Remove the file object as it can't be serialized
+                };
+              } else if (item.base64) {
+                // If the item already has base64 data, use that
+                return {
+                  ...item,
+                  url: item.base64,
+                  base64: undefined // Remove duplicate data
+                };
+              }
+              return item;
+            })
+          );
+          
+          console.log(`Processed ${convertedMediaItems.length} media items`);
+          
+          // Update the media object with converted items
+          processedMedia = {
+            ...processedMedia,
+            mediaItems: convertedMediaItems
+          };
+          
+          // Extract photos and videos into separate arrays
+          const photoItems = convertedMediaItems.filter((item: any) => item.type === 'photo');
+          const videoItems = convertedMediaItems.filter((item: any) => item.type === 'video');
+          
+          console.log(`Found ${photoItems.length} photos and ${videoItems.length} videos`);
+          
+          // Add photos array
+          if (photoItems.length > 0) {
+            processedMedia.photos = photoItems.map((item: any) => item.url);
+          }
+          
+          // Add videos array
+          if (videoItems.length > 0) {
+            processedMedia.videos = videoItems.map((item: any) => item.url);
+          }
+        } catch (error) {
+          console.error('Error processing media items:', error);
+          toast.error('Error processing media files. Please try again.');
+          setIsSubmitting(false);
+          return;
         }
       }
       

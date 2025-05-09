@@ -46,8 +46,16 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       // Process each media item to add base64 data if not already present
       const processedItems = await Promise.all(items.map(async (item) => {
         if (!item.base64 && item.file) {
-          const base64Data = await convertToBase64(item.file);
-          return { ...item, base64: base64Data };
+          console.log(`Processing ${item.type} file: ${item.title}`);
+          try {
+            const base64Data = await convertToBase64(item.file);
+            console.log(`Successfully converted ${item.type} to base64`);
+            return { ...item, base64: base64Data };
+          } catch (conversionError) {
+            console.error(`Error converting ${item.type} file to base64:`, conversionError);
+            // Return item without base64 to prevent blocking the entire process
+            return item;
+          }
         }
         return item;
       }));
@@ -57,15 +65,26 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       
       // Update parent component with processed items
       // Convert to format expected by parent component
-      const parentFormatItems = processedItems.map(item => ({
-        id: item.id,
-        type: item.type,
-        url: item.base64 || item.preview,
-        title: item.title,
-        tags: item.tags,
-        roomType: item.roomType,
-        category: item.category
-      }));
+      const parentFormatItems = processedItems.map(item => {
+        // For videos, ensure we're passing both the file and base64 data
+        if (item.type === 'video') {
+          console.log(`Preparing video item for parent component: ${item.title}`);
+        }
+        
+        return {
+          id: item.id,
+          type: item.type,
+          url: item.base64 || item.preview,
+          title: item.title,
+          tags: item.tags,
+          roomType: item.roomType,
+          category: item.category,
+          file: item.file // Include the file object for further processing
+        };
+      });
+      
+      console.log(`Sending ${parentFormatItems.length} media items to parent component`);
+      console.log(`Videos: ${parentFormatItems.filter(item => item.type === 'video').length}`);
       
       onMediaItemsChange(parentFormatItems);
     } catch (error) {
