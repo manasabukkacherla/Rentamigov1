@@ -14,7 +14,7 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 
 function Propdetail() {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const allMedia = [propertyData.video, ...propertyData.images.map(img => img.url)];
+  const allMedia = [propertyData.video, ...propertyData.images.map((img: { url: any; }) => img.url)];
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % allMedia.length);
