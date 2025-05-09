@@ -271,7 +271,7 @@ const App = () => {
                   element={<Pgapp defaultSection="settings" />}
                 />
                 {/* Dynamic PG Details page route */}
-                <Route path="/pgdash/listings/:id" element={<PGDetails />} />
+                <Route path="/pgdash/listings/:propertyId" element={<PGDetails />} />
 
             
 

@@ -1,22 +1,32 @@
-import React, { useState, useMemo } from 'react';
-import { Building2, Search, Filter, MapPin, Users, IndianRupee, Wifi, Car, Dumbbell, Eye, Pencil, Trash2 } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import axios from 'axios';
+import { Eye, Pencil, Trash2, Search, Filter, MapPin, Users, IndianRupee, Wifi, Car, Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface PG {
-  id: string;
-  name: string;
-  location: string;
-  area: string;
-  rooms: string;
-  occupancy: string;
-  rent: number;
-  sharing: string;
-  amenities: string[];
-  image: string;
+  propertyId: string;
+  pgDetails: {
+    name: string;
+    address: string;
+  };
+  pricing: {
+    rent: number;
+  };
+  media: {
+    photos: string[];
+  };
+  roomConfiguration: {
+    sharingTypes: string[];
+    singleRoomAmenities: string[];
+    doubleShareRoomAmenities: string[];
+    tripleShareRoomAmenities: string[];
+    fourShareRoomAmenities: string[];
+    fiveShareRoomAmenities: string[];
+  };
 }
 
 const PGListings: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Initialize useNavigate hook for navigation
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     priceRange: 'all',
@@ -25,90 +35,62 @@ const PGListings: React.FC = () => {
     amenities: [] as string[],
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [pgs, setPgs] = useState<PG[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // Sample PG data
-  const pgs: PG[] = [
-    {
-      id: '1',
-      name: 'Sunshine PG',
-      location: 'Koramangala',
-      area: 'Koramangala',
-      rooms: '24',
-      occupancy: '95%',
-      rent: 12000,
-      sharing: 'single',
-      amenities: ['wifi', 'parking', 'gym'],
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80'
-    },
-    {
-      id: '2',
-      name: 'Green Valley',
-      location: 'HSR Layout',
-      area: 'HSR Layout',
-      rooms: '32',
-      occupancy: '88%',
-      rent: 14000,
-      sharing: 'double',
-      amenities: ['wifi', 'gym'],
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80'
-    },
-    {
-      id: '3',
-      name: 'City Living',
-      location: 'Indiranagar',
-      area: 'Indiranagar',
-      rooms: '28',
-      occupancy: '92%',
-      rent: 15000,
-      sharing: 'triple',
-      amenities: ['wifi', 'parking'],
-      image: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80'
-    },
-  ];
+  // Fetch PG data from the API when the component mounts
+  useEffect(() => {
+    const fetchPGs = async () => {
+      try {
+        const response = await axios.get('/api/residential/pgmain');
+        setPgs(response.data.data);
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch PG data');
+        setLoading(false);
+      }
+    };
 
-  // Filter PGs based on search term and filters
+    fetchPGs();
+  }, []);
+
+  // Filter PGs based on search term and filter criteria
   const filteredPGs = useMemo(() => {
     return pgs.filter(pg => {
-      const matchesSearch = pg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          pg.location.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesPrice = filters.priceRange === 'all' ||
-        (filters.priceRange === 'under10k' && pg.rent < 10000) ||
-        (filters.priceRange === '10k-15k' && pg.rent >= 10000 && pg.rent <= 15000) ||
-        (filters.priceRange === 'above15k' && pg.rent > 15000);
+      const matchesSearch =
+        pg.pgDetails.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        pg.pgDetails.address.toLowerCase().includes(searchTerm.toLowerCase());
 
-      const matchesSharing = filters.sharing === 'all' || pg.sharing === filters.sharing;
-      
-      const matchesArea = filters.area === 'all' || pg.area === filters.area;
+      const matchesPrice =
+        filters.priceRange === 'all' ||
+        (filters.priceRange === 'under10k' && pg.pricing.rent < 10000) ||
+        (filters.priceRange === '10k-15k' && pg.pricing.rent >= 10000 && pg.pricing.rent <= 15000) ||
+        (filters.priceRange === 'above15k' && pg.pricing.rent > 15000);
 
-      const matchesAmenities = filters.amenities.length === 0 ||
-        filters.amenities.every(amenity => pg.amenities.includes(amenity));
+      const matchesSharing = filters.sharing === 'all' || pg.roomConfiguration.sharingTypes.includes(filters.sharing);
+      const matchesArea = filters.area === 'all' || pg.pgDetails.address === filters.area;
+
+      const matchesAmenities =
+        filters.amenities.length === 0 ||
+        filters.amenities.every(amenity => pg.roomConfiguration.singleRoomAmenities.includes(amenity));
 
       return matchesSearch && matchesPrice && matchesSharing && matchesArea && matchesAmenities;
     });
   }, [pgs, searchTerm, filters]);
 
-  const handleAmenityToggle = (amenity: string) => {
-    setFilters(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }));
+  // Handle View button click and navigate to PG details page
+  const handleView = (propertyId: string) => {
+    console.log('Navigating to PG:', propertyId);  // Debugging line to see if id is correct
+    navigate(`/pgdash/listings/${propertyId}`); // Navigate using propertyId
   };
 
-  const handleView = (pgId: string) => {
-    navigate(`/pgdash/listings/${pgId}`);
+  const handleEdit = (propertyId: string) => {
+    console.log('Edit PG:', propertyId);
   };
 
-  const handleEdit = (pgId: string) => {
-    // Handle edit action
-    console.log('Edit PG:', pgId);
-  };
-
-  const handleDelete = (pgId: string) => {
-    // Handle delete action
-    console.log('Delete PG:', pgId);
+  const handleDelete = (propertyId: string) => {
+    console.log('Delete PG:', propertyId);
   };
 
   return (
@@ -146,147 +128,67 @@ const PGListings: React.FC = () => {
 
           {showFilters && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
-                <select
-                  value={filters.priceRange}
-                  onChange={(e) => setFilters(prev => ({ ...prev, priceRange: e.target.value }))}
-                  className="w-full p-2 border border-gray-200 rounded-lg"
-                >
-                  <option value="all">All Prices</option>
-                  <option value="under10k">Under ₹10,000</option>
-                  <option value="10k-15k">₹10,000 - ₹15,000</option>
-                  <option value="above15k">Above ₹15,000</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Sharing Type</label>
-                <select
-                  value={filters.sharing}
-                  onChange={(e) => setFilters(prev => ({ ...prev, sharing: e.target.value }))}
-                  className="w-full p-2 border border-gray-200 rounded-lg"
-                >
-                  <option value="all">All Types</option>
-                  <option value="single">Single Sharing</option>
-                  <option value="double">Double Sharing</option>
-                  <option value="triple">Triple Sharing</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Area</label>
-                <select
-                  value={filters.area}
-                  onChange={(e) => setFilters(prev => ({ ...prev, area: e.target.value }))}
-                  className="w-full p-2 border border-gray-200 rounded-lg"
-                >
-                  <option value="all">All Areas</option>
-                  <option value="Koramangala">Koramangala</option>
-                  <option value="HSR Layout">HSR Layout</option>
-                  <option value="Indiranagar">Indiranagar</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
-                <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={filters.amenities.includes('wifi')}
-                      onChange={() => handleAmenityToggle('wifi')}
-                      className="rounded text-black"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">WiFi</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={filters.amenities.includes('parking')}
-                      onChange={() => handleAmenityToggle('parking')}
-                      className="rounded text-black"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Parking</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={filters.amenities.includes('gym')}
-                      onChange={() => handleAmenityToggle('gym')}
-                      className="rounded text-black"
-                    />
-                    <span className="ml-2 text-sm text-gray-600">Gym</span>
-                  </label>
-                </div>
-              </div>
+              {/* Filters */}
             </div>
           )}
         </div>
 
         <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPGs.map((pg) => (
-            <div key={pg.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
-              <img
-                src={pg.image}
-                alt={pg.name}
-                className="w-full h-48 object-cover"
-              />
-              <div className="p-4">
-                <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold text-gray-900">{pg.name}</h3>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={() => handleView(pg.id)}
-                      className="p-1 text-gray-600 hover:text-gray-900"
-                    >
-                      <Eye className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(pg.id)}
-                      className="p-1 text-gray-600 hover:text-gray-900"
-                    >
-                      <Pencil className="h-5 w-5" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(pg.id)}
-                      className="p-1 text-gray-600 hover:text-gray-900"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
+          {loading ? (
+            <p>Loading PGs...</p>
+          ) : error ? (
+            <p>{error}</p>
+          ) : (
+            filteredPGs.map((pg) => (
+              <div key={pg.propertyId} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                <img src={pg.media.photos[0]} alt={pg.pgDetails.name} className="w-full h-48 object-cover" />
+                <div className="p-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-900">{pg.pgDetails.name}</h3>
+                    <div className="flex space-x-2">
+                      <button onClick={() => handleView(pg.propertyId)} className="p-1 text-gray-600 hover:text-gray-900">
+                        <Eye className="h-5 w-5" />
+                      </button>
+                      <button onClick={() => handleEdit(pg.propertyId)} className="p-1 text-gray-600 hover:text-gray-900">
+                        <Pencil className="h-5 w-5" />
+                      </button>
+                      <button onClick={() => handleDelete(pg.propertyId)} className="p-1 text-gray-600 hover:text-gray-900">
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="mt-2 space-y-2">
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{pg.location}</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{pg.sharing} sharing</span>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <IndianRupee className="h-4 w-4 mr-2" />
-                    <span className="text-sm">₹{pg.rent.toLocaleString()}/month</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {pg.amenities.includes('wifi') && (
-                      <Wifi className="h-4 w-4 text-gray-600" />
-                    )}
-                    {pg.amenities.includes('parking') && (
-                      <Car className="h-4 w-4 text-gray-600" />
-                    )}
-                    {pg.amenities.includes('gym') && (
-                      <Dumbbell className="h-4 w-4 text-gray-600" />
-                    )}
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center text-gray-600">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      <span className="text-sm">{pg.pgDetails.address}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Users className="h-4 w-4 mr-2" />
+                      <span className="text-sm">{pg.roomConfiguration.sharingTypes.join(', ')}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <IndianRupee className="h-4 w-4 mr-2" />
+                      <span className="text-sm">₹{pg.pricing.rent.toLocaleString()}/month</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {pg.roomConfiguration.singleRoomAmenities.includes('wifi') && (
+                        <Wifi className="h-4 w-4 text-gray-600" />
+                      )}
+                      {pg.roomConfiguration.singleRoomAmenities.includes('parking') && (
+                        <Car className="h-4 w-4 text-gray-600" />
+                      )}
+                      {pg.roomConfiguration.singleRoomAmenities.includes('gym') && (
+                        <Dumbbell className="h-4 w-4 text-gray-600" />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
-        {filteredPGs.length === 0 && (
+        {filteredPGs.length === 0 && !loading && !error && (
           <div className="text-center py-12">
             <p className="text-gray-500">No PGs found matching your criteria</p>
           </div>

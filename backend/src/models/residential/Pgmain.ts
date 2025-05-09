@@ -16,10 +16,6 @@ export interface IPgMain extends Document {
     sharingTypes: string[];
     customShare?: string;
     roomSize?: number;
-    // attachedWashroom?: boolean;
-    // balcony?: boolean;
-    // acAvailable?: boolean;
-    // nonAcAvailable?: boolean;
     singleRoomAmenities?: string[];
     doubleShareRoomAmenities?: string[];
     tripleShareRoomAmenities?: string[];
@@ -107,7 +103,7 @@ export interface IPgMain extends Document {
     }>;
   };
   metadata: {
-    userId: any;
+    userId: mongoose.Schema.Types.ObjectId;  // Directly define as ObjectId reference to User model
     userName: string;
     createdAt: Date;
   };
@@ -209,18 +205,7 @@ const PgMainSchema: Schema = new Schema(
       ],
     },
     metadata: {
-      userId: { 
-  type: Schema.Types.ObjectId, 
-  ref: 'User', 
-  required: true,
-  validate: {
-    validator: function(v: any) {
-      // Only allow non-empty ObjectId strings or ObjectId objects
-      return v && (typeof v === 'object' || (typeof v === 'string' && v.match(/^[0-9a-fA-F]{24}$/)));
-    },
-    message: 'metadata.userId must be a valid ObjectId and not empty'
-  }
-},
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
       userName: { type: String, default: 'Not Specified' },
       createdAt: { type: Date, default: Date.now },
     }

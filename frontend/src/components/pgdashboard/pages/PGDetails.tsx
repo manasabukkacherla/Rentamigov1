@@ -1,161 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { MapPin, Users, IndianRupee, Wifi, Car, Dumbbell, Bed, Bath, DoorClosed, UtensilsCrossed, Tv, Fan, Snowflake, Sofa, Laptop, Lock, Zap, Clock, Calculator as Elevator, Coffee, Utensils, Stars as Stairs, Warehouse, Shirt, Droplets, Flame, Refrigerator, BookOpen, Cctv, Fingerprint, Phone, Loader2 } from 'lucide-react';
+import axios from 'axios';
+import { MapPin, Wifi, Zap, Car, Dumbbell, Tv, Bed, IndianRupee, Lock, Fingerprint, Cctv, Droplets, Snowflake, Sofa, Laptop, DoorClosed, Bath, Flame, WashingMachine, Clock, Beer } from 'lucide-react';
 import ContactModal from '../components/ContactModal';
 
-const pgData = {
-  '1': {
-    id: '1',
-    name: 'Sunshine PG',
-    location: 'Koramangala',
-    area: 'Koramangala',
-    mainImage: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80',
-    address: '123, 5th Block, Koramangala, Bangalore - 560034',
-    description: 'Premium PG accommodation with modern amenities and comfortable living spaces. Located in the heart of Koramangala with easy access to tech parks and shopping areas.',
-    facilities: {
-      lift: {
-        title: 'Modern Lifts',
-        description: '2 high-speed elevators with power backup',
-        images: [
-          'https://images.unsplash.com/photo-1557672172-298e090bd0f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1590824116506-8e9d5fc9a494?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      dining: {
-        title: 'Dining Hall',
-        description: 'Spacious dining area with modern kitchen facilities',
-        images: [
-          'https://images.unsplash.com/photo-1554118811-1e0d58224f24?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1505826759037-406b40feb4cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      stairs: {
-        title: 'Wide Staircases',
-        description: 'Well-lit and spacious staircases with safety railings',
-        images: [
-          'https://images.unsplash.com/photo-1520536237849-cf56d5799135?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1513694203232-719a280e022f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      warehouse: {
-        title: 'Storage Area',
-        description: 'Secure storage facilities for extra belongings',
-        images: [
-          'https://images.unsplash.com/photo-1600585152220-90363fe7e115?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1595428774223-ef52624120d2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      }
-    },
-    sharingTypes: [
-      {
-        type: 'Single Sharing',
-        rent: 15000,
-        rooms: 10,
-        amenities: ['AC', 'Attached Bathroom', 'Study Table', 'Wardrobe', 'TV', '24/7 Power Backup', 'Premium Furniture', 'Hot Water', 'Balcony'],
-        images: [
-          'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1540518614846-7eded433c457?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      {
-        type: 'Double Sharing',
-        rent: 10000,
-        rooms: 8,
-        amenities: ['AC', 'Attached Bathroom', 'Study Table', 'Wardrobe', '24/7 Power Backup', 'Hot Water'],
-        images: [
-          'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      {
-        type: 'Triple Sharing',
-        rent: 8000,
-        rooms: 6,
-        amenities: ['Non-AC', 'Common Bathroom', 'Study Table', 'Wardrobe', '24/7 Power Backup', 'Hot Water'],
-        images: [
-          'https://images.unsplash.com/photo-1460317442991-0ec209397118?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1486304873000-235643847519?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      {
-        type: 'Four Sharing',
-        rent: 6000,
-        rooms: 4,
-        amenities: ['Non-AC', 'Common Bathroom', 'Study Table', 'Wardrobe', 'Basic Furniture', 'Hot Water'],
-        images: [
-          'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      },
-      {
-        type: 'Five Sharing',
-        rent: 5000,
-        rooms: 3,
-        amenities: ['Non-AC', 'Common Bathroom', 'Study Table', 'Basic Furniture', 'Hot Water', 'Common TV'],
-        images: [
-          'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
-          'https://images.unsplash.com/photo-1596276020587-8044fe049813?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80'
-        ]
-      }
-    ],
-    commonAmenities: [
-      {
-        category: 'Basic Amenities',
-        items: [
-          { name: 'WiFi', icon: Wifi },
-          { name: 'Power Backup', icon: Zap },
-          { name: 'Water Purifier', icon: Droplets },
-          { name: 'Hot Water', icon: Flame }
-        ]
-      },
-      {
-        category: 'Security',
-        items: [
-          { name: 'CCTV Surveillance', icon: Cctv },
-          { name: 'Biometric Access', icon: Fingerprint },
-          { name: '24/7 Security', icon: Lock },
-          { name: 'Emergency Response', icon: Phone }
-        ]
-      },
-      {
-        category: 'Facilities',
-        items: [
-          { name: 'Modern Kitchen', icon: UtensilsCrossed },
-          { name: 'Laundry Service', icon: Shirt },
-          { name: 'Study Room', icon: BookOpen },
-          { name: 'Refrigerator', icon: Refrigerator }
-        ]
-      },
-      {
-        category: 'Recreation',
-        items: [
-          { name: 'TV Room', icon: Tv },
-          { name: 'Gym', icon: Dumbbell },
-          { name: 'Common Area', icon: Sofa },
-          { name: 'Indoor Games', icon: Users }
-        ]
-      }
-    ],
-    coordinates: {
-      latitude: 12.9716,
-      longitude: 77.5946
-    },
-  }
-};
+interface Facility {
+  url: string;
+  title: string;
+  description: string;
+  images: string[];
+}
+
+interface SharingType {
+  type: string;
+  rent: number;
+  rooms: number;
+  amenities: string[];
+  images: string[];
+}
+
+interface PG {
+  roomConfiguration: any;
+  mediaItems: any;
+  pricing: any;
+  foodServices: any;
+  otherFeaturesAndRestrictions: any;
+  commonAreaAmenitiesAndServices: any;
+  media: any;
+  pgDetails: any;
+  propertyId: string;
+  name: string;
+  location: string;
+  area: string;
+  mainImage: string;
+  address: string;
+  description: string;
+  facilities: Record<string, Facility>;
+  sharingTypes: SharingType[];
+  commonAmenities: { 
+    category: string; 
+    items: { name: string, icon: React.ComponentType<any> }[]; 
+  }[];
+  coordinates: { 
+    latitude: number;
+    longitude: number; 
+  };
+}
 
 const PGDetails: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { propertyId } = useParams<{ propertyId: string }>();
   const [selectedSharing, setSelectedSharing] = useState<number | null>(null);
   const [selectedFacility, setSelectedFacility] = useState<string | null>(null);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
-  const pg = pgData[id as keyof typeof pgData];
+  const [pg, setPg] = useState<PG | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch PG details based on the propertyId
+  useEffect(() => {
+    const fetchPGDetails = async () => {
+      try {
+        const response = await axios.get(`/api/residential/pgmain/${propertyId}`);
+        if (response.data.success) {
+          setPg(response.data.data);  // Set the PG data
+        } else {
+          setError('PG not found');
+        }
+        setLoading(false);
+      } catch (err) {
+        setError('Failed to fetch PG data');
+        setLoading(false);
+      }
+    };
+
+    fetchPGDetails();
+  }, [propertyId]);
+
+  // Error handling if the data is not found or failed to fetch
+  if (loading) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-12 text-red-500">{error}</div>;
+  }
 
   if (!pg) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">PG not found</p>
-      </div>
-    );
+    return <div className="text-center py-12 text-gray-500">PG not found</div>;
   }
 
   return (
@@ -163,10 +94,10 @@ const PGDetails: React.FC = () => {
       {/* Header with Name and Rating */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{pg.name}</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{pg.pgDetails.name}</h1>
           <div className="flex items-center text-gray-600 mt-1">
             <MapPin className="h-5 w-5 mr-1" />
-            <span>{pg.location}, {pg.area}</span>
+            <span>{pg.pgDetails.address}</span>
           </div>
         </div>
 
@@ -178,218 +109,335 @@ const PGDetails: React.FC = () => {
             <span className="font-semibold text-gray-900 mr-1">4.8</span>
             <span className="text-gray-500">(42 reviews)</span>
           </div>
-          
         </div>
       </div>
 
-      {/* Main Image and Basic Info */}
+      {/* Main Image and Description */}
       <div className="relative h-[400px] rounded-lg overflow-hidden">
         <img
-          src={pg.mainImage}
-          alt={pg.name}
+          src={pg.media.photos && pg.media.photos.length > 0 ? pg.media.photos[0] : "default-image.jpg"}  // If there are no photos, use a fallback image
+          alt={pg.pgDetails.name}
           className="w-full h-full object-cover"
         />
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-8">
-          <h1 className="text-4xl font-semibold text-white">{pg.name}</h1>
+          <h1 className="text-4xl font-semibold text-white">{pg.pgDetails.name}</h1>
           <div className="flex items-center mt-2 text-white/90">
             <MapPin className="h-5 w-5 mr-2" />
-            <span>{pg.address}</span>
+            <span>{pg.pgDetails.address}</span>
           </div>
-          <p className="mt-2 text-white/80 max-w-3xl">{pg.description}</p>
-        </div>
-      </div>
-
-      {/* Location Map Section */}
-      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Location</h2>
-        <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3888.5965966906644!2d77.64163427473439!3d12.838572987455667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bae6b2ef7f1c6f3%3A0x6c06e8c7dc1ac0e!2sElectronic%20City%2C%20Bengaluru%2C%20Karnataka!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin"
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="rounded-xl"
-            title="PG Location Map"
-          ></iframe>
-        </div>
-        <div className="flex items-start gap-3 mb-4">
-          <div className="bg-gray-100 p-2 rounded-full">
-            <MapPin className="w-5 h-5 text-gray-700" />
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-1">PG Address</h3>
-            <p className="text-gray-600">{pg.address}</p>
-          </div>
+        
         </div>
       </div>
 
       {/* Common Amenities */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Common Amenities</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-x divide-y md:divide-y-0">
-          {pg.commonAmenities.map((category, index) => (
-            <div key={index} className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">{category.category}</h3>
-              <div className="space-y-4">
-                {category.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="flex items-center">
-                    <item.icon className="h-5 w-5 text-gray-600 mr-3" />
-                    <span className="text-gray-700">{item.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Facilities */}
-      <div className="bg-white rounded-lg border border-gray-200">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Facilities</h2>
-        </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.entries(pg.facilities).map(([key, facility]) => (
-            <div
-              key={key}
-              className={`rounded-lg border transition-all cursor-pointer ${
-                selectedFacility === key
-                  ? 'border-gray-900 ring-2 ring-gray-900'
-                  : 'border-gray-200 hover:border-gray-900'
-              }`}
-              onClick={() => setSelectedFacility(selectedFacility === key ? null : key)}
-            >
-              <div className="aspect-w-16 aspect-h-9">
-                <img
-                  src={facility.images[0]}
-                  alt={facility.title}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                />
-              </div>
-              <div className="p-4">
-                <h3 className="font-medium text-gray-900">{facility.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{facility.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Selected Facility Details */}
-      {selectedFacility && (
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {pg.facilities[selectedFacility as keyof typeof pg.facilities].title} Details
-            </h2>
+{/* Common Amenities */}
+<div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+  <div className="p-6 border-b border-gray-200">
+    <h2 className="text-xl font-semibold text-gray-900">Common Amenities</h2>
+  </div>
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-x divide-y md:divide-y-0">
+    {/* Basic Amenities */}
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Basic Amenities</h3>
+      <div className="space-y-4">
+        {pg.commonAreaAmenitiesAndServices?.map((amenity, index) => (
+          <div key={index} className="flex items-center">
+            {/* Render icons dynamically based on amenity */}
+            <span className="text-gray-700 capitalize">{amenity.replace('-', ' ')}</span>
           </div>
-          <div className="p-6">
-            <div className="grid grid-cols-2 gap-6">
-              {pg.facilities[selectedFacility as keyof typeof pg.facilities].images.map((image, index) => (
-                <img
-                  key={index}
-                  src={image}
-                  alt={`Facility ${index + 1}`}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
+        ))}
+      </div>
+    </div>
+
+    {/* Other Features */}
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Other Features</h3>
+      <div className="space-y-4">
+        {pg.otherFeaturesAndRestrictions?.otherFeatures?.map((feature, index) => (
+          <div key={index} className="flex items-center">
+            {/* Render icons dynamically based on feature */}
+            <span className="text-gray-700 capitalize">{feature.replace('-', ' ')}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Restrictions */}
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Restrictions</h3>
+      <div className="space-y-4">
+        {pg.otherFeaturesAndRestrictions?.restrictions?.map((restriction, index) => (
+          <div key={index} className="flex items-center">
+            {/* Render icons dynamically based on restriction */}
+            <span className="text-gray-700 capitalize">{restriction.replace('-', ' ')}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* Accommodation Type */}
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Accommodation Type</h3>
+      <div className="space-y-4">
+        <div className="flex items-center">
+          <span className="text-gray-700">{pg.pgDetails?.accommodationType || 'Not available'}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{/* Food Services */}
+{pg.foodServices?.available && (
+  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mt-6">
+    <div className="p-6 border-b border-gray-200">
+      <h2 className="text-xl font-semibold text-gray-900">Food Services</h2>
+    </div>
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Meals Offered</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Loop through the week and display meals */}
+        {Object.entries(pg.foodServices.weekMeals).map(([day, meals]) => (
+          <div key={day} className="p-4 bg-gray-50 rounded-lg">
+            <h4 className="text-xl font-semibold text-gray-900">{day.charAt(0).toUpperCase() + day.slice(1)}</h4>
+            <div className="mt-2 space-y-2">
+              {Object.entries(meals).map(([mealType, meal]) => (
+                <div key={mealType} className="flex items-center">
+                  <span className="font-medium text-gray-700 capitalize">{mealType}:</span>
+                  <span className="text-gray-600 ml-2">{meal.name || 'Not available'}</span>
+                </div>
               ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Sharing Types */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-        {pg.sharingTypes.map((sharing, index) => (
-          <div
-            key={index}
-            className={`bg-white rounded-lg border transition-all cursor-pointer ${
-              selectedSharing === index
-                ? 'border-gray-900 ring-2 ring-gray-900'
-                : 'border-gray-200 hover:border-gray-900'
-            }`}
-            onClick={() => setSelectedSharing(selectedSharing === index ? null : index)}
-          >
-            <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900">{sharing.type}</h2>
-              <div className="mt-4 space-y-3">
-                <div className="flex items-center text-gray-900">
-                  <IndianRupee className="h-5 w-5 mr-2" />
-                  <span className="text-lg font-medium">₹{sharing.rent.toLocaleString()}/month</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Bed className="h-5 w-5 mr-2" />
-                  <span>{sharing.rooms} rooms available</span>
-                </div>
-              </div>
             </div>
           </div>
         ))}
       </div>
+    </div>
+  </div>
+)}
+{/* Facilities */}
+<div className="bg-white rounded-lg border border-gray-200">
+  <div className="p-6 border-b border-gray-200">
+    <h2 className="text-xl font-semibold text-gray-900">Facilities</h2>
+  </div>
+  <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    {pg.media.mediaItems &&
+      ["lifts", "dining", "staircases", "kitchen"].map((roomType) => {
+        // Filter media items by roomType
+        const roomImages = pg.media.mediaItems.filter(
+          (item) => item.roomType === roomType
+        );
+
+        return roomImages.length > 0 ? (
+          <div
+            key={roomType}
+            className={`rounded-lg border transition-all cursor-pointer ${
+              selectedFacility === roomType
+                ? "border-gray-900 ring-2 ring-gray-900"
+                : "border-gray-200 hover:border-gray-900"
+            }`}
+            onClick={() =>
+              setSelectedFacility(
+                selectedFacility === roomType ? null : roomType
+              )
+            }
+          >
+            <div className="aspect-w-16 aspect-h-9">
+              <img
+                src={roomImages[0].url} // Display the first image for the facility
+                alt={roomType}
+                className="w-full h-48 object-cover rounded-t-lg"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="font-medium text-gray-900">
+                {roomType.charAt(0).toUpperCase() + roomType.slice(1)} Facility
+              </h3>
+            </div>
+          </div>
+        ) : null;
+      })}
+  </div>
+</div>
+
+{/* Selected Facility Details */}
+{selectedFacility && (
+  <div className="bg-white rounded-lg border border-gray-200">
+    <div className="p-6 border-b border-gray-200">
+      <h2 className="text-xl font-semibold text-gray-900">
+        {selectedFacility.charAt(0).toUpperCase() + selectedFacility.slice(1)}{" "}
+        Facility Details
+      </h2>
+    </div>
+    <div className="p-6">
+      <div className="grid grid-cols-2 gap-6">
+        {/* Filter images based on selected room type */}
+        {pg.media.mediaItems
+          .filter((item) => item.roomType === selectedFacility)
+          .map((image, index) => (
+            <img
+              key={index}
+              src={image.url}
+              alt={`Facility Image ${index + 1}`}
+              className="w-full h-64 object-cover rounded-lg"
+            />
+          ))}
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+      {/* Sharing Types */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+  {[
+    { type: 'Single Sharing', pricing: pg.pricing.roomSharePricing.singleShare },
+    { type: 'Double Sharing', pricing: pg.pricing.roomSharePricing.doubleShare },
+    { type: 'Triple Sharing', pricing: pg.pricing.roomSharePricing.tripleShare },
+    { type: 'Four Sharing', pricing: pg.pricing.roomSharePricing.fourShare },
+    { type: 'Five Sharing', pricing: pg.pricing.roomSharePricing.fiveShare },
+  ].map((sharing, index) => (
+    <div
+      key={index}
+      className={`bg-white rounded-lg border transition-all cursor-pointer ${
+        selectedSharing === index ? 'border-gray-900 ring-2 ring-gray-900' : 'border-gray-200 hover:border-gray-900'
+      }`}
+      onClick={() => setSelectedSharing(selectedSharing === index ? null : index)}
+    >
+      <div className="p-6">
+        <h2 className="text-xl font-semibold text-gray-900">{sharing.type}</h2>
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center text-gray-900">
+            <IndianRupee className="h-5 w-5 mr-2" />
+            <span className="text-lg font-medium">
+              ₹{sharing.pricing.monthlyRent.toLocaleString()}/month
+            </span>
+          </div>
+          <div className="flex items-center text-gray-600">
+            <Bed className="h-5 w-5 mr-2" />
+            <span>{sharing.pricing.roomsAvailable} rooms available</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
 
       {/* Selected Sharing Details */}
       {selectedSharing !== null && (
-        <div className="bg-white rounded-lg border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">
-                {pg.sharingTypes[selectedSharing].type} Details
-              </h2>
-              <button
-                onClick={() => setIsContactModalOpen(true)}
-                className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Enquire Now
-              </button>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-            {/* Room Images */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Room Images</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {pg.sharingTypes[selectedSharing].images.map((image, index) => (
-                  <img
-                    key={index}
-                    src={image}
-                    alt={`Room ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-lg"
-                  />
-                ))}
-              </div>
-            </div>
+  <div className="bg-white rounded-lg border border-gray-200">
+    <div className="p-6 border-b border-gray-200">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-semibold text-gray-900">
+          {pg.roomConfiguration.customShare ? 'Custom Share' : 'Room Configuration'} Details
+        </h2>
+        <button
+          onClick={() => setIsContactModalOpen(true)}
+          className="px-6 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+        >
+          Enquire Now
+        </button>
+      </div>
+    </div>
 
-            {/* Room Amenities */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Room Amenities</h3>
-              <div className="grid grid-cols-2 gap-4">
-                {pg.sharingTypes[selectedSharing].amenities.map((amenity, index) => (
-                  <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    {amenity === 'AC' && <Snowflake className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'TV' && <Tv className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Study Table' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Wardrobe' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Hot Water' && <Droplets className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Attached Bathroom' && <Bath className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Common Bathroom' && <Bath className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === '24/7 Power Backup' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Premium Furniture' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Basic Furniture' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
-                    {amenity === 'Balcony' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
-                    <span className="text-gray-900">{amenity}</span>
-                  </div>
-                ))}
-              </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+      {/* Room Images */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Room Images</h3>
+        <div className="grid grid-cols-2 gap-4">
+  {pg.media.mediaItems?.filter(item => 
+    // Checking for room type based on selected sharing configuration
+    (selectedSharing === 0 && item.roomType === 'single') || // Single room
+    (selectedSharing === 1 && item.roomType === 'double') || // Double room
+    (selectedSharing === 2 && item.roomType === 'triple') || // Triple room
+    (selectedSharing === 3 && item.roomType === 'four') || // Four room
+    (selectedSharing === 4 && item.roomType === 'five') // Five room
+  ).map((image, index) => (
+    <img
+      key={index}
+      src={image.url}
+      alt={`Room Image ${index + 1}`}
+      className="w-full h-48 object-cover rounded-lg"
+    />
+  ))}
+</div>
+
+      </div>
+
+      {/* Room Amenities */}
+      <div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Room Amenities</h3>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Single Room Amenities */}
+          {selectedSharing === 0 && pg.roomConfiguration.singleRoomAmenities?.map((amenity, index) => (
+            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+              {amenity === 'premium-mattress' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'private-wardrobe' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'charging-ports' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'study-set' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
+              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
             </div>
-          </div>
+          ))}
+
+          {/* Double Room Amenities */}
+          {selectedSharing === 1 && pg.roomConfiguration.doubleShareRoomAmenities?.map((amenity, index) => (
+            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+              {amenity === 'wardrobe-1' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'charging-1' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'fan' && <Snowflake className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'ac' && <Snowflake className="h-5 w-5 text-gray-600 mr-3" />}
+              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
+            </div>
+          ))}
+
+          {/* Triple Room Amenities */}
+          {selectedSharing === 2 && pg.roomConfiguration.tripleShareRoomAmenities?.map((amenity, index) => (
+            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+              {amenity === 'wardrobe-1' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'wardrobe-2' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'wardrobe-3' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'charging-2' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'lockers' && <Lock className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'study-desk' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
+              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
+            </div>
+          ))}
+
+          {/* Four Room Amenities */}
+          {selectedSharing === 3 && pg.roomConfiguration.fourShareRoomAmenities?.map((amenity, index) => (
+            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+              {amenity === 'wardrobe-1' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'wardrobe-2' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'wardrobe-3' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
+              
+              {amenity === 'bunk-beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'study-table' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
+              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
+            </div>
+          ))}
+
+          {/* Five Room Amenities */}
+          {selectedSharing === 4 && pg.roomConfiguration.fiveShareRoomAmenities?.map((amenity, index) => (
+            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
+              {amenity === 'bunk-beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
+              {amenity === 'lockers' && <Lock className="h-5 w-5 text-gray-600 mr-3" />}
+              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
 
       <ContactModal
         isOpen={isContactModalOpen}
