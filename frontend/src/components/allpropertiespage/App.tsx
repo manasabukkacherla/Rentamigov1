@@ -1,213 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { MapPin, ChevronDown, X, Home, Search, Filter, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Property, Filters } from './types';
+import { Property, Filters, BHKType, FurnishingType, ListingType, PropertyIntent, PropertyStatus, PropertyType } from './types';
 import { PropertyCard } from './components/PropertyCard';
 import { FiltersPanel } from './components/FiltersPanel';
 import { VoiceSearch } from './components/VoiceSearch';
 import { searchProperties, formatSearchSummary, formatNearbySuggestion, extractSearchCriteria } from './utils/searchUtils';
 
-const sampleProperties: Property[] = [
-  {
-    id: '1',
-    title: 'Modern Apartment in City Center',
-    type: 'Apartment',
-    listingType: 'Owner',
-    price: 25000,
-    location: 'Koramangala, Bangalore',
-    bhkType: '3 BHK',
-    bathrooms: 2,
-    furnishing: 'Fully Furnished',
-    area: 1200,
-    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-15',
-    status: 'Available',
-    intent: 'Rent'
-  },
-  {
-    id: '2',
-    title: 'Luxury Villa with Garden',
-    type: 'Villa',
-    listingType: 'RentAmigo',
-    price: 45000,
-    location: 'HSR Layout, Bangalore',
-    bhkType: '4 BHK',
-    bathrooms: 3,
-    furnishing: 'Semi Furnished',
-    area: 2500,
-    image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-14',
-    status: 'Available',
-    intent: 'Sale'
-  },
-  {
-    id: '3',
-    title: 'Cozy Studio Apartment',
-    type: 'Studio',
-    listingType: 'PG',
-    price: 15000,
-    location: 'Indiranagar, Bangalore',
-    bhkType: '1 RK',
-    bathrooms: 1,
-    furnishing: 'Fully Furnished',
-    area: 500,
-    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-13',
-    status: 'Rented',
-    intent: 'Rent'
-  },
-  {
-    id: '4',
-    title: 'Spacious Penthouse with Terrace',
-    type: 'Penthouse',
-    listingType: 'Owner',
-    price: 75000,
-    location: 'Richmond Road, Bangalore',
-    bhkType: '4+ BHK',
-    bathrooms: 4,
-    furnishing: 'Semi Furnished',
-    area: 3500,
-    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-12',
-    status: 'Under Maintenance',
-    intent: 'Lease'
-  },
-  {
-    id: '5',
-    title: 'Budget 2BHK Near Metro',
-    type: 'Apartment',
-    listingType: 'Agent',
-    price: 18000,
-    location: 'Indiranagar, Bangalore',
-    bhkType: '2 BHK',
-    bathrooms: 2,
-    furnishing: 'Semi Furnished',
-    area: 950,
-    image: 'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-16',
-    status: 'Available',
-    intent: 'Rent'
-  },
-  {
-    id: '6',
-    title: 'Premium 3BHK with Pool Access',
-    type: 'Apartment',
-    listingType: 'RentAmigo',
-    price: 35000,
-    location: 'Koramangala, Bangalore',
-    bhkType: '3 BHK',
-    bathrooms: 3,
-    furnishing: 'Fully Furnished',
-    area: 1600,
-    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-15',
-    status: 'Available',
-    intent: 'Rent'
-  },
-  {
-    id: '7',
-    title: 'Compact 1BHK for Singles',
-    type: 'Apartment',
-    listingType: 'Owner',
-    price: 16000,
-    location: 'HSR Layout, Bangalore',
-    bhkType: '1 BHK',
-    bathrooms: 1,
-    furnishing: 'Fully Furnished',
-    area: 650,
-    image: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-14',
-    status: 'Rented',
-    intent: 'Rent'
-  },
-  {
-    id: '8',
-    title: 'Single Sharing PG Accommodation',
-    type: 'PG',
-    listingType: 'PG',
-    price: 12000,
-    location: 'Koramangala, Bangalore',
-    bhkType: '1 RK',
-    bathrooms: 1,
-    furnishing: 'Fully Furnished',
-    area: 400,
-    image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-16',
-    sharing: '1 Share',
-    status: 'Available',
-    intent: 'Rent'
-  },
-  {
-    id: '9',
-    title: 'Spacious 4BHK Family Home',
-    type: 'House',
-    listingType: 'Owner',
-    price: 55000,
-    location: 'Indiranagar, Bangalore',
-    bhkType: '4 BHK',
-    bathrooms: 4,
-    furnishing: 'Semi Furnished',
-    area: 2800,
-    image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-13',
-    status: 'Available',
-    intent: 'Sale'
-  },
-  {
-    id: '10',
-    title: 'Triple Sharing Student PG with Meals',
-    type: 'PG',
-    listingType: 'PG',
-    price: 14000,
-    location: 'HSR Layout, Bangalore',
-    bhkType: '1 RK',
-    bathrooms: 1,
-    furnishing: 'Fully Furnished',
-    area: 450,
-    image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-15',
-    sharing: '3 Share',
-    status: 'Available',
-    intent: 'Rent'
-  },
-  {
-    id: '11',
-    title: 'Luxury 3BHK with Garden View',
-    type: 'Apartment',
-    listingType: 'RentAmigo',
-    price: 42000,
-    location: 'Richmond Road, Bangalore',
-    bhkType: '3 BHK',
-    bathrooms: 3,
-    furnishing: 'Fully Furnished',
-    area: 1800,
-    image: 'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-16',
-    status: 'Available',
-    intent: 'Lease'
-  },
-  {
-    id: '12',
-    title: 'Double Sharing PG for Working Professionals',
-    type: 'PG',
-    listingType: 'PG',
-    price: 13000,
-    location: 'Koramangala, Bangalore',
-    bhkType: '1 RK',
-    bathrooms: 1,
-    furnishing: 'Fully Furnished',
-    area: 400,
-    image: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=800',
-    postedDate: '2024-03-14',
-    sharing: '2 Share',
-    status: 'Available',
-    intent: 'Rent'
-  }
-];
+
 
 function Allproperties() {
   const navigate = useNavigate();
   const [location, setLocation] = useState('Bangalore, Karnataka');
+  const [fetchedProperties, setFetchedProperties] = useState<Property[]>([]);
+const [loading, setLoading] = useState(true);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [locationSearch, setLocationSearch] = useState('');
   const [recentLocations, setRecentLocations] = useState<string[]>(() => {
@@ -233,9 +39,97 @@ function Allproperties() {
   ];
 
   // Save recentLocations to localStorage
-  React.useEffect(() => {
-    localStorage.setItem('recentLocations', JSON.stringify(recentLocations));
-  }, [recentLocations]);
+// Updated useEffect to include showroom data
+// Updated useEffect to include new property data
+React.useEffect(() => {
+  let hasFetched = false;
+
+  const fetchAllProperties = async () => {
+    if (hasFetched) return;
+    hasFetched = true;
+
+    try {
+      const [
+        agriRes, othersRes, coveredRes, plotRes, retailRes, shedRes, shopRes, showroomRes, 
+        rentAgriRes, rentCoveredRes, warehouseRes, officeSpaceRes
+      ] = await Promise.all([
+        fetch('/api/commercial/lease/agriculture'),
+        fetch('/api/commercial/lease/others'),
+        fetch('/api/commercial/lease/covered-space'),
+        fetch('/api/commercial/lease/plot'),
+        fetch('/api/commercial/lease/retail-store'),
+        fetch('/api/commercial/lease/sheds'),
+        fetch('/api/commercial/lease/shops'),
+        fetch('/api/commercial/lease/showrooms'),
+        fetch('/api/commercial/rent/agriculture'),
+        fetch('/api/commercial/rent/covered-space'),
+        fetch('/api/commercial/lease/warehouses'),
+        fetch('/api/commercial/lease/office-space'),
+      ]);
+
+      const [
+        agriData, othersData, coveredData, plotData, retailData, shedData, shopData, showroomData, 
+        rentAgriData, rentCoveredData, warehouseData, officeSpaceData
+      ] = await Promise.all([
+        agriRes.json(),
+        othersRes.json(),
+        coveredRes.json(),
+        plotRes.json(),
+        retailRes.json(),
+        shedRes.json(),
+        shopRes.json(),
+        showroomRes.json(),
+        rentAgriRes.json(),
+        rentCoveredRes.json(),
+        warehouseRes.json(),  // ✅ Corrected
+        officeSpaceRes.json()  // ✅ Corrected
+      ]);
+
+      const agriList = agriData.success ? agriData.data : [];
+      const otherList = othersData.success ? othersData.data : [];
+      const coveredList = coveredData.success ? coveredData.data : [];
+      const plotList = plotData.success ? plotData.data : [];
+      const retailList = retailData.success ? retailData.data : [];
+      const shedList = shedData.success ? shedData.data : [];
+      const shopList = shopData.success ? shopData.data : [];
+      const showroomList = showroomData.success ? showroomData.data : [];
+      const rentAgriList = rentAgriData.success ? rentAgriData.data : [];
+      const rentCoveredList = rentCoveredData.success ? rentCoveredData.data : [];
+      const warehouseList = warehouseData.success ? warehouseData.data : [];  // ✅ Corrected
+      const officeSpaceList = officeSpaceData.success ? officeSpaceData.data : [];  // ✅ Corrected
+
+      // ✅ Remove duplicate properties using propertyId or _id
+      const uniqueById = (arr: any[]) => {
+        const seen = new Set();
+        return arr.filter((item) => {
+          const id = item._id || item.propertyId;
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        });
+      };
+
+      const all = uniqueById([
+        ...agriList, ...otherList, ...coveredList, ...plotList, ...retailList,
+        ...shedList, ...shopList, ...showroomList,
+        ...rentAgriList, ...rentCoveredList, ...warehouseList, ...officeSpaceList
+      ]);
+
+      setFetchedProperties(all);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchAllProperties();
+
+  return () => {
+    hasFetched = true;
+  };
+}, []);
+
 
   // Filtered locations for modal
   const filteredLocations = popularLocations.filter((loc) =>
@@ -267,16 +161,61 @@ function Allproperties() {
     }
   });
 
-  const filteredProperties = useMemo(() => {
-    let filtered = sampleProperties;
-    if (location) {
-      filtered = filtered.filter((p) =>
-        p.location && p.location.toLowerCase().includes(location.toLowerCase())
-      );
-    }
-    return filtered;
-  }, [location]);
-
+  const filteredProperties: Property[] = useMemo(() => {
+    return fetchedProperties.map((item: any): Property => {
+      const isOther = item.commercialType?.includes("Other");
+      const isCovered = item.coveredSpaceDetails !== undefined;
+      const isPlot = item.plotDetails !== undefined || item.totalPlotArea !== undefined;
+      const isRetail = item.basicInformation?.storeType?.length > 0;
+      const isShed = item.basicInformation?.shedType?.length > 0 || item.shedDetails !== undefined;
+      const isShop = item.basicInformation?.shopType?.length > 0 || item.shopDetails !== undefined;
+      const isShowroom = item.basicInformation?.showroomType?.length > 0 || item.showroomDetails !== undefined;
+      const isRentAgri = item.Agriculturelanddetails !== undefined;
+      const isRentCovered = item.spaceDetails !== undefined;
+      const isWarehouse = item.coveredSpaceDetails?.ceilingHeight !== undefined;
+      const isOfficeSpace = item.officeSpaceDetails?.seatingcapacity !== undefined;
+  
+      return {
+        id: item._id || item.propertyId || '',
+        title: item.basicInformation?.title || item.title || 'Unnamed Property',
+        type: isShowroom
+          ? 'Showroom' as PropertyType
+          : isShed
+          ? 'Shed' as PropertyType
+          : isRetail
+          ? 'Retail Store' as PropertyType
+          : isShop
+          ? 'Shop' as PropertyType
+          : isPlot
+          ? 'Plot' as PropertyType
+          : isCovered
+          ? 'Warehouse' as PropertyType
+          : isRentAgri
+          ? 'Agricultural Land (Rent)' as PropertyType
+          : isRentCovered
+          ? 'Covered Space (Rent)' as PropertyType
+          : isWarehouse
+          ? 'Warehouse' as PropertyType
+          : isOfficeSpace
+          ? 'Office Space' as PropertyType
+          : isOther
+          ? 'Standalone Building' as PropertyType
+          : 'Agricultural' as PropertyType,
+        listingType: 'Owner' as ListingType,
+        price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
+        location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}`,
+        area: item.propertyDetails?.area?.totalArea || 0,
+        image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
+        postedDate: item.metadata?.createdAt?.slice(0, 10) || '',
+        status: (item.availability?.type || 'Available') as PropertyStatus,
+        intent: 'Lease' as PropertyIntent,
+        bhkType: item.propertyDetails?.bhkType || '1 BHK',  // ✅ Default BHK Type
+        bathrooms: item.propertyDetails?.bathrooms || 1,  // ✅ Default number of bathrooms
+        furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',  // ✅ Default furnishing
+      };
+    });
+  }, [fetchedProperties]);
+  
   const searchResults = useMemo(() => {
     const normalizedQuery = searchQuery.trim()
       .toLowerCase()
@@ -539,32 +478,25 @@ function Allproperties() {
           )}
 
           {/* Previous (Unfiltered) Property Cards */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-2">All Properties (Unfiltered)</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-              {sampleProperties.map((property) => (
-                <div key={property.id} onClick={() => navigate(`/propertydetails/`)} className="cursor-pointer">
-                  <PropertyCard
-                    property={property}
-                    matchedFields={new Set()}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
+          {loading ? (
+  <div className="text-center py-8 text-gray-500">Loading properties...</div>
+) : (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+    {sortedResults.map((property) => (
+  <div 
+    key={property.id} 
+    onClick={() => navigate(`/detailprop/${property.id}`)} 
+    className="cursor-pointer"
+  >
+    <PropertyCard
+      property={property}
+      matchedFields={searchResults.matchedFields}
+    />
+  </div>
+))}
 
-          {/* Filtered Property Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-            {sortedResults.map((property) => (
-              <div key={property.id} onClick={() => navigate(`/propertydetails/${property.id}`)} className="cursor-pointer">
-                <PropertyCard
-                  property={property}
-                  matchedFields={searchResults.matchedFields}
-                />
-              </div>
-            ))}
-          </div>
-
+  </div>
+)}
           {sortedResults.length === 0 && (
             <div className="text-center py-8">
               <p className="text-gray-500">No properties found matching your criteria.</p>

@@ -273,16 +273,16 @@ const App = () => {
                 {/* Dynamic PG Details page route */}
                 <Route path="/pgdash/listings/:id" element={<PGDetails />} />
 
-            
+                {/* agriplot routes*/}
+                <Route path="/agriplot" element={<Agriplot />} />
 
-  {/* agriplot routes*/}
- <Route path="/agriplot" element={<Agriplot />} />
-
-{/* Agriplot route */}
-<Route path="/agriplot" element={<Agriplot />} />
-{/* propdetailspage*/}
-<Route path="/detailprop" element={<Propdetail />} />
+                {/* Agriplot route */}
+                <Route path="/agriplot" element={<Agriplot />} />
+                {/* propdetailspage*/}
+                <Route path="/detailprop/:id" element={<Propdetail />} />
+                {/*Emp das*/}
                 <Route path="/empdash" element={<Empapp />} />
+
                 <Route path="/propertypage" element={<Propertydetail />} />
                 {/* Logins Layout */}
                 <Route path="/Login" element={<Loginhome />} />
