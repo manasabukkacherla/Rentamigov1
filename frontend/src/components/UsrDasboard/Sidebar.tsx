@@ -20,7 +20,8 @@ const navItems = [
   { icon: Home, label: "Properties", path: "properties" }, // ✅ Fixed path
   { icon: Users, label: "Leads", path: "leads" }, // ✅ Fixed path
   { icon: Bell, label: "Notifications", path: "notifications" }, // ✅ Fixed path
-  
+  { icon: Bell, label: "My Messages", path: "/messages" }, // ✅ Fixed path
+  { icon: Bell, label: "Chat", path: "/findEmployee" }, // ✅ Fixed path
   { icon: CreditCard, label: "Plans", path: "plans" },
   { icon: Settings, label: "Settings", path: "settings" }, // ✅ Fixed path
 ];
