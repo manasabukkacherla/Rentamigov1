@@ -1,17 +1,17 @@
 import { Request, Response } from 'express';
 import PgMain from '../../models/residential/Pgmain';
+import mongoose from 'mongoose';
 
 /**
  * Generate a unique property ID for PGs
  */
 const generatePropertyId = async (): Promise<string> => {
   try {
-    // Prefix for PG property ID
-    const prefix = "RA-REPG";
-    // Find the PG with the highest property ID number
+    const prefix = 'RA-REPG';
     const highestPg = await PgMain.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
+      propertyId: { $regex: `^${prefix}\\d+$` },
     }).sort({ propertyId: -1 });
+
     let nextNumber = 1;
     if (highestPg && highestPg.propertyId) {
       const match = highestPg.propertyId.match(/(\d+)$/);
@@ -19,6 +19,7 @@ const generatePropertyId = async (): Promise<string> => {
         nextNumber = parseInt(match[1], 10) + 1;
       }
     }
+
     const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
     const existingWithExactId = await PgMain.findOne({ propertyId });
     if (existingWithExactId) {
@@ -30,25 +31,31 @@ const generatePropertyId = async (): Promise<string> => {
       }
       return forcedPropertyId;
     }
+
     return propertyId;
   } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
     return `RA-PGMAIN${timestamp}`;
   }
-}
+};
 
+/**
+ * Create a new PG listing
+ */
 export const createPg = async (req: Request, res: Response) => {
   try {
+    const { body } = req;
+
+    // Validate userId - Ensure it's a valid ObjectId format
+    if (!mongoose.Types.ObjectId.isValid(body.metadata.userId)) {
+      return res.status(400).json({ success: false, error: 'Invalid userId format' });
+    }
+
     // Generate propertyId for the new PG
     const propertyId = await generatePropertyId();
-    console.log('Received PG data:', JSON.stringify(req.body, null, 2));
-    
+
     // Ensure required fields have default values if missing
-    const body = req.body;
-    console.log('Received media data:', body.media);
-    
-    // Ensure metadata is properly structured
     const pgData = {
       ...body,
       propertyId,
@@ -56,50 +63,29 @@ export const createPg = async (req: Request, res: Response) => {
         name: body.pgDetails?.name || '',
         accommodationType: body.pgDetails?.accommodationType || 'both boys and girls',
         address: body.pgDetails?.address || '',
-        ...body.pgDetails
-      },
-      location: {
-        latitude: body.location?.latitude || 0,
-        longitude: body.location?.longitude || 0,
-        ...body.location
-      },
-      roomConfiguration: {
-        totalRooms: body.roomConfiguration?.totalRooms || 0,
-        sharingTypes: body.roomConfiguration?.sharingTypes || [],
-        ...body.roomConfiguration
-      },
-      foodServices: {
-        available: body.foodServices?.available === true,
-        ...body.foodServices
-      },
-      pricing: {
-        rent: body.pricing?.rent || 0,
-        ...body.pricing
-      },
-      // Ensure media is properly structured
-      media: {
-        photos: body.media?.photos || [],
-        videos: body.media?.videos || [],
-        mediaItems: body.media?.mediaItems || [],
-        ...body.media
+        ...body.pgDetails,
       },
       metadata: {
-        ...body.metadata,
+        userId: new mongoose.Types.ObjectId(body.metadata.userId), // Ensure userId is passed as ObjectId
+        userName: body.metadata?.userName || 'Not Specified',
         createdAt: body.metadata?.createdAt || new Date().toISOString(),
       },
     };
-    
+
+    // Create and save PG
     const pg = new PgMain(pgData);
     await pg.save();
-    console.log('PG listing created successfully');
-    res.status(201).json({ success: true, data: pg });
+
+    return res.status(201).json({ success: true, data: pg });
   } catch (err) {
-    console.error('Error creating PG listing:', err);
     const errorMsg = err instanceof Error ? err.message : String(err);
-    res.status(400).json({ success: false, error: errorMsg });
+    return res.status(400).json({ success: false, error: errorMsg });
   }
 };
 
+/**
+ * Get all PGs
+ */
 export const getAllPgs = async (req: Request, res: Response) => {
   try {
     const pgs = await PgMain.find();
@@ -110,10 +96,20 @@ export const getAllPgs = async (req: Request, res: Response) => {
   }
 };
 
-export const getPgById = async (req: Request, res: Response) => {
+/**
+ * Get PG by ID
+ */
+export const getPgByPropertyId = async (req: Request, res: Response) => {
+  const { propertyId } = req.params;
+
   try {
-    const pg = await PgMain.findById(req.params.id);
-    if (!pg) return res.status(404).json({ success: false, error: 'Not found' });
+    // Find PG by the propertyId string
+    const pg = await PgMain.findOne({ propertyId });
+
+    if (!pg) {
+      return res.status(404).json({ success: false, error: 'PG not found' });
+    }
+
     res.json({ success: true, data: pg });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
@@ -121,24 +117,46 @@ export const getPgById = async (req: Request, res: Response) => {
   }
 };
 
+/**
+ * Update PG by ID
+ */
 export const updatePgById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, error: 'Invalid ID format' });
+  }
+
   try {
-    const pg = await PgMain.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!pg) return res.status(404).json({ success: false, error: 'Not found' });
-    res.json({ success: true, data: pg });
+    const pg = await PgMain.findByIdAndUpdate(id, req.body, { new: true });
+    if (!pg) return res.status(404).json({ success: false, error: 'PG not found' });
+
+    return res.json({ success: true, data: pg });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    res.status(400).json({ success: false, error: errorMsg });
+    return res.status(400).json({ success: false, error: errorMsg });
   }
 };
 
+/**
+ * Delete PG by ID
+ */
 export const deletePgById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  // Validate ObjectId format
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ success: false, error: 'Invalid ID format' });
+  }
+
   try {
-    const pg = await PgMain.findByIdAndDelete(req.params.id);
-    if (!pg) return res.status(404).json({ success: false, error: 'Not found' });
-    res.json({ success: true, data: pg });
+    const pg = await PgMain.findByIdAndDelete(id);
+    if (!pg) return res.status(404).json({ success: false, error: 'PG not found' });
+
+    return res.json({ success: true, data: pg });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    res.status(500).json({ success: false, error: errorMsg });
+    return res.status(500).json({ success: false, error: errorMsg });
   }
 };
