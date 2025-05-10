@@ -61,10 +61,11 @@ React.useEffect(() => {
         fetch('/api/commercial/lease/sheds'),
         fetch('/api/commercial/lease/shops'),
         fetch('/api/commercial/lease/showrooms'),
-        fetch('/api/commercial/rent/agriculture'),
-        fetch('/api/commercial/rent/covered-space'),
         fetch('/api/commercial/lease/warehouses'),
         fetch('/api/commercial/lease/office-space'),
+        //Commercial Rent API's
+        fetch('/api/commercial/rent/agriculture'),
+        fetch('/api/commercial/rent/covered-space'),
       ]);
 
       const [
