@@ -284,20 +284,14 @@ const PGDetails: React.FC = () => {
     </div>
   </div>
 )}
-
-
-
-
-
-
-      {/* Sharing Types */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
   {[
     { type: 'Single Sharing', pricing: pg.pricing.roomSharePricing.singleShare },
     { type: 'Double Sharing', pricing: pg.pricing.roomSharePricing.doubleShare },
     { type: 'Triple Sharing', pricing: pg.pricing.roomSharePricing.tripleShare },
     { type: 'Four Sharing', pricing: pg.pricing.roomSharePricing.fourShare },
     { type: 'Five Sharing', pricing: pg.pricing.roomSharePricing.fiveShare },
+    { type: 'Custom Sharing', pricing: null } // Add Custom Sharing here
   ].map((sharing, index) => (
     <div
       key={index}
@@ -309,25 +303,28 @@ const PGDetails: React.FC = () => {
       <div className="p-6">
         <h2 className="text-xl font-semibold text-gray-900">{sharing.type}</h2>
         <div className="mt-4 space-y-3">
-          <div className="flex items-center text-gray-900">
-            <IndianRupee className="h-5 w-5 mr-2" />
-            <span className="text-lg font-medium">
-              ₹{sharing.pricing.monthlyRent.toLocaleString()}/month
-            </span>
-          </div>
-          <div className="flex items-center text-gray-600">
-            <Bed className="h-5 w-5 mr-2" />
-            <span>{sharing.pricing.roomsAvailable} rooms available</span>
-          </div>
+          {sharing.pricing ? (
+            <>
+              <div className="flex items-center text-gray-900">
+                <IndianRupee className="h-5 w-5 mr-2" />
+                <span className="text-lg font-medium">
+                  ₹{sharing.pricing.monthlyRent.toLocaleString()}/month
+                </span>
+              </div>
+              <div className="flex items-center text-gray-600">
+                <Bed className="h-5 w-5 mr-2" />
+                <span>{sharing.pricing.roomsAvailable} rooms available</span>
+              </div>
+            </>
+          ) : (
+            <div className="text-gray-600">Custom room sharing, no pricing available</div> // Show a custom message for "Custom Sharing"
+          )}
         </div>
       </div>
     </div>
   ))}
 </div>
-
-
-      {/* Selected Sharing Details */}
-      {selectedSharing !== null && (
+{selectedSharing !== null && (
   <div className="bg-white rounded-lg border border-gray-200">
     <div className="p-6 border-b border-gray-200">
       <div className="flex justify-between items-center">
@@ -348,23 +345,25 @@ const PGDetails: React.FC = () => {
       <div>
         <h3 className="text-lg font-medium text-gray-900 mb-4">Room Images</h3>
         <div className="grid grid-cols-2 gap-4">
-  {pg.media.mediaItems?.filter(item => 
-    // Checking for room type based on selected sharing configuration
-    (selectedSharing === 0 && item.roomType === 'single') || // Single room
-    (selectedSharing === 1 && item.roomType === 'double') || // Double room
-    (selectedSharing === 2 && item.roomType === 'triple') || // Triple room
-    (selectedSharing === 3 && item.roomType === 'four') || // Four room
-    (selectedSharing === 4 && item.roomType === 'five') // Five room
-  ).map((image, index) => (
-    <img
-      key={index}
-      src={image.url}
-      alt={`Room Image ${index + 1}`}
-      className="w-full h-48 object-cover rounded-lg"
-    />
-  ))}
-</div>
-
+          {pg.media.mediaItems
+            .filter(item => 
+              // Checking for room type based on selected sharing configuration
+              (selectedSharing === 0 && item.roomType === 'single') || // Single room
+              (selectedSharing === 1 && item.roomType === 'double') || // Double room
+              (selectedSharing === 2 && item.roomType === 'triple') || // Triple room
+              (selectedSharing === 3 && item.roomType === 'four') || // Four room
+              (selectedSharing === 4 && item.roomType === 'five') || // Five room
+              (selectedSharing === 5 && item.roomType === 'custom') // Custom room (added for custom sharing)
+            )
+            .map((image, index) => (
+              <img
+                key={index}
+                src={image.url}
+                alt={`Room Image ${index + 1}`}
+                className="w-full h-48 object-cover rounded-lg"
+              />
+            ))}
+        </div>
       </div>
 
       {/* Room Amenities */}
@@ -374,10 +373,6 @@ const PGDetails: React.FC = () => {
           {/* Single Room Amenities */}
           {selectedSharing === 0 && pg.roomConfiguration.singleRoomAmenities?.map((amenity, index) => (
             <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              {amenity === 'premium-mattress' && <Sofa className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'private-wardrobe' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'charging-ports' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'study-set' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
               <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
             </div>
           ))}
@@ -385,11 +380,6 @@ const PGDetails: React.FC = () => {
           {/* Double Room Amenities */}
           {selectedSharing === 1 && pg.roomConfiguration.doubleShareRoomAmenities?.map((amenity, index) => (
             <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              {amenity === 'wardrobe-1' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'charging-1' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'fan' && <Snowflake className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'ac' && <Snowflake className="h-5 w-5 text-gray-600 mr-3" />}
               <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
             </div>
           ))}
@@ -397,13 +387,6 @@ const PGDetails: React.FC = () => {
           {/* Triple Room Amenities */}
           {selectedSharing === 2 && pg.roomConfiguration.tripleShareRoomAmenities?.map((amenity, index) => (
             <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              {amenity === 'wardrobe-1' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'wardrobe-2' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'wardrobe-3' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'charging-2' && <Zap className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'lockers' && <Lock className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'study-desk' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
               <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
             </div>
           ))}
@@ -411,12 +394,6 @@ const PGDetails: React.FC = () => {
           {/* Four Room Amenities */}
           {selectedSharing === 3 && pg.roomConfiguration.fourShareRoomAmenities?.map((amenity, index) => (
             <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              {amenity === 'wardrobe-1' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'wardrobe-2' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'wardrobe-3' && <DoorClosed className="h-5 w-5 text-gray-600 mr-3" />}
-              
-              {amenity === 'bunk-beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'study-table' && <Laptop className="h-5 w-5 text-gray-600 mr-3" />}
               <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
             </div>
           ))}
@@ -424,8 +401,13 @@ const PGDetails: React.FC = () => {
           {/* Five Room Amenities */}
           {selectedSharing === 4 && pg.roomConfiguration.fiveShareRoomAmenities?.map((amenity, index) => (
             <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              {amenity === 'bunk-beds' && <Bed className="h-5 w-5 text-gray-600 mr-3" />}
-              {amenity === 'lockers' && <Lock className="h-5 w-5 text-gray-600 mr-3" />}
+              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
+            </div>
+          ))}
+
+          {/* Custom Room Amenities */}
+          {selectedSharing === 5 && pg.roomConfiguration.customShareRoomAmenities?.map((amenity, index) => (
+            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
               <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
             </div>
           ))}
@@ -434,10 +416,6 @@ const PGDetails: React.FC = () => {
     </div>
   </div>
 )}
-
-
-
-
 
       <ContactModal
         isOpen={isContactModalOpen}

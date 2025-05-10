@@ -100,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "users", icon: Users, label: "Users" },
     { id: "notifications", icon: Bell, label: "Notifications" },
     { id: "settings", icon: Settings, label: "Settings" },
-    
+    { id: "messages", icon: MessageCircle, label: "My Messages" },
   ];
 
   const handleLogout = () => {

@@ -232,8 +232,6 @@ app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
 app.use("/api/commercial/sell/warehouses", commercialWarehouseRoutes);
 app.use("/api/commercial/sell/plots", commercialPlotRoutes);
 app.use("/api/commercial/sell/agriculture", commercialSellAgricultureRoutes);
-
-// Residential routes
 app.use("/api/commercial/sell/others", commercialSellOthersRoutes);
 app.use("/api/commercial/sell/office-space", commercialSellOfficeSpaceRoutes);
 app.use("/api/commercial/sell/retail-store", commercialSellRetailStore);
