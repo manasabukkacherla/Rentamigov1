@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -11,18 +11,7 @@ import OtherFeaturesAndRestrictions from './OtherFeaturesAndRestrictions';
 import FoodServices from './FoodServices';
 import Pricing from './Pricing';
 import PgMedia from './PgMedia';
-
-// Room share options for consistency
-const shareOptions = [
-  { id: 'single', label: 'Single Share' },
-  { id: 'double', label: 'Double Share' },
-  { id: 'triple', label: 'Triple Share' },
-  { id: 'four', label: 'Four Share' },
-  { id: 'five', label: 'Five Share' },
-  { id: 'more', label: 'More' },
-];
-
-import { Store, ChevronRight, ChevronLeft, Building2, UserCircle, ImageIcon, Calendar, DollarSign, Loader2, Star } from "lucide-react";
+import { Store, ChevronRight, ChevronLeft, Building2, ImageIcon, DollarSign, Star, Loader2 } from "lucide-react";
 
 const globalStyles = `
   input::placeholder,
@@ -154,6 +143,10 @@ export interface PgMainFormData {
       title?: string;
       tags?: string[];
       roomType?: string;
+      category?: string;
+      base64?: string;
+      file?: File;
+      preview?: string;
     }>;
   };
   metadata: {
@@ -163,31 +156,67 @@ export interface PgMainFormData {
   };
 }
 
+// Session storage key for PG form data
+const PG_FORM_DATA_KEY = 'pgFormData';
+const PG_FORM_STEP_KEY = 'pgFormStep';
+
 function Pgmain() {
+  // Initialize form data from session storage or use default values
+  const getInitialFormData = (): PgMainFormData => {
+    const savedData = sessionStorage.getItem(PG_FORM_DATA_KEY);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        console.log('Restored form data from session storage');
+        return parsedData;
+      } catch (error) {
+        console.error('Error parsing saved form data:', error);
+        // If there's an error parsing, return default form data
+      }
+    }
+    
+    // Default form data if nothing is saved
+    return {
+      pgDetails: { name: '', accommodationType: 'both boys and girls', address: '' },
+      location: { latitude: 0, longitude: 0 },
+      roomConfiguration: {
+        totalRooms: 0,
+        sharingTypes: [],
+        customShare: '',
+        roomSize: undefined,
+        singleRoomAmenities: [],
+        doubleShareRoomAmenities: [],
+        tripleShareRoomAmenities: [],
+        fourShareRoomAmenities: [],
+        fiveShareRoomAmenities: [],
+        customShareRoomAmenities: [],
+      },
+      commonAreaAmenitiesAndServices: [],
+      otherFeaturesAndRestrictions: { otherFeatures: [], restrictions: [] },
+      foodServices: { available: false },
+      pricing: { rent: 0 },
+      media: { photos: [] },
+      metadata: { userId: '', userName: '', createdAt: '' },
+    };
+  };
+  
   // State for PgMain form data
-  const [formData, setFormData] = React.useState<PgMainFormData>({
-    pgDetails: { name: '', accommodationType: 'both boys and girls', address: '' },
-    location: { latitude: 0, longitude: 0 },
-    roomConfiguration: {
-      totalRooms: 0,
-      sharingTypes: [],
-      customShare: '',
-      roomSize: undefined,
-      singleRoomAmenities: [],
-      doubleShareRoomAmenities: [],
-      tripleShareRoomAmenities: [],
-      fourShareRoomAmenities: [],
-      fiveShareRoomAmenities: [],
-      customShareRoomAmenities: [],
-    },
-    commonAreaAmenitiesAndServices: [],
-    otherFeaturesAndRestrictions: { otherFeatures: [], restrictions: [] },
-    foodServices: { available: false },
-    pricing: { rent: 0 },
-    media: { photos: [] },
-    metadata: { userId: '', userName: '', createdAt: '' },
-  });
-  const [currentStep, setCurrentStep] = useState(0);
+  const [formData, setFormData] = React.useState<PgMainFormData>(getInitialFormData());
+  
+  // Get initial step from session storage or default to 0
+  const getInitialStep = (): number => {
+    const savedStep = sessionStorage.getItem(PG_FORM_STEP_KEY);
+    if (savedStep) {
+      try {
+        return parseInt(savedStep, 10);
+      } catch (error) {
+        return 0;
+      }
+    }
+    return 0;
+  };
+  
+  const [currentStep, setCurrentStep] = useState(getInitialStep());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string | null>(null);
 
@@ -197,14 +226,69 @@ function Pgmain() {
   // Refs for elements
   const progressBarRef = React.useRef<HTMLDivElement>(null);
   const titleRef = React.useRef<HTMLHeadingElement>(null);
+  
+  // Save form data to session storage whenever it changes
+  useEffect(() => {
+    try {
+      // Remove file objects before saving to session storage
+      const formDataForStorage = JSON.parse(JSON.stringify(formData));
+      
+      // If there are media items, clean them for storage
+      if (formDataForStorage.media && formDataForStorage.media.mediaItems) {
+        formDataForStorage.media.mediaItems = formDataForStorage.media.mediaItems.map((item: any) => {
+          // Keep essential properties but remove file objects and large data
+          return {
+            id: item.id,
+            type: item.type,
+            url: item.url,
+            title: item.title,
+            tags: item.tags,
+            roomType: item.roomType,
+            category: item.category,
+            // Exclude: file, preview, base64
+          };
+        });
+      }
+      
+      sessionStorage.setItem(PG_FORM_DATA_KEY, JSON.stringify(formDataForStorage));
+      console.log('Saved form data to session storage');
+    } catch (error) {
+      console.error('Error saving form data to session storage:', error);
+    }
+  }, [formData]);
+  
+  // Save current step to session storage whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem(PG_FORM_STEP_KEY, currentStep.toString());
+  }, [currentStep]);
 
-  // Function to convert file to base64
+  // Function to convert file to base64 with size check
   const convertFileToBase64 = (file: File): Promise<string> => {
+    // For videos, check size first
+    if (file.type.startsWith('video/') && file.size > 50 * 1024 * 1024) { // 50MB limit for videos
+      throw new Error(`Video file size exceeds 50MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+    }
+    
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+      
+      // Add timeout handling
+      const timeout = setTimeout(() => {
+        reader.abort();
+        reject(new Error('File conversion timed out'));
+      }, 30000); // 30 second timeout
+      
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
+      
+      reader.onload = () => {
+        clearTimeout(timeout);
+        resolve(reader.result as string);
+      };
+      
+      reader.onerror = error => {
+        clearTimeout(timeout);
+        reject(error);
+      };
     });
   };
 
@@ -235,30 +319,128 @@ function Pgmain() {
       let processedMedia = { ...formData.media };
       
       if (formData.media && formData.media.mediaItems && formData.media.mediaItems.length > 0) {
-        console.log('Processing media items for base64 conversion...');
+        console.log('Processing media items for submission...');
         try {
-          const convertedMediaItems = await Promise.all(
-            formData.media.mediaItems.map(async (item: any) => {
-              // Check if the item has a file or if it already has a base64 url
-              if (item.file) {
-                console.log(`Converting ${item.type} file to base64: ${item.title}`);
+          // Separate photos and videos for different processing strategies
+          const photoItems = formData.media.mediaItems.filter((item: any) => item.type === 'photo');
+          const videoItems = formData.media.mediaItems.filter((item: any) => item.type === 'video');
+          
+          console.log(`Processing ${photoItems.length} photos and ${videoItems.length} videos for submission`);
+          
+          if (videoItems.length > 0) {
+            toast.loading(`Preparing ${videoItems.length} videos for submission...`, {
+              id: 'video-submission',
+              duration: 5000
+            });
+          }
+          
+          // Process photos in parallel (they're typically smaller and process faster)
+          const processedPhotoItems = await Promise.all(photoItems.map(async (item: any) => {
+            // If the item already has a url or base64, use that
+            if (item.url) {
+              return {
+                ...item,
+                file: undefined // Remove the file object as it can't be serialized
+              };
+            } else if (item.base64) {
+              // If the item has base64 data, use that as the url
+              return {
+                ...item,
+                url: item.base64,
+                base64: undefined, // Remove duplicate data
+                file: undefined // Remove the file object
+              };
+            } else if (item.file) {
+              // Convert photo to base64
+              console.log(`Converting photo to base64: ${item.title}`);
+              try {
                 const base64Data = await convertFileToBase64(item.file);
                 return {
                   ...item,
                   url: base64Data, // Replace file with base64 data
                   file: undefined // Remove the file object as it can't be serialized
                 };
-              } else if (item.base64) {
-                // If the item already has base64 data, use that
-                return {
-                  ...item,
-                  url: item.base64,
-                  base64: undefined // Remove duplicate data
-                };
+              } catch (conversionError) {
+                console.error(`Error converting photo file:`, conversionError);
+                throw conversionError;
               }
-              return item;
-            })
-          );
+            }
+            return item;
+          }));
+          
+          // Process videos sequentially to avoid memory issues
+          let processedVideoItems: any[] = [];
+          for (const item of videoItems) {
+            // If the item already has a url or base64, use that
+            if (item.url) {
+              processedVideoItems.push({
+                ...item,
+                file: undefined // Remove the file object as it can't be serialized
+              });
+              continue;
+            } else if (item.base64) {
+              // If the item has base64 data, use that as the url
+              processedVideoItems.push({
+                ...item,
+                url: item.base64,
+                base64: undefined, // Remove duplicate data
+                file: undefined // Remove the file object
+              });
+              continue;
+            } else if (item.file) {
+              // Check video format
+              if (!['video/mp4', 'video/webm', 'video/quicktime'].includes(item.file.type)) {
+                console.warn(`Unsupported video format: ${item.file.type}. Using preview URL.`);
+                processedVideoItems.push({
+                  ...item,
+                  url: item.preview || 'video-placeholder',
+                  file: undefined
+                });
+                continue;
+              }
+              
+              // For large videos, use the preview URL
+              if (item.file.size > 20 * 1024 * 1024) { // 20MB threshold
+                console.log(`Video file is large (${(item.file.size / (1024 * 1024)).toFixed(2)}MB), using preview URL`);
+                processedVideoItems.push({
+                  ...item,
+                  url: item.preview || 'video-placeholder', 
+                  file: undefined
+                });
+                continue;
+              }
+              
+              // For smaller videos, convert to base64
+              console.log(`Converting video to base64: ${item.title}`);
+              try {
+                const base64Data = await convertFileToBase64(item.file);
+                processedVideoItems.push({
+                  ...item,
+                  url: base64Data,
+                  file: undefined
+                });
+              } catch (conversionError) {
+                console.error(`Error converting video file:`, conversionError);
+                // For videos that fail conversion, use the preview URL
+                if (item.preview) {
+                  processedVideoItems.push({
+                    ...item,
+                    url: item.preview,
+                    file: undefined
+                  });
+                } else {
+                  // If no preview, skip this video
+                  console.warn(`Skipping video without preview: ${item.title}`);
+                }
+              }
+            } else {
+              // Item has neither url, base64, nor file
+              processedVideoItems.push(item);
+            }
+          }
+          
+          // Combine processed photos and videos
+          const convertedMediaItems = [...processedPhotoItems, ...processedVideoItems];
           
           console.log(`Processed ${convertedMediaItems.length} media items`);
           
@@ -268,24 +450,32 @@ function Pgmain() {
             mediaItems: convertedMediaItems
           };
           
-          // Extract photos and videos into separate arrays
-          const photoItems = convertedMediaItems.filter((item: any) => item.type === 'photo');
-          const videoItems = convertedMediaItems.filter((item: any) => item.type === 'video');
+          // Extract photos and videos into separate arrays for the API
+          const finalPhotoItems = convertedMediaItems.filter((item: any) => item.type === 'photo');
+          const finalVideoItems = convertedMediaItems.filter((item: any) => item.type === 'video');
           
-          console.log(`Found ${photoItems.length} photos and ${videoItems.length} videos`);
+          console.log(`Final count: ${finalPhotoItems.length} photos and ${finalVideoItems.length} videos`);
           
           // Add photos array
-          if (photoItems.length > 0) {
-            processedMedia.photos = photoItems.map((item: any) => item.url);
+          if (finalPhotoItems.length > 0) {
+            processedMedia.photos = finalPhotoItems.map((item: any) => item.url);
           }
           
           // Add videos array
-          if (videoItems.length > 0) {
-            processedMedia.videos = videoItems.map((item: any) => item.url);
+          if (finalVideoItems.length > 0) {
+            processedMedia.videos = finalVideoItems.map((item: any) => item.url);
           }
-        } catch (error) {
+          
+          if (videoItems.length > 0) {
+            toast.success(`Successfully processed ${finalVideoItems.length} videos`, {
+              id: 'video-submission'
+            });
+          }
+        } catch (error: any) {
           console.error('Error processing media items:', error);
-          toast.error('Error processing media files. Please try again.');
+          toast.error(error.message || 'Error processing media files. Please try again.', {
+            id: 'video-submission'
+          });
           setIsSubmitting(false);
           return;
         }
@@ -309,6 +499,9 @@ function Pgmain() {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
 
+      // Clear session storage after successful submission
+      sessionStorage.removeItem(PG_FORM_DATA_KEY);
+      sessionStorage.removeItem(PG_FORM_STEP_KEY);
 
       toast.success('PG listing created!');
       setSubmitStatus('success');
@@ -482,6 +675,44 @@ function Pgmain() {
       titleRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
+  
+  // Function to clear form data and start over
+  const handleClearForm = () => {
+    if (window.confirm('Are you sure you want to clear all form data? This cannot be undone.')) {
+      // Clear session storage
+      sessionStorage.removeItem(PG_FORM_DATA_KEY);
+      sessionStorage.removeItem(PG_FORM_STEP_KEY);
+      
+      // Reset form to defaults
+      setFormData({
+        pgDetails: { name: '', accommodationType: 'both boys and girls', address: '' },
+        location: { latitude: 0, longitude: 0 },
+        roomConfiguration: {
+          totalRooms: 0,
+          sharingTypes: [],
+          customShare: '',
+          roomSize: undefined,
+          singleRoomAmenities: [],
+          doubleShareRoomAmenities: [],
+          tripleShareRoomAmenities: [],
+          fourShareRoomAmenities: [],
+          fiveShareRoomAmenities: [],
+          customShareRoomAmenities: [],
+        },
+        commonAreaAmenitiesAndServices: [],
+        otherFeaturesAndRestrictions: { otherFeatures: [], restrictions: [] },
+        foodServices: { available: false },
+        pricing: { rent: 0 },
+        media: { photos: [] },
+        metadata: { userId: '', userName: '', createdAt: '' },
+      });
+      
+      // Reset step to beginning
+      setCurrentStep(0);
+      
+      toast.success('Form data cleared');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -538,13 +769,31 @@ function Pgmain() {
       <div className="max-w-5xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Submit Form Button and Feedback */}
         <form onSubmit={handleSubmit} className="mb-8">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Submitting...' : 'Submit PG Details'}
-          </button>
+          <div className="flex flex-wrap gap-4">
+            <button
+              type="submit"
+              className="px-6 py-2 bg-black text-white rounded hover:bg-gray-800 disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Submit PG Details'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={handleClearForm}
+              className="px-6 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              disabled={isSubmitting}
+            >
+              Clear Form Data
+            </button>
+            
+            <div className="flex items-center">
+              <span className="text-sm text-gray-500">
+                Form data is automatically saved as you type
+              </span>
+            </div>
+          </div>
+          
           {submitStatus === 'success' && (
             <div className="mt-4 text-green-600">Submitted successfully!</div>
           )}

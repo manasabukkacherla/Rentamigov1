@@ -1,5 +1,6 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
 import { Image as ImageIcon, Video, X, Upload, Camera, AlertCircle, Tag, Users, Home, Key, Lightbulb, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 interface MediaItem {
   id: string;
@@ -30,29 +31,58 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   // Initialize state from props or empty array
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   
-  // Convert file to base64
+  // Convert file to base64 with size check
   const convertToBase64 = async (file: File): Promise<string> => {
+    // For videos, check size first
+    if (file.type.startsWith('video/') && file.size > 50 * 1024 * 1024) { // 50MB limit for videos
+      throw new Error(`Video file size exceeds 50MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+    }
+    
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
+      
+      // Add timeout handling
+      const timeout = setTimeout(() => {
+        reader.abort();
+        reject(new Error('File conversion timed out'));
+      }, 30000); // 30 second timeout
+      
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
+      
+      reader.onload = () => {
+        clearTimeout(timeout);
+        resolve(reader.result as string);
+      };
+      
+      reader.onerror = error => {
+        clearTimeout(timeout);
+        reject(error);
+      };
     });
   };
   
   // Process media items and update parent component
   const processAndUpdateMediaItems = async (items: MediaItem[]) => {
     try {
-      // Process each media item to add base64 data if not already present
-      const processedItems = await Promise.all(items.map(async (item) => {
+      setError(''); // Clear any previous errors
+      
+      // Separate photos and videos for different processing strategies
+      const photoItems = items.filter(item => item.type === 'photo');
+      const videoItems = items.filter(item => item.type === 'video');
+      
+      console.log(`Processing ${photoItems.length} photos and ${videoItems.length} videos`);
+      
+      // Process photos in parallel (they're typically smaller and process faster)
+      const processedPhotoItems = await Promise.all(photoItems.map(async (item) => {
         if (!item.base64 && item.file) {
-          console.log(`Processing ${item.type} file: ${item.title}`);
+          console.log(`Processing photo: ${item.title} (${(item.file.size / (1024 * 1024)).toFixed(2)}MB)`);
+          
           try {
             const base64Data = await convertToBase64(item.file);
-            console.log(`Successfully converted ${item.type} to base64`);
+            console.log(`Successfully converted photo to base64`);
             return { ...item, base64: base64Data };
-          } catch (conversionError) {
-            console.error(`Error converting ${item.type} file to base64:`, conversionError);
+          } catch (conversionError: any) {
+            console.error(`Error processing photo file:`, conversionError);
             // Return item without base64 to prevent blocking the entire process
             return item;
           }
@@ -60,17 +90,67 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
         return item;
       }));
       
+      // Process videos sequentially to avoid memory issues
+      let processedVideoItems: MediaItem[] = [];
+      for (const item of videoItems) {
+        if (!item.base64 && item.file) {
+          console.log(`Processing video: ${item.title} (${(item.file.size / (1024 * 1024)).toFixed(2)}MB)`);
+          
+          try {
+            // Check video format
+            if (!['video/mp4', 'video/webm', 'video/quicktime'].includes(item.file.type)) {
+              console.warn(`Unsupported video format: ${item.file.type}. Please use MP4, WebM, or MOV format.`);
+              // Still include the item but with a warning
+              processedVideoItems.push(item);
+              continue;
+            }
+            
+            // For large videos, we'll just use the preview URL and not convert to base64
+            if (item.file.size > 20 * 1024 * 1024) { // 20MB threshold
+              console.log(`Video file is large (${(item.file.size / (1024 * 1024)).toFixed(2)}MB), skipping base64 conversion`);
+              processedVideoItems.push(item); // Keep the file and preview, but skip base64 conversion
+              continue;
+            }
+            
+            // Convert to base64 for smaller videos
+            const base64Data = await convertToBase64(item.file);
+            console.log(`Successfully converted video to base64`);
+            processedVideoItems.push({ ...item, base64: base64Data });
+          } catch (conversionError: any) {
+            console.error(`Error processing video file:`, conversionError);
+            // Still include the item without base64
+            processedVideoItems.push(item);
+          }
+        } else {
+          processedVideoItems.push(item);
+        }
+      }
+      
+      // Combine processed photos and videos
+      const processedItems = [...processedPhotoItems, ...processedVideoItems];
+      
       // Update local state
       setMediaItems(processedItems);
       
       // Update parent component with processed items
       // Convert to format expected by parent component
       const parentFormatItems = processedItems.map(item => {
-        // For videos, ensure we're passing both the file and base64 data
         if (item.type === 'video') {
           console.log(`Preparing video item for parent component: ${item.title}`);
+          // For videos, use base64 if available, otherwise use preview URL
+          return {
+            id: item.id,
+            type: item.type,
+            url: item.base64 || item.preview,
+            title: item.title,
+            tags: item.tags,
+            roomType: item.roomType,
+            category: item.category,
+            file: item.file // Always include the file object for server upload
+          };
         }
         
+        // For photos and other media
         return {
           id: item.id,
           type: item.type,
@@ -79,7 +159,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           tags: item.tags,
           roomType: item.roomType,
           category: item.category,
-          file: item.file // Include the file object for further processing
+          file: item.file
         };
       });
       
@@ -87,9 +167,9 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       console.log(`Videos: ${parentFormatItems.filter(item => item.type === 'video').length}`);
       
       onMediaItemsChange(parentFormatItems);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing media items:', error);
-      setError('Failed to process media items');
+      setError(error.message || 'Failed to process media items');
     }
   };
   const [batchTitle, setBatchTitle] = useState('');
@@ -248,6 +328,40 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       setError(`Invalid files selected: ${invalidFiles.length} file(s) are not ${selectedType}s`);
       return;
     }
+    
+    // Validate video file sizes and formats
+    if (selectedType === 'video') {
+      // Check for unsupported video formats
+      const unsupportedVideos = files.filter(file => 
+        !['video/mp4', 'video/webm', 'video/quicktime'].includes(file.type)
+      );
+      
+      if (unsupportedVideos.length > 0) {
+        setError(`Unsupported video format(s). Please use MP4, WebM, or MOV formats only.`);
+        return;
+      }
+      
+      // Check for oversized videos
+      const oversizedVideos = files.filter(file => file.size > 100 * 1024 * 1024); // 100MB limit
+      
+      if (oversizedVideos.length > 0) {
+        setError(`Video file(s) exceed the 100MB size limit. Please compress your videos.`);
+        return;
+      }
+      
+      // Warning for large videos
+      const largeVideos = files.filter(file => file.size > 20 * 1024 * 1024); // 20MB threshold
+      
+      if (largeVideos.length > 0) {
+        console.warn(`Large video file(s) detected (${largeVideos.length}). These may take longer to process.`);
+      }
+      
+      // Limit the number of videos that can be uploaded at once
+      if (files.length > 3) {
+        setError(`Please upload a maximum of 3 videos at a time to avoid processing issues.`);
+        return;
+      }
+    }
 
     // Create object URLs for previews and prepare for base64 conversion
     const newMediaItems = files.map((file, index) => {
@@ -264,14 +378,54 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       };
     });
 
-    // Update state with new items and process them for base64
-    const updatedItems = [...mediaItems, ...newMediaItems];
-    setMediaItems(updatedItems);
-    await processAndUpdateMediaItems(updatedItems);
-    
-    setBatchTitle('');
-    if (e.target) {
-      e.target.value = '';
+    try {
+      // Update state with new items and process them for base64
+      const updatedItems = [...mediaItems, ...newMediaItems];
+      setMediaItems(updatedItems);
+      
+      // Show loading message for multiple videos
+      if (selectedType === 'video' && files.length > 1) {
+        toast.loading(`Processing ${files.length} videos. This may take a moment...`, {
+          id: 'video-processing',
+          duration: 5000
+        });
+      }
+      
+      await processAndUpdateMediaItems(updatedItems);
+      
+      setBatchTitle('');
+      if (e.target) {
+        e.target.value = '';
+      }
+      
+      // Dismiss loading toast if it was shown
+      if (selectedType === 'video' && files.length > 1) {
+        toast.success(`Successfully processed ${files.length} videos`, {
+          id: 'video-processing'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error handling file selection:', error);
+      setError(error.message || 'Failed to process selected files');
+      
+      // Dismiss loading toast with error if it was shown
+      if (selectedType === 'video' && files.length > 1) {
+        toast.error(`Error processing videos: ${error.message || 'Unknown error'}`, {
+          id: 'video-processing'
+        });
+      }
+      
+      // Clean up object URLs for failed uploads
+      newMediaItems.forEach(item => {
+        if (item.preview) {
+          URL.revokeObjectURL(item.preview);
+        }
+      });
+      
+      // Reset the file input
+      if (e.target) {
+        e.target.value = '';
+      }
     }
   };
 
@@ -458,7 +612,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
                         {item.type === 'photo' ? (
                           <img src={item.preview} alt={item.title} className="w-full h-full object-cover" />
                         ) : (
-                          <video src={item.preview} className="w-full h-full object-cover" />
+                          <video src={item.preview} className="w-full h-full object-cover" controls muted />
                         )}
                         <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button
@@ -518,7 +672,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
                     {item.type === 'photo' ? (
                       <img src={item.preview} alt={item.title} className="w-full h-full object-cover" />
                     ) : (
-                      <video src={item.preview} controls className="w-full h-full object-cover" />
+                      <video src={item.preview} controls muted className="w-full h-full object-cover" />
                     )}
                     <div className="absolute inset-0 bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
@@ -650,6 +804,16 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
         </div>
       )}
 
+      {/* Error Display */}
+      {error && (
+        <div className="my-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex items-start">
+            <AlertCircle className="w-5 h-5 text-red-500 mr-2 flex-shrink-0 mt-0.5" />
+            <p className="text-red-700 text-sm">{error}</p>
+          </div>
+        </div>
+      )}
+      
       {/* Media Summary */}
       {mediaItems.length > 0 && (
         <div className="mt-6 pt-4 border-t border-gray-200">
@@ -664,7 +828,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
               <span>{mediaItems.filter(item => item.type === 'video').length} Videos</span>
             </div>
             <div className="text-gray-500">
-              Total Size: {(mediaItems.reduce((acc, item) => acc + item.file.size, 0) / (1024 * 1024)).toFixed(1)} MB
+              Total Size: {(mediaItems.reduce((acc, item) => acc + (item.file ? item.file.size : 0), 0) / (1024 * 1024)).toFixed(1)} MB
             </div>
           </div>
           
