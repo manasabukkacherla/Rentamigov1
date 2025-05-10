@@ -1,5 +1,5 @@
 import express from 'express';
-import { pgMediaUpload, processAndUploadPgMedia } from '../../middlewares/pgMediaUploader';
+import { pgMediaUpload, processAndUploadPgMedia } from '../../middleware/pgMediaUploader';
 import PgMain from '../../models/residential/Pgmain';
 import mongoose from 'mongoose';
 
