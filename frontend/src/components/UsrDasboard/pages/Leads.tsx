@@ -4,7 +4,7 @@ import { LeadsTable } from "../LeadsTable";
 import { Lead } from "../types";
 import { CheckCircle, X } from "lucide-react";
 
-type ReportType = 'agent' | 'fraud' | 'other';
+type ReportType = "agent" | "fraud" | "other";
 
 interface ReportedLead {
   leadId: string;
@@ -19,11 +19,10 @@ export function Leads() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [reportType, setReportType] = useState<ReportType>('agent');
-  const [reportDescription, setReportDescription] = useState('');
+  const [reportType, setReportType] = useState<ReportType>("agent");
+  const [reportDescription, setReportDescription] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [reportedLeads, setReportedLeads] = useState<string[]>([]);
-
 
   // 🔹 Fetch leads from the backend
   useEffect(() => {
@@ -36,7 +35,7 @@ export function Leads() {
           return;
         }
 
-        const response = await axios.get(`http://localhost:8000/api/leads/glead`, {
+        const response = await axios.get(`/api/leads/glead`, {
           params: { userId }, // Send userId as a query parameter
         });
 
@@ -102,9 +101,12 @@ export function Leads() {
   };
 
   // 🔹 Handle Status Change & Update Backend
-  const handleStatusChange = async (leadId: string, newStatus: Lead["status"]) => {
+  const handleStatusChange = async (
+    leadId: string,
+    newStatus: Lead["status"]
+  ) => {
     try {
-      const response = await axios.put(`http://localhost:8000/api/leads/update-status/${leadId}`, {
+      const response = await axios.put(`/api/leads/update-status/${leadId}`, {
         status: newStatus,
       });
 
@@ -144,7 +146,7 @@ export function Leads() {
         };
 
         // Send data to backend
-        const response = await axios.post("http://localhost:8000/api/Report/reports", newReport);
+        const response = await axios.post("/api/Report/reports", newReport);
 
         if (response.status === 201) {
           setReportedLeads([...reportedLeads, selectedLead.id]); // Store only the lead ID
@@ -153,9 +155,13 @@ export function Leads() {
           setReportType("agent");
           setReportDescription("");
 
-          setLeads(leads.map(lead =>
-            lead.id === selectedLead.id ? { ...lead, status: "Not Interested" } : lead
-          ));
+          setLeads(
+            leads.map((lead) =>
+              lead.id === selectedLead.id
+                ? { ...lead, status: "Not Interested" }
+                : lead
+            )
+          );
 
           setTimeout(() => {
             setShowSuccessModal(false);
@@ -173,13 +179,13 @@ export function Leads() {
   const isLeadReported = (leadId: string) => {
     return reportedLeads.includes(leadId); // ✅ Check if leadId exists in the reportedLeads array
   };
-  
 
-  const filteredLeads = leads.filter(lead => 
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.flatNo.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredLeads = leads.filter(
+    (lead) =>
+      lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.flatNo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -192,14 +198,17 @@ export function Leads() {
         onSearchChange={setSearchTerm}
         onViewDetails={handleViewDetails}
         onStatusChange={handleStatusChange}
-        reportedLeads={reportedLeads}      />
+        reportedLeads={reportedLeads}
+      />
 
       {/* Lead Details Modal */}
       {showDetailsModal && selectedLead && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-lg">
             <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-semibold text-black">{selectedLead.name}</h2>
+              <h2 className="text-xl font-semibold text-black">
+                {selectedLead.name}
+              </h2>
               <button
                 onClick={() => setShowDetailsModal(false)}
                 className="p-2 hover:bg-black/5 rounded-lg transition-colors"
@@ -221,13 +230,19 @@ export function Leads() {
                 </div>
                 <div>
                   <p className="text-sm text-black/60">Email</p>
-                  <a href={`mailto:${selectedLead.email}`} className="text-blue-600 hover:underline">
+                  <a
+                    href={`mailto:${selectedLead.email}`}
+                    className="text-blue-600 hover:underline"
+                  >
                     {selectedLead.email}
                   </a>
                 </div>
                 <div>
                   <p className="text-sm text-black/60">Phone</p>
-                  <a href={`tel:${selectedLead.phone}`} className="text-blue-600 hover:underline">
+                  <a
+                    href={`tel:${selectedLead.phone}`}
+                    className="text-blue-600 hover:underline"
+                  >
                     {selectedLead.phone}
                   </a>
                 </div>
@@ -239,7 +254,12 @@ export function Leads() {
                   <p className="text-sm text-black/60">Status</p>
                   <select
                     value={selectedLead.status}
-                    onChange={(e) => handleStatusChange(selectedLead.id, e.target.value as Lead['status'])}
+                    onChange={(e) =>
+                      handleStatusChange(
+                        selectedLead.id,
+                        e.target.value as Lead["status"]
+                      )
+                    }
                     className="mt-1 block w-full px-3 py-2 text-sm border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                     disabled={isLeadReported(selectedLead.id)}
                   >
@@ -251,7 +271,9 @@ export function Leads() {
                     <option value="RNR">RNR (Ringing No Response)</option>
                     <option value="Call Back">Call Back</option>
                     <option value="No Requirement">No Requirement</option>
-                    <option value="Different Requirement">Different Requirement</option>
+                    <option value="Different Requirement">
+                      Different Requirement
+                    </option>
                     <option value="Converted">Converted</option>
                   </select>
                 </div>
@@ -285,8 +307,12 @@ export function Leads() {
           <div className="bg-white rounded-xl p-6 w-full max-w-lg">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h2 className="text-xl font-semibold text-black">Report Lead</h2>
-                <p className="text-sm text-black/60 mt-1">Report inappropriate or suspicious lead behavior</p>
+                <h2 className="text-xl font-semibold text-black">
+                  Report Lead
+                </h2>
+                <p className="text-sm text-black/60 mt-1">
+                  Report inappropriate or suspicious lead behavior
+                </p>
               </div>
               <button
                 onClick={() => setShowReportModal(false)}
@@ -298,20 +324,26 @@ export function Leads() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-black/70 mb-2">Report Type</label>
+                <label className="block text-sm font-medium text-black/70 mb-2">
+                  Report Type
+                </label>
                 <div className="space-y-2">
                   <label className="flex items-center p-3 border border-black/10 rounded-lg cursor-pointer hover:bg-black/5">
                     <input
                       type="radio"
                       name="reportType"
                       value="agent"
-                      checked={reportType === 'agent'}
-                      onChange={(e) => setReportType(e.target.value as ReportType)}
+                      checked={reportType === "agent"}
+                      onChange={(e) =>
+                        setReportType(e.target.value as ReportType)
+                      }
                       className="mr-3"
                     />
                     <div>
                       <p className="font-medium text-black">Report as Agent</p>
-                      <p className="text-xs text-black/60">Reporting User as agent </p>
+                      <p className="text-xs text-black/60">
+                        Reporting User as agent{" "}
+                      </p>
                     </div>
                   </label>
                   <label className="flex items-center p-3 border border-black/10 rounded-lg cursor-pointer hover:bg-black/5">
@@ -319,13 +351,17 @@ export function Leads() {
                       type="radio"
                       name="reportType"
                       value="fraud"
-                      checked={reportType === 'fraud'}
-                      onChange={(e) => setReportType(e.target.value as ReportType)}
+                      checked={reportType === "fraud"}
+                      onChange={(e) =>
+                        setReportType(e.target.value as ReportType)
+                      }
                       className="mr-3"
                     />
                     <div>
                       <p className="font-medium text-black">Report Fraud</p>
-                      <p className="text-xs text-black/60">Report suspicious or fraudulent activity</p>
+                      <p className="text-xs text-black/60">
+                        Report suspicious or fraudulent activity
+                      </p>
                     </div>
                   </label>
                   <label className="flex items-center p-3 border border-black/10 rounded-lg cursor-pointer hover:bg-black/5">
@@ -333,20 +369,26 @@ export function Leads() {
                       type="radio"
                       name="reportType"
                       value="other"
-                      checked={reportType === 'other'}
-                      onChange={(e) => setReportType(e.target.value as ReportType)}
+                      checked={reportType === "other"}
+                      onChange={(e) =>
+                        setReportType(e.target.value as ReportType)
+                      }
                       className="mr-3"
                     />
                     <div>
                       <p className="font-medium text-black">Other</p>
-                      <p className="text-xs text-black/60">Report for other reasons</p>
+                      <p className="text-xs text-black/60">
+                        Report for other reasons
+                      </p>
                     </div>
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-black/70 mb-2">Description</label>
+                <label className="block text-sm font-medium text-black/70 mb-2">
+                  Description
+                </label>
                 <textarea
                   value={reportDescription}
                   onChange={(e) => setReportDescription(e.target.value)}
@@ -383,9 +425,12 @@ export function Leads() {
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <CheckCircle className="w-8 h-8 text-green-500" />
             </div>
-            <h3 className="text-xl font-semibold text-black mb-2">Report Submitted</h3>
+            <h3 className="text-xl font-semibold text-black mb-2">
+              Report Submitted
+            </h3>
             <p className="text-black/60 mb-4">
-              Thank you for your report. Our admin team will review it and take appropriate action.
+              Thank you for your report. Our admin team will review it and take
+              appropriate action.
             </p>
           </div>
         </div>
