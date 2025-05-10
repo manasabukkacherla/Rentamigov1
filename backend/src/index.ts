@@ -96,6 +96,7 @@ import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilde
 import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
 import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
 import residentialRentIndependentHouseRoutes from "./routes/residential/rentIndependentHouse";
+import pgMediaRoutes from "./routes/residential/pgMediaRoutes";
 
 dotenv.config();
 
@@ -266,6 +267,9 @@ app.use("/api/commercial/rent/plots", commercialRentPlot);
 // PG Main (residential) API route
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 app.use("/api/residential/pgmain", residentialPgmainRoutes);
+
+// PG Media routes for S3 uploads
+app.use("/api/residential/pg-media", pgMediaRoutes);
 
 //sell routes
 app.use("/api/residential/sale/apartments", residentialSellApartmentRoutes);
