@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { ImageGallery } from "./components/ImageGallery"
 import { BasicInfo } from "./components/BasicInfo"
@@ -13,11 +11,15 @@ import { Reviews } from "./components/Reviews"
 import { Footer } from "./components/Footer"
 import { propertyData } from "./data"
 import { ChevronLeft, ChevronRight, MapPin, Heart, Share2, ArrowLeft, Star } from "lucide-react"
+import { useParams } from 'react-router-dom';
 
 function Propertydetail() {
+  const { id } = useParams();
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showAllImages, setShowAllImages] = useState(false)
+  const [property, setProperty] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
   const allMedia = [propertyData.video, ...propertyData.images.map((img) => img.url)]
 
   const goToNext = () => {
@@ -29,8 +31,25 @@ function Propertydetail() {
   }
 
   useEffect(() => {
-    window.scrollTo(0, 0)
-  }, [])
+    const fetchProperty = async () => {
+      try {
+        const response = await fetch(`/api/commercial/lease/agriculture/${id}`);
+        const data = await response.json();
+        if (data.success) {
+          setProperty(data.data);
+        } else {
+          console.error('Property not found');
+        }
+      } catch (error) {
+        console.error('Error fetching property:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchProperty();
+  }, [id]);
+  
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,10 +82,12 @@ function Propertydetail() {
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Property Title */}
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Prestige Lake Ridge</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+  {property?.title || "Property Details"}
+</h1>
           <div className="flex items-center gap-2 text-gray-600">
-            <MapPin className="w-5 h-5" />
-            <p>Electronic City Phase 1, Bangalore</p>
+          <MapPin className="w-5 h-5" />
+          <p>{property?.location || "Location not available"}</p>
             <div className="flex items-center ml-4 bg-gray-100 px-2 py-1 rounded-md">
               <Star className="w-4 h-4 text-amber-500 fill-amber-500 mr-1" />
               <span className="font-medium">4.8</span>
