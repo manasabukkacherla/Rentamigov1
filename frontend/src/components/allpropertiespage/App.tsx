@@ -50,9 +50,11 @@ React.useEffect(() => {
 
     try {
       const [
-        agriRes, othersRes, coveredRes, plotRes, retailRes, shedRes, shopRes, showroomRes, 
-        rentAgriRes, rentCoveredRes, warehouseRes, officeSpaceRes
+        agriRes, othersRes, coveredRes, plotRes, retailRes, shedRes, shopRes, showroomRes,
+        rentAgriRes, rentCoveredRes, warehouseRes, officeSpaceRes, rentOthersRes, rentOfficeSpaceRes, rentShopRes, rentRetailStoreRes, rentShowroomRes, rentShedRes, rentPlotRes,
+        sellShopRes, sellAgricultureRes, sellCoveredSpaceRes, sellOfficeSpaceRes, sellOthersRes, sellRetailStoreRes, sellShedRes, sellPlotRes // <-- Added sellPlotRes
       ] = await Promise.all([
+        // Lease Properties
         fetch('/api/commercial/lease/agriculture'),
         fetch('/api/commercial/lease/others'),
         fetch('/api/commercial/lease/covered-space'),
@@ -61,15 +63,36 @@ React.useEffect(() => {
         fetch('/api/commercial/lease/sheds'),
         fetch('/api/commercial/lease/shops'),
         fetch('/api/commercial/lease/showrooms'),
-        fetch('/api/commercial/rent/agriculture'),
-        fetch('/api/commercial/rent/covered-space'),
         fetch('/api/commercial/lease/warehouses'),
         fetch('/api/commercial/lease/office-space'),
+
+        // Commercial Rent Properties
+        fetch('/api/commercial/rent/agriculture'),
+        fetch('/api/commercial/rent/covered-space'),
+        fetch('/api/commercial/rent/others'), 
+        fetch('/api/commercial/rent/warehouses'), // <-- Rent Warehouse
+        fetch('/api/commercial/rent/office-spaces'), // <-- Rent Office Space
+        fetch('/api/commercial/rent/shops'), // <-- Rent Shop
+        fetch('/api/commercial/rent/retail-stores'), // <-- Rent Retail Store
+        fetch('/api/commercial/rent/showrooms'), // <-- Rent Showroom
+        fetch('/api/commercial/rent/sheds'), // <-- Rent Shed
+        fetch('/api/commercial/rent/plots'), // <-- Rent Plot
+
+        // Commercial Sell Properties
+        fetch('/api/commercial/sell/shops'), // <-- Added Sell Shops
+        fetch('/api/commercial/sell/agriculture'), // <-- Added Sell Agriculture
+        fetch('/api/commercial/sell/covered-space'), // <-- Added Sell Covered Space
+        fetch('/api/commercial/sell/office-space'), // <-- Added Sell Office Space
+        fetch('/api/commercial/sell/others'), // <-- Added Sell Others
+        fetch('/api/commercial/sell/retail-store'), // <-- Added Sell Retail Store
+        fetch('/api/commercial/sell/sheds'), // <-- Added Sell Sheds
+        fetch('/api/commercial/sell/plots') // <-- Added Sell Plots
       ]);
 
       const [
-        agriData, othersData, coveredData, plotData, retailData, shedData, shopData, showroomData, 
-        rentAgriData, rentCoveredData, warehouseData, officeSpaceData
+        agriData, othersData, coveredData, plotData, retailData, shedData, shopData, showroomData,
+        rentAgriData, rentCoveredData, warehouseData, officeSpaceData, rentOthersData, rentOfficeSpaceData, rentShopData, rentRetailStoreData, rentShowroomData, rentShedData, rentPlotData,
+        sellShopData, sellAgricultureData, sellCoveredSpaceData, sellOfficeSpaceData, sellOthersData, sellRetailStoreData, sellShedData, sellPlotData // <-- Added sellPlotData
       ] = await Promise.all([
         agriRes.json(),
         othersRes.json(),
@@ -81,10 +104,26 @@ React.useEffect(() => {
         showroomRes.json(),
         rentAgriRes.json(),
         rentCoveredRes.json(),
-        warehouseRes.json(),  // ✅ Corrected
-        officeSpaceRes.json()  // ✅ Corrected
+        warehouseRes.json(),
+        officeSpaceRes.json(),
+        rentOthersRes.json(),
+        rentOfficeSpaceRes.json(),
+        rentShopRes.json(),
+        rentRetailStoreRes.json(),
+        rentShowroomRes.json(),
+        rentShedRes.json(), // <-- Rent Shed Data
+        rentPlotRes.json(), // <-- Rent Plot Data
+        sellShopRes.json(), // <-- Sell Shop Data
+        sellAgricultureRes.json(), // <-- Sell Agriculture Data
+        sellCoveredSpaceRes.json(), // <-- Sell Covered Space Data
+        sellOfficeSpaceRes.json(), // <-- Sell Office Space Data
+        sellOthersRes.json(), // <-- Sell Others Data
+        sellRetailStoreRes.json(), // <-- Sell Retail Store Data
+        sellShedRes.json(), // <-- Sell Sheds Data
+        sellPlotRes.json() // <-- Sell Plot Data
       ]);
 
+      // Process data for each category
       const agriList = agriData.success ? agriData.data : [];
       const otherList = othersData.success ? othersData.data : [];
       const coveredList = coveredData.success ? coveredData.data : [];
@@ -95,10 +134,25 @@ React.useEffect(() => {
       const showroomList = showroomData.success ? showroomData.data : [];
       const rentAgriList = rentAgriData.success ? rentAgriData.data : [];
       const rentCoveredList = rentCoveredData.success ? rentCoveredData.data : [];
-      const warehouseList = warehouseData.success ? warehouseData.data : [];  // ✅ Corrected
-      const officeSpaceList = officeSpaceData.success ? officeSpaceData.data : [];  // ✅ Corrected
+      const warehouseList = warehouseData.success ? warehouseData.data : [];
+      const officeSpaceList = officeSpaceData.success ? officeSpaceData.data : [];
+      const rentOthersList = rentOthersData.success ? rentOthersData.data : [];
+      const rentOfficeSpaceList = rentOfficeSpaceData.success ? rentOfficeSpaceData.data : [];
+      const rentShopList = rentShopData.success ? rentShopData.data : [];
+      const rentRetailStoreList = rentRetailStoreData.success ? rentRetailStoreData.data : [];
+      const rentShowroomList = rentShowroomData.success ? rentShowroomData.data : [];
+      const rentShedList = rentShedData.success ? rentShedData.data : [];
+      const rentPlotList = rentPlotData.success ? rentPlotData.data : [];
+      const sellShopList = sellShopData.success ? sellShopData.data : [];
+      const sellAgricultureList = sellAgricultureData.success ? sellAgricultureData.data : [];
+      const sellCoveredSpaceList = sellCoveredSpaceData.success ? sellCoveredSpaceData.data : [];
+      const sellOfficeSpaceList = sellOfficeSpaceData.success ? sellOfficeSpaceData.data : []; // <-- Sell Office Space Data
+      const sellOthersList = sellOthersData.success ? sellOthersData.data : []; // <-- Sell Others Data
+      const sellRetailStoreList = sellRetailStoreData.success ? sellRetailStoreData.data : []; // <-- Sell Retail Store Data
+      const sellShedList = sellShedData.success ? sellShedData.data : []; // <-- Sell Sheds Data
+      const sellPlotList = sellPlotData.success ? sellPlotData.data : []; // <-- Sell Plot Data
 
-      // ✅ Remove duplicate properties using propertyId or _id
+      // Remove duplicates by filtering based on unique propertyId or _id
       const uniqueById = (arr: any[]) => {
         const seen = new Set();
         return arr.filter((item) => {
@@ -112,7 +166,8 @@ React.useEffect(() => {
       const all = uniqueById([
         ...agriList, ...otherList, ...coveredList, ...plotList, ...retailList,
         ...shedList, ...shopList, ...showroomList,
-        ...rentAgriList, ...rentCoveredList, ...warehouseList, ...officeSpaceList
+        ...rentAgriList, ...rentCoveredList, ...warehouseList, ...officeSpaceList,
+        ...rentOthersList, ...rentOfficeSpaceList, ...rentShopList, ...rentRetailStoreList, ...rentShowroomList, ...rentShedList, ...rentPlotList, ...sellShopList, ...sellAgricultureList, ...sellCoveredSpaceList, ...sellOfficeSpaceList, ...sellOthersList, ...sellRetailStoreList, ...sellShedList, ...sellPlotList // <-- Added Sell Plot Data
       ]);
 
       setFetchedProperties(all);
@@ -129,6 +184,7 @@ React.useEffect(() => {
     hasFetched = true;
   };
 }, []);
+
 
 
   // Filtered locations for modal
@@ -160,62 +216,103 @@ React.useEffect(() => {
       max: null
     }
   });
+const filteredProperties: Property[] = useMemo(() => {
+  return fetchedProperties.map((item: any): Property => {
+    // Define property type flags
+    const isOther = item.commercialType?.includes("Other");
+    const isCovered = item.coveredSpaceDetails !== undefined;
+    const isPlot = item.plotDetails !== undefined || item.totalPlotArea !== undefined;
+    const isRetail = item.basicInformation?.storeType?.length > 0;
+    const isShed = item.basicInformation?.shedType?.length > 0 || item.shedDetails !== undefined;
+    const isShop = item.basicInformation?.shopType?.length > 0 || item.shopDetails !== undefined;
+    const isShowroom = item.basicInformation?.showroomType?.length > 0 || item.showroomDetails !== undefined;
+    const isRentAgri = item.Agriculturelanddetails !== undefined;
+    const isRentCovered = item.spaceDetails !== undefined;
+    const isWarehouse = item.coveredSpaceDetails?.ceilingHeight !== undefined;
+    const isOfficeSpace = item.officeSpaceDetails?.seatingcapacity !== undefined;
 
-  const filteredProperties: Property[] = useMemo(() => {
-    return fetchedProperties.map((item: any): Property => {
-      const isOther = item.commercialType?.includes("Other");
-      const isCovered = item.coveredSpaceDetails !== undefined;
-      const isPlot = item.plotDetails !== undefined || item.totalPlotArea !== undefined;
-      const isRetail = item.basicInformation?.storeType?.length > 0;
-      const isShed = item.basicInformation?.shedType?.length > 0 || item.shedDetails !== undefined;
-      const isShop = item.basicInformation?.shopType?.length > 0 || item.shopDetails !== undefined;
-      const isShowroom = item.basicInformation?.showroomType?.length > 0 || item.showroomDetails !== undefined;
-      const isRentAgri = item.Agriculturelanddetails !== undefined;
-      const isRentCovered = item.spaceDetails !== undefined;
-      const isWarehouse = item.coveredSpaceDetails?.ceilingHeight !== undefined;
-      const isOfficeSpace = item.officeSpaceDetails?.seatingcapacity !== undefined;
-  
-      return {
-        id: item._id || item.propertyId || '',
-        title: item.basicInformation?.title || item.title || 'Unnamed Property',
-        type: isShowroom
-          ? 'Showroom' as PropertyType
-          : isShed
-          ? 'Shed' as PropertyType
-          : isRetail
-          ? 'Retail Store' as PropertyType
-          : isShop
-          ? 'Shop' as PropertyType
-          : isPlot
-          ? 'Plot' as PropertyType
-          : isCovered
-          ? 'Warehouse' as PropertyType
-          : isRentAgri
-          ? 'Agricultural Land (Rent)' as PropertyType
-          : isRentCovered
-          ? 'Covered Space (Rent)' as PropertyType
-          : isWarehouse
-          ? 'Warehouse' as PropertyType
-          : isOfficeSpace
-          ? 'Office Space' as PropertyType
-          : isOther
-          ? 'Standalone Building' as PropertyType
-          : 'Agricultural' as PropertyType,
-        listingType: 'Owner' as ListingType,
-        price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
-        location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}`,
-        area: item.propertyDetails?.area?.totalArea || 0,
-        image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
-        postedDate: item.metadata?.createdAt?.slice(0, 10) || '',
-        status: (item.availability?.type || 'Available') as PropertyStatus,
-        intent: 'Lease' as PropertyIntent,
-        bhkType: item.propertyDetails?.bhkType || '1 BHK',  // ✅ Default BHK Type
-        bathrooms: item.propertyDetails?.bathrooms || 1,  // ✅ Default number of bathrooms
-        furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',  // ✅ Default furnishing
-      };
-    });
-  }, [fetchedProperties]);
-  
+    // Add classification for Rent Shop, Rent Warehouse, Rent Office Space, Rent Showroom, Rent Shed, Rent Plot, Sell Shop, Sell Agriculture, Sell Office Space, Sell Retail Store, and Sell Plot
+    const isRentWarehouse = item.commercialType?.includes("Warehouse (Rent)"); // Rent Warehouse classification
+    const isRentOfficeSpace = item.commercialType?.includes("Office Space (Rent)"); // Rent Office Space classification
+    const isRentShop = item.commercialType?.includes("Shop (Rent)"); // Rent Shop classification
+    const isRentShowroom = item.commercialType?.includes("Showroom (Rent)"); // Rent Showroom classification
+    const isRentShed = item.commercialType?.includes("Shed (Rent)"); // Rent Shed classification
+    const isRentPlot = item.commercialType?.includes("Plot (Rent)"); // Rent Plot classification
+    const isSellShop = item.commercialType?.includes("Shop (Sell)"); // Sell Shop classification
+    const isSellAgriculture = item.commercialType?.includes("Agriculture (Sell)"); // Sell Agriculture classification
+    const isSellOfficeSpace = item.commercialType?.includes("Office Space (Sell)"); // Sell Office Space classification
+    const isSellRetailStore = item.commercialType?.includes("Retail Store (Sell)"); // Sell Retail Store classification
+    const isSellPlot = item.commercialType?.includes("Plot (Sell)"); // Sell Plot classification
+
+    // Classify Rent Others
+    const isRentOthers = item.commercialType?.includes("Other") && !item.coveredSpaceDetails && !item.plotDetails;
+
+    return {
+      id: item._id || item.propertyId || '',
+      title: item.basicInformation?.title || item.title || 'Unnamed Property',
+      type: isShowroom
+        ? 'Showroom' as PropertyType
+        : isShed
+        ? 'Shed' as PropertyType
+        : isRetail
+        ? 'Retail Store' as PropertyType
+        : isShop
+        ? 'Shop' as PropertyType
+        : isPlot
+        ? 'Plot' as PropertyType
+        : isCovered
+        ? 'Warehouse' as PropertyType
+        : isRentAgri
+        ? 'Agricultural Land (Rent)' as PropertyType
+        : isRentCovered
+        ? 'Covered Space (Rent)' as PropertyType
+        : isWarehouse
+        ? 'Warehouse' as PropertyType
+        : isOfficeSpace
+        ? 'Office Space' as PropertyType
+        : isRentWarehouse
+        ? 'Warehouse (Rent)' as PropertyType
+        : isRentOfficeSpace
+        ? 'Office Space (Rent)' as PropertyType
+        : isRentShop
+        ? 'Shop (Rent)' as PropertyType
+        : isRentShowroom
+        ? 'Showroom (Rent)' as PropertyType
+        : isRentShed
+        ? 'Shed (Rent)' as PropertyType
+        : isRentPlot
+        ? 'Plot (Rent)' as PropertyType
+        : isSellShop
+        ? 'Shop (Sell)' as PropertyType
+        : isSellAgriculture
+        ? 'Agriculture (Sell)' as PropertyType
+        : isSellOfficeSpace
+        ? 'Office Space (Sell)' as PropertyType // Added Sell Office Space
+        : isSellRetailStore
+        ? 'Retail Store (Sell)' as PropertyType // Added Sell Retail Store
+        : isSellPlot
+        ? 'Plot (Sell)' as PropertyType // Added Sell Plot
+        : isRentOthers
+        ? 'Standalone Building (Rent)' as PropertyType
+        : isOther
+        ? 'Standalone Building' as PropertyType
+        : 'Agricultural' as PropertyType,
+      listingType: 'Owner' as ListingType,
+      price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
+      location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}`,
+      area: item.propertyDetails?.area?.totalArea || 0,
+      image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
+      postedDate: item.metadata?.createdAt?.slice(0, 10) || '',
+      status: (item.availability?.type || 'Available') as PropertyStatus,
+      intent: isSellOfficeSpace || isSellRetailStore || isSellPlot ? 'Sale' as PropertyIntent : 'Lease' as PropertyIntent, // Adjusted for Sale properties like Sell Office Space, Sell Retail Store, and Sell Plot
+      bhkType: item.propertyDetails?.bhkType || '1 BHK',  // Default BHK Type
+      bathrooms: item.propertyDetails?.bathrooms || 1,  // Default number of bathrooms
+      furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',  // Default furnishing
+    };
+  });
+}, [fetchedProperties]);
+
+
   const searchResults = useMemo(() => {
     const normalizedQuery = searchQuery.trim()
       .toLowerCase()
