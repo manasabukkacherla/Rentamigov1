@@ -96,7 +96,6 @@ import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilde
 import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
 import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
 import residentialRentIndependentHouseRoutes from "./routes/residential/rentIndependentHouse";
-import pgMediaRoutes from "./routes/residential/pgMediaRoutes";
 
 dotenv.config();
 
@@ -264,12 +263,26 @@ app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
 
-// PG Main (residential) API route
+// PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
-app.use("/api/residential/pgmain", residentialPgmainRoutes);
 
-// PG Media routes for S3 uploads
-app.use("/api/residential/pg-media", pgMediaRoutes);
+// Redirect old pg-media routes to the new integrated endpoints
+app.use("/api/residential/pg-media", (req, res, next) => {
+  // Rewrite the URL to use the new media endpoints in residentialPgmain
+  if (req.path === '/upload') {
+    req.url = '/media/upload';
+  } else if (req.path.match(/^\/[\w-]+\/[\w-]+$/)) {
+    // For paths like /:propertyId/:mediaId (DELETE)
+    const parts = req.path.split('/');
+    req.url = `/media${req.path}`;
+  } else if (req.path.match(/^\/[\w-]+$/)) {
+    // For paths like /:propertyId (GET)
+    req.url = `/media${req.path}`;
+  }
+  
+  // Forward to the residentialPgmain router
+  residentialPgmainRoutes(req, res, next);
+});
 
 //sell routes
 app.use("/api/residential/sale/apartments", residentialSellApartmentRoutes);
