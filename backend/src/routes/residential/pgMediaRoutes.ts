@@ -1,36 +1,14 @@
 import express from 'express';
-import {
-  createPg,
-  getAllPgs,
-  getPgByPropertyId,
-  updatePgById,
-  deletePgById
-} from '../../controllers/residential/residentialPgmainController';
 import { pgMediaUpload, processAndUploadPgMedia } from '../../middlewares/pgMediaUploader';
 import PgMain from '../../models/residential/Pgmain';
 import mongoose from 'mongoose';
 
 const router = express.Router();
 
-// Create new PG listing
-router.post('/', createPg);
-
-// Get all PG listings
-router.get('/', getAllPgs);
-
-// Get PG by Property ID
-router.get('/:propertyId', getPgByPropertyId);
-
-// Update PG by ID
-router.put('/:id', updatePgById);
-
-// Delete PG by ID
-router.delete('/:id', deletePgById);
-
 /**
  * Route to upload media files to S3 and save to MongoDB
  */
-router.post('/media/upload', pgMediaUpload, processAndUploadPgMedia, async (req, res) => {
+router.post('/upload', pgMediaUpload, processAndUploadPgMedia, async (req, res) => {
   try {
     const { propertyId } = req.body;
     const mediaItems = req.mediaItems;
@@ -120,7 +98,7 @@ router.post('/media/upload', pgMediaUpload, processAndUploadPgMedia, async (req,
 /**
  * Route to delete a media item from a PG property
  */
-router.delete('/media/:propertyId/:mediaId', async (req, res) => {
+router.delete('/:propertyId/:mediaId', async (req, res) => {
   try {
     const { propertyId, mediaId } = req.params;
 
@@ -178,7 +156,7 @@ router.delete('/media/:propertyId/:mediaId', async (req, res) => {
 /**
  * Route to get all media for a PG property
  */
-router.get('/media/:propertyId', async (req, res) => {
+router.get('/:propertyId', async (req, res) => {
   try {
     const { propertyId } = req.params;
 
