@@ -6,7 +6,7 @@ import {
   updatePgById,
   deletePgById
 } from '../../controllers/residential/residentialPgmainController';
-import { pgMediaUpload, processAndUploadPgMedia } from '../../middlewares/pgMediaUploader';
+import { pgMediaUpload, processAndUploadPgMedia } from '../../middleware/pgMediaUploader';
 import PgMain from '../../models/residential/Pgmain';
 import mongoose from 'mongoose';
 
