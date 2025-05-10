@@ -113,6 +113,8 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
     { id: 'triple', label: 'Triple Share Room', icon: <Users className="h-4 w-4" /> },
     { id: 'four', label: 'Four Share Room', icon: <Users className="h-4 w-4" /> },
     { id: 'five', label: 'Five Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'custom', label: 'Custom Share Room', icon: <Users className="h-4 w-4" /> },
+
     // custom/multi-share will be handled separately
   ];
 
