@@ -114,17 +114,16 @@ interface FormData {
       amount?: number;
     };
     availability: {
-      // immediate: boolean;
+      type: string;
       date: Date;
-      // specificDate: Date;
-      availableImmediately: boolean;
       preferredSaleDuration: string;
       noticePeriod: string;
-      petsAllowed: boolean;
-      operatingHours: {
-        restricted: boolean;
-        restrictions: string;
-      };
+      isPetsAllowed: boolean;
+      operatingHours: boolean;
+      // operatingHours: {
+      //   restricted: boolean;
+      //   restrictions: string;
+      // };
     };
   };
   contactInformation: {
@@ -243,17 +242,16 @@ const LeaseShopMain = () => {
         amount: 0
       },
       availability: {
-        // immediate: false,
-        date: new Date(),
-        // specificDate: new Date(),
-        availableImmediately: false,
-        preferredSaleDuration: '',
-        noticePeriod: '',
-        petsAllowed: false,
-        operatingHours: {
-          restricted: false,
-          restrictions: ''
-        }
+        type: 'immediate',
+    date: new Date(),
+    preferredSaleDuration: '',
+    noticePeriod: '',
+    isPetsAllowed: false,
+    operatingHours: false
+        // operatingHours: {
+        //   restricted: false,
+        //   restrictions: ''
+        // }
       }
     },
     contactInformation: {
@@ -467,14 +465,15 @@ const LeaseShopMain = () => {
                   // immediate: availability.immediate || false,
                   date: availability.date || new Date(),
                   // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
-                  availableImmediately: availability.availableImmediately || false,
+                  type: availability.type|| false,
                   preferredSaleDuration: availability.preferredSaleDuration || '',
                   noticePeriod: availability.noticePeriod || '',
-                  petsAllowed: availability.petsAllowed || false,
-                  operatingHours: {
-                    restricted: availability.operatingHours?.restricted || false,
-                    restrictions: availability.operatingHours?.restrictions || ''
-                  }
+                  isPetsAllowed: availability.isPetsAllowed || false,
+                  operatingHours: availability.operatingHours || false,
+                  // operatingHours: {
+                  //   restricted: availability.operatingHours?.restricted || false,
+                  //   restrictions: availability.operatingHours?.restrictions || ''
+                  // }
                 }
               }
             }))}
@@ -634,7 +633,7 @@ const LeaseShopMain = () => {
 
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial/lease-shops', transformedData, {
+        const response = await axios.post('/api/commercial/lease/shops', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

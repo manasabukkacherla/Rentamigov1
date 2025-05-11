@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import CommercialLeaseShop from '../../models/commercial/CommercialLeaseShop';
-import _ from 'lodash';
+import _, { property } from 'lodash';
 // import { validateCommercialShop } from '../validators/commercialShopValidator';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -55,55 +55,26 @@ export const createCommercialLeaseShop = async (req: Request, res: Response) => 
     const propertyId = await generatePropertyId();
 
     // Create the shop data with propertyId at the top level
-    const shopData = {
-      propertyId, // Ensure this is at the top level
-      basicInformation: formData.basicInformation,
-      shopDetails: formData.shopDetails,
-      propertyDetails: formData.propertyDetails,
-      leaseTerms: formData.leaseTerms,
-      contactInformation: formData.contactInformation,
-      media: formData.media,
-      metadata: {
-        ...formData.metadata,
-        createdBy: req.user?._id || null,
-        createdAt: new Date()
-        // updatedAt: new Date()
-      }
-    };
+    const property = new CommercialLeaseShop({
+      ...req.body,
+    propertyId,
+    metadata: {
+      ...req.body.metadata,
+      createdAt: new Date()
+    }
+    });
 
-    // // Create new shop listing
-    const shop = new CommercialLeaseShop(shopData);
-    await shop.save();
-
+    await property.save();
     res.status(201).json({
       success: true,
-      message: 'Commercial lease shop listing created successfully',
-      data: shop
-    });
-  } catch (error: any) {
-    console.error('Error creating commercial lease shop:', error);
-    res.status(500).json({ 
-      error: 'Failed to create commercial lease shop listing',
-      details: error.message 
-    });
-  }
-};
-
-
-export const getAllCommercialLeaseShop = async (req: Request, res: Response) => {
-  try {
-    const properties = await CommercialLeaseShop.find().sort({ 'metadata.createdAt': -1 });
-    
-    res.status(200).json({
-      success: true,
-      message: 'Commercial lease shop listings retrieved successfully',
-      data: properties
+      message: 'Lease Shop created successfully',
+      data: property,
     });
   } catch (error) {
-    console.error('Error fetching commercial lease shop listings:', error);
-    res.status(500).json({ 
+    console.error('Error creating lease shop:', error);
+    res.status(500).json({
       success: false,
-      error: 'Failed to fetch commercial lease shop listings' 
+      error: 'Failed to create lease shop',
     });
   }
 };
@@ -130,6 +101,22 @@ export const getCommercialLeaseShopById = async (req: Request, res: Response) =>
     res.status(500).json({ 
       success: false,
       error: 'Failed to fetch Commercial lease shop property' 
+    });
+  }
+};
+export const getAllCommercialLeaseShop = async (req: Request, res: Response) => {
+  try {
+    const properties = await CommercialLeaseShop.find({}).sort({ 'metadata.createdAt': -1 });
+    res.status(200).json({
+      success: true,
+      message: 'Fetched all lease shop successfully',
+      data: properties,
+    });
+  } catch (error) {
+    console.error('Error fetching shop:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch lease shop',
     });
   }
 };

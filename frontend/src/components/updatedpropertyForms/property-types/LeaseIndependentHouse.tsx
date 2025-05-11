@@ -442,7 +442,7 @@ const LeaseIndependentHouse = () => {
       otherCharges: {
         water: {
           amount: 0,
-          type: 'inclusive',
+         type: 'inclusive',
         },
         electricity: {
           amount: 0,

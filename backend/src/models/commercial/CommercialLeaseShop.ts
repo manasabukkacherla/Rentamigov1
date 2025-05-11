@@ -39,8 +39,8 @@ interface IMedia {
 }
 
 interface IMetadata {
-  createdBy: Schema.Types.ObjectId | null;
-  createdAt: Date;
+  createdBy: string;
+  createdAt: string;
 }
 
 interface ILeaseTerms {
@@ -91,14 +91,12 @@ interface ILeaseTerms {
         },
         availability: {
             date: Date,
-            availableImmediately: Boolean,
+            type: string,
             preferredSaleDuration: String,
             noticePeriod: String,
             isPetsAllowed: Boolean,
-            operatingHours: {
-                restricted: Boolean,
-                restrictions: String
-            }
+            operatingHours:  Boolean,
+                
         },
       },
     
@@ -136,7 +134,7 @@ interface ICommercialLeaseShop extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   leaseTerms: ILeaseTerms;
@@ -192,7 +190,7 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
       backup: { type: Boolean, default: false },
     },
     waterAvailability: { type: String, required: true },
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type:String, required: true },
     propertyCondition: { type: String, required: true },
   },    
   leaseTerms: {
@@ -242,14 +240,11 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
     },
     availability: {
         date: { type: Date, required: true },
-        availableImmediately: { type: Boolean, required: true },
+        type: { type: String, required: true },
         preferredSaleDuration: { type: String, required: true },
         noticePeriod: { type: String, required: true },
         isPetsAllowed: { type: Boolean, required: true },
-        operatingHours: {
-            restricted: { type: Boolean, required: true },
-            restrictions: { type: String, required: true }  
-        }
+        operatingHours: { type: Boolean, required: true},
     }
   },
   contactInformation: {
@@ -272,9 +267,9 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
     documents: [{ type: String }] 
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
-  }
+    createdBy: { type: String, required: true },
+    createdAt: { type: String, required: true },
+  },
 }, {
   timestamps: true
 });

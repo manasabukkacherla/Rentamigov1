@@ -1361,7 +1361,7 @@ const LeaseBuilderFloor  = () => {
   
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Apartment</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Builder Floor</h1>
         </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep - 1].title}</h2>
