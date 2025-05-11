@@ -84,7 +84,7 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
       ...formData,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+       // createdBy: req.user?._id || null,
         createdAt: new Date()
       }
     };

@@ -777,7 +777,7 @@ const LeasePlotMain = () => {
           createdBy: author,
           createdAt: new Date(),
           userName: author,
-          userId: author // Ensure userId is present for backend validation
+          userId: author 
         }
       };
 

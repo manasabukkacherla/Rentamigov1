@@ -128,7 +128,7 @@ export interface ICommercialLeaseAgriculture extends Document {
   }
 }
 
-const CommercialLeaseAgricultureSchema: Schema = new Schema({
+const CommercialLeaseAgriculture = new Schema({
   propertyId: { type: String, default: () => `CLA-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   title: { type: String, default: "Unnamed Property" },
   landType: { type: [String], default: ["Agricultural"] },
@@ -198,19 +198,19 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
   },
   otherCharges: {
     electricityCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+      type: { type: String, enum: ['inclusive', 'exclusive']},
       amount: { type: Number }
     },
     waterCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+      type: { type: String, enum: ['inclusive', 'exclusive']},
       amount: { type: Number }
     },
     gasCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+      type: { type: String, enum: ['inclusive', 'exclusive']},
       amount: { type: Number }
     },
     otherCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+      type: { type: String, enum: ['inclusive', 'exclusive']},
       amount: { type: Number }
     }
   },
@@ -248,9 +248,9 @@ const CommercialLeaseAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now }
   }
 });
 
-export default mongoose.model<ICommercialLeaseAgriculture>('CommercialLeaseAgriculture', CommercialLeaseAgricultureSchema); 
+export default mongoose.model<ICommercialLeaseAgriculture>('CommercialLeaseAgriculture', CommercialLeaseAgriculture); 
