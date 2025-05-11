@@ -218,7 +218,8 @@ function Pgmain() {
   
   const [currentStep, setCurrentStep] = useState(getInitialStep());
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<string>('');
+  const [propertyId, setPropertyId] = useState<string>('');
 
   // Handle form submission to backend
   const navigate = useNavigate();
@@ -495,9 +496,14 @@ function Pgmain() {
       console.log('OtherFeaturesAndRestrictions before POST:', formData.otherFeaturesAndRestrictions);
       console.log('Sending payload with processed media');
       
-      await axios.post('/api/residential/pgmain', payload, {
+      const response = await axios.post('/api/residential/pgmain', payload, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
+      
+      // Store the property ID for S3 uploads
+      if (response.data && response.data.data && response.data.data.propertyId) {
+        setPropertyId(response.data.data.propertyId);
+      }
 
       // Clear session storage after successful submission
       sessionStorage.removeItem(PG_FORM_DATA_KEY);
@@ -650,6 +656,7 @@ function Pgmain() {
           ...prev,
           media: { ...prev.media, mediaItems: mediaItems }
         }))}
+        propertyId={propertyId}
       />
     }
   ];

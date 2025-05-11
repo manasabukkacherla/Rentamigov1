@@ -1,6 +1,7 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { Image as ImageIcon, Video, X, Upload, Camera, AlertCircle, Tag, Users, Home, Key, Lightbulb, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Image as ImageIcon, Video, X, Camera, Users, Home, Plus, ChevronDown, ChevronUp, AlertCircle, Tag, Key, Lightbulb, Upload } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { uploadPgMediaToS3 } from '../../../../utils/pgMediaUploader';
 
 interface MediaItem {
   id: string;
@@ -10,8 +11,9 @@ interface MediaItem {
   title: string;
   tags: string[];
   roomType?: string;
-  base64?: string; // Store the base64 encoded data
   category?: string; // For categorizing common areas
+  uploaded?: boolean;
+  url?: string;
 }
 
 interface RoomTypeOption {
@@ -25,153 +27,12 @@ interface PgMediaProps {
   customShare: string;
   mediaItems: any[];
   onMediaItemsChange: (mediaItems: any[]) => void;
+  propertyId?: string;
 }
 
-const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaItems: propMediaItems, onMediaItemsChange }) => {
-  // Initialize state from props or empty array
+const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaItems: propMediaItems, onMediaItemsChange, propertyId }) => {
+  // Initialize all state variables at the top of the component
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
-  
-  // Convert file to base64 with size check
-  const convertToBase64 = async (file: File): Promise<string> => {
-    // For videos, check size first
-    if (file.type.startsWith('video/') && file.size > 50 * 1024 * 1024) { // 50MB limit for videos
-      throw new Error(`Video file size exceeds 50MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
-    }
-    
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      
-      // Add timeout handling
-      const timeout = setTimeout(() => {
-        reader.abort();
-        reject(new Error('File conversion timed out'));
-      }, 30000); // 30 second timeout
-      
-      reader.readAsDataURL(file);
-      
-      reader.onload = () => {
-        clearTimeout(timeout);
-        resolve(reader.result as string);
-      };
-      
-      reader.onerror = error => {
-        clearTimeout(timeout);
-        reject(error);
-      };
-    });
-  };
-  
-  // Process media items and update parent component
-  const processAndUpdateMediaItems = async (items: MediaItem[]) => {
-    try {
-      setError(''); // Clear any previous errors
-      
-      // Separate photos and videos for different processing strategies
-      const photoItems = items.filter(item => item.type === 'photo');
-      const videoItems = items.filter(item => item.type === 'video');
-      
-      console.log(`Processing ${photoItems.length} photos and ${videoItems.length} videos`);
-      
-      // Process photos in parallel (they're typically smaller and process faster)
-      const processedPhotoItems = await Promise.all(photoItems.map(async (item) => {
-        if (!item.base64 && item.file) {
-          console.log(`Processing photo: ${item.title} (${(item.file.size / (1024 * 1024)).toFixed(2)}MB)`);
-          
-          try {
-            const base64Data = await convertToBase64(item.file);
-            console.log(`Successfully converted photo to base64`);
-            return { ...item, base64: base64Data };
-          } catch (conversionError: any) {
-            console.error(`Error processing photo file:`, conversionError);
-            // Return item without base64 to prevent blocking the entire process
-            return item;
-          }
-        }
-        return item;
-      }));
-      
-      // Process videos sequentially to avoid memory issues
-      let processedVideoItems: MediaItem[] = [];
-      for (const item of videoItems) {
-        if (!item.base64 && item.file) {
-          console.log(`Processing video: ${item.title} (${(item.file.size / (1024 * 1024)).toFixed(2)}MB)`);
-          
-          try {
-            // Check video format
-            if (!['video/mp4', 'video/webm', 'video/quicktime'].includes(item.file.type)) {
-              console.warn(`Unsupported video format: ${item.file.type}. Please use MP4, WebM, or MOV format.`);
-              // Still include the item but with a warning
-              processedVideoItems.push(item);
-              continue;
-            }
-            
-            // For large videos, we'll just use the preview URL and not convert to base64
-            if (item.file.size > 20 * 1024 * 1024) { // 20MB threshold
-              console.log(`Video file is large (${(item.file.size / (1024 * 1024)).toFixed(2)}MB), skipping base64 conversion`);
-              processedVideoItems.push(item); // Keep the file and preview, but skip base64 conversion
-              continue;
-            }
-            
-            // Convert to base64 for smaller videos
-            const base64Data = await convertToBase64(item.file);
-            console.log(`Successfully converted video to base64`);
-            processedVideoItems.push({ ...item, base64: base64Data });
-          } catch (conversionError: any) {
-            console.error(`Error processing video file:`, conversionError);
-            // Still include the item without base64
-            processedVideoItems.push(item);
-          }
-        } else {
-          processedVideoItems.push(item);
-        }
-      }
-      
-      // Combine processed photos and videos
-      const processedItems = [...processedPhotoItems, ...processedVideoItems];
-      
-      // Update local state
-      setMediaItems(processedItems);
-      
-      // Update parent component with processed items
-      // Convert to format expected by parent component
-      const parentFormatItems = processedItems.map(item => {
-        if (item.type === 'video') {
-          console.log(`Preparing video item for parent component: ${item.title}`);
-          // For videos, use base64 if available, otherwise use preview URL
-          return {
-            id: item.id,
-            type: item.type,
-            url: item.base64 || item.preview,
-            title: item.title,
-            tags: item.tags,
-            roomType: item.roomType,
-            category: item.category,
-            file: item.file // Always include the file object for server upload
-          };
-        }
-        
-        // For photos and other media
-        return {
-          id: item.id,
-          type: item.type,
-          url: item.base64 || item.preview,
-          title: item.title,
-          tags: item.tags,
-          roomType: item.roomType,
-          category: item.category,
-          file: item.file
-        };
-      });
-      
-      console.log(`Sending ${parentFormatItems.length} media items to parent component`);
-      console.log(`Videos: ${parentFormatItems.filter(item => item.type === 'video').length}`);
-      
-      onMediaItemsChange(parentFormatItems);
-    } catch (error: any) {
-      console.error('Error processing media items:', error);
-      setError(error.message || 'Failed to process media items');
-    }
-  };
   const [batchTitle, setBatchTitle] = useState('');
   const [selectedType, setSelectedType] = useState<'photo' | 'video'>('photo');
   const [error, setError] = useState('');
@@ -183,10 +44,123 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  
   const defaultPhotoTags = ['Exterior', 'Interior', 'Room', 'Bathroom', 'Kitchen', 'Common Area'];
   const defaultVideoTags = ['Room Tour', 'Facility Tour', 'Amenities', 'Overview'];
-
+  
+  // Check file size for videos
+  const checkVideoFileSize = (file: File): void => {
+    if (file.type.startsWith('video/') && file.size > 50 * 1024 * 1024) { // 50MB limit for videos
+      throw new Error(`Video file size exceeds 50MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+    }
+  };
+  
+  // Process media items and update parent component
+  const processAndUpdateMediaItems = async (items: MediaItem[]) => {
+    try {
+      setError(''); // Clear any previous errors
+      
+      const photoItems = items.filter(item => item.type === 'photo');
+      const videoItems = items.filter(item => item.type === 'video');
+      
+      console.log(`Processing ${photoItems.length} photos and ${videoItems.length} videos`);
+      
+      // Check video file sizes
+      for (const item of videoItems) {
+        if (item.file) {
+          try {
+            checkVideoFileSize(item.file);
+          } catch (error: any) {
+            console.error('Video file size error:', error);
+            toast.error(error.message);
+            setError(error.message);
+            return;
+          }
+        }
+      }
+      
+      // Check video formats
+      for (const item of videoItems) {
+        if (item.file && !['video/mp4', 'video/webm', 'video/quicktime'].includes(item.file.type)) {
+          console.warn(`Unsupported video format: ${item.file.type}. Please use MP4, WebM, or MOV format.`);
+          toast.error(`Unsupported video format: ${item.file.type}. Please use MP4, WebM, or MOV format.`);
+        }
+      }
+      
+      // If no propertyId is available, we'll just process the media locally
+      // and update the UI with preview URLs instead of uploading to S3
+      
+      if (propertyId) {
+        // If propertyId is available, upload to S3
+        // Show loading toast
+        toast.loading('Uploading media to server...', { id: 'media-upload' });
+        
+        // Prepare items for S3 upload
+        const itemsToUpload = items.map(item => ({
+          id: item.id,
+          type: item.type,
+          file: item.file,
+          title: item.title,
+          tags: item.tags,
+          roomType: item.roomType,
+          category: item.category
+        }));
+        
+        try {
+          // Upload to S3
+          const uploadedItems = await uploadPgMediaToS3(propertyId, itemsToUpload);
+          
+          // Show success toast
+          toast.success(`Successfully uploaded ${uploadedItems.length} files`, { id: 'media-upload' });
+          
+          // Update local state with uploaded items
+          setMediaItems(items.map(item => {
+            const uploadedItem = uploadedItems.find(ui => ui.id === item.id);
+            if (uploadedItem) {
+              return {
+                ...item,
+                url: uploadedItem.url, // Use the S3 URL
+                uploaded: true
+              };
+            }
+            return item;
+          }));
+          
+          // Update parent component with uploaded items
+          onMediaItemsChange(uploadedItems);
+        } catch (uploadError: any) {
+          console.error('Error uploading to S3:', uploadError);
+          toast.error(`Error uploading: ${uploadError.message}`, { id: 'media-upload' });
+          setError(uploadError.message || 'Failed to upload media to server');
+        }
+      } else {
+        // If no propertyId, just process locally and use preview URLs
+        console.log('No propertyId available, processing media locally');
+        
+        // Update local state with the new items
+        setMediaItems(items);
+        
+        // Update parent component with the new items
+        // Convert to format expected by parent component
+        const parentFormatItems = items.map(item => ({
+          id: item.id,
+          type: item.type,
+          url: item.preview, // Use the preview URL since we don't have S3 URLs yet
+          title: item.title,
+          tags: item.tags,
+          roomType: item.roomType,
+          category: item.category
+        }));
+        
+        onMediaItemsChange(parentFormatItems);
+        toast.success(`Added ${items.length} media files for later upload`);
+      }
+    } catch (error: any) {
+      console.error('Error processing media items:', error);
+      setError(error.message || 'Failed to process media items');
+    }
+  };
+  
   const roomTypeOptions: RoomTypeOption[] = [
     { id: 'single', label: 'Single Room', icon: <Home className="h-4 w-4" /> },
     { id: 'double', label: 'Double Share Room', icon: <Users className="h-4 w-4" /> },
@@ -270,7 +244,6 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
               type: 'photo',
               file: file,
               preview: URL.createObjectURL(blob),
-              base64: base64Data,
               title: batchTitle || `${getRoomTypeLabel(selectedRoomType)} Photo`,
               tags: [],
               roomType: selectedRoomType || undefined,
@@ -357,8 +330,8 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       }
       
       // Limit the number of videos that can be uploaded at once
-      if (files.length > 3) {
-        setError(`Please upload a maximum of 3 videos at a time to avoid processing issues.`);
+      if (files.length > 6) {
+        setError(`Please upload a maximum of 6 videos at a time to avoid processing issues.`);
         return;
       }
     }
@@ -377,23 +350,34 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
         category: category
       };
     });
-
+    
     try {
-      // Update state with new items and process them for base64
-      const updatedItems = [...mediaItems, ...newMediaItems];
-      setMediaItems(updatedItems);
-      
-      // Show loading message for multiple videos
+      // Show appropriate loading message based on number of videos
       if (selectedType === 'video' && files.length > 1) {
-        toast.loading(`Processing ${files.length} videos. This may take a moment...`, {
+        const duration = files.length > 3 ? 10000 : 5000; // Longer duration for more videos
+        const message = files.length > 3 
+          ? `Processing ${files.length} videos. This may take several minutes...` 
+          : `Processing ${files.length} videos. This may take a moment...`;
+        
+        toast.loading(message, {
           id: 'video-processing',
-          duration: 5000
+          duration: duration
         });
+        
+        // For larger batches of videos (4-6), show additional info
+        if (files.length > 3) {
+          console.log(`Processing ${files.length} videos. Uploading to S3 may take several minutes.`);
+          setTimeout(() => {
+            if (files.length > 3) {
+              toast.loading('Still uploading videos to S3. Please be patient...', {
+                id: 'video-processing-update',
+                duration: 15000
+              });
+            }
+          }, duration);
+        }
       }
       
-      await processAndUpdateMediaItems(updatedItems);
-      
-      setBatchTitle('');
       if (e.target) {
         e.target.value = '';
       }
@@ -404,6 +388,11 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           id: 'video-processing'
         });
       }
+      
+      // Process and add the new media items
+      setMediaItems(prevItems => [...prevItems, ...newMediaItems]);
+      processAndUpdateMediaItems([...mediaItems, ...newMediaItems]);
+      
     } catch (error: any) {
       console.error('Error handling file selection:', error);
       setError(error.message || 'Failed to process selected files');
