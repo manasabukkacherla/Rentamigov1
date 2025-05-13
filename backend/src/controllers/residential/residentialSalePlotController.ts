@@ -240,7 +240,7 @@ const transformPlotData = (formData: any) => {
 };
 
 // Create a new commercial lease plot listing
-export const createLeasePlot = async (req: Request, res: Response) => {
+export const createPlot = async (req: Request, res: Response) => {
     try {
         const formData = req.body;
         console.log('Received lease plot data:', formData);
@@ -290,7 +290,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 };
 
 // Get all commercial lease plots
-export const getAllLeasePlots = async (req: Request, res: Response) => {
+export const getAllPlots = async (req: Request, res: Response) => {
     try {
         const leasePlots = await SalePlot.find()
             .populate('metadata.createdBy', 'name email')
@@ -313,7 +313,7 @@ export const getAllLeasePlots = async (req: Request, res: Response) => {
 };
 
 // Get a specific commercial lease plot by ID
-export const getLeasePlotById = async (req: Request, res: Response) => {
+export const getPlotById = async (req: Request, res: Response) => {
     try {
         const leasePlot = await SalePlot.findById(req.params.id)
             .populate('metadata.createdBy', 'name email')
@@ -389,7 +389,7 @@ export const updatePlotById = async (req: Request, res: Response) => {
       }
     };
   
-  export const deleteLeasePlotById = async (req: Request, res: Response) => {
+  export const deletePlotById = async (req: Request, res: Response) => {
     try {
         const data = await SalePlot.findByIdAndDelete(req.params.id);
 
