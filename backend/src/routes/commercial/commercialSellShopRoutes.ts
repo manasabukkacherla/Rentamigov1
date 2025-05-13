@@ -1,29 +1,26 @@
 import express from 'express';
-import { protect } from '../../middleware/authMiddleware';
-import { 
-  createCommercialSellShop,
-  getAllCommercialSellShops,
-  getCommercialSellShopById,
-  updateCommercialSellShop,
-  deleteCommercialSellShop
-} from '../../controllers/commercial/commercialSellShopController';
+import { createCommercialShop, deleteCommercialSellShop, getAllCommercialSellShop, getCommercialSellShopById, updateCommercialSellShop } from '../../controllers/commercial/commercialSellShopController';
+import fileUpload from '../../middleware/fileUpload';
+import { authenticateUser } from '../../middleware/auth';
 
-const router = express.Router();
+const commercialSellShopRoutes = express.Router();
 
-// Create a new commercial shop listing for sale
-// Optional authentication - metadata.createdBy will be used if user is authenticated
-router.post('/', createCommercialSellShop);
+const uploadFields = [
+  { name: 'photos[exterior]', maxCount: 10 },
+  { name: 'photos[interior]', maxCount: 10 },
+  { name: 'photos[floorPlan]', maxCount: 5 },
+  { name: 'photos[washrooms]', maxCount: 5 },
+  { name: 'photos[lifts]', maxCount: 5 },
+  { name: 'photos[emergencyExits]', maxCount: 5 },
+  { name: 'videoTour', maxCount: 1 },
+  { name: 'documents', maxCount: 5 }
+];
 
-// Get all commercial shop listings (public)
-router.get('/', getAllCommercialSellShops);
+// Create a new commercial shop listing
+commercialSellShopRoutes.post('/create', authenticateUser, fileUpload.fields(uploadFields), createCommercialShop);
+commercialSellShopRoutes.get('/', getAllCommercialSellShop);
+commercialSellShopRoutes.get('/:id', getCommercialSellShopById);
+commercialSellShopRoutes.put('/:id', updateCommercialSellShop);
+commercialSellShopRoutes.delete('/:id', deleteCommercialSellShop);
 
-// Get a single commercial shop listing by id (public)
-router.get('/:id', getCommercialSellShopById);
-
-// Update a commercial shop listing (protected - must be listing creator)
-router.put('/:id', protect, updateCommercialSellShop);
-
-// Delete a commercial shop listing (protected - must be listing creator)
-router.delete('/:id', protect, deleteCommercialSellShop);
-
-export default router; 
+export default commercialSellShopRoutes; 

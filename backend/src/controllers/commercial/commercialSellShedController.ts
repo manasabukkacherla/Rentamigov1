@@ -1,50 +1,41 @@
 import { Request, Response } from 'express';
-import CommercialSellShed from '../../models/commercial/CommercialSellShed';
+import CommercialShed from '../../models/commercial/CommercialSellShed';
+import { ICommercialSellShed } from '../../models/commercial/CommercialSellShed';
 
+// Generate property ID with format RA-COMSHED-XXXX
 const generatePropertyId = async (): Promise<string> => {
   try {
-    // Prefix for the commercial sell shed property ID
-    const prefix = "RA-COMSESD";
+    const prefix = "RA-COMSHED";
     
-    // Find the property with the highest property ID number
-    const highestProperty = await CommercialSellShed.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
-    }).sort({ propertyId: -1 });
+    // Find the shed with the highest property ID number
+    const highestShed = await CommercialShed.findOne({
+      propertyId: { $regex: `^${prefix}-\\d+$` }
+    }).sort({ propertyId: -1 }).lean();
     
-    let nextNumber = 1; // Default start number
+    let nextNumber = 1;
     
-    if (highestProperty && highestProperty.propertyId) {
-      // Extract the numeric part from the existing highest property ID
-      const match = highestProperty.propertyId.match(/(\d+)$/);
+    if (highestShed && highestShed.propertyId) {
+      const match = highestShed.propertyId?.match(/-(\d+)$/);
       if (match && match[1]) {
-        // Convert to number and increment by 1
         nextNumber = parseInt(match[1], 10) + 1;
       }
     }
     
-    // Create the property ID with the sequence number
-    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+    const propertyId = `${prefix}-${nextNumber.toString().padStart(4, '0')}`;
     
-    // Check if this exact ID somehow exists (should be rare but possible with manual entries)
-    const existingWithExactId = await CommercialSellShed.findOne({ propertyId });
-    
+    // Verify the generated ID doesn't already exist
+    const existingWithExactId = await CommercialShed.findOne({ propertyId }).lean();
     if (existingWithExactId) {
-      // In case of collision (e.g., if IDs were manually entered), recursively try the next number
-      console.log(`Property ID ${propertyId} already exists, trying next number`);
-      
-      // Force increment the next number and try again
-      const forcedNextNumber = nextNumber + 1;
-      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
-      
-      // Double-check this new ID
-      const forcedExisting = await CommercialSellShed.findOne({ propertyId: forcedPropertyId });
+      // Try the next sequential ID to avoid collisions
+      const forcedNextId = `${prefix}-${(nextNumber + 1).toString().padStart(4, '0')}`;
+      const forcedExisting = await CommercialShed.findOne({ propertyId: forcedNextId }).lean();
       
       if (forcedExisting) {
-        // If still colliding, recursively generate a new ID
+        // If still colliding, generate a completely new ID
         return generatePropertyId();
       }
       
-      return forcedPropertyId;
+      return forcedNextId;
     }
     
     return propertyId;
@@ -52,118 +43,316 @@ const generatePropertyId = async (): Promise<string> => {
     console.error('Error generating property ID:', error);
     // Fallback to timestamp-based ID if there's an error
     const timestamp = Date.now().toString().slice(-8);
-    return `SD-COMSESD${timestamp}`;
+    return `RA-COMSHED-${timestamp}`;
   }
 };
 
-export const createCommercialSellShed = async (req: Request, res: Response) => {
+// Create a new commercial shed listing
+export const createCommercialShed = async (req: Request, res: Response) => {
   try {
-    const formData = req.body;
-    console.log(formData);
-    // Generate property ID
-    const propertyId = await generatePropertyId();
-
-    // Prepare shed data with property ID and metadata
-    const shedData = {
-      propertyId,
-      ...formData,
-      metaData: {
-        ...formData.metaData,
-        createdBy: req.user?._id || null,
-        createdAt: new Date()
-        }
-    };
+    const shedData = req.body;
     
-    // Create new shed listing
-    const shed = new CommercialSellShed(shedData);
-    await shed.save();
-
-    res.status(201).json({
-      message: 'Commercial sell shed listing created successfully',
-      data: shed
-    });
-  } catch (error) {
-    console.error('Error creating commercial sell shed:', error);
-    res.status(500).json({ error: 'Failed to create commercial sell shed listing' });
-  }
-};
-
-export const getAllSellShed = async (req: Request, res: Response) => {
-  try {
-    const properties = await CommercialSellShed.find().sort({ 'metaData.createdAt': -1 });
-    
-    res.status(200).json({
-      message: 'Commercial sell shed listings retrieved successfully',
-      data: properties
-    });
-  } catch (error) {
-    console.error('Error fetching commercial sell shed listings:', error);
-    res.status(500).json({ error: 'Failed to fetch commercial sell shed listings' });
-  }
-};
-
-export const getSellShedById = async (req: Request, res: Response) => {
-  try {
-    const propertyId = req.params.id;
-    const property = await CommercialSellShed.findOne({ propertyId });
-    
-    if (!property) {
-      return res.status(404).json({ error: 'Commercial sell shed property not found' });
+    // Basic validation - ensure required fields exist
+    if (!shedData.propertyName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: property name'
+      });
     }
     
-    res.status(200).json({
-      message: 'Commercial sell shed property retrieved successfully',
-      data: property
+    if (!shedData.shedDetails?.totalArea) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required field: property area'
+      });
+    }
+
+    // Generate property ID
+    const propertyId = await generatePropertyId();
+    
+    // Add metadata and property ID
+    shedData.metaData = {
+      creadtedBy: shedData.metaData?.creadtedBy, 
+      createdAt: new Date(),
+      // status: 'pending',
+      // isVerified: false,
+      // isActive: true,
+      // views: 0,
+      // inquiries: 0,
+      // favoriteCount: 0
+    };
+    
+    // Add property ID to the shed data
+    shedData.propertyId = propertyId;
+
+    // Create and save shed with optimized approach
+    const shed = new CommercialShed(shedData);
+    await shed.save();
+
+    // Return a successful response with minimal data
+    return res.status(201).json({
+      success: true,
+      message: 'Commercial shed listing created successfully',
+      data: {
+        propertyId: shed.propertyId,
+        _id: shed._id,
+        propertyName: shed.propertyName,
+        metaData: shed.metaData
+      }
     });
-  } catch (error) {
-    console.error('Error fetching commercial sell shed property:', error);
-    res.status(500).json({ error: 'Failed to fetch commercial sell shed property' });
+
+  } catch (error: any) {
+    console.error('Error creating commercial shed:', error);
+
+    // Handle validation errors specifically
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.message
+      });
+    }
+
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        error: 'Duplicate property information',
+        details: 'A property with this information already exists'
+      });
+    }
+
+    // General error response
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to create commercial shed listing',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 };
 
-export const updateSellShed = async (req: Request, res: Response) => {
+// Get all commercial sheds with pagination and filtering
+export const getAllCommercialSheds = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const { page = 1, limit = 10, city, minPrice, maxPrice, minArea, maxArea, sort } = req.query;
+    
+    const pageNum = parseInt(page as string, 10);
+    const limitNum = parseInt(limit as string, 10);
+    const skip = (pageNum - 1) * limitNum;
+    
+    // Build filter query
+    const query: any = {};
+    
+    if (city) {
+      query['address.city'] = city;
+    }
+    
+    if (minPrice) {
+      query['pricingDetails.propertyPrice'] = { $gte: parseInt(minPrice as string, 10) };
+    }
+    
+    if (maxPrice) {
+      query['pricingDetails.propertyPrice'] = { 
+        ...query['pricingDetails.propertyPrice'] || {},
+        $lte: parseInt(maxPrice as string, 10) 
+      };
+    }
+    
+    if (minArea) {
+      query['shedDetails.totalArea'] = { $gte: parseInt(minArea as string, 10) };
+    }
+    
+    if (maxArea) {
+      query['shedDetails.totalArea'] = { 
+        ...query['shedDetails.totalArea'] || {},
+        $lte: parseInt(maxArea as string, 10) 
+      };
+    }
+    
+    // Build sort query
+    let sortQuery: any = { 'metaData.createdAt': -1 }; // Default sorting
+    
+    if (sort === 'price-asc') {
+      sortQuery = { 'pricingDetails.propertyPrice': 1 };
+    } else if (sort === 'price-desc') {
+      sortQuery = { 'pricingDetails.propertyPrice': -1 };
+    } else if (sort === 'area-asc') {
+      sortQuery = { 'shedDetails.totalArea': 1 };
+    } else if (sort === 'area-desc') {
+      sortQuery = { 'shedDetails.totalArea': -1 };
+    }
+    
+    // Execute query with projection for list view
+    const sheds = await CommercialShed.find(query)
+      .select('propertyId propertyName shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metaData')
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limitNum)
+      .lean();
+    
+    // Get total count for pagination
+    const total = await CommercialShed.countDocuments(query);
+    
+    return res.status(200).json({
+      success: true,
+      data: sheds,
+      pagination: {
+        total,
+        page: pageNum,
+        limit: limitNum,
+        pages: Math.ceil(total / limitNum)
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error fetching commercial sheds:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch commercial sheds'
+    });
+  }
+};
+
+// Get a single commercial shed by ID
+export const getCommercialShedById = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
+    // Try to find by MongoDB _id or propertyId
+    const query = id.match(/^[0-9a-fA-F]{24}$/) 
+      ? { _id: id } 
+      : { propertyId: id };
+    
+    const shed = await CommercialShed.findOne(query).lean();
+    
+    if (!shed) {
+      return res.status(404).json({
+        success: false,
+        error: 'Commercial shed not found'
+      });
+    }
+    
+    // Update view count
+    await CommercialShed.updateOne(
+      query, 
+      { $inc: { 'metaData.views': 1 } }
+    );
+    
+    return res.status(200).json({
+      success: true,
+      data: shed
+    });
+    
+  } catch (error) {
+    console.error('Error fetching commercial shed:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to fetch commercial shed'
+    });
+  }
+};
+
+// Update a commercial shed
+export const updateCommercialShed = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
     const updateData = req.body;
     
-    // Find and update the property
-    const updatedProperty = await CommercialSellShed.findOneAndUpdate(
-      { propertyId },
-      { $set: updateData },
+    // Try to find by MongoDB _id or propertyId
+    const query = id.match(/^[0-9a-fA-F]{24}$/) 
+      ? { _id: id } 
+      : { propertyId: id };
+    
+    // Update metadata
+    updateData.metaData = {
+      ...updateData.metaData,
+      updatedAt: new Date()
+    };
+
+    const shed = await CommercialShed.findById(req.params.id);
+    const userId = req.body.userId;
+    if (shed?.metaData?.createdBy?.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this listing'
+      });
+    }
+    
+    const updatedShed = await CommercialShed.findOneAndUpdate(
+      query,
+      updateData,
       { new: true, runValidators: true }
     );
     
-    if (!updatedProperty) {
-      return res.status(404).json({ error: 'Commercial sell shed property not found' });
+    if (!updatedShed) {
+      return res.status(404).json({
+        success: false,
+        error: 'Commercial shed not found'
+      });
     }
     
-    res.status(200).json({
-      message: 'Commercial sell shed property updated successfully',
-      data: updatedProperty
+    return res.status(200).json({
+      success: true,
+      message: 'Commercial shed updated successfully',
+      data: updatedShed
     });
-  } catch (error) {
-    console.error('Error updating commercial sell shed property:', error);
-    res.status(500).json({ error: 'Failed to update commercial sell shed property' });
+    
+  } catch (error: any) {
+    console.error('Error updating commercial shed:', error);
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.message
+      });
+    }
+    
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to update commercial shed'
+    });
   }
 };
 
-export const deleteSellShed = async (req: Request, res: Response) => {
+// Delete a commercial shed
+export const deleteCommercialShed = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const { id } = req.params;
     
-    // Find and delete the property
-    const deletedProperty = await CommercialSellShed.findOneAndDelete({ propertyId });
+    // Try to find by MongoDB _id or propertyId
+    const query = id.match(/^[0-9a-fA-F]{24}$/) 
+      ? { _id: id } 
+      : { propertyId: id };
     
-    if (!deletedProperty) {
-      return res.status(404).json({ error: 'Commercial sell shed property not found' });
+    const deletedShed = await CommercialShed.findOneAndDelete(query);
+    const userId = req.body.userId;
+
+    if (deletedShed?.metaData?.createdBy?.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this listing'
+      });
     }
     
-    res.status(200).json({
-      message: 'Commercial sell shed property deleted successfully',
-      data: deletedProperty
+    if (!deletedShed) {
+      return res.status(404).json({
+        success: false,
+        error: 'Commercial shed not found'
+      });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Commercial shed deleted successfully'
     });
+    
   } catch (error) {
-    console.error('Error deleting commercial sell shed property:', error);
-    res.status(500).json({ error: 'Failed to delete commercial sell shed property' });
+    console.error('Error deleting commercial shed:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Failed to delete commercial shed'
+    });
   }
-}; 
+};
+
