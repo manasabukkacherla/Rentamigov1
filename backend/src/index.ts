@@ -49,11 +49,7 @@ import { Server as SocketIOServer, Socket, Server } from "socket.io";
 import Notification from "./models/Notification";
 import { Document } from "mongoose";
 
-import commercialShopRoutes from "./routes/commercial/commercialShopRoutes";
-import commercialShowroomRoutes from "./routes/commercial/commercialShowroomRoutes";
-import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main route
-import commercialShedRoutes from "./routes/commercial/commercialShedRoutes";
-import commercialWarehouseRoutes from "./routes/commercial/commercialWarehouseRoutes";
+import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main 
 import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
 import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
@@ -70,7 +66,6 @@ import commercialSellRetailStore from "./routes/commercial/commercialSellRetailS
 import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
-import commercialSellShedRoutes from "./routes/commercial/commercialSellShedRoutes";
 import commercialLeasePlotRoutes from "./routes/commercial/commercialLeasePlotRoutes";
 import commercialLeaseAgricultureRoutes from "./routes/commercial/commercialLeaseAgricultureRoutes";
 import commercialLeaseShopRoutes from "./routes/commercial/commercialLeaseShop";
@@ -96,6 +91,10 @@ import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilde
 import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
 import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
 import residentialRentIndependentHouseRoutes from "./routes/residential/rentIndependentHouse";
+import commercialSellShopRoutes from "./routes/commercial/commercialSellShopRoutes";
+import commercialSellShedRoutes from "./routes/commercial/commercialSellShedRoutes";
+import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShowroomRoutes";
+import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 
 dotenv.config();
 
@@ -227,9 +226,9 @@ app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
 
-app.use("/api/commercial/sell/shops", commercialShopRoutes);
-app.use("/api/commercial/sell/showrooms", commercialShowroomRoutes);
-app.use("/api/commercial/sell/warehouses", commercialWarehouseRoutes);
+app.use("/api/commercial/sell/shops", commercialSellShopRoutes);
+app.use("/api/commercial/sell/showrooms", commercialSellShowroomRoutes);
+app.use("/api/commercial/sell/warehouses", commercialSellWarehouseRoutes);
 app.use("/api/commercial/sell/plots", commercialPlotRoutes);
 app.use("/api/commercial/sell/agriculture", commercialSellAgricultureRoutes);
 app.use("/api/commercial/sell/others", commercialSellOthersRoutes);

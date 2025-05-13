@@ -24,4 +24,4 @@ router.put('/:id', updatePlotById as express.RequestHandler);
 // Delete a shed listing
 router.delete('/:id', deleteLeasePlotById as express.RequestHandler);
 
-export default router; 
+export default router;  

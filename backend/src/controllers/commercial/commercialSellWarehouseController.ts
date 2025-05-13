@@ -161,6 +161,7 @@ export const updateSellWarehouse = async (req: Request, res: Response) => {
   try {
     const documentId = req.params.id; 
     const incomingData = req.body?.data;
+    const userId = req.body.userId;
     if (!incomingData) {
       return res.status(400).json({
         success: false,
@@ -177,6 +178,12 @@ export const updateSellWarehouse = async (req: Request, res: Response) => {
 
    
     const existingDoc = await CommercialWarehouse.findById(documentId);
+    if (existingDoc?.metadata?.createdBy?.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to update this listing",
+      });
+    }
     if (!existingDoc) {
       return res.status(404).json({
         success: false,
@@ -208,6 +215,15 @@ export const updateSellWarehouse = async (req: Request, res: Response) => {
 
 export const deleteSellWarehouse = async (req: Request, res: Response) => {
   try {
+    const userId = req.body.userId;
+    const listing = await CommercialWarehouse.findById(req.params.id);
+    if (listing?.metadata?.createdBy?.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Not authorized to delete this listing",
+      });
+    }
+
     const data = await CommercialWarehouse.findByIdAndDelete(req.params.id);
 
     if (!data) {
