@@ -643,7 +643,25 @@ const Apartment = () => {
           propertyId={propertyId}
           propertyType="apartment"
           initialMedia={formData.media}
-          onMediaChange={(media) => setFormData(prevFormData => ({ ...prevFormData, media }))}
+          onMediaChange={(media) => {
+            
+            
+            // Store the updated media in form data
+            setFormData(prevFormData => {
+              const updatedFormData = { 
+                ...prevFormData, 
+                media: {
+                  ...media,
+                  // Ensure videoTour is properly captured if it exists
+                  videoTour: media.videoTour || prevFormData.media.videoTour
+                }
+              };
+              
+              
+              
+              return updatedFormData;
+            });
+          }}
         />
       ),
     },
@@ -704,15 +722,36 @@ const Apartment = () => {
 
         // Process media items to ensure we only send URLs to the backend
         const processMediaForSubmission = (media: IMedia) => {
+          // Debug the incoming media object
+          console.log('Processing media for submission:', {
+            hasVideoTour: !!media.videoTour,
+            videoTourType: media.videoTour ? typeof media.videoTour : 'undefined',
+            videoTourValue: media.videoTour
+          });
+          
+          // Ensure videoTour is properly extracted from media object
+          const videoTourUrl = media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined;
+          
+          // Log the videoTour URL for debugging
+          console.log('VideoTour URL for submission:', videoTourUrl);
+          
           const processedMedia = {
             photos: {} as { [key: string]: string[] },
-            videoTour: media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined,
+            videoTour: videoTourUrl, // Use the extracted URL
             documents: media.documents ? media.documents.filter(doc => typeof doc === 'string') as string[] : []
           };
           
           // Process photos - only include string URLs, not File objects
-          Object.entries(media.photos).forEach(([category, files]) => {
+          Object.entries(media.photos || {}).forEach(([category, files]) => {
             processedMedia.photos[category] = files.filter(file => typeof file === 'string') as string[];
+          });
+          
+          // Final check of processed media
+          console.log('Final processed media for backend:', {
+            hasVideoTour: !!processedMedia.videoTour,
+            videoTourValue: processedMedia.videoTour,
+            photoCategories: Object.keys(processedMedia.photos),
+            documentCount: processedMedia.documents.length
           });
           
           return processedMedia;

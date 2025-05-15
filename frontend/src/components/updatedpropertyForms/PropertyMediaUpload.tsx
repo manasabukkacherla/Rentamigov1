@@ -1,5 +1,5 @@
 import React, { useState, useRef, DragEvent, useEffect } from 'react';
-import { Upload, Camera, Video, FileText, X } from 'lucide-react';
+import { Upload, Video, FileText, X } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadPropertyMediaToS3 } from '../../utils/propertyMediaUploader';
@@ -63,6 +63,14 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
     { id: 'storerooms', label: 'Storerooms' },
     { id: 'kitchen', label: 'Kitchen' },
   ];
+  
+  // Use a ref to store the onMediaChange callback to prevent re-renders
+  const onMediaChangeRef = useRef(onMediaChange);
+  
+  // Update the ref when the prop changes
+  useEffect(() => {
+    onMediaChangeRef.current = onMediaChange;
+  }, [onMediaChange]);
 
   // Initialize media from props - only runs when initialMedia actually changes
   useEffect(() => {
@@ -125,6 +133,7 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
     }
   }, [initialMedia]);
 
+  
   // Update parent component when media changes
   useEffect(() => {
     const photos: { [category: string]: string[] } = {};
@@ -141,7 +150,9 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
           photos[file.category].push(file.url);
         }
       } else if (file.type === 'video' && file.uploaded && file.url) {
+        // Ensure the video URL is properly assigned to videoTour
         videoTour = file.url;
+        // console.log('Video tour URL detected and assigned:', videoTour);
       } else if (file.type === 'document' && file.uploaded && file.url) {
         documents.push(file.url);
       }
@@ -154,9 +165,9 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
       documents,
     };
     
-    // Update parent component
-    onMediaChange(mediaPayload);
-  }, [mediaFiles]); // Removed onMediaChange from dependencies
+    // Update parent component using the ref to avoid dependency issues
+    onMediaChangeRef.current(mediaPayload);
+  }, [mediaFiles]); // Remove onMediaChange from dependencies to prevent infinite re-renders
 
   // Handle file selection
   const handleFileSelect = (category: string, type: 'photo' | 'video' | 'document', files: FileList | null) => {
@@ -334,14 +345,35 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
       // STEP 5: Process the upload results
       console.log('Upload completed successfully. Results:', uploadedItems);
       
-      // Check specifically for video uploads
+      // Process all uploaded items by type
+      const uploadedPhotos = uploadedItems.filter(item => item.type === 'photo');
       const uploadedVideos = uploadedItems.filter(item => item.type === 'video');
+      const uploadedDocuments = uploadedItems.filter(item => item.type === 'document');
+      
+      // Log upload statistics
+      console.log(`Upload summary: ${uploadedPhotos.length} photos, ${uploadedVideos.length} videos, ${uploadedDocuments.length} documents`);
+      
+      // Process videos - IMPORTANT for ensuring videoTour URL is immediately available
       if (uploadedVideos.length > 0) {
         uploadedVideos.forEach(video => {
-          console.log('\u2705 VIDEO UPLOAD SUCCESS:', {
+          console.log('✅ VIDEO UPLOAD SUCCESS:', {
             id: video.id,
             url: video.url,
             category: video.category || 'videoTour'
+          });
+          
+          if (!video.url) {
+            console.error('ERROR: Video upload succeeded but URL is missing');
+            return;
+          }
+          
+          // IMPORTANT: Directly notify parent component about the video URL
+          // This ensures the videoTour URL is immediately available to the parent
+          console.log('DIRECTLY SENDING VIDEO URL TO PARENT:', video.url);
+          onMediaChangeRef.current({
+            photos: {},
+            videoTour: video.url,
+            documents: []
           });
         });
       }
@@ -366,6 +398,35 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
         if (updatedVideos.length > 0) {
           console.log('Updated video files in state:', updatedVideos);
         }
+        
+        // IMPORTANT: Collect all uploaded media and notify parent directly
+        // This ensures all media URLs are immediately available to the parent
+        setTimeout(() => {
+          const photos: { [category: string]: string[] } = {};
+          let videoTour: string | undefined;
+          const documents: string[] = [];
+          
+          // Group files by category
+          updated.forEach((file) => {
+            if (file.type === 'photo' && file.uploaded && file.url) {
+              if (!photos[file.category]) {
+                photos[file.category] = [];
+              }
+              photos[file.category].push(file.url);
+            } else if (file.type === 'video' && file.uploaded && file.url) {
+              videoTour = file.url;
+            } else if (file.type === 'document' && file.uploaded && file.url) {
+              documents.push(file.url);
+            }
+          });
+          
+          // Directly notify parent with all media
+          onMediaChangeRef.current({
+            photos,
+            videoTour,
+            documents
+          });
+        }, 0);
         
         return updated;
       });
