@@ -324,7 +324,7 @@ const residentialRentIndependentHouseSchema = new mongoose.Schema<IResidentialRe
       storerooms: [{ type: String, required: false }],
       kitchen: [{ type: String, required: false }]
     },
-    videoTour: { type: String },
+    videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
   metadata: {
