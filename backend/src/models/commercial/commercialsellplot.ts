@@ -140,8 +140,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
-        totalArea: { type: Number, required: true },
-        zoningType: { type: String, required: true },
+        totalArea: { type: Number},
+        zoningType: { type: String },
         plotFacing: { type: String },
         roadWidth: { type: Number },
         landmarkProximity: [{ type: String }],
@@ -220,7 +220,7 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         videoTour: { type: String }
     },
     metadata: {
-        creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         createdAt: { type: Date, default: Date.now }
     }
 }, {
