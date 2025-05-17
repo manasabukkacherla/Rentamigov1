@@ -29,6 +29,8 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
     if (!propertyType) {
       return res.status(400).json({ success: false, error: 'Property type is required' });
     }
+    
+    // PropertyId is completely optional - we'll proceed with upload even without it
 
     if (!mediaItems || !Array.isArray(mediaItems) || mediaItems.length === 0) {
       return res.status(400).json({ success: false, error: 'No media items were processed' });

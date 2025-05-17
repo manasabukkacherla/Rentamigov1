@@ -1,5 +1,5 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { Image as ImageIcon, Video, X, Camera, Users, Home, Plus, ChevronDown, ChevronUp, AlertCircle, Tag, Key, Lightbulb, Upload } from 'lucide-react';
+import { Image as ImageIcon, Video, X, Camera, Users, Home, Plus, ChevronDown, ChevronUp, AlertCircle, Key, Lightbulb } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { uploadPgMediaToS3 } from '../../../../utils/pgMediaUploader';
 
@@ -87,73 +87,47 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
         }
       }
       
-      // If no propertyId is available, we'll just process the media locally
-      // and update the UI with preview URLs instead of uploading to S3
+      // Always upload to S3 regardless of whether propertyId is available
+      // Show loading toast
+      toast.loading('Uploading media to server...', { id: 'media-upload' });
       
-      if (propertyId) {
-        // If propertyId is available, upload to S3
-        // Show loading toast
-        toast.loading('Uploading media to server...', { id: 'media-upload' });
+      // Prepare items for S3 upload
+      const itemsToUpload = items.map(item => ({
+        id: item.id,
+        type: item.type,
+        file: item.file,
+        title: item.title,
+        tags: item.tags,
+        roomType: item.roomType,
+        category: item.category
+      }));
+      
+      try {
+        // Upload to S3 - propertyId is now optional in the function
+        const uploadedItems = await uploadPgMediaToS3(itemsToUpload, propertyId);
         
-        // Prepare items for S3 upload
-        const itemsToUpload = items.map(item => ({
-          id: item.id,
-          type: item.type,
-          file: item.file,
-          title: item.title,
-          tags: item.tags,
-          roomType: item.roomType,
-          category: item.category
+        // Show success toast
+        toast.success(`Successfully uploaded ${uploadedItems.length} files`, { id: 'media-upload' });
+        
+        // Update local state with uploaded items
+        setMediaItems(items.map(item => {
+          const uploadedItem = uploadedItems.find(ui => ui.id === item.id);
+          if (uploadedItem) {
+            return {
+              ...item,
+              url: uploadedItem.url, // Use the S3 URL
+              uploaded: true
+            };
+          }
+          return item;
         }));
         
-        try {
-          // Upload to S3
-          const uploadedItems = await uploadPgMediaToS3(propertyId, itemsToUpload);
-          
-          // Show success toast
-          toast.success(`Successfully uploaded ${uploadedItems.length} files`, { id: 'media-upload' });
-          
-          // Update local state with uploaded items
-          setMediaItems(items.map(item => {
-            const uploadedItem = uploadedItems.find(ui => ui.id === item.id);
-            if (uploadedItem) {
-              return {
-                ...item,
-                url: uploadedItem.url, // Use the S3 URL
-                uploaded: true
-              };
-            }
-            return item;
-          }));
-          
-          // Update parent component with uploaded items
-          onMediaItemsChange(uploadedItems);
-        } catch (uploadError: any) {
-          console.error('Error uploading to S3:', uploadError);
-          toast.error(`Error uploading: ${uploadError.message}`, { id: 'media-upload' });
-          setError(uploadError.message || 'Failed to upload media to server');
-        }
-      } else {
-        // If no propertyId, just process locally and use preview URLs
-        console.log('No propertyId available, processing media locally');
-        
-        // Update local state with the new items
-        setMediaItems(items);
-        
-        // Update parent component with the new items
-        // Convert to format expected by parent component
-        const parentFormatItems = items.map(item => ({
-          id: item.id,
-          type: item.type,
-          url: item.preview, // Use the preview URL since we don't have S3 URLs yet
-          title: item.title,
-          tags: item.tags,
-          roomType: item.roomType,
-          category: item.category
-        }));
-        
-        onMediaItemsChange(parentFormatItems);
-        toast.success(`Added ${items.length} media files for later upload`);
+        // Update parent component with uploaded items
+        onMediaItemsChange(uploadedItems);
+      } catch (uploadError: any) {
+        console.error('Error uploading to S3:', uploadError);
+        toast.error(`Error uploading: ${uploadError.message}`, { id: 'media-upload' });
+        setError(uploadError.message || 'Failed to upload media to server');
       }
     } catch (error: any) {
       console.error('Error processing media items:', error);

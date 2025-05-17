@@ -12,15 +12,15 @@ interface MediaItem {
 
 /**
  * Uploads property media files (photos, videos, documents) to S3 via the backend API
- * @param propertyId - The ID of the property
  * @param propertyType - The type of property (e.g., 'apartment', 'builderFloor', etc.)
  * @param mediaItems - Array of media items to upload
+ * @param propertyId - Optional ID of the property to associate the media with
  * @returns Promise with the uploaded media items including S3 URLs
  */
 export const uploadPropertyMediaToS3 = async (
-  propertyId: string,
   propertyType: string,
-  mediaItems: MediaItem[]
+  mediaItems: MediaItem[],
+  propertyId?: string
 ): Promise<any[]> => {
   try {
     if (!mediaItems.length) {

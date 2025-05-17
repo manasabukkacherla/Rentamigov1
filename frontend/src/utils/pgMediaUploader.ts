@@ -13,13 +13,13 @@ interface MediaItem {
 
 /**
  * Uploads PG media files (photos and videos) to S3 via the backend API
- * @param propertyId - The ID of the PG property
  * @param mediaItems - Array of media items to upload
+ * @param propertyId - Optional ID of the PG property to associate the media with
  * @returns Promise with the uploaded media items
  */
 export const uploadPgMediaToS3 = async (
-  propertyId: string,
-  mediaItems: MediaItem[]
+  mediaItems: MediaItem[],
+  propertyId?: string
 ): Promise<any[]> => {
   try {
     if (!mediaItems.length) {
@@ -28,7 +28,10 @@ export const uploadPgMediaToS3 = async (
 
     // Create a FormData object to send files
     const formData = new FormData();
-    formData.append('propertyId', propertyId);
+    // Only append propertyId if it exists
+    if (propertyId) {
+      formData.append('propertyId', propertyId);
+    }
 
     // Prepare metadata for each file
     const mediaData: any[] = [];

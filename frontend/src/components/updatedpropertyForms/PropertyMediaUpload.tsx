@@ -331,12 +331,11 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
       console.log('Starting upload to AWS S3 with the following items:', 
         mediaItemsToUpload.map(item => ({ id: item.id, type: item.type, category: item.category })));
       
-      // Call uploadPropertyMediaToS3 with propertyId (if available)
-      // The utility function already handles the case when propertyId is undefined
+      // Call uploadPropertyMediaToS3 with the new parameter order
       const uploadedItems = await uploadPropertyMediaToS3(
-        propertyId || '', // Pass empty string if propertyId is undefined
         propertyType,
-        mediaItemsToUpload
+        mediaItemsToUpload,
+        propertyId // This is now optional, can be undefined
       );
       
       // Clear the update interval if it exists
