@@ -41,192 +41,84 @@ const [loading, setLoading] = useState(true);
   // Save recentLocations to localStorage
 // Updated useEffect to include showroom data
 // Updated useEffect to include new property data
+
+
+
+
 React.useEffect(() => {
-  let hasFetched = false;
+  let didCancel = false;
 
   const fetchAllProperties = async () => {
-    if (hasFetched) return;
-    hasFetched = true;
-
     try {
-      const [
-        agriRes, othersRes, coveredRes, plotRes, retailRes, shedRes, shopRes, showroomRes,
-        rentAgriRes, rentCoveredRes, warehouseRes, officeSpaceRes, rentOthersRes, rentOfficeSpaceRes, rentShopRes, rentRetailStoreRes, rentShowroomRes, rentShedRes, rentPlotRes,
-        sellShopRes, sellAgricultureRes, sellCoveredSpaceRes, sellOfficeSpaceRes, sellOthersRes, sellRetailStoreRes, sellShedRes, sellPlotRes,
-        // Residential Sale Apartments
-        residentialSaleApartmentsRes,
-        // Residential Sale Builder Floors
-        residentialSaleBuilderFloorsRes,
-        // Residential Rent Apartments
-        residentialRentApartmentsRes,
-        // Residential Rent Builder Floors
-        residentialRentBuilderFloorsRes,
-        // Residential Rent Independent Houses
-        residentialRentIndependentHousesRes,
-        // Residential Lease Independent Houses
-        residentialLeaseIndependentHousesRes,
-        // Residential Lease Apartments
-        residentialLeaseApartmentsRes,
-        // Residential Lease Builder Floors
-        residentialLeaseBuilderFloorsRes,
-        // Residential Sale Plots
-        residentialSalePlotsRes,
-        // Residential Sale Independent Houses
-        residentialSaleIndependentHousesRes,  
-        // Fetch Commercial Sale Showrooms Data
-        commercialSaleShowroomsRes,  
-        // Fetch Commercial Sale Warehouses Data
-        commercialSaleWarehousesRes,  // <-- Added Commercial Sale Warehouses API request
-        // Fetch Commercial Sale Shops Data <-- Added Commercial Sale Shops request
-        commercialSaleShopsRes  // <-- Added Commercial Sale Shops API request
-      ] = await Promise.all([
-        // Commercial Lease Properties
-        fetch('/api/commercial/lease/agriculture'),
-        fetch('/api/commercial/lease/others'),
-        fetch('/api/commercial/lease/covered-space'),
-        fetch('/api/commercial/lease/plot'),
-        fetch('/api/commercial/lease/retail-store'),
-        fetch('/api/commercial/lease/sheds'),
-        fetch('/api/commercial/lease/shops'),
-        fetch('/api/commercial/lease/showrooms'),
-        fetch('/api/commercial/lease/warehouses'),
-        fetch('/api/commercial/lease/office-space'),
+      const response = await fetch("/api/properties/all");
+      const data = await response.json();
 
-        // Commercial Rent Properties
-        fetch('/api/commercial/rent/agriculture'),
-        fetch('/api/commercial/rent/covered-space'),
-        fetch('/api/commercial/rent/others'),
-        fetch('/api/commercial/rent/warehouses'),
-        fetch('/api/commercial/rent/office-spaces'),
-        fetch('/api/commercial/rent/shops'),
-        fetch('/api/commercial/rent/retail-stores'),
-        fetch('/api/commercial/rent/showrooms'),
-        fetch('/api/commercial/rent/sheds'),
-        fetch('/api/commercial/rent/plots'),
+      if (!didCancel) {
+        const allProperties = [
+          ...(data.leaseAgri || []),
+          ...(data.leaseOthers || []),
+          ...(data.leasePlot || []),
+          ...(data.leaseRetail || []),
+          ...(data.leaseShop || []),
+          ...(data.leaseShowroom || []),
+          ...(data.leaseCovered || []),
+          ...(data.leaseOffice || []),
+          ...(data.leaseShed || []),
+          ...(data.leaseWarehouse || []),
 
-        // Commercial Sell Properties
-        fetch('/api/commercial/sell/agriculture'),
-        fetch('/api/commercial/sell/covered-space'),
-        fetch('/api/commercial/sell/office-space'),
-        fetch('/api/commercial/sell/others'),
-        fetch('/api/commercial/sell/retail-store'),
-        fetch('/api/commercial/sell/sheds'),
-        fetch('/api/commercial/sell/plots'),
-        fetch('/api/commercial/sell/showrooms'),  // <-- Added request for Commercial Sale Showrooms
-        fetch('/api/commercial/sell/warehouses'),  // <-- Added request for Commercial Sale Warehouses
-        fetch('/api/commercial/sell/shops') , // <-- Added request for Commercial Sale Shops
+          ...(data.rentAgri || []),
+          ...(data.rentCovered || []),
+          ...(data.rentOffice || []),
+          ...(data.rentOthers || []),
+          ...(data.rentPlot || []),
+          ...(data.rentRetail || []),
+          ...(data.rentShed || []),
+          ...(data.rentShop || []),
+          ...(data.rentShowroom || []),
+          ...(data.rentWarehouse || []),
 
-        // Residential Sale 
-        fetch('/api/residential/sale/apartments'),
-        fetch('/api/residential/sale/builder-floor'),
-        fetch('/api/residential/sale/plots'),
-        fetch('/api/residential/sale/independent-house'),
-        // Residential Rent 
-        fetch('/api/residential/rent/apartment'),
-        fetch('/api/residential/rent/builder-floor'),
-        fetch('/api/residential/rent/independent-house'),
+          ...(data.sellAgri || []),
+          ...(data.sellCovered || []),
+          ...(data.sellOffice || []),
+          ...(data.sellOthers || []),
+          ...(data.sellPlot || []),
+          ...(data.sellRetail || []),
+          ...(data.sellShed || []),
+          ...(data.sellShop || []),
+          ...(data.sellShowroom || []),
+          ...(data.sellWarehouse || []),
 
-        // Residential Lease 
-        fetch('/api/residential/lease/independent-house'),
-        fetch('/api/residential/lease/appartment'),
-        fetch('/api/residential/lease/builder-floor'),
-      ]);
+          ...(data.leaseAppartment || []),
+          ...(data.leaseIndepHouse || []),
 
-      const [
-        agriData, othersData, coveredData, plotData, retailData, shedData, shopData, showroomData,
-        rentAgriData, rentCoveredData, warehouseData, officeSpaceData, rentOthersData, rentOfficeSpaceData, rentShopData, rentRetailStoreData, rentShowroomData, rentShedData, rentPlotData,
-        sellShopData, sellAgricultureData, sellCoveredSpaceData, sellOfficeSpaceData, sellOthersData, sellRetailStoreData, sellShedData, sellPlotData,
-        residentialSaleApartmentsData,
-        residentialSaleBuilderFloorsData,
-        residentialRentApartmentsData,
-        residentialRentBuilderFloorsData,
-        residentialRentIndependentHousesData,
-        residentialLeaseIndependentHousesData,
-        residentialLeaseApartmentsData,
-        residentialLeaseBuilderFloorsData,
-        residentialSalePlotsData,
-        residentialSaleIndependentHousesData,
-        commercialSaleShowroomsData,  
-        commercialSaleWarehousesData,  // <-- Added Commercial Sale Warehouses Data
-        commercialSaleShopsData  // <-- Added Commercial Sale Shops Data
-      ] = await Promise.all([
-        agriRes.json(),
-        othersRes.json(),
-        coveredRes.json(),
-        plotRes.json(),
-        retailRes.json(),
-        shedRes.json(),
-        shopRes.json(),
-        showroomRes.json(),
-        rentAgriRes.json(),
-        rentCoveredRes.json(),
-        warehouseRes.json(),
-        officeSpaceRes.json(),
-        rentOthersRes.json(),
-        rentOfficeSpaceRes.json(),
-        rentShopRes.json(),
-        rentRetailStoreRes.json(),
-        rentShowroomRes.json(),
-        rentShedRes.json(),
-        rentPlotRes.json(),
-        sellShopRes.json(),
-        sellAgricultureRes.json(),
-        sellCoveredSpaceRes.json(),
-        sellOfficeSpaceRes.json(),
-        sellOthersRes.json(),
-        sellRetailStoreRes.json(),
-        sellShedRes.json(),
-        sellPlotRes.json(),
-        residentialSaleApartmentsRes.json(),
-        residentialSaleBuilderFloorsRes.json(),
-        residentialRentApartmentsRes.json(),
-        residentialRentBuilderFloorsRes.json(),
-        residentialRentIndependentHousesRes.json(),
-        residentialLeaseIndependentHousesRes.json(),
-        residentialLeaseApartmentsRes.json(),
-        residentialLeaseBuilderFloorsRes.json(),
-        residentialSalePlotsRes.json(),
-        residentialSaleIndependentHousesRes.json(),
-        commercialSaleShowroomsRes.json(),  
-        commercialSaleWarehousesRes.json(),  // <-- Commercial Sale Warehouses Data
-        commercialSaleShopsRes.json()  // <-- Commercial Sale Shops Data
-      ]);
+          ...(data.rentAppartment || []),
+          ...(data.rentBuilder || []),
+          ...(data.rentIndepHouse || []),
 
-      const allProperties = [
-        ...agriData.data, ...othersData.data, ...coveredData.data, ...plotData.data, 
-        ...retailData.data, ...shedData.data, ...shopData.data, ...showroomData.data, 
-        ...rentAgriData.data, ...rentCoveredData.data, ...warehouseData.data, ...officeSpaceData.data, 
-        ...rentOthersData.data, ...rentOfficeSpaceData.data, ...rentShopData.data, 
-        ...rentRetailStoreData.data, ...rentShowroomData.data, ...rentShedData.data, ...rentPlotData.data,
-        ...sellShopData.data, ...sellAgricultureData.data, ...sellCoveredSpaceData.data, 
-        ...sellOfficeSpaceData.data, ...sellOthersData.data, ...sellRetailStoreData.data, 
-        ...sellShedData.data, ...sellPlotData.data,
-        ...residentialSaleApartmentsData.data, ...residentialSaleBuilderFloorsData.data, 
-        ...residentialRentApartmentsData.data, ...residentialRentBuilderFloorsData.data, 
-        ...residentialRentIndependentHousesData.data, ...residentialLeaseIndependentHousesData.data, 
-        ...residentialLeaseApartmentsData.data, ...residentialLeaseBuilderFloorsData.data,
-        ...residentialSalePlotsData.data, 
-        ...residentialSaleIndependentHousesData.data,
-        ...commercialSaleShowroomsData.data,  
-        ...commercialSaleWarehousesData.data,  // <-- Commercial Sale Warehouses Data
-        ...commercialSaleShopsData.data  // <-- Commercial Sale Shops Data
-      ];
+          ...(data.saleAppartment || []),
+          ...(data.saleBuilder || []),
+          ...(data.saleIndepHouse || []),
+          ...(data.salePlot || [])
+        ];
 
-      // Update the state with all the fetched properties
-      setFetchedProperties(allProperties);
+        setFetchedProperties(allProperties);
+      }
     } catch (error) {
-      console.error('Error fetching properties:', error);
+      console.error("Error fetching properties:", error);
     } finally {
-      setLoading(false);
+      if (!didCancel) {
+        setLoading(false);
+      }
     }
   };
 
   fetchAllProperties();
 
   return () => {
-    hasFetched = true;
+    didCancel = true;
   };
 }, []);
+
 
 
 
@@ -264,140 +156,98 @@ React.useEffect(() => {
       max: null
     }
   });
+
+
 const filteredProperties: Property[] = useMemo(() => {
   return fetchedProperties.map((item: any): Property => {
-    // Define property type flags
-    const isOther = item.commercialType?.includes("Other");
-    const isCovered = item.coveredSpaceDetails !== undefined;
-    const isPlot = item.plotDetails !== undefined || item.totalPlotArea !== undefined;
-    const isRetail = item.basicInformation?.storeType?.length > 0;
-    const isShed = item.basicInformation?.shedType?.length > 0 || item.shedDetails !== undefined;
-    const isShop = item.basicInformation?.shopType?.length > 0 || item.shopDetails !== undefined;
-    const isShowroom = item.basicInformation?.showroomType?.length > 0 || item.showroomDetails !== undefined;
-    const isRentAgri = item.Agriculturelanddetails !== undefined;
-    const isRentCovered = item.spaceDetails !== undefined;
-    const isWarehouse = item.coveredSpaceDetails?.ceilingHeight !== undefined;
-    const isOfficeSpace = item.officeSpaceDetails?.seatingcapacity !== undefined;
-    const isResidentialApartmentSale = item.residentialType?.includes("Apartment (Sale)"); // Residential Apartment Sale classification
-    const isResidentialSaleBuilderFloor = item.propertyType === "Sale Builder Floor"; // Residential Sale Builder Floor classification
-    const isResidentialRentApartment = item.residentialType?.includes("Apartment (Rent)"); // Residential Rent Apartment classification
-    const isResidentialRentBuilderFloor = item.propertyType === "Rent Builder Floor"; // Residential Rent Builder Floor classification
-    const isResidentialRentIndependentHouse = item.propertyType === "Rent Independent House"; // Residential Rent Independent House classification
-    const isResidentialLeaseIndependentHouse = item.propertyType === "Lease Independent House"; // Residential Lease Independent House classification
-    const isResidentialLeaseApartment = item.propertyType === "Lease Apartment"; // Lease Apartment classification
-    const isResidentialLeaseBuilderFloor = item.propertyType === "Lease Builder Floor"; // Residential Lease Builder Floor classification
-    const isResidentialSalePlot = item.propertyType === "Sale Plot"; // Residential Sale Plot classification
-    const isResidentialSaleIndependentHouse = item.propertyType === "Sale Independent House"; // Residential Sale Independent House classification
-    const isCommercialSaleShop = item.commercialType?.includes("Shop (Sell)"); // Commercial Sale Shop classification
-    const isCommercialSaleShowroom = item.commercialType?.includes("Showroom (Sell)"); // Commercial Sale Showroom classification
-    const isCommercialSaleWarehouse = item.commercialType?.includes("Warehouse (Sell)"); // Commercial Sale Warehouse classification
+    const title = item.basicInformation?.title || item.title || 'Unnamed Property';
+    const city = item.basicInformation?.address?.city || '';
+    const state = item.basicInformation?.address?.state || '';
+    const image = item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image';
+    const postedDate = item.metadata?.createdAt?.slice(0, 10) || '';
+    const price = item.rent?.expectedRent || item.leaseAmount?.amount || 0;
+    const area = item.propertyDetails?.area?.totalArea || 0;
+    const bhkType = item.propertyDetails?.bhkType || '1 BHK';
+    const bathrooms = item.propertyDetails?.bathrooms || 1;
+    const furnishing = item.propertyDetails?.furnishingStatus || 'Unfurnished';
+    const status = (item.availability?.type || 'Available') as PropertyStatus;
 
-    // Add classification for Rent Shop, Rent Warehouse, Rent Office Space, Rent Showroom, Rent Shed, Rent Plot, Sell Shop, Sell Agriculture, Sell Office Space, Sell Retail Store, and Sell Plot
-    const isRentWarehouse = item.commercialType?.includes("Warehouse (Rent)"); // Rent Warehouse classification
-    const isRentOfficeSpace = item.commercialType?.includes("Office Space (Rent)"); // Rent Office Space classification
-    const isRentShop = item.commercialType?.includes("Shop (Rent)"); // Rent Shop classification
-    const isRentShowroom = item.commercialType?.includes("Showroom (Rent)"); // Rent Showroom classification
-    const isRentShed = item.commercialType?.includes("Shed (Rent)"); // Rent Shed classification
-    const isRentPlot = item.commercialType?.includes("Plot (Rent)"); // Rent Plot classification
-    const isSellShop = item.commercialType?.includes("Shop (Sell)"); // Sell Shop classification
-    const isSellAgriculture = item.commercialType?.includes("Agriculture (Sell)"); // Sell Agriculture classification
-    const isSellOfficeSpace = item.commercialType?.includes("Office Space (Sell)"); // Sell Office Space classification
-    const isSellRetailStore = item.commercialType?.includes("Retail Store (Sell)"); // Sell Retail Store classification
-    const isSellPlot = item.commercialType?.includes("Plot (Sell)"); // Sell Plot classification
+    const commercialType = item.commercialType || '';
+    const propertyType = item.propertyType || '';
+    const residentialType = item.residentialType || '';
 
-    // Classify Rent Others
-    const isRentOthers = item.commercialType?.includes("Other") && !item.coveredSpaceDetails && !item.plotDetails;
+    const classifications: { check: boolean; label: PropertyType }[] = [
+      { check: commercialType.includes('Warehouse (Sell)'), label: 'Commercial Sale Warehouse' },
+      { check: commercialType.includes('Showroom (Sell)'), label: 'Commercial Sale Showroom' },
+      { check: commercialType.includes('Shop (Sell)'), label: 'Commercial Sale Shop' },
+      { check: propertyType === 'Sale Independent House', label: 'Residential Sale Independent House' },
+      { check: propertyType === 'Sale Plot', label: 'Residential Sale Plot' },
+      { check: residentialType.includes('Apartment (Rent)'), label: 'Residential Apartment (Rent)' },
+      { check: residentialType.includes('Apartment (Sale)'), label: 'Residential Apartment (Sale)' },
+      { check: propertyType === 'Sale Builder Floor', label: 'Residential Sale Builder Floor' },
+      { check: propertyType === 'Rent Builder Floor', label: 'Residential Rent Builder Floor' },
+      { check: propertyType === 'Rent Independent House', label: 'Residential Rent Independent House' },
+      { check: propertyType === 'Lease Independent House', label: 'Residential Lease Independent House' },
+      { check: propertyType === 'Lease Apartment', label: 'Residential Lease Apartment' },
+      { check: propertyType === 'Lease Builder Floor', label: 'Residential Lease Builder Floor' },
+      { check: item.basicInformation?.showroomType?.length > 0 || item.showroomDetails, label: 'Showroom' },
+      { check: item.basicInformation?.shedType?.length > 0 || item.shedDetails, label: 'Shed' },
+      { check: item.basicInformation?.storeType?.length > 0, label: 'Retail Store' },
+      { check: item.basicInformation?.shopType?.length > 0 || item.shopDetails, label: 'Shop' },
+      { check: item.plotDetails || item.totalPlotArea, label: 'Plot' },
+      { check: item.coveredSpaceDetails, label: 'Warehouse' },
+      { check: item.Agriculturelanddetails, label: 'Agricultural Land (Rent)' },
+      { check: item.spaceDetails, label: 'Covered Space (Rent)' },
+      { check: item.coveredSpaceDetails?.ceilingHeight, label: 'Warehouse' },
+      { check: item.officeSpaceDetails?.seatingcapacity, label: 'Office Space' },
+      { check: commercialType.includes('Warehouse (Rent)'), label: 'Warehouse (Rent)' },
+      { check: commercialType.includes('Office Space (Rent)'), label: 'Office Space (Rent)' },
+      { check: commercialType.includes('Shop (Rent)'), label: 'Shop (Rent)' },
+      { check: commercialType.includes('Showroom (Rent)'), label: 'Showroom (Rent)' },
+      { check: commercialType.includes('Shed (Rent)'), label: 'Shed (Rent)' },
+      { check: commercialType.includes('Plot (Rent)'), label: 'Plot (Rent)' },
+      { check: commercialType.includes('Agriculture (Sell)'), label: 'Agriculture (Sell)' },
+      { check: commercialType.includes('Office Space (Sell)'), label: 'Office Space (Sell)' },
+      { check: commercialType.includes('Retail Store (Sell)'), label: 'Retail Store (Sell)' },
+      { check: commercialType.includes('Plot (Sell)'), label: 'Plot (Sell)' },
+      { check: commercialType.includes('Other') && !item.coveredSpaceDetails && !item.plotDetails, label: 'Standalone Building (Rent)' },
+      { check: commercialType.includes('Other'), label: 'Standalone Building' }
+    ];
+
+    const matchedType = classifications.find((cls) => cls.check)?.label || 'Agricultural';
+
+    const intent: PropertyIntent = [
+      'Commercial Sale Warehouse',
+      'Commercial Sale Shop',
+      'Commercial Sale Showroom',
+      'Retail Store (Sell)',
+      'Office Space (Sell)',
+      'Plot (Sell)',
+      'Agriculture (Sell)'
+    ].includes(matchedType)
+      ? 'Sale'
+      : 'Lease';
 
     return {
       id: item._id || item.propertyId || '',
-      title: item.basicInformation?.title || item.title || 'Unnamed Property',
-      type: isCommercialSaleWarehouse
-        ? 'Commercial Sale Warehouse' as PropertyType  // Added classification for Commercial Sale Warehouse
-        : isCommercialSaleShowroom
-        ? 'Commercial Sale Showroom' as PropertyType  // Added classification for Commercial Sale Showroom
-        : isCommercialSaleShop
-        ? 'Commercial Sale Shop' as PropertyType  // Added classification for Commercial Sale Shop
-        : isResidentialSaleIndependentHouse
-        ? 'Residential Sale Independent House' as PropertyType
-        : isResidentialSalePlot
-        ? 'Residential Sale Plot' as PropertyType
-        : isResidentialRentApartment
-        ? 'Residential Apartment (Rent)' as PropertyType
-        : isResidentialApartmentSale
-        ? 'Residential Apartment (Sale)' as PropertyType
-        : isResidentialSaleBuilderFloor
-        ? 'Residential Sale Builder Floor' as PropertyType
-        : isResidentialRentBuilderFloor
-        ? 'Residential Rent Builder Floor' as PropertyType
-        : isResidentialRentIndependentHouse
-        ? 'Residential Rent Independent House' as PropertyType
-        : isResidentialLeaseIndependentHouse
-        ? 'Residential Lease Independent House' as PropertyType
-        : isResidentialLeaseApartment
-        ? 'Residential Lease Apartment' as PropertyType // Correct classification for Lease Apartments
-        : isResidentialLeaseBuilderFloor
-        ? 'Residential Lease Builder Floor' as PropertyType
-        : isShowroom
-        ? 'Showroom' as PropertyType
-        : isShed
-        ? 'Shed' as PropertyType
-        : isRetail
-        ? 'Retail Store' as PropertyType
-        : isShop
-        ? 'Shop' as PropertyType
-        : isPlot
-        ? 'Plot' as PropertyType
-        : isCovered
-        ? 'Warehouse' as PropertyType
-        : isRentAgri
-        ? 'Agricultural Land (Rent)' as PropertyType
-        : isRentCovered
-        ? 'Covered Space (Rent)' as PropertyType
-        : isWarehouse
-        ? 'Warehouse' as PropertyType
-        : isOfficeSpace
-        ? 'Office Space' as PropertyType
-        : isRentWarehouse
-        ? 'Warehouse (Rent)' as PropertyType
-        : isRentOfficeSpace
-        ? 'Office Space (Rent)' as PropertyType
-        : isRentShop
-        ? 'Shop (Rent)' as PropertyType
-        : isRentShowroom
-        ? 'Showroom (Rent)' as PropertyType
-        : isRentShed
-        ? 'Shed (Rent)' as PropertyType
-        : isRentPlot
-        ? 'Plot (Rent)' as PropertyType
-        : isSellShop
-        ? 'Shop (Sell)' as PropertyType
-        : isSellAgriculture
-        ? 'Agriculture (Sell)' as PropertyType
-        : isSellOfficeSpace
-        ? 'Office Space (Sell)' as PropertyType
-        : isSellRetailStore
-        ? 'Retail Store (Sell)' as PropertyType
-        : isSellPlot
-        ? 'Plot (Sell)' as PropertyType
-        : isRentOthers
-        ? 'Standalone Building (Rent)' as PropertyType
-        : isOther
-        ? 'Standalone Building' as PropertyType
-        : 'Agricultural' as PropertyType,
+      title,
+      type: matchedType,
       listingType: 'Owner' as ListingType,
-      price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
-      location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}`,
-      area: item.propertyDetails?.area?.totalArea || 0,
-      image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
-      postedDate: item.metadata?.createdAt?.slice(0, 10) || '',
-      status: (item.availability?.type || 'Available') as PropertyStatus,
-      intent: isSellOfficeSpace || isSellRetailStore || isSellPlot ? 'Sale' as PropertyIntent : 'Lease' as PropertyIntent,
-      bhkType: item.propertyDetails?.bhkType || '1 BHK',  // Default BHK Type
-      bathrooms: item.propertyDetails?.bathrooms || 1,  // Default number of bathrooms
-      furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',  // Default furnishing
+      price,
+      location: `${city}, ${state}`,
+      area,
+      image,
+      postedDate,
+      status,
+      intent,
+      bhkType,
+      bathrooms,
+      furnishing
     };
   });
 }, [fetchedProperties]);
+
+
 
 
 

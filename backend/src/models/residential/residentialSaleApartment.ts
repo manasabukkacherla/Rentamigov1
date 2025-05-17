@@ -286,4 +286,4 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialSaleApartment>({
   timestamps: true
 }
 );
-export default mongoose.model<IResidentialSaleApartment>('ResidentialSaleApartment', ResidentailRentApartmentSchema);
+export default mongoose.models.ResidentialSaleApartment || mongoose.model('ResidentialSaleApartment', ResidentailRentApartmentSchema);

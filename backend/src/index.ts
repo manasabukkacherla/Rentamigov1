@@ -95,7 +95,7 @@ import commercialSellShopRoutes from "./routes/commercial/commercialSellShopRout
 import commercialSellShedRoutes from "./routes/commercial/commercialSellShedRoutes";
 import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShowroomRoutes";
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
-
+import propertyRoutes from './routes/propertyRoutes';
 dotenv.config();
 
 // Validate required environment variables
@@ -204,6 +204,8 @@ app.use("/api/conversation", conversationRoutes);
 //Property listing apis
 //app.use("/api/property-selection", Propertyrouter);
 // app.use("/api/basicdetails", BasicDetailsrouter);
+app.use('/api', propertyRoutes);
+
 app.use("/api/properties", PropertyDetailsrouter);
 
 //Subscription pllan routes
@@ -303,6 +305,8 @@ app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");
   res.json({ message: "Test message" });
 });
+
+// all get propertie
 // // Basic route
 // app.get("/", (req: Request, res: Response) => {
 //   res.json({ message: "Welcome to the API" });
