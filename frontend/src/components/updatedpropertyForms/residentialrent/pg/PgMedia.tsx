@@ -48,6 +48,8 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   const defaultPhotoTags = ['Exterior', 'Interior', 'Room', 'Bathroom', 'Kitchen', 'Common Area'];
   const defaultVideoTags = ['Room Tour', 'Facility Tour', 'Amenities', 'Overview'];
   
+
+  
   // Check file size for videos
   const checkVideoFileSize = (file: File): void => {
     if (file.type.startsWith('video/') && file.size > 50 * 1024 * 1024) { // 50MB limit for videos
