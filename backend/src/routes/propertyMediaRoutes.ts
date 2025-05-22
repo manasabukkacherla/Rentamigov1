@@ -36,8 +36,17 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
       return res.status(400).json({ success: false, error: 'No media items were processed' });
     }
 
+    // Define an interface for detailed photo information
+    interface IPhotoDetail {
+      id: string;
+      url: string;
+      title: string;
+      category: string;
+      tags?: string[];
+    }
+
     // Group media items by category and type
-    const photos: { [category: string]: string[] } = {};
+    const photos: { [category: string]: IPhotoDetail[] } = {};
     const documents: string[] = [];
     let videoTour: string = ''; // Initialize as empty string instead of null
     
@@ -91,8 +100,16 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
         if (!photos[item.category]) {
           photos[item.category] = [];
         }
-        photos[item.category].push(item.url);
-        console.log(`Added photo to category ${item.category}:`, item.url);
+        // Store the detailed photo object instead of just the URL
+        const photoDetail: IPhotoDetail = {
+          id: item.id, // Assuming item has an id, title, tags
+          url: item.url,
+          title: item.title || 'Untitled',
+          category: item.category,
+          tags: item.tags || []
+        };
+        photos[item.category].push(photoDetail);
+        console.log(`Added photo to category ${item.category}:`, photoDetail);
       } else if (item.type === 'video') {
         // All videos are treated as videoTour
         videoTour = item.url;
@@ -149,14 +166,16 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
         const newPhotosData = { ...currentDbPhotos };
         let photosChanged = false;
 
-        Object.entries(photos).forEach(([category, newUrls]) => {
-          const existingCategoryUrls = newPhotosData[category] || [];
-          // Combine and deduplicate URLs for the category
-          const combinedUrls = Array.from(new Set([...existingCategoryUrls, ...newUrls]));
+        Object.entries(photos).forEach(([category, newPhotoItems]) => {
+          const existingCategoryItems = newPhotosData[category] || [];
+          // Combine and deduplicate photo items based on their 'id'
+          const combinedItems = [...existingCategoryItems, ...newPhotoItems];
+          const uniquePhotoItems = Array.from(new Map(combinedItems.map(item => [item.id, item])).values());
           
           // Check if this category's photo list actually changed
-          if (JSON.stringify(combinedUrls) !== JSON.stringify(existingCategoryUrls)) {
-            newPhotosData[category] = combinedUrls;
+          // Comparing stringified versions is a common way, ensure consistent object key order or use a deep equal library for more robustness
+          if (JSON.stringify(uniquePhotoItems) !== JSON.stringify(existingCategoryItems)) {
+            newPhotosData[category] = uniquePhotoItems;
             photosChanged = true;
           }
         });
