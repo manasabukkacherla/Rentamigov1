@@ -58,12 +58,69 @@ export const createRentIndependentHouse = async (req: Request, res: Response) =>
       }
     };
 
+    // Initialize media structure if not present
+    if (!independentHouseData.media) {
+      independentHouseData.media = {
+        photos: {
+          exterior: [],
+          interior: [],
+          floorPlan: [],
+          washrooms: [],
+          lifts: [],
+          emergencyExits: [],
+          bedrooms: [],
+          halls: [],
+          storerooms: [],
+          kitchen: []
+        },
+        documents: [],
+        videoTour: '',
+        mediaItems: []  // Initialize empty mediaItems array
+      };
+      console.log('Initialized empty media structure in createRentIndependentHouse');
+    } else {
+      // Ensure all required media properties exist
+      if (!independentHouseData.media.photos) {
+        independentHouseData.media.photos = {};
+      }
+      // Initialize photo categories
+      ['exterior', 'interior', 'floorPlan', 'washrooms', 'lifts', 
+       'emergencyExits', 'bedrooms', 'halls', 'storerooms', 'kitchen'].forEach(category => {
+        if (!independentHouseData.media.photos[category]) {
+          independentHouseData.media.photos[category] = [];
+        }
+      });
+      
+      // Initialize other media properties
+      if (!independentHouseData.media.documents) independentHouseData.media.documents = [];
+      if (!independentHouseData.media.videoTour) independentHouseData.media.videoTour = '';
+      if (!independentHouseData.media.mediaItems) {
+        independentHouseData.media.mediaItems = [];
+        console.log('Initialized empty mediaItems array in existing media');
+      }
+    }
+
+    console.log('Independent house data before save:', JSON.stringify({
+      propertyId: independentHouseData.propertyId,
+      mediaItemsLength: independentHouseData.media?.mediaItems?.length || 0
+    }));
+
     const independentHouse = new ResidentialRentIndependentHouse(independentHouseData);
+    
+    // Explicitly ensure mediaItems is set
+    if (!independentHouse.media.mediaItems) {
+      independentHouse.media.mediaItems = [];
+    }
+    
     await independentHouse.save();
+    
+    // Verify mediaItems was saved correctly
+    const savedIndependentHouse = await ResidentialRentIndependentHouse.findOne({ propertyId });
+    console.log('Saved independent house mediaItems:', savedIndependentHouse?.media?.mediaItems?.length || 0);
 
     res.status(201).json({
       success: true,
-      message: 'Independent House listing created successfully',
+      message: 'Independent house listing created successfully',
       data: independentHouse
     });
   } catch (error) {

@@ -136,6 +136,15 @@ interface IMedia {
     storerooms: IPhotoDetail[];
     kitchen: IPhotoDetail[];
   };
+  mediaItems?: Array<{
+    id?: string;
+    type?: 'photo' | 'video';
+    url?: string;
+    title?: string;
+    tags?: string[];
+    roomType?: string;
+    category?: string;
+  }>;
   videoTour?: string;
   documents: string[];
 }
@@ -279,17 +288,86 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
   },
   media: {
     photos: {
-      exterior: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      interior: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      floorPlan: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      washrooms: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      lifts: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      emergencyExits: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      bedrooms: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      halls: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      storerooms: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }],
-      kitchen: [{ id: { type: String, required: true }, url: { type: String, required: true }, title: { type: String }, category: { type: String }, tags: [{ type: String }] }]
+      exterior: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      interior: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      floorPlan: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      washrooms: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      lifts: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      emergencyExits: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      bedrooms: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      halls: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      storerooms: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }],
+      kitchen: [{ 
+        id: String, 
+        url: String, 
+        title: String, 
+        category: String, 
+        tags: [String] 
+      }]
     },
+    mediaItems: [{
+      id: String,
+      type: String,
+      url: String,
+      title: String,
+      tags: [String],
+      roomType: String,
+      category: String
+    }],
     videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
