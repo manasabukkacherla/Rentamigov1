@@ -212,7 +212,9 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
     },
   },
   restrictions: {
-    foodPreference: { type: String, required: false },
+
+    foodPreference: { type: String, required:false },
+
     petsAllowed: { type: String, required: false },
     tenantType: { type: String, required: false },
   },
@@ -280,7 +282,7 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
         storerooms: [{ type: String, required: false }],
         kitchen: [{ type: String, required: false }]
     },
-    videoTour: { type: String },
+    videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
   metadata: {
