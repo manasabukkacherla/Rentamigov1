@@ -36,8 +36,17 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
       return res.status(400).json({ success: false, error: 'No media items were processed' });
     }
 
+    // Define an interface for detailed photo information
+    interface IPhotoDetail {
+      id: string;
+      url: string;
+      title: string;
+      category: string;
+      tags?: string[];
+    }
+
     // Group media items by category and type
-    const photos: { [category: string]: string[] } = {};
+    const photos: { [category: string]: IPhotoDetail[] } = {};
     const documents: string[] = [];
     let videoTour: string = ''; // Initialize as empty string instead of null
     
@@ -91,8 +100,16 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
         if (!photos[item.category]) {
           photos[item.category] = [];
         }
-        photos[item.category].push(item.url);
-        console.log(`Added photo to category ${item.category}:`, item.url);
+        // Store the detailed photo object instead of just the URL
+        const photoDetail: IPhotoDetail = {
+          id: item.id, // Assuming item has an id, title, tags
+          url: item.url,
+          title: item.title || 'Untitled',
+          category: item.category,
+          tags: item.tags || []
+        };
+        photos[item.category].push(photoDetail);
+        console.log(`Added photo to category ${item.category}:`, photoDetail);
       } else if (item.type === 'video') {
         // All videos are treated as videoTour
         videoTour = item.url;
@@ -127,109 +144,140 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
     
     // If propertyId is provided and property was found, update the property document
     if (propertyId && propertyFound && property) {
-      // Merge new photos with existing ones
-      Object.entries(photos).forEach(([category, urls]) => {
-        if (!property.media.photos[category]) {
-          property.media.photos[category] = [];
-        }
-        property.media.photos[category] = [...property.media.photos[category], ...urls];
-        // Mark each category as modified
-        property.markModified(`media.photos.${category}`);
-      });
-      
-      // Set videoTour if provided - ENHANCED APPROACH
-      if (videoTour) {
-        console.log('Setting videoTour in property document:', videoTour);
-        
-        // Force direct assignment to ensure it's set
-        if (!property.media) {
-          property.media = {};
-        }
-        
-        // Use direct assignment to ensure it's set properly
-        property.media.videoTour = videoTour;
-        
-        // Log the value after assignment
-        console.log('✅ Video tour URL set in property object:', property.media.videoTour);
-        
-        // Try alternative approach if needed
-        try {
-          // Use $set operator directly to ensure it's set
-          property.set('media.videoTour', videoTour);
-          console.log('Also used set() method as backup');
-        } catch (setError) {
-          console.error('Error using set() method:', setError);
-        }
-      } else if (!property.media.videoTour) {
-        // Set to empty string if it doesn't already exist
-        property.media.videoTour = '';
-        property.set('media.videoTour', '');
-        console.log('Setting empty videoTour field to ensure it exists in the document');
-      }
-      
-      // Explicitly mark the field as modified for Mongoose - ALWAYS DO THIS
-      property.markModified('media');
-      property.markModified('media.videoTour');
-      
-      // Double check that the field is set
-      console.log('VERIFICATION - videoTour field after setting:', property.media.videoTour);
+      const updateOperations: any = { $set: {}, $push: {} };
+      let hasMediaChangesToPersist = false;
 
-      // Update documents if provided
+      // Ensure property.media and its sub-fields are initialized if they don't exist
+      // This is important for the logic that merges new data with existing data.
+      if (!property.media) {
+        property.media = { photos: {}, documents: [], videoTour: '' }; // Default structure
+      }
+      if (!property.media.photos) {
+        property.media.photos = {};
+      }
+      if (!property.media.documents) {
+        property.media.documents = [];
+      }
+      // property.media.videoTour can be undefined initially, handled below.
+
+      // --- Prepare Photos for Update ---
+      if (Object.keys(photos).length > 0) {
+        const currentDbPhotos = property.media.photos || {};
+        const newPhotosData = { ...currentDbPhotos };
+        let photosChanged = false;
+
+        Object.entries(photos).forEach(([category, newPhotoItems]) => {
+          const existingCategoryItems = newPhotosData[category] || [];
+          // Combine and deduplicate photo items based on their 'id'
+          const combinedItems = [...existingCategoryItems, ...newPhotoItems];
+          const uniquePhotoItems = Array.from(new Map(combinedItems.map(item => [item.id, item])).values());
+          
+          // Check if this category's photo list actually changed
+          // Comparing stringified versions is a common way, ensure consistent object key order or use a deep equal library for more robustness
+          if (JSON.stringify(uniquePhotoItems) !== JSON.stringify(existingCategoryItems)) {
+            newPhotosData[category] = uniquePhotoItems;
+            photosChanged = true;
+          }
+        });
+
+        if (photosChanged) {
+          updateOperations.$set['media.photos'] = newPhotosData;
+          hasMediaChangesToPersist = true;
+          console.log('Prepared photos for update:', newPhotosData);
+        }
+      }
+
+      // --- Prepare videoTour for Update ---
+      // `videoTour` is the URL from the current upload batch, or `''` if no video was in mediaItems.
+      // `property.media.videoTour` is the value currently in the database.
+      if (videoTour) { // A video URL was processed in this upload batch
+        if (videoTour !== property.media.videoTour) {
+          updateOperations.$set['media.videoTour'] = videoTour;
+          hasMediaChangesToPersist = true;
+          console.log('Prepared videoTour for update (new/changed):', videoTour);
+        }
+      } else { // No video was processed in this batch (so `videoTour` is `''`)
+        if (property.media.videoTour === undefined) { // And no videoTour field exists on the record yet
+          updateOperations.$set['media.videoTour'] = ''; // Initialize to empty string
+          hasMediaChangesToPersist = true;
+          console.log('Initialized videoTour field to empty string as it was undefined.');
+        }
+        // If `videoTour` is `''` (no new video) and `property.media.videoTour` already exists (e.g., as a URL or `''`), do nothing to it.
+      }
+
+      // --- Prepare Documents for Update ---
       if (documents.length > 0) {
-        if (!property.media.documents) {
-          property.media.documents = [];
-        }
-        property.media.documents = [...property.media.documents, ...documents];
-        // Mark documents as modified
-        property.markModified('media.documents');
+        updateOperations.$push['media.documents'] = { $each: documents };
+        hasMediaChangesToPersist = true;
+        console.log('Prepared documents for update (pushing):', documents);
+      }
+      
+      // Clean up empty $set or $push from updateOperations to avoid empty update objects
+      if (Object.keys(updateOperations.$set).length === 0) {
+        delete updateOperations.$set;
+      }
+      if (Object.keys(updateOperations.$push).length === 0) {
+        delete updateOperations.$push;
       }
 
-      // Save the updated property
-      try {
-        // Try direct update first to ensure videoTour is set
-        if (videoTour) {
-          // Use direct MongoDB update to ensure the field is set
+      // --- Perform Database Update ---
+      if (hasMediaChangesToPersist && (updateOperations.$set || updateOperations.$push)) {
+        try {
+          console.log('Attempting direct DB update with operations:', JSON.stringify(updateOperations));
           const updateResult = await propertyModels[propertyType].updateOne(
             { propertyId },
-            { $set: { 'media.videoTour': videoTour } }
+            updateOperations
           );
           console.log('Direct DB update result:', updateResult);
-        }
-        
-        // Then save the full document with explicit validation
-        await property.save({ validateBeforeSave: true });
-        console.log('Property saved successfully with updated media');
-        
-        // Double-check that videoTour was saved correctly
-        if (videoTour) {
-          const updatedProperty = await propertyModels[propertyType].findOne({ propertyId });
-          console.log('Verification - videoTour after save:', updatedProperty?.media?.videoTour);
-          
-          // If still not set, try one more direct update
-          if (!updatedProperty?.media?.videoTour) {
-            console.log('⚠️ videoTour still not set after save, trying direct update again');
-            await propertyModels[propertyType].updateOne(
-              { propertyId },
-              { 
-                $set: { 'media.videoTour': videoTour },
-                $currentDate: { updatedAt: true }
-              }
-            );
-            console.log('Final direct update completed');
-          }
-        }
-      } catch (saveError) {
-        console.error('Error saving property with updated media:', saveError);
-        throw saveError;
-      }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Media uploaded successfully and saved to property',
-        data: {
-          media: property.media
+          if (updateResult.modifiedCount > 0 || (updateResult.matchedCount > 0 && !updateResult.modifiedCount)) {
+            // modifiedCount > 0 means changes were made.
+            // matchedCount > 0 && modifiedCount === 0 means the document was found but data was identical to what was being set.
+            console.log(`Property media ${updateResult.modifiedCount > 0 ? 'updated' : 'already up-to-date'} successfully via updateOne.`);
+
+            // Fetch the updated property to return its media and for verification
+            const updatedPropertyAfterSave = await propertyModels[propertyType].findOne({ propertyId });
+            
+            if (updatedPropertyAfterSave) {
+                console.log('Verification - media after updateOne:', updatedPropertyAfterSave.media);
+            }
+            
+            return res.status(200).json({
+              success: true,
+              message: 'Media uploaded successfully and saved to property',
+              data: {
+                media: updatedPropertyAfterSave?.media // Return the potentially updated media
+              }
+            });
+          } else {
+            // This case (e.g., matchedCount = 0) should ideally not be hit if property was found earlier.
+            console.warn('updateOne operation did not find or modify the document. PropertyId:', propertyId);
+            return res.status(200).json({
+              success: true, // Media was uploaded to S3, but DB link might have issues
+              message: 'Media uploaded. However, property data in DB was not found or not changed by this operation.',
+              data: {
+                media: property.media // Return original media as DB interaction was not conclusive for update
+              }
+            });
+          }
+        } catch (dbError) {
+          console.error('Error updating property media with updateOne:', dbError);
+          return res.status(500).json({
+            success: false,
+            error: dbError instanceof Error ? dbError.message : 'Failed to save media to property'
+          });
         }
-      });
+      } else {
+        // No actual changes to persist to the database for this property's media
+        console.log('No new or changed media content to persist to the database for this property.');
+        return res.status(200).json({
+          success: true,
+          message: 'Media uploaded successfully. No changes made to property media data as content was identical or not provided for update.',
+          data: {
+            media: property.media // Return existing media as no changes were made
+          }
+        });
+      }
     } else {
       // If no propertyId is provided or property wasn't found, just return the media URLs
       const mediaResponse = {

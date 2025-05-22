@@ -133,14 +133,26 @@ export const uploadPropertyMediaToS3 = async (
         
         // Process photos
         if (photos) {
-          Object.entries(photos).forEach(([category, urlsArray]) => {
-            const urls = urlsArray as string[];
-            urls.forEach((url: string) => {
+          // Define a type for photoDetail for clarity, mirroring backend's IPhotoDetail
+          // This helps in understanding the structure of objects in photoDetailsArray
+          interface PhotoDetailFromBackend {
+            id: string;
+            url: string;
+            title?: string;
+            // category is implicitly part of the structure from backend but we use the 'category' key from Object.entries
+            tags?: string[];
+          }
+
+          Object.entries(photos).forEach(([category, photoDetailsArray]) => {
+            // photoDetailsArray is an array of objects, each conforming to PhotoDetailFromBackend
+            (photoDetailsArray as PhotoDetailFromBackend[]).forEach((photoDetail: PhotoDetailFromBackend) => {
               mediaItems.push({
-                id: url.split('/').pop()?.split('-')[0] || Math.random().toString(),
+                id: photoDetail.id, // Use the ID from the backend
                 type: 'photo',
-                url,
-                category
+                url: photoDetail.url, // Use the URL from the photoDetail object
+                category: category, // Use the category key from Object.entries
+                title: photoDetail.title,
+                tags: photoDetail.tags
               });
             });
           });
