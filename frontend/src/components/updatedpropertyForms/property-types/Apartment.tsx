@@ -644,22 +644,26 @@ const Apartment = () => {
           propertyType="apartment"
           initialMedia={formData.media}
           onMediaChange={(media) => {
-            
-            
             // Store the updated media in form data
             setFormData(prevFormData => {
-              const updatedFormData = { 
+              const mergedPhotos = { ...prevFormData.media.photos };
+              
+              // Merge new photo categories without overwriting existing ones
+              Object.entries(media.photos || {}).forEach(([category, urls]) => {
+                if (!mergedPhotos[category]) {
+                  mergedPhotos[category] = [];
+                }
+                mergedPhotos[category] = [...new Set([...mergedPhotos[category], ...urls])];
+              });
+              
+              return { 
                 ...prevFormData, 
-                media: {
-                  ...media,
-                  // Ensure videoTour is properly captured if it exists
-                  videoTour: media.videoTour || prevFormData.media.videoTour
+                media: { 
+                  photos: mergedPhotos,
+                  videoTour: media.videoTour || prevFormData.media.videoTour,
+                  documents: media.documents || prevFormData.media.documents
                 }
               };
-              
-              
-              
-              return updatedFormData;
             });
           }}
         />
@@ -713,7 +717,8 @@ const Apartment = () => {
   const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
+    console.log("Final formData before submit", formData);
+
 
     try {
       const user = sessionStorage.getItem('user');
