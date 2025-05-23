@@ -14,18 +14,17 @@ import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
 import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import OtherCharges from "../residentialrent/OtherCharges"
-import MediaUpload from "../MediaUpload"
+import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 
-interface LeaseApartmentProps {
-  propertyId: string
-  onSubmit?: (formData: any) => void
+interface Location {
+  latitude: string;
+  longitude: string;
 }
-
 
 interface Address {
   flatNo: number;
@@ -36,44 +35,39 @@ interface Address {
   city: string;
   state: string;
   zipCode: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
+  location: Location;
 }
 
-interface IBasicInformation {
+interface BasicInformation {
   propertyName: string;
-  address: {
-    flatNo: number;
-    showFlatNo: boolean;
-    floor: number;
-    apartmentName: string;
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    location: {
-      latitude: string;
-      longitude: string;
-    };
-  };
+  address: Address;
 }
+
+interface ParkingDetails {
+  twoWheeler: number;
+  fourWheeler: number;
+}
+
+interface ExtraRooms {
+  servant: boolean;
+  puja: boolean;
+  store: boolean;
+  others: boolean;
+}
+
+interface WaterAvailability {
+  borewell: boolean;
+  governmentSupply: boolean;
+  tankerSupply: boolean;
+}
+
 interface PropertyDetails {
   bedrooms: number;
   washrooms: number;
   balconies: number;
   hasParking: boolean;
-  parkingDetails: {
-    twoWheeler: number;
-    fourWheeler: number;
-  };
-  extraRooms: {
-    servant: boolean;
-    puja: boolean;
-    store: boolean;
-    others: boolean;
-  };
+  parkingDetails: ParkingDetails;
+  extraRooms: ExtraRooms;
   utilityArea: string;
   furnishingStatus: string;
   totalFloors: number;
@@ -87,11 +81,7 @@ interface PropertyDetails {
   carpetAreaSqft: number;
   carpetAreaSqmt: number;
   electricityAvailability: string;
-  waterAvailability: {
-    borewell: boolean;
-    governmentSupply: boolean;
-    tankerSupply: boolean;
-  };
+  waterAvailability: WaterAvailability;
 }
 
 interface FlatAmenities {
@@ -143,7 +133,7 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
-interface IMedia {
+interface Media {
   photos: {
     exterior: (File | string)[];
     interior: (File | string)[];
@@ -156,11 +146,9 @@ interface IMedia {
     storerooms: (File | string)[];
     kitchen: (File | string)[];
   };
-  videoTour?: File | string;
+  videoTour?: File | string | undefined;
   documents: (File | string)[];
 }
-
-
 
 interface Restrictions {
   foodPreference: string;
@@ -168,78 +156,77 @@ interface Restrictions {
   tenantType: string;
 }
 
+interface LeaseAmount {
+  amount: number;
+  type: string;
+  duration: number;
+  durationUnit: string;
+}
 
+interface TenureDetails {
+  minimumTenure: number;
+  minimumUnit: string;
+  maximumTenure: number;
+  maximumUnit: string;
+  lockInPeriod: number;
+  lockInUnit: string;
+  noticePeriod: number;
+  noticePeriodUnit: string;
+}
 
+interface ChargeDetails {
+  amount: number;
+  type: string;
+}
 
+interface OtherCharges {
+  water: ChargeDetails;
+  electricity: ChargeDetails;
+  gas: ChargeDetails;
+  others: ChargeDetails;
+}
 
-interface ILeaseTerms {
+interface LeaseTerms {
   leaseDetails: {
-    leaseAmount:{
-    amount: number;
-    type: string;
-    duration: number;
-    durationUnit: string;
-    },
+    leaseAmount: LeaseAmount;
   };
-  tenureDetails: {
-    minimumTenure: number;
-    minimumUnit: string;
-    maximumTenure: number;
-    maximumUnit: string;
-    lockInPeriod: number;
-    lockInUnit: string;
-    noticePeriod: number;
-    noticePeriodUnit: string;
-  };
+  tenureDetails: TenureDetails;
   maintenanceAmount: {
     amount: number;
     frequency: string;
   };
-  otherCharges: {
-    water: {
-      amount: number;
-      type: string;
-    };
-    electricity: {
-      amount: number;
-      type: string;
-    };
-    gas: {
-      amount: number;
-      type: string;
-    };
-    others: {
-      amount: number;
-      type: string;
-    }
-  };
+  otherCharges: OtherCharges;
   brokerage: {
     required: string;
     amount?: number;
   };
- 
-}
-interface IMetadata {
-  createdBy: string;
-  createdAt: string;
 }
 
-interface formData {
-  basicInformation: IBasicInformation;
+interface Availability {
+  type: string;
+  date: string;
+}
+
+interface FormData {
+  basicInformation: BasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
   restrictions: Restrictions;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
-  leaseTerms:ILeaseTerms;
-  availability: {
-    type: string;
-    date: string;
+  leaseTerms: LeaseTerms;
+  availability: Availability;
+  media: Media;
+  metadata?: {
+    createdBy: string;
+    createdAt: string;
   };
-  media: IMedia;
-
 }
 
+interface LeaseApartmentProps {
+  propertyId: string
+  onSubmit?: (formData: any) => void
+}
 
 interface PropertyNameProps {
   // propertyName: string
@@ -257,7 +244,6 @@ interface PropertySizeProps {
   propertySize: number;
   onPropertySizeChange: (size: number) => void;
 }
-
 
 interface PropertyFeaturesProps {
   onFeaturesChange?: (features: Record<string, any>) => void
@@ -283,8 +269,6 @@ interface AvailabilityDateProps {
   onChange: (date: Date) => void
 }
 
-
-
 interface MediaUploadProps {
   onMediaChange?: (media: {
     exteriorViews: File[];
@@ -298,19 +282,30 @@ interface MediaUploadProps {
   }) => void;
 }
 
+const LeaseApartment: React.FC = () => {
+  const navigate = useNavigate();
+  const formRef = useRef<HTMLDivElement>(null);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [propertyId, setPropertyId] = useState<string | undefined>(undefined);
 
-const LeaseApartment  = () => {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const formRef = useRef<HTMLDivElement>(null)
-  const initialData={
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const initialFormData: FormData = {
     basicInformation: {
       propertyName: "",
       address: {
         flatNo: 0,
-        showFlatNo: false,
+        showFlatNo: true,
         floor: 0,
         apartmentName: "",
         street: "",
@@ -410,204 +405,56 @@ const LeaseApartment  = () => {
       smarthometechnology: [],
       otheritems: []
     },
-    leaseTerms:{
+    leaseTerms: {
       leaseDetails: {
-        leaseAmount:{
+        leaseAmount: {
+          amount: 0,
+          type: "",
+          duration: 0,
+          durationUnit: ""
+        }
+      },
+      tenureDetails: {
+        minimumTenure: 0,
+        minimumUnit: "",
+        maximumTenure: 0,
+        maximumUnit: "",
+        lockInPeriod: 0,
+        lockInUnit: "",
+        noticePeriod: 0,
+        noticePeriodUnit: ""
+      },
+      maintenanceAmount: {
         amount: 0,
-        type: 'fixed',
-    duration: 0,
-    durationUnit: 'years'
+        frequency: ""
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: ""
         },
-      },
-      tenureDetails: {
-        minimumTenure: 0,
-        minimumUnit: "years",
-        maximumTenure: 0,
-        maximumUnit: "years",
-        lockInPeriod: 0,
-        lockInUnit: "years",
-        noticePeriod: 0,
-        noticePeriodUnit: "months",
-      },
-      maintenanceAmount: {
-        amount: 0,
-        frequency: "monthly",
-      },
-      otherCharges: {
-        water: { amount: 0, type: "inclusive" },
-        electricity: { amount: 0, type: "inclusive" },
-        gas: { amount: 0, type: "inclusive" },
-        others: { amount: 0, type: "inclusive" },
-      },
-      brokerage: {
-        required: "no",
-        amount: 0,
-      },
-    },
-      availability: {
-        date: new Date().toISOString(),
-        type: "immediate",
-      },
-    media: {
-      photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: [],
-        bedrooms: [],
-        halls: [],
-        storerooms: [],
-        kitchen: []
-      },
-      videoTour: undefined,
-      documents: [],
-    },
-  }
-  const [formData, setFormData] = useState<formData>({
-    basicInformation: {
-      propertyName: "",
-      address: {
-        flatNo: 0,
-        showFlatNo: false,
-        floor: 0,
-        apartmentName: "",
-        street: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        location: {
-          latitude: "",
-          longitude: ""
+        electricity: {
+          amount: 0,
+          type: ""
+        },
+        gas: {
+          amount: 0,
+          type: ""
+        },
+        others: {
+          amount: 0,
+          type: ""
         }
-      }
-    },
-    propertySize: 0,
-    propertyDetails: {
-      bedrooms: 0,
-      washrooms: 0,
-      balconies: 0,
-      hasParking: false,
-      parkingDetails: {
-        twoWheeler: 0,
-        fourWheeler: 0
-      },
-      extraRooms: {
-        servant: false,
-        puja: false,
-        store: false,
-        others: false
-      },
-      utilityArea: "",
-      furnishingStatus: "",
-      totalFloors: 0,
-      propertyOnFloor: 0,
-      facing: "",
-      propertyAge: "",
-      superBuiltUpAreaSqft: 0,
-      superBuiltUpAreaSqmt: 0,
-      builtUpAreaSqft: 0,
-      builtUpAreaSqmt: 0,
-      carpetAreaSqft: 0,
-      carpetAreaSqmt: 0,
-      electricityAvailability: "",
-      waterAvailability: {
-        borewell: false,
-        governmentSupply: false,
-        tankerSupply: false
-      }
-    },
-    restrictions: {
-      foodPreference: "",
-      petsAllowed: "",
-      tenantType: ""
-    },
-    flatAmenities: {
-      lights: 0,
-      ceilingFan: 0,
-      geysers: 0,
-      chimney: false,
-      callingBell: false,
-      wardrobes: 0,
-      lofts: 0,
-      kitchenCabinets: 0,
-      clothHanger: 0,
-      pipedGasConnection: false,
-      gasStoveWithCylinder: false,
-      ironingStand: false,
-      bathtub: false,
-      shower: false,
-      sofa: false,
-      coffeeTable: false,
-      tvUnit: false,
-      diningTableWithChairs: 0,
-      cotWithMattress: 0,
-      sideTable: 0,
-      studyTableWithChair: 0,
-      television: false,
-      refrigerator: false,
-      washingMachine: false,
-      dishwasher: false,
-      waterPurifier: false,
-      microwaveOven: false,
-      inductionCooktop: false,
-      gasStove: false,
-      airConditioner: 0,
-      desertCooler: 0,
-      ironBox: false,
-      exhaustFan: 0
-    },
-    societyAmenities: {
-      powerutility: [],
-      parkingtranspotation: [],
-      recreationalsportsfacilities: [],
-      childrenfamilyamenities: [],
-      healthwellnessfacilities: [],
-      shoppingconviencestores: [],
-      ecofriendlysustainable: [],
-      communityculturalspaces: [],
-      smarthometechnology: [],
-      otheritems: []
-    },
-    leaseTerms:{
-      leaseDetails: {
-        leaseAmount:{
-        amount: 0,
-        type: 'fixed',
-    duration: 0,
-    durationUnit: 'years'
-      },
-    },
-      tenureDetails: {
-        minimumTenure: 0,
-        minimumUnit: "years",
-        maximumTenure: 0,
-        maximumUnit: "years",
-        lockInPeriod: 0,
-        lockInUnit: "years",
-        noticePeriod: 0,
-        noticePeriodUnit: "months",
-      },
-      maintenanceAmount: {
-        amount: 0,
-        frequency: "monthly",
-      },
-      otherCharges: {
-        water: { amount: 0, type: "inclusive" },
-        electricity: { amount: 0, type: "inclusive" },
-        gas: { amount: 0, type: "inclusive" },
-        others: { amount: 0, type: "inclusive" },
       },
       brokerage: {
-        required: "no",
-        amount: 0,
-      },
+        required: "",
+        amount: 0
+      }
     },
-      availability: {
-        date: new Date().toISOString(),
-        type: "immediate",
-      },
+    availability: {
+      type: "",
+      date: ""
+    },
     media: {
       photos: {
         exterior: [],
@@ -621,10 +468,11 @@ const LeaseApartment  = () => {
         storerooms: [],
         kitchen: []
       },
-      videoTour: undefined,
-      documents: [],
-    },
-  })
+      documents: []
+    }
+  };
+
+  const [formData, setFormData] = useState<FormData>(initialFormData);
 
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
@@ -642,7 +490,6 @@ const LeaseApartment  = () => {
       }
     }));
   }, []);
-
 
   const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
     setFormData(prev => ({
@@ -681,93 +528,6 @@ const LeaseApartment  = () => {
       iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
     }
   };
-
-  // // Function to get current location
-  // const getCurrentLocation = () => {
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const lat = position.coords.latitude.toString();
-  //         const lng = position.coords.longitude.toString();
-          
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           coordinates: {
-  //             latitude: lat,
-  //             longitude: lng
-  //           }
-  //         }));
-          
-  //         updateMapLocation(lat, lng);
-          
-  //         reverseGeocode(lat, lng);
-  //       },
-  //       (error) => {
-  //         console.error("Error getting location: ", error);
-  //         toast.error("Unable to get your current location. Please check your browser permissions.");
-  //       }
-  //     );
-  //   } else {
-  //     toast.error("Geolocation is not supported by your browser.");
-  //   }
-  // };
-
-  // // Reverse geocode to get address from coordinates
-  // const reverseGeocode = (lat: string, lng: string) => {
-  //   const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
-  //   fetch(geocodingUrl)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       if (data.status === "OK" && data.results && data.results.length > 0) {
-  //         const address = data.results[0];
-          
-  //         const addressComponents = {
-  //           street: '',
-  //           city: '',
-  //           state: '',
-  //           zipCode: ''
-  //         };
-          
-  //         address.address_components.forEach((component: any) => {
-  //           const types = component.types;
-            
-  //           if (types.includes('route')) {
-  //             addressComponents.street = component.long_name;
-  //           } else if (types.includes('locality')) {
-  //             addressComponents.city = component.long_name;
-  //           } else if (types.includes('administrative_area_level_1')) {
-  //             addressComponents.state = component.long_name;
-  //           } else if (types.includes('postal_code')) {
-  //             addressComponents.zipCode = component.long_name;
-  //           }
-  //         });
-          
-  //         if (!addressComponents.street && address.formatted_address) {
-  //           const formattedParts = address.formatted_address.split(',');
-  //           if (formattedParts.length > 0) {
-  //             addressComponents.street = formattedParts[0];
-  //           }
-  //         }
-          
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           propertyAddress: {
-  //             ...prev.propertyAddress,
-  //             ...addressComponents
-  //           }
-  //         }));
-          
-  //         toast.success("Location details updated successfully");
-  //       } else {
-  //         console.error("Geocoding failed:", data.status);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error("Error during reverse geocoding:", error);
-  //     });
-  // };
-
 
   const formSections = [
     {
@@ -1018,37 +778,16 @@ const LeaseApartment  = () => {
       component: (
         
           <div className="space-y-8">
-            <MediaUpload
-              initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: media.photos.exterior,
-                      interior: media.photos.interior,
-                      floorPlan: media.photos.floorPlan,
-                      washrooms: media.photos.washrooms,
-                      lifts: media.photos.lifts,
-                      emergencyExits: media.photos.emergencyExits,
-                      bedrooms: media.photos.bedrooms,
-                      halls: media.photos.halls,
-                      storerooms: media.photos.storerooms,
-                      kitchen: media.photos.kitchen
-                    },
-                    videoTour: media.videoTour,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+            <ResidentialPropertyMediaUpload
+                propertyType="apartment"
+                propertyId={propertyId}
+                value={formData.media}
+                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+              />
             </div>
       ),
     },
   ];
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  // const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
@@ -1090,309 +829,232 @@ const LeaseApartment  = () => {
     }
   };
 
-  const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
-
     try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
+      const user = sessionStorage.getItem("user");
+      if (!user) {
+        navigate("/login");
+        return;
+      }
 
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
-          });
-        };
+      const author = JSON.parse(user).id;
 
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all(formData.media.photos.exterior.map(async file => {
             if (file instanceof File) {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
+              return await convertFileToBase64(file);
             }
+            return file;
+          })),
+          interior: await Promise.all(formData.media.photos.interior.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          floorPlan: await Promise.all(formData.media.photos.floorPlan.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          washrooms: await Promise.all(formData.media.photos.washrooms.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          lifts: await Promise.all(formData.media.photos.lifts.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          emergencyExits: await Promise.all(formData.media.photos.emergencyExits.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          bedrooms: await Promise.all(formData.media.photos.bedrooms.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          halls: await Promise.all(formData.media.photos.halls.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          storerooms: await Promise.all(formData.media.photos.storerooms.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          kitchen: await Promise.all(formData.media.photos.kitchen.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          }))
+        },
+        videoTour: formData.media.videoTour
+          ? formData.media.videoTour instanceof File
+            ? await convertFileToBase64(formData.media.videoTour)
+            : formData.media.videoTour
+          : undefined,
+        documents: await Promise.all(formData.media.documents.map(async file => {
+          if (file instanceof File) {
+            return await convertFileToBase64(file);
           }
-          return results;
-        };
+          return file;
+        }))
+      };
 
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
-        };
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date()
-          }
-        };
-
-        const response = await axios.post('/api/residential/lease/appartment', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          toast.success('Apartment listing created successfully!');
-          setFormData({...initialData} as formData);
+      const transformedData = {
+        ...formData,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date().toISOString()
         }
-      } else {
-        navigate('/login');
+      };
+
+      const response = await axios.post(
+        "/api/residential/lease/apartments",
+        transformedData,
+        {
+          headers: {
+            "Content-Type": "application/json"
+          }
+        }
+      );
+
+      if (response.data.success) {
+        setPropertyId(response.data.propertyId);
+        toast.success("Property listing created successfully!");
+        setFormData(initialFormData);
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create apartment listing. Please try again.');
+      console.error("Error submitting form:", error);
+      toast.error("Failed to create apartment listing. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-
-//   return (
-//     <form onSubmit={(e) => e.preventDefault()} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
-//       {/* Progress indicator */}
-//       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-//         <div className="max-w-5xl mx-auto px-4 py-4">
-//           <div className="flex justify-center">
-//             <div className="flex items-center space-x-2">
-//               {formSections.map((section, index) => (
-//                 <div
-//                   key={index}
-//                   className="flex items-center cursor-pointer"
-//                   onClick={() => {
-//                     if (index < currentStep) {
-//                       setCurrentStep(index);
-//                       setTimeout(() => {
-//                         if (formRef.current) {
-//                           window.scrollTo({
-//                             top: formRef.current.offsetTop - 100,
-//                             behavior: 'smooth'
-//                           });
-//                         }
-//                       }, 100);
-//                     }
-//                   }}
-//                 >
-//                   <div className="flex flex-col items-center group">
-//                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep
-//                       ? 'bg-black text-white'
-//                       : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-//                       }`}>
-//                       {section.icon}
-//                     </div>
-//                     <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep
-//                       ? 'text-black'
-//                       : 'text-gray-500 group-hover:text-gray-700'
-//                       }`}>
-//                       {section.title}
-//                     </span>
-//                   </div>
-//                   {index < formSections.length - 1 && (
-//                     <div className="flex items-center mx-1">
-//                       <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
-//                         }`} />
-//                     </div>
-//                   )}
-//                 </div>
-//               ))}
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-
-//       <div className="space-y-12">
-//         <div className="mb-8">
-//           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
-//           <p className="text-gray-600">Please fill in the details for your apartment property</p>
-//         </div>
-//         <div className="space-y-8">{formSections[currentStep].component}</div>
-//       </div>
-
-//       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-//         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-//           {currentStep > 0 ? (
-//             <button
-//               type="button"
-//               className="flex items-center px-6 py-2 rounded-lg border border-black/20 bg-white text-black transition-all duration-200"
-//               onClick={handlePrevious}
-//               disabled={loading}
-//             >
-//               <ChevronLeft className="w-5 h-5 mr-2" />
-//               Previous
-//             </button>
-//           ) : (
-//             <div></div>
-//           )}
-
-//           {currentStep < formSections.length - 1 ? (
-//             <button
-//               type="button"
-//               className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
-//               onClick={handleNext}
-//             >
-//               Next
-//               <ChevronRight className="w-5 h-5 ml-2" />
-//             </button>
-//           ) : (
-//             <button
-//               type="button"
-//               className="flex items-center px-6 py-2 rounded-lg bg-black text-white transition-all duration-200"
-//               onClick={() => onSubmit?.(formData)}
-//             >
-//               {loading ? (
-//                 <>
-//                   <Loader2 className="animate-spin mr-2 h-5 w-5" />
-//                   Submitting...
-//                 </>
-//               ) : (
-//                 <>
-//                   List Property
-//                   <ChevronRight className="w-5 h-5 ml-2" />
-//                 </>
-//               )}
-//             </button>
-//           )}
-//         </div>
-//       </div>
-//     </form>
-//   );
-// };
-
-
-return (
-  <div ref={formRef} className="min-h-screen bg-white">
-    <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-      <div className="max-w-5xl mx-auto px-4 py-4">
-        <div className="flex justify-center">
-          <div className="flex items-center space-x-2">
-            {formSections.map((section, index) => (
-              <div
-                key={index}
-                className="flex items-center cursor-pointer"
-                onClick={() => {
-                  setCurrentStep(index + 1);
-                  setTimeout(() => {
-                    if (formRef.current) {
-                      window.scrollTo({
-                        top: formRef.current.offsetTop - 100,
-                        behavior: 'smooth'
-                      });
-                    } else {
-                      window.scrollTo({
-                        top: 0,
-                        behavior: 'smooth'
-                      });
-                    }
-                  }, 100);
-                }}
-              >
-                <div className="flex flex-col items-center group">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index + 1 <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }`}>
-                    {section.icon}
+  return (
+    <div ref={formRef} className="min-h-screen bg-white">
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {formSections.map((section, index) => (
+                <div
+                  key={index}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => {
+                    setCurrentStep(index + 1);
+                    setTimeout(() => {
+                      if (formRef.current) {
+                        window.scrollTo({
+                          top: formRef.current.offsetTop - 100,
+                          behavior: 'smooth'
+                        });
+                      } else {
+                        window.scrollTo({
+                          top: 0,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }, 100);
+                  }}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index + 1 <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}>
+                      {section.icon}
+                    </div>
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index + 1 <= currentStep ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'
+                      }`}>
+                      {section.title}
+                    </span>
                   </div>
-                  <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index + 1 <= currentStep ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'
-                    }`}>
-                    {section.title}
-                  </span>
+                  {index < formSections.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep - 1 ? 'bg-black' : 'bg-gray-200'
+                        }`} />
+                    </div>
+                  )}
                 </div>
-                {index < formSections.length - 1 && (
-                  <div className="flex items-center mx-1">
-                    <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep - 1 ? 'bg-black' : 'bg-gray-200'
-                      }`} />
-                  </div>
-                )}
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
+
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Apartment</h1>
+        </div>
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep - 1].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+
+        {formSections[currentStep - 1].component}
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-white text-black hover:bg-black hover:text-white'
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          <button
+            onClick={() => currentStep === formSections.length ? handleSubmit() : handleNext()}
+            disabled={isSubmitting}
+            className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="animate-spin mr-2 h-5 w-5" />
+                Submitting...
+              </>
+            ) : (
+              <>
+                {currentStep === formSections.length ? 'Submit' : 'Next'}
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
+          {error}
+        </div>
+      )}
+      {success && (
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
+          {success}
+        </div>
+      )}
     </div>
-
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Apartment</h1>
-      </div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep - 1].title}</h2>
-        <p className="text-gray-600">Please fill in the details for your property</p>
-      </div>
-
-      {formSections[currentStep - 1].component}
-    </div>
-
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-      <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-        <button
-          onClick={handlePrevious}
-          disabled={currentStep === 0}
-          className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-white text-black hover:bg-black hover:text-white'
-            }`}
-        >
-          <ChevronLeft className="w-5 h-5 mr-2" />
-          Previous
-        </button>
-        <button
-          onClick={() => currentStep === formSections.length ? handleSubmit() : handleNext()}
-          disabled={isSubmitting}
-          className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="animate-spin mr-2 h-5 w-5" />
-              Submitting...
-            </>
-          ) : (
-            <>
-              {currentStep === formSections.length ? 'Submit' : 'Next'}
-              <ChevronRight className="w-5 h-5 ml-2" />
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-
-    {error && (
-      <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-        {error}
-      </div>
-    )}
-    {success && (
-      <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
-        {success}
-      </div>
-    )}
-  </div>
-);
+  );
 };
+
 export default LeaseApartment;

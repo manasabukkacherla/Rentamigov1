@@ -96,6 +96,7 @@ import commercialSellShedRoutes from "./routes/commercial/commercialSellShedRout
 import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShowroomRoutes";
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
+import residentialMediaRoutes from './routes/residentialMediaRoutes';
 
 dotenv.config();
 
@@ -268,6 +269,9 @@ app.use('/api/residential/pgmain', residentialPgmainRoutes);
 
 // Property media routes for all property types
 app.use('/api/property-media', propertyMediaRoutes);
+
+// Residential Media Routes
+app.use('/api/residential/media', residentialMediaRoutes);
 
 // Redirect old pg-media routes to the new integrated endpoints
 app.use("/api/residential/pg-media", (req, res, next) => {
