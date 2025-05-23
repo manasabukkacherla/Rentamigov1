@@ -160,6 +160,15 @@ interface IResidentialSaleBuilderFloor extends Document {
       storerooms: string[];
       kitchen: string[];
     };
+    mediaItems?: Array<{
+      id?: string;
+      type?: 'photo' | 'video';
+      url?: string;
+      title?: string;
+      tags?: string[];
+      roomType?: string;
+      category?: string;
+    }>;
     videoTour?: string;
     documents: string[];
   };
@@ -332,7 +341,16 @@ const residentialSaleBuilderFloorSchema = new mongoose.Schema<IResidentialSaleBu
       storerooms: [{ type: String, required: false }],
       kitchen: [{ type: String, required: false }]
     },
-    videoTour: { type: String },
+    mediaItems: [{
+      id: String,
+      type: String,
+      url: String,
+      title: String,
+      tags: [String],
+      roomType: String,
+      category: String
+    }],
+    videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
   metadata: {

@@ -126,6 +126,15 @@ interface IMedia {
     storerooms: string[];
     kitchen: string[];
   };
+  mediaItems?: Array<{
+    id?: string;
+    type?: 'photo' | 'video';
+    url?: string;
+    title?: string;
+    tags?: string[];
+    roomType?: string;
+    category?: string;
+  }>;
   videoTour?: string;
   documents: string[];
 }
@@ -259,17 +268,26 @@ const ResidentailsaleIndependentHouseSchema = new Schema<IResidentialSaleIndepen
   media: {
     photos: {
       exterior: [{ type: String, required: false }],
-        interior: [{ type: String, required: false }],
-        floorPlan: [{ type: String, required: false }],
-        washrooms: [{ type: String, required: false }],
-        lifts: [{ type: String, required: false }],
-        emergencyExits: [{ type: String, required: false }],
-        bedrooms: [{ type: String, required: false }],
-        halls: [{ type: String, required: false }],
-        storerooms: [{ type: String, required: false }],
-        kitchen: [{ type: String, required: false }]
+      interior: [{ type: String, required: false }],
+      floorPlan: [{ type: String, required: false }],
+      washrooms: [{ type: String, required: false }],
+      lifts: [{ type: String, required: false }],
+      emergencyExits: [{ type: String, required: false }],
+      bedrooms: [{ type: String, required: false }],
+      halls: [{ type: String, required: false }],
+      storerooms: [{ type: String, required: false }],
+      kitchen: [{ type: String, required: false }]
     },
-    videoTour: { type: String },
+    mediaItems: [{
+      id: String,
+      type: String,
+      url: String,
+      title: String,
+      tags: [String],
+      roomType: String,
+      category: String
+    }],
+    videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
   metadata: {

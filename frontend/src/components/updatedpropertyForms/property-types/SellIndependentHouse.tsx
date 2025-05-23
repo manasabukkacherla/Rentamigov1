@@ -8,7 +8,7 @@ import PropertySize from "../PropertySize"
 import PropertyFeatures from "../PropertyFeatures"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
-import MediaUpload from "../MediaUpload"
+import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import AvailabilityDate from "../AvailabilityDate"
 import Restrictions from "../Restrictions"
 import axios from "axios"
@@ -574,30 +574,12 @@ const SellIndependentHouse = () => {
       content: (
         <div className="space-y-6">
           <div className="space-y-8">
-            <MediaUpload
-              initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: media.photos.exterior,
-                      interior: media.photos.interior,
-                      floorPlan: media.photos.floorPlan,
-                      washrooms: media.photos.washrooms,
-                      lifts: media.photos.lifts,
-                      emergencyExits: media.photos.emergencyExits,
-                      bedrooms: media.photos.bedrooms,
-                      halls: media.photos.halls,
-                      storerooms: media.photos.storerooms,
-                      kitchen: media.photos.kitchen
-                    },
-                    videoTour: media.videoTour,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+            <ResidentialPropertyMediaUpload
+                propertyType="independenthouse"
+                propertyId={propertyId}
+                value={formData.media}
+                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+              />
 
           </div>
         </div>
@@ -719,7 +701,10 @@ const SellIndependentHouse = () => {
         });
 
         if (response.data.success) {
-          toast.success('Independent House listing created successfully!');
+          // Set the propertyId from the response
+          setPropertyId(response.data.propertyId);
+          toast.success('Property listing created successfully!');
+          setFormData({...initialFormData} as FormData);
         }
       } else {
         navigate('/login');

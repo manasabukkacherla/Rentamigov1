@@ -6,14 +6,46 @@ import mongoose from 'mongoose';
 import ResidentialRentApartment from '../models/residential/residentialRentApartment';
 import ResidentialRentBuilderFloor from '../models/residential/residentialRentBuilderFloor';
 import ResidentialRentIndependent from '../models/residential/residentialRentIndependent';
+import ResidentialSaleApartment from '../models/residential/residentialSaleApartment';
+import ResidentialSaleBuilderFloor from '../models/residential/residentialSaleBuilderFloor';
+import ResidentialSaleIndependentHouse from '../models/residential/saleIndependentHouse';
+import ResidentialLeaseApartment from '../models/residential/residentialLeaseAppartment';
+import ResidentialLeaseBuilderFloor from '../models/residential/leaseBuilderFloor';
+import ResidentialLeaseIndependentHouse from '../models/residential/residentialLeaseIndependentHouse';
+import ResidentialSalePlot from '../models/residential/salePlot';
+
+// Import all commercial models
+import CommercialRentRetailStore from '../models/commercial/CommercialRentRetailStore';
+import CommercialRentPlot from '../models/commercial/commercialRentPlot';
+import CommercialRentShed from '../models/commercial/CommercialRentShed';
+import CommercialRentOthers from '../models/commercial/CommercialRentOthers';
+import CommercialLeaseRetail from '../models/commercial/CommercialLeaseRetail';
 
 const router = express.Router();
 
 // Map property types to their respective models
 const propertyModels: { [key: string]: mongoose.Model<any> } = {
+  // Residential Rent
   'apartment': ResidentialRentApartment,
   'builderFloor': ResidentialRentBuilderFloor,
   'independentHouse': ResidentialRentIndependent,
+  
+  // Residential Sale
+  'saleApartment': ResidentialSaleApartment,
+  'saleBuilderFloor': ResidentialSaleBuilderFloor,
+  'saleIndependentHouse': ResidentialSaleIndependentHouse,
+  'salePlot': ResidentialSalePlot,
+  
+  // Residential Lease
+  'leaseApartment': ResidentialLeaseApartment,
+  'leaseBuilderFloor': ResidentialLeaseBuilderFloor,
+  'leaseIndependentHouse': ResidentialLeaseIndependentHouse,
+  
+  // Commercial
+  'commercialRentRetail': CommercialRentRetailStore,
+  'commercialRentPlot': CommercialRentPlot,
+  'commercialRentShed': CommercialRentShed,
+  'commercialRentOthers': CommercialRentOthers,
   // Add more property types as needed
 };
 
@@ -302,61 +334,24 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
         let photosChanged = false;
 
         // Handle different photo storage formats based on property type
-        if (propertyType === 'apartment') {
-          // For ResidentialRentApartment model:
-          // Schema: exterior: [{ id: { type: String, required: true }, url: { type: String, required: true }, ... }]
-          Object.entries(photos).forEach(([category, newPhotoItems]) => {
-            // Check if this category exists in the schema
-            if (!newPhotosData[category]) {
-              newPhotosData[category] = [];
-            }
-            
-            // For apartment model, ensure we have the correct property format
-            const existingCategoryItems = Array.isArray(newPhotosData[category]) ? newPhotosData[category] : [];
-            
-            // Convert photo items to MongoDB document structure
-            const processedPhotoItems = newPhotoItems.map(item => {
-              // MongoDB creates an _id for each document in the array
-              return {
-                id: item.id,
-                url: item.url,
-                title: item.title || 'Untitled',
-                category: item.category,
-                tags: item.tags || []
-              };
-            });
-            
-            // Debug the schema mismatch
-            console.log('Original photo item from upload:', JSON.stringify(newPhotoItems[0] || {}, null, 2));
-            console.log('Processed photo item for MongoDB:', JSON.stringify(processedPhotoItems[0] || {}, null, 2));
-            
-            // Add new items to the category array
-            newPhotosData[category] = [...existingCategoryItems, ...processedPhotoItems];
-            photosChanged = true;
-            
-            console.log(`Updated ${category} photos - added ${processedPhotoItems.length} new items`);
-          });
+        Object.entries(photos).forEach(([category, newPhotoItems]) => {
+          // Check if this category exists in the schema
+          if (!newPhotosData[category]) {
+            newPhotosData[category] = [];
+          }
           
-          // Log the full update operation for debugging
-          console.log('FULL MEDIA UPDATE FOR APARTMENT:', JSON.stringify(newPhotosData, null, 2));
-        } else {
-          // Original logic for other property types which use simple URL arrays
-          Object.entries(photos).forEach(([category, newPhotoItems]) => {
-            const existingCategoryItems = newPhotosData[category] || [];
-            // Extract URLs from photo detail objects
-            const newPhotoUrls = newPhotoItems.map(item => item.url);
-            
-            // Combine and deduplicate URLs
-            const combinedUrls = [...existingCategoryItems, ...newPhotoUrls];
-            const uniqueUrls = [...new Set(combinedUrls)];
-            
-            // Check if this category's photo list actually changed
-            if (JSON.stringify(uniqueUrls) !== JSON.stringify(existingCategoryItems)) {
-              newPhotosData[category] = uniqueUrls;
-              photosChanged = true;
-            }
-          });
-        }
+          // For all property types, store URLs directly
+          const newUrls = newPhotoItems.map(item => item.url);
+          
+          // Add new URLs to the category array
+          newPhotosData[category] = [...(newPhotosData[category] || []), ...newUrls];
+          photosChanged = true;
+          
+          console.log(`Updated ${category} photos - added ${newUrls.length} new items`);
+        });
+        
+        // Log the full update operation for debugging
+        console.log('FULL MEDIA UPDATE:', JSON.stringify(newPhotosData, null, 2));
 
         if (photosChanged) {
           updateOperations.$set['media.photos'] = newPhotosData;
@@ -398,180 +393,116 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
           console.log('Property Type:', propertyType);
           console.log('Update Operations:', JSON.stringify(updateOperations, null, 2));
           
-          // For apartment type, directly update with a simpler operation just for photos
-          if (propertyType === 'apartment') {
-            console.log('APARTMENT SPECIAL UPDATE FLOW');
+          // Process photos for category-specific arrays
+          if (updateOperations.$set && updateOperations.$set['media.photos']) {
+            const photoUpdates = updateOperations.$set['media.photos'];
+            console.log('Photo updates to be applied:', JSON.stringify(photoUpdates, null, 2));
             
-            // Process photos for category-specific arrays
-            if (updateOperations.$set && updateOperations.$set['media.photos']) {
-              const photoUpdates = updateOperations.$set['media.photos'];
-              console.log('Photo updates to be applied:', JSON.stringify(photoUpdates, null, 2));
-              
-              // Check if we have photos to update
-              if (Object.keys(photoUpdates).length > 0) {
-                // Create a direct update operation for each category that has photos
-                const photoUpdatePromises = Object.entries(photoUpdates).map(async ([category, items]) => {
-                  if (Array.isArray(items) && items.length > 0) {
-                    // Create an update command for this category
-                    console.log(`Updating ${items.length} photos for category ${category}`);
+            // Check if we have photos to update
+            if (Object.keys(photoUpdates).length > 0) {
+              // Create a direct update operation for each category that has photos
+              const photoUpdatePromises = Object.entries(photoUpdates).map(async ([category, items]) => {
+                if (Array.isArray(items) && items.length > 0) {
+                  // Create an update command for this category
+                  console.log(`Updating ${items.length} photos for category ${category}`);
+                  
+                  try {
+                    // Use $push to append each photo to the array
+                    const categoryUpdateResult = await propertyModels[propertyType].updateOne(
+                      { propertyId },
+                      { $push: { [`media.photos.${category}`]: { $each: items } } }
+                    );
                     
-                    try {
-                      // Use $push to append each photo to the array
-                      const categoryUpdateResult = await propertyModels[propertyType].updateOne(
-                        { propertyId },
-                        { $push: { [`media.photos.${category}`]: { $each: items } } }
-                      );
-                      
-                      console.log(`Update result for ${category}:`, categoryUpdateResult);
-                      return categoryUpdateResult;
-                    } catch (categoryError) {
-                      console.error(`Error updating ${category} photos:`, categoryError);
-                      return null;
-                    }
+                    console.log(`Update result for ${category}:`, categoryUpdateResult);
+                    return categoryUpdateResult;
+                  } catch (categoryError) {
+                    console.error(`Error updating ${category} photos:`, categoryError);
+                    return null;
                   }
-                  return null;
-                });
-                
-                // Wait for all photo category updates to complete
-                const photoResults = await Promise.all(photoUpdatePromises.filter(p => p !== null));
-                console.log('All photo update results:', photoResults);
-              }
+                }
+                return null;
+              });
+              
+              // Wait for all photo category updates to complete
+              const photoResults = await Promise.all(photoUpdatePromises.filter(p => p !== null));
+              console.log('All photo update results:', photoResults);
             }
-            
-            // Also ensure all media items are stored in the mediaItems array
-            const allMediaItems = [...mediaItems];
-            if (allMediaItems.length > 0) {
-              try {
-                console.log('Storing all media items in mediaItems array:', allMediaItems.length, 'items');
-                
-                // First ensure the mediaItems array exists (initialize if needed)
-                await propertyModels[propertyType].updateOne(
-                  { propertyId, 'media.mediaItems': { $exists: false } },
-                  { $set: { 'media.mediaItems': [] } },
-                  { upsert: true }
-                );
-                
-                // Then add the items
-                await propertyModels[propertyType].updateOne(
-                  { propertyId },
-                  { $push: { 'media.mediaItems': { $each: allMediaItems } } }
-                );
-                
-                console.log('Successfully pushed items to mediaItems array');
-              } catch (mediaItemsError) {
-                console.error('Error updating mediaItems array:', mediaItemsError);
-              }
-            }
-            
-            // Update the video separately if needed
-            if (videoTour && videoTour !== property.media.videoTour) {
-              console.log('Updating video tour:', videoTour);
+          }
+          
+          // Also ensure all media items are stored in the mediaItems array
+          const allMediaItems = [...mediaItems];
+          if (allMediaItems.length > 0) {
+            try {
+              console.log('Storing all media items in mediaItems array:', allMediaItems.length, 'items');
+              
+              // First ensure the mediaItems array exists (initialize if needed)
+              await propertyModels[propertyType].updateOne(
+                { propertyId, 'media.mediaItems': { $exists: false } },
+                { $set: { 'media.mediaItems': [] } },
+                { upsert: true }
+              );
+              
+              // Then add the items
               await propertyModels[propertyType].updateOne(
                 { propertyId },
-                { $set: { 'media.videoTour': videoTour } }
+                { $push: { 'media.mediaItems': { $each: allMediaItems } } }
               );
+              
+              console.log('Successfully pushed items to mediaItems array');
+            } catch (mediaItemsError) {
+              console.error('Error updating mediaItems array:', mediaItemsError);
             }
+          }
+          
+          // Update the video separately if needed
+          if (videoTour && videoTour !== property.media.videoTour) {
+            console.log('Updating video tour:', videoTour);
+            await propertyModels[propertyType].updateOne(
+              { propertyId },
+              { $set: { 'media.videoTour': videoTour } }
+            );
+          }
+          
+          // Check the result
+          const updatedProperty = await propertyModels[propertyType].findOne({ propertyId });
+          if (updatedProperty && updatedProperty.media) {
+            console.log('UPDATED PROPERTY MEDIA:');
             
-            // Check the result
-            const updatedProperty = await propertyModels[propertyType].findOne({ propertyId });
-            if (updatedProperty && updatedProperty.media) {
-              console.log('UPDATED PROPERTY MEDIA:');
-              
-              // Log photos by category
-              if (updatedProperty.media.photos) {
-                console.log('PHOTOS BY CATEGORY:');
-                Object.entries(updatedProperty.media.photos).forEach(([category, photos]: [string, any]) => {
-                  if (Array.isArray(photos) && photos.length > 0) {
-                    console.log(`${category}: ${photos.length} photos found`);
-                    console.log(`Sample: ${JSON.stringify(photos[0], null, 2)}`);
-                  }
-                });
-              }
-              
-              // Log all media items
-              if (updatedProperty.media.mediaItems) {
-                console.log('ALL MEDIA ITEMS:');
-                console.log(`Total: ${updatedProperty.media.mediaItems.length} items`);
-                if (updatedProperty.media.mediaItems.length > 0) {
-                  console.log(`Sample: ${JSON.stringify(updatedProperty.media.mediaItems[0], null, 2)}`);
-                }
-              }
-              
-              // Log video tour
-              if (updatedProperty.media.videoTour) {
-                console.log('Video tour URL:', updatedProperty.media.videoTour);
-              }
-              
-              return res.status(200).json({
-                success: true,
-                message: 'Media uploaded successfully and saved to property',
-                data: {
-                  media: updatedProperty.media
+            // Log photos by category
+            if (updatedProperty.media.photos) {
+              console.log('PHOTOS BY CATEGORY:');
+              Object.entries(updatedProperty.media.photos).forEach(([category, photos]: [string, any]) => {
+                if (Array.isArray(photos) && photos.length > 0) {
+                  console.log(`${category}: ${photos.length} photos found`);
+                  console.log(`Sample: ${JSON.stringify(photos[0], null, 2)}`);
                 }
               });
             }
             
-            // If the above didn't return, continue with standard update flow
-          }
-          
-          // If we didn't do a special update for apartments or it didn't work, fall back to regular update
-          await propertyModels[propertyType].updateOne(
-            { propertyId, 'media.mediaItems': { $exists: false } },
-            { $set: { 'media.mediaItems': [] } }
-          );
-          
-          const updateResult = await propertyModels[propertyType].updateOne(
-            { propertyId },
-            updateOperations
-          );
-          console.log('Direct DB update result:', updateResult);
-
-          if (updateResult.modifiedCount > 0 || (updateResult.matchedCount > 0 && !updateResult.modifiedCount)) {
-            // modifiedCount > 0 means changes were made.
-            // matchedCount > 0 && modifiedCount === 0 means the document was found but data was identical to what was being set.
-            console.log(`Property media ${updateResult.modifiedCount > 0 ? 'updated' : 'already up-to-date'} successfully via updateOne.`);
-
-            // Fetch the updated property to return its media and for verification
-            const updatedPropertyAfterSave = await propertyModels[propertyType].findOne({ propertyId });
+            // Log all media items
+            if (updatedProperty.media.mediaItems) {
+              console.log('ALL MEDIA ITEMS:');
+              console.log(`Total: ${updatedProperty.media.mediaItems.length} items`);
+              if (updatedProperty.media.mediaItems.length > 0) {
+                console.log(`Sample: ${JSON.stringify(updatedProperty.media.mediaItems[0], null, 2)}`);
+              }
+            }
             
-            if (updatedPropertyAfterSave) {
-                console.log('Verification - media after updateOne:');
-                if (updatedPropertyAfterSave.media && updatedPropertyAfterSave.media.photos) {
-                  Object.entries(updatedPropertyAfterSave.media.photos).forEach(([category, items]: [string, any]) => {
-                    if (Array.isArray(items) && items.length > 0) {
-                      console.log(`${category}: ${items.length} items`);
-                      console.log(`${category} sample:`, JSON.stringify(items[0], null, 2));
-                    } else {
-                      console.log(`${category}: No items or invalid format`);
-                    }
-                  });
-                }
-                
-                if (updatedPropertyAfterSave.media && updatedPropertyAfterSave.media.videoTour) {
-                  console.log('videoTour:', updatedPropertyAfterSave.media.videoTour);
-                }
+            // Log video tour
+            if (updatedProperty.media.videoTour) {
+              console.log('Video tour URL:', updatedProperty.media.videoTour);
             }
             
             return res.status(200).json({
               success: true,
               message: 'Media uploaded successfully and saved to property',
               data: {
-                media: updatedPropertyAfterSave?.media // Return the potentially updated media
-              }
-            });
-          } else {
-            // This case (e.g., matchedCount = 0) should ideally not be hit if property was found earlier.
-            console.warn('updateOne operation did not find or modify the document. PropertyId:', propertyId);
-            return res.status(200).json({
-              success: true, // Media was uploaded to S3, but DB link might have issues
-              message: 'Media uploaded. However, property data in DB was not found or not changed by this operation.',
-              data: {
-                media: property.media // Return original media as DB interaction was not conclusive for update
+                media: updatedProperty.media
               }
             });
           }
         } catch (dbError) {
-          console.error('Error updating property media with updateOne:', dbError);
+          console.error('Error updating property media:', dbError);
           return res.status(500).json({
             success: false,
             error: dbError instanceof Error ? dbError.message : 'Failed to save media to property'

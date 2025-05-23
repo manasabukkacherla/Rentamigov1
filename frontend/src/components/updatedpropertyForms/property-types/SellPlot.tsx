@@ -1,4 +1,5 @@
 "use client"
+
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, MapPin, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
@@ -22,127 +23,149 @@ import CommercialContactDetails from "../CommercialComponents/CommercialContactD
 import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import MapLocation from "../CommercialComponents/MapLocation"
 import SellPlotMain from "../commercialpropertytypes/SellPlotMain"
+
+interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+interface Coordinates {
+  latitude: string;
+  longitude: string;
+}
+
+interface BasicInformation {
+  title: string;
+  plotType: string[];
+  address: Address;
+  landmark: string;
+  coordinates: Coordinates;
+  isCornerProperty: boolean;
+}
+
+interface Area {
+  totalArea: number;
+  carpetArea: number;
+  builtUpArea: number;
+}
+
+interface Floor {
+  floorNumber: number;
+  totalFloors: number;
+}
+
+interface PropertyDetails {
+  area: Area;
+  floor: Floor;
+  facingDirection?: string;
+  furnishingStatus?: string;
+  propertyAmenities?: string[];
+  wholeSpaceAmenities?: string;
+  waterAvailability?: string;
+}
+
+interface PlotDetails {
+  totalPlotArea: number;
+  zoningType: string;
+  infrastructure: string[];
+  roadAccess: string;
+  securityRoom: boolean;
+  previousConstruction: string;
+}
+
+interface LeaseDuration {
+  duration: number;
+  type: string;
+  amountType: "fixed" | "negotiable";
+}
+
+interface Tenure {
+  duration: number;
+  type: string;
+}
+
+interface LeaseTenure {
+  minimumTenure: Tenure;
+  maximumTenure: Tenure;
+  lockInPeriod: Tenure;
+  noticePeriod: Tenure;
+}
+
+interface MaintenanceCharges {
+  amount: number;
+  frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
+}
+
+interface ChargeDetails {
+  type: "inclusive" | "exclusive";
+  amount?: number;
+}
+
+interface OtherCharges {
+  electricityCharges: ChargeDetails;
+  waterCharges: ChargeDetails;
+  gasCharges: ChargeDetails;
+  otherCharges: "inclusive" | "exclusive";
+  amount?: number;
+}
+
+interface LeaseDetails {
+  leaseAmount: number;
+  leaseduration: LeaseDuration;
+  leasetenure: LeaseTenure;
+  maintenanceCharges: MaintenanceCharges;
+  otherCharges: OtherCharges;
+}
+
+interface Brokerage {
+  required: boolean;
+  amount?: number;
+}
+
+interface Availability {
+  availableFrom?: Date;
+  availableImmediately?: boolean;
+  availabilityStatus: string;
+  leaseDuration?: string;
+  noticePeriod?: string;
+  isPetsAllowed?: boolean;
+  operatingHours?: boolean;
+}
+
+interface ContactInformation {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone?: string;
+  bestTimeToContact?: string;
+  preferredContactTime?: string;
+}
+
+interface Media {
+  photos: {
+    exterior: (File | string)[];
+    interior: (File | string)[];
+    floorPlan: (File | string)[];
+    washroom: (File | string)[];
+    lift: (File | string)[];
+    emergencyExit: (File | string)[];
+  };
+  videoTour?: File | string | null;
+  documents: (File | string)[];
+}
+
 interface FormData {
   propertyId?: string;
-  basicInformation: {
-    title: string;
-    plotType: string[];
-    address: {
-      street: string;
-      city: string;
-      state: string;
-      zipCode: string;
-    };
-    landmark: string;
-    coordinates: {
-      latitude: string;
-      longitude: string;
-    };
-    isCornerProperty: boolean;
-  };
-  propertyDetails: {
-    area: {
-      totalArea: number;
-      carpetArea: number;
-      builtUpArea: number;
-    };
-    floor: {
-      floorNumber: number;
-      totalFloors: number;
-    };
-    facingDirection?: string;
-    furnishingStatus?: string;
-    propertyAmenities?: string[];
-    wholeSpaceAmenities?: string;
-    waterAvailability?: string;
-  };
-  plotDetails: {
-    totalPlotArea: number;
-    zoningType: string;
-    infrastructure: string[];
-    roadAccess: string;
-    securityRoom: boolean;
-    previousConstruction: string;
-  };
-  leaseDetails: {
-    leaseAmount: number;
-    leaseduration: {
-      duration: number;
-      type: string;
-      amountType: "fixed" | "negotiable";
-    };
-    leasetenure: {
-      minimumTenure: {
-        duration: number;
-        type: string;
-      };
-      maximumTenure: {
-        duration: number;
-        type: string;
-      };
-      lockInPeriod: {
-        duration: number;
-        type: string;
-      };
-      noticePeriod: {
-        duration: number;
-        type: string;
-      };
-    };
-    maintenanceCharges: {
-      amount: number;
-      frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
-    };
-    otherCharges: {
-      electricityCharges: {
-        type: "inclusive" | "exclusive";
-        amount?: number;
-      };
-      waterCharges: {
-        type: "inclusive" | "exclusive";
-        amount?: number;
-      };
-      gasCharges: {
-        type: "inclusive" | "exclusive";
-        amount?: number;
-      };
-      otherCharges: "inclusive" | "exclusive";
-      amount?: number;
-    };
-  };
-  brokerage?: {
-    required: boolean;
-    amount?: number;
-  };
-  availability: {
-    availableFrom?: Date;
-    availableImmediately?: boolean;
-    availabilityStatus: string;
-    leaseDuration?: string;
-    noticePeriod?: string;
-    isPetsAllowed?: boolean;
-    operatingHours?: boolean;
-  };
-  contactInformation: {
-    name: string;
-    email: string;
-    phone: string;
-    alternatePhone?: string;
-    bestTimeToContact?: string;
-    preferredContactTime?: string;
-  };
-  media: {
-    photos: {
-      exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      washroom: File[];
-      lift: File[];
-      emergencyExit: File[];
-    };
-    videoTour?: File | null;
-    documents: File[];
-  };
+  basicInformation: BasicInformation;
+  propertyDetails: PropertyDetails;
+  plotDetails: PlotDetails;
+  leaseDetails: LeaseDetails;
+  brokerage?: Brokerage;
+  availability: Availability;
+  contactInformation: ContactInformation;
+  media: Media;
   metadata?: {
     createdBy?: string | null;
     createdAt: Date;
@@ -156,6 +179,19 @@ const convertFileToBase64 = (file: File): Promise<string> => {
     reader.onload = () => resolve(reader.result as string);
     reader.onerror = error => reject(error);
   });
+};
+
+const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+  const results: string[] = [];
+  for (const file of files) {
+    if (file instanceof File) {
+      const base64 = await convertFileToBase64(file);
+      results.push(base64);
+    } else {
+      results.push(file); // Already a string (URL)
+    }
+  }
+  return results;
 };
 
 const globalStyles = `
@@ -318,6 +354,10 @@ const SellPlot = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [propertyId, setPropertyId] = useState<string | undefined>(undefined);
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -342,7 +382,6 @@ const SellPlot = () => {
       icon: <Store className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
-
           <PropertyName
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
@@ -368,7 +407,6 @@ const SellPlot = () => {
       icon: <Building2 className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
-
           <PlotDetails onDetailsChange={(details) => {
             // Make sure totalArea is properly set
             const updatedArea = {
@@ -418,10 +456,6 @@ const SellPlot = () => {
               </div>
             </div>
           </div>
-
-          {/* <CommercialPropertyDetails
-            onDetailsChange={(details) => handleChange('propertyDetails', details)}
-          /> */}
         </div>
       ),
     },
@@ -489,27 +523,33 @@ const SellPlot = () => {
     },
     {
       title: "Property Media",
-      icon: <ImageIcon className="w-5 h-5" />,
-      content: (
-        <MediaUploadforagriplot
-            onMediaChange={(mediaUpdate) => {
-              const convertedPhotos: any = {};
-
-              mediaUpdate.images.forEach(({ category, files }) => {
-                convertedPhotos[category] = files.map(f => f.file);
-              });
-
-              handleChange('media', {
+      icon: <ImageIcon className="w-6 h-6" />,
+      component: (
+        <div className="space-y-8">
+          <MediaUploadforagriplot
+            onMediaChange={(media: {
+              images: { category: string; files: { url: string; file: File }[] }[];
+              video?: { url: string; file: File };
+              documents: { type: string; file: File }[];
+            }) => {
+              // Convert the media format to match our FormData interface
+              const convertedMedia: Media = {
                 photos: {
-                  ...formData.media.photos,
-                  ...convertedPhotos
+                  exterior: media.images.find(img => img.category === 'exterior')?.files.map(f => f.file) || [],
+                  interior: media.images.find(img => img.category === 'interior')?.files.map(f => f.file) || [],
+                  floorPlan: media.images.find(img => img.category === 'floorPlan')?.files.map(f => f.file) || [],
+                  washroom: media.images.find(img => img.category === 'washroom')?.files.map(f => f.file) || [],
+                  lift: media.images.find(img => img.category === 'lift')?.files.map(f => f.file) || [],
+                  emergencyExit: media.images.find(img => img.category === 'emergencyExit')?.files.map(f => f.file) || []
                 },
-                videoTour: mediaUpdate.video?.file || null,
-                documents: mediaUpdate.documents.map(d => d.file)
-              });
+                videoTour: media.video?.file || null,
+                documents: media.documents.map(d => d.file)
+              };
+              setFormData(prev => ({ ...prev, media: convertedMedia }));
             }}
           />
-      ),
+        </div>
+      )
     },
   ];
 
@@ -590,19 +630,6 @@ const SellPlot = () => {
 
     return errors;
   };
-
-  // Submit button will also show validation summary
-  // const showValidationSummary = () => {
-  //   const errors = validateFormData();
-  //   // if (errors.length > 0) {
-  //   //   console.warn("Form has missing required fields:", errors);
-  //   //   toast.warn(`Please fill in all required fields: ${errors.join(", ")}`);
-  //   //   return false;
-  //   // }
-  //   return true;
-  // };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -758,15 +785,54 @@ const SellPlot = () => {
       // Convert all media files to base64
       const convertedMedia = {
         photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washroom: await Promise.all((formData.media?.photos?.washroom ?? []).map(convertFileToBase64)),
-          lift: await Promise.all((formData.media?.photos?.lift ?? []).map(convertFileToBase64)),
-          emergencyExit: await Promise.all((formData.media?.photos?.emergencyExit ?? []).map(convertFileToBase64))
+          exterior: await Promise.all(formData.media.photos.exterior.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          interior: await Promise.all(formData.media.photos.interior.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          floorPlan: await Promise.all(formData.media.photos.floorPlan.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          washroom: await Promise.all(formData.media.photos.washroom.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          lift: await Promise.all(formData.media.photos.lift.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
+          emergencyExit: await Promise.all(formData.media.photos.emergencyExit.map(async file => {
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file;
+          })),
         },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+        videoTour: formData.media.videoTour
+          ? formData.media.videoTour instanceof File
+            ? await convertFileToBase64(formData.media.videoTour)
+            : formData.media.videoTour
+          : null,
+        documents: await Promise.all(formData.media.documents.map(async file => {
+          if (file instanceof File) {
+            return await convertFileToBase64(file);
+          }
+          return file;
+        }))
       };
 
       const transformedData = {
@@ -789,9 +855,11 @@ const SellPlot = () => {
       console.log("Response from server:", response.data);
 
       if (response.data.success) {
-        toast.success('Residential plot sale listing created successfully!');
-        navigate('/updatepropertyform');
-      } else {
+          // Set the propertyId from the response
+          setPropertyId(response.data.propertyId);
+          toast.success('Property listing created successfully!');
+          setFormData({...formData} as FormData);
+        } else {
         console.error("Server returned success:false", response.data);
         toast.error(response.data.message || 'Failed to create listing. Please try again.');
       }

@@ -14,7 +14,7 @@ import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
 import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import OtherCharges from "../residentialrent/OtherCharges"
-import MediaUpload from "../MediaUpload"
+import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
@@ -22,9 +22,10 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 
 interface LeaseBuilderFloorProps {
-  propertyId: string
-  onSubmit?: (formData: any) => void
+  propertyId?: string;
+  onSubmit?: (formData: FormData) => void;
 }
+
 interface Address {
   flatNo: number;
   showFlatNo: boolean;
@@ -57,6 +58,7 @@ interface IBasicInformation {
     };
   };
 }
+
 interface PropertyDetails {
   bedrooms: number;
   washrooms: number;
@@ -158,17 +160,11 @@ interface IMedia {
   documents: (File | string)[];
 }
 
-
-
 interface Restrictions {
   foodPreference: string;
   petsAllowed: string;
   tenantType: string;
 }
-
-
-
-
 
 interface ILeaseTerms {
   leaseDetails: {
@@ -217,6 +213,7 @@ interface ILeaseTerms {
   };
  
 }
+
 interface IMetadata {
   createdBy: string;
   createdAt: string;
@@ -235,12 +232,9 @@ interface formData {
     date: string;
   };
   media: IMedia;
-
 }
 
-
 interface PropertyNameProps {
-  // propertyName: string
   onPropertyNameChange: (name: string) => void
 }
 
@@ -255,7 +249,6 @@ interface PropertySizeProps {
   propertySize: number;
   onPropertySizeChange: (size: number) => void;
 }
-
 
 interface PropertyFeaturesProps {
   onFeaturesChange?: (features: Record<string, any>) => void
@@ -281,8 +274,6 @@ interface AvailabilityDateProps {
   onChange: (date: Date) => void
 }
 
-
-
 interface MediaUploadProps {
   onMediaChange?: (media: {
     exteriorViews: File[];
@@ -296,12 +287,12 @@ interface MediaUploadProps {
   }) => void;
 }
 
-
-const LeaseBuilderFloor  = () => {
+const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initialPropertyId, onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
   const formRef = useRef<HTMLDivElement>(null)
   const initialData={
     basicInformation: {
@@ -641,7 +632,6 @@ const LeaseBuilderFloor  = () => {
     }));
   }, []);
 
-
   const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
     setFormData(prev => ({
       ...prev,
@@ -672,119 +662,12 @@ const LeaseBuilderFloor  = () => {
     }))
   }, []);
 
-  // Function to update map location based on latitude and longitude
-  // const updateMapLocation = (lat: string, lng: string) => {
-  //   const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
-  //   if (iframe && lat && lng) {
-  //     iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
-  //   }
-  // };
-
-    
-// const LeaseBuilderFloor = ({ propertyId, onSubmit }: LeaseBuilderFloorProps) => {
-//   const [currentStep, setCurrentStep] = useState(0)
-//   const [loading, setLoading] = useState(false)
-//   const [error, setError] = useState<string | null>(null)
-//   const [success, setSuccess] = useState<string | null>(null)
-//   const formRef = useRef<HTMLDivElement>(null)
-
-//   const [formData, setFormData] = useState({
-
-  // Function to update map location based on latitude and longitude
   const updateMapLocation = (lat: string, lng: string) => {
     const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
     if (iframe && lat && lng) {
       iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
     }
   };
-
-  // // Function to get current location
-  // const getCurrentLocation = () => {
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const lat = position.coords.latitude.toString();
-  //         const lng = position.coords.longitude.toString();
-          
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           coordinates: {
-  //             latitude: lat,
-  //             longitude: lng
-  //           }
-  //         }));
-          
-  //         updateMapLocation(lat, lng);
-          
-  //         reverseGeocode(lat, lng);
-  //       },
-  //       (error) => {
-  //         console.error("Error getting location: ", error);
-  //         toast.error("Unable to get your current location. Please check your browser permissions.");
-  //       }
-  //     );
-  //   } else {
-  //     toast.error("Geolocation is not supported by your browser.");
-  //   }
-  // };
-
-  // // Reverse geocode to get address from coordinates
-  // const reverseGeocode = (lat: string, lng: string) => {
-  //   const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
-  //   fetch(geocodingUrl)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       if (data.status === "OK" && data.results && data.results.length > 0) {
-  //         const address = data.results[0];
-          
-  //         const addressComponents = {
-  //           street: '',
-  //           city: '',
-  //           state: '',
-  //           zipCode: ''
-  //         };
-          
-  //         address.address_components.forEach((component: any) => {
-  //           const types = component.types;
-            
-  //           if (types.includes('route')) {
-  //             addressComponents.street = component.long_name;
-  //           } else if (types.includes('locality')) {
-  //             addressComponents.city = component.long_name;
-  //           } else if (types.includes('administrative_area_level_1')) {
-  //             addressComponents.state = component.long_name;
-  //           } else if (types.includes('postal_code')) {
-  //             addressComponents.zipCode = component.long_name;
-  //           }
-  //         });
-          
-  //         if (!addressComponents.street && address.formatted_address) {
-  //           const formattedParts = address.formatted_address.split(',');
-  //           if (formattedParts.length > 0) {
-  //             addressComponents.street = formattedParts[0];
-  //           }
-  //         }
-          
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           propertyAddress: {
-  //             ...prev.propertyAddress,
-  //             ...addressComponents
-  //           }
-  //         }));
-          
-  //         toast.success("Location details updated successfully");
-  //       } else {
-  //         console.error("Geocoding failed:", data.status);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error("Error during reverse geocoding:", error);
-  //     });
-  // };
-
-
 
   const formSections = [
     {
@@ -807,8 +690,6 @@ const LeaseBuilderFloor  = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <PropertyAddress
-                // latitude={formData.basicInformation.address.location.latitude}
-                // longitude={formData.basicInformation.address.location.longitude}
                 address={{
                   ...formData.basicInformation.address,
                   location: {
@@ -818,127 +699,6 @@ const LeaseBuilderFloor  = () => {
                 }}
                 onAddressChange={handleAddressChange}
               />
-                {/* <div className="bg-white p-6 rounded-lg space-y-6">
-                  <div>
-                    <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Use the map below to set your property's location. Click on the map or search for an address.
-                    </p>
-                    <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
-                      <iframe
-                        id="map-iframe"
-                        src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${formData.coordinates.longitude || '78.9629'}!3d${formData.coordinates.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${formData.coordinates.latitude || '20.5937'},${formData.coordinates.longitude || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        className="rounded-xl"
-                        title="Property Location Map"
-                      ></iframe>
-                      
-                      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                        <button 
-                          onClick={() => getCurrentLocation()}
-                          className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                          aria-label="Get current location"
-                          type="button"
-                        >
-                          <Locate className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm font-medium">My Location</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => openLocationPicker()}
-                          className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                          aria-label="Select location"
-                          type="button"
-                        >
-                          <Navigation className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm font-medium">Select Location</span>
-                        </button>
-                      </div>
-                      
-                      <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
-                        Powered by Google Maps
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
-                          Latitude
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            id="latitude"
-                            value={formData.coordinates.latitude}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (!isNaN(Number(value)) || value === '-' || value === '') {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  coordinates: {
-                                    ...prev.coordinates,
-                                    latitude: value
-                                  }
-                                }));
-                                
-                                updateMapLocation(
-                                  value, 
-                                  formData.coordinates.longitude || '78.9629'
-                                );
-                              }
-                            }}
-                            placeholder="Enter latitude (e.g., 17.683301)"
-                            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                          />
-                          <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
-                          Longitude
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            id="longitude"
-                            value={formData.coordinates.longitude}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (!isNaN(Number(value)) || value === '-' || value === '') {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  coordinates: {
-                                    ...prev.coordinates,
-                                    longitude: value
-                                  }
-                                }));
-                                
-                                updateMapLocation(
-                                  formData.coordinates.latitude || '20.5937',
-                                  value
-                                );
-                              }
-                            }}
-                            placeholder="Enter longitude (e.g., 83.019301)"
-                            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                          />
-                          <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      Enter coordinates manually or use the map above to set the location.
-                    </p>
-                  </div>
-                </div> */}
               </div>
             </div>
           </div>
@@ -1152,42 +912,23 @@ const LeaseBuilderFloor  = () => {
       icon: <Image className="w-6 h-6" />,
       component: (
          <div className="space-y-8">
-            <MediaUpload
-              initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: media.photos.exterior,
-                      interior: media.photos.interior,
-                      floorPlan: media.photos.floorPlan,
-                      washrooms: media.photos.washrooms,
-                      lifts: media.photos.lifts,
-                      emergencyExits: media.photos.emergencyExits,
-                      bedrooms: media.photos.bedrooms,
-                      halls: media.photos.halls,
-                      storerooms: media.photos.storerooms,
-                      kitchen: media.photos.kitchen
-                    },
-                    videoTour: media.videoTour,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+            <ResidentialPropertyMediaUpload
+                propertyType="builderfloor"
+                propertyId={propertyId}
+                value={formData.media}
+                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+              />
             </div>
       ),
     },
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
       setCurrentStep(currentStep + 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -1207,7 +948,6 @@ const LeaseBuilderFloor  = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -1224,82 +964,83 @@ const LeaseBuilderFloor  = () => {
     }
   };
 
-  const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
+    console.log(formData);
 
     try {
       const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
-
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
-          });
-        };
-
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
-            if (file instanceof File) {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
-            }
-          }
-          return results;
-        };
-
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
-        };
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date()
-          }
-        };
-
-        const response = await axios.post('/api/residential/lease/builder-floor', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          toast.success('Builder Floor listing created successfully!');
-          setFormData({...initialData} as formData);
-        }
-      } else {
+      if (!user) {
         navigate('/login');
+        return;
+      }
+
+      const author = JSON.parse(user).id;
+
+      // Convert media files to base64
+      const convertFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
+      };
+
+      // Helper function to convert array of files to base64
+      const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+        const results: string[] = [];
+        for (const file of files) {
+          if (file instanceof File) {
+            const base64 = await convertFileToBase64(file);
+            results.push(base64);
+          } else {
+            results.push(file); // Already a string (URL)
+          }
+        }
+        return results;
+      };
+
+      const convertedMedia = {
+        photos: {
+          exterior: await convertFilesToBase64(formData.media.photos.exterior),
+          interior: await convertFilesToBase64(formData.media.photos.interior),
+          floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+          washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+          lifts: await convertFilesToBase64(formData.media.photos.lifts),
+          emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+          bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+          halls: await convertFilesToBase64(formData.media.photos.halls),
+          storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+          kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
+        },
+        videoTour: formData.media.videoTour
+          ? formData.media.videoTour instanceof File
+            ? await convertFileToBase64(formData.media.videoTour)
+            : formData.media.videoTour
+          : undefined,
+        documents: await convertFilesToBase64(formData.media.documents)
+      };
+
+      const transformedData = {
+        ...formData,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date()
+        }
+      };
+
+      const response = await axios.post('/api/residential/lease/builder-floor', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.success) {
+        setPropertyId(response.data.propertyId);
+        toast.success('Property listing created successfully!');
+        setFormData(initialData);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -1416,6 +1157,6 @@ const LeaseBuilderFloor  = () => {
       )}
     </div>
   );
-  };
+};
 
 export default LeaseBuilderFloor;
