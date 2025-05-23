@@ -3,6 +3,36 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import { Request, Response, NextFunction } from 'express';
 
+// Define MediaItem interface
+interface MediaItem {
+  id: string;
+  type: 'photo' | 'video' | 'document';
+  url: string;
+  title: string;
+  category: string;
+  tags: string[];
+  roomType?: string;
+}
+
+// Define the S3 bucket URL
+const s3BucketUrl = `https://${process.env.AWS_S3_BUCKET_NAME || 'rentamigo-bucket'}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com`;
+
+// Helper function to determine file type
+const getFileType = (mimetype: string): 'photo' | 'video' | 'document' | null => {
+  if (mimetype.startsWith('image/')) {
+    return 'photo';
+  } else if (mimetype.startsWith('video/')) {
+    return 'video';
+  } else if (
+    mimetype === 'application/pdf' ||
+    mimetype === 'application/msword' ||
+    mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  ) {
+    return 'document';
+  }
+  return null;
+};
+
 // Configure S3 Client
 const s3 = new S3Client({
   region: process.env.AWS_REGION || 'eu-north-1',
@@ -43,27 +73,11 @@ export const propertyMediaUpload = upload.array('mediaFiles', 20); // Allow up t
 // Function to upload a file to S3
 export const uploadToS3 = async (
   file: Express.Multer.File,
-  propertyType: string,
-  category: string,
-  mediaType: 'photo' | 'video' | 'document'
+  path: string,
+  category: string = 'general',
+  mediaType: 'photo' | 'video' | 'document' = 'photo'
 ): Promise<string> => {
   const uniqueFileName = `${uuidv4()}-${file.originalname.replace(/\s+/g, '-')}`;
-  
-  // Use different path structures for different media types
-  let basePath = '';
-  switch (mediaType) {
-    case 'photo':
-      basePath = 'property-photos';
-      break;
-    case 'video':
-      basePath = 'property-videos';
-      break;
-    case 'document':
-      basePath = 'property-documents';
-      break;
-    default:
-      basePath = 'property-media';
-  }
   
   // For videos, always use videoTour as the category
   if (mediaType === 'video') {
@@ -71,7 +85,7 @@ export const uploadToS3 = async (
     console.log('Setting video category to videoTour');
   }
   
-  const fileKey = `${basePath}/${propertyType}/${category}/${uniqueFileName}`;
+  const fileKey = `${path}/${uniqueFileName}`;
 
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME || 'rentamigo-bucket',
@@ -85,7 +99,7 @@ export const uploadToS3 = async (
     await s3.send(command);
     
     // Return the public URL of the uploaded file
-    return `https://${process.env.AWS_S3_BUCKET_NAME || 'rentamigo-bucket'}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com/${fileKey}`;
+    return fileKey;
   } catch (error) {
     console.error(`Error uploading ${mediaType} to S3:`, error);
     throw new Error(`Failed to upload ${mediaType} to S3`);
@@ -96,7 +110,7 @@ export const uploadToS3 = async (
 declare global {
   namespace Express {
     interface Request {
-      mediaItems?: any[];
+      mediaItems?: any[]; // Keep existing type definition to avoid conflicts
     }
   }
 }
@@ -104,110 +118,74 @@ declare global {
 // Middleware to process and upload media files to S3
 export const processAndUploadPropertyMedia = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.files || req.files.length === 0) {
-      return next(); // No files to process, continue
+    const files = req.files as Express.Multer.File[];
+    
+    if (!files || files.length === 0) {
+      return res.status(400).json({ success: false, error: 'No files were uploaded' });
     }
 
-    const files = req.files as Express.Multer.File[];
-    const mediaData = JSON.parse(req.body.mediaData || '[]');
-    const propertyType = req.body.propertyType || 'unknown';
-    
-    const mediaItems = [];
-    const videoCount = mediaData.filter((item: any) => item.type === 'video').length;
-    
-    // Log the upload request details
-    console.log(`Processing ${files.length} files (${videoCount} videos) for property type: ${propertyType}`);
-    
-    // Log all media data for debugging
-    console.log('Media data received:', mediaData);
-    console.log('Files received:', files.map(f => ({ originalname: f.originalname, mimetype: f.mimetype, size: f.size })));
-    
-    // Process each file
+    const propertyType = req.body.propertyType;
+    if (!propertyType) {
+      return res.status(400).json({ success: false, error: 'Property type is required' });
+    }
+
+    const baseS3Path = `property-${req.body.mediaType || 'photos'}/${propertyType}`;
+    const mediaItems: MediaItem[] = [];
+
     for (const file of files) {
-      // Special handling for video files with the VIDEO_ prefix
-      let mediaInfo;
+      const fileCategory = file.fieldname.split('-')[0]; // Extract category from field name (e.g., "exterior-photo")
       
-      if (file.originalname.startsWith('VIDEO_')) {
-        // Extract the ID from the video filename
-        const videoId = file.originalname.replace('VIDEO_', '');
-        mediaInfo = mediaData.find((item: any) => item.id === videoId);
-        console.log(`Processing video file with ID: ${videoId}`);
-      } else {
-        // Regular handling for non-video files
-        mediaInfo = mediaData.find((item: any) => item.id === file.originalname);
+      // Fix for improper "mediaFiles" category - map it to a valid category
+      let category = fileCategory;
+      if (category === 'mediaFiles') {
+        // Try to determine a proper category based on file.mimetype or default to 'exterior'
+        category = file.mimetype.startsWith('video/') ? 'videoTour' : 'exterior';
+        console.log(`Correcting category from 'mediaFiles' to '${category}'`);
       }
       
-      if (!mediaInfo) {
-        console.error(`No metadata found for file: ${file.originalname}`);
+      const fileType = getFileType(file.mimetype);
+      
+      if (!fileType) {
+        console.error(`Unsupported file type: ${file.mimetype}`);
         continue;
       }
+
+      const s3Key = await uploadToS3(file, `${baseS3Path}/${category}`, category, fileType);
       
-      const { type, category, title, tags } = mediaInfo;
-      const mediaType = type as 'photo' | 'video' | 'document';
-      
-      // Log file details before upload
-      console.log(`Processing file: ${file.originalname}`, {
-        mediaType,
-        category,
-        mimetype: file.mimetype,
-        size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`
-      });
-      
-      // Special handling for video files
-      if (mediaType === 'video') {
-        console.log('Processing video file:', {
-          originalname: file.originalname,
-          mimetype: file.mimetype,
-          size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-          category
-        });
+      if (!s3Key) {
+        console.error(`Failed to upload file: ${file.originalname}`);
+        continue;
       }
+
+      const itemId = uuidv4();
+      const url = `${s3BucketUrl}/${s3Key}`;
       
-      // Upload to S3
-      let url = await uploadToS3(file, propertyType, category, mediaType);
-      
-      // Handle all media types the same way (photos, videos, documents)
-      if (mediaType === 'video') {
-        console.log(`Processing video file: ${file.originalname}, size: ${(file.size / (1024 * 1024)).toFixed(2)} MB`);
-        // No need to set category here as it's already set in the uploadToS3 function
-        console.log(`Using category: ${category} for video file`);
-      }
-      
-      // Generate a unique ID for this media item
-      const mediaId = uuidv4();
-      
-      // Add to media items array
-      mediaItems.push({
-        id: mediaId,
-        type: mediaType,
+      const mediaItem: MediaItem = {
+        id: itemId,
+        type: fileType,
         url,
-        title: title || 'Untitled',
-        tags: tags || [],
-        category: category || 'general'
-      });
-      
-      // Enhanced logging for video items
-      if (mediaType === 'video') {
-        // Log immediately after upload
-        console.log('✅ VIDEO UPLOAD SUCCESS ✅');
-        console.log('AWS S3 VIDEO URL:', url);
-        console.log('VIDEO DETAILS:', {
-          id: mediaId,
-          url,
-          category,
-          type: mediaType
-        });
-      }
+        title: req.body.title || file.originalname || 'Untitled',
+        category: category, // Use the corrected category, not fileCategory
+        tags: req.body.tags ? JSON.parse(req.body.tags) : []
+      };
+
+      mediaItems.push(mediaItem);
+      console.log(`Processed media item: ${fileType} for category ${category}, url: ${url.substring(0, 50)}...`);
     }
+
+    console.log(`Middleware processed ${mediaItems.length} media items`);
+    console.log('Sample item:', mediaItems[0] ? JSON.stringify(mediaItems[0], null, 2) : 'none');
     
-    // Attach the media items to the request for the controller to use
+    // Attach the media items to the request object
     req.mediaItems = mediaItems;
+
+    // Call the next middleware or route handler
     next();
   } catch (error) {
-    console.error('Error processing media uploads:', error);
-    return res.status(500).json({ 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Failed to process media uploads' 
+    console.error('Error processing and uploading property media:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to process and upload property media'
     });
   }
 };

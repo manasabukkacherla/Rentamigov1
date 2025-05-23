@@ -36,6 +36,9 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
       return res.status(400).json({ success: false, error: 'No media items were processed' });
     }
 
+    console.log(`Upload route handling ${mediaItems.length} items for ${propertyType}${propertyId ? ` with ID ${propertyId}` : ''}`);
+    console.log('Media items:', JSON.stringify(mediaItems.slice(0, 2), null, 2)); // Log sample of media items
+
     // Define an interface for detailed photo information
     interface IPhotoDetail {
       id: string;
@@ -69,7 +72,7 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
             propertyFound = true;
             // Initialize media structure if it doesn't exist
             if (!property.media) {
-              property.media = { photos: {}, documents: [], videoTour: '' };
+              property.media = { photos: {}, documents: [], videoTour: '', mediaItems: [] };
             }
             
             // Ensure photos object exists
@@ -80,6 +83,12 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
             // Ensure documents array exists
             if (!property.media.documents) {
               property.media.documents = [];
+            }
+
+            // Ensure mediaItems array exists
+            if (!property.media.mediaItems) {
+              property.media.mediaItems = [];
+              console.log('Initializing empty mediaItems array on existing property');
             }
           } else {
             console.warn(`Property not found with ID: ${propertyId}. Media will be uploaded but not linked to a property.`);
@@ -142,6 +151,132 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
       console.log('No videoTour URL found in processed media items');
     }
     
+    // DIRECT UPDATE - Always update mediaItems array regardless of property found status
+    if (propertyId) {
+      try {
+        console.log('ATTEMPTING DIRECT mediaItems UPDATE');
+        // First make sure propertyId exists in the database
+        const PropertyModel = propertyModels[propertyType];
+        if (PropertyModel) {
+          // First ensure the media structure exists
+          await PropertyModel.updateOne(
+            { propertyId, 'media': { $exists: false } },
+            { $set: { 'media': { photos: {}, documents: [], videoTour: '', mediaItems: [] } } },
+            { upsert: true }
+          );
+          
+          // Then ensure mediaItems exists
+          await PropertyModel.updateOne(
+            { propertyId, 'media.mediaItems': { $exists: false } },
+            { $set: { 'media.mediaItems': [] } }
+          );
+          
+          // Make sure all media items have the required fields 
+          const validatedMediaItems = mediaItems.map(item => ({
+            id: item.id || new mongoose.Types.ObjectId().toString(),
+            type: item.type || 'photo',
+            url: item.url,
+            title: item.title || 'Untitled',
+            category: item.category || 'other',
+            tags: item.tags || [],
+            roomType: item.roomType || ''
+          }));
+          
+          // Now add all mediaItems directly using the reliable approach for ALL property types
+          if (validatedMediaItems && validatedMediaItems.length > 0) {
+            console.log(`Adding ${validatedMediaItems.length} items to mediaItems array`);
+            
+            // First use findOne to get the current state
+            const currentProperty = await PropertyModel.findOne({ propertyId });
+            console.log('Current property media status:', {
+              hasMedia: !!currentProperty?.media,
+              hasMediaItems: !!currentProperty?.media?.mediaItems,
+              mediaItemsCount: currentProperty?.media?.mediaItems?.length || 0
+            });
+            
+            // Use direct MongoDB operations for all property types, not just apartments
+            console.log('USING DIRECT MONGO OPERATIONS');
+              
+            // Force create mediaItems array if it doesn't exist or is invalid
+            await PropertyModel.updateOne(
+              { propertyId },
+              { $set: { 'media.mediaItems': currentProperty?.media?.mediaItems || [] } }
+            );
+              
+            // Add each media item individually to avoid array issues
+            for (const item of validatedMediaItems) {
+              console.log(`Directly adding item to mediaItems: ${item.id} (${item.type}) - category: ${item.category}`);
+              await PropertyModel.updateOne(
+                { propertyId },
+                { $push: { 'media.mediaItems': item } }
+              );
+            }
+              
+            // Verify the update
+            const updatedAfterDirectPush = await PropertyModel.findOne({ propertyId });
+            console.log('Updated mediaItems count after direct operations:', 
+              updatedAfterDirectPush?.media?.mediaItems?.length || 0);
+              
+            // If category-specific photo arrays need updating, do that too
+            for (const [category, items] of Object.entries(photos)) {
+              if (Array.isArray(items) && items.length > 0) {
+                console.log(`Updating ${items.length} photos for category ${category}`);
+                
+                // For apartment type which uses object arrays
+                if (propertyType === 'apartment') {
+                  await PropertyModel.updateOne(
+                    { propertyId },
+                    { $push: { [`media.photos.${category}`]: { $each: items } } }
+                  );
+                } 
+                // For other property types that use string URL arrays
+                else {
+                  const photoUrls = items.map(item => item.url);
+                  await PropertyModel.updateOne(
+                    { propertyId },
+                    { $push: { [`media.photos.${category}`]: { $each: photoUrls } } }
+                  );
+                }
+              }
+            }
+              
+            // Update videoTour if present
+            if (videoTour) {
+              await PropertyModel.updateOne(
+                { propertyId },
+                { $set: { 'media.videoTour': videoTour } }
+              );
+            }
+            
+            // Check if the update worked
+            const updatedProperty = await PropertyModel.findOne({ propertyId });
+            if (updatedProperty && updatedProperty.media && updatedProperty.media.mediaItems) {
+              console.log(`mediaItems after update: ${updatedProperty.media.mediaItems.length} items`);
+              console.log('Sample mediaItem:', JSON.stringify(updatedProperty.media.mediaItems[0] || {}, null, 2));
+            } else {
+              console.error('Failed to find updated property or mediaItems array is missing');
+              console.log('Updated property:', updatedProperty);
+              
+              // Last attempt to fix media structure if it's still missing
+              await PropertyModel.updateOne(
+                { propertyId },
+                { $set: { 'media.mediaItems': validatedMediaItems || [] } },
+                { upsert: true }
+              );
+              
+              // Verify again
+              const reCheckedProperty = await PropertyModel.findOne({ propertyId });
+              console.log('After final fix attempt - mediaItems exists:', 
+                !!reCheckedProperty?.media?.mediaItems, 
+                'count:', reCheckedProperty?.media?.mediaItems?.length || 0);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error directly updating mediaItems:', error);
+      }
+    }
+    
     // If propertyId is provided and property was found, update the property document
     if (propertyId && propertyFound && property) {
       const updateOperations: any = { $set: {}, $push: {} };
@@ -166,19 +301,62 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
         const newPhotosData = { ...currentDbPhotos };
         let photosChanged = false;
 
-        Object.entries(photos).forEach(([category, newPhotoItems]) => {
-          const existingCategoryItems = newPhotosData[category] || [];
-          // Combine and deduplicate photo items based on their 'id'
-          const combinedItems = [...existingCategoryItems, ...newPhotoItems];
-          const uniquePhotoItems = Array.from(new Map(combinedItems.map(item => [item.id, item])).values());
-          
-          // Check if this category's photo list actually changed
-          // Comparing stringified versions is a common way, ensure consistent object key order or use a deep equal library for more robustness
-          if (JSON.stringify(uniquePhotoItems) !== JSON.stringify(existingCategoryItems)) {
-            newPhotosData[category] = uniquePhotoItems;
+        // Handle different photo storage formats based on property type
+        if (propertyType === 'apartment') {
+          // For ResidentialRentApartment model:
+          // Schema: exterior: [{ id: { type: String, required: true }, url: { type: String, required: true }, ... }]
+          Object.entries(photos).forEach(([category, newPhotoItems]) => {
+            // Check if this category exists in the schema
+            if (!newPhotosData[category]) {
+              newPhotosData[category] = [];
+            }
+            
+            // For apartment model, ensure we have the correct property format
+            const existingCategoryItems = Array.isArray(newPhotosData[category]) ? newPhotosData[category] : [];
+            
+            // Convert photo items to MongoDB document structure
+            const processedPhotoItems = newPhotoItems.map(item => {
+              // MongoDB creates an _id for each document in the array
+              return {
+                id: item.id,
+                url: item.url,
+                title: item.title || 'Untitled',
+                category: item.category,
+                tags: item.tags || []
+              };
+            });
+            
+            // Debug the schema mismatch
+            console.log('Original photo item from upload:', JSON.stringify(newPhotoItems[0] || {}, null, 2));
+            console.log('Processed photo item for MongoDB:', JSON.stringify(processedPhotoItems[0] || {}, null, 2));
+            
+            // Add new items to the category array
+            newPhotosData[category] = [...existingCategoryItems, ...processedPhotoItems];
             photosChanged = true;
-          }
-        });
+            
+            console.log(`Updated ${category} photos - added ${processedPhotoItems.length} new items`);
+          });
+          
+          // Log the full update operation for debugging
+          console.log('FULL MEDIA UPDATE FOR APARTMENT:', JSON.stringify(newPhotosData, null, 2));
+        } else {
+          // Original logic for other property types which use simple URL arrays
+          Object.entries(photos).forEach(([category, newPhotoItems]) => {
+            const existingCategoryItems = newPhotosData[category] || [];
+            // Extract URLs from photo detail objects
+            const newPhotoUrls = newPhotoItems.map(item => item.url);
+            
+            // Combine and deduplicate URLs
+            const combinedUrls = [...existingCategoryItems, ...newPhotoUrls];
+            const uniqueUrls = [...new Set(combinedUrls)];
+            
+            // Check if this category's photo list actually changed
+            if (JSON.stringify(uniqueUrls) !== JSON.stringify(existingCategoryItems)) {
+              newPhotosData[category] = uniqueUrls;
+              photosChanged = true;
+            }
+          });
+        }
 
         if (photosChanged) {
           updateOperations.$set['media.photos'] = newPhotosData;
@@ -212,18 +390,136 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
         console.log('Prepared documents for update (pushing):', documents);
       }
       
-      // Clean up empty $set or $push from updateOperations to avoid empty update objects
-      if (Object.keys(updateOperations.$set).length === 0) {
-        delete updateOperations.$set;
-      }
-      if (Object.keys(updateOperations.$push).length === 0) {
-        delete updateOperations.$push;
-      }
-
       // --- Perform Database Update ---
       if (hasMediaChangesToPersist && (updateOperations.$set || updateOperations.$push)) {
         try {
-          console.log('Attempting direct DB update with operations:', JSON.stringify(updateOperations));
+          console.log('ATTEMPTING DATABASE UPDATE');
+          console.log('Property ID:', propertyId);
+          console.log('Property Type:', propertyType);
+          console.log('Update Operations:', JSON.stringify(updateOperations, null, 2));
+          
+          // For apartment type, directly update with a simpler operation just for photos
+          if (propertyType === 'apartment') {
+            console.log('APARTMENT SPECIAL UPDATE FLOW');
+            
+            // Process photos for category-specific arrays
+            if (updateOperations.$set && updateOperations.$set['media.photos']) {
+              const photoUpdates = updateOperations.$set['media.photos'];
+              console.log('Photo updates to be applied:', JSON.stringify(photoUpdates, null, 2));
+              
+              // Check if we have photos to update
+              if (Object.keys(photoUpdates).length > 0) {
+                // Create a direct update operation for each category that has photos
+                const photoUpdatePromises = Object.entries(photoUpdates).map(async ([category, items]) => {
+                  if (Array.isArray(items) && items.length > 0) {
+                    // Create an update command for this category
+                    console.log(`Updating ${items.length} photos for category ${category}`);
+                    
+                    try {
+                      // Use $push to append each photo to the array
+                      const categoryUpdateResult = await propertyModels[propertyType].updateOne(
+                        { propertyId },
+                        { $push: { [`media.photos.${category}`]: { $each: items } } }
+                      );
+                      
+                      console.log(`Update result for ${category}:`, categoryUpdateResult);
+                      return categoryUpdateResult;
+                    } catch (categoryError) {
+                      console.error(`Error updating ${category} photos:`, categoryError);
+                      return null;
+                    }
+                  }
+                  return null;
+                });
+                
+                // Wait for all photo category updates to complete
+                const photoResults = await Promise.all(photoUpdatePromises.filter(p => p !== null));
+                console.log('All photo update results:', photoResults);
+              }
+            }
+            
+            // Also ensure all media items are stored in the mediaItems array
+            const allMediaItems = [...mediaItems];
+            if (allMediaItems.length > 0) {
+              try {
+                console.log('Storing all media items in mediaItems array:', allMediaItems.length, 'items');
+                
+                // First ensure the mediaItems array exists (initialize if needed)
+                await propertyModels[propertyType].updateOne(
+                  { propertyId, 'media.mediaItems': { $exists: false } },
+                  { $set: { 'media.mediaItems': [] } },
+                  { upsert: true }
+                );
+                
+                // Then add the items
+                await propertyModels[propertyType].updateOne(
+                  { propertyId },
+                  { $push: { 'media.mediaItems': { $each: allMediaItems } } }
+                );
+                
+                console.log('Successfully pushed items to mediaItems array');
+              } catch (mediaItemsError) {
+                console.error('Error updating mediaItems array:', mediaItemsError);
+              }
+            }
+            
+            // Update the video separately if needed
+            if (videoTour && videoTour !== property.media.videoTour) {
+              console.log('Updating video tour:', videoTour);
+              await propertyModels[propertyType].updateOne(
+                { propertyId },
+                { $set: { 'media.videoTour': videoTour } }
+              );
+            }
+            
+            // Check the result
+            const updatedProperty = await propertyModels[propertyType].findOne({ propertyId });
+            if (updatedProperty && updatedProperty.media) {
+              console.log('UPDATED PROPERTY MEDIA:');
+              
+              // Log photos by category
+              if (updatedProperty.media.photos) {
+                console.log('PHOTOS BY CATEGORY:');
+                Object.entries(updatedProperty.media.photos).forEach(([category, photos]: [string, any]) => {
+                  if (Array.isArray(photos) && photos.length > 0) {
+                    console.log(`${category}: ${photos.length} photos found`);
+                    console.log(`Sample: ${JSON.stringify(photos[0], null, 2)}`);
+                  }
+                });
+              }
+              
+              // Log all media items
+              if (updatedProperty.media.mediaItems) {
+                console.log('ALL MEDIA ITEMS:');
+                console.log(`Total: ${updatedProperty.media.mediaItems.length} items`);
+                if (updatedProperty.media.mediaItems.length > 0) {
+                  console.log(`Sample: ${JSON.stringify(updatedProperty.media.mediaItems[0], null, 2)}`);
+                }
+              }
+              
+              // Log video tour
+              if (updatedProperty.media.videoTour) {
+                console.log('Video tour URL:', updatedProperty.media.videoTour);
+              }
+              
+              return res.status(200).json({
+                success: true,
+                message: 'Media uploaded successfully and saved to property',
+                data: {
+                  media: updatedProperty.media
+                }
+              });
+            }
+            
+            // If the above didn't return, continue with standard update flow
+          }
+          
+          // If we didn't do a special update for apartments or it didn't work, fall back to regular update
+          await propertyModels[propertyType].updateOne(
+            { propertyId, 'media.mediaItems': { $exists: false } },
+            { $set: { 'media.mediaItems': [] } }
+          );
+          
           const updateResult = await propertyModels[propertyType].updateOne(
             { propertyId },
             updateOperations
@@ -239,7 +535,21 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
             const updatedPropertyAfterSave = await propertyModels[propertyType].findOne({ propertyId });
             
             if (updatedPropertyAfterSave) {
-                console.log('Verification - media after updateOne:', updatedPropertyAfterSave.media);
+                console.log('Verification - media after updateOne:');
+                if (updatedPropertyAfterSave.media && updatedPropertyAfterSave.media.photos) {
+                  Object.entries(updatedPropertyAfterSave.media.photos).forEach(([category, items]: [string, any]) => {
+                    if (Array.isArray(items) && items.length > 0) {
+                      console.log(`${category}: ${items.length} items`);
+                      console.log(`${category} sample:`, JSON.stringify(items[0], null, 2));
+                    } else {
+                      console.log(`${category}: No items or invalid format`);
+                    }
+                  });
+                }
+                
+                if (updatedPropertyAfterSave.media && updatedPropertyAfterSave.media.videoTour) {
+                  console.log('videoTour:', updatedPropertyAfterSave.media.videoTour);
+                }
             }
             
             return res.status(200).json({
@@ -344,12 +654,34 @@ router.delete('/:propertyType/:propertyId/:mediaUrl(*)', async (req, res) => {
     // Remove from photos if present
     let mediaRemoved = false;
     if (property.media.photos) {
-      Object.keys(property.media.photos).forEach(category => {
-        if (property.media.photos[category].includes(decodedUrl)) {
-          property.media.photos[category] = property.media.photos[category].filter((url: string) => url !== decodedUrl);
-          mediaRemoved = true;
-        }
-      });
+      // Handle deletion based on property type - apartments use objects, others use string URLs
+      if (propertyType === 'apartment') {
+        // For apartments, we need to find and filter objects with matching URLs
+        Object.keys(property.media.photos).forEach(category => {
+          if (Array.isArray(property.media.photos[category])) {
+            const originalLength = property.media.photos[category].length;
+            
+            // Filter out the media item with the matching URL
+            property.media.photos[category] = property.media.photos[category].filter(
+              (item: any) => item && item.url !== decodedUrl
+            );
+            
+            // Check if anything was removed
+            if (property.media.photos[category].length < originalLength) {
+              mediaRemoved = true;
+              console.log(`Removed photo with URL ${decodedUrl} from ${category}`);
+            }
+          }
+        });
+      } else {
+        // For other property types that use simple URL arrays
+        Object.keys(property.media.photos).forEach(category => {
+          if (property.media.photos[category].includes(decodedUrl)) {
+            property.media.photos[category] = property.media.photos[category].filter((url: string) => url !== decodedUrl);
+            mediaRemoved = true;
+          }
+        });
+      }
     }
 
     // Remove from videoTour if it matches
@@ -469,4 +801,392 @@ router.get('/info/:propertyId/:propertyType', async (req, res) => {
   }
 });
 
+/**
+ * Debug route to check media structure for a property
+ */
+router.get('/debug/:propertyType/:propertyId', async (req, res) => {
+  try {
+    const { propertyType, propertyId } = req.params;
+
+    if (!propertyId || !propertyType) {
+      return res.status(400).json({ success: false, error: 'Property ID and type are required' });
+    }
+
+    // Get the model for this property type
+    if (!propertyModels[propertyType]) {
+      return res.status(400).json({ success: false, error: 'Invalid property type' });
+    }
+
+    // Log property media structure
+    await logPropertyMediaStructure(propertyType, propertyId);
+    
+    // Check if mediaItems array exists
+    const hasMediaItems = await ensureMediaItemsExists(propertyType, propertyId);
+    
+    const PropertyModel = propertyModels[propertyType];
+    const property = await PropertyModel.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ success: false, error: 'Property not found' });
+    }
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Property media structure checked',
+      data: {
+        hasMediaItems,
+        mediaItemsCount: property?.media?.mediaItems?.length || 0,
+        media: property?.media || null
+      }
+    });
+  } catch (error) {
+    console.error('Error in debug route:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to check property media'
+    });
+  }
+});
+
+/**
+ * Route to repair mediaItems for a property
+ */
+router.post('/repair/:propertyType/:propertyId', async (req, res) => {
+  try {
+    const { propertyType, propertyId } = req.params;
+
+    if (!propertyId || !propertyType) {
+      return res.status(400).json({ success: false, error: 'Property ID and type are required' });
+    }
+
+    // Get the model for this property type
+    if (!propertyModels[propertyType]) {
+      return res.status(400).json({ success: false, error: 'Invalid property type' });
+    }
+
+    // Log initial media structure
+    console.log('BEFORE REPAIR:');
+    await logPropertyMediaStructure(propertyType, propertyId);
+    
+    // First ensure mediaItems array exists
+    await ensureMediaItemsExists(propertyType, propertyId);
+    
+    // Then repair mediaItems by populating from category arrays
+    const repaired = await repairMediaItemsFromCategories(propertyType, propertyId);
+    
+    // Log after repair
+    console.log('AFTER REPAIR:');
+    await logPropertyMediaStructure(propertyType, propertyId);
+    
+    const PropertyModel = propertyModels[propertyType];
+    const property = await PropertyModel.findOne({ propertyId });
+    
+    return res.status(200).json({
+      success: true,
+      message: 'Media items repaired successfully',
+      data: {
+        mediaItemsCount: property?.media?.mediaItems?.length || 0
+      }
+    });
+  } catch (error) {
+    console.error('Error in repair route:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to repair property media'
+    });
+  }
+});
+
+/**
+ * Direct fix for a specific property ID
+ */
+router.post('/direct-fix/:propertyId', async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+    const propertyType = 'apartment'; // Force apartment type for specific fix
+    
+    console.log(`Performing direct fix for property: ${propertyId}`);
+    
+    if (!propertyId) {
+      return res.status(400).json({ success: false, error: 'Property ID is required' });
+    }
+    
+    const PropertyModel = propertyModels[propertyType];
+    const property = await PropertyModel.findOne({ propertyId });
+    
+    if (!property) {
+      return res.status(404).json({ success: false, error: 'Property not found' });
+    }
+    
+    // Log initial state
+    console.log('============ BEFORE FIX ============');
+    await logPropertyMediaStructure(propertyType, propertyId);
+    
+    // Force create clean mediaItems array
+    await PropertyModel.updateOne(
+      { propertyId },
+      { $set: { 'media.mediaItems': [] } }
+    );
+    
+    // Build a fresh mediaItems array from existing media
+    const newMediaItems = [];
+    
+    // Process each category of photos
+    if (property.media && property.media.photos) {
+      Object.entries(property.media.photos).forEach(([category, items]: [string, any]) => {
+        if (Array.isArray(items) && items.length > 0) {
+          items.forEach((item: any) => {
+            if (item) {
+              // For detailed photo objects (apartment type)
+              if (typeof item === 'object' && item.url) {
+                newMediaItems.push({
+                  id: item.id || new mongoose.Types.ObjectId().toString(),
+                  type: 'photo',
+                  url: item.url,
+                  title: item.title || 'Untitled',
+                  category: category,
+                  tags: item.tags || []
+                });
+                console.log(`Added photo from ${category}: ${item.url}`);
+              } 
+              // For string URLs (other property types)
+              else if (typeof item === 'string') {
+                newMediaItems.push({
+                  id: new mongoose.Types.ObjectId().toString(),
+                  type: 'photo',
+                  url: item,
+                  title: 'Untitled',
+                  category: category,
+                  tags: []
+                });
+                console.log(`Added photo from ${category}: ${item}`);
+              }
+            }
+          });
+        }
+      });
+    }
+    
+    // Add video if exists
+    if (property.media && property.media.videoTour) {
+      newMediaItems.push({
+        id: new mongoose.Types.ObjectId().toString(),
+        type: 'video',
+        url: property.media.videoTour,
+        title: 'Video Tour',
+        category: 'videoTour',
+        tags: []
+      });
+      console.log(`Added video: ${property.media.videoTour}`);
+    }
+    
+    // Add documents if exist
+    if (property.media && Array.isArray(property.media.documents)) {
+      property.media.documents.forEach((docUrl: string) => {
+        if (docUrl) {
+          newMediaItems.push({
+            id: new mongoose.Types.ObjectId().toString(),
+            type: 'document',
+            url: docUrl,
+            title: 'Document',
+            category: 'document',
+            tags: []
+          });
+          console.log(`Added document: ${docUrl}`);
+        }
+      });
+    }
+    
+    console.log(`Found ${newMediaItems.length} total media items to add`);
+    
+    // Update with new mediaItems if we found any
+    if (newMediaItems.length > 0) {
+      // First try using $set for full array replacement
+      const updateResult = await PropertyModel.updateOne(
+        { propertyId },
+        { $set: { 'media.mediaItems': newMediaItems } }
+      );
+      
+      console.log('Update result using $set:', updateResult);
+      
+      // If that didn't work, try adding each item individually
+      if (updateResult.modifiedCount === 0) {
+        console.log('First update attempt failed, trying individual pushes');
+        
+        for (const item of newMediaItems) {
+          await PropertyModel.updateOne(
+            { propertyId },
+            { $push: { 'media.mediaItems': item } }
+          );
+          console.log(`Pushed item ${item.id} individually`);
+        }
+      }
+    } else {
+      console.log('No media items found to repair');
+    }
+    
+    // Log final state
+    console.log('============ AFTER FIX ============');
+    await logPropertyMediaStructure(propertyType, propertyId);
+    
+    // Verify the update
+    const updatedProperty = await PropertyModel.findOne({ propertyId });
+    const mediaItemsCount = updatedProperty?.media?.mediaItems?.length || 0;
+    
+    return res.status(200).json({
+      success: true,
+      message: `Direct fix applied. MediaItems: ${mediaItemsCount}`,
+      data: {
+        mediaItemsCount,
+        mediaItems: updatedProperty?.media?.mediaItems || []
+      }
+    });
+  } catch (error) {
+    console.error('Error in direct fix route:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to apply direct fix'
+    });
+  }
+});
+
+/**
+ * Direct fix for specific problematic property (RA-RESREAP0006)
+ */
+router.get('/fix-property/:propertyId', async (req, res) => {
+  try {
+    const { propertyId } = req.params;
+    const targetId = propertyId || "RA-RESREAP0006"; // Default to the known problematic ID
+    const propertyType = "apartment";
+    
+    console.log(`Running direct fix for property ${targetId}`);
+    
+    // Get the property model
+    const PropertyModel = propertyModels[propertyType];
+    if (!PropertyModel) {
+      return res.status(400).json({ success: false, error: 'Invalid property type' });
+    }
+
+    // Get the property
+    const property = await PropertyModel.findOne({ propertyId: targetId });
+    if (!property) {
+      return res.status(404).json({ success: false, error: 'Property not found' });
+    }
+
+    console.log('Media before fix:', property.media);
+    
+    // Prepare update operations
+    const fixedMediaItems = [];
+    
+    // Add photos from category-specific arrays
+    if (property.media && property.media.photos) {
+      for (const category in property.media.photos) {
+        const photos = property.media.photos[category];
+        if (Array.isArray(photos)) {
+          photos.forEach(photo => {
+            if (photo && photo.url) {
+              // For object-based photo items (apartment type)
+              fixedMediaItems.push({
+                id: photo.id || new mongoose.Types.ObjectId().toString(),
+                type: 'photo',
+                url: photo.url,
+                title: photo.title || 'Untitled',
+                category: category,
+                tags: photo.tags || []
+              });
+            } else if (typeof photo === 'string') {
+              // For string-based photo URLs (other types)
+              fixedMediaItems.push({
+                id: new mongoose.Types.ObjectId().toString(),
+                type: 'photo',
+                url: photo,
+                title: 'Untitled',
+                category: category,
+                tags: []
+              });
+            }
+          });
+        }
+      }
+    }
+
+    // Add video tour if exists
+    if (property.media && property.media.videoTour) {
+      fixedMediaItems.push({
+        id: new mongoose.Types.ObjectId().toString(),
+        type: 'video',
+        url: property.media.videoTour,
+        title: 'Video Tour',
+        category: 'videoTour',
+        tags: []
+      });
+    }
+
+    // Add documents if exist
+    if (property.media && property.media.documents && Array.isArray(property.media.documents)) {
+      property.media.documents.forEach((docUrl: string) => {
+        if (docUrl) {
+          fixedMediaItems.push({
+            id: new mongoose.Types.ObjectId().toString(),
+            type: 'document',
+            url: docUrl,
+            title: 'Document',
+            category: 'document',
+            tags: []
+          });
+        }
+      });
+    }
+
+    // Update the property with fixed mediaItems
+    if (fixedMediaItems.length > 0) {
+      console.log(`Adding ${fixedMediaItems.length} items to mediaItems array`);
+      
+      const updateResult = await PropertyModel.updateOne(
+        { propertyId: targetId },
+        { $set: { 'media.mediaItems': fixedMediaItems } }
+      );
+      
+      console.log('Update result:', updateResult);
+      
+      // Verify update
+      const updatedProperty = await PropertyModel.findOne({ propertyId: targetId });
+      const mediaItemsCount = updatedProperty?.media?.mediaItems?.length || 0;
+      
+      return res.status(200).json({
+        success: true,
+        message: `Fixed mediaItems for property ${targetId}. Added ${mediaItemsCount} items.`,
+        data: {
+          mediaItemsCount,
+          mediaItems: updatedProperty?.media?.mediaItems
+        }
+      });
+    } else {
+      return res.status(200).json({
+        success: true,
+        message: 'No media items found to add',
+        data: { mediaItemsCount: 0 }
+      });
+    }
+  } catch (error) {
+    console.error('Error fixing property:', error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fix property'
+    });
+  }
+});
+
 export default router;
+function logPropertyMediaStructure(propertyType: string, propertyId: string) {
+  throw new Error('Function not implemented.');
+}
+
+function ensureMediaItemsExists(propertyType: string, propertyId: string) {
+  throw new Error('Function not implemented.');
+}
+
+function repairMediaItemsFromCategories(propertyType: string, propertyId: string) {
+  throw new Error('Function not implemented.');
+}
+

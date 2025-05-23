@@ -1,8 +1,9 @@
-import React, { useState, useRef, DragEvent, useEffect } from 'react';
-import { Upload, Video, FileText, X } from 'lucide-react';
+import React, { useState, useRef, DragEvent, useEffect, ChangeEvent, useCallback } from 'react';
+import { Upload, Video, FileText, X, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { v4 as uuidv4 } from 'uuid';
 import { uploadPropertyMediaToS3 } from '../../utils/propertyMediaUploader';
+import axios from 'axios';
 
 interface MediaFile {
   id: string;
@@ -14,11 +15,19 @@ interface MediaFile {
   url?: string;
 }
 
+interface MediaFilesState {
+  photos: {
+    [category: string]: string[];
+  };
+  videoTour?: string;
+  documents: string[];
+}
+
 interface PropertyMediaUploadProps {
   propertyId?: string;
   propertyType: string; // 'apartment', 'builderFloor', 'independentHouse', etc.
   initialMedia?: {
-    photos?: {
+    photos: {
       [category: string]: string[];
     };
     videoTour?: string;
@@ -33,6 +42,11 @@ interface PropertyMediaUploadProps {
   }) => void;
 }
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/jpg'];
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+
 const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
   propertyId,
   propertyType,
@@ -40,6 +54,11 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
   onMediaChange,
 }): React.ReactElement => {
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [organizedMedia, setOrganizedMedia] = useState<MediaFilesState>({
+    photos: {},
+    videoTour: undefined,
+    documents: []
+  });
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -78,10 +97,16 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
     if (!initialMedia) return;
     
     const files: MediaFile[] = [];
+    const organized: MediaFilesState = {
+      photos: {},
+      documents: []
+    };
 
     // Process initial photos
     if (initialMedia.photos) {
       Object.entries(initialMedia.photos).forEach(([category, urls]) => {
+        organized.photos[category] = [];
+        
         urls.forEach((url) => {
           if (typeof url === 'string' && url) {
             files.push({
@@ -93,6 +118,8 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
               uploaded: true,
               url,
             });
+            
+            organized.photos[category].push(url);
           }
         });
       });
@@ -109,10 +136,14 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
         uploaded: true,
         url: initialMedia.videoTour,
       });
+      
+      organized.videoTour = initialMedia.videoTour;
     }
 
     // Process initial documents
     if (initialMedia.documents) {
+      organized.documents = [];
+      
       initialMedia.documents.forEach((url) => {
         if (typeof url === 'string' && url) {
           files.push({
@@ -124,50 +155,50 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
             uploaded: true,
             url,
           });
+          
+          organized.documents.push(url);
         }
       });
     }
 
     if (files.length > 0) {
       setMediaFiles(files);
+      setOrganizedMedia(organized);
     }
   }, [initialMedia]);
 
   
   // Update parent component when media changes
   useEffect(() => {
+    // Organize files by type and category for the parent component
     const photos: { [category: string]: string[] } = {};
     let videoTour: string | undefined;
     const documents: string[] = [];
 
     // Group files by category
     mediaFiles.forEach((file) => {
-      if (file.type === 'photo') {
+      if (file.type === 'photo' && file.uploaded && file.url) {
         if (!photos[file.category]) {
           photos[file.category] = [];
         }
-        if (file.uploaded && file.url) {
-          photos[file.category].push(file.url);
-        }
+        photos[file.category].push(file.url);
       } else if (file.type === 'video' && file.uploaded && file.url) {
         // Ensure the video URL is properly assigned to videoTour
         videoTour = file.url;
-        // console.log('Video tour URL detected and assigned:', videoTour);
       } else if (file.type === 'document' && file.uploaded && file.url) {
         documents.push(file.url);
       }
     });
 
-    // Only update if anything has changed to prevent unnecessary renders
-    const mediaPayload = {
+    // Update our organizedMedia state to match
+    setOrganizedMedia({
       photos,
       videoTour,
-      documents,
-    };
+      documents
+    });
     
-    // Update parent component using the ref to avoid dependency issues
-    onMediaChangeRef.current(mediaPayload);
-  }, [mediaFiles]); // Remove onMediaChange from dependencies to prevent infinite re-renders
+    // No need to call onMediaChange here anymore, as we handle it directly in the handlers
+  }, [mediaFiles]);
 
   // Handle file selection
   const handleFileSelect = (category: string, type: 'photo' | 'video' | 'document', files: FileList | null) => {
@@ -597,6 +628,369 @@ const PropertyMediaUpload: React.FC<PropertyMediaUploadProps> = ({
       </section>
     );
   };
+
+  const handlePhotoUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>, category: string) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
+    const file = event.target.files[0];
+
+    // File validation
+    if (!ALLOWED_PHOTO_TYPES.includes(file.type)) {
+      setError('Invalid file type. Please upload a JPG, JPEG, or PNG image.');
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File is too large. Maximum file size is 10MB.');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      // IMPORTANT: Set the field name with proper category prefix
+      formData.append(`${category}-photo`, file);
+      formData.append('propertyType', propertyType);
+      
+      if (propertyId) {
+        formData.append('propertyId', propertyId);
+      }
+
+      // Show what's being sent
+      console.log(`Uploading file with category: ${category}`, {
+        filename: file.name,
+        fileType: file.type,
+        fileSize: file.size
+      });
+
+      const response = await axios.post('/api/property-media/upload', formData);
+
+      if (response.data.success) {
+        const media = response.data.data.media;
+        console.log('Upload successful, media response:', media);
+
+        // Update the state with the new photo URL
+        if (media && media.photos && media.photos[category]) {
+          // For apartment type which returns objects, extract URLs
+          const newPhotoUrls = media.photos[category].map((item: any) => 
+            typeof item === 'string' ? item : item.url
+          );
+
+          // Add the new photo files to mediaFiles array
+          const newMediaFiles = newPhotoUrls.map((url: string) => ({
+            id: uuidv4(),
+            file: url,
+            preview: url,
+            category,
+            type: 'photo' as const,
+            uploaded: true,
+            url
+          }));
+          
+          // Update mediaFiles state with new files
+          setMediaFiles(prev => [...prev, ...newMediaFiles]);
+          
+          // Update organizedMedia state with new URLs
+          setOrganizedMedia(prev => {
+            const updatedPhotos = { ...prev.photos };
+            if (!updatedPhotos[category]) {
+              updatedPhotos[category] = [];
+            }
+            updatedPhotos[category] = [...updatedPhotos[category], ...newPhotoUrls];
+            return {
+              ...prev,
+              photos: updatedPhotos
+            };
+          });
+
+          // Check and update mediaItems too
+          if (media.mediaItems && Array.isArray(media.mediaItems)) {
+            console.log('Media items received:', media.mediaItems.length);
+          }
+        }
+        
+        // Propagate changes to parent component
+        onMediaChangeRef.current({
+          photos: media.photos || {},
+          videoTour: media.videoTour,
+          documents: media.documents || []
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      setError('Failed to upload photo. Please try again.');
+    } finally {
+      setUploading(false);
+      // Reset the file input
+      event.target.value = '';
+    }
+  }, [propertyType, propertyId]);
+
+  const handleVideoUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
+    const file = event.target.files[0];
+
+    // File validation
+    if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
+      setError('Invalid file type. Please upload an MP4, MOV, or AVI video.');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      // IMPORTANT: Set the field name with proper category
+      formData.append('videoTour-video', file);
+      formData.append('propertyType', propertyType);
+      
+      if (propertyId) {
+        formData.append('propertyId', propertyId);
+      }
+
+      console.log('Uploading video file:', {
+        filename: file.name,
+        fileType: file.type,
+        fileSize: file.size
+      });
+
+      const response = await axios.post('/api/property-media/upload', formData);
+
+      if (response.data.success) {
+        const media = response.data.data.media;
+        console.log('Video upload successful, media response:', media);
+
+        // Update state with video URL
+        if (media && media.videoTour) {
+          // Add the new video file to mediaFiles array
+          const newMediaFile = {
+            id: uuidv4(),
+            file: media.videoTour,
+            preview: media.videoTour,
+            category: 'videoTour',
+            type: 'video' as const,
+            uploaded: true,
+            url: media.videoTour
+          };
+          
+          // Update mediaFiles array - remove any existing videos first
+          setMediaFiles(prev => [...prev.filter(f => f.type !== 'video'), newMediaFile]);
+          
+          // Update organizedMedia state
+          setOrganizedMedia(prev => ({
+            ...prev,
+            videoTour: media.videoTour
+          }));
+          
+          // Propagate changes to parent component
+          onMediaChangeRef.current({
+            photos: media.photos || {},
+            videoTour: media.videoTour,
+            documents: media.documents || []
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      setError('Failed to upload video. Please try again.');
+    } finally {
+      setUploading(false);
+      // Reset the file input
+      event.target.value = '';
+    }
+  }, [propertyType, propertyId]);
+
+  const handleDocumentUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
+    const file = event.target.files[0];
+
+    // File validation
+    if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
+      setError('Invalid file type. Please upload a PDF, DOC, or DOCX document.');
+      return;
+    }
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError('File is too large. Maximum file size is 10MB.');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      // IMPORTANT: Set the field name with proper category
+      formData.append('document-file', file);
+      formData.append('propertyType', propertyType);
+      
+      if (propertyId) {
+        formData.append('propertyId', propertyId);
+      }
+
+      const response = await axios.post('/api/property-media/upload', formData);
+
+      if (response.data.success) {
+        const media = response.data.data.media;
+        
+        // Update state with document URLs
+        if (media && media.documents && media.documents.length > 0) {
+          // Add the new document files to mediaFiles array
+          const newMediaFiles = media.documents.map((url: string) => ({
+            id: uuidv4(),
+            file: url,
+            preview: url,
+            category: 'documents',
+            type: 'document' as const,
+            uploaded: true,
+            url
+          }));
+          
+          // Update mediaFiles array with new documents
+          setMediaFiles(prev => [...prev, ...newMediaFiles]);
+          
+          // Update organizedMedia state
+          setOrganizedMedia(prev => ({
+            ...prev,
+            documents: [...prev.documents, ...media.documents]
+          }));
+          
+          // Propagate changes to parent component
+          onMediaChangeRef.current({
+            photos: media.photos || {},
+            videoTour: media.videoTour,
+            documents: media.documents
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading document:', error);
+      setError('Failed to upload document. Please try again.');
+    } finally {
+      setUploading(false);
+      // Reset the file input
+      event.target.value = '';
+    }
+  }, [propertyType, propertyId]);
+
+  const handleDeletePhoto = useCallback(async (category: string, photoUrl: string) => {
+    // If we have a propertyId, try to delete from server first
+    if (propertyId) {
+      try {
+        const encodedUrl = encodeURIComponent(photoUrl);
+        await axios.delete(`/api/property-media/${propertyType}/${propertyId}/${encodedUrl}`);
+      } catch (error) {
+        console.error('Error deleting photo from server:', error);
+        setError('Failed to delete photo. Please try again.');
+        return;
+      }
+    }
+
+    // Update mediaFiles state
+    setMediaFiles(prev => 
+      prev.filter(file => !(file.type === 'photo' && file.category === category && file.url === photoUrl))
+    );
+
+    // Update organizedMedia state
+    setOrganizedMedia(prev => {
+      const updatedPhotos = { ...prev.photos };
+      if (updatedPhotos[category]) {
+        updatedPhotos[category] = updatedPhotos[category].filter(url => url !== photoUrl);
+      }
+      return {
+        ...prev,
+        photos: updatedPhotos
+      };
+    });
+
+    // Propagate changes to parent component
+    onMediaChangeRef.current({
+      photos: {
+        ...organizedMedia.photos,
+        [category]: organizedMedia.photos[category] 
+          ? organizedMedia.photos[category].filter(url => url !== photoUrl) 
+          : []
+      },
+      videoTour: organizedMedia.videoTour,
+      documents: organizedMedia.documents
+    });
+  }, [organizedMedia, propertyId, propertyType]);
+
+  const handleDeleteVideo = useCallback(async () => {
+    // Get the video URL from organizedMedia
+    const videoUrl = organizedMedia.videoTour;
+    
+    // If we have a propertyId and a video URL, try to delete from server first
+    if (propertyId && videoUrl) {
+      try {
+        const encodedUrl = encodeURIComponent(videoUrl);
+        await axios.delete(`/api/property-media/${propertyType}/${propertyId}/${encodedUrl}`);
+      } catch (error) {
+        console.error('Error deleting video from server:', error);
+        setError('Failed to delete video. Please try again.');
+        return;
+      }
+    }
+
+    // Update mediaFiles state
+    setMediaFiles(prev => prev.filter(file => file.type !== 'video'));
+
+    // Update organizedMedia state
+    setOrganizedMedia(prev => ({
+      ...prev,
+      videoTour: undefined
+    }));
+
+    // Propagate changes to parent component
+    onMediaChangeRef.current({
+      photos: organizedMedia.photos,
+      videoTour: undefined,
+      documents: organizedMedia.documents
+    });
+  }, [organizedMedia, propertyId, propertyType]);
+
+  const handleDeleteDocument = useCallback(async (docUrl: string) => {
+    // If we have a propertyId, try to delete from server first
+    if (propertyId) {
+      try {
+        const encodedUrl = encodeURIComponent(docUrl);
+        await axios.delete(`/api/property-media/${propertyType}/${propertyId}/${encodedUrl}`);
+      } catch (error) {
+        console.error('Error deleting document from server:', error);
+        setError('Failed to delete document. Please try again.');
+        return;
+      }
+    }
+
+    // Update mediaFiles state
+    setMediaFiles(prev => 
+      prev.filter(file => !(file.type === 'document' && file.url === docUrl))
+    );
+
+    // Update organizedMedia state
+    setOrganizedMedia(prev => ({
+      ...prev,
+      documents: prev.documents.filter(url => url !== docUrl)
+    }));
+
+    // Propagate changes to parent component
+    onMediaChangeRef.current({
+      photos: organizedMedia.photos,
+      videoTour: organizedMedia.videoTour,
+      documents: organizedMedia.documents.filter(url => url !== docUrl)
+    });
+  }, [organizedMedia, propertyId, propertyType]);
 
   return (
     <div className="space-y-6">
