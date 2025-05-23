@@ -55,7 +55,23 @@ export const uploadToS3 = async (
     await s3.send(command);
     
     // Return the public URL of the uploaded file
-    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+    const s3Url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+    
+    // Debug logging
+    console.log('S3 Upload Details:', {
+      bucketName: process.env.AWS_S3_BUCKET_NAME,
+      region: process.env.AWS_REGION,
+      fileKey,
+      generatedUrl: s3Url,
+      envVarsSet: {
+        bucketName: !!process.env.AWS_S3_BUCKET_NAME,
+        region: !!process.env.AWS_REGION,
+        accessKey: !!process.env.AWS_ACCESS_KEY_ID,
+        secretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+      }
+    });
+    
+    return s3Url;
   } catch (error) {
     console.error(`Error uploading ${mediaType} to S3:`, error);
     throw new Error(`Failed to upload ${mediaType} to S3`);
@@ -87,14 +103,27 @@ export const processAndUploadPgMedia = async (req: Request, res: Response, next:
     // Log the upload request details
     console.log(`Processing ${files.length} files (${videoCount} videos) for upload`);
     
+    // Debug log the mediaData and file names to help diagnose the issue
+    console.log('Media data IDs:', mediaData.map((item: any) => item.id));
+    console.log('File originalnames:', files.map(file => file.originalname));
+    
     // Process each file
     for (const file of files) {
       // Find corresponding metadata from the mediaData
-      const mediaInfo = mediaData.find((item: any) => item.id === file.originalname);
+      let mediaInfo = mediaData.find((item: any) => item.id === file.originalname);
       
       if (!mediaInfo) {
         console.warn(`No metadata found for file: ${file.originalname}`);
-        continue;
+        // Instead of skipping, let's create basic metadata to allow upload to continue
+        // This prevents the 400 error when metadata doesn't match exactly
+        const fileType = file.mimetype.startsWith('image/') ? 'photo' : 'video';
+        mediaInfo = {
+          id: file.originalname,
+          type: fileType,
+          title: 'Untitled',
+          tags: [],
+          roomType: 'general'
+        };
       }
       
       const { type, roomType, title, tags } = mediaInfo;
@@ -105,14 +134,24 @@ export const processAndUploadPgMedia = async (req: Request, res: Response, next:
       const url = await uploadToS3(file, roomTypeFolder, mediaType);
       
       // Add to media items array
-      mediaItems.push({
+      const mediaItem = {
         id: uuidv4(),
         type: mediaType,
         url,
         title: title || 'Untitled',
         tags: tags || [],
         roomType: roomType || undefined
+      };
+      
+      // Debug logging for each media item
+      console.log('Created media item with S3 URL:', {
+        id: mediaItem.id,
+        type: mediaItem.type,
+        url: mediaItem.url,
+        isS3Url: mediaItem.url.includes('s3.')
       });
+      
+      mediaItems.push(mediaItem);
     }
     
     // Attach the media items to the request for the controller to use

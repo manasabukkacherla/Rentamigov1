@@ -156,6 +156,15 @@ interface IResidentialRentIndependentHouse extends Document {
       storerooms: string[];
       kitchen: string[];
     };
+    mediaItems?: Array<{
+      id?: string;
+      type?: 'photo' | 'video';
+      url?: string;
+      title?: string;
+      tags?: string[];
+      roomType?: string;
+      category?: string;
+    }>;
     videoTour?: string;
     documents: string[];
   };
@@ -324,7 +333,16 @@ const residentialRentIndependentHouseSchema = new mongoose.Schema<IResidentialRe
       storerooms: [{ type: String, required: false }],
       kitchen: [{ type: String, required: false }]
     },
-    videoTour: { type: String },
+    mediaItems: [{
+      id: { type: String },
+      type: { type: String },
+      url: { type: String },
+      title: { type: String },
+      tags: [{ type: String }],
+      roomType: { type: String },
+      category: { type: String },
+    }],
+    videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
   metadata: {
