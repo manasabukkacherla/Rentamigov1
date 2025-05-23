@@ -125,16 +125,16 @@ interface IPhotoDetail {
 
 interface IMedia {
   photos: {
-    exterior: IPhotoDetail[];
-    interior: IPhotoDetail[];
-    floorPlan: IPhotoDetail[];
-    washrooms: IPhotoDetail[];
-    lifts: IPhotoDetail[];
-    emergencyExits: IPhotoDetail[];
-    bedrooms: IPhotoDetail[];
-    halls: IPhotoDetail[];
-    storerooms: IPhotoDetail[];
-    kitchen: IPhotoDetail[];
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    washrooms: string[];
+    lifts: string[];
+    emergencyExits: string[];
+    bedrooms: string[];
+    halls: string[];
+    storerooms: string[];
+    kitchen: string[];
   };
   mediaItems?: Array<{
     id?: string;
@@ -288,76 +288,16 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
   },
   media: {
     photos: {
-      exterior: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      interior: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      floorPlan: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      washrooms: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      lifts: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      emergencyExits: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      bedrooms: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      halls: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      storerooms: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      kitchen: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }]
+      exterior: [{ type: String, required: false }],
+      interior: [{ type: String, required: false }],
+      floorPlan: [{ type: String, required: false }],
+      washrooms: [{ type: String, required: false }],
+      lifts: [{ type: String, required: false }],
+      emergencyExits: [{ type: String, required: false }],
+      bedrooms: [{ type: String, required: false }],
+      halls: [{ type: String, required: false }],
+      storerooms: [{ type: String, required: false }],
+      kitchen: [{ type: String, required: false }]
     },
     mediaItems: [{
       id: String,

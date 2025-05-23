@@ -303,38 +303,20 @@ router.post('/upload', propertyMediaUpload, processAndUploadPropertyMedia, async
 
         // Handle different photo storage formats based on property type
         if (propertyType === 'apartment') {
-          // For ResidentialRentApartment model:
-          // Schema: exterior: [{ id: { type: String, required: true }, url: { type: String, required: true }, ... }]
           Object.entries(photos).forEach(([category, newPhotoItems]) => {
             // Check if this category exists in the schema
             if (!newPhotosData[category]) {
               newPhotosData[category] = [];
             }
             
-            // For apartment model, ensure we have the correct property format
-            const existingCategoryItems = Array.isArray(newPhotosData[category]) ? newPhotosData[category] : [];
+            // For apartment model, store URLs directly
+            const newUrls = newPhotoItems.map(item => item.url);
             
-            // Convert photo items to MongoDB document structure
-            const processedPhotoItems = newPhotoItems.map(item => {
-              // MongoDB creates an _id for each document in the array
-              return {
-                id: item.id,
-                url: item.url,
-                title: item.title || 'Untitled',
-                category: item.category,
-                tags: item.tags || []
-              };
-            });
-            
-            // Debug the schema mismatch
-            console.log('Original photo item from upload:', JSON.stringify(newPhotoItems[0] || {}, null, 2));
-            console.log('Processed photo item for MongoDB:', JSON.stringify(processedPhotoItems[0] || {}, null, 2));
-            
-            // Add new items to the category array
-            newPhotosData[category] = [...existingCategoryItems, ...processedPhotoItems];
+            // Add new URLs to the category array
+            newPhotosData[category] = [...(newPhotosData[category] || []), ...newUrls];
             photosChanged = true;
             
-            console.log(`Updated ${category} photos - added ${processedPhotoItems.length} new items`);
+            console.log(`Updated ${category} photos - added ${newUrls.length} new items`);
           });
           
           // Log the full update operation for debugging
