@@ -1,10 +1,9 @@
 "use client"
 
 import React, { useState, useRef, useCallback } from "react"
-import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2 } from "lucide-react"
+import { Building2, MapPin, IndianRupee, Calendar, Image, Home, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
-import MapCoordinates from "../MapCoordinates"
 import PropertySize from "../PropertySize"
 import Restrictions from "../Restrictions"
 import PropertyFeatures from "../PropertyFeatures"
@@ -20,6 +19,7 @@ import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
+import { uploadResidentialMediaToS3 } from "../../../utils/residentialMediaUploader"
 
 interface Location {
   latitude: string;
@@ -207,6 +207,12 @@ interface Availability {
   date: string;
 }
 
+interface MediaUploadResult {
+  photos: Record<string, string[]>;
+  videoTour?: string;
+  documents: string[];
+}
+
 interface FormData {
   basicInformation: BasicInformation;
   propertySize: number;
@@ -223,73 +229,15 @@ interface FormData {
   };
 }
 
-interface LeaseApartmentProps {
-  propertyId: string
-  onSubmit?: (formData: any) => void
-}
-
-interface PropertyNameProps {
-  // propertyName: string
-  onPropertyNameChange: (name: string) => void
-}
-
-interface MapSelectorProps {
-  latitude: string
-  longitude: string
-  onLocationSelect: (lat: string, lng: string, address?: any) => void
-  initialShowMap?: boolean
-}
-
-interface PropertySizeProps {
-  propertySize: number;
-  onPropertySizeChange: (size: number) => void;
-}
-
-interface PropertyFeaturesProps {
-  onFeaturesChange?: (features: Record<string, any>) => void
-}
-
-interface FlatAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
-}
-
-interface SocietyAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
-}
-
-interface RestrictionsProps {
-  restrictions: string[]
-  onChange: (restrictions: string[]) => void
-}
-
-interface AvailabilityDateProps {
-  date: Date
-  onChange: (date: Date) => void
-}
-
-interface MediaUploadProps {
-  onMediaChange?: (media: {
-    exteriorViews: File[];
-    interiorViews: File[];
-    floorPlan: File[];
-    washrooms: File[];
-    lifts: File[];
-    emergencyExits: File[];
-    videoTour?: File;
-    legalDocuments: File[];
-  }) => void;
-}
-
 const LeaseApartment: React.FC = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [error] = useState<string | null>(null);
+  const [success] = useState<string | null>(null);
   const [propertyId, setPropertyId] = useState<string | undefined>(undefined);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -491,25 +439,6 @@ const LeaseApartment: React.FC = () => {
     }));
   }, []);
 
-  const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        address: {
-          ...prev.basicInformation.address,
-          street: address?.address || prev.basicInformation.address.street,
-          city: address?.city || prev.basicInformation.address.city,
-          state: address?.state || prev.basicInformation.address.state,
-          zipCode: address?.pinCode || prev.basicInformation.address.zipCode,
-          location: {
-            latitude: lat,
-            longitude: lng
-          },
-        }
-      }
-    }))
-  }, []);
 
   const handleAvailabilityChange = useCallback((newAvailability: { type: "immediate" | "specific", date?: string }) => {
     setFormData(prev => ({
@@ -522,18 +451,12 @@ const LeaseApartment: React.FC = () => {
   }, []);
 
   // Function to update map location based on latitude and longitude
-  const updateMapLocation = (lat: string, lng: string) => {
-    const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
-    if (iframe && lat && lng) {
-      iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
-    }
-  };
 
   const formSections = [
     {
       title: "Basic Information",
       icon: <Home className="w-6 h-6" />,
-      component: (
+      content: (
         <div className="space-y-8">
             <div className="space-y-8">
             <PropertyName
@@ -570,7 +493,7 @@ const LeaseApartment: React.FC = () => {
     {
       title: "Property Details",
       icon: <Building2 className="w-6 h-6" />,
-      component: (
+      content: (
         <div className="space-y-8">
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -664,7 +587,7 @@ const LeaseApartment: React.FC = () => {
     {
       title: "Lease Terms",
       icon: <IndianRupee className="w-6 h-6" />,
-      component: (
+      content: (
         <div className="space-y-8">
           
               
@@ -755,7 +678,7 @@ const LeaseApartment: React.FC = () => {
     {
       title: "Availability",
       icon: <Calendar className="w-6 h-6" />,
-      component: (
+      content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-8">
             
@@ -775,22 +698,31 @@ const LeaseApartment: React.FC = () => {
     {
       title: "Property Media",
       icon: <Image className="w-6 h-6" />,
-      component: (
-        
-          <div className="space-y-8">
-            <ResidentialPropertyMediaUpload
-                propertyType="apartment"
-                propertyId={propertyId}
-                value={formData.media}
-                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
-              />
+      content: (
+        <div className="space-y-8">
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <div className="space-y-8">
+              <div className="flex items-center mb-8">
+                <Image className="text-black mr-3" size={28} />
+                <h3 className="text-2xl font-semibold text-black">Property Media</h3>
+              </div>
+              <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+                <ResidentialPropertyMediaUpload
+                  propertyType="apartment"
+                  propertyId={propertyId}
+                  value={formData.media}
+                  onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+                />
+              </div>
             </div>
+          </div>
+        </div>
       ),
     },
   ];
 
   const handleNext = () => {
-    if (currentStep < formSections.length) {
+    if (currentStep < formSections.length - 1) {
       setCurrentStep(currentStep + 1);
       // Scroll to top of the form
       setTimeout(() => {
@@ -831,6 +763,8 @@ const LeaseApartment: React.FC = () => {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
+    console.log("Final formData before submit", formData);
+
     try {
       const user = sessionStorage.getItem("user");
       if (!user) {
@@ -840,111 +774,192 @@ const LeaseApartment: React.FC = () => {
 
       const author = JSON.parse(user).id;
 
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all(formData.media.photos.exterior.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          interior: await Promise.all(formData.media.photos.interior.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          floorPlan: await Promise.all(formData.media.photos.floorPlan.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          washrooms: await Promise.all(formData.media.photos.washrooms.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          lifts: await Promise.all(formData.media.photos.lifts.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          emergencyExits: await Promise.all(formData.media.photos.emergencyExits.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          bedrooms: await Promise.all(formData.media.photos.bedrooms.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          halls: await Promise.all(formData.media.photos.halls.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          storerooms: await Promise.all(formData.media.photos.storerooms.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          })),
-          kitchen: await Promise.all(formData.media.photos.kitchen.map(async file => {
-            if (file instanceof File) {
-              return await convertFileToBase64(file);
-            }
-            return file;
-          }))
-        },
-        videoTour: formData.media.videoTour
-          ? formData.media.videoTour instanceof File
-            ? await convertFileToBase64(formData.media.videoTour)
-            : formData.media.videoTour
-          : undefined,
-        documents: await Promise.all(formData.media.documents.map(async file => {
-          if (file instanceof File) {
-            return await convertFileToBase64(file);
-          }
-          return file;
-        }))
+      // Process media items to ensure we only send URLs to the backend
+      const processMediaForSubmission = (media: Media) => {
+        return {
+          photos: {
+            exterior: media.photos.exterior.filter(item => typeof item === 'string') as string[],
+            interior: media.photos.interior.filter(item => typeof item === 'string') as string[],
+            floorPlan: media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
+            washrooms: media.photos.washrooms.filter(item => typeof item === 'string') as string[],
+            lifts: media.photos.lifts.filter(item => typeof item === 'string') as string[],
+            emergencyExits: media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
+            bedrooms: media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
+            halls: media.photos.halls.filter(item => typeof item === 'string') as string[],
+            storerooms: media.photos.storerooms.filter(item => typeof item === 'string') as string[],
+            kitchen: media.photos.kitchen.filter(item => typeof item === 'string') as string[]
+          },
+          videoTour: typeof media.videoTour === 'string' ? media.videoTour : undefined,
+          documents: media.documents.filter(doc => typeof doc === 'string') as string[]
+        };
       };
+
+      // First check if there are any new files to upload
+      const hasNewFiles = Object.values(formData.media.photos).some(files => 
+        files.some(file => file instanceof File)
+      ) || formData.media.videoTour instanceof File || 
+      formData.media.documents.some(file => file instanceof File);
+
+      let uploadedMedia;
+      if (hasNewFiles) {
+        setUploadingMedia(true);
+        toast.loading('Uploading media files...', { toastId: 'mediaUpload' });
+
+        const mediaItems: { id: string; type: "photo" | "video" | "document"; file: File; category: string; }[] = [];
+
+        // Process photos
+        for (const [category, files] of Object.entries(formData.media.photos)) {
+          for (const file of files) {
+            if (file instanceof File) {
+              mediaItems.push({
+                id: crypto.randomUUID(),
+                type: "photo",
+                file,
+                category
+              });
+            }
+          }
+        }
+
+        // Process video tour
+        if (formData.media.videoTour instanceof File) {
+          mediaItems.push({
+            id: crypto.randomUUID(),
+            type: "video",
+            file: formData.media.videoTour,
+            category: "videoTour"
+          });
+        }
+
+        // Process documents
+        for (const file of formData.media.documents) {
+          if (file instanceof File) {
+            mediaItems.push({
+              id: crypto.randomUUID(),
+              type: "document",
+              file,
+              category: "documents"
+            });
+          }
+        }
+
+        try {
+          const uploadedItems = await uploadResidentialMediaToS3('apartment', mediaItems, propertyId);
+          
+          // Transform uploaded items into the expected format
+          uploadedMedia = {
+            photos: {
+              exterior: formData.media.photos.exterior.filter(item => typeof item === 'string') as string[],
+              interior: formData.media.photos.interior.filter(item => typeof item === 'string') as string[],
+              floorPlan: formData.media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
+              washrooms: formData.media.photos.washrooms.filter(item => typeof item === 'string') as string[],
+              lifts: formData.media.photos.lifts.filter(item => typeof item === 'string') as string[],
+              emergencyExits: formData.media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
+              bedrooms: formData.media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
+              halls: formData.media.photos.halls.filter(item => typeof item === 'string') as string[],
+              storerooms: formData.media.photos.storerooms.filter(item => typeof item === 'string') as string[],
+              kitchen: formData.media.photos.kitchen.filter(item => typeof item === 'string') as string[]
+            },
+            videoTour: undefined,
+            documents: formData.media.documents.filter(doc => typeof doc === 'string') as string[]
+          };
+
+          // Add newly uploaded items to the media object
+          uploadedItems.forEach(item => {
+            if (item.type === 'photo' && item.category) {
+              uploadedMedia!.photos[item.category].push(item.url);
+            } else if (item.type === 'video') {
+              uploadedMedia!.videoTour = item.url;
+            } else if (item.type === 'document') {
+              uploadedMedia!.documents.push(item.url);
+            }
+          });
+
+          toast.dismiss('mediaUpload');
+          toast.success('Media files uploaded successfully');
+        } catch (error: any) {
+          console.error('Error uploading media:', error);
+          toast.dismiss('mediaUpload');
+          toast.error(`Failed to upload media: ${error.message}`);
+          setIsSubmitting(false);
+          setUploadingMedia(false);
+          return;
+        }
+        setUploadingMedia(false);
+      }
+
+      // Show form submission toast
+      toast.loading('Creating property listing...', { toastId: 'formSubmit' });
 
       const transformedData = {
         ...formData,
-        media: convertedMedia,
+        media: uploadedMedia || processMediaForSubmission(formData.media),
         metadata: {
           createdBy: author,
           createdAt: new Date().toISOString()
         }
       };
 
-      const response = await axios.post(
-        "/api/residential/lease/apartments",
-        transformedData,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          }
+      // Log the data being sent to the backend
+      console.log('Data being sent to backend:', JSON.stringify(transformedData, null, 2));
+
+      // Create axios instance with custom config
+      const axiosInstance = axios.create({
+        baseURL: 'http://localhost:8000',
+        timeout: 60000, // Increase timeout to 60 seconds
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         }
-      );
+      });
+
+      const response = await axios.post(
+        "/api/residential/lease/apartment",
+        transformedData
+      ).catch((error) => {
+        if (error.code === 'ECONNABORTED') {
+          throw new Error('Request timed out. The server is taking too long to respond. Please try again.');
+        }
+        if (!error.response) {
+          throw new Error('Network error. Please check if the backend server is running at http://localhost:8000');
+        }
+        throw error;
+      });
 
       if (response.data.success) {
         setPropertyId(response.data.propertyId);
+        toast.dismiss('formSubmit');
         toast.success("Property listing created successfully!");
         setFormData(initialFormData);
+        navigate('/dashboard');
+      } else {
+        throw new Error(response.data.message || 'Failed to create listing');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting form:", error);
-      toast.error("Failed to create apartment listing. Please try again.");
+      toast.dismiss('formSubmit');
+      
+      // Handle different types of errors
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        const errorMessage = error.response.data?.message || 
+                           error.response.data?.error || 
+                           error.response.data?.details || 
+                           "Server error. Please try again.";
+        toast.error(errorMessage);
+      } else if (error.request) {
+        // The request was made but no response was received
+        toast.error("No response from server. Please check if the backend server is running at http://localhost:8000");
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        toast.error(error.message || "Failed to create apartment listing. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
+      setUploadingMedia(false);
     }
   };
 
@@ -959,7 +974,7 @@ const LeaseApartment: React.FC = () => {
                   key={index}
                   className="flex items-center cursor-pointer"
                   onClick={() => {
-                    setCurrentStep(index + 1);
+                    setCurrentStep(index);
                     setTimeout(() => {
                       if (formRef.current) {
                         window.scrollTo({
@@ -976,18 +991,18 @@ const LeaseApartment: React.FC = () => {
                   }}
                 >
                   <div className="flex flex-col items-center group">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index + 1 <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${index <= currentStep ? 'bg-black text-white' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
                       }`}>
                       {section.icon}
                     </div>
-                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index + 1 <= currentStep ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'
+                    <span className={`text-xs mt-1 font-medium transition-colors duration-200 ${index <= currentStep ? 'text-black' : 'text-gray-500 group-hover:text-gray-700'
                       }`}>
                       {section.title}
                     </span>
                   </div>
                   {index < formSections.length - 1 && (
                     <div className="flex items-center mx-1">
-                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep - 1 ? 'bg-black' : 'bg-gray-200'
+                      <div className={`w-12 h-1 transition-colors duration-200 ${index < currentStep ? 'bg-black' : 'bg-gray-200'
                         }`} />
                     </div>
                   )}
@@ -1003,11 +1018,11 @@ const LeaseApartment: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Apartment</h1>
         </div>
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep - 1].title}</h2>
+          <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep].title}</h2>
           <p className="text-gray-600">Please fill in the details for your property</p>
         </div>
 
-        {formSections[currentStep - 1].component}
+        {formSections[currentStep].content}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
@@ -1024,7 +1039,7 @@ const LeaseApartment: React.FC = () => {
             Previous
           </button>
           <button
-            onClick={() => currentStep === formSections.length ? handleSubmit() : handleNext()}
+            onClick={() => currentStep === formSections.length - 1 ? handleSubmit() : handleNext()}
             disabled={isSubmitting}
             className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
           >
@@ -1035,7 +1050,7 @@ const LeaseApartment: React.FC = () => {
               </>
             ) : (
               <>
-                {currentStep === formSections.length ? 'Submit' : 'Next'}
+                {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />
               </>
             )}

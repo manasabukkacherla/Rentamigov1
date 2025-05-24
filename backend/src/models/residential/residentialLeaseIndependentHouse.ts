@@ -164,7 +164,7 @@ interface IResidentialLeaseIndependentHouse extends Document {
 }
 
 const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndependentHouse>({
-  propertyId: { type: String, required: true, unique: true },
+  propertyId: { type: String, required: false, unique: false },
   basicInformation: {
     title: { type: String },
     propertyType: { type: String },
@@ -307,7 +307,7 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
     createdAt: { type: Date, default: Date.now },
   }
 }, {
-  timestamps: true
+  timestamps: false
 });
 
 // Check if the model exists before compiling it

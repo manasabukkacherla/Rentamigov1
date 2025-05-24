@@ -31,7 +31,7 @@ interface Address {
 interface IBasicInformation {
   propertyName: string;
   address: {
-    houseNo: string;
+    houseName: string;    
     street: string;
     city: string;
     state: string;
@@ -246,13 +246,14 @@ const SellIndependentHouse = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [propertyId, setPropertyId] = useState<string | undefined>()
   const formRef = useRef<HTMLDivElement>(null)
 
-  const [formData, setFormData] = useState<FormData>({
+  const initialFormData: FormData = {
     basicInformation: {
       propertyName: "",
       address: {
-        houseNo: "",
+        houseName: "",    
         street: "",
         city: "",
         state: "",
@@ -371,7 +372,9 @@ const SellIndependentHouse = () => {
       videoTour: undefined,
       documents: []
     }
-  })
+  };
+
+  const [formData, setFormData] = useState<FormData>(initialFormData);
 
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
@@ -439,10 +442,16 @@ const SellIndependentHouse = () => {
               </div>
 
               <PropertyAddress
-                // latitude={formData.basicInformation.address.location.latitude}
-                // longitude={formData.basicInformation.address.location.longitude}
-                address={formData.basicInformation.address}
-                onAddressChange={handleAddressChange}
+                propertyAddress={formData.basicInformation.address}
+                onAddressChange={(newAddress) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    basicInformation: {
+                      ...prev.basicInformation,
+                      address: newAddress
+                    }
+                  }))
+                }
               />
             </div>
           </div>
@@ -578,7 +587,10 @@ const SellIndependentHouse = () => {
                 propertyType="independenthouse"
                 propertyId={propertyId}
                 value={formData.media}
-                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+                onChange={(media) => {
+                  setFormData(prev => ({ ...prev, media }));
+                  setError(null); // Clear any previous errors
+                }}
               />
 
           </div>
@@ -588,7 +600,7 @@ const SellIndependentHouse = () => {
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
@@ -630,40 +642,66 @@ const SellIndependentHouse = () => {
     }
   };
 
-  const navigate = useNavigate()
+  // Add a function to handle media upload errors
+  const handleMediaError = (error: any) => {
+    console.error('Media upload error:', error);
+    setError(error.message || 'Failed to upload media files');
+    toast.error(error.message || 'Failed to upload media files');
+  };
+
+  // Add a function to handle media upload success
+  const handleMediaSuccess = (mediaItems: any[]) => {
+    console.log('Media upload success:', mediaItems);
+    toast.success(`Successfully uploaded ${mediaItems.length} files`);
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
+    setError(null);
+    console.log('Submitting form data:', formData);
 
     try {
       const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
+      if (!user) {
+        toast.error('Please login to continue');
+        navigate('/login');
+        return;
+      }
 
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
-          });
-        };
+      const author = JSON.parse(user).id;
 
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
-            if (file instanceof File) {
+      // Convert media files to base64
+      const convertFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
+      };
+
+      // Helper function to convert array of files to base64
+      const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+        const results: string[] = [];
+        for (const file of files) {
+          if (file instanceof File) {
+            try {
               const base64 = await convertFileToBase64(file);
               results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
+            } catch (error) {
+              console.error('Error converting file to base64:', error);
+              throw new Error('Failed to process media files');
             }
+          } else {
+            results.push(file); // Already a string (URL)
           }
-          return results;
-        };
+        }
+        return results;
+      };
 
+      
+
+      try {
         const convertedMedia = {
           photos: {
             exterior: await convertFilesToBase64(formData.media.photos.exterior),
@@ -685,6 +723,9 @@ const SellIndependentHouse = () => {
           documents: await convertFilesToBase64(formData.media.documents)
         };
 
+        // Update loading toast
+        toast.success('Media files processed successfully');
+
         const transformedData = {
           ...formData,
           media: convertedMedia,
@@ -693,6 +734,7 @@ const SellIndependentHouse = () => {
             createdAt: new Date()
           }
         };
+
 
         const response = await axios.post('/api/residential/sale/independent-house', transformedData, {
           headers: {
@@ -704,14 +746,20 @@ const SellIndependentHouse = () => {
           // Set the propertyId from the response
           setPropertyId(response.data.propertyId);
           toast.success('Property listing created successfully!');
-          setFormData({...initialFormData} as FormData);
+          setFormData(initialFormData);
+          
+          // Scroll to top
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-      } else {
-        navigate('/login');
+      } catch (error: any) {
+        console.error('Error processing media:', error);
+        toast.error('Failed to process media files');
+        throw error;
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      toast.error('Failed to create independent house listing. Please try again.');
+      toast.error(error.message || 'Failed to create independent house listing. Please try again.');
+      setError(error.message || 'Failed to create independent house listing');
     } finally {
       setIsSubmitting(false);
     }
