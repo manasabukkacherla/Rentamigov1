@@ -116,7 +116,7 @@ const app: Application = express();
 const server = http.createServer(app);
 
 // Increase timeout
-server.timeout = 120000; // 2 minutes
+server.timeout = 300000; // 5 minutes
 
 // Initialize Socket.IO with correct CORS settings
 export const io: Server = new Server(server, {
@@ -136,12 +136,17 @@ connectToDatabase()
 // Serve static files from "build"
 app.use(express.static(path.join(__dirname, "build")));
 // cors
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'], // Add your frontend URLs
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: false
+}));
 
 // Configure express with proper types
 app.use(
   express.json({
-    limit: "50mb",
+    limit: "100mb", // Increase limit
     verify: (
       req: express.Request,
       res: express.Response,
@@ -154,6 +159,7 @@ app.use(
         res.status(400).json({
           success: false,
           error: "Invalid JSON",
+          message: "The request contains invalid JSON data."
         });
         throw new Error("Invalid JSON");
       }
@@ -163,7 +169,7 @@ app.use(
 app.use(
   express.urlencoded({
     extended: true,
-    limit: "50mb",
+    limit: "100mb", // Increase limit
   })
 );
 
@@ -173,10 +179,11 @@ const timeout = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  res.setTimeout(120000, () => {
+  res.setTimeout(300000, () => { // 5 minutes
     res.status(408).json({
       success: false,
       error: "Request timeout",
+      message: "The request took too long to process. Please try again."
     });
   });
   next();
@@ -304,7 +311,7 @@ app.use('/api/residential/rent/independent-house', residentialRentIndependentHou
 
 //lease
 app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
-app.use('/api/residential/lease/appartment',residentialLeaseApartmentRoutes);
+app.use('/api/residential/lease/apartment',residentialLeaseApartmentRoutes);
 app.use('/api/residential/lease/builder-floor',residentialLeaseBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
