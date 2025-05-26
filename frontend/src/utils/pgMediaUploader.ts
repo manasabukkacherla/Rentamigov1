@@ -28,6 +28,7 @@ export const uploadPgMediaToS3 = async (
 
     // Create a FormData object to send files
     const formData = new FormData();
+
     // Only append propertyId if it exists
     if (propertyId) {
       formData.append('propertyId', propertyId);
@@ -57,10 +58,9 @@ export const uploadPgMediaToS3 = async (
     // Add the metadata as a JSON string
     formData.append('mediaData', JSON.stringify(mediaData));
 
-    // Make the API call with timeout and retry logic for multiple videos
-    const videoCount = mediaItems.filter(item => item.type === 'video').length;
-    const timeout = videoCount > 3 ? 180000 : 120000; // 3 minutes for >3 videos, 2 minutes otherwise
-    
+    // Use a generous fixed timeout (5 minutes)
+    const timeout = 300000; // 5 minutes
+
     // Function to attempt upload with retry logic
     const attemptUpload = async (retries = 2): Promise<any> => {
       try {
@@ -71,7 +71,7 @@ export const uploadPgMediaToS3 = async (
             headers: {
               'Content-Type': 'multipart/form-data',
             },
-            timeout: timeout, // Set longer timeout for video uploads
+            timeout: timeout,
           }
         );
       } catch (error: any) {
@@ -82,7 +82,7 @@ export const uploadPgMediaToS3 = async (
         throw error;
       }
     };
-    
+
     const response = await attemptUpload();
 
     if (response.data.success) {
@@ -108,7 +108,6 @@ export const deletePgMediaFromS3 = async (
 ): Promise<boolean> => {
   try {
     const response = await axios.delete(`/api/residential/pg-media/${propertyId}/${mediaId}`);
-    
     return response.data.success;
   } catch (error: any) {
     console.error('Error deleting PG media:', error);
@@ -126,7 +125,7 @@ export const getPgMediaFromS3 = async (
 ): Promise<any> => {
   try {
     const response = await axios.get(`/api/residential/pg-media/${propertyId}`);
-    
+
     if (response.data.success) {
       return response.data.data;
     } else {

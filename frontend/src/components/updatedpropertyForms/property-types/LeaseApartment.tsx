@@ -915,10 +915,7 @@ const LeaseApartment: React.FC = () => {
         }
       });
 
-      const response = await axios.post(
-        "/api/residential/lease/apartment",
-        transformedData
-      ).catch((error) => {
+      const response = await axiosInstance.post("http://localhost:8000/api/residential/lease/apartment", transformedData).catch((error) => {
         if (error.code === 'ECONNABORTED') {
           throw new Error('Request timed out. The server is taking too long to respond. Please try again.');
         }
