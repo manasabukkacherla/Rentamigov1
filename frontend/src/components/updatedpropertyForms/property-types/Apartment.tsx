@@ -16,6 +16,7 @@ import FinalSteps from "../FinalSteps"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
+import ResidentialPropertyMediaUpload from '../ResidentialPropertyMediaUpload'
 
 // interface ApartmentProps {
 //   propertyId: string
@@ -141,10 +142,19 @@ interface SocietyAmenities {
 
 interface IMedia {
   photos: {
-    [category: string]: string[];
+    exterior: (File | string)[];
+    interior: (File | string)[];
+    floorPlan: (File | string)[];
+    washrooms: (File | string)[];
+    lifts: (File | string)[];
+    emergencyExits: (File | string)[];
+    bedrooms: (File | string)[];
+    halls: (File | string)[];
+    storerooms: (File | string)[];
+    kitchen: (File | string)[];
   };
-  videoTour?: string;
-  documents?: string[];
+  videoTour?: File | string;
+  documents: (File | string)[];
 }
 
 interface PropertySize {
@@ -295,19 +305,19 @@ const Apartment = () => {
     },
     media: {
       photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: [],
-        bedrooms: [],
-        halls: [],
-        storerooms: [],
-        kitchen: []
+        exterior: [] as (File | string)[],
+        interior: [] as (File | string)[],
+        floorPlan: [] as (File | string)[],
+        washrooms: [] as (File | string)[],
+        lifts: [] as (File | string)[],
+        emergencyExits: [] as (File | string)[],
+        bedrooms: [] as (File | string)[],
+        halls: [] as (File | string)[],
+        storerooms: [] as (File | string)[],
+        kitchen: [] as (File | string)[]
       },
-      videoTour: undefined,
-      documents: []
+      videoTour: undefined as (File | string | undefined),
+      documents: [] as (File | string)[]
     }
   }
   const [formData, setFormData] = useState<FormData>({
@@ -421,19 +431,19 @@ const Apartment = () => {
     },
     media: {
       photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: [],
-        bedrooms: [],
-        halls: [],
-        storerooms: [],
-        kitchen: []
+        exterior: [] as (File | string)[],
+        interior: [] as (File | string)[],
+        floorPlan: [] as (File | string)[],
+        washrooms: [] as (File | string)[],
+        lifts: [] as (File | string)[],
+        emergencyExits: [] as (File | string)[],
+        bedrooms: [] as (File | string)[],
+        halls: [] as (File | string)[],
+        storerooms: [] as (File | string)[],
+        kitchen: [] as (File | string)[]
       },
-      videoTour: undefined,
-      documents: []
+      videoTour: undefined as (File | string | undefined),
+      documents: [] as (File | string)[]
     }
   })
 
@@ -639,34 +649,16 @@ const Apartment = () => {
       title: "Media",
       icon: <Image className="w-5 h-5" />,
       content: (
-        <PropertyMediaUpload
-          propertyId={propertyId}
-          propertyType="apartment"
-          initialMedia={formData.media}
-          onMediaChange={(media) => {
-            // Store the updated media in form data
-            setFormData(prevFormData => {
-              const mergedPhotos = { ...prevFormData.media.photos };
-              
-              // Merge new photo categories without overwriting existing ones
-              Object.entries(media.photos || {}).forEach(([category, urls]) => {
-                if (!mergedPhotos[category]) {
-                  mergedPhotos[category] = [];
-                }
-                mergedPhotos[category] = [...new Set([...mergedPhotos[category], ...urls])];
-              });
-              
-              return { 
-                ...prevFormData, 
-                media: { 
-                  photos: mergedPhotos,
-                  videoTour: media.videoTour || prevFormData.media.videoTour,
-                  documents: media.documents || prevFormData.media.documents
-                }
-              };
-            });
-          }}
-        />
+        <div className="space-y-6">
+          <div className="space-y-8">
+            <ResidentialPropertyMediaUpload
+              propertyType="apartment"
+              propertyId={propertyId}
+              value={formData.media}
+              onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+            />
+          </div>
+        </div>
       ),
     },
   ];
@@ -719,7 +711,6 @@ const Apartment = () => {
     setIsSubmitting(true);
     console.log("Final formData before submit", formData);
 
-
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -741,15 +732,21 @@ const Apartment = () => {
           console.log('VideoTour URL for submission:', videoTourUrl);
           
           const processedMedia = {
-            photos: {} as { [key: string]: string[] },
-            videoTour: videoTourUrl, // Use the extracted URL
-            documents: media.documents ? media.documents.filter(doc => typeof doc === 'string') as string[] : []
+            photos: {
+              exterior: media.photos.exterior.filter(item => typeof item === 'string') as string[],
+              interior: media.photos.interior.filter(item => typeof item === 'string') as string[],
+              floorPlan: media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
+              washrooms: media.photos.washrooms.filter(item => typeof item === 'string') as string[],
+              lifts: media.photos.lifts.filter(item => typeof item === 'string') as string[],
+              emergencyExits: media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
+              bedrooms: media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
+              halls: media.photos.halls.filter(item => typeof item === 'string') as string[],
+              storerooms: media.photos.storerooms.filter(item => typeof item === 'string') as string[],
+              kitchen: media.photos.kitchen.filter(item => typeof item === 'string') as string[]
+            },
+            videoTour: videoTourUrl,
+            documents: media.documents.filter(doc => typeof doc === 'string') as string[]
           };
-          
-          // Process photos - only include string URLs, not File objects
-          Object.entries(media.photos || {}).forEach(([category, files]) => {
-            processedMedia.photos[category] = files.filter(file => typeof file === 'string') as string[];
-          });
           
           // Final check of processed media
           console.log('Final processed media for backend:', {
@@ -778,11 +775,9 @@ const Apartment = () => {
         });
 
         if (response.data.success) {
-          // Save the property ID for media uploads
-          if (response.data.data && response.data.data.propertyId) {
-            setPropertyId(response.data.data.propertyId);
-          }
-          toast.success('Apartment listing created successfully!');
+          // Set the propertyId from the response
+          setPropertyId(response.data.propertyId);
+          toast.success('Property listing created successfully!');
           setFormData({...initialFormData} as FormData);
         }
       } else {

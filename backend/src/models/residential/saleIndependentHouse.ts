@@ -126,6 +126,15 @@ interface IMedia {
     storerooms: string[];
     kitchen: string[];
   };
+  mediaItems?: Array<{
+    id?: string;
+    type?: 'photo' | 'video';
+    url?: string;
+    title?: string;
+    tags?: string[];
+    roomType?: string;
+    category?: string;
+  }>;
   videoTour?: string;
   documents: string[];
 }
@@ -149,9 +158,9 @@ interface IResidentialSaleIndependentHouse extends Document {
 }
 
 const ResidentailsaleIndependentHouseSchema = new Schema<IResidentialSaleIndependentHouse>({
-  propertyId: { type: String, required: true, unique: true },
+  propertyId: { type: String, required: false, unique: false },
   basicInformation: {
-    propertyName: { type: String, required: true },
+    propertyName: { type: String, required: false },
     address: {
       houseNo: { type: String },
       street: { type: String },
@@ -165,39 +174,39 @@ const ResidentailsaleIndependentHouseSchema = new Schema<IResidentialSaleIndepen
       },
     },
   },
-  propertySize: { type: Number, required: true },
+  propertySize: { type: Number, required: false },
   propertyDetails: {
-    bedrooms: { type: Number, required: true },
-    washrooms: { type: Number, required: true },
-    balconies: { type: Number, required: true },
-    hasParking: { type: Boolean, required: true },
+    bedrooms: { type: Number, required: false },
+    washrooms: { type: Number, required: false },
+    balconies: { type: Number, required: false },
+    hasParking: { type: Boolean, required: false },
     parkingDetails: {
-      twoWheeler: { type: Number, required: true },
-      fourWheeler: { type: Number, required: true },
+      twoWheeler: { type: Number, required: false },
+      fourWheeler: { type: Number, required: false },
     },
     extraRooms: {
-      servant: { type: Boolean, required: true },
-      puja: { type: Boolean, required: true },
-      store: { type: Boolean, required: true },
-      others: { type: Boolean, required: true },
+      servant: { type: Boolean, required: false },
+      puja: { type: Boolean, required: false },
+      store: { type: Boolean, required: false },
+      others: { type: Boolean, required: false },
     },
-    utilityArea: { type: String, required: true },
-    furnishingStatus: { type: String, required: true },
-    totalFloors: { type: Number, required: true },
-    propertyOnFloor: { type: Number, required: true },
-    facing: { type: String, required: true },
-    propertyAge: { type: String, required: true },
-    superBuiltUpAreaSqft: { type: Number, required: true },
-    superBuiltUpAreaSqmt: { type: Number, required: true },
-    builtUpAreaSqft: { type: Number, required: true },
-    builtUpAreaSqmt: { type: Number, required: true },
-    carpetAreaSqft: { type: Number, required: true },
-    carpetAreaSqmt: { type: Number, required: true },
-    electricityAvailability: { type: String, required: true },
+    utilityArea: { type: String, required: false },
+    furnishingStatus: { type: String, required: false },
+    totalFloors: { type: Number, required: false },
+    propertyOnFloor: { type: Number, required: false },
+    facing: { type: String, required: false },
+    propertyAge: { type: String, required: false },
+    superBuiltUpAreaSqft: { type: Number, required: false },
+    superBuiltUpAreaSqmt: { type: Number, required: false },
+    builtUpAreaSqft: { type: Number, required: false },
+    builtUpAreaSqmt: { type: Number, required: false },
+    carpetAreaSqft: { type: Number, required: false },
+    carpetAreaSqmt: { type: Number, required: false },
+    electricityAvailability: { type: String, required: false },
     waterAvailability: {
-      borewell: { type: Boolean, required: true },
-      governmentSupply: { type: Boolean, required: true },
-      tankerSupply: { type: Boolean, required: true },
+      borewell: { type: Boolean, required: false },
+      governmentSupply: { type: Boolean, required: false },
+      tankerSupply: { type: Boolean, required: false },
     },
   },
   restrictions: {
@@ -206,78 +215,87 @@ const ResidentailsaleIndependentHouseSchema = new Schema<IResidentialSaleIndepen
     tenantType: { type: String },
   },
   flatAmenities: {
-    lights: { type: Number, required: true },
-    ceilingFan: { type: Number, required: true },
-    geysers: { type: Number, required: true },
-    chimney: { type: Boolean, required: true },
-    callingBell: { type: Boolean, required: true },
-    wardrobes: { type: Number, required: true },
-    lofts: { type: Number, required: true },
-    kitchenCabinets: { type: Number, required: true },
-    clothHanger: { type: Number, required: true },
-    pipedGasConnection: { type: Boolean, required: true },
-    gasStoveWithCylinder: { type: Boolean, required: true },
-    ironingStand: { type: Boolean, required: true },
-    bathtub: { type: Boolean, required: true },
-    shower: { type: Boolean, required: true },
-    sofa: { type: Boolean, required: true },
-    coffeeTable: { type: Boolean, required: true },
-    tvUnit: { type: Boolean, required: true },
-    diningTableWithChairs: { type: Number, required: true },
-    cotWithMattress: { type: Number, required: true },
-    sideTable: { type: Number, required: true },
-    studyTableWithChair: { type: Number, required: true },
-    television: { type: Boolean, required: true },
-    refrigerator: { type: Boolean, required: true },
-    washingMachine: { type: Boolean, required: true },
-    dishwasher: { type: Boolean, required: true },
-    waterPurifier: { type: Boolean, required: true },
-    microwaveOven: { type: Boolean, required: true },
-    inductionCooktop: { type: Boolean, required: true },
-    gasStove: { type: Boolean, required: true },
-    airConditioner: { type: Number, required: true },
-    desertCooler: { type: Number, required: true },
-    ironBox: { type: Boolean, required: true },
-    exhaustFan: { type: Number, required: true },
+    lights: { type: Number, required: false },
+    ceilingFan: { type: Number, required: false },
+    geysers: { type: Number, required: false },
+    chimney: { type: Boolean, required: false },
+    callingBell: { type: Boolean, required: false },
+    wardrobes: { type: Number, required: false },
+    lofts: { type: Number, required: false },
+    kitchenCabinets: { type: Number, required: false },
+    clothHanger: { type: Number, required: false },
+    pipedGasConnection: { type: Boolean, required: false },
+    gasStoveWithCylinder: { type: Boolean, required: false },
+    ironingStand: { type: Boolean, required: false },
+    bathtub: { type: Boolean, required: false },
+    shower: { type: Boolean, required: false },
+    sofa: { type: Boolean, required: false },
+    coffeeTable: { type: Boolean, required: false },
+    tvUnit: { type: Boolean, required: false },
+    diningTableWithChairs: { type: Number, required: false },
+    cotWithMattress: { type: Number, required: false },
+    sideTable: { type: Number, required: false },
+    studyTableWithChair: { type: Number, required: false },
+    television: { type: Boolean, required: false },
+    refrigerator: { type: Boolean, required: false },
+    washingMachine: { type: Boolean, required: false },
+    dishwasher: { type: Boolean, required: false },
+    waterPurifier: { type: Boolean, required: false },
+    microwaveOven: { type: Boolean, required: false },
+    inductionCooktop: { type: Boolean, required: false },
+    gasStove: { type: Boolean, required: false },
+    airConditioner: { type: Number, required: false },
+    desertCooler: { type: Number, required: false },
+    ironBox: { type: Boolean, required: false },
+    exhaustFan: { type: Number, required: false },
   },
   societyAmenities: {
-    powerutility: { type: [String], required: true },
-    parkingtranspotation: { type: [String], required: true },
-    recreationalsportsfacilities: { type: [String], required: true },
-    childrenfamilyamenities: { type: [String], required: true },
-    healthwellnessfacilities: { type: [String], required: true },
-    shoppingconviencestores: { type: [String], required: true },
-    ecofriendlysustainable: { type: [String], required: true },
-    communityculturalspaces: { type: [String], required: true },
-    smarthometechnology: { type: [String], required: true },
-    otheritems: { type: [String], required: true },
+    powerutility: { type: [String], required: false },
+    parkingtranspotation: { type: [String], required: false },
+    recreationalsportsfacilities: { type: [String], required: false },
+    childrenfamilyamenities: { type: [String], required: false },
+    healthwellnessfacilities: { type: [String], required: false },
+    shoppingconviencestores: { type: [String], required: false },
+    ecofriendlysustainable: { type: [String], required: false },
+    communityculturalspaces: { type: [String], required: false },
+    smarthometechnology: { type: [String], required: false },
+    otheritems: { type: [String], required: false },
   },
   availability: {
-    type: { type: String, required: true },
+    type: { type: String, required: false },
     date: { type: String },
   },
   media: {
     photos: {
       exterior: [{ type: String, required: false }],
-        interior: [{ type: String, required: false }],
-        floorPlan: [{ type: String, required: false }],
-        washrooms: [{ type: String, required: false }],
-        lifts: [{ type: String, required: false }],
-        emergencyExits: [{ type: String, required: false }],
-        bedrooms: [{ type: String, required: false }],
-        halls: [{ type: String, required: false }],
-        storerooms: [{ type: String, required: false }],
-        kitchen: [{ type: String, required: false }]
+      interior: [{ type: String, required: false }],
+      floorPlan: [{ type: String, required: false }],
+      washrooms: [{ type: String, required: false }],
+      lifts: [{ type: String, required: false }],
+      emergencyExits: [{ type: String, required: false }],
+      bedrooms: [{ type: String, required: false }],
+      halls: [{ type: String, required: false }],
+      storerooms: [{ type: String, required: false }],
+      kitchen: [{ type: String, required: false }]
     },
-    videoTour: { type: String },
+    mediaItems: [{
+      id: String,
+      type: String,
+      url: String,
+      title: String,
+      tags: [String],
+      roomType: String,
+      category: String
+    }],
+    videoTour: { type: String, required: false, default: '' },
     documents: [{ type: String, required: false }]
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     createdAt: { type: Date, default: Date.now },
   }
 }, {
-  timestamps: true
+  timestamps: false
 }
 );
 
