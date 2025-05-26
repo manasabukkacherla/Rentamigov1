@@ -78,7 +78,9 @@ React.useEffect(() => {
         // Fetch Commercial Sale Warehouses Data
         commercialSaleWarehousesRes,  // <-- Added Commercial Sale Warehouses API request
         // Fetch Commercial Sale Shops Data <-- Added Commercial Sale Shops request
-        commercialSaleShopsRes  // <-- Added Commercial Sale Shops API request
+        commercialSaleShopsRes,  // <-- Added Commercial Sale Shops API request
+        // Fetch Residential PG data
+        pgMainRes  // <-- Added Residential PG Main request
       ] = await Promise.all([
         // Commercial Lease Properties
         fetch('/api/commercial/lease/agriculture'),
@@ -114,13 +116,14 @@ React.useEffect(() => {
         fetch('/api/commercial/sell/plots'),
         fetch('/api/commercial/sell/showrooms'),  // <-- Added request for Commercial Sale Showrooms
         fetch('/api/commercial/sell/warehouses'),  // <-- Added request for Commercial Sale Warehouses
-        fetch('/api/commercial/sell/shops') , // <-- Added request for Commercial Sale Shops
+        fetch('/api/commercial/sell/shops'), // <-- Added request for Commercial Sale Shops
 
         // Residential Sale 
         fetch('/api/residential/sale/apartments'),
         fetch('/api/residential/sale/builder-floor'),
         fetch('/api/residential/sale/plots'),
         fetch('/api/residential/sale/independent-house'),
+        
         // Residential Rent 
         fetch('/api/residential/rent/apartment'),
         fetch('/api/residential/rent/builder-floor'),
@@ -130,6 +133,9 @@ React.useEffect(() => {
         fetch('/api/residential/lease/independent-house'),
         fetch('/api/residential/lease/appartment'),
         fetch('/api/residential/lease/builder-floor'),
+
+        // Residential PG data
+        fetch('/api/residential/pgmain')  // <-- Fetch Residential PG data
       ]);
 
       const [
@@ -148,48 +154,23 @@ React.useEffect(() => {
         residentialSaleIndependentHousesData,
         commercialSaleShowroomsData,  
         commercialSaleWarehousesData,  // <-- Added Commercial Sale Warehouses Data
-        commercialSaleShopsData  // <-- Added Commercial Sale Shops Data
+        commercialSaleShopsData,  // <-- Added Commercial Sale Shops Data
+        pgMainData  // <-- Residential PG Main Data
       ] = await Promise.all([
-        agriRes.json(),
-        othersRes.json(),
-        coveredRes.json(),
-        plotRes.json(),
-        retailRes.json(),
-        shedRes.json(),
-        shopRes.json(),
-        showroomRes.json(),
-        rentAgriRes.json(),
-        rentCoveredRes.json(),
-        warehouseRes.json(),
-        officeSpaceRes.json(),
-        rentOthersRes.json(),
-        rentOfficeSpaceRes.json(),
-        rentShopRes.json(),
-        rentRetailStoreRes.json(),
-        rentShowroomRes.json(),
-        rentShedRes.json(),
-        rentPlotRes.json(),
-        sellShopRes.json(),
-        sellAgricultureRes.json(),
-        sellCoveredSpaceRes.json(),
-        sellOfficeSpaceRes.json(),
-        sellOthersRes.json(),
-        sellRetailStoreRes.json(),
-        sellShedRes.json(),
-        sellPlotRes.json(),
-        residentialSaleApartmentsRes.json(),
-        residentialSaleBuilderFloorsRes.json(),
-        residentialRentApartmentsRes.json(),
-        residentialRentBuilderFloorsRes.json(),
-        residentialRentIndependentHousesRes.json(),
-        residentialLeaseIndependentHousesRes.json(),
-        residentialLeaseApartmentsRes.json(),
-        residentialLeaseBuilderFloorsRes.json(),
-        residentialSalePlotsRes.json(),
-        residentialSaleIndependentHousesRes.json(),
+        agriRes.json(), othersRes.json(), coveredRes.json(), plotRes.json(), retailRes.json(),
+        shedRes.json(), shopRes.json(), showroomRes.json(), rentAgriRes.json(), rentCoveredRes.json(),
+        warehouseRes.json(), officeSpaceRes.json(), rentOthersRes.json(), rentOfficeSpaceRes.json(),
+        rentShopRes.json(), rentRetailStoreRes.json(), rentShowroomRes.json(), rentShedRes.json(),
+        rentPlotRes.json(), sellShopRes.json(), sellAgricultureRes.json(), sellCoveredSpaceRes.json(),
+        sellOfficeSpaceRes.json(), sellOthersRes.json(), sellRetailStoreRes.json(), sellShedRes.json(),
+        sellPlotRes.json(), residentialSaleApartmentsRes.json(), residentialSaleBuilderFloorsRes.json(),
+        residentialRentApartmentsRes.json(), residentialRentBuilderFloorsRes.json(), residentialRentIndependentHousesRes.json(),
+        residentialLeaseIndependentHousesRes.json(), residentialLeaseApartmentsRes.json(), residentialLeaseBuilderFloorsRes.json(),
+        residentialSalePlotsRes.json(), residentialSaleIndependentHousesRes.json(),
         commercialSaleShowroomsRes.json(),  
         commercialSaleWarehousesRes.json(),  // <-- Commercial Sale Warehouses Data
-        commercialSaleShopsRes.json()  // <-- Commercial Sale Shops Data
+        commercialSaleShopsRes.json(),  // <-- Commercial Sale Shops Data
+        pgMainRes.json()  // <-- Residential PG Main Data
       ]);
 
       const allProperties = [
@@ -208,8 +189,9 @@ React.useEffect(() => {
         ...residentialSalePlotsData.data, 
         ...residentialSaleIndependentHousesData.data,
         ...commercialSaleShowroomsData.data,  
-        ...commercialSaleWarehousesData.data,  // <-- Commercial Sale Warehouses Data
-        ...commercialSaleShopsData.data  // <-- Commercial Sale Shops Data
+        ...commercialSaleWarehousesData.data,  // Commercial Sale Warehouses Data
+        ...commercialSaleShopsData.data,  // Commercial Sale Shops Data
+        ...pgMainData.data  // Residential PG Main Data
       ];
 
       // Update the state with all the fetched properties
@@ -227,6 +209,7 @@ React.useEffect(() => {
     hasFetched = true;
   };
 }, []);
+
 
 
 
@@ -266,7 +249,7 @@ React.useEffect(() => {
   });
 const filteredProperties: Property[] = useMemo(() => {
   return fetchedProperties.map((item: any): Property => {
-    // Define property type flags
+    // Define property type flags for regular properties
     const isOther = item.commercialType?.includes("Other");
     const isCovered = item.coveredSpaceDetails !== undefined;
     const isPlot = item.plotDetails !== undefined || item.totalPlotArea !== undefined;
@@ -308,10 +291,15 @@ const filteredProperties: Property[] = useMemo(() => {
     // Classify Rent Others
     const isRentOthers = item.commercialType?.includes("Other") && !item.coveredSpaceDetails && !item.plotDetails;
 
+    // Check if it's PG data from /api/residential/pgmain
+    const isPG = item.pgDetails !== undefined; // Check if the PG details exist
+
     return {
       id: item._id || item.propertyId || '',
-      title: item.basicInformation?.title || item.title || 'Unnamed Property',
-      type: isCommercialSaleWarehouse
+      title: item.basicInformation?.title || item.title || item.pgDetails?.name || 'Unnamed Property',
+      type: isPG
+        ? 'PG' as PropertyType  // PG type classification
+        : isCommercialSaleWarehouse
         ? 'Commercial Sale Warehouse' as PropertyType  // Added classification for Commercial Sale Warehouse
         : isCommercialSaleShowroom
         ? 'Commercial Sale Showroom' as PropertyType  // Added classification for Commercial Sale Showroom
@@ -386,7 +374,7 @@ const filteredProperties: Property[] = useMemo(() => {
         : 'Agricultural' as PropertyType,
       listingType: 'Owner' as ListingType,
       price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
-      location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}`,
+      location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}` || item.pgDetails?.address || '',
       area: item.propertyDetails?.area?.totalArea || 0,
       image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
       postedDate: item.metadata?.createdAt?.slice(0, 10) || '',
@@ -398,6 +386,7 @@ const filteredProperties: Property[] = useMemo(() => {
     };
   });
 }, [fetchedProperties]);
+
 
 
 
@@ -523,6 +512,7 @@ const filteredProperties: Property[] = useMemo(() => {
                 </button>
               </div>
             </div>
+            
             <div className="flex-1">
               <form onSubmit={handleSearch} className="flex items-center gap-2">
                 <div className="relative flex-1">
