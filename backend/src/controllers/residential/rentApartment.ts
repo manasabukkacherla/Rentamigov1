@@ -198,7 +198,7 @@ const ensureMediaItemsExists = async (apartmentId: string): Promise<void> => {
 // Update the getRentApartmentById function to ensure mediaItems exists
 export const getRentApartmentById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.id);
+    const apartment = await ResidentialRentApartment.findById(req.params.propertyId);
     
     if (!apartment) {
       return res.status(404).json({
@@ -208,10 +208,10 @@ export const getRentApartmentById = async (req: Request, res: Response) => {
     }
 
     // Ensure mediaItems exists
-    await ensureMediaItemsExists(req.params.id);
+    await ensureMediaItemsExists(req.params.propertyId);
     
     // Re-fetch to get updated data
-    const updatedApartment = await ResidentialRentApartment.findById(req.params.id);
+    const updatedApartment = await ResidentialRentApartment.findById(req.params.propertyId);
 
     res.status(200).json({
       success: true,
