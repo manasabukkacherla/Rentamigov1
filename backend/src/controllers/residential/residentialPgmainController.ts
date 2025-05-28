@@ -83,6 +83,27 @@ export const createPg = async (req: Request, res: Response) => {
   }
 };
 
+export const updatePgMain = async (req: Request, res: Response) => {
+  try {
+    const { propertyId } = req.params;
+
+   const updatedPg = await PgMain.findOneAndUpdate(
+  { propertyId: req.params.propertyId }, // ✅ match by custom field
+  req.body,
+  { new: true }
+);
+
+
+    if (!updatedPg) {
+      return res.status(404).json({ success: false, message: "PG not found" });
+    }
+
+    res.status(200).json({ success: true, data: updatedPg });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to update PG", error });
+  }
+};
+
 /**
  * Get all PGs
  */
@@ -118,45 +139,35 @@ export const getPgByPropertyId = async (req: Request, res: Response) => {
 };
 
 /**
+ * Update PG by propertyId (used in PATCH route)
+ */
+
+
+/**
  * Update PG by ID
  */
-export const updatePgById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  // Validate ObjectId format
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ success: false, error: 'Invalid ID format' });
-  }
-
-  try {
-    const pg = await PgMain.findByIdAndUpdate(id, req.body, { new: true });
-    if (!pg) return res.status(404).json({ success: false, error: 'PG not found' });
-
-    return res.json({ success: true, data: pg });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return res.status(400).json({ success: false, error: errorMsg });
-  }
-};
 
 /**
  * Delete PG by ID
  */
-export const deletePgById = async (req: Request, res: Response) => {
-  const { id } = req.params;
-
-  // Validate ObjectId format
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ success: false, error: 'Invalid ID format' });
-  }
-
+export const deletePgMain = async (req: Request, res: Response) => {
   try {
-    const pg = await PgMain.findByIdAndDelete(id);
-    if (!pg) return res.status(404).json({ success: false, error: 'PG not found' });
+    const { propertyId } = req.params;
 
-    return res.json({ success: true, data: pg });
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : String(err);
-    return res.status(500).json({ success: false, error: errorMsg });
+    const deleted = await PgMain.findOneAndDelete({ propertyId });
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: "PG not found" });
+    }
+
+    return res.status(200).json({ success: true, message: "PG deleted successfully" });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Failed to delete PG';
+    return res.status(500).json({ success: false, error: message });
   }
 };
+
+
+
+
+
