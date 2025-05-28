@@ -915,12 +915,25 @@ const LeaseApartment: React.FC = () => {
         }
       });
 
-      const response = await axiosInstance.post("http://localhost:8000/api/residential/lease/apartment", transformedData).catch((error) => {
+      // Log request details for debugging
+      console.log('Request URL:', '/api/residential/lease/apartment');
+      console.log('Request headers:', axiosInstance.defaults.headers);
+
+      const response = await axiosInstance.post("/api/residential/lease/apartment", transformedData).catch((error) => {
+        console.error('Full error object:', error);
+        console.error('Error response data:', error.response?.data);
+        console.error('Error status:', error.response?.status);
+
         if (error.code === 'ECONNABORTED') {
           throw new Error('Request timed out. The server is taking too long to respond. Please try again.');
         }
         if (!error.response) {
           throw new Error('Network error. Please check if the backend server is running at http://localhost:8000');
+        }
+        if (error.response.status === 400) {
+          const validationErrors = error.response.data.details;
+          const errorMessage = Object.values(validationErrors).join(', ');
+          throw new Error(`Validation failed: ${errorMessage}`);
         }
         throw error;
       });
@@ -928,7 +941,7 @@ const LeaseApartment: React.FC = () => {
       if (response.data.success) {
         setPropertyId(response.data.propertyId);
         toast.dismiss('formSubmit');
-        toast.success("Property listing created successfully!");
+        toast.success('Property listing created successfully!');
         setFormData(initialFormData);
         navigate('/dashboard');
       } else {

@@ -80,7 +80,7 @@ React.useEffect(() => {
         // Fetch Commercial Sale Shops Data <-- Added Commercial Sale Shops request
         commercialSaleShopsRes,  // <-- Added Commercial Sale Shops API request
         // Fetch Residential PG data
-        pgMainRes  // <-- Added Residential PG Main request
+        // pgMainRes  // <-- Added Residential PG Main request
       ] = await Promise.all([
         // Commercial Lease Properties
         fetch('/api/commercial/lease/agriculture'),
@@ -131,7 +131,7 @@ React.useEffect(() => {
 
         // Residential Lease 
         fetch('/api/residential/lease/independent-house'),
-        fetch('/api/residential/lease/appartment'),
+        // fetch('/api/residential/lease/appartment'),
         fetch('/api/residential/lease/builder-floor'),
 
         // Residential PG data
@@ -155,7 +155,7 @@ React.useEffect(() => {
         commercialSaleShowroomsData,  
         commercialSaleWarehousesData,  // <-- Added Commercial Sale Warehouses Data
         commercialSaleShopsData,  // <-- Added Commercial Sale Shops Data
-        pgMainData  // <-- Residential PG Main Data
+        // pgMainData  // <-- Residential PG Main Data
       ] = await Promise.all([
         agriRes.json(), othersRes.json(), coveredRes.json(), plotRes.json(), retailRes.json(),
         shedRes.json(), shopRes.json(), showroomRes.json(), rentAgriRes.json(), rentCoveredRes.json(),
@@ -170,7 +170,7 @@ React.useEffect(() => {
         commercialSaleShowroomsRes.json(),  
         commercialSaleWarehousesRes.json(),  // <-- Commercial Sale Warehouses Data
         commercialSaleShopsRes.json(),  // <-- Commercial Sale Shops Data
-        pgMainRes.json()  // <-- Residential PG Main Data
+        // pgMainRes.json()  // <-- Residential PG Main Data
       ]);
 
       const allProperties = [
@@ -191,7 +191,7 @@ React.useEffect(() => {
         ...commercialSaleShowroomsData.data,  
         ...commercialSaleWarehousesData.data,  // Commercial Sale Warehouses Data
         ...commercialSaleShopsData.data,  // Commercial Sale Shops Data
-        ...pgMainData.data  // Residential PG Main Data
+        // ...pgMainData.data  // Residential PG Main Data
       ];
 
       // Update the state with all the fetched properties
