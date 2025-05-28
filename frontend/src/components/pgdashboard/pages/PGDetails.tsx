@@ -343,33 +343,32 @@ const PGDetails: React.FC = () => {
     <div className="p-6 space-y-8">
 
   {/* Room Videos */}
-  <div>
-    <h3 className="text-lg font-medium text-gray-900 mb-4">Room Videos</h3>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {pg.media.mediaItems
-        .filter(item =>
-          item.type === "video" &&
-          (
-            (selectedSharing === 0 && item.roomType === 'single') ||
-            (selectedSharing === 1 && item.roomType === 'double') ||
-            (selectedSharing === 2 && item.roomType === 'triple') ||
-            (selectedSharing === 3 && item.roomType === 'four') ||
-            (selectedSharing === 4 && item.roomType === 'five') ||
-            (selectedSharing === 5 && item.roomType === 'custom')
-          )
-        )
-        .map((video, index) => (
-          <video
-            key={index}
-            controls
-            className="w-full h-64 object-cover rounded-lg"
-          >
-            <source src={video.url} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        ))}
-    </div>
-  </div>
+ <h3 className="text-lg font-medium text-gray-900 mb-4">Room Videos</h3>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {pg.media.mediaItems
+    .filter(item =>
+      item.type === "video" &&
+      (
+        (selectedSharing === 0 && item.roomType === 'single') ||
+        (selectedSharing === 1 && item.roomType === 'double') ||
+        (selectedSharing === 2 && item.roomType === 'triple') ||
+        (selectedSharing === 3 && item.roomType === 'four') ||
+        (selectedSharing === 4 && item.roomType === 'five') ||
+        (selectedSharing === 5 && item.roomType === 'custom')
+      )
+    )
+    .map((video, index) => (
+      <video
+        key={`${selectedSharing}-${index}`}
+        controls
+        className="w-full h-64 object-cover rounded-lg"
+      >
+        <source src={video.url} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    ))}
+</div>
+
 
   {/* Room Images & Amenities */}
   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">

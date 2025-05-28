@@ -3,18 +3,17 @@ import {
   createPg,
   getAllPgs,
   getPgByPropertyId,
-  updatePgById,
-  deletePgById
+  updatePgMain,
+ deletePgMain
 } from '../../controllers/residential/residentialPgmainController';
 import { pgMediaUpload, processAndUploadPgMedia } from '../../middleware/pgMediaUploader';
 import PgMain from '../../models/residential/Pgmain';
 import mongoose from 'mongoose';
-
 const router = express.Router();
 
 // Create new PG listing
 router.post('/', createPg);
-
+router.patch('/:propertyId', updatePgMain);
 // Get all PG listings
 router.get('/', getAllPgs);
 
@@ -22,10 +21,12 @@ router.get('/', getAllPgs);
 router.get('/:propertyId', getPgByPropertyId);
 
 // Update PG by ID
-router.put('/:id', updatePgById);
 
 // Delete PG by ID
-router.delete('/:id', deletePgById);
+// Fix this to match the controller
+router.delete('/:propertyId', deletePgMain);
+
+
 
 /**
  * Route to upload media files to S3 and save to MongoDB
