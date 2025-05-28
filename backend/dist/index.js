@@ -59,8 +59,8 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT) : 8000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log("Environment variables loaded:", {
-        VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "****" : undefined,
-        ACCOUNT_SID: process.env.ACCOUNT_SID ? "****" : undefined,
-        AUTH_TOKEN: process.env.AUTH_TOKEN ? "****" : undefined,
+      VERIFY_SERVICE_SID: process.env.VERIFY_SERVICE_SID ? "****" : undefined,
+      ACCOUNT_SID: process.env.ACCOUNT_SID ? "****" : undefined,
+      AUTH_TOKEN: process.env.AUTH_TOKEN ? "****" : undefined,
     });
-});
+  });
