@@ -76,6 +76,7 @@ export interface Filters {
 // Unified Property Card Interface
 export interface Property {
   id: string;
+  propertyId: string;
   title: string;
   type: PropertyType;
   listingType: ListingType;
