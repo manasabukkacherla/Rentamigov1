@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
 
 // Generate unique propertyId
 const generatePropertyId = async (): Promise<string> => {
-  const prefix = "RA-COMSH";
+  const prefix = "RA-COMLECS";
   const latest = await CommercialLeaseCoveredSpace.findOne({
     propertyId: { $regex: `^${prefix}\\d+$` }
   }).sort({ propertyId: -1 });
@@ -132,7 +132,8 @@ export const getAllCommercialLeaseCoveredSpaces = async (req: Request, res: Resp
 // GET BY ID
 export const getCommercialLeaseCoveredSpaceById = async (req: Request, res: Response) => {
   try {
-    const coveredSpace = await CommercialLeaseCoveredSpace.findById(req.params.id)
+    const propertyId = req.params.propertyId;
+    const coveredSpace = await CommercialLeaseCoveredSpace.findOne({propertyId})
       .populate('metadata.createdBy', 'name email');
 
     if (!coveredSpace) return res.status(404).json({ success: false, error: 'Not found' });

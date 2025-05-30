@@ -10,7 +10,7 @@ import {
 const router = express.Router();
 
 router.get('/', getAllCommercialLeaseCoveredSpaces);
-router.get('/:id', getCommercialLeaseCoveredSpaceById);
+router.get('/:propertyId', getCommercialLeaseCoveredSpaceById);
 router.post('/', createCommercialLeaseCoveredSpace);
 router.put('/:id', updateCommercialLeaseCoveredSpace);
 router.delete('/:id', deleteCommercialLeaseCoveredSpace);

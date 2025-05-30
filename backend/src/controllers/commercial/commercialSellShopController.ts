@@ -102,7 +102,7 @@ export const getAllCommercialSellShop = async (req: Request, res: Response) => {
 
 export const getCommercialSellShopById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialSellShop.findOne({ propertyId });
     
     if (!property) {

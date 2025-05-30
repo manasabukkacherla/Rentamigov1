@@ -137,7 +137,7 @@ export const getAllCommercialSellAgriculture = async (req: Request, res: Respons
 
 export const getCommercialSellAgricultureById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialSellAgriculture.findOne({ propertyId });
     
     if (!property) {

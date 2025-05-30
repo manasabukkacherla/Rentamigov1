@@ -120,13 +120,15 @@ export const getSheds = async (req: Request, res: Response) => {
 
 export const getShedById = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialRentShed.findById(req.params.id);
+        const propertyId = req.params.propertyId;
+        const shed = await CommercialRentShed.findOne({ propertyId });
         if (!shed) {
             return res.status(404).json({
                 success: false,
-                error: 'Shed not found'
+                error: 'Commercial RentShed listing not found'
             });
         }
+        
         res.status(200).json({
             success: true,
             data: shed

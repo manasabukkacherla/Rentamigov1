@@ -216,14 +216,9 @@ export const getAllCommercialSheds = async (req: Request, res: Response) => {
 // Get a single commercial shed by ID
 export const getCommercialShedById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const propertyId = req.params.propertyId;
     
-    // Try to find by MongoDB _id or propertyId
-    const query = id.match(/^[0-9a-fA-F]{24}$/) 
-      ? { _id: id } 
-      : { propertyId: id };
-    
-    const shed = await CommercialShed.findOne(query).lean();
+    const shed = await CommercialShed.findOne({propertyId})
     
     if (!shed) {
       return res.status(404).json({
@@ -234,7 +229,7 @@ export const getCommercialShedById = async (req: Request, res: Response) => {
     
     // Update view count
     await CommercialShed.updateOne(
-      query, 
+      
       { $inc: { 'metaData.views': 1 } }
     );
     

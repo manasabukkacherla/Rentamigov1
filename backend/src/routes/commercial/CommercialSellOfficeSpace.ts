@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/', createSellOfficeSpace);
 router.get('/', getAllSellOfficeSpace);
-router.get('/:id', getSellOfficeSpaceById);
+router.get('/:propertyId', getSellOfficeSpaceById);
 router.put('/:id', updateSellOfficeSpace);
 router.delete('/:id', deleteSellOfficeSpace);
 
