@@ -132,8 +132,7 @@ export const getAllCommercialLeaseCoveredSpaces = async (req: Request, res: Resp
 // GET BY ID
 export const getCommercialLeaseCoveredSpaceById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.propertyId;
-    const coveredSpace = await CommercialLeaseCoveredSpace.findOne({propertyId})
+    const coveredSpace = await CommercialLeaseCoveredSpace.findById(req.params.propertyId)
       .populate('metadata.createdBy', 'name email');
 
     if (!coveredSpace) return res.status(404).json({ success: false, error: 'Not found' });

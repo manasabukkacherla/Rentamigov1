@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-COMSH";
+        const prefix = "RA-COMLESD";
 
         const highestShed = await CommercialLeaseShed.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
@@ -42,7 +42,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMSH${timestamp}`;
+        return `RA-COMLESH${timestamp}`;
     }
 };
 

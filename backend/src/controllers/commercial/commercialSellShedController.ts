@@ -5,7 +5,7 @@ import { ICommercialSellShed } from '../../models/commercial/CommercialSellShed'
 // Generate property ID with format RA-COMSHED-XXXX
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMSHED";
+    const prefix = "RA-COMSESD";
     
     // Find the shed with the highest property ID number
     const highestShed = await CommercialShed.findOne({
@@ -43,7 +43,7 @@ const generatePropertyId = async (): Promise<string> => {
     console.error('Error generating property ID:', error);
     // Fallback to timestamp-based ID if there's an error
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSHED-${timestamp}`;
+    return `RA-COMSESD-${timestamp}`;
   }
 };
 

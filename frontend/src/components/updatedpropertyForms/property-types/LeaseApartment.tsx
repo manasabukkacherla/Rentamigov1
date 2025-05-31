@@ -379,28 +379,28 @@ const LeaseApartment: React.FC = () => {
       otherCharges: {
         water: {
           amount: 0,
-          type: ""
+          type: "inclusive"
         },
         electricity: {
           amount: 0,
-          type: ""
+          type: "inclusive"
         },
         gas: {
           amount: 0,
-          type: ""
+          type: "inclusive"
         },
         others: {
           amount: 0,
-          type: ""
+          type: "inclusive"
         }
       },
       brokerage: {
-        required: "",
+        required: "no",
         amount: 0
       }
     },
     availability: {
-      type: "",
+      type: "immediate",
       date: ""
     },
     media: {
@@ -458,12 +458,12 @@ const LeaseApartment: React.FC = () => {
       icon: <Home className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-            <div className="space-y-8">
+          <div className="space-y-8">
             <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
-          />
-              </div>
+              propertyName={formData.basicInformation.propertyName}
+              onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+            />
+          </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -472,20 +472,20 @@ const LeaseApartment: React.FC = () => {
                 <h3 className="text-2xl font-semibold text-black">Location Details</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertyAddress
-                // latitude={formData.basicInformation.address.location.latitude}
-                // longitude={formData.basicInformation.address.location.longitude}
-                address={{
-                  ...formData.basicInformation.address,
-                  location: {
-                    latitude: formData.basicInformation.address.location.latitude,
-                    longitude: formData.basicInformation.address.location.longitude
-                  }
-                }}
-                onAddressChange={handleAddressChange}
-              />
-                </div>
-                </div>
+                <PropertyAddress
+                  // latitude={formData.basicInformation.address.location.latitude}
+                  // longitude={formData.basicInformation.address.location.longitude}
+                  address={{
+                    ...formData.basicInformation.address,
+                    location: {
+                      latitude: formData.basicInformation.address.location.latitude,
+                      longitude: formData.basicInformation.address.location.longitude
+                    }
+                  }}
+                  onAddressChange={handleAddressChange}
+                />
+              </div>
+            </div>
           </div>
         </div>
       ),
@@ -502,7 +502,7 @@ const LeaseApartment: React.FC = () => {
                 <h3 className="text-2xl font-semibold text-black">Property Size</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertySize
+                <PropertySize
                   propertySize={formData.propertySize}
                   onPropertySizeChange={(size: number) => {
                     setFormData(prev => ({
@@ -522,23 +522,23 @@ const LeaseApartment: React.FC = () => {
                 <h3 className="text-2xl font-semibold text-black">Property Features</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertyFeatures
-                onFeaturesChange={(features: Record<string, any>) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    propertyDetails: {
-                      ...prev.propertyDetails,
-                      ...features
-                    }
-                  }))
-                }}
-              />
+                <PropertyFeatures
+                  onFeaturesChange={(features: Record<string, any>) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      propertyDetails: {
+                        ...prev.propertyDetails,
+                        ...features
+                      }
+                    }))
+                  }}
+                />
               </div>
             </div>
           </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <Restrictions
+            <Restrictions
               res={formData.restrictions}
               onRestrictionsChange={(restrictions: {
                 foodPreference: string;
@@ -558,26 +558,26 @@ const LeaseApartment: React.FC = () => {
                 <h3 className="text-2xl font-semibold text-black">Amenities</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <FlatAmenities
-                    amenities={formData.flatAmenities}
-                    onAmenitiesChange={(amenities) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        flatAmenities: {
-                          ...prev.flatAmenities,
-                          ...amenities
-                        }
-                      }))
-                    }
-                  />
-
-                  <SocietyAmenities
-                    amenities={formData.societyAmenities}
-                    onChange={(updatedAmenities) => setFormData((prev) => ({
+                <FlatAmenities
+                  amenities={formData.flatAmenities}
+                  onAmenitiesChange={(amenities) =>
+                    setFormData((prev) => ({
                       ...prev,
-                      societyAmenities: updatedAmenities
-                    }))}
-                  />
+                      flatAmenities: {
+                        ...prev.flatAmenities,
+                        ...amenities
+                      }
+                    }))
+                  }
+                />
+
+                <SocietyAmenities
+                  amenities={formData.societyAmenities}
+                  onChange={(updatedAmenities) => setFormData((prev) => ({
+                    ...prev,
+                    societyAmenities: updatedAmenities
+                  }))}
+                />
               </div>
             </div>
           </div>
@@ -589,8 +589,8 @@ const LeaseApartment: React.FC = () => {
       icon: <IndianRupee className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          
-              
+
+
           <LeaseAmount
             onLeaseAmountChange={(amount) => setFormData(prev => ({
               ...prev,
@@ -672,7 +672,7 @@ const LeaseApartment: React.FC = () => {
               }
             }))}
           />
-              </div>
+        </div>
       ),
     },
     {
@@ -681,9 +681,9 @@ const LeaseApartment: React.FC = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-8">
-            
+
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-            <AvailabilityDate
+              <AvailabilityDate
                 availability={{
                   type: formData.availability.type === "immediate" ? "immediate" : "specific",
                   date: formData.availability.date
@@ -773,192 +773,84 @@ const LeaseApartment: React.FC = () => {
       }
 
       const author = JSON.parse(user).id;
-
-      // Process media items to ensure we only send URLs to the backend
       const processMediaForSubmission = (media: Media) => {
-        return {
+        // Debug the incoming media object
+        console.log('Processing media for submission:', {
+          hasVideoTour: !!media.videoTour,
+          videoTourType: media.videoTour ? typeof media.videoTour : 'undefined',
+          videoTourValue: media.videoTour
+        });
+        
+        // Ensure videoTour is properly extracted from media object
+        const videoTourUrl = media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined;
+        
+        // Log the videoTour URL for debugging
+        console.log('VideoTour URL for submission:', videoTourUrl);
+        
+        const processedMedia = {
           photos: {
-            exterior: media.photos.exterior.filter(item => typeof item === 'string') as string[],
-            interior: media.photos.interior.filter(item => typeof item === 'string') as string[],
-            floorPlan: media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
-            washrooms: media.photos.washrooms.filter(item => typeof item === 'string') as string[],
-            lifts: media.photos.lifts.filter(item => typeof item === 'string') as string[],
-            emergencyExits: media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
-            bedrooms: media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
-            halls: media.photos.halls.filter(item => typeof item === 'string') as string[],
-            storerooms: media.photos.storerooms.filter(item => typeof item === 'string') as string[],
-            kitchen: media.photos.kitchen.filter(item => typeof item === 'string') as string[]
+            exterior: media.photos.exterior.filter((item: any) => typeof item === 'string') as string[],
+            interior: media.photos.interior.filter((item: any) => typeof item === 'string') as string[],
+            floorPlan: media.photos.floorPlan.filter((item: any) => typeof item === 'string') as string[],
+            washrooms: media.photos.washrooms.filter((item: any) => typeof item === 'string') as string[],
+            lifts: media.photos.lifts.filter((item: any) => typeof item === 'string') as string[],
+            emergencyExits: media.photos.emergencyExits.filter((item: any) => typeof item === 'string') as string[],
+            bedrooms: media.photos.bedrooms.filter((item: any) => typeof item === 'string') as string[],
+            halls: media.photos.halls.filter((item: any) => typeof item === 'string') as string[],
+            storerooms: media.photos.storerooms.filter((item: any) => typeof item === 'string') as string[],
+            kitchen: media.photos.kitchen.filter((item: any) => typeof item === 'string') as string[]
           },
-          videoTour: typeof media.videoTour === 'string' ? media.videoTour : undefined,
+          videoTour: videoTourUrl,
           documents: media.documents.filter(doc => typeof doc === 'string') as string[]
         };
+        
+        // Final check of processed media
+        console.log('Final processed media for backend:', {
+          hasVideoTour: !!processedMedia.videoTour,
+          videoTourValue: processedMedia.videoTour,
+          photoCategories: Object.keys(processedMedia.photos),
+          documentCount: processedMedia.documents.length
+        });
+        
+        return processedMedia;
       };
 
-      // First check if there are any new files to upload
-      const hasNewFiles = Object.values(formData.media.photos).some(files => 
-        files.some(file => file instanceof File)
-      ) || formData.media.videoTour instanceof File || 
-      formData.media.documents.some(file => file instanceof File);
-
-      let uploadedMedia;
-      if (hasNewFiles) {
-        setUploadingMedia(true);
-        toast.loading('Uploading media files...', { toastId: 'mediaUpload' });
-
-        const mediaItems: { id: string; type: "photo" | "video" | "document"; file: File; category: string; }[] = [];
-
-        // Process photos
-        for (const [category, files] of Object.entries(formData.media.photos)) {
-          for (const file of files) {
-            if (file instanceof File) {
-              mediaItems.push({
-                id: crypto.randomUUID(),
-                type: "photo",
-                file,
-                category
-              });
-            }
-          }
-        }
-
-        // Process video tour
-        if (formData.media.videoTour instanceof File) {
-          mediaItems.push({
-            id: crypto.randomUUID(),
-            type: "video",
-            file: formData.media.videoTour,
-            category: "videoTour"
-          });
-        }
-
-        // Process documents
-        for (const file of formData.media.documents) {
-          if (file instanceof File) {
-            mediaItems.push({
-              id: crypto.randomUUID(),
-              type: "document",
-              file,
-              category: "documents"
-            });
-          }
-        }
-
-        try {
-          const uploadedItems = await uploadResidentialMediaToS3('apartment', mediaItems, propertyId);
-          
-          // Transform uploaded items into the expected format
-          uploadedMedia = {
-            photos: {
-              exterior: formData.media.photos.exterior.filter(item => typeof item === 'string') as string[],
-              interior: formData.media.photos.interior.filter(item => typeof item === 'string') as string[],
-              floorPlan: formData.media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
-              washrooms: formData.media.photos.washrooms.filter(item => typeof item === 'string') as string[],
-              lifts: formData.media.photos.lifts.filter(item => typeof item === 'string') as string[],
-              emergencyExits: formData.media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
-              bedrooms: formData.media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
-              halls: formData.media.photos.halls.filter(item => typeof item === 'string') as string[],
-              storerooms: formData.media.photos.storerooms.filter(item => typeof item === 'string') as string[],
-              kitchen: formData.media.photos.kitchen.filter(item => typeof item === 'string') as string[]
-            },
-            videoTour: undefined,
-            documents: formData.media.documents.filter(doc => typeof doc === 'string') as string[]
-          };
-
-          // Add newly uploaded items to the media object
-          uploadedItems.forEach(item => {
-            if (item.type === 'photo' && item.category) {
-              uploadedMedia!.photos[item.category].push(item.url);
-            } else if (item.type === 'video') {
-              uploadedMedia!.videoTour = item.url;
-            } else if (item.type === 'document') {
-              uploadedMedia!.documents.push(item.url);
-            }
-          });
-
-          toast.dismiss('mediaUpload');
-          toast.success('Media files uploaded successfully');
-        } catch (error: any) {
-          console.error('Error uploading media:', error);
-          toast.dismiss('mediaUpload');
-          toast.error(`Failed to upload media: ${error.message}`);
-          setIsSubmitting(false);
-          setUploadingMedia(false);
-          return;
-        }
-        setUploadingMedia(false);
-      }
-
-      // Show form submission toast
-      toast.loading('Creating property listing...', { toastId: 'formSubmit' });
+      console.log("Final formData before submit", formData);
 
       const transformedData = {
         ...formData,
-        media: uploadedMedia || processMediaForSubmission(formData.media),
+        media: processMediaForSubmission(formData.media),
         metadata: {
           createdBy: author,
-          createdAt: new Date().toISOString()
+          createdAt: new Date()
         }
       };
 
-      // Log the data being sent to the backend
-      console.log('Data being sent to backend:', JSON.stringify(transformedData, null, 2));
-
-      // Create axios instance with custom config
-      const axiosInstance = axios.create({
-        baseURL: 'http://localhost:8000',
-        timeout: 60000, // Increase timeout to 60 seconds
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
+      const response = await axios.post('/api/residential/lease/apartment', transformedData, {
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Content-Type': 'application/json'
         }
-      });
-
-      // Log request details for debugging
-      console.log('Request URL:', '/api/residential/lease/apartment');
-      console.log('Request headers:', axiosInstance.defaults.headers);
-
-      const response = await axiosInstance.post("/api/residential/lease/apartment", transformedData).catch((error) => {
-        console.error('Full error object:', error);
-        console.error('Error response data:', error.response?.data);
-        console.error('Error status:', error.response?.status);
-
-        if (error.code === 'ECONNABORTED') {
-          throw new Error('Request timed out. The server is taking too long to respond. Please try again.');
-        }
-        if (!error.response) {
-          throw new Error('Network error. Please check if the backend server is running at http://localhost:8000');
-        }
-        if (error.response.status === 400) {
-          const validationErrors = error.response.data.details;
-          const errorMessage = Object.values(validationErrors).join(', ');
-          throw new Error(`Validation failed: ${errorMessage}`);
-        }
-        throw error;
       });
 
       if (response.data.success) {
+        // Set the propertyId from the response
         setPropertyId(response.data.propertyId);
-        toast.dismiss('formSubmit');
         toast.success('Property listing created successfully!');
-        setFormData(initialFormData);
-        navigate('/dashboard');
-      } else {
-        throw new Error(response.data.message || 'Failed to create listing');
+        setFormData({...initialFormData} as FormData);
       }
+      
     } catch (error: any) {
       console.error("Error submitting form:", error);
       toast.dismiss('formSubmit');
-      
+
       // Handle different types of errors
       if (error.response) {
         // The request was made and the server responded with a status code
         // that falls out of the range of 2xx
-        const errorMessage = error.response.data?.message || 
-                           error.response.data?.error || 
-                           error.response.data?.details || 
-                           "Server error. Please try again.";
+        const errorMessage = error.response.data?.message ||
+          error.response.data?.error ||
+          error.response.data?.details ||
+          "Server error. Please try again.";
         toast.error(errorMessage);
       } else if (error.request) {
         // The request was made but no response was received

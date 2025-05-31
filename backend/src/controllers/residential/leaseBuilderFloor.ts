@@ -117,7 +117,7 @@ export const getAllLeaseBuilderFloors = async (req: Request, res: Response) => {
 // Get a single lease builder floor listing by ID
 export const getLeaseBuilderFloorById = async (req: Request, res: Response) => {
   try {
-    const property = await LeaseBuilderFloor.findOne({ propertyId: req.params.id });
+    const property = await LeaseBuilderFloor.findOne({ propertyId: req.params.propertyId });
 
     if (!property) {
       return res.status(404).json({

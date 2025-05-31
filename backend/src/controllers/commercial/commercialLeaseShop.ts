@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMLEASH";
+    const prefix = "RA-COMLESH";
     
     const highestShop = await CommercialLeaseShop.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }

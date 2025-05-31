@@ -14,7 +14,7 @@ const router = express.Router();
 // Public routes
 router.get('/search', searchLeaseBuilderFloors);
 router.get('/', getAllLeaseBuilderFloors);
-router.get('/:id', getLeaseBuilderFloorById);
+router.get('/:propertyId', getLeaseBuilderFloorById);
 
 // Protected routes - require authentication
 router.post('/', authenticateUser, createLeaseBuilderFloor);

@@ -86,7 +86,7 @@ function Allproperties() {
           fetch('/api/commercial/lease/agriculture'),
           fetch('/api/commercial/lease/others'),
           fetch('/api/commercial/lease/covered-space'),
-          fetch('/api/commercial/lease/plot'),
+          fetch('/api/commercial/lease/plots'),
           fetch('/api/commercial/lease/retail-store'),
           fetch('/api/commercial/lease/sheds'),
           fetch('/api/commercial/lease/shops'),
@@ -99,9 +99,9 @@ function Allproperties() {
           fetch('/api/commercial/rent/covered-space'),
           fetch('/api/commercial/rent/others'),
           fetch('/api/commercial/rent/warehouses'),
-          fetch('/api/commercial/rent/office-spaces'),
+          fetch('/api/commercial/rent/office-space'),
           fetch('/api/commercial/rent/shops'),
-          fetch('/api/commercial/rent/retail-stores'),
+          fetch('/api/commercial/rent/retail-store'),
           fetch('/api/commercial/rent/showrooms'),
           fetch('/api/commercial/rent/sheds'),
           fetch('/api/commercial/rent/plots'),
@@ -119,7 +119,7 @@ function Allproperties() {
           fetch('/api/commercial/sell/shops'), // <-- Added request for Commercial Sale Shops
 
           // Residential Sale 
-          fetch('/api/residential/sale/apartments'),
+          fetch('/api/residential/sale/apartment'),
           fetch('/api/residential/sale/builder-floor'),
           fetch('/api/residential/sale/plots'),
           fetch('/api/residential/sale/independent-house'),
@@ -131,7 +131,7 @@ function Allproperties() {
 
           // Residential Lease 
           fetch('/api/residential/lease/independent-house'),
-          // fetch('/api/residential/lease/appartment'),
+          fetch('/api/residential/lease/apartment'),
           fetch('/api/residential/lease/builder-floor'),
 
           // Residential PG data

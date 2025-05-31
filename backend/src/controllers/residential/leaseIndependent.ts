@@ -78,8 +78,8 @@ export const getAllLeaseIndependentHouses = async (req: Request, res: Response) 
 
 export const getLeaseIndependentHouseById = async (req: Request, res: Response) => {
   try {
-    const id  = req.params._id;
-    const property = await LeaseIndependentHouse.findOne({ propertyId: id });
+    const propertyId  = req.params.propertyId;
+    const property = await LeaseIndependentHouse.findOne({ propertyId });
 
     if (!property) {
       return res.status(404).json({

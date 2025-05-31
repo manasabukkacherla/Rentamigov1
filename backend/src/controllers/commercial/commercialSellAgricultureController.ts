@@ -53,7 +53,7 @@ const generatePropertyId = async (): Promise<string> => {
     console.error('Error generating property ID:', error);
     // Fallback to timestamp-based ID if there's an error
     const timestamp = Date.now().toString().slice(-8);
-    return `SA-COMSAG${timestamp}`;
+    return `SA-COMSEAG${timestamp}`;
   }
 };
 

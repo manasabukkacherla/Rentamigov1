@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMSELS";
+    const prefix = "RA-COMSERS";
     
     const highestShop = await CommercialSellRetailStore.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
@@ -51,7 +51,7 @@ const generatePropertyId = async (): Promise<string> => {
   } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSELS${timestamp}`;
+    return `RA-COMSERS${timestamp}`;
   }
 };
 

@@ -198,7 +198,7 @@ const ensureMediaItemsExists = async (apartmentId: string): Promise<void> => {
 // Update the getRentApartmentById function to ensure mediaItems exists
 export const getRentApartmentById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.propertyId);
+    const apartment = await ResidentialRentApartment.findOne({propertyId: req.params.propertyId});
     
     if (!apartment) {
       return res.status(404).json({

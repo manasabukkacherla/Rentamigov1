@@ -4,7 +4,7 @@ import CommercialRentShed from '../../models/commercial/CommercialRentShed';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-COMRSD";
+        const prefix = "RA-COMRESD";
 
         const highestShowroom = await CommercialRentShed.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
@@ -42,7 +42,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMRSH${timestamp}`;
+        return `RA-COMRESD${timestamp}`;
     }
 };
 

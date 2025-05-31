@@ -1,52 +1,81 @@
 import { Request, Response } from 'express';
 import LeaseApartment from '../../models/residential/residentialLeaseAppartment';
-import _ from 'lodash';
-import { generatePropertyId } from '../../utils/units';
+import _, { property } from 'lodash';
+
+const generatePropertyId = async (): Promise<string> => {
+  try {
+    const prefix = "RA-RESLEAP";
+
+    const highestShowroom = await LeaseApartment.findOne({
+        propertyId: { $regex: `^${prefix}\\d+$` }
+    }).sort({ propertyId: -1 });
+
+    let nextNumber = 1;
+
+    if (highestShowroom) {
+        const match = highestShowroom.propertyId.match(/(\d+)$/);
+        if (match && match[1]) {
+            nextNumber = parseInt(match[1], 10) + 1;
+        }
+    }
+
+    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+
+    const existingWithExactId = await LeaseApartment.findOne({ propertyId });
+
+    if (existingWithExactId) {
+        console.log(`Property ID ${propertyId} already exists, trying next number`);
+
+        const forcedNextNumber = nextNumber + 1;
+        const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+
+        const forcedExisting = await LeaseApartment.findOne({ propertyId: forcedPropertyId });
+
+        if (forcedExisting) {
+            return generatePropertyId();
+        }
+
+        return forcedPropertyId;
+    }
+
+    return propertyId;
+} catch (error) {
+    console.error('Error generating property ID:', error);
+    const timestamp = Date.now().toString().slice(-8);
+    return `RA-RESLEAP${timestamp}`;
+}
+}; 
 
 // Create Lease Apartment
 export const createLeaseApartment = async (req: Request, res: Response) => {
   try {
     // Log the incoming request body
-    console.log('Incoming request body:', JSON.stringify(req.body, null, 2));
+    console.log('Incoming request body:', req.body);
 
     const formData = req.body;
     const propertyId = await generatePropertyId();
+    console.log('Property ID:', propertyId);
     
     // Create new property with the generated ID and metadata
-    const property = new LeaseApartment({
-      ...formData,
+    const propertyData = JSON.parse(JSON.stringify({
+      ...req.body,
       propertyId,
       metadata: {
-        ...formData.metadata,
-        createdAt: new Date().toISOString()
+        ...req.body.metadata,
+        createdAt: new Date()
       }
-    });
+    }));
+    console.log('Property data before save:', JSON.stringify(propertyData, null, 2));
 
-    // Validate the document before saving
-    const validationError = property.validateSync();
-    if (validationError) {
-      console.error('Validation error:', validationError);
-      return res.status(400).json({
-        success: false,
-        error: 'Validation failed',
-        details: validationError.errors
-      });
-    }
+    const property = new LeaseApartment(propertyData);
 
-    // Set a timeout for the save operation
-    const saveTimeout = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Save operation timed out')), 30000);
-    });
-
-    // Save with timeout
-    const savePromise = property.save();
-    const savedProperty = await Promise.race([savePromise, saveTimeout]);
+    await property.save()
 
     res.status(201).json({
       success: true,
       message: 'Lease Apartment created successfully',
-      propertyId: savedProperty.propertyId,
-      data: savedProperty
+      propertyId: property.propertyId,
+      data: property
     });
   } catch (error: any) {
     console.error('Error creating lease apartment:', error);
@@ -86,8 +115,8 @@ export const getAllLeaseApartments = async (req: Request, res: Response) => {
 // Get Lease Apartment by Property ID
 export const getLeaseApartmentById = async (req: Request, res: Response) => {
   try {
-    const id = req.params._id;
-    const property = await LeaseApartment.findOne({ propertyId: id })
+    const propertyId = req.params.propertyId;
+    const property = await LeaseApartment.findOne({ propertyId })
       .lean()
       .exec();
 
