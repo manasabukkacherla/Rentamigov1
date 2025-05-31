@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PgName from './PgName';
 import Configuration from './Configuration';
 import CommonAreaAmenitiesAndServices from './CommonAreaAmenitiesAndServices';
@@ -219,7 +219,9 @@ function Pgmain() {
   const [currentStep, setCurrentStep] = useState(getInitialStep());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<string>('');
-  const [propertyId, setPropertyId] = useState<string>('');
+const { propertyId: routePropertyId } = useParams();
+const [propertyId, setPropertyId] = useState<string>('');
+
 
   // Handle form submission to backend
   const navigate = useNavigate();
@@ -292,6 +294,32 @@ function Pgmain() {
       };
     });
   };
+useEffect(() => {
+  const fetchPGDataForEdit = async () => {
+    if (routePropertyId) {
+      try {
+        const response = await axios.get(`/api/residential/pgmain/${routePropertyId}`);
+        const data = response.data?.data; // ✅ Only the actual PG form data object
+        setFormData(data);
+        setPropertyId(routePropertyId);
+
+        if (data.roomConfiguration?.sharingTypes) {
+          setSelectedShares(data.roomConfiguration.sharingTypes);
+        }
+        if (data.roomConfiguration?.customShare) {
+          setCustomShare(data.roomConfiguration.customShare);
+        }
+
+        console.log("Loaded PG data for editing:", data);
+      } catch (error) {
+        console.error("Failed to load PG for editing", error);
+      }
+    }
+  };
+
+  fetchPGDataForEdit();
+}, [routePropertyId]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -496,9 +524,21 @@ function Pgmain() {
       console.log('OtherFeaturesAndRestrictions before POST:', formData.otherFeaturesAndRestrictions);
       console.log('Sending payload with processed media');
       
-      const response = await axios.post('/api/residential/pgmain', payload, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
+     let response;
+if (propertyId) {
+  // EDIT MODE
+  response = await axios.patch(`/api/residential/pgmain/${propertyId}`, payload, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  toast.success('PG listing updated!');
+} else {
+  // CREATE MODE
+  response = await axios.post('/api/residential/pgmain', payload, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  toast.success('PG listing created!');
+}
+
       
       // Store the property ID for S3 uploads
       if (response.data && response.data.data && response.data.data.propertyId) {
@@ -509,7 +549,7 @@ function Pgmain() {
       sessionStorage.removeItem(PG_FORM_DATA_KEY);
       sessionStorage.removeItem(PG_FORM_STEP_KEY);
 
-      toast.success('PG listing created!');
+     
       setSubmitStatus('success');
       // Optionally reset form or navigate
     } catch (err: any) {

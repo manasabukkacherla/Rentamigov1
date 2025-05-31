@@ -2,7 +2,8 @@ import express from 'express';
 import { pgMediaUpload, processAndUploadPgMedia } from '../../middleware/pgMediaUploader';
 import PgMain from '../../models/residential/Pgmain';
 import mongoose from 'mongoose';
-
+import { updatePgMain } from '../../controllers/residential/residentialPgmainController';
+import { deletePgMain } from '../../controllers/residential/residentialPgmainController';
 const router = express.Router();
 
 /**
@@ -94,6 +95,9 @@ router.post('/upload', pgMediaUpload, processAndUploadPgMedia, async (req, res) 
     });
   }
 });
+// Update PG listing (for edit)
+
+router.patch('/:propertyId', updatePgMain);
 
 /**
  * Route to delete a media item from a PG property
@@ -152,7 +156,7 @@ router.delete('/:propertyId/:mediaId', async (req, res) => {
     });
   }
 });
-
+router.delete('/:propertyId', deletePgMain);
 /**
  * Route to get all media for a PG property
  */

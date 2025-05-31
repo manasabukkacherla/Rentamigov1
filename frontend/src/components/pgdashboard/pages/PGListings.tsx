@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import axios from 'axios';
 import { Eye, Pencil, Trash2, Search, Filter, MapPin, Users, IndianRupee, Wifi, Car, Dumbbell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
+import { toast } from 'react-hot-toast';
 interface PG {
   propertyId: string;
   pgDetails: {
@@ -85,13 +85,32 @@ const PGListings: React.FC = () => {
     navigate(`/pgdash/listings/${propertyId}`); // Navigate using propertyId
   };
 
-  const handleEdit = (propertyId: string) => {
-    console.log('Edit PG:', propertyId);
-  };
+ const handleEdit = (propertyId: string) => {
+  navigate(`/updatepropertyform/${propertyId}`);
+};
 
-  const handleDelete = (propertyId: string) => {
-    console.log('Delete PG:', propertyId);
-  };
+
+const handleDelete = async (propertyId: string) => {
+  const confirmDelete = window.confirm("Are you sure you want to delete this PG listing?");
+  if (!confirmDelete) return;
+
+  try {
+    const response = await axios.delete(`/api/residential/pgmain/${propertyId}`);
+
+    if (response.data.success) {
+      setPgs(prev => prev.filter(pg => pg.propertyId !== propertyId));
+      toast.success(`Property with ID ${propertyId} deleted successfully.`);
+    } else {
+      toast.error(response.data.error || "Failed to delete the property.");
+    }
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('Delete error:', message);
+    toast.error("Delete failed: " + message);
+  }
+};
+
+
 
   return (
     <div className="space-y-6">
