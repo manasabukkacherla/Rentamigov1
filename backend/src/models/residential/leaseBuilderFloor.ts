@@ -161,6 +161,11 @@ interface ILeaseBuilderFloor extends Document {
   basicInformation: IBasicInformation;
   propertyDetails: IPropertyDetails;
   availableitems: IAvailableItems;
+  restrictions: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  };
   floorAmenities: IFloorAmenities;
   leaseDetails: ILeaseDetails;
   availability: IAvailability;
@@ -244,6 +249,11 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
     diningTableWithChairs: { type: Number },
     sideTable: { type: Number },
     desertCooler: { type: Number }
+  },
+  restrictions: {
+    foodPreference: { type: String },
+    petsAllowed: { type: String },
+    tenantType: { type: String }
   },
   leaseDetails: {
     monthlyRent: { type: Number, required: false },

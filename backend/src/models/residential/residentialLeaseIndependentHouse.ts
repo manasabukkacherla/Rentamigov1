@@ -19,53 +19,84 @@ interface IBasicInformation {
   };
 }
 
-interface propertyDetails {
-  propertysize: number;
-  plotArea: number;
-  constructedArea: number;
+interface ParkingDetails {
+  twoWheeler: number;
+  fourWheeler: number;
+}
+
+interface ExtraRooms {
+  servant: boolean;
+  puja: boolean;
+  store: boolean;
+  others: boolean;
+}
+
+interface WaterAvailability {
+  borewell: boolean;
+  governmentSupply: boolean;
+  tankerSupply: boolean;
+}
+
+interface PropertyDetails {
   bedrooms: number;
   washrooms: number;
-  bathrooms: number;
   balconies: number;
-  parkingdetails: 'yes' | 'No';
-  ExtraRooms: string[];
-  utility: 'Yes' | 'No';
-  Furnishingstatus: 'Unfurnished' | 'Semi-Furnished' | 'Fully-Furnished';
-  totalfloors: number;
-  propertyfacing: string;
-  propertyage: string;
-  superareasqft: number;
-  superareasqmt: number;
-  builtupareasqft: number;
-  builtupareasqmt: number;
-  carpetareasqft: number;
-  carpetareasqmt: number;
-  electricityavailability: string;
-  wateravailability: string[];
-  garden: boolean;
-  basement: boolean;
-  servantQuarters: boolean;
+  hasParking: boolean;
+  parkingDetails: ParkingDetails;
+  extraRooms: ExtraRooms;
+  utilityArea: string;
+  furnishingStatus: string;
+  totalFloors: number;
+  propertyOnFloor: number;
+  facing: string;
+  propertyAge: string;
+  superBuiltUpAreaSqft: number;
+  superBuiltUpAreaSqmt: number;
+  builtUpAreaSqft: number;
+  builtUpAreaSqmt: number;
+  carpetAreaSqft: number;
+  carpetAreaSqmt: number;
+  electricityAvailability: string;
+  waterAvailability: WaterAvailability;
 }
 
-interface houseAmenities {
+interface FlatAmenities {
   lights: number;
-  geysers: number;
-  lofts: number;
-  clothHanger: number;
-  cotWithMattress: number;
-  airConditioner: number;
-  exhaustFan: number;
   ceilingFan: number;
+  geysers: number;
+  chimney: boolean;
+  callingBell: boolean;
   wardrobes: number;
+  lofts: number;
   kitchenCabinets: number;
+  clothHanger: number;
+  pipedGasConnection: boolean;
+  gasStoveWithCylinder: boolean;
+  ironingStand: boolean;
+  bathtub: boolean;
+  shower: boolean;
+  sofa: boolean;
+  coffeeTable: boolean;
+  tvUnit: boolean;
   diningTableWithChairs: number;
+  cotWithMattress: number;
   sideTable: number;
+  studyTableWithChair: number;
+  television: boolean;
+  refrigerator: boolean;
+  washingMachine: boolean;
+  dishwasher: boolean;
+  waterPurifier: boolean;
+  microwaveOven: boolean;
+  inductionCooktop: boolean;
+  gasStove: boolean;
+  airConditioner: number;
   desertCooler: number;
+  ironBox: boolean;
+  exhaustFan: number;
 }
 
-interface availableitems {
-  availableitems: string[];
-  securityandsafety: string[];
+interface SocietyAmenities {
   powerutility: string[];
   parkingtranspotation: string[];
   recreationalsportsfacilities: string[];
@@ -75,6 +106,7 @@ interface availableitems {
   ecofriendlysustainable: string[];
   communityculturalspaces: string[];
   smarthometechnology: string[];
+  otheritems: string[];
 }
 
 interface leaseDetails {
@@ -154,9 +186,15 @@ interface IMedia {
 interface IResidentialLeaseIndependentHouse extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
-  propertyDetails: propertyDetails;
-  availableitems: availableitems;
-  houseAmenities: houseAmenities;
+  propertySize: number;
+  propertyDetails: PropertyDetails;
+  restrictions: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  };
+  flatAmenities: FlatAmenities;
+  societyAmenities: SocietyAmenities;
   leaseDetails: leaseDetails;
   media: IMedia;
   metadata: IMetadata;
@@ -164,53 +202,100 @@ interface IResidentialLeaseIndependentHouse extends Document {
 }
 
 const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndependentHouse>({
-  propertyId: { type: String, required: false, unique: false },
+  propertyId: { type: String, required: true, unique: true },
   basicInformation: {
-    title: { type: String },
-    propertyType: { type: String },
-    plotNumber: { type: String },
+    propertyName: { type: String },
     address: {
+      flatNo: { type: Number },
+      showFlatNo: { type: Boolean },
+      floor: { type: Number },
+      apartmentName: { type: String },
       street: { type: String },
       city: { type: String },
       state: { type: String },
       zipCode: { type: String },
       location: {
-        longitude: { type: String },
         latitude: { type: String },
-        locationLabel: { type: String },
+        longitude: { type: String }
       }
-    },
+    }
   },
+  propertySize: { type: Number },
   propertyDetails: {
-    propertysize: { type: Number },
-    plotArea: { type: Number },
-    constructedArea: { type: Number },
     bedrooms: { type: Number },
     washrooms: { type: Number },
-    bathrooms: { type: Number },
     balconies: { type: Number },
-    parkingdetails: { type: String },
-    ExtraRooms: [{ type: String }],
-    utility: { type: String },
-    Furnishingstatus: { type: String },
-    totalfloors: { type: Number },
-    propertyfacing: { type: String },
-    propertyage: { type: String },
-    superareasqft: { type: Number },
-    superareasqmt: { type: Number },
-    builtupareasqft: { type: Number },
-    builtupareasqmt: { type: Number },
-    carpetareasqft: { type: Number },
-    carpetareasqmt: { type: Number },
-    electricityavailability: { type: String },
-    wateravailability: [{ type: String }],
-    garden: { type: Boolean },
-    basement: { type: Boolean },
-    servantQuarters: { type: Boolean },
+    hasParking: { type: Boolean },
+    parkingDetails: {
+      twoWheeler: { type: Number },
+      fourWheeler: { type: Number }
+    },
+    extraRooms: {
+      servant: { type: Boolean },
+      puja: { type: Boolean },
+      store: { type: Boolean },
+      others: { type: Boolean }
+    },
+    utilityArea: { type: String },
+    furnishingStatus: { type: String },
+    totalFloors: { type: Number },
+    propertyOnFloor: { type: Number },
+    facing: { type: String },
+    propertyAge: { type: String },
+    superBuiltUpAreaSqft: { type: Number },
+    superBuiltUpAreaSqmt: { type: Number },
+    builtUpAreaSqft: { type: Number },
+    builtUpAreaSqmt: { type: Number },
+    carpetAreaSqft: { type: Number },
+    carpetAreaSqmt: { type: Number },
+    electricityAvailability: { type: String },
+    waterAvailability: {
+      borewell: { type: Boolean },
+      governmentSupply: { type: Boolean },
+      tankerSupply: { type: Boolean }
+    }
   },
-  availableitems: {
-    availableitems: [{ type: String }],
-    securityandsafety: [{ type: String }],
+  restrictions: {
+    foodPreference: { type: String },
+    petsAllowed: { type: String },
+    tenantType: { type: String }
+  },
+  flatAmenities: {
+    lights: { type: Number },
+    ceilingFan: { type: Number },
+    geysers: { type: Number },
+    chimney: { type: Boolean },
+    callingBell: { type: Boolean },
+    wardrobes: { type: Number },
+    lofts: { type: Number },
+    kitchenCabinets: { type: Number },
+    clothHanger: { type: Number },
+    pipedGasConnection: { type: Boolean },
+    gasStoveWithCylinder: { type: Boolean },
+    ironingStand: { type: Boolean },
+    bathtub: { type: Boolean },
+    shower: { type: Boolean },
+    sofa: { type: Boolean },
+    coffeeTable: { type: Boolean },
+    tvUnit: { type: Boolean },
+    diningTableWithChairs: { type: Number },
+    cotWithMattress: { type: Number },
+    sideTable: { type: Number },
+    studyTableWithChair: { type: Number },
+    television: { type: Boolean },
+    refrigerator: { type: Boolean },
+    washingMachine: { type: Boolean },
+    dishwasher: { type: Boolean },
+    waterPurifier: { type: Boolean },
+    microwaveOven: { type: Boolean },
+    inductionCooktop: { type: Boolean },
+    gasStove: { type: Boolean },
+    airConditioner: { type: Number },
+    desertCooler: { type: Number },
+    ironBox: { type: Boolean },
+    exhaustFan: { type: Number }
+  },
+  societyAmenities: {
     powerutility: [{ type: String }],
     parkingtranspotation: [{ type: String }],
     recreationalsportsfacilities: [{ type: String }],
@@ -220,21 +305,7 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
     ecofriendlysustainable: [{ type: String }],
     communityculturalspaces: [{ type: String }],
     smarthometechnology: [{ type: String }],
-  },
-  houseAmenities: {
-    lights: { type: Number },
-    geysers: { type: Number },
-    lofts: { type: Number },
-    clothHanger: { type: Number },
-    cotWithMattress: { type: Number },
-    airConditioner: { type: Number },
-    exhaustFan: { type: Number },
-    ceilingFan: { type: Number },
-    wardrobes: { type: Number },
-    kitchenCabinets: { type: Number },
-    diningTableWithChairs: { type: Number },
-    sideTable: { type: Number },
-    desertCooler: { type: Number },
+    otheritems: [{ type: String }]
   },
   leaseDetails: {
     monthlyRent: { type: Number },
