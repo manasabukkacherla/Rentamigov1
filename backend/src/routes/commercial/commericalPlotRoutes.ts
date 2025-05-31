@@ -15,6 +15,6 @@ router.post('/', createPlot as express.RequestHandler);
 router.get('/', getAllPlots as express.RequestHandler);
 
 // Get a specific commercial plot by ID
-router.get('/:id', getPlotById as express.RequestHandler);
+router.get('/:propertyId', getPlotById as express.RequestHandler);
 
 export default router;

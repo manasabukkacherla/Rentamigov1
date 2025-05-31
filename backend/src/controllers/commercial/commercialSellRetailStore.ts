@@ -172,13 +172,8 @@ export const getAllCommercialSellRetailStores = async (req: Request, res: Respon
 
 export const getCommercialSellRetailStoreById = async (req: Request, res: Response) => {
   try {
-    const shop = await CommercialSellRetailStore.findOne({
-      $or: [
-        { propertyId: req.params.id },
-        { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null }
-      ],
-      'metadata.status': { $ne: 'deleted' }
-    });
+    const propertyId = req.params.propertyId;
+    const shop = await CommercialSellRetailStore.findOne({ propertyId });
 
     if (!shop) {
       return res.status(404).json({

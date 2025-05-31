@@ -254,9 +254,10 @@ export const getLeaseOfficeSpaces = async (req: Request, res: Response) => {
 // Get single lease office space listing
 export const getLeaseOfficeSpaceById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+   const propertyId = req.params.propertyId;
+ 
 
-    const leaseOfficeSpace = await CommercialLeaseOfficeSpace.findById(id);
+    const leaseOfficeSpace = await CommercialLeaseOfficeSpace.findOne({propertyId});
 
     if (!leaseOfficeSpace) {
       return res.status(404).json({

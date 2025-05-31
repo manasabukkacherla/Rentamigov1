@@ -20,7 +20,7 @@ router.get('/', getSheds);
 // router.get('/filter', getShedsByFilters);
 
 // Get a single shed listing by ID
-router.get('/:id', getShedById);
+router.get('/:propertyId', getShedById);
 
 // Update a shed listing
 router.put('/:id', updateShed);

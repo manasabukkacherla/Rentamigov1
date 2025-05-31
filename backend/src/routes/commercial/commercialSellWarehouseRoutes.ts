@@ -6,7 +6,7 @@ const commercialSellWarehouseRoutes = express.Router();
 // Routes - only POST method
 commercialSellWarehouseRoutes.post('/', createCommercialWarehouse);
 commercialSellWarehouseRoutes.get('/', getAllSellWarehouses);
-commercialSellWarehouseRoutes.get('/:id', getSellWarehouseById);
+commercialSellWarehouseRoutes.get('/:propertyId', getSellWarehouseById);
 commercialSellWarehouseRoutes.put('/:id', updateSellWarehouse);
 commercialSellWarehouseRoutes.delete('/:id', deleteSellWarehouse);
 

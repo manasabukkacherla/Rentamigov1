@@ -30,7 +30,7 @@ const router = express.Router();
 
 router.post('/', createRentShowroom);
 router.get('/', getAllCommercialRentShowroom);
-router.get('/:id', getCommercialRentShowroomById);
+router.get('/:propertyId', getCommercialRentShowroomById);
 router.put('/:id', updateCommercialRentShowroom);
 router.delete('/:id', deleteCommercialRentShowroom);
 

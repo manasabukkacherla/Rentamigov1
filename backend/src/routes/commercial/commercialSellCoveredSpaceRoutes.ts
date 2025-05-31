@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/', createCommercialSellCoveredSpace);
 router.get('/', getAllCommercialSellCoveredSpaces);
-router.get('/:id', getAllCommercialSellCoveredSpaces);
+router.get('/:propertyId', getAllCommercialSellCoveredSpaces);
 router.put('/:id', updateCommercialSellCoveredSpace);
 router.delete('/:id', deleteCommercialSellCoveredSpace);
 

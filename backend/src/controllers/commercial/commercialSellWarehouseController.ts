@@ -134,7 +134,8 @@ export const getAllSellWarehouses = async (req: Request, res: Response) => {
 
 export const getSellWarehouseById = async (req: Request, res: Response) => {
   try {
-      const warehouse = await CommercialWarehouse.findById(req.params.id);
+    const propertyId = req.params.propertyId;
+      const warehouse = await CommercialWarehouse.findOne({propertyId});
 
       if (!warehouse) {
           return res.status(404).json({
