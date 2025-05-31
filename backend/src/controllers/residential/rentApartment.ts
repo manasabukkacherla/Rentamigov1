@@ -211,7 +211,7 @@ export const getRentApartmentById = async (req: Request, res: Response) => {
     await ensureMediaItemsExists(req.params.propertyId);
     
     // Re-fetch to get updated data
-    const updatedApartment = await ResidentialRentApartment.findById(req.params.propertyId);
+    const updatedApartment = await ResidentialRentApartment.findOne({propertyId: req.params.propertyId});
 
     res.status(200).json({
       success: true,
