@@ -5,52 +5,54 @@ import _ from 'lodash';
 // Generate Property ID for Lease Builder Floor
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-RESLEBF";
-
-    const highestBuilderFloor = await LeaseBuilderFloor.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
-    }).sort({ propertyId: -1 });
-
-    let nextNumber = 1;
-
-    if (highestBuilderFloor && highestBuilderFloor.propertyId) {
-      const match = highestBuilderFloor.propertyId.match(/(\d+)$/);
-      if (match && match[1]) {
-        nextNumber = parseInt(match[1], 10) + 1;
+      const prefix = "RA-RESLEBF";
+  
+      const highestbf = await LeaseBuilderFloor.findOne({
+          propertyId: { $regex: `^${prefix}\\d+$` }
+      }).sort({ propertyId: -1 });
+  
+      let nextNumber = 1;
+  
+      if (highestbf && highestbf.propertyId) {
+          const match = highestbf.propertyId.match(/(\d+)$/);
+          if (match && match[1]) {
+              nextNumber = parseInt(match[1], 10) + 1;
+          }
       }
-    }
-
-    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-
-    const existingWithExactId = await LeaseBuilderFloor.findOne({ propertyId });
-
-    if (existingWithExactId) {
-      console.log(`Property ID ${propertyId} already exists, trying next number`);
-
-      const forcedNextNumber = nextNumber + 1;
-      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
-
-      const forcedExisting = await LeaseBuilderFloor.findOne({ propertyId: forcedPropertyId });
-
-      if (forcedExisting) {
-        return generatePropertyId();
+  
+      const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+  
+      const existingWithExactId = await LeaseBuilderFloor.findOne({ propertyId });
+  
+      if (existingWithExactId) {
+          console.log(`Property ID ${propertyId} already exists, trying next number`);
+  
+          const forcedNextNumber = nextNumber + 1;
+          const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+  
+          const forcedExisting = await LeaseBuilderFloor.findOne({ propertyId: forcedPropertyId });
+  
+          if (forcedExisting) {
+              return generatePropertyId();
+          }
+  
+          return forcedPropertyId;
       }
-
-      return forcedPropertyId;
-    }
-
-    return propertyId;
+  
+      return propertyId;
   } catch (error) {
-    console.error('Error generating property ID:', error);
-    const timestamp = Date.now().toString().slice(-8);
-    return `RA-RESLEBF${timestamp}`;
+      console.error('Error generating property ID:', error);
+      const timestamp = Date.now().toString().slice(-8);
+      return `RA-RESLEBF${timestamp}`;
   }
 };
 
 // Create a new lease builder floor listing
 export const createLeaseBuilderFloor = async (req: Request, res: Response) => {
   try {
+    console.log('Incoming request body:', req.body);
     const propertyId = await generatePropertyId();
+    console.log('Property ID:', propertyId);
     const builderFloorData = {
       ...req.body,
       propertyId,

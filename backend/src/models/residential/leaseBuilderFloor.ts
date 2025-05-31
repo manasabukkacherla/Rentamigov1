@@ -3,10 +3,13 @@ import mongoose, { Document, Schema } from "mongoose";
 interface IBasicInformation {
   propertyId?: string;
   title: string;
-  builderName: string;
   floorNumber: number;
   totalFloors: number;
   address: {
+    flatNo: number;
+    showFlatNo: boolean;
+    floor: number;
+    apartmentName: string;
     street: string;
     city: string;
     state: string;
@@ -166,17 +169,20 @@ interface ILeaseBuilderFloor extends Document {
 }
 
 const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
-  propertyId: { type: String, required: false, unique: false },
+  propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    builderName: { type: String, required: true },
-    floorNumber: { type: Number, required: true },
-    totalFloors: { type: Number, required: true },
+    floorNumber: { type: Number, required: false },
+    totalFloors: { type: Number, required: false },
     address: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      zipCode: { type: String, required: true },
+      flatNo: { type: Number },
+      showFlatNo: { type: Boolean },
+      floor: { type: Number },
+      apartmentName: { type: String },
+      street: { type: String, required: false },
+      city: { type: String, required: false },
+      state: { type: String, required: false },
+      zipCode: { type: String, required: false },
       location: {
         latitude: { type: String },
         longitude: { type: String },
@@ -185,11 +191,11 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
     }
   },
   propertyDetails: {
-    propertysize: { type: Number, required: true },
-    bedrooms: { type: Number, required: true },
-    washrooms: { type: Number, required: true },
-    bathrooms: { type: Number, required: true },
-    balconies: { type: Number, required: true },
+    propertysize: { type: Number, required: false },
+    bedrooms: { type: Number, required: false },
+    washrooms: { type: Number, required: false },
+    bathrooms: { type: Number, required: false },
+    balconies: { type: Number, required: false },
     parkingdetails: { type: String },
     ExtraRooms: [{ type: String }],
     utility: { type: String },
@@ -240,8 +246,8 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
     desertCooler: { type: Number }
   },
   leaseDetails: {
-    monthlyRent: { type: Number, required: true },
-    securityDeposit: { type: Number, required: true },
+    monthlyRent: { type: Number, required: false },
+    securityDeposit: { type: Number, required: false },
     maintenanceCharges: {
       amount: { type: Number },
       type: { type: String, enum: ['monthly', 'quarterly', 'yearly'] }
@@ -313,4 +319,4 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
   }
 });
 
-export default mongoose.model<ILeaseBuilderFloor>('LeaseBuilderFloor', LeaseBuilderFloorSchema); 
+export default mongoose.model<ILeaseBuilderFloor>('ResidentialLeaseBuilderFloor', LeaseBuilderFloorSchema); 

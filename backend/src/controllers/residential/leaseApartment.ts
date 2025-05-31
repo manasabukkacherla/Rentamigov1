@@ -7,16 +7,16 @@ const generatePropertyId = async (): Promise<string> => {
     const prefix = "RA-RESLEAP";
 
     const highestShowroom = await LeaseApartment.findOne({
-        propertyId: { $regex: `^${prefix}\\d+$` }
+      propertyId: { $regex: `^${prefix}\\d+$` }
     }).sort({ propertyId: -1 });
 
     let nextNumber = 1;
 
     if (highestShowroom) {
-        const match = highestShowroom.propertyId.match(/(\d+)$/);
-        if (match && match[1]) {
-            nextNumber = parseInt(match[1], 10) + 1;
-        }
+      const match = highestShowroom.propertyId.match(/(\d+)$/);
+      if (match && match[1]) {
+        nextNumber = parseInt(match[1], 10) + 1;
+      }
     }
 
     const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
@@ -24,27 +24,27 @@ const generatePropertyId = async (): Promise<string> => {
     const existingWithExactId = await LeaseApartment.findOne({ propertyId });
 
     if (existingWithExactId) {
-        console.log(`Property ID ${propertyId} already exists, trying next number`);
+      console.log(`Property ID ${propertyId} already exists, trying next number`);
 
-        const forcedNextNumber = nextNumber + 1;
-        const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+      const forcedNextNumber = nextNumber + 1;
+      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
 
-        const forcedExisting = await LeaseApartment.findOne({ propertyId: forcedPropertyId });
+      const forcedExisting = await LeaseApartment.findOne({ propertyId: forcedPropertyId });
 
-        if (forcedExisting) {
-            return generatePropertyId();
-        }
+      if (forcedExisting) {
+        return generatePropertyId();
+      }
 
-        return forcedPropertyId;
+      return forcedPropertyId;
     }
 
     return propertyId;
-} catch (error) {
+  } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
     return `RA-RESLEAP${timestamp}`;
-}
-}; 
+  }
+};
 
 // Create Lease Apartment
 export const createLeaseApartment = async (req: Request, res: Response) => {
@@ -55,7 +55,7 @@ export const createLeaseApartment = async (req: Request, res: Response) => {
     const formData = req.body;
     const propertyId = await generatePropertyId();
     console.log('Property ID:', propertyId);
-    
+
     // Create new property with the generated ID and metadata
     const propertyData = JSON.parse(JSON.stringify({
       ...req.body,
@@ -79,7 +79,7 @@ export const createLeaseApartment = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Error creating lease apartment:', error);
-    
+
     // Send more detailed error information
     res.status(500).json({
       success: false,
