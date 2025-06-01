@@ -1,27 +1,19 @@
-import mongoose, { Schema, Document, Types, model } from 'mongoose';
-import { NumberListInstance } from 'twilio/lib/rest/pricing/v2/number';
+import mongoose, { Schema, Document } from "mongoose";
 
 interface IBasicInformation {
-  propertyId?: string;
-  title: string;
-  propertyType: string;
-  plotNumber: string;
-  address: {
+  propertyName: string;
+  propertyAddress: {
+    houseName: string;
     street: string;
     city: string;
     state: string;
     zipCode: string;
-    location?: {
+    pinCode: string;
+    location: {
       latitude: string;
       longitude: string;
-      locationLabel?: string;
-    }
+    };
   };
-}
-
-interface ParkingDetails {
-  twoWheeler: number;
-  fourWheeler: number;
 }
 
 interface ExtraRooms {
@@ -29,6 +21,11 @@ interface ExtraRooms {
   puja: boolean;
   store: boolean;
   others: boolean;
+}
+
+interface ParkingDetails {
+  twoWheeler: number;
+  fourWheeler: number;
 }
 
 interface WaterAvailability {
@@ -46,6 +43,7 @@ interface PropertyDetails {
   extraRooms: ExtraRooms;
   utilityArea: string;
   furnishingStatus: string;
+  flooring: string;
   totalFloors: number;
   propertyOnFloor: number;
   facing: string;
@@ -61,39 +59,7 @@ interface PropertyDetails {
 }
 
 interface FlatAmenities {
-  lights: number;
-  ceilingFan: number;
-  geysers: number;
-  chimney: boolean;
-  callingBell: boolean;
-  wardrobes: number;
-  lofts: number;
-  kitchenCabinets: number;
-  clothHanger: number;
-  pipedGasConnection: boolean;
-  gasStoveWithCylinder: boolean;
-  ironingStand: boolean;
-  bathtub: boolean;
-  shower: boolean;
-  sofa: boolean;
-  coffeeTable: boolean;
-  tvUnit: boolean;
-  diningTableWithChairs: number;
-  cotWithMattress: number;
-  sideTable: number;
-  studyTableWithChair: number;
-  television: boolean;
-  refrigerator: boolean;
-  washingMachine: boolean;
-  dishwasher: boolean;
-  waterPurifier: boolean;
-  microwaveOven: boolean;
-  inductionCooktop: boolean;
-  gasStove: boolean;
-  airConditioner: number;
-  desertCooler: number;
-  ironBox: boolean;
-  exhaustFan: number;
+  [key: string]: number | boolean;
 }
 
 interface SocietyAmenities {
@@ -109,54 +75,59 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
-interface leaseDetails {
-  monthlyRent: number;
-  securityDeposit: number;
-  maintenanceCharges: {
+interface LeaseTerms {
+  leaseDetails: {
+    leaseAmount: {
+      amount: number;
+      type: string;
+      duration: number;
+      durationUnit: string;
+    };
+  };
+  tenureDetails: {
+    minimumTenure: number;
+    minimumUnit: string;
+    maximumTenure: number;
+    maximumUnit: string;
+    lockInPeriod: number;
+    lockInUnit: string;
+    noticePeriod: number;
+    noticePeriodUnit: string;
+  };
+  maintenanceAmount: {
     amount: number;
-    type: 'monthly' | 'quarterly' | 'yearly';
+    frequency: string;
   };
-  leaseDuration: {
-    minimumDuration: number;
-    maximumDuration: number;
-    durationUnit: 'months' | 'years';
-  };
-  rentNegotiable: boolean;
-  additionalCharges: {
-    waterCharges: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
+  otherCharges: {
+    water: {
+      amount: number;
+      type: string;
     };
-    electricityCharges: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
+    electricity: {
+      amount: number;
+      type: string;
     };
-    gasCharges: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
+    gas: {
+      amount: number;
+      type: string;
     };
-    otherCharges: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
+    others: {
+      amount: number;
+      type: string;
     };
   };
   brokerage: {
-    type: 'yes' | 'no';
+    required: string;
     amount?: number;
   };
 }
 
-interface IMetadata {
-  createdBy: Schema.Types.ObjectId | string;
-  createdAt: Date;
+interface Availability {
+  type: string;
+  date: string;
 }
 
-interface availability {
-  availablefrom: string;
-  date?: string;
-}
-
-interface IMedia {
+interface Media {
   photos: {
     exterior: string[];
     interior: string[];
@@ -168,23 +139,19 @@ interface IMedia {
     halls: string[];
     storerooms: string[];
     kitchen: string[];
-    servantQuarters: string[];
+    servantQuarters?: string[];
   };
-  mediaItems?: Array<{
-    id?: string;
-    type?: 'photo' | 'video';
-    url?: string;
-    title?: string;
-    tags?: string[];
-    roomType?: string;
-    category?: string;
-  }>;
   videoTour?: string;
   documents: string[];
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: string;
+}
+
 interface IResidentialLeaseIndependentHouse extends Document {
-  propertyId: string;
+  propertyId?: string;
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
@@ -195,25 +162,23 @@ interface IResidentialLeaseIndependentHouse extends Document {
   };
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
-  leaseDetails: leaseDetails;
-  media: IMedia;
-  metadata: IMetadata;
-  availability: availability;
+  leaseTerms: LeaseTerms;
+  availability: Availability;
+  media: Media;
+  metadata?: IMetadata;
 }
 
 const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndependentHouse>({
-  propertyId: { type: String, required: true, unique: true },
+  propertyId: { type: String },
   basicInformation: {
     propertyName: { type: String },
-    address: {
-      flatNo: { type: Number },
-      showFlatNo: { type: Boolean },
-      floor: { type: Number },
-      apartmentName: { type: String },
+    propertyAddress: {
+      houseName: { type: String },
       street: { type: String },
       city: { type: String },
       state: { type: String },
       zipCode: { type: String },
+      pinCode: { type: String },
       location: {
         latitude: { type: String },
         longitude: { type: String }
@@ -222,164 +187,138 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
   },
   propertySize: { type: Number },
   propertyDetails: {
-    bedrooms: { type: Number },
-    washrooms: { type: Number },
-    balconies: { type: Number },
-    hasParking: { type: Boolean },
+    bedrooms: Number,
+    washrooms: Number,
+    balconies: Number,
+    hasParking: Boolean,
     parkingDetails: {
-      twoWheeler: { type: Number },
-      fourWheeler: { type: Number }
+      twoWheeler: Number,
+      fourWheeler: Number
     },
     extraRooms: {
-      servant: { type: Boolean },
-      puja: { type: Boolean },
-      store: { type: Boolean },
-      others: { type: Boolean }
+      servant: Boolean,
+      puja: Boolean,
+      store: Boolean,
+      others: Boolean
     },
-    utilityArea: { type: String },
-    furnishingStatus: { type: String },
-    totalFloors: { type: Number },
-    propertyOnFloor: { type: Number },
-    facing: { type: String },
-    propertyAge: { type: String },
-    superBuiltUpAreaSqft: { type: Number },
-    superBuiltUpAreaSqmt: { type: Number },
-    builtUpAreaSqft: { type: Number },
-    builtUpAreaSqmt: { type: Number },
-    carpetAreaSqft: { type: Number },
-    carpetAreaSqmt: { type: Number },
-    electricityAvailability: { type: String },
+    utilityArea: String,
+    furnishingStatus: String,
+    flooring: String,
+    totalFloors: Number,
+    propertyOnFloor: Number,
+    facing: String,
+    propertyAge: String,
+    superBuiltUpAreaSqft: Number,
+    superBuiltUpAreaSqmt: Number,
+    builtUpAreaSqft: Number,
+    builtUpAreaSqmt: Number,
+    carpetAreaSqft: Number,
+    carpetAreaSqmt: Number,
+    electricityAvailability: String,
     waterAvailability: {
-      borewell: { type: Boolean },
-      governmentSupply: { type: Boolean },
-      tankerSupply: { type: Boolean }
+      borewell: Boolean,
+      governmentSupply: Boolean,
+      tankerSupply: Boolean
     }
   },
   restrictions: {
-    foodPreference: { type: String },
-    petsAllowed: { type: String },
-    tenantType: { type: String }
+    foodPreference: String,
+    petsAllowed: String,
+    tenantType: String
   },
-  flatAmenities: {
-    lights: { type: Number },
-    ceilingFan: { type: Number },
-    geysers: { type: Number },
-    chimney: { type: Boolean },
-    callingBell: { type: Boolean },
-    wardrobes: { type: Number },
-    lofts: { type: Number },
-    kitchenCabinets: { type: Number },
-    clothHanger: { type: Number },
-    pipedGasConnection: { type: Boolean },
-    gasStoveWithCylinder: { type: Boolean },
-    ironingStand: { type: Boolean },
-    bathtub: { type: Boolean },
-    shower: { type: Boolean },
-    sofa: { type: Boolean },
-    coffeeTable: { type: Boolean },
-    tvUnit: { type: Boolean },
-    diningTableWithChairs: { type: Number },
-    cotWithMattress: { type: Number },
-    sideTable: { type: Number },
-    studyTableWithChair: { type: Number },
-    television: { type: Boolean },
-    refrigerator: { type: Boolean },
-    washingMachine: { type: Boolean },
-    dishwasher: { type: Boolean },
-    waterPurifier: { type: Boolean },
-    microwaveOven: { type: Boolean },
-    inductionCooktop: { type: Boolean },
-    gasStove: { type: Boolean },
-    airConditioner: { type: Number },
-    desertCooler: { type: Number },
-    ironBox: { type: Boolean },
-    exhaustFan: { type: Number }
-  },
+  flatAmenities: { type: Schema.Types.Mixed },
   societyAmenities: {
-    powerutility: [{ type: String }],
-    parkingtranspotation: [{ type: String }],
-    recreationalsportsfacilities: [{ type: String }],
-    childrenfamilyamenities: [{ type: String }],
-    healthwellnessfacilities: [{ type: String }],
-    shoppingconviencestores: [{ type: String }],
-    ecofriendlysustainable: [{ type: String }],
-    communityculturalspaces: [{ type: String }],
-    smarthometechnology: [{ type: String }],
-    otheritems: [{ type: String }]
+    powerutility: [String],
+    parkingtranspotation: [String],
+    recreationalsportsfacilities: [String],
+    childrenfamilyamenities: [String],
+    healthwellnessfacilities: [String],
+    shoppingconviencestores: [String],
+    ecofriendlysustainable: [String],
+    communityculturalspaces: [String],
+    smarthometechnology: [String],
+    otheritems: [String]
   },
-  leaseDetails: {
-    monthlyRent: { type: Number },
-    securityDeposit: { type: Number },
-    maintenanceCharges: {
+  leaseTerms: {
+    leaseDetails: {
+      leaseAmount: {
+        amount: { type: Number },
+        type: { type: String },
+        duration: { type: Number },
+        durationUnit: { type: String }
+      }
+    },
+    tenureDetails: {
+      minimumTenure: { type: Number },
+      minimumUnit: { type: String },
+      maximumTenure: { type: Number },
+      maximumUnit: { type: String },
+      lockInPeriod: { type: Number },
+      lockInUnit: { type: String },
+      noticePeriod: { type: Number },
+      noticePeriodUnit: { type: String }
+    },
+    maintenanceAmount: {
       amount: { type: Number },
-      type: { type: String },
+      frequency: { type: String }
     },
-    leaseDuration: {
-      minimumDuration: { type: Number },
-      maximumDuration: { type: Number },
-      durationUnit: { type: String },
-    },
-    rentNegotiable: { type: Boolean },
-    additionalCharges: {
-      waterCharges: {
-        type: { type: String },
+    otherCharges: {
+      water: {
         amount: { type: Number },
+        type: { type: String }
       },
-      electricityCharges: {
-        type: { type: String },
+      electricity: {
         amount: { type: Number },
+        type: { type: String }
       },
-      gasCharges: {
-        type: { type: String },
+      gas: {
         amount: { type: Number },
+        type: { type: String }
       },
-      otherCharges: {
-        type: { type: String },
+      others: {
         amount: { type: Number },
-      },
+        type: { type: String }
+      }
     },
     brokerage: {
-      type: { type: String },
-      amount: { type: Number },
-    },
-  },
+      required: { type: String },
+      amount: { type: Number }
+    }
+  }
+  
+  
+  ,
   availability: {
-    availablefrom: { type: String },
-    date: { type: String },
+    type: { type: String },
+    date: { type: String }
   },
   media: {
     photos: {
-      exterior: [{ type: String, required: false }],
-      interior: [{ type: String, required: false }],
-      floorPlan: [{ type: String, required: false }],
-      washrooms: [{ type: String, required: false }],
-      garden: [{ type: String, required: false }],
-      basement: [{ type: String, required: false }],
-      bedrooms: [{ type: String, required: false }],
-      halls: [{ type: String, required: false }],
-      storerooms: [{ type: String, required: false }],
-      kitchen: [{ type: String, required: false }],
-      servantQuarters: [{ type: String, required: false }]
+      exterior: [String],
+      interior: [String],
+      floorPlan: [String],
+      washrooms: [String],
+      garden: [String],
+      basement: [String],
+      bedrooms: [String],
+      halls: [String],
+      storerooms: [String],
+      kitchen: [String],
+      servantQuarters: [String]
     },
-    mediaItems: [{
-      id: String,
-      type: String,
-      url: String,
-      title: String,
-      tags: [String],
-      roomType: String,
-      category: String
-    }],
-    videoTour: { type: String, required: false, default: '' },
-    documents: [{ type: String, required: false }]
+    videoTour: { type: String },
+    documents: [String]
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    createdAt: { type: Date, default: Date.now },
+    createdBy: { type: String },
+    createdAt: { type: String }
   }
 }, {
   timestamps: false
 });
 
-// Check if the model exists before compiling it
-export default mongoose.models.ResidentialLeaseIndependentHouse || mongoose.model<IResidentialLeaseIndependentHouse>('ResidentialLeaseIndependentHouse', ResidentialLeaseIndependentHouseSchema);
+export default mongoose.models.ResidentialLeaseIndependentHouse ||
+  mongoose.model<IResidentialLeaseIndependentHouse>(
+    'ResidentialLeaseIndependentHouse',
+    ResidentialLeaseIndependentHouseSchema
+  );
