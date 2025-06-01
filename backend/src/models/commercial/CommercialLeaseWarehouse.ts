@@ -139,7 +139,7 @@ interface IMetadata {
     // isVerified: boolean;
 }
 
-interface ICommercialLeaseWarehouse extends Document {
+export interface ICommercialLeaseWarehouse extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     coveredSpaceDetails: ICoveredSpaceDetails;

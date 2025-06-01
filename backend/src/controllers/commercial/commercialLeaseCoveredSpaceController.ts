@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Request, Response } from 'express';
-import CommercialLeaseCoveredSpace from '../../models/commercial/CommericalLeaseCoveredSpace';
+import CommercialLeaseCoveredSpace from '../../models/commercial/CommercialLeaseCoveredSpace';
 import mongoose from 'mongoose';
 
 interface AuthenticatedRequest extends Request {

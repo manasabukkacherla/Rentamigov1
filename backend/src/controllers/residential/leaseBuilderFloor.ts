@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import LeaseBuilderFloor from '../../models/residential/leaseBuilderFloor';
+import LeaseBuilderFloor from '../../models/residential/residentialLeaseBuilderFloor';
 import _ from 'lodash';
 
 // Generate Property ID for Lease Builder Floor

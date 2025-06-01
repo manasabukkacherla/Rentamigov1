@@ -1,0 +1,17 @@
+import express from 'express';
+import { CommercialPropertyController } from '../../controllers/commercial/CommercialPropertyController';
+import ResidentialApartment from '../../models/residential/residentialLeaseAppartment';
+
+const router = express.Router();
+
+// Create controllers for different property types
+const residentialLeaseController = new CommercialPropertyController(ResidentialApartment, 'RA-RESAP');
+
+// Routes for commercial rent properties
+router.post('/', residentialLeaseController.createProperty.bind(residentialLeaseController));
+router.get('/', residentialLeaseController.getProperties.bind(residentialLeaseController));
+router.get('/:propertyId', residentialLeaseController.getPropertyById.bind(residentialLeaseController));
+router.put('/:id', residentialLeaseController.updateProperty.bind(residentialLeaseController));
+router.delete('/:id', residentialLeaseController.deleteProperty.bind(residentialLeaseController));
+
+export default router;

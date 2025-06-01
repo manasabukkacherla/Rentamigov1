@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import _ from 'lodash';
-import CommercialRentShowroom from '../../models/commercial/commericalRentShowroom';
+import { CommercialRentShowroom } from '../../models/commercial/commercialRentShowroom';
 
 // Generate property ID with format RA-COMRSH####
 const generatePropertyId = async (): Promise<string> => {

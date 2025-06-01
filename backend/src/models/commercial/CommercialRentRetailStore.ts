@@ -95,7 +95,7 @@ interface IRentalTerms {
     }
 }
 
-interface ICommercialRentRetailStore extends Document {
+export interface ICommercialRentRetailStore extends Document {
   propertyId: string;
   
   basicInformation: IBasicInformation;

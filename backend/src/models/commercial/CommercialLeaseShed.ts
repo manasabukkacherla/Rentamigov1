@@ -136,7 +136,7 @@ interface IMetadata {
     // isVerified: boolean;
 }
 
-interface ICommercialLeaseShed extends Document {
+export interface ICommercialLeaseShed extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     shedDetails: IShedDetails;
@@ -287,5 +287,4 @@ CommercialLeaseShedSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShedSchema.index({ 'metadata.createdAt': -1 });
 
 export const CommercialLeaseShed = model<ICommercialLeaseShed>('CommercialLeaseShed', CommercialLeaseShedSchema);
-export type { ICommercialLeaseShed, IBasicInformation, IShedDetails, IPropertyDetails, ILeaseTerms, IContactInformation, IMedia, IMetadata };
-
+// export type { ICommercialLeaseShed, IBasicInformation, IShedDetails, IPropertyDetails, ILeaseTerms, IContactInformation, IMedia, IMetadata };

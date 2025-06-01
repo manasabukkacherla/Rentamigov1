@@ -138,6 +138,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: string;
   createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
 }
 
 interface IRentalTerms {
@@ -329,6 +333,10 @@ const RentOfficeSpace = () => {
     metadata: {
       createdBy: '',
       createdAt: new Date(),
+      propertyType: '',
+      propertyName: '',
+      intent: '',
+      status: '',
     },
   });
 
@@ -728,7 +736,6 @@ const RentOfficeSpace = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     console.log(formData);
     try {
       const user = sessionStorage.getItem('user');
@@ -763,7 +770,12 @@ const RentOfficeSpace = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            intent: "Rent",
+            status: "Available",
+            propertyType: "Commercial",
+            propertyName: "Office Space",
+
           }
         };
 

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CommercialLeaseShed } from '../../models/commercial/CommericalLeaseShed';
+import { CommercialLeaseShed } from '../../models/commercial/CommercialLeaseShed';
 import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {

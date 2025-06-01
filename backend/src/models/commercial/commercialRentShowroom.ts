@@ -123,7 +123,7 @@ interface IMetadata {
     createdAt: Date;
 }
 
-interface ICommercialRentShowroom extends Document {
+export interface ICommercialRentShowroom extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     showroomDetails: showRoomDetails;
@@ -263,10 +263,10 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
 // CommercialRentShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialRentShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialRentShowroomSchema.index({ 'basicInformation.state': 1 });
-CommercialRentShowroomSchema.index({ 'rentalDetails.expectedRent': 1 });
+CommercialRentShowroomSchema.index({ 'rentalTerms.expectedRent': 1 });
 CommercialRentShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentShowroomSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-// export { ICommercialRentShowroom, IBasicInformation, IArea, IRentalDetails, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialRentShowroom>('CommercialRentShowroom', CommercialRentShowroomSchema); 
+export const CommercialRentShowroom = model<ICommercialRentShowroom>('CommercialRentShowroom', CommercialRentShowroomSchema);
+export { IBasicInformation, IArea, IRentalDetails, IAvailability, IContactInformation, IMedia, IMetadata };

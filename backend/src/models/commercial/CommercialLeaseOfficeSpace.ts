@@ -143,7 +143,7 @@ interface IMetadata {
     // isVerified: boolean;
 }
 
-interface ICommercialLeaseOfficeSpace extends Document {
+export interface ICommercialLeaseOfficeSpace extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     officeSpaceDetails: IOfficeSpaceDetails;

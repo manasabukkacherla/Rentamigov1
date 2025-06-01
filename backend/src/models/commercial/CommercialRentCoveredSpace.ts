@@ -109,7 +109,7 @@ interface IMetadata {
   createdAt: Date;
 }
 
-interface ICommercialRentCoveredSpace extends Document {
+export interface ICommercialRentCoveredSpace extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   spaceDetails: ISpaceDetails;

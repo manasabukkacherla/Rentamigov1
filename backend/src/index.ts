@@ -50,11 +50,13 @@ import Notification from "./models/Notification";
 import { Document } from "mongoose";
 
 import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main 
-import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
+import commercialPlotRoutes from "./routes/commercial/commercialPlotRoutes";
 import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouseRoutes";
-import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
+// import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
+
+import commercialRentOfficeSpaceRoutes from "./routes/commercial/commercialRoutes";
 import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
 import commercialSellAgricultureRoutes from "./routes/commercial/commercialSellAgricultureRoutes";
@@ -63,7 +65,7 @@ import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRent
 import commercialSellCoveredSpaceRoutes from "./routes/commercial/commercialSellCoveredSpaceRoutes";
 import commercialSellOfficeSpaceRoutes from "./routes/commercial/CommercialSellOfficeSpace";
 import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
-import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
+import commercialRentShowroom from "./routes/commercial/commercialRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialLeasePlotRoutes from "./routes/commercial/commercialLeasePlotRoutes";
@@ -77,7 +79,7 @@ import conversationRoutes from "./routes/conversationRoutes";
 import messageRoutes from "./routes/messageRoutes";
 import socketHandler from "./sockets";
 import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
-import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
+import CommercialLeaseOfficeSpace from "./routes/commercial/CommercialLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 
 
@@ -97,6 +99,7 @@ import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShow
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
+import allpropertiesData from "./routes/allpropertiesData";
 
 dotenv.config();
 
@@ -262,6 +265,8 @@ app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 //rent routes
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
+// app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
+
 app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
 app.use("/api/commercial/rent/covered-space", commercialRentCoveredSpaceRoutes);
@@ -271,6 +276,8 @@ app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
 
+app.use("/api/all",allpropertiesData);
+
 // PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 
@@ -279,6 +286,9 @@ app.use('/api/property-media', propertyMediaRoutes);
 
 // Residential Media Routes
 app.use('/api/residential/media', residentialMediaRoutes);
+
+// All properties route
+app.use('/api/all', allpropertiesData);
 
 // Redirect old pg-media routes to the new integrated endpoints
 app.use("/api/residential/pg-media", (req, res, next) => {
