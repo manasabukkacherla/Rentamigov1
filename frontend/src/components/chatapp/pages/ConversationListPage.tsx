@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import Chat from "../Chat"; // Make sure this exists and is correctly imported
 
 interface Participant {
   _id: string;
   username?: string;
-  name?: string; // Add name field for employees
+  name?: string;
+  email?: string;
 }
 
 interface Conversation {
@@ -21,29 +23,49 @@ interface Conversation {
   isOnline?: boolean;
   lastSeen?: string;
   avatar?: string;
+  status?: string;
+  lastResolvedAt?: string;
 }
+
+const StatusCard: React.FC<{ title: string; count: number; color: string }> = ({
+  title,
+  count,
+  color,
+}) => {
+  return (
+    <div
+      style={{
+        backgroundColor: "#f8f9fa",
+        border: `2px solid ${color}`,
+        color: "#1a1a1a",
+        padding: "16px",
+        borderRadius: "12px",
+        flex: 1,
+        textAlign: "center",
+        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
+      }}
+    >
+      <h3 style={{ margin: 0, fontSize: "14px", fontWeight: "bold" }}>{title}</h3>
+      <p style={{ margin: 0, fontSize: "24px", fontWeight: "bold" }}>{count}</p>
+    </div>
+  );
+};
 
 const ConversationListPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const userId = sessionStorage.getItem("userId");
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
-  const getOtherUser = (
-    participants: Participant[],
-    currentUserId: string
-  ): Participant | undefined => {
-    // Filter out null participants first
+  const userId = sessionStorage.getItem("userId") || "";
+
+  const getOtherUser = (participants: Participant[], currentUserId: string): Participant | undefined => {
     const validParticipants = participants.filter((p) => p !== null);
-    return validParticipants.find(
-      (participant) => participant._id !== currentUserId
-    );
+    return validParticipants.find((participant) => participant._id !== currentUserId);
   };
 
-  // Function to get a display name for a participant
   const getDisplayName = (participant: Participant | undefined): string => {
     if (!participant) return "Unknown User";
-    // First try username, then name (for employees), then fallback to ID
     return (
       participant.username ||
       participant.name ||
@@ -51,7 +73,20 @@ const ConversationListPage: React.FC = () => {
     );
   };
 
-  console.log(getOtherUser);
+  const refreshCounts = (all: Conversation[]) => {
+    return {
+      total: all.length,
+      pending: all.filter((conv) => {
+        const latest = new Date(conv.updatedAt);
+        const resolved = conv.lastResolvedAt ? new Date(conv.lastResolvedAt) : null;
+        return !resolved || latest > resolved;
+      }).length,
+      active: all.filter((conv) => conv.status === "active").length,
+    };
+  };
+
+  const [counts, setCounts] = useState({ total: 0, pending: 0, active: 0 });
+
   useEffect(() => {
     const fetchConversations = async () => {
       try {
@@ -66,30 +101,19 @@ const ConversationListPage: React.FC = () => {
         if (!response.ok) {
           setError(data.message || "Failed to fetch conversations.");
         } else {
-          // Filter out null participants from each conversation
-          const processedConversations = data.conversations.map(
-            (conv: Conversation) => {
-              return {
-                ...conv,
-                participants: conv.participants.filter(
-                  (p: Participant | null) => p !== null
-                ),
-              };
-            }
-          );
+          const processedConversations = data.conversations.map((conv: Conversation) => {
+            return {
+              ...conv,
+              participants: conv.participants.filter((p: Participant | null) => p !== null),
+            };
+          });
 
-          // Sort conversations by last message time
-          const sortedConversations = processedConversations.sort(
-            (a: Conversation, b: Conversation) => {
-              return (
-                new Date(b.updatedAt).getTime() -
-                new Date(a.updatedAt).getTime()
-              );
-            }
-          );
-          console.log("Fetched conversations:", sortedConversations);
-          console.log("Current userId:", userId);
+          const sortedConversations = processedConversations.sort((a: { updatedAt: string | number | Date; }, b: { updatedAt: string | number | Date; }) => {
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+          });
+
           setConversations(sortedConversations);
+          setCounts(refreshCounts(sortedConversations));
         }
       } catch (err) {
         setError("An error occurred during fetching conversations.");
@@ -97,33 +121,22 @@ const ConversationListPage: React.FC = () => {
     };
 
     fetchConversations();
-  }, []);
+  }, [userId]);
 
   const filteredConversations = conversations.filter((conv) => {
-    // If there's only one participant, it's likely a self-conversation
-    if (conv.participants.length <= 1) {
-      return true; // Include self-conversations
-    }
-
-    const otherUser = getOtherUser(conv.participants, userId || "");
-    console.log("Conversation:", conv._id, "Other user:", otherUser);
-
-    // Use the getDisplayName function to safely get a display name
+    if (conv.participants.length <= 1) return true;
+    const otherUser = getOtherUser(conv.participants, userId);
     const displayName = getDisplayName(otherUser);
     return displayName.toLowerCase().includes(searchQuery.toLowerCase());
   });
-  console.log("Filtered conversations:", filteredConversations);
+
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
     if (days === 0) {
-      return date.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     } else if (days === 1) {
       return "Yesterday";
     } else if (days < 7) {
@@ -133,222 +146,135 @@ const ConversationListPage: React.FC = () => {
     }
   };
 
+  const latestMessageTime = selectedConversation?.updatedAt || new Date().toISOString();
+  const isButtonEnabled = !selectedConversation?.lastResolvedAt ||
+    new Date(latestMessageTime) > new Date(selectedConversation.lastResolvedAt);
+
   return (
-    <div
-      className="conversation-list-container"
-      style={{
-        maxWidth: "800px",
-        margin: "auto",
-        padding: "20px",
-        backgroundColor: "#f0f2f5",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          borderRadius: "12px",
-          padding: "16px",
-          marginBottom: "20px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <h2 style={{ margin: "0 0 16px 0", color: "#1a1a1a" }}>Messages</h2>
+    <div className="p-6 min-h-screen bg-gray-50">
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <StatusCard title="Pending" count={counts.pending} color="#f59e0b" />
+        <StatusCard title="Active" count={counts.active} color="#3b82f6" />
+        <StatusCard title="Total" count={counts.total} color="#10b981" />
+      </div>
+
+      <div className="bg-white rounded-lg shadow p-4 mb-6">
+        <h2 className="text-lg font-semibold mb-4">Messages</h2>
         <input
           type="text"
           placeholder="Search conversations..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "12px",
-            borderRadius: "8px",
-            border: "1px solid #e0e0e0",
-            fontSize: "14px",
-            outline: "none",
-            transition: "border-color 0.2s",
-          }}
+          className="w-full p-3 border border-gray-200 rounded-lg"
         />
       </div>
 
       {error && (
-        <div
-          style={{
-            backgroundColor: "#ffebee",
-            color: "#c62828",
-            padding: "12px",
-            borderRadius: "8px",
-            marginBottom: "16px",
-          }}
-        >
-          {error}
-        </div>
+        <div className="bg-red-100 text-red-700 p-4 rounded mb-4">{error}</div>
       )}
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}
-      >
-        {filteredConversations.map((conv) => {
-          const otherUser = getOtherUser(conv.participants, userId || "");
-          console.log(otherUser);
-          const displayName = getDisplayName(otherUser);
+      <div className="grid grid-cols-3 gap-6">
+        <div className="col-span-1 bg-white rounded-lg shadow p-4 overflow-y-auto max-h-[80vh]">
+          {filteredConversations.map((conv) => {
+            const otherUser = getOtherUser(conv.participants, userId);
+            const displayName = getDisplayName(otherUser);
 
-          return (
-            <Link
-              key={conv._id}
-              to={`/chat/${otherUser?._id}`}
-              style={{
-                textDecoration: "none",
-                color: "inherit",
-                backgroundColor: "#ffffff",
-                borderRadius: "12px",
-                padding: "16px",
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                transition: "transform 0.2s, box-shadow 0.2s",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                cursor: "pointer",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.boxShadow = "0 4px 8px rgba(0,0,0,0.1)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "none";
-                e.currentTarget.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
-              }}
-            >
+            return (
               <div
-                style={{
-                  position: "relative",
-                  width: "56px",
-                  height: "56px",
-                }}
+                key={conv._id}
+                onClick={() => setSelectedConversation(conv)}
+                className={`p-4 rounded-md shadow mb-2 cursor-pointer hover:bg-gray-100 ${selectedConversation?._id === conv._id ? "bg-gray-100" : "bg-white"}`}
               >
-                <img
-                  src={
-                    conv.avatar ||
-                    `https://ui-avatars.com/api/?name=${displayName}&background=random`
-                  }
-                  alt={displayName}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                  }}
-                />
-                {conv.isOnline && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "2px",
-                      right: "2px",
-                      width: "12px",
-                      height: "12px",
-                      backgroundColor: "#4CAF50",
-                      borderRadius: "50%",
-                      border: "2px solid #ffffff",
-                    }}
+                <div className="flex items-center gap-4">
+                  <img
+                    src={conv.avatar || `https://ui-avatars.com/api/?name=${displayName}&background=random`}
+                    alt={displayName}
+                    className="w-12 h-12 rounded-full object-cover"
                   />
-                )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-semibold text-sm truncate">{displayName}</h3>
+                      <span className="text-xs text-gray-500">{formatTime(conv.updatedAt)}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">{conv.lastMessage}</p>
+                    {conv.lastSeen && !conv.isOnline && (
+                      <p className="text-xs text-gray-400 mt-1">Last seen {formatTime(conv.lastSeen)}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="col-span-2 bg-white rounded-lg shadow p-4">
+          {selectedConversation ? (
+            <>
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <h3 className="font-semibold">
+                    {getDisplayName(getOtherUser(selectedConversation.participants, userId))}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    {getOtherUser(selectedConversation.participants, userId)?.email || ""}
+                  </p>
+                </div>
+                <span className="text-xs px-3 py-1 bg-yellow-200 rounded-full">
+                  {selectedConversation.status === "resolved"
+                    ? "Resolved"
+                    : selectedConversation.lastMessage
+                      ? "Active"
+                      : "Pending"}
+                </span>
               </div>
 
-              <div
-                style={{
-                  flex: 1,
-                  minWidth: 0,
+              <Chat
+                currentUserId={userId}
+                otherUserId={getOtherUser(selectedConversation.participants, userId)?._id || ""}
+                otherUsername={getDisplayName(getOtherUser(selectedConversation.participants, userId))}
+              />
+
+              <button
+                className={`mt-4 text-white px-4 py-2 rounded ${isButtonEnabled ? "bg-green-600" : "bg-gray-400 cursor-not-allowed"}`}
+                disabled={!isButtonEnabled}
+                onClick={async () => {
+                  if (!selectedConversation || !isButtonEnabled) return;
+
+                  try {
+                    const response = await fetch(`/api/conversation/${selectedConversation._id}/status`, {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${sessionStorage.getItem("token")}`,
+                      },
+                      body: JSON.stringify({ status: "resolved", lastResolvedAt: new Date().toISOString() }),
+                    });
+
+                    if (response.ok) {
+                      const updatedConv = {
+                        ...selectedConversation,
+                        status: "resolved",
+                        lastResolvedAt: new Date().toISOString(),
+                      };
+                      setSelectedConversation(updatedConv);
+                      const newList = conversations.map(c => (c._id === updatedConv._id ? updatedConv : c));
+                      setConversations(newList);
+                      setCounts(refreshCounts(newList));
+                    } else {
+                      console.error("Failed to update status");
+                    }
+                  } catch (error) {
+                    console.error("Error updating status:", error);
+                  }
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "baseline",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <h3
-                    style={{
-                      margin: 0,
-                      fontSize: "16px",
-                      fontWeight: 600,
-                      color: "#1a1a1a",
-                    }}
-                  >
-                    {displayName}
-                  </h3>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      color: "#666666",
-                    }}
-                  >
-                    {formatTime(conv.updatedAt)}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "14px",
-                      color: "#666666",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      maxWidth: "400px",
-                    }}
-                  >
-                    {conv.lastMessage}
-                  </p>
-                  {conv.unreadCount && conv.unreadCount > 0 && (
-                    <div
-                      style={{
-                        backgroundColor: "#0084ff",
-                        color: "#ffffff",
-                        borderRadius: "50%",
-                        minWidth: "20px",
-                        height: "20px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        padding: "0 6px",
-                      }}
-                    >
-                      {conv.unreadCount}
-                    </div>
-                  )}
-                </div>
-
-                {conv.lastSeen && !conv.isOnline && (
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#666666",
-                      marginTop: "4px",
-                    }}
-                  >
-                    Last seen {formatTime(conv.lastSeen)}
-                  </div>
-                )}
-              </div>
-            </Link>
-          );
-        })}
+                Mark as Resolved
+              </button>
+            </>
+          ) : (
+            <p className="text-center text-gray-500">Select a conversation</p>
+          )}
+        </div>
       </div>
     </div>
   );
