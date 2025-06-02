@@ -85,4 +85,82 @@ router.get("/", protect, async (req, res) => {
   res.json({ conversations: populatedConvos });
 });
 
+// GET /api/conversation/employee-status
+// Returns status of each employee's conversation
+router.get("/employee-status", async (req, res) => {
+  try {
+    const conversations = await Conversation.find({});
+
+    // Create a mapping of employeeId to their latest status
+    const statusMap: Record<string, string> = {};
+
+    conversations.forEach((conv) => {
+      // Assuming the second participant is the employee
+      const employeeId = conv.participants[1]?.toString();
+      const status = conv.status || "pending";
+
+      if (employeeId) {
+        // Prefer "active" over "pending" or "resolved"
+        if (!statusMap[employeeId] || status === "active") {
+          statusMap[employeeId] = status;
+        }
+      }
+    });
+
+    // Convert to an array of { employeeId, status }
+    const result = Object.entries(statusMap).map(([employeeId, status]) => ({
+      employeeId,
+      status,
+    }));
+
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching employee statuses:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Update conversation status
+// PUT /api/conversation/:id/status
+router.put("/:id/status", protect, async (req, res) => {
+  console.log("HIT: PUT /:id/status", req.params.id, req.body);
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!["pending", "active", "resolved"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status value" });
+  }
+
+  try {
+    const updateFields: any = { status };
+
+    // If marking as resolved, set lastResolvedAt to current time
+    if (status === "resolved") {
+      updateFields.lastResolvedAt = new Date();
+    } else {
+      updateFields.lastResolvedAt = null;
+    }
+
+    const updatedConversation = await Conversation.findByIdAndUpdate(
+      id,
+      updateFields,
+      { new: true }
+    );
+
+    if (!updatedConversation) {
+      return res.status(404).json({ message: "Conversation not found" });
+    }
+
+    res.status(200).json({
+      message: "Status updated",
+      conversation: updatedConversation,
+    });
+  } catch (error) {
+    console.error("Status update error:", error);
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
+
 export default router;

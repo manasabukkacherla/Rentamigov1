@@ -10,6 +10,7 @@ export interface IMessage extends Document {
   text: string;
   createdAt: Date;
   read: boolean;
+  lastResolvedAt?: string;
 }
 // Define the message schema.
 // Here we define what data each message should store.
