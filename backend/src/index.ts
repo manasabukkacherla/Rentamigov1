@@ -287,9 +287,6 @@ app.use('/api/property-media', propertyMediaRoutes);
 // Residential Media Routes
 app.use('/api/residential/media', residentialMediaRoutes);
 
-// All properties route
-app.use('/api/all', allpropertiesData);
-
 // Redirect old pg-media routes to the new integrated endpoints
 app.use("/api/residential/pg-media", (req, res, next) => {
   // Rewrite the URL to use the new media endpoints in residentialPgmain

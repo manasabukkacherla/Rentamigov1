@@ -12,7 +12,6 @@ import ICommercialRentPlot from '../models/commercial/commercialRentPlot';
 import ICommercialRentShop from '../models/commercial/commercialrentshop';
 import { CommercialRentShowroom } from '../models/commercial/commercialRentShowroom';
 
-
 // Commercial Sell Models
 import ICommercialSellAgriculture from '../models/commercial/CommercialSellAgriculture';
 import ICommercialSellCoveredSpace from '../models/commercial/CommercialSellCoveredSpace';
@@ -37,106 +36,211 @@ import CommercialLeaseOfficeSpace from '../models/commercial/CommercialLeaseOffi
 import CommercialLeaseWarehouse from '../models/commercial/CommercialLeaseWarehouse';
 import { CommercialLeaseShed } from '../models/commercial/CommercialLeaseShed';
 
-
-
 // Residential Rent Models
 import IResidentialRentApartment from '../models/residential/residentialRentApartment';
 import IResidentialRentBuilderFloor from '../models/residential/residentialRentBuilderFloor';
 import IResidentialRentIndependent from '../models/residential/residentialRentIndependent';
+
 // Residential Sale Models
 import IResidentialSaleApartment from '../models/residential/residentialSaleApartment';
 import IResidentialSaleBuilderFloor from '../models/residential/residentialSaleBuilderFloor';
 import ISaleIndependentHouse from '../models/residential/saleIndependentHouse';
 import ISalePlot from '../models/residential/salePlot';
+
 // Residential Lease Models
 import IResidentialLeaseApartment from '../models/residential/residentialLeaseAppartment';
 import IResidentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
 import IResidentialLeaseIndependentHouse from '../models/residential/residentialLeaseIndependentHouse';
-import { error } from 'console';
 
 const router = express.Router();
 
-router.get('/all', async (req, res) => {
+// Normalizer helper to pick only needed fields
+const normalizeProperty = (item: any) => ({
+  id: item._id?.toString() || item.propertyId || '',
+  title: item.basicInformation?.title || item.title || item.pgDetails?.name || 'Unnamed Property',
+  propertyName: item.metadata?.propertyName || ''
+});
+
+// ✅ Fetch all properties (limited results for each), select only needed fields, normalize before sending response
+router.get('/', async (req, res) => {
   try {
-    // Commercial Rent Properties
-    const commercialRentProperties = {
-      agriculture: await ICommercialRentAgriculture.find().limit(10),
-      coveredSpace: await ICommercialRentCoveredSpace.find().limit(10),
-      officeSpace: await ICommercialRentOfficeSpace.find().limit(10),
-      others: await ICommercialRentOthers.find().limit(10),
-      retailStore: await ICommercialRentRetailStore.find().limit(10),
-      shed: await ICommercialRentShed.find().limit(10),
-      warehouse: await ICommercialRentWarehouse.find().limit(10),
-      plot: await ICommercialRentPlot.find().limit(10),
-      shop: await ICommercialRentShop.find().limit(10),
-      showroom: await CommercialRentShowroom.find().limit(10)
-    };
+    const results = await Promise.allSettled([
+      // Commercial Rent
+      ICommercialRentAgriculture.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentCoveredSpace.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentOfficeSpace.find().limit(10).select('_id basicInformation.title  metadata.propertyName'),
+      ICommercialRentOthers.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentRetailStore.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentShed.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentWarehouse.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentPlot.find().limit(10).select('_id basicInformation.title'),
+      ICommercialRentShop.find().limit(10).select('_id basicInformation.title'),
+      CommercialRentShowroom.find().limit(10).select('_id basicInformation.title'),
 
-    // Residential Rent Properties
-    const residentialRentProperties = {
-      apartment: await IResidentialRentApartment.find().limit(10),
-      builderFloor: await IResidentialRentBuilderFloor.find().limit(10),
-      independent: await IResidentialRentIndependent.find().limit(10)
-    };
+      // Commercial Sell
+      ICommercialSellAgriculture.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellCoveredSpace.find().limit(10).select('_id basicInformation.title'),
+       ICommercialSellOfficeSpace.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellOthers.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellRetailStore.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellShed.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellWarehouse.find().limit(10).select('_id basicInformation.title'),
+      ICommercialPlot.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellShop.find().limit(10).select('_id basicInformation.title'),
+      ICommercialSellShowroom.find().limit(10).select('_id basicInformation.title'),
 
-    // Commercial Sale Properties
-    const commercialSaleProperties = {
-      agriculture: await ICommercialSellAgriculture.find().limit(10),
-      coveredSpace: await ICommercialSellCoveredSpace.find().limit(10),
-      officeSpace: await ICommercialSellOfficeSpace.find().limit(10),
-      others: await ICommercialSellOthers.find().limit(10),
-      retailStore: await ICommercialSellRetailStore.find().limit(10),
-      shed: await ICommercialSellShed.find().limit(10),
-      warehouse: await ICommercialSellWarehouse.find().limit(10),
-      plot: await ICommercialPlot.find().limit(10),
-      shop: await ICommercialSellShop.find().limit(10),
-      showroom: await ICommercialSellShowroom.find().limit(10)
-    };
+      // Commercial Lease
+      ICommercialLeaseAgriculture.find().limit(10).select('_id basicInformation.title'),
+      ICommercialLeaseOthers.find().limit(10).select('_id basicInformation.title'),
+      ICommercialLeaseRetailStore.find().limit(10).select('_id basicInformation.title'),
+      ICommercialLeaseShop.find().limit(10).select('_id basicInformation.title'),
+      ICommercialLeasePlot.find().limit(10).select('_id basicInformation.title'),
+      ICommercialLeaseShowroom.find().limit(10).select('_id basicInformation.title'),
+      CommercialLeaseCoveredSpace.find().limit(10).select('_id basicInformation.title'),
+      CommercialLeaseOfficeSpace.find().limit(10).select('_id basicInformation.title'),
+      CommercialLeaseWarehouse.find().limit(10).select('_id basicInformation.title'),
+      CommercialLeaseShed.find().limit(10).select('_id basicInformation.title'),
 
-    // Residential Sale Properties
-    const residentialSaleProperties = {
-      apartment: await IResidentialSaleApartment.find().limit(10),
-      builderFloor: await IResidentialSaleBuilderFloor.find().limit(10),
-      independentHouse: await ISaleIndependentHouse.find().limit(10),
-      plot: await ISalePlot.find().limit(10)
-    };
+      // Residential Rent
+      IResidentialRentApartment.find().limit(10).select('_id basicInformation.title'),
+      IResidentialRentBuilderFloor.find().limit(10).select('_id basicInformation.title'),
+      IResidentialRentIndependent.find().limit(10).select('_id basicInformation.title'),
 
-    // Commercial Lease Properties
-    const commercialLeaseProperties = {
-      agriculture: await ICommercialLeaseAgriculture.find().limit(10),
-      others: await ICommercialLeaseOthers.find().limit(10),
-      retailStore: await ICommercialLeaseRetailStore.find().limit(10),
-      shop: await ICommercialLeaseShop.find().limit(10),
-      showroom: await ICommercialLeaseShowroom.find().limit(10),
-      coveredSpace: await CommercialLeaseCoveredSpace.find().limit(10),
-      officeSpace: await CommercialLeaseOfficeSpace.find().limit(10),
-      warehouse: await CommercialLeaseWarehouse.find().limit(10),
-      plot: await ICommercialLeasePlot.find().limit(10),
-      shed: await CommercialLeaseShed.find().limit(10)
-    };
+      // Residential Sale
+      IResidentialSaleApartment.find().limit(10).select('_id basicInformation.title'),
+      IResidentialSaleBuilderFloor.find().limit(10).select('_id basicInformation.title'),
+      ISaleIndependentHouse.find().limit(10).select('_id basicInformation.title'),
+      ISalePlot.find().limit(10).select('_id basicInformation.title'),
 
-    // Residential Lease Properties
-    const residentialLeaseProperties = {
-      apartment: await IResidentialLeaseApartment.find().limit(10),
-      builderFloor: await IResidentialLeaseBuilderFloor.find().limit(10),
-      independentHouse: await IResidentialLeaseIndependentHouse.find().limit(10)
-    };
+      // Residential Lease
+      IResidentialLeaseApartment.find().limit(10).select('_id basicInformation.title'),
+      IResidentialLeaseBuilderFloor.find().limit(10).select('_id basicInformation.title'),
+      IResidentialLeaseIndependentHouse.find().limit(10).select('_id basicInformation.title'),
+    ]);
 
-    res.status(200).json({
+    // Check for any rejected promise
+    const failed = results.find(r => r.status === 'rejected');
+    if (failed) {
+      console.error('Fetch error:', failed.reason);
+      return res.status(500).json({
+        success: false,
+        message: 'Error fetching some property data',
+        error: failed.reason
+      });
+    }
+
+    // Destructure and normalize results
+    const [
+      rentAgriculture,
+      rentCoveredSpace,
+      rentOfficeSpace,
+      rentOthers,
+      rentRetailStore,
+      rentShed,
+      rentWarehouse,
+      rentPlot,
+      rentShop,
+      rentShowroom,
+
+      sellAgriculture,
+      sellCoveredSpace,
+      sellOfficeSpace,
+      sellOthers,
+      sellRetailStore,
+      sellShed,
+      sellWarehouse,
+      sellPlot,
+      sellShop,
+      sellShowroom,
+
+      leaseAgriculture,
+      leaseOthers,
+      leaseRetailStore,
+      leaseShop,
+      leasePlot,
+      leaseShowroom,
+      leaseCoveredSpace,
+      leaseOfficeSpace,
+      leaseWarehouse,
+      leaseShed,
+
+      resRentApartment,
+      resRentBuilderFloor,
+      resRentIndependent,
+
+      resSaleApartment,
+      resSaleBuilderFloor,
+      resSaleIndependentHouse,
+      resSalePlot,
+
+      resLeaseApartment,
+      resLeaseBuilderFloor,
+      resLeaseIndependentHouse
+    ] = results.map(r => (r.status === 'fulfilled' ? r.value.map(normalizeProperty) : []));
+
+    return res.status(200).json({
       success: true,
       message: 'All properties fetched successfully',
       data: {
-      commercialRent: commercialRentProperties,
-      residentialRent: residentialRentProperties,
-      commercialSale: commercialSaleProperties,
-      residentialSale: residentialSaleProperties,
-      commercialLease: commercialLeaseProperties,
-      residentialLease: residentialLeaseProperties
+        commercialRent: {
+          agriculture: rentAgriculture,
+          coveredSpace: rentCoveredSpace,
+          officeSpace: rentOfficeSpace,
+          others: rentOthers,
+          retailStore: rentRetailStore,
+          shed: rentShed,
+          warehouse: rentWarehouse,
+          plot: rentPlot,
+          shop: rentShop,
+          showroom: rentShowroom
+        },
+        commercialSale: {
+          agriculture: sellAgriculture,
+          coveredSpace: sellCoveredSpace,
+          officeSpace: sellOfficeSpace,
+          others: sellOthers,
+          retailStore: sellRetailStore,
+          shed: sellShed,
+          warehouse: sellWarehouse,
+          plot: sellPlot,
+          shop: sellShop,
+          showroom: sellShowroom
+        },
+        commercialLease: {
+          agriculture: leaseAgriculture,
+          others: leaseOthers,
+          retailStore: leaseRetailStore,
+          shop: leaseShop,
+          plot: leasePlot,
+          showroom: leaseShowroom,
+          coveredSpace: leaseCoveredSpace,
+          officeSpace: leaseOfficeSpace,
+          warehouse: leaseWarehouse,
+          shed: leaseShed
+        },
+        residentialRent: {
+          apartment: resRentApartment,
+          builderFloor: resRentBuilderFloor,
+          independent: resRentIndependent
+        },
+        residentialSale: {
+          apartment: resSaleApartment,
+          builderFloor: resSaleBuilderFloor,
+          independentHouse: resSaleIndependentHouse,
+          plot: resSalePlot
+        },
+        residentialLease: {
+          apartment: resLeaseApartment,
+          builderFloor: resLeaseBuilderFloor,
+          independentHouse: resLeaseIndependentHouse
+        }
+      }
+    });
+  } catch (err) {
+    console.error('Unhandled error in all properties route:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: 'Server error', error: err });
     }
-  });
-  } catch (error:any) {
-    console.error('Error fetching properties:', error);
-    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
