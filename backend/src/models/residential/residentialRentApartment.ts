@@ -108,7 +108,15 @@ interface societyAmenities {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: string;
+  intent: 'Rent';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
+  updatedBy?: Schema.Types.ObjectId | string;
+  updatedAt?: Date;
 }
+
+
 
 interface availability {
   type: string;
@@ -312,8 +320,18 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
     documents: [{ type: String, required: false }]
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    propertyName: { type: String, default:'Appartment' },
+    intent: { type: String, default: 'Rent' },
+    status: { 
+      type: String, 
+      enum: ['Available', 'Rented', 'Under Maintenance'], 
+      default: 'Available' 
+    },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    updatedAt: { type: Date }
   }
 }, {
   timestamps: false

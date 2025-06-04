@@ -140,6 +140,15 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Appartment';
+  intent: 'Rent';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
+}
+
 interface IMedia {
   photos: {
     exterior: (File | string)[];
@@ -184,7 +193,8 @@ interface FormData {
     date: string;
   };
   media: IMedia;
-}
+  metadata: IMetadata;
+};
 
 const Apartment = () => {
   const [currentStep, setCurrentStep] = useState(1)
@@ -318,7 +328,15 @@ const Apartment = () => {
       },
       videoTour: undefined as (File | string | undefined),
       documents: [] as (File | string)[]
-    }
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: 'Residential',
+      propertyName: 'Appartment',
+      intent: 'Rent',
+      status: 'Available'
+    },
   }
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -444,6 +462,14 @@ const Apartment = () => {
       },
       videoTour: undefined as (File | string | undefined),
       documents: [] as (File | string)[]
+    },
+    metadata: {
+      createdBy: '',
+      createdAt: new Date(),
+      propertyType: 'Residential',
+      propertyName: 'Appartment',
+      intent: 'Rent',
+      status: 'Available'
     }
   })
 
@@ -764,7 +790,11 @@ const Apartment = () => {
           media: processMediaForSubmission(formData.media),
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Residential',
+            propertyName: 'Appartment',
+            intent: 'Rent',
+            status: 'Available'
           }
         };
 
