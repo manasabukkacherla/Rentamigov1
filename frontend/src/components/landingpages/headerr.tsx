@@ -128,9 +128,9 @@ const Headerr: React.FC = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const toggleChatbot = () => {
-    setShowChatbot(!showChatbot);
-  };
+ const toggleChatbot = () => {
+  navigate("/findEmployee");
+};
 
   const handleNewChatNotification = (notification: ChatNotification) => {
     setChatNotifications((prev) => {
