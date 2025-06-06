@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-COMLEPL";
+        const prefix = "RA-RESSEPL";
         const highestPlot = await SalePlot.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
         }).sort({ propertyId: -1 });
@@ -48,7 +48,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMLEPL${timestamp}`;
+        return `RA-RESSEPL${timestamp}`;
     }
 };
 
@@ -315,7 +315,7 @@ export const getAllPlots = async (req: Request, res: Response) => {
 // Get a specific commercial lease plot by ID
 export const getPlotById = async (req: Request, res: Response) => {
     try {
-        const leasePlot = await SalePlot.findById(req.params.id)
+        const leasePlot = await SalePlot.findOne({propertyId: req.params.propertyId})
             .populate('metadata.createdBy', 'name email')
             .select('-__v');
 

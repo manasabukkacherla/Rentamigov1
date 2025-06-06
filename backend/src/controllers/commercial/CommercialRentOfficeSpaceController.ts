@@ -231,7 +231,8 @@ export const getOfficeSpaces = async (req: Request, res: Response) => {
 // Get single office space listing
 export const getOfficeSpaceById = async (req: Request, res: Response) => {
     try {
-        const officeSpace = await CommercialOfficeSpace.findById(req.params.id);
+        const propertyId = req.params.propertyId;
+        const officeSpace = await CommercialOfficeSpace.findOne({propertyId});
 
         if (!officeSpace) {
             return res.status(404).json({

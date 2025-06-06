@@ -3,7 +3,7 @@ import ResidentialSaleApartment from '../../models/residential/saleApartment';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-RESREAP";
+        const prefix = "RA-RESSEAP";
 
         const highestShowroom = await ResidentialSaleApartment.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
@@ -41,7 +41,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-RESREAP${timestamp}`;
+        return `RA-RESSEAP${timestamp}`;
     }
 };
 
@@ -120,7 +120,7 @@ export const getAllSaleApartments = async (req: Request, res: Response) => {
 
 export const getSaleApartmentById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const apartment = await ResidentialSaleApartment.findOne({propertyId: req.params.propertyId});
     
     if (!apartment) {
       return res.status(404).json({

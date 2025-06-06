@@ -177,7 +177,7 @@ export const getAllRentIndependentHouses = async (req: Request, res: Response) =
 
 export const getRentIndependentHouseById = async (req: Request, res: Response) => {
   try {
-    const independentHouse = await ResidentialRentIndependentHouse.findById(req.params.id);
+    const independentHouse = await ResidentialRentIndependentHouse.findOne({propertyId: req.params.propertyId});
     
     if (!independentHouse) {
       return res.status(404).json({

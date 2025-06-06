@@ -356,7 +356,8 @@ export const getAllPlots = async (req: Request, res: Response) => {
 // Get a specific commercial plot by ID
 export const getPlotById = async (req: Request, res: Response) => {
     try {
-        const plot = await SellPlot.findById(req.params.id)
+        const propertyId = req.params.propertyId;
+        const plot = await SellPlot.findById({propertyId})
             .populate('metadata.createdBy', 'name email')
             .select('-__v');
 

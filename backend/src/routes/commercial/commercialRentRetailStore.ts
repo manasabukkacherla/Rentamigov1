@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', createCommercialRentRetailStore);
 router.get('/', getAllCommercialRentRetail);
-router.get('/:id', getCommercialRentRetailById);
+router.get('/:propertyId', getCommercialRentRetailById);
 router.put('/:id', updateCommercialRentRetail);
 router.delete('/:id', deleteCommercialRentRetail);
 

@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMSELS";
+    const prefix = "RA-COMSERS";
     
     const highestShop = await CommercialSellRetailStore.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
@@ -51,7 +51,7 @@ const generatePropertyId = async (): Promise<string> => {
   } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSELS${timestamp}`;
+    return `RA-COMSERS${timestamp}`;
   }
 };
 
@@ -172,13 +172,8 @@ export const getAllCommercialSellRetailStores = async (req: Request, res: Respon
 
 export const getCommercialSellRetailStoreById = async (req: Request, res: Response) => {
   try {
-    const shop = await CommercialSellRetailStore.findOne({
-      $or: [
-        { propertyId: req.params.id },
-        { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null }
-      ],
-      'metadata.status': { $ne: 'deleted' }
-    });
+    const propertyId = req.params.propertyId;
+    const shop = await CommercialSellRetailStore.findOne({ propertyId });
 
     if (!shop) {
       return res.status(404).json({

@@ -206,7 +206,7 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
   
   export const getSellOfficeSpaceById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
+      const propertyId = req.params.propertyId;
       const property = await CommercialSellOfficeSpace.findOne({ propertyId });
       
       if (!property) {

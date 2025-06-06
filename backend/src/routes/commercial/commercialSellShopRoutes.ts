@@ -19,7 +19,7 @@ const uploadFields = [
 // Create a new commercial shop listing
 commercialSellShopRoutes.post('/create', authenticateUser, fileUpload.fields(uploadFields), createCommercialShop);
 commercialSellShopRoutes.get('/', getAllCommercialSellShop);
-commercialSellShopRoutes.get('/:id', getCommercialSellShopById);
+commercialSellShopRoutes.get('/:propertyId', getCommercialSellShopById);
 commercialSellShopRoutes.put('/:id', updateCommercialSellShop);
 commercialSellShopRoutes.delete('/:id', deleteCommercialSellShop);
 
