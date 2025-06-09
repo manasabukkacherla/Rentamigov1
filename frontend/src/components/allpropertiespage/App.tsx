@@ -717,6 +717,8 @@ function Allproperties() {
                   <PropertyCard
                     property={property}
                     matchedFields={searchResults.matchedFields}
+
+                    
                   />
                 </div>
               ))}
