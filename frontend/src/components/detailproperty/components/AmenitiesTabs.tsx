@@ -1,12 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PropertyDetails } from '../types';
-import { AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, Gamepad, Shirt, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath, FileWarning as Running, School as Pool, Tent as Tennis, Calculator as Elevator, BatteryCharging, Shield, Target, AlertTriangle, ChevronRight, ChevronLeft } from 'lucide-react';
+import { AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, Gamepad, Shirt, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath, FileWarning as Running, School as Pool, Tent as Tennis, Calculator as Elevator, BatteryCharging, Shield, Target, AlertTriangle, ChevronRight, ChevronLeft, LucideIcon } from 'lucide-react';
+
+// Add IconWrapper component
+const IconWrapper = ({ icon: Icon, className }: { icon: LucideIcon; className?: string }) => {
+  return <Icon className={className} />;
+};
+
+// Add styles
+const progressAnimation = `
+@keyframes progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+`;
+
+const styleSheet = document.createElement("style");
+styleSheet.textContent = progressAnimation;
+document.head.appendChild(styleSheet);
 
 interface AmenitiesTabsProps {
   details: PropertyDetails;
 }
 
-const amenityIcons: Record<string, React.FC> = {
+const amenityIcons: Record<string, LucideIcon> = {
   'Air Conditioner': AirVent,
   'Bed': Bed,
   'Dining Table': Utensils,
@@ -87,10 +104,10 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
     setActiveTab(tabs[newIndex].id);
   };
 
-  const AmenityCard = ({ icon: Icon, label }: { icon: React.FC; label: string }) => (
+  const AmenityCard = ({ icon: Icon, label }: { icon: LucideIcon; label: string }) => (
     <div className="group flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-100">
       <div className="w-12 h-12 bg-white group-hover:bg-gray-50 rounded-lg flex items-center justify-center transition-colors">
-        <Icon className="w-6 h-6 text-gray-900" />
+        <IconWrapper icon={Icon} className="w-6 h-6 text-gray-900" />
       </div>
       <span className="text-center text-sm font-medium text-gray-900 group-hover:text-gray-700">{label}</span>
     </div>
@@ -186,19 +203,14 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
               }`}
               onClick={() => setActiveTab(tab.id)}
             >
-              <Icon className="w-4 h-4" />
+              <IconWrapper icon={Icon} className="w-4 h-4" />
               <span className="font-medium text-sm">{tab.label}</span>
               {activeTab === tab.id && (
                 <div className="absolute bottom-0 left-0 w-full h-1">
                   <div 
-                    className="h-full bg-white/30 rounded-full transition-all duration-5000"
-                    style={{
-                      animation: autoScrollPaused ? 'none' : 'progress 5s linear',
-                      '@keyframes progress': {
-                        from: { width: '0%' },
-                        to: { width: '100%' }
-                      }
-                    }}
+                    className={`h-full bg-white/30 rounded-full transition-all duration-5000 ${
+                      !autoScrollPaused ? 'animate-[progress_5s_linear]' : ''
+                    }`}
                   />
                 </div>
               )}

@@ -11,6 +11,7 @@ interface ChatProps {
   currentUserId: string;
   otherUserId: string;
   otherUsername: string;
+  onConversationUpdate?: (updatedConversation: any) => void; 
 }
 
 interface Message {
@@ -26,6 +27,7 @@ const Chat: React.FC<ChatProps> = ({
   currentUserId,
   otherUserId,
   otherUsername,
+  onConversationUpdate,
 }) => {
   // Define a unique room ID by consistently combining the two user IDs.
   const roomId =
@@ -128,25 +130,34 @@ const Chat: React.FC<ChatProps> = ({
   }, [socket, otherUserId]);
 
   // Function to send a message.
-  const handleSendMessage = (text: string) => {
-    if (socket && text.trim()) {
-      // Construct the message data.
-      const messageData = {
-        senderId: currentUserId,
-        receiverId: otherUserId,
+ const handleSendMessage = (text: string) => {
+  if (socket && text.trim()) {
+    const messageData = {
+      senderId: currentUserId,
+      receiverId: otherUserId,
+      roomId,
+      text,
+      createdAt: new Date().toISOString(),
+      read: false,
+    };
+
+    socket.emit("chatMessage", messageData);
+
+    // Update local message list
+    setMessages((prev) => [...prev, { ...messageData, read: true }]);
+
+    // 🔄 Notify parent (ChatPage) to possibly update the conversation status to "pending"
+    if (onConversationUpdate) {
+      onConversationUpdate({
         roomId,
-        text,
-        createdAt: new Date().toISOString(),
-        read: false,
-      };
-
-      // Emit the chat message using our socket.
-      socket.emit("chatMessage", messageData);
-
-      // Since the current user is sending the message, mark it as read.
-      setMessages((prev) => [...prev, { ...messageData, read: true }]);
+        lastMessage: text,
+        status: "pending",
+        lastResolvedAt: null,
+      });
     }
-  };
+  }
+};
+
 
   // Function to handle typing indicator
   const handleTyping = (isTyping: boolean) => {

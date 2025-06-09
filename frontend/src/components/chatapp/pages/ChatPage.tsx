@@ -15,21 +15,18 @@ interface User {
 }
 
 const ChatPage: React.FC = () => {
-  // Extract the other user's ID from the URL.
   const { otherUserId } = useParams<{ otherUserId: string }>();
   const navigate = useNavigate();
 
-  // State to store the other user's information
   const [otherUser, setOtherUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  // Get currentUserId from sessionStorage with a fallback
+  const [conversation, setConversation] = useState<any>(null);
+
   const currentUserId = sessionStorage.getItem("userId") || "";
 
-  // Function to get a display name for a user
   const getDisplayName = (user: User | null): string => {
     if (!user) return "Unknown User";
-    // For both employees and users, use the name field
     return user.name || user.username || `User ${user._id.substring(0, 6)}`;
   };
 
@@ -40,7 +37,6 @@ const ChatPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // First try to fetch as a user
         let response = await fetch(`/api/user/${otherUserId}`, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`,
@@ -50,7 +46,6 @@ const ChatPage: React.FC = () => {
 
         let data = await response.json();
 
-        // If not found as a user, try to fetch as an employee
         if (!response.ok || !data.user) {
           response = await fetch(`/api/employees/${otherUserId}`, {
             headers: {
@@ -61,7 +56,6 @@ const ChatPage: React.FC = () => {
 
           data = await response.json();
 
-          // If employee data is found, transform it to match our User interface
           if (response.ok && data.data) {
             setOtherUser({
               _id: data.data._id,
@@ -210,13 +204,23 @@ const ChatPage: React.FC = () => {
             {otherUser?.email || ""}
           </p>
         </div>
+
+        {conversation?.status === "resolved" ? (
+          <span className="text-xs px-3 py-1 bg-yellow-200 rounded-full ml-auto">
+            Resolved
+          </span>
+        ) : (
+          <span className="text-xs px-3 py-1 bg-blue-200 rounded-full ml-auto">
+            Active
+          </span>
+        )}
       </div>
 
-      {/* Pass the IDs to our Chat component so it can join the proper room */}
       <Chat
         currentUserId={currentUserId}
         otherUserId={otherUserId}
         otherUsername={displayName}
+        onConversationUpdate={(updatedConv) => setConversation(updatedConv)}
       />
     </div>
   );
