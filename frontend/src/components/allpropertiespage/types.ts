@@ -77,7 +77,8 @@ export interface Filters {
 export interface Property {
   id: string;
   title: string;
-  type: PropertyType;
+  propertyType: PropertyType;
+  propertyName: string;
   listingType: ListingType;
   price: number;
   location: string;
