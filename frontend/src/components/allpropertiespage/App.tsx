@@ -39,89 +39,6 @@ function Allproperties() {
   ];
 
   // Save recentLocations to localStorage
-
-// Updated useEffect to include showroom data
-// Updated useEffect to include new property data
-React.useEffect(() => {
-  let hasFetched = false;
-
-const fetchAllProperties = async () => {
-  if (hasFetched) return;
-  hasFetched = true;
-
-  try {
-    const endpoints = [
-      '/api/commercial/lease/agriculture',
-      '/api/commercial/lease/others',
-      '/api/commercial/lease/covered-space',
-      '/api/commercial/lease/plot',
-      '/api/commercial/lease/retail-store',
-      '/api/commercial/lease/sheds',
-      '/api/commercial/lease/shops',
-      '/api/commercial/lease/showrooms',
-      '/api/commercial/lease/warehouses',
-      '/api/commercial/lease/office-space',
-
-      '/api/commercial/rent/agriculture',
-      '/api/commercial/rent/covered-space',
-      '/api/commercial/rent/others',
-      '/api/commercial/rent/warehouses',
-      '/api/commercial/rent/office-spaces',
-      '/api/commercial/rent/shops',
-      '/api/commercial/rent/retail-stores',
-      '/api/commercial/rent/showrooms',
-      '/api/commercial/rent/sheds',
-      '/api/commercial/rent/plots',
-
-      '/api/commercial/sell/agriculture',
-      '/api/commercial/sell/covered-space',
-      '/api/commercial/sell/office-space',
-      '/api/commercial/sell/others',
-      '/api/commercial/sell/retail-store',
-      '/api/commercial/sell/sheds',
-      '/api/commercial/sell/plots',
-      '/api/commercial/sell/showrooms',
-      '/api/commercial/sell/warehouses',
-      '/api/commercial/sell/shops',
-
-      '/api/residential/sale/apartments',
-      '/api/residential/sale/builder-floor',
-      '/api/residential/sale/plots',
-      '/api/residential/sale/independent-house',
-
-      '/api/residential/rent/apartment',
-      '/api/residential/rent/builder-floor',
-      '/api/residential/rent/independent-house',
-
-      '/api/residential/lease/independent-house',
-      '/api/residential/lease/appartment',
-      '/api/residential/lease/builder-floor',
-
-      '/api/residential/pgmain'
-    ];
-
-    const responses = await Promise.all(endpoints.map(url => fetch(url)));
-
-    for (let i = 0; i < responses.length; i++) {
-      if (!responses[i].ok) {
-        const text = await responses[i].text();
-        throw new Error(`Error fetching ${endpoints[i]}: ${responses[i].status} - ${text}`);
-      }
-    }
-
-    const jsonData = await Promise.all(responses.map(r => r.json()));
-
-    const allProperties = jsonData.flatMap(data => data.data || []);
-
-    setFetchedProperties(allProperties);
-  } catch (error) {
-    console.error('Error fetching properties:', error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-
   // Updated useEffect to include showroom data
   // Updated useEffect to include new property data
   React.useEffect(() => {
@@ -286,7 +203,6 @@ const fetchAllProperties = async () => {
         setLoading(false);
       }
     };
-
 
     fetchAllProperties();
 
