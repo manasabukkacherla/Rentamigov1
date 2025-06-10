@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 interface IResidentialSaleBuilderFloor extends Document {
   propertyId: string;
   basicInformation: {
-    propertyName: string;
+    title: string;
     address: {
       flatNo: number;
       showFlatNo: boolean;
@@ -175,6 +175,12 @@ interface IResidentialSaleBuilderFloor extends Document {
   metadata: {
     createdBy: Schema.Types.ObjectId | string;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
+    updatedBy: Schema.Types.ObjectId | string;
+    updatedAt: Date;
   };
 }
 
@@ -185,7 +191,7 @@ const residentialSaleBuilderFloorSchema = new mongoose.Schema<IResidentialSaleBu
     unique: false,
   },
   basicInformation: {
-    propertyName: { type: String, required: false },
+    title: { type: String, required: false },
     address: {
       flatNo: { type: Number, required: false },
       showFlatNo: { type: Boolean, required: false },
@@ -356,6 +362,13 @@ const residentialSaleBuilderFloorSchema = new mongoose.Schema<IResidentialSaleBu
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    intent: { type: String, default: 'Sale' },
+    propertyName: { type: String, default: 'Builder Floor' },
+    status: { type: String, default: 'Available' },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    updatedAt: { type: Date, default: Date.now },
+
   }
 }, {
   timestamps: false

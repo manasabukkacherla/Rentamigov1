@@ -1376,7 +1376,11 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               ...updatedFormData,
               metadata: {
                 createdBy: author,
-                createdAt: new Date()
+                createdAt: new Date(),
+                propertyType: "Residential",
+                propertyName: "Builder Floor",
+                intent: "Lease",
+                status: "Available"
               }
             });
 

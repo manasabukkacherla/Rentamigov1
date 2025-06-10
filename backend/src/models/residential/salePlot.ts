@@ -129,6 +129,12 @@ interface IMedia {
 interface IMetadata {
     createdBy?: Schema.Types.ObjectId | null;
      createdAt: Date;
+     propertyType: string;
+     intent: string;
+     propertyName: string;
+     status: string;
+     updatedBy?: Schema.Types.ObjectId | null;
+     updatedAt: Date;
 }
 interface IPlotDetails {
     totalPlotArea: number;
@@ -278,7 +284,13 @@ const ResidentialSalePlotSchema = new Schema<IResidentialSalePlot>({
     },
     metadata: {
       createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-       createdAt: { type: Date, default: Date.now }
+       createdAt: { type: Date, default: Date.now },
+       propertyType: { type: String, default: 'Residential' },
+       intent: { type: String, default: 'Sale' },
+       propertyName: { type: String, default: 'Plot' },
+       status: { type: String, default: 'Available' },
+       updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+       updatedAt: { type: Date, default: Date.now },
     }
 }, {
     timestamps: true

@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 interface IResidentialRentBuilderFloor extends Document {
   propertyId: string;
   basicInformation: {
-    propertyName: string;
+    title: string;
     address: {
       flatNo: number;
       showFlatNo: boolean;
@@ -175,6 +175,12 @@ interface IResidentialRentBuilderFloor extends Document {
   metadata: {
     createdBy: Schema.Types.ObjectId | string;
     createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Builder Floor';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
+    updatedBy?: Schema.Types.ObjectId | string;
+    updatedAt?: Date;
   };
 }
 
@@ -185,7 +191,7 @@ const residentialRentBuilderFloorSchema = new mongoose.Schema<IResidentialRentBu
     unique: false,
   },
   basicInformation: {
-    propertyName: { type: String, required: false },
+    title: { type: String, required: false },
     address: {
       flatNo: { type: Number, required: false },
       showFlatNo: { type: Boolean, required: false },
@@ -356,6 +362,12 @@ const residentialRentBuilderFloorSchema = new mongoose.Schema<IResidentialRentBu
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    intent: { type: String, default: 'Rent' },
+    propertyName: { type: String, default: 'Builder Floor' },
+    status: { type: String, default: 'Available' },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    updatedAt: { type: Date, default: Date.now },
   }
 }, {
   timestamps: false
