@@ -55,7 +55,7 @@ const generatePropertyId = async (): Promise<string> => {
     console.error('Error generating property ID:', error);
     // Fallback to timestamp-based ID if there's an error
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSESH${timestamp}`;
+    return `RA-COMREWH${timestamp}`;
   }
 };
 
@@ -123,7 +123,8 @@ export const getAllRentWarehouses = async (req: Request, res: Response) => {
 // Get a single commercial Rent warehouse by ID
 export const getRentWarehouseById = async (req: Request, res: Response) => {
   try {
-      const warehouse = await CommercialRentWarehouse.findById(req.params.id);
+    const propertyId = req.params.propertyId;
+      const warehouse = await CommercialRentWarehouse.findOne({propertyId});
 
       if (!warehouse) {
           return res.status(404).json({

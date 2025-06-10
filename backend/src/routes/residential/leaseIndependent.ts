@@ -11,7 +11,7 @@ const Router = express.Router();
 
 Router.post('/', createLeaseIndependentHouse);
 Router.get('/', getAllLeaseIndependentHouses);
-Router.get('/:id', getLeaseIndependentHouseById);
+Router.get('/:propertyId', getLeaseIndependentHouseById);
 Router.put('/:id', updateLeaseIndependentHouse);
 Router.delete('/:id', deleteLeaseIndependentHouse);
 

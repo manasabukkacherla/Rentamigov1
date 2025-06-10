@@ -11,6 +11,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   property, 
   matchedFields = new Set()
 }) => {
+  console.log(property)
   const highlightIfMatched = (field: string, content: string) => {
     return matchedFields.has(field) ? (
       <span className="bg-gray-100">{content}</span>

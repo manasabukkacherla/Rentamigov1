@@ -16,7 +16,7 @@ router.post('/', createCommercialLeaseRetail);
 router.get('/', getAllCommercialLeaseRetail);
 
 // Get a specific commercial lease retail property by ID
-router.get('/:id', getCommercialLeaseRetailById);
+router.get('/:propertyId', getCommercialLeaseRetailById);
 
 // Update a commercial lease retail property
 router.put('/:id', updateCommercialLeaseRetail);

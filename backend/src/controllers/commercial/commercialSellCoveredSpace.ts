@@ -104,6 +104,7 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
 
 export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Response) => {
   try {
+    
     const coveredSpaces = await CommercialSellCoveredSpace.find({});
     
     res.status(200).json({
@@ -121,7 +122,7 @@ export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Respo
 
 export const getCommercialSellCoveredSpaceById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialSellCoveredSpace.findOne({ propertyId });
     
     if (!property) {

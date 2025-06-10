@@ -86,7 +86,7 @@ import residentialLeaseIndependentHouse from "./routes/residential/leaseIndepend
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
-import residentialLeaseApartmentRoutes from "./routes/residential/leaseAppartment";
+import residentialLeaseApartmentRoutes from "./routes/residential/leaseApartment";
 import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilderFloor";
 import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
 import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
@@ -191,7 +191,13 @@ const timeout = (
 
 app.use(timeout);
 
-
+// Configure CORS
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Initialize all Socket.IO event handlers
 socketHandler(io);
@@ -248,7 +254,7 @@ app.use("/api/commercial/sell/covered-space", commercialSellCoveredSpaceRoutes);
 //openspace
 
 //lease routes
-app.use("/api/commercial/lease/plot", commercialLeasePlotRoutes);
+app.use("/api/commercial/lease/plots", commercialLeasePlotRoutes);
 app.use("/api/commercial/lease/agriculture", commercialLeaseAgricultureRoutes);
 app.use("/api/commercial/lease/shops", commercialLeaseShopRoutes);
 app.use("/api/commercial/lease/others", commercialLeaseOthersRoutes);
@@ -262,11 +268,11 @@ app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 //rent routes
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
-app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
+app.use("/api/commercial/rent/office-space", commercialRentOfficeSpaceRoutes);
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
 app.use("/api/commercial/rent/covered-space", commercialRentCoveredSpaceRoutes);
 app.use("/api/commercial/rent/shops", commercialRentShop);
-app.use("/api/commercial/rent/retail-stores", commercialRentRetailStore);
+app.use("/api/commercial/rent/retail-store", commercialRentRetailStore);
 app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
@@ -299,7 +305,7 @@ app.use("/api/residential/pg-media", (req, res, next) => {
 });
 
 //sell routes
-app.use("/api/residential/sale/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/apartment", residentialSellApartmentRoutes);
 app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
 app.use("/api/residential/sale/independent-house", residentialSaleIndependentHouseRoutes);
 app.use("/api/residential/sale/builder-floor", residentialSaleBuilderFloorRoutes);

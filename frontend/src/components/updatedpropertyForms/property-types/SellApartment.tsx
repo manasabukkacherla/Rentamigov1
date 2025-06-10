@@ -934,7 +934,7 @@ const SellApartment = () => {
         }
       };
 
-      const response = await axios.post('/api/residential/sale/apartments', transformedData, {
+      const response = await axios.post('/api/residential/sale/apartment', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

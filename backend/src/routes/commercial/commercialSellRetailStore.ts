@@ -21,7 +21,7 @@ commercialSellRetailStore.post(
 commercialSellRetailStore.get('/', getAllCommercialSellRetailStores);
 
 // Get a single commercial sell retail store listing by id (public)
-commercialSellRetailStore.get('/:id', getCommercialSellRetailStoreById);
+commercialSellRetailStore.get('/:propertyId', getCommercialSellRetailStoreById);
 
 // Update a commercial sell retail store listing
 commercialSellRetailStore.put('/:id', protect, updateCommercialSellRetailStore);
