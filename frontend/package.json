@@ -37,6 +37,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "framer-motion": "^12.9.4",
+    "fuse.js": "^7.1.0",
     "idna-uts46-hx": "^6.0.6",
     "lucide-react": "^0.462.0",
     "next": "^15.2.4",
