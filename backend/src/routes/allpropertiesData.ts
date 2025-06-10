@@ -58,7 +58,8 @@ const router = express.Router();
 const normalizeProperty = (item: any) => ({
   id: item._id?.toString() || item.propertyId || '',
   title: item.basicInformation?.title || item.title || item.pgDetails?.name || 'Unnamed Property',
-  propertyName: item.metadata?.propertyName || ''
+  propertyName: item.metadata?.propertyName || '',
+  exteriorImage: item.media?.photos.exterior || ''
 });
 
 // ✅ Fetch all properties (limited results for each), select only needed fields, normalize before sending response
@@ -68,7 +69,7 @@ router.get('/', async (req, res) => {
       // Commercial Rent
       ICommercialRentAgriculture.find().limit(10).select('_id basicInformation.title'),
       ICommercialRentCoveredSpace.find().limit(10).select('_id basicInformation.title'),
-      ICommercialRentOfficeSpace.find().limit(10).select('_id basicInformation.title  metadata.propertyName'),
+      ICommercialRentOfficeSpace.find().limit(10).select('_id basicInformation.title metadata.propertyName'),
       ICommercialRentOthers.find().limit(10).select('_id basicInformation.title'),
       ICommercialRentRetailStore.find().limit(10).select('_id basicInformation.title'),
       ICommercialRentShed.find().limit(10).select('_id basicInformation.title'),
@@ -102,20 +103,20 @@ router.get('/', async (req, res) => {
       CommercialLeaseShed.find().limit(10).select('_id basicInformation.title'),
 
       // Residential Rent
-      IResidentialRentApartment.find().limit(10).select('_id basicInformation.title'),
-      IResidentialRentBuilderFloor.find().limit(10).select('_id basicInformation.title'),
-      IResidentialRentIndependent.find().limit(10).select('_id basicInformation.title'),
+      IResidentialRentApartment.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      IResidentialRentBuilderFloor.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      IResidentialRentIndependent.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
 
       // Residential Sale
-      IResidentialSaleApartment.find().limit(10).select('_id basicInformation.title'),
-      IResidentialSaleBuilderFloor.find().limit(10).select('_id basicInformation.title'),
-      ISaleIndependentHouse.find().limit(10).select('_id basicInformation.title'),
-      ISalePlot.find().limit(10).select('_id basicInformation.title'),
+      IResidentialSaleApartment.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      IResidentialSaleBuilderFloor.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      ISaleIndependentHouse.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      ISalePlot.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
 
       // Residential Lease
-      IResidentialLeaseApartment.find().limit(10).select('_id basicInformation.title'),
-      IResidentialLeaseBuilderFloor.find().limit(10).select('_id basicInformation.title'),
-      IResidentialLeaseIndependentHouse.find().limit(10).select('_id basicInformation.title'),
+      IResidentialLeaseApartment.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      IResidentialLeaseBuilderFloor.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
+      IResidentialLeaseIndependentHouse.find().limit(10).select('_id basicInformation.title media.photos.exterior'),
     ]);
 
     // Check for any rejected promise

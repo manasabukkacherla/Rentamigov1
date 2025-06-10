@@ -32,7 +32,7 @@ const customStyles = `
 
 interface FormData {
   basicInformation: {
-    propertyName: string
+    title: string
     propertyAddress: {
       houseName: string;
       street: string;
@@ -187,6 +187,14 @@ interface FormData {
     };
     videoTour?: File | string;
     documents: (File | string)[];
+  },
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Independent House';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   }
 }
 
@@ -205,7 +213,7 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
       propertyAddress: {
         houseName: "",
         street: "",
@@ -360,6 +368,14 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
       },
       videoTour: undefined,
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Independent House",
+      intent: "Rent",
+      status: "Available"
     }
   })
 
@@ -373,9 +389,9 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
 
 
             <PropertyName
-              propertyName={formData.basicInformation.propertyName}
+              propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) =>
-                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))
               }
             />
           </div>
@@ -723,7 +739,11 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Independent House",
+          intent: "Rent",
+          status: "Available"
         }
       };
 

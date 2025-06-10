@@ -211,6 +211,10 @@ interface pricedetails {
 interface IMetadata {
   createdBy: string;
   createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
 }
 
 interface availability {
@@ -429,7 +433,11 @@ const initialFormData = {
   },
   metadata: {
     createdBy: "",
-    createdAt: new Date()
+    createdAt: new Date(),
+    propertyType: "Residential",
+    propertyName: "Apartment",
+    intent: "Sell",
+    status: "Available"
   },
   availability: {
     type: "immediate",
@@ -603,7 +611,11 @@ const SellApartment = () => {
     },
     metadata: {
       createdBy: "",
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Apartment",
+      intent: "Sell",
+      status: "Available"
     },
     availability: {
       type: "immediate",
@@ -930,7 +942,11 @@ const SellApartment = () => {
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Apartment",
+          intent: "Sell",
+          status: "Available"
         }
       };
 

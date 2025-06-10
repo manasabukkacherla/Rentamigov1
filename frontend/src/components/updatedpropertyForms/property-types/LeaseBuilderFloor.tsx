@@ -191,6 +191,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: string;
   createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Builder Floor';
+  intent: 'Lease';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
 }
 
 interface ValidationError {
@@ -340,12 +344,16 @@ interface FormData {
   metadata: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Builder Floor';
+    intent: 'Lease';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
 interface PropertyNameProps {
-  propertyName: string;
-  onPropertyNameChange: (name: string) => void;
+  title: string;
+  onTitleChange: (name: string) => void;
 }
 
 interface MapSelectorProps {
@@ -683,7 +691,11 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
     },
     metadata: {
       createdBy: "",
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Lease",
+      status: "Available"
     }
   }
   const [formData, setFormData] = useState<FormData>({
@@ -821,7 +833,11 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
     },
     metadata: {
       createdBy: "",
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Lease",
+      status: "Available"
     }
   })
 
@@ -1381,7 +1397,11 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
           ...formData,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: "Residential",
+            propertyName: "Builder Floor",
+            intent: "Lease",
+            status: "Available"
           }
         });
 
