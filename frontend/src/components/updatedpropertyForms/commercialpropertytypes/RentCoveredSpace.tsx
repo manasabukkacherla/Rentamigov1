@@ -983,7 +983,11 @@ const RentCoveredSpace = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Covered Space',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

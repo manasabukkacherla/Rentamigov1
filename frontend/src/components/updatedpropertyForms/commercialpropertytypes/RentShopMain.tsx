@@ -568,7 +568,11 @@ const RentShopMain = () => {
           media: convertedMedia,
           metadata: {
             craetedBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Rent',
+            status: 'Available'
           }
         };
 

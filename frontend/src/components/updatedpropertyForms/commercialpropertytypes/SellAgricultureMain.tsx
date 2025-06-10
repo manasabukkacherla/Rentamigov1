@@ -37,7 +37,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 // Interface that matches the backend model structure
 interface FormData {
   propertyId?: string;
-  propertyName: string;
+  title: string;
   landType: string[];
   powerSupply: boolean;
   address: {
@@ -126,6 +126,10 @@ interface FormData {
   metaData?: {
     createdBy: string;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -133,7 +137,7 @@ const SellAgricultureMain = () => {
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
+    title: "",
     landType: [],
     powerSupply: false,
     address: {
@@ -225,8 +229,8 @@ const SellAgricultureMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+              propertyName={formData.title}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
             />
             <AgriculturalLandType
               onLandTypeChange={(types) => setFormData((prev) => ({ ...prev, landType: types }))}
@@ -461,7 +465,7 @@ const SellAgricultureMain = () => {
 
         // Create the payload matching the backend model structure
         const transformedData = {
-          propertyName: formData.propertyName,
+          title: formData.title,
           landType: formData.landType,
           powerSupply: formData.powerSupply,
           address: formData.address,
@@ -480,7 +484,11 @@ const SellAgricultureMain = () => {
           media: convertedMedia,
           metaData: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Agricultural Land',
+            intent: 'Sell',
+            status: 'Available',
           }
         };
 

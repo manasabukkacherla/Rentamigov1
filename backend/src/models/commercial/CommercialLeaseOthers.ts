@@ -136,6 +136,10 @@ export interface ICommercialLeaseOthers extends Document {
   metaData?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -269,7 +273,11 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   
   metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Lease' },
+    propertyName: { type: String,  default: 'Others' },
+    status: { type: String, default: 'Available' }
   }
 });
 

@@ -32,7 +32,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define proper interface for form data
 interface FormData {
-  propertyName: string;
+  title: string;
   officeType: string;
   address: {
     street: string;
@@ -110,7 +110,7 @@ const SellOfficeSpaceMain = () => {
 
   // Initialize form data with proper structure
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
+    title: "",
     officeType: "",
     address: {
       street: "",
@@ -196,8 +196,8 @@ const SellOfficeSpaceMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+            propertyName={formData.title}
+            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
           />
           <OfficeSpaceType
             onOfficeTypeChange={(types) => {
@@ -473,7 +473,7 @@ const SellOfficeSpaceMain = () => {
       // Create payload for API
       const transformedData = {
         basicInformation: {
-          title: formData.propertyName,
+          title: formData.title,
           officeType: [formData.officeType],
           address: formData.address,
           landmark: formData.landmark,
@@ -493,7 +493,11 @@ const SellOfficeSpaceMain = () => {
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Office Space',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 

@@ -60,6 +60,10 @@ export interface ICommercialRentAgriculture extends Document {
   metaData : {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   }
 }
 
@@ -121,7 +125,11 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   },
   metaData : {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Agriculture' },
+    status: { type: String, default: 'Available' }
   }
 });
 

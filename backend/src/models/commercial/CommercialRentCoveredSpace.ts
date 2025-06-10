@@ -107,6 +107,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
 }
 
 export interface ICommercialRentCoveredSpace extends Document {
@@ -237,6 +241,10 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Covered Space' },
+    status: { type: String, default: 'Available' }
   },
 }, {
   timestamps: true,

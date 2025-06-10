@@ -69,7 +69,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 
 interface FormData {
   propertyId?: string;
-  propertyName: string;
+  title: string;
   landType: string[];
   powerSupply: 'Available' | 'Not Available';
   waterSource?: string;
@@ -136,7 +136,7 @@ const RentAgriculture = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyId: '',
-    propertyName: '',
+    title: '',
     landType: [] as string[],
     powerSupply: 'Available',
     waterSource: '',
@@ -220,7 +220,7 @@ const RentAgriculture = () => {
 
   // Handler functions
   const handlePropertyNameChange = (name: string) => {
-    setFormData(prev => ({ ...prev, propertyName: name }));
+    setFormData(prev => ({ ...prev, title: name }));
   };
 
   const handleLandTypeChange = (types: string[]) => {
@@ -322,7 +322,7 @@ const RentAgriculture = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <div className="space-y-6">
-            <PropertyName propertyName={formData.propertyName} onPropertyNameChange={handlePropertyNameChange} />
+            <PropertyName propertyName={formData.title} onPropertyNameChange={handlePropertyNameChange} />
             <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
           </div>     
 
@@ -475,7 +475,7 @@ const RentAgriculture = () => {
         };
         const transformedData = {
           propertyId: formData.propertyId,
-          propertyName: formData.propertyName,
+          title: formData.title,
           landType: formData.landType,
           powerSupply: formData.powerSupply,
           waterSource: formData.waterSource,
@@ -491,7 +491,11 @@ const RentAgriculture = () => {
           media: convertedMedia,
           metaData: {
             userId: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Agriculture',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
         const response = await axios.post('/api/commercial/rent/agriculture', transformedData, {

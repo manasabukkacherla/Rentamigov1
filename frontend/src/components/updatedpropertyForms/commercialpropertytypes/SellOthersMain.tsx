@@ -38,7 +38,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 // Define interface that matches backend model structure
 interface FormData {
   propertyId?: string;
-  propertyName: string;
+  title: string;
   commercialType: string[];
   address: {
     street: string;
@@ -124,6 +124,10 @@ interface FormData {
   metaData?: {
     createdBy: string;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -131,7 +135,7 @@ const SellOthersMain = () => {
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
+    title: "",
     commercialType: [],
     address: {
       street: "",
@@ -218,8 +222,8 @@ const SellOthersMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+              propertyName={formData.title}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
             />
             <OtherCommercialType
               onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, commercialType: type as string[] }))}
@@ -492,7 +496,7 @@ const SellOthersMain = () => {
 
       // Create payload matching the backend model structure
       const transformedData = {
-        propertyName: formData.propertyName,
+        title: formData.title,
         commercialType: formData.commercialType,
         address: formData.address,
         landmark: formData.landmark,
@@ -509,7 +513,11 @@ const SellOthersMain = () => {
         media: convertedMedia,
         metaData: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Other',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 

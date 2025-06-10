@@ -25,7 +25,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
   basicInformation: {
-    propertyName: string;
+    title: string;
     plotType: string[];
     address: {
       street: string;
@@ -162,7 +162,7 @@ const SellPlotMain = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
       plotType: [],
       address: {
         street: "",
@@ -392,8 +392,8 @@ const SellPlotMain = () => {
       content: (
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name) => handleChange('basicInformation.propertyName', name)}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
           <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => handleChange('basicInformation.address', address)} />
@@ -830,7 +830,11 @@ const SellPlotMain = () => {
         metadata: {
           userId: author, // Ensure userId is included for backend validation
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Plot',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 

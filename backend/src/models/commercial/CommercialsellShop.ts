@@ -70,7 +70,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
-  // status?: 'active' | 'inactive' | 'deleted';
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -221,6 +224,10 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Shop' },
+    status: { type: String, default: 'Available' }
     // status: { type: String, enum: ['active', 'inactive', 'deleted'], default: 'active' }
   }
 }, {

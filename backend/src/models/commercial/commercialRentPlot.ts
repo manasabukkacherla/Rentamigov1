@@ -41,6 +41,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface IRentalTerms {
@@ -241,7 +245,11 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
     },
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' } 
     }
 }, {
     timestamps: true

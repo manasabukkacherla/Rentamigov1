@@ -803,7 +803,11 @@ const SellShopMain = () => {
         metadata: {
           createdBy: author,
           createdAt: new Date(),
-          status: 'active'
+          propertyType: 'Commercial',
+          propertyName: 'Shop',
+          intent: 'Sell',
+          status: 'Available',
+         
         }
       };
 

@@ -138,12 +138,11 @@ interface IMedia {
 interface IMetadata {
   createdBy: string;
   createdAt: Date;
-  propertyType: string;
-  propertyName: string;
-  intent: string;
-  status: string;
+  propertyType: 'Commercial';
+  propertyName: 'Office Space';
+  intent: 'Rent';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
 }
-
 interface IRentalTerms {
   rentDetails: {
     expectedRent: number;
@@ -333,10 +332,10 @@ const RentOfficeSpace = () => {
     metadata: {
       createdBy: '',
       createdAt: new Date(),
-      propertyType: '',
-      propertyName: '',
-      intent: '',
-      status: '',
+      propertyType: 'Commercial',
+      propertyName: 'Office Space',
+      intent: 'Rent',
+      status: 'Available',
     },
   });
 

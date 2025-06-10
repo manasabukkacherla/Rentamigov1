@@ -269,7 +269,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         propertyType: { type: String, default: 'Commercial' },
         intent: { type: String,default: 'Rent' },
         propertyName: { type: String,  default: 'Office Space' },
-        status: { type: String, default: 'Available' }
+        status: { type: String, default: 'Available' } 
     }
 }, {
     timestamps: true
