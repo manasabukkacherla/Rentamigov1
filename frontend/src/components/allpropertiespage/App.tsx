@@ -44,164 +44,82 @@ const [loading, setLoading] = useState(true);
 React.useEffect(() => {
   let hasFetched = false;
 
-  const fetchAllProperties = async () => {
-    if (hasFetched) return;
-    hasFetched = true;
+const fetchAllProperties = async () => {
+  if (hasFetched) return;
+  hasFetched = true;
 
-    try {
-      const [
-        agriRes, othersRes, coveredRes, plotRes, retailRes, shedRes, shopRes, showroomRes,
-        rentAgriRes, rentCoveredRes, warehouseRes, officeSpaceRes, rentOthersRes, rentOfficeSpaceRes, rentShopRes, rentRetailStoreRes, rentShowroomRes, rentShedRes, rentPlotRes,
-        sellShopRes, sellAgricultureRes, sellCoveredSpaceRes, sellOfficeSpaceRes, sellOthersRes, sellRetailStoreRes, sellShedRes, sellPlotRes,
-        // Residential Sale Apartments
-        residentialSaleApartmentsRes,
-        // Residential Sale Builder Floors
-        residentialSaleBuilderFloorsRes,
-        // Residential Rent Apartments
-        residentialRentApartmentsRes,
-        // Residential Rent Builder Floors
-        residentialRentBuilderFloorsRes,
-        // Residential Rent Independent Houses
-        residentialRentIndependentHousesRes,
-        // Residential Lease Independent Houses
-        residentialLeaseIndependentHousesRes,
-        // Residential Lease Apartments
-        residentialLeaseApartmentsRes,
-        // Residential Lease Builder Floors
-        residentialLeaseBuilderFloorsRes,
-        // Residential Sale Plots
-        residentialSalePlotsRes,
-        // Residential Sale Independent Houses
-        residentialSaleIndependentHousesRes,  
-        // Fetch Commercial Sale Showrooms Data
-        commercialSaleShowroomsRes,  
-        // Fetch Commercial Sale Warehouses Data
-        commercialSaleWarehousesRes,  // <-- Added Commercial Sale Warehouses API request
-        // Fetch Commercial Sale Shops Data <-- Added Commercial Sale Shops request
-        commercialSaleShopsRes,  // <-- Added Commercial Sale Shops API request
-        // Fetch Residential PG data
-        pgMainRes  // <-- Added Residential PG Main request
-      ] = await Promise.all([
-        // Commercial Lease Properties
-        fetch('/api/commercial/lease/agriculture'),
-        fetch('/api/commercial/lease/others'),
-        fetch('/api/commercial/lease/covered-space'),
-        fetch('/api/commercial/lease/plot'),
-        fetch('/api/commercial/lease/retail-store'),
-        fetch('/api/commercial/lease/sheds'),
-        fetch('/api/commercial/lease/shops'),
-        fetch('/api/commercial/lease/showrooms'),
-        fetch('/api/commercial/lease/warehouses'),
-        fetch('/api/commercial/lease/office-space'),
+  try {
+    const endpoints = [
+      '/api/commercial/lease/agriculture',
+      '/api/commercial/lease/others',
+      '/api/commercial/lease/covered-space',
+      '/api/commercial/lease/plot',
+      '/api/commercial/lease/retail-store',
+      '/api/commercial/lease/sheds',
+      '/api/commercial/lease/shops',
+      '/api/commercial/lease/showrooms',
+      '/api/commercial/lease/warehouses',
+      '/api/commercial/lease/office-space',
 
-        // Commercial Rent Properties
-        fetch('/api/commercial/rent/agriculture'),
-        fetch('/api/commercial/rent/covered-space'),
-        fetch('/api/commercial/rent/others'),
-        fetch('/api/commercial/rent/warehouses'),
-        fetch('/api/commercial/rent/office-spaces'),
-        fetch('/api/commercial/rent/shops'),
-        fetch('/api/commercial/rent/retail-stores'),
-        fetch('/api/commercial/rent/showrooms'),
-        fetch('/api/commercial/rent/sheds'),
-        fetch('/api/commercial/rent/plots'),
+      '/api/commercial/rent/agriculture',
+      '/api/commercial/rent/covered-space',
+      '/api/commercial/rent/others',
+      '/api/commercial/rent/warehouses',
+      '/api/commercial/rent/office-spaces',
+      '/api/commercial/rent/shops',
+      '/api/commercial/rent/retail-stores',
+      '/api/commercial/rent/showrooms',
+      '/api/commercial/rent/sheds',
+      '/api/commercial/rent/plots',
 
-        // Commercial Sell Properties
-        fetch('/api/commercial/sell/agriculture'),
-        fetch('/api/commercial/sell/covered-space'),
-        fetch('/api/commercial/sell/office-space'),
-        fetch('/api/commercial/sell/others'),
-        fetch('/api/commercial/sell/retail-store'),
-        fetch('/api/commercial/sell/sheds'),
-        fetch('/api/commercial/sell/plots'),
-        fetch('/api/commercial/sell/showrooms'),  // <-- Added request for Commercial Sale Showrooms
-        fetch('/api/commercial/sell/warehouses'),  // <-- Added request for Commercial Sale Warehouses
-        fetch('/api/commercial/sell/shops'), // <-- Added request for Commercial Sale Shops
+      '/api/commercial/sell/agriculture',
+      '/api/commercial/sell/covered-space',
+      '/api/commercial/sell/office-space',
+      '/api/commercial/sell/others',
+      '/api/commercial/sell/retail-store',
+      '/api/commercial/sell/sheds',
+      '/api/commercial/sell/plots',
+      '/api/commercial/sell/showrooms',
+      '/api/commercial/sell/warehouses',
+      '/api/commercial/sell/shops',
 
-        // Residential Sale 
-        fetch('/api/residential/sale/apartments'),
-        fetch('/api/residential/sale/builder-floor'),
-        fetch('/api/residential/sale/plots'),
-        fetch('/api/residential/sale/independent-house'),
-        
-        // Residential Rent 
-        fetch('/api/residential/rent/apartment'),
-        fetch('/api/residential/rent/builder-floor'),
-        fetch('/api/residential/rent/independent-house'),
+      '/api/residential/sale/apartments',
+      '/api/residential/sale/builder-floor',
+      '/api/residential/sale/plots',
+      '/api/residential/sale/independent-house',
 
-        // Residential Lease 
-        fetch('/api/residential/lease/independent-house'),
-        fetch('/api/residential/lease/appartment'),
-        fetch('/api/residential/lease/builder-floor'),
+      '/api/residential/rent/apartment',
+      '/api/residential/rent/builder-floor',
+      '/api/residential/rent/independent-house',
 
-        // Residential PG data
-        fetch('/api/residential/pgmain')  // <-- Fetch Residential PG data
-      ]);
+      '/api/residential/lease/independent-house',
+      '/api/residential/lease/appartment',
+      '/api/residential/lease/builder-floor',
 
-      const [
-        agriData, othersData, coveredData, plotData, retailData, shedData, shopData, showroomData,
-        rentAgriData, rentCoveredData, warehouseData, officeSpaceData, rentOthersData, rentOfficeSpaceData, rentShopData, rentRetailStoreData, rentShowroomData, rentShedData, rentPlotData,
-        sellShopData, sellAgricultureData, sellCoveredSpaceData, sellOfficeSpaceData, sellOthersData, sellRetailStoreData, sellShedData, sellPlotData,
-        residentialSaleApartmentsData,
-        residentialSaleBuilderFloorsData,
-        residentialRentApartmentsData,
-        residentialRentBuilderFloorsData,
-        residentialRentIndependentHousesData,
-        residentialLeaseIndependentHousesData,
-        residentialLeaseApartmentsData,
-        residentialLeaseBuilderFloorsData,
-        residentialSalePlotsData,
-        residentialSaleIndependentHousesData,
-        commercialSaleShowroomsData,  
-        commercialSaleWarehousesData,  // <-- Added Commercial Sale Warehouses Data
-        commercialSaleShopsData,  // <-- Added Commercial Sale Shops Data
-        pgMainData  // <-- Residential PG Main Data
-      ] = await Promise.all([
-        agriRes.json(), othersRes.json(), coveredRes.json(), plotRes.json(), retailRes.json(),
-        shedRes.json(), shopRes.json(), showroomRes.json(), rentAgriRes.json(), rentCoveredRes.json(),
-        warehouseRes.json(), officeSpaceRes.json(), rentOthersRes.json(), rentOfficeSpaceRes.json(),
-        rentShopRes.json(), rentRetailStoreRes.json(), rentShowroomRes.json(), rentShedRes.json(),
-        rentPlotRes.json(), sellShopRes.json(), sellAgricultureRes.json(), sellCoveredSpaceRes.json(),
-        sellOfficeSpaceRes.json(), sellOthersRes.json(), sellRetailStoreRes.json(), sellShedRes.json(),
-        sellPlotRes.json(), residentialSaleApartmentsRes.json(), residentialSaleBuilderFloorsRes.json(),
-        residentialRentApartmentsRes.json(), residentialRentBuilderFloorsRes.json(), residentialRentIndependentHousesRes.json(),
-        residentialLeaseIndependentHousesRes.json(), residentialLeaseApartmentsRes.json(), residentialLeaseBuilderFloorsRes.json(),
-        residentialSalePlotsRes.json(), residentialSaleIndependentHousesRes.json(),
-        commercialSaleShowroomsRes.json(),  
-        commercialSaleWarehousesRes.json(),  // <-- Commercial Sale Warehouses Data
-        commercialSaleShopsRes.json(),  // <-- Commercial Sale Shops Data
-        pgMainRes.json()  // <-- Residential PG Main Data
-      ]);
+      '/api/residential/pgmain'
+    ];
 
-      const allProperties = [
-        ...agriData.data, ...othersData.data, ...coveredData.data, ...plotData.data, 
-        ...retailData.data, ...shedData.data, ...shopData.data, ...showroomData.data, 
-        ...rentAgriData.data, ...rentCoveredData.data, ...warehouseData.data, ...officeSpaceData.data, 
-        ...rentOthersData.data, ...rentOfficeSpaceData.data, ...rentShopData.data, 
-        ...rentRetailStoreData.data, ...rentShowroomData.data, ...rentShedData.data, ...rentPlotData.data,
-        ...sellShopData.data, ...sellAgricultureData.data, ...sellCoveredSpaceData.data, 
-        ...sellOfficeSpaceData.data, ...sellOthersData.data, ...sellRetailStoreData.data, 
-        ...sellShedData.data, ...sellPlotData.data,
-        ...residentialSaleApartmentsData.data, ...residentialSaleBuilderFloorsData.data, 
-        ...residentialRentApartmentsData.data, ...residentialRentBuilderFloorsData.data, 
-        ...residentialRentIndependentHousesData.data, ...residentialLeaseIndependentHousesData.data, 
-        ...residentialLeaseApartmentsData.data, ...residentialLeaseBuilderFloorsData.data,
-        ...residentialSalePlotsData.data, 
-        ...residentialSaleIndependentHousesData.data,
-        ...commercialSaleShowroomsData.data,  
-        ...commercialSaleWarehousesData.data,  // Commercial Sale Warehouses Data
-        ...commercialSaleShopsData.data,  // Commercial Sale Shops Data
-        ...pgMainData.data  // Residential PG Main Data
-      ];
+    const responses = await Promise.all(endpoints.map(url => fetch(url)));
 
-      // Update the state with all the fetched properties
-      setFetchedProperties(allProperties);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    } finally {
-      setLoading(false);
+    for (let i = 0; i < responses.length; i++) {
+      if (!responses[i].ok) {
+        const text = await responses[i].text();
+        throw new Error(`Error fetching ${endpoints[i]}: ${responses[i].status} - ${text}`);
+      }
     }
-  };
+
+    const jsonData = await Promise.all(responses.map(r => r.json()));
+
+    const allProperties = jsonData.flatMap(data => data.data || []);
+
+    setFetchedProperties(allProperties);
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   fetchAllProperties();
 
