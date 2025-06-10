@@ -14,10 +14,27 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
+export interface Property {
+  propertyId: string;
+  basicInformation: {
+    title: string;
+    address: {
+      city: string;
+      state: string;
+      country: string;
+      pincode: string;
+    };
+  }
+  images: string[];
+  video: string;
+}
+
 function Propdetail() {
   const { id: propertyId } = useParams<{ id: string }>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const allMedia = [propertyData.video, ...propertyData.images.map((img: { url: any; }) => img.url)];
+  const [property, setProperty] = useState<Property>({} as Property);
+  const [loading, setLoading] = useState(true);
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % allMedia.length);
@@ -79,6 +96,9 @@ function Propdetail() {
       try {
         const response = await axios.get(`/api/${category}/${listing}/${type}/${propertyId}`);
         console.log(response.data);
+        setProperty(response.data.data);
+        console.log(property);
+        setLoading(false);
       } catch (err) {
         console.log(err);
       }
@@ -92,10 +112,12 @@ function Propdetail() {
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Property Header */}
         <div className="bg-white rounded-xl shadow-lg p-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Prestige Lake Ridge</h1>
+          {/* <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.basicInformation.title}</h1> */}
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Prestige</h1>
           <div className="flex items-center gap-2 text-gray-600">
             <MapPin className="w-5 h-5" />
-            <p>Electronic City Phase 1, Bangalore</p>
+            {/* <p>{property.basicInformation.address.city}, {property.basicInformation.address.state}</p> */}
+            <p>Bangalore, Karnataka</p>
           </div>
         </div>
 
