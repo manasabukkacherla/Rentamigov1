@@ -16,7 +16,7 @@ router.post('/', createLeasePlot as express.RequestHandler);
 router.get('/', getAllLeasePlots as express.RequestHandler);
 
 // Get a specific commercial lease plot by ID
-router.get('/:id', getLeasePlotById as express.RequestHandler);
+router.get('/:propertyId', getLeasePlotById as express.RequestHandler);
 
 // Update a shed listing
 router.put('/:id', updatePlotById as express.RequestHandler);

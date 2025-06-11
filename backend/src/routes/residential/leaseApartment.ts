@@ -1,17 +1,11 @@
 import express from 'express';
-import {
-  createLeaseApartment,
-  getLeaseApartmentById,
-  updateLeaseApartment,
-  deleteLeaseApartment,
-  getAllLeaseApartments
-} from '../../controllers/residential/leaseAppartment';
+import { createLeaseApartment, deleteLeaseApartment, getAllLeaseApartments, getLeaseApartmentById, updateLeaseApartment } from '../../controllers/residential/leaseApartment';
 
 const Router= express.Router();
 
 Router.post('/', createLeaseApartment);
 Router.get('/', getAllLeaseApartments);
-Router.get('/:id', getLeaseApartmentById);
+Router.get('/:propertyId', getLeaseApartmentById);
 Router.put('/:id', updateLeaseApartment);
 Router.delete('/:id', deleteLeaseApartment);
 

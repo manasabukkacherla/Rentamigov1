@@ -12,7 +12,7 @@ interface IFloor {
 }
 
 export interface ICommercialLeaseAgriculture extends Document {
-  propertyId?: string;
+  propertyId: string;
   title: string;
   landType: string[];
   address: {
@@ -133,7 +133,7 @@ export interface ICommercialLeaseAgriculture extends Document {
 }
 
 const CommercialLeaseAgriculture = new Schema({
-  propertyId: { type: String, default: () => `CLA-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
+  propertyId: { type: String },
   title: { type: String, default: "Unnamed Property" },
   landType: { type: [String], default: ["Agricultural"] },
   powerSupply: { type: Boolean, default: false },
@@ -145,8 +145,8 @@ const CommercialLeaseAgriculture = new Schema({
   },
   landmark: { type: String },
   location: {
-    latitude: { type: String ,required:true},
-    longitude: { type: String ,required:true}
+    latitude: { type: String ,required:false},
+    longitude: { type: String ,required: false}
   },
   isCornerProperty: { type: Boolean, default: false },
   landDetails: {

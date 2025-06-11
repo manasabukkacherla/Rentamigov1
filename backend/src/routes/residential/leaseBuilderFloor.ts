@@ -7,18 +7,17 @@ import {
   deleteLeaseBuilderFloor,
   searchLeaseBuilderFloors
 } from '../../controllers/residential/leaseBuilderFloor';
-import { authenticateUser } from '../../middleware/auth';
 
 const router = express.Router();
 
 // Public routes
 router.get('/search', searchLeaseBuilderFloors);
 router.get('/', getAllLeaseBuilderFloors);
-router.get('/:id', getLeaseBuilderFloorById);
+router.get('/:propertyId', getLeaseBuilderFloorById);
 
 // Protected routes - require authentication
-router.post('/', authenticateUser, createLeaseBuilderFloor);
-router.put('/:id', authenticateUser, updateLeaseBuilderFloor);
-router.delete('/:id', authenticateUser, deleteLeaseBuilderFloor);
+router.post('/', createLeaseBuilderFloor);
+router.put('/:id', updateLeaseBuilderFloor);
+router.delete('/:id', deleteLeaseBuilderFloor);
 
 export default router;

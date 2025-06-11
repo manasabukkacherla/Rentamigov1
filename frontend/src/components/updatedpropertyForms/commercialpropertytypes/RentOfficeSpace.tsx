@@ -778,7 +778,7 @@ const RentOfficeSpace = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial/rent/office-spaces', transformedData, {
+        const response = await axios.post('/api/commercial/rent/office-space', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

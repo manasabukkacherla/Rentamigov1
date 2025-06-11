@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/', createCommercialRentAgriculture);
 router.get('/', getAllCommercialRentAgriculture);
-router.get('/:id', getCommercialRentAgricultureById);
+router.get('/:propertyId', getCommercialRentAgricultureById);
 router.put('/:id', updateCommercialRentAgriculture);
 router.delete('/:id', deleteCommercialRentAgriculture);
 

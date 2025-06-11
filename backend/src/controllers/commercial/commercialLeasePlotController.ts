@@ -315,11 +315,11 @@ export const getAllLeasePlots = async (req: Request, res: Response) => {
 // Get a specific commercial lease plot by ID
 export const getLeasePlotById = async (req: Request, res: Response) => {
     try {
-        const leasePlot = await LeasePlot.findById(req.params.id)
-            .populate('metadata.userId', 'name email')
-            .select('-__v');
-
-        if (!leasePlot) {
+        const propertyId = req.params.propertyId;
+        const leasePlot = await LeasePlot.findOne({ propertyId })
+           .populate('metadata.userId', 'name email')
+           .select('-__v');
+             if (!leasePlot) {
             return res.status(404).json({
                 success: false,
                 error: 'Lease plot not found'

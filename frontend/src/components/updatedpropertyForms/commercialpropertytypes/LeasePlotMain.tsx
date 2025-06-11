@@ -787,7 +787,7 @@ const LeasePlotMain = () => {
 
       console.log("Submitting data:", transformedData);
 
-      const response = await axios.post('http://localhost:8000/api/commercial/lease/plot', transformedData, {
+      const response = await axios.post('http://localhost:8000/api/commercial/lease/plots', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }
