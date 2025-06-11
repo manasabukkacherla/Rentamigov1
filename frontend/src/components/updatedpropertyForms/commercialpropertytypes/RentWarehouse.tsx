@@ -789,6 +789,7 @@ const RentWarehouse = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
+            ...formData.metadata,
             createdBy: author,
             createdAt: new Date(),
             propertyType: 'Commercial',

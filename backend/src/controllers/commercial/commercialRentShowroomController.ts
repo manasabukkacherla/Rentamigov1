@@ -97,7 +97,7 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: req.user?._id || null,
+                createdBy: req.user?._id || formData?.metadata?.createdBy || null,
                 createdAt: new Date()
             }
         };

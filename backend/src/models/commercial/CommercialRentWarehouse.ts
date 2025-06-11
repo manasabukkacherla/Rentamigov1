@@ -270,7 +270,7 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     documents: [{ type: String }]
   },
   metadata: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Rent' },

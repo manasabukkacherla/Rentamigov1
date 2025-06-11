@@ -256,7 +256,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
         createdAt: { type: Date, default: Date.now },
         propertyType: { type: String, default: 'Commercial' },
         intent: { type: String,default: 'Rent' },

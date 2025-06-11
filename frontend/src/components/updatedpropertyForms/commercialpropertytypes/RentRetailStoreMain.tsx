@@ -684,6 +684,7 @@ const RentRetailStoreMain = () => {
       if (user) {
         const author = JSON.parse(user).id;
 
+
         // Convert media files to base64
         const convertFileToBase64 = (file: File): Promise<string> => {
           return new Promise((resolve, reject) => {
@@ -711,7 +712,8 @@ const RentRetailStoreMain = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            createdBy: author,
+            ...formData.metadata,
+            createdBy: JSON.parse(user).id,
             createdAt: new Date(),
             propertyType: 'Commercial',
             propertyName: formData.basicInformation.title,

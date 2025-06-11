@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface ICommercialRentAgriculture extends Document {
   propertyId: string;
-  propertyName: string;
+  title: string;
   landType: string[];
   waterSource?: string;
   powerSupply: 'Available' | 'Not Available';
@@ -69,7 +69,7 @@ export interface ICommercialRentAgriculture extends Document {
 
 const CommercialRentAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
-  propertyName: { type: String, required: true },
+  title: { type: String, required: true },
   landType: { type: [String], required: true },
   waterSource: { type: String},
   powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
@@ -99,7 +99,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   rent: {
     expectedRent: { type: Number, required: true },
     isNegotiable: { type: Boolean, default: false },
-    maintenanceType: { type: String, enum: ['inclusive', 'exclusive'], required: true }
+    maintenanceType: { type: String, enum: ['inclusive', 'exclusive']}
   },
   
     

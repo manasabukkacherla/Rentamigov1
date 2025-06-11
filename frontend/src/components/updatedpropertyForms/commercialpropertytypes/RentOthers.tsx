@@ -55,7 +55,7 @@ const globalStyles = `
 
 // Define interface for form data structure based on the backend model
 interface FormData {
-  title: string;
+  propertyName: string;
   commercialType: string[];
   address: {
     street: string;
@@ -191,7 +191,7 @@ const RentOthers = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
-    title: '',
+    propertyName: '',
     commercialType: [],
     address: {
       street: '',
@@ -305,8 +305,8 @@ const RentOthers = () => {
   }, [navigate]);
 
   // Handler functions
-  const handleTitleChange = (name: string) => {
-    setFormData(prev => ({ ...prev, title: name }));
+  const handlePropertyNameChange = (name: string) => {
+    setFormData(prev => ({ ...prev, propertyName: name }));
   };
 
   const handleCommercialTypeChange = (types: string[]) => {
@@ -476,8 +476,8 @@ const RentOthers = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.title}
-            onPropertyNameChange={handleTitleChange}
+            propertyName={formData.propertyName}
+            onPropertyNameChange={handlePropertyNameChange}
           />
           <OtherCommercialType
             onCommercialTypeChange={handleCommercialTypeChange}
@@ -667,11 +667,7 @@ const RentOthers = () => {
           media: convertedMedia,
           metaData: {
             createdBy: author,
-            createdAt: new Date(),
-            propertyType: 'Commercial',
-            propertyName: 'Others',
-            intent: 'Rent',
-            status: 'Available',
+            createdAt: new Date()
           }
         };
 
@@ -800,4 +796,3 @@ const RentOthers = () => {
 };
 
 export default RentOthers;
-

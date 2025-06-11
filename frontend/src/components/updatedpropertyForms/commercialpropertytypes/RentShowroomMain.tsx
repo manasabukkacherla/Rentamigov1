@@ -690,12 +690,13 @@ const RentShowroomMain = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
+            ...formData.metadata,
             createdBy: author,
             createdAt: new Date(),
             propertyType: 'Commercial',
-            propertyName: formData.basicInformation.title,
+            propertyName: 'Showroom',
             intent: 'Rent',
-            status: 'Available'
+            status: 'Available',
           }
         };
 

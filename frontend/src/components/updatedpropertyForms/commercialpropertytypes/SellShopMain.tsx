@@ -815,6 +815,7 @@ const SellShopMain = () => {
       console.log("Request endpoint:", '/api/commercial/sell/shops');
 
       // Send the data to the backend
+      ///api/commercial/sell/shops
       const response = await axios.post('/api/commercial/sell/shops', transformedData, {
         headers: {
           'Content-Type': 'application/json',

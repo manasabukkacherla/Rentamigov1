@@ -192,7 +192,7 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Sell' },

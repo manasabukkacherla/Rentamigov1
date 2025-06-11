@@ -177,15 +177,15 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
       powerLoad: { type: Number, required: true },
       backup: { type: Boolean, required: true },
     },
-    waterAvailability: { type: String, required: true },
-    propertyAge: { type: String, required: true },
-    propertyCondition: { type: String, required: true },
+    waterAvailability: { type: String },
+    propertyAge: { type: String },
+    propertyCondition: { type: String },
   },  
   rentalTerms: {
     rentDetails: {
-        expectedRent: { type: Number, required: true },
+        expectedRent: { type: Number},
         isNegotiable: { type: Boolean, default: false },
-        rentType: { type: String, required: true },
+        rentType: { type: String},
     },
     securityDeposit: {
         amount: { type: Number, required: true },
@@ -241,7 +241,7 @@ const CommercialRentRetailStoreSchema = new Schema<ICommercialRentRetailStore>({
     documents: [{ type: String }] 
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Rent' },

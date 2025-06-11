@@ -177,7 +177,8 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
       amount: { type: Number }
     },
     availability: {
-      type: { type: String, required: true, enum: ['Ready to Move', 'Under Construction', 'Soon', 'Specific Date'] },
+      type: { type: String, required: true, enum: ['Ready to Move', 'Under Construction', 'Soon', 
+        'Specific Date','Available','Not Available','immediate'] },
       date: { type: String }
     }
   },
@@ -201,7 +202,7 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
     documents: [{ type: String }] 
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Sell' },

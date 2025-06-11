@@ -150,7 +150,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
     frontageWidth: { type: Number, required: true },
     ceilingHeight: { type: Number, required: true },
     glassFrontage: { type: Boolean, default: false },
-    lightingType: { type: String, enum: ['warm', 'cool', 'natural'] },
+    lightingType: { type: String, enum: ['warm', 'cool', 'natural','immediate',``] },
     acInstalled: { type: Boolean, default: false },
     nearbyCompetitors: {
       present: { type: Boolean, default: false },

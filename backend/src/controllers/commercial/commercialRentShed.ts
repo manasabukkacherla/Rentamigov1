@@ -56,6 +56,11 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
+        // Robustly set metadata.createdBy and createdAt
+        formData.metadata = formData.metadata || {};
+        formData.metadata.createdBy = req.user?._id || formData.metadata.createdBy || null;
+        formData.metadata.createdAt = formData.metadata.createdAt || new Date();
+
         if (!formData.metadata.createdBy) {
             return res.status(400).json({
                 success: false,
@@ -68,11 +73,12 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             propertyId,
             ...formData,
             metadata: {
-                ...formData.metadata,
-                createdBy: req.user?._id || null,
-                createdAt: new Date()
+                ...formData.metadata
             }
         };
+
+        // Debug: log the payload being saved
+        console.log('Saving CommercialRentShed:', JSON.stringify(showroomData, null, 2));
 
         const showroom = new CommercialRentShed(showroomData);
         await showroom.save();

@@ -13,7 +13,7 @@ interface IFloor {
 
 export interface ICommercialRentOthers extends Document {
   propertyId: string;
-  propertyName: string;
+  title: string;
   commercialType: string[];
   address: {
     street: string;
@@ -22,7 +22,7 @@ export interface ICommercialRentOthers extends Document {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
@@ -119,7 +119,7 @@ export interface ICommercialRentOthers extends Document {
 
 const CommercialRentOthersSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
-  propertyName: { type: String, required: true },
+  title: { type: String, required: true },
   commercialType: { type: [String]  , required: true },
   address: {
     street: { type: String, required: true },
@@ -128,7 +128,7 @@ const CommercialRentOthersSchema: Schema = new Schema({
     zipCode: { type: String, required: true }
   },
   landmark: { type: String },
-  coordinates: {
+  location: {
     latitude: { type: String ,required:true},
     longitude: { type: String ,required:true}
   },
