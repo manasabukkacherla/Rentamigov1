@@ -138,8 +138,11 @@ interface IMedia {
 interface IMetadata {
   createdBy: string;
   createdAt: Date;
+  propertyType: 'Commercial';
+  propertyName: 'Office Space';
+  intent: 'Rent';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
 }
-
 interface IRentalTerms {
   rentDetails: {
     expectedRent: number;
@@ -222,14 +225,14 @@ const RentOfficeSpace = () => {
         street: '',
         city: '',
         state: '',
-        zipCode: '',
+        zipCode: ''
       },
       landmark: '',
       location: {
         latitude: '',
-        longitude: '',
+        longitude: ''
       },
-      isCornerProperty: false,
+      isCornerProperty: false
     },
     officeDetails: {
       seatingCapacity: 0,
@@ -239,17 +242,17 @@ const RentOfficeSpace = () => {
       receptionArea: false,
       wifiSetup: false,
       serverRoom: false,
-      coworkingFriendly: false,
+      coworkingFriendly: false
     },
     propertyDetails: {
       area: {
         totalArea: 0,
         builtUpArea: 0,
-        carpetArea: 0,
+        carpetArea: 0
       },
       floor: {
         floorNumber: 0,
-        totalFloors: 0,
+        totalFloors: 0
       },
       facingDirection: '',
       furnishingStatus: '',
@@ -257,62 +260,62 @@ const RentOfficeSpace = () => {
       wholeSpaceAmenities: [],
       electricitySupply: {
         powerLoad: 0,
-        backup: false,
+        backup: false
       },
       waterAvailability: '',
       propertyAge: '',
-      propertyCondition: '',
+      propertyCondition: ''
     },
     rentalTerms: {
       rentDetails: {
         expectedRent: 0,
         isNegotiable: false,
-        rentType: '',
+        rentType: ''
       },
       securityDeposit: {
-        amount: 0,
+        amount: 0
       },
       maintenanceAmount: {
         amount: 0,
-        frequency: '',
+        frequency: ''
       },
       otherCharges: {
         water: {
           amount: 0,
-          type: '',
+          type: ''
         },
         electricity: {
           amount: 0,
-          type: '',
+          type: ''
         },
         gas: {
           amount: 0,
-          type: '',
+          type: ''
         },
         others: {
           amount: 0,
-          type: '',
-        },
+          type: ''
+        }
       },
       brokerage: {
         required: '',
-        amount: 0,
+        amount: 0
       },
       availability: {
         type: '',
-        date: '',
-      },
+        date: ''
+      }
     },
     availability: {
       type: '',
-      date: '',
+      date: ''
     },
     contactInformation: {
       name: '',
       email: '',
       phone: '',
       alternatePhone: '',
-      bestTimeToContact: '',
+      bestTimeToContact: ''
     },
     media: {
       photos: {
@@ -321,14 +324,18 @@ const RentOfficeSpace = () => {
         floorPlan: [],
         washrooms: [],
         lifts: [],
-        emergencyExits: [],
+        emergencyExits: []
       },
       videoTour: null,
-      documents: [],
+      documents: []
     },
     metadata: {
       createdBy: '',
       createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Office Space',
+      intent: 'Rent',
+      status: 'Available',
     },
   });
 
@@ -728,7 +735,6 @@ const RentOfficeSpace = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     console.log(formData);
     try {
       const user = sessionStorage.getItem('user');
@@ -763,7 +769,12 @@ const RentOfficeSpace = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            intent: "Rent",
+            status: "Available",
+            propertyType: "Commercial",
+            propertyName: "Office Space",
+
           }
         };
 

@@ -38,7 +38,7 @@ interface OfficeDetails {
 }
 
 interface FormData {
-  propertyName: string;
+  title: string;
   officeType: string[];
   address: {
     street: string;
@@ -102,7 +102,7 @@ const LeaseOfficeSpaceMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
+    title: '',
     officeType: [] as string[],
     address: {
       street: '',
@@ -191,7 +191,7 @@ const LeaseOfficeSpaceMain = () => {
         <div className="space-y-6">
           <div className="space-y-6">
             <div className="relative">
-              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+              <PropertyName propertyName={formData.title} onPropertyNameChange={(propertyName) => setFormData(prev => ({ ...prev, title: propertyName }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
             <OfficeSpaceType onOfficeTypeChange={(type) => setFormData(prev => ({ ...prev, officeType: type }))} />
@@ -339,7 +339,7 @@ const LeaseOfficeSpaceMain = () => {
     // Add validation logic based on the current step
     switch (currentStep) {
       case 0: // Basic Information
-        return !!formData.propertyName &&
+        return !!formData.title &&
           formData.officeType.length > 0 &&
           !!formData.address.street &&
           !!formData.address.city &&
@@ -606,7 +606,7 @@ const LeaseOfficeSpaceMain = () => {
     const backendData = {
       propertyId: propertyId,
       basicInformation: {
-        title: formData.propertyName || '',
+        title: formData.title || '',
         officeType: formData.officeType || [],
         address: {
           street: formData.address.street || '',
@@ -704,11 +704,12 @@ const LeaseOfficeSpaceMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        status: 'active',
-        views: 0,
-        favorites: 0,
-        isVerified: false,
-        createdBy: localStorage.getItem('userId') || null
+        userId: localStorage.getItem('userId') || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: 'Office Space',
+        intent: 'Lease',
+        status: 'Available',
       }
     };
 

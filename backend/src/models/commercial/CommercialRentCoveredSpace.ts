@@ -107,9 +107,13 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
 }
 
-interface ICommercialRentCoveredSpace extends Document {
+export interface ICommercialRentCoveredSpace extends Document {
   propertyId: string;
   basicInformation: IBasicInformation;
   spaceDetails: ISpaceDetails;
@@ -235,8 +239,12 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     bestTimeToContact: { type: String },
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'}, 
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Covered Space' },
+    status: { type: String, default: 'Available' }
   },
 }, {
   timestamps: true,

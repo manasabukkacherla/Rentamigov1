@@ -92,7 +92,7 @@ interface IFloor {
 }
 
 interface FormData {
-  propertyName: string;
+  title: string;
   showroomType: string[];
   address: {
     street: string;
@@ -147,7 +147,7 @@ interface FormData {
 
 const SellShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
+    title: '',
     showroomType: [],
     address: {
       street: '',
@@ -284,8 +284,8 @@ const SellShowroomMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+              propertyName={formData.title}
+              onPropertyNameChange={(name) => setFormData({ ...formData, title: name })}
             />
             <ShowroomType
               onTypeChange={(type) => setFormData(prev => ({
@@ -509,7 +509,7 @@ const SellShowroomMain = () => {
 
         const transformedData = {
           basicInformation: {
-            title: formData.basicInformation?.title || formData.propertyName || 'Commercial Showroom',
+            title: formData.basicInformation?.title || formData.title || 'Commercial Showroom',
             showroomType: Array.isArray(formData.showroomType) ? formData.showroomType : [],
             address: {
               street: formData.basicInformation?.address?.street || formData.address?.street || '',
@@ -558,7 +558,11 @@ const SellShowroomMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Showroom',
+            intent: 'Sell',
+            status: 'Available',
           }
         };
 

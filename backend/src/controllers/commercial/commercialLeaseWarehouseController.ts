@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import CommercialLeaseWarehouse from '../../models/commercial/CommericalLeaseWarehouse';
+import CommercialLeaseWarehouse from '../../models/commercial/CommercialLeaseWarehouse';
 import _ from 'lodash';
 
 // Generate property ID with format RA-COMLEWHXXXX

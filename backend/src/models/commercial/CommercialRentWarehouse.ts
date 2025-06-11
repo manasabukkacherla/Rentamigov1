@@ -61,6 +61,10 @@ interface IMedia {
 interface IMetadata {
   creadtedBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 
@@ -266,8 +270,12 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     documents: [{ type: String }]
   },
   metadata: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Warehouse' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true

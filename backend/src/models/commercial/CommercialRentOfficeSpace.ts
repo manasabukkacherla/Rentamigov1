@@ -38,10 +38,7 @@ interface IOfficeDetails {
     coworkingFriendly: boolean;
 }
 
-interface IAvailability {
-    availableFrom?: string;
-    availableImmediately: boolean;
-}
+
 
 interface IContactInformation {
     name: string;
@@ -67,6 +64,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName:'Office Space';
+    intent:'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance' ;
 }
 
 interface IRentalTerms {
@@ -135,7 +136,6 @@ interface ICommercialRentOfficeSpace extends Document {
         propertyCondition: string;
     };
     rentalTerms: IRentalTerms;
-    availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
     metadata: IMetadata;
@@ -158,7 +158,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
             latitude: { type: String ,required:true},
             longitude: { type: String ,required:true},
         },
-        isCornerProperty: { type: Boolean }
+        isCornerProperty: { type: Boolean,default:false }
     },
     officeDetails: {
         seatingCapacity: { type: Number, required: true },
@@ -206,7 +206,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         },
         maintenanceAmount: {
             amount: { type: Number, required: true },
-            frequency: { type: String, required: true },
+            frequency: { type: String},
         },
         otherCharges: {
             water: {
@@ -235,10 +235,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
             date: { type: String },
         }
     },
-    availability: {
-        availableFrom: { type: String },
-        availableImmediately: { type: Boolean, required: true }
-    },
+   
     contactInformation: {
         name: { type: String, required: true },
         email: { type: String, required: true },
@@ -260,7 +257,19 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
     },
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        // propertyType: { type: String, default:'Commercial', required: true },
+        // propertyName:{type:String},
+        // intent: { type: String, default:'Rent', required: true },
+        // status: { 
+        //     type: String, 
+        //     enum: ['available', 'rented', 'Under Maintenance'], 
+        //     default: 'available' 
+        // }
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Office Space' },
+        status: { type: String, default: 'Available' } 
     }
 }, {
     timestamps: true
@@ -274,5 +283,5 @@ CommercialRentOfficeSpaceSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentOfficeSpaceSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialRentOfficeSpace, IBasicInformation, IArea, IAvailability, IContactInformation, IMedia, IMetadata };
+export { ICommercialRentOfficeSpace, IBasicInformation, IArea, IContactInformation, IMedia, IMetadata };
 export default model<ICommercialRentOfficeSpace>('CommercialRentOfficeSpace', CommercialRentOfficeSpaceSchema); 

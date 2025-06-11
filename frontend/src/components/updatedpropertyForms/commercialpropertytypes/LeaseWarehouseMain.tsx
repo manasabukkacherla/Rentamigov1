@@ -28,7 +28,8 @@ interface MediaType {
 }
 
 interface FormData {
-  propertyName: string;
+  [x: string]: any;
+  title: string;
   warehouseType: string[];
   address: {
     street: string;
@@ -91,7 +92,7 @@ const LeaseWarehouseMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
+    title: '',
     warehouseType: [] as string[],
     address: {
       street: '',
@@ -169,7 +170,7 @@ const LeaseWarehouseMain = () => {
         <div className="space-y-6">
           <div className="space-y-6">
             <div className="relative">
-              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+              <PropertyName propertyName={formData.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, title: name }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
             <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev, warehouseType: type }))} />
@@ -444,7 +445,7 @@ const LeaseWarehouseMain = () => {
     // Create the backend data object with proper mapping
     const backendData = {
       basicInformation: {
-        title: formData.propertyName || '',
+        title: formData.title || '',
         warehouseType: formData.warehouseType || [],
         address: {
           street: formData.address.street || '',
@@ -540,11 +541,12 @@ const LeaseWarehouseMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        status: 'active',
-        views: 0,
-        favorites: 0,
-        isVerified: false,
-        createdBy: localStorage.getItem('userId') || null
+        createdBy: localStorage.getItem('userId') || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: formData.basicInformation.title,
+        intent: 'Rent',
+        status: 'Available'
       }
     };
 

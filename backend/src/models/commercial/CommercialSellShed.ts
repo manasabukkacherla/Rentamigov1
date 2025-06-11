@@ -49,6 +49,10 @@ interface IContactInformation {
 interface IMetadata {
   createdBy: Types.ObjectId;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -133,10 +137,7 @@ export interface ICommercialSellShed extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData: {
-    createdBy: Schema.Types.ObjectId | null;
-    createdAt: Date;
-  }
+  metaData: IMetadata;
 }
 
 // Schema
@@ -230,7 +231,11 @@ const CommercialSellShedSchema: Schema = new Schema({
   },
   metaData: {
     creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Shed' },
+    status: { type: String, default: 'Available' }
   }
 });
 

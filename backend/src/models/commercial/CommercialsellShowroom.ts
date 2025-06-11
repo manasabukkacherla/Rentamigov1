@@ -69,6 +69,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -146,7 +150,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
     frontageWidth: { type: Number, required: true },
     ceilingHeight: { type: Number, required: true },
     glassFrontage: { type: Boolean, default: false },
-    lightingType: { type: String, enum: ['warm', 'cool', 'natural'] },
+    lightingType: { type: String, enum: ['warm', 'cool', 'natural','immediate',``] },
     acInstalled: { type: Boolean, default: false },
     nearbyCompetitors: {
       present: { type: Boolean, default: false },
@@ -224,7 +228,11 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Showroom' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true

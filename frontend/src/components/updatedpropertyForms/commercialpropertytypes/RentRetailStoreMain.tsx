@@ -157,12 +157,15 @@ interface FormData {
     videoTour?: File | null;
     documents: File[];
   };
-  metadata: {
+   metadata:  {
     createdBy: string;
     createdAt: Date;
-  };
-}
-
+    propertyType: 'Commercial';
+    propertyName: 'Retail Store';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
+};
+};
 interface MediaUploadProps {
   images: Array<{ category: string; files: Array<{ url: string; file: File }> }>;
   video?: { url: string; file: File };
@@ -301,7 +304,11 @@ const RentRetailStoreMain = () => {
     },
     metadata: {
       createdBy: '',
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Retail Store',
+      intent: 'Rent',
+      status: 'Available'
     }
   });
 
@@ -677,6 +684,7 @@ const RentRetailStoreMain = () => {
       if (user) {
         const author = JSON.parse(user).id;
 
+
         // Convert media files to base64
         const convertFileToBase64 = (file: File): Promise<string> => {
           return new Promise((resolve, reject) => {
@@ -704,8 +712,13 @@ const RentRetailStoreMain = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            createdBy: author,
-            createdAt: new Date()
+            ...formData.metadata,
+            createdBy: JSON.parse(user).id,
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Rent',
+            status: 'Available'
           }
         };
 

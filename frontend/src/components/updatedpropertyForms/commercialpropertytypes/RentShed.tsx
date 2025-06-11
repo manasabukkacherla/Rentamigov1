@@ -142,6 +142,10 @@ interface FormData {
   metadata: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName: 'Shed';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
@@ -337,7 +341,11 @@ const RentShed = () => {
     },
     metadata: {
       createdBy: '',
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Shed',
+      intent: 'Rent',
+      status: 'Available',
     }
   });
 
@@ -699,7 +707,11 @@ const RentShed = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Shed',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

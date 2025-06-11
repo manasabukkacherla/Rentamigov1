@@ -1,9 +1,8 @@
-import { Schema, model, Document, Types } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 
-// Interfaces
 interface IBasicInformation {
     title: string;
-    warehouseType: string[];
+    shedType: string[];
     address: {
         street: string;
         city: string;
@@ -18,17 +17,12 @@ interface IBasicInformation {
     isCornerProperty: boolean;
 }
 
-interface ICoveredSpaceDetails {
+interface IShedDetails {
     totalArea: number;
-    ceilingHeight: number;
-    loadingDocks: number;
-    dockHeight: number;
-    floorload: number;
-    firesafety: boolean;
-    security: boolean;
-    access247: boolean;
-    truckparking: boolean;
-    parking: boolean;
+    carpetArea: number;
+    height: number;
+    entranceWidth: number;
+    additionaldetails: string;
 }
 
 interface IPropertyDetails {
@@ -49,7 +43,7 @@ interface IPropertyDetails {
         powerLoad: number;
         backup: boolean;
     };
-    propertyAge: string;
+    propertyAge: number;
     propertyCondition: string;
 }
 
@@ -78,19 +72,19 @@ interface ILeaseTerms {
     };
     otherCharges: {
         electricityCharges: {
-            type: 'inclusive' | 'exclusive';
+            type: "inclusive" | "exclusive";
             amount?: number;
         };
         waterCharges: {
-            type: 'inclusive' | 'exclusive';
+            type: "inclusive" | "exclusive";
             amount?: number;
         };
         gasCharges: {
-            type: 'inclusive' | 'exclusive';
+            type: "inclusive" | "exclusive";
             amount?: number;
         };
         otherCharges: {
-            type: 'inclusive' | 'exclusive';
+            type: "inclusive" | "exclusive";
             amount?: number;
         };
     };
@@ -104,7 +98,10 @@ interface ILeaseTerms {
         leaseDuration: string;
         noticePeriod: string;
         petsAllowed: boolean;
-        operatingHours: boolean;
+        operatingHours: {
+            restricted: boolean;
+            restrictions: string;
+        };
     };
 }
 
@@ -130,19 +127,18 @@ interface IMedia {
 }
 
 interface IMetadata {
-    creadtedBy: Schema.Types.ObjectId | null;
+    createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
-    // updatedAt?: Date;
-    // status: 'active' | 'inactive' | 'sold' | 'rented';
-    // views: number;
-    // favorites: number;
-    // isVerified: boolean;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
 }
 
-interface ICommercialLeaseWarehouse extends Document {
+export interface ICommercialLeaseShed extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
-    coveredSpaceDetails: ICoveredSpaceDetails;
+    shedDetails: IShedDetails;
     propertyDetails: IPropertyDetails;
     leaseTerms: ILeaseTerms;
     contactInformation: IContactInformation;
@@ -150,36 +146,30 @@ interface ICommercialLeaseWarehouse extends Document {
     metadata: IMetadata;
 }
 
-// Schema
-const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
+const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        warehouseType: [{ type: String, required: true }],
+        shedType: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
             state: { type: String, required: true },
-            zipCode: { type: String, required: true },
+            zipCode: { type: String, required: true }
         },
         landmark: { type: String, required: true },
         location: {
             latitude: { type: String, required: true },
-            longitude: { type: String, required: true },
+            longitude: { type: String, required: true }
         },
-        isCornerProperty: { type: Boolean }
+        isCornerProperty: { type: Boolean, default: false }
     },
-    coveredSpaceDetails: {
+    shedDetails: {
         totalArea: { type: Number, required: true },
-        ceilingHeight: { type: Number, required: true },
-        loadingDocks: { type: Number, default: 0 },
-        dockHeight: { type: Number },
-        floorload: { type: Number },
-        firesafety: { type: Boolean, default: false },
-        security: { type: Boolean, default: false },
-        access247: { type: Boolean, default: false },
-        truckparking: { type: Boolean, default: false },
-        parking: { type: Boolean, default: false }
+        carpetArea: { type: Number, required: true },
+        height: { type: Number, required: true },
+        entranceWidth: { type: Number, required: true },
+        additionaldetails: { type: String }
     },
     propertyDetails: {
         area: {
@@ -191,22 +181,22 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
             floorNumber: { type: Number, required: true },
             totalFloors: { type: Number, required: true }
         },
-        facingDirection: { type: String },
-        furnishingStatus: { type: String },
+        facingDirection: { type: String, required: true },
+        furnishingStatus: { type: String, required: true },
         propertyAmenities: [{ type: String }],
         wholeSpaceAmenities: [{ type: String }],
         electricitySupply: {
-            powerLoad: { type: Number },
+            powerLoad: { type: Number, required: true },
             backup: { type: Boolean, default: false }
         },
-        propertyAge: { type: String },
-        propertyCondition: { type: String }
+        propertyAge: { type: Number, required: true },
+        propertyCondition: { type: String, required: true }
     },
     leaseTerms: {
         leaseDetails: {
             leaseAmount: {
                 amount: { type: Number, required: true },
-                type: { type: String, enum: ['Fixed', 'Negotiable'] },
+                type: { type: String, enum: ['Fixed', 'Negotiable'], default: 'Fixed' },
                 duration: { type: Number, required: true },
                 durationUnit: { type: String, required: true }
             }
@@ -248,12 +238,15 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
             amount: { type: Number }
         },
         availability: {
-            availableFrom: { type: Date },
+            availableFrom: { type: Date, required: true },
             availableImmediately: { type: Boolean, default: false },
-            leaseDuration: { type: String },
-            noticePeriod: { type: String },
+            leaseDuration: { type: String, required: true },
+            noticePeriod: { type: String, required: true },
             petsAllowed: { type: Boolean, default: false },
-            operatingHours: { type: Boolean, default: false }
+            operatingHours: {
+                restricted: { type: Boolean, default: false },
+                restrictions: { type: String }
+            }
         }
     },
     contactInformation: {
@@ -278,12 +271,18 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
         createdAt: { type: Date, default: Date.now },
-        // updatedAt: { type: Date },
-        // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
-        // views: { type: Number, default: 0 },
-        // favorites: { type: Number, default: 0 },
-        // isVerified: { type: Boolean, default: false }
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Lease' },
+        propertyName: { type: String,  default: 'Shed' },
+        status: { type: String, default: 'Available' }
     }
-});
+}, { timestamps: true });
 
-export default model<ICommercialLeaseWarehouse>('CommercialLeaseWarehouse', CommercialLeaseWarehouseSchema); 
+// Add indexes for better query performance
+// CommercialLeaseShedSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
+CommercialLeaseShedSchema.index({ 'basicInformation.city': 1 });
+CommercialLeaseShedSchema.index({ 'basicInformation.state': 1 });
+CommercialLeaseShedSchema.index({ 'metadata.createdAt': -1 });
+
+export const CommercialLeaseShed = model<ICommercialLeaseShed>('CommercialLeaseShed', CommercialLeaseShedSchema);
+// export type { ICommercialLeaseShed, IBasicInformation, IShedDetails, IPropertyDetails, ILeaseTerms, IContactInformation, IMedia, IMetadata };

@@ -184,7 +184,11 @@ interface FormData {
   metadata: {
     userId: string;
     // userName: string;
-    createdAt: Date;
+    createdAt: Date,
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -303,7 +307,11 @@ const RentPlot = () => {
     },
     metadata: {
       userId: '',
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Plot',
+      intent: 'Rent',
+      status: 'Available',
     }
   });
 
@@ -726,7 +734,11 @@ const RentPlot = () => {
           media: convertedMedia,
           metadata: {
             userId: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Plot',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

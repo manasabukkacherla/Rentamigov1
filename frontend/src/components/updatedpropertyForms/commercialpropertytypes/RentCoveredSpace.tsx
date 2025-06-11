@@ -115,6 +115,8 @@ interface IFormData {
     availability: {
       type: string;
       date?: string;
+      availableImmediately: boolean;
+      availableFrom: string;
     };
   };
 
@@ -150,10 +152,10 @@ const RentCoveredSpace = () => {
         state: '',
         zipCode: '',
       },
-      landmark: '',
+      landmark: '', // required, must be filled by user
       location: {
-        latitude: '',
-        longitude: '',
+        latitude: '', // required, must be filled by user
+        longitude: '', // required, must be filled by user
       },
       isCornerProperty: false,
     },
@@ -232,6 +234,8 @@ const RentCoveredSpace = () => {
       availability: {
         type: 'immediate',
         date: '',
+        availableImmediately: false,
+        availableFrom: '',
       },
     },
 
@@ -983,7 +987,11 @@ const RentCoveredSpace = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Covered Space',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

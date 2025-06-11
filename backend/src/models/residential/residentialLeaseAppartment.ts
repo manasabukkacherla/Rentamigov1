@@ -208,8 +208,12 @@ interface Media {
 }
 
 interface IMetadata {
-  createdBy: string;
-  createdAt: string;
+  createdBy: Schema.Types.ObjectId | string;
+  createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Appartment';
+  intent: 'Lease';
+  status: 'Available' | 'Leased' | 'Under Maintenance';
 }
 
 interface IResidentialLeaseApartment extends Document {
@@ -227,7 +231,7 @@ interface IResidentialLeaseApartment extends Document {
   leaseTerms: LeaseTerms;
   availability: Availability;
   media: Media;
-  metadata?: IMetadata;
+  metadata: IMetadata;
 }
 
 const ResidentialLeaseApartmentSchema = new Schema<IResidentialLeaseApartment>({
@@ -403,11 +407,19 @@ const ResidentialLeaseApartmentSchema = new Schema<IResidentialLeaseApartment>({
     documents: [{ type: String, required: false }]
   },
   metadata: {
-    createdBy: { type: String },
-    createdAt: { type: String }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    propertyName: { type: String, default:'Appartment' },
+    intent: { type: String, default: 'Lease' },
+    status: { 
+      type: String, 
+      enum: ['Available', 'Leased', 'Under Maintenance'], 
+      default: 'Available' 
+    }
   }
 }, {
   timestamps: false
 });
 
-export default mongoose.models.ResidentialLeaseApartment || mongoose.model<IResidentialLeaseApartment>('ResidentialLeaseApartment', ResidentialLeaseApartmentSchema); 
+export default mongoose.models.ResidentialLeaseApartment || mongoose.model<IResidentialLeaseApartment>('ResidentialLeaseApartment', ResidentialLeaseApartmentSchema);

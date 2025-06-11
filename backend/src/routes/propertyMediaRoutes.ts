@@ -10,7 +10,7 @@ import ResidentialSaleApartment from '../models/residential/residentialSaleApart
 import ResidentialSaleBuilderFloor from '../models/residential/residentialSaleBuilderFloor';
 import ResidentialSaleIndependentHouse from '../models/residential/saleIndependentHouse';
 import ResidentialLeaseApartment from '../models/residential/residentialLeaseAppartment';
-import ResidentialLeaseBuilderFloor from '../models/residential/leaseBuilderFloor';
+import ResidentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
 import ResidentialLeaseIndependentHouse from '../models/residential/residentialLeaseIndependentHouse';
 import ResidentialSalePlot from '../models/residential/salePlot';
 
