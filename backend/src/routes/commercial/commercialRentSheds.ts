@@ -9,7 +9,7 @@ const router = express.Router();
 router.post('/', createCommercialRentShed);
 router.get('/', getSheds);
 // router.get('/filter', getShedsByFilters);
-router.get('/:id', getShedById);
+router.get('/:propertyId', getShedById);
 router.put('/:id', updateShed);
 router.delete('/:id', deleteShed);
 

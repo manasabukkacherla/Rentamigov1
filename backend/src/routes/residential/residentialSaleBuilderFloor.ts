@@ -12,7 +12,7 @@ const residentialSaleBuilderFloorRoutes = express.Router();
 
 residentialSaleBuilderFloorRoutes.post('/', createSaleBuilderFloor);
 residentialSaleBuilderFloorRoutes.get('/', getAllSaleBuilderFloors);
-residentialSaleBuilderFloorRoutes.get('/:id', getSaleBuilderFloorById);
+residentialSaleBuilderFloorRoutes.get('/:propertyId', getSaleBuilderFloorById);
 residentialSaleBuilderFloorRoutes.put('/:id', updateSaleBuilderFloor);
 residentialSaleBuilderFloorRoutes.delete('/:id', deleteSaleBuilderFloor);
 

@@ -258,18 +258,14 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
         createdAt: { type: Date, default: Date.now },
-        // propertyType: { type: String, default:'Commercial', required: true },
-        // propertyName:{type:String},
-        // intent: { type: String, default:'Rent', required: true },
-        // status: { 
-        //     type: String, 
-        //     enum: ['available', 'rented', 'Under Maintenance'], 
-        //     default: 'available' 
-        // }
+        status: { 
+            type: String, 
+            enum: ['available', 'rented', 'Under Maintenance'], 
+            default: 'available' 
+        },
         propertyType: { type: String, default: 'Commercial' },
         intent: { type: String,default: 'Rent' },
-        propertyName: { type: String,  default: 'Office Space' },
-        status: { type: String, default: 'Available' }
+        propertyName: { type: String,  default: 'Office Space' }
     }
 }, {
     timestamps: true

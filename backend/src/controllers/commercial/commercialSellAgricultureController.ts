@@ -53,7 +53,7 @@ const generatePropertyId = async (): Promise<string> => {
     console.error('Error generating property ID:', error);
     // Fallback to timestamp-based ID if there's an error
     const timestamp = Date.now().toString().slice(-8);
-    return `SA-COMSAG${timestamp}`;
+    return `SA-COMSEAG${timestamp}`;
   }
 };
 
@@ -137,7 +137,7 @@ export const getAllCommercialSellAgriculture = async (req: Request, res: Respons
 
 export const getCommercialSellAgricultureById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialSellAgriculture.findOne({ propertyId });
     
     if (!property) {

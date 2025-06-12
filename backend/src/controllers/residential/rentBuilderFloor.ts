@@ -177,7 +177,7 @@ export const getAllRentBuilderFloors = async (req: Request, res: Response) => {
 
 export const getRentBuilderFloorById = async (req: Request, res: Response) => {
   try {
-    const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);
+    const builderFloor = await ResidentialRentBuilderFloor.findOne({propertyId: req.params.propertyId});
     
     if (!builderFloor) {
       return res.status(404).json({

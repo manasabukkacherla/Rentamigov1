@@ -6,7 +6,7 @@ import { CommercialRentShowroom } from '../../models/commercial/commercialRentSh
 const generatePropertyId = async (): Promise<string> => {
     try {
         // Prefix for the commercial rent showroom property ID
-        const prefix = "RA-COMRSH";
+        const prefix = "RA-COMRESH";
 
         // Find the showroom with the highest property ID number
         const highestShowroom = await CommercialRentShowroom.findOne({
@@ -54,7 +54,7 @@ const generatePropertyId = async (): Promise<string> => {
         console.error('Error generating property ID:', error);
         // Fallback to timestamp-based ID if there's an error
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMRSH${timestamp}`;
+        return `RA-COMRESH${timestamp}`;
     }
 };
 
@@ -152,7 +152,7 @@ export const getAllCommercialRentShowroom = async (req: Request, res: Response) 
   
   export const getCommercialRentShowroomById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
+      const propertyId = req.params.propertyId;
       const property = await CommercialRentShowroom.findOne({ propertyId });
       
       if (!property) {

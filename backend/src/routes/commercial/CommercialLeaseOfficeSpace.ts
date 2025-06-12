@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post('/', createLeaseOfficeSpace);
 router.get('/', getLeaseOfficeSpaces);
-router.get('/:id', getLeaseOfficeSpaceById);
+router.get('/:propertyId', getLeaseOfficeSpaceById);
 router.put('/:id', updateLeaseOfficeSpace);
 router.delete('/:id', deleteLeaseOfficeSpace);
 

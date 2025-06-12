@@ -12,7 +12,7 @@ const router = express.Router();
 
 router.post('/', createCommercialLeaseAgriculture);
 router.get('/', getAllCommercialLeaseAgriculture);
-router.get('/:id', getCommercialLeaseAgricultureById);
+router.get('/:propertyId', getCommercialLeaseAgricultureById);
 router.put('/:id', updateCommercialLeaseAgriculture);
 router.delete('/:id', deleteCommercialLeaseAgriculture);
 

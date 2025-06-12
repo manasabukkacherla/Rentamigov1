@@ -29,6 +29,10 @@ interface LeaseBuilderFloorProps {
 }
 
 interface Address {
+  flatNo: number;
+  showFlatNo: boolean;
+  floor: number;
+  apartmentName: string;
   street: string;
   city: string;
   state: string;
@@ -36,7 +40,6 @@ interface Address {
   location: {
     latitude: string;
     longitude: string;
-    locationLabel: string;
   };
 }
 
@@ -47,6 +50,10 @@ interface IBasicInformation {
   totalFloors: number;
   propertyId?: string;
   address: {
+    flatNo: number;
+    showFlatNo: boolean;
+    floor: number;
+    apartmentName: string;
     street: string;
     city: string;
     state: string;
@@ -563,14 +570,17 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       floorNumber: 0,
       totalFloors: 0,
       address: {
+        flatNo: 0,
+        showFlatNo: false,
+        floor: 0,
+        apartmentName: "",
         street: "",
         city: "",
         state: "",
         zipCode: "",
         location: {
           latitude: "",
-          longitude: "",
-          locationLabel: ""
+          longitude: ""
         }
       }
     },
@@ -705,6 +715,10 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       floorNumber: 0,
       totalFloors: 0,
       address: {
+        flatNo: 0,
+        showFlatNo: false,
+        floor: 0,
+        apartmentName: "",
         street: "",
         city: "",
         state: "",
@@ -712,7 +726,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
         location: {
           latitude: "",
           longitude: "",
-          locationLabel: ""
         }
       }
     },
@@ -841,15 +854,22 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
     }
   })
 
-  const handleAddressChange = useCallback((newAddress: FormData['basicInformation']['address']) => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        address: newAddress
-      }
-    }));
-  }, []);
+  const handleAddressChange = useCallback((newAddress: Address) => {
+      setFormData(prev => ({
+        ...prev,
+        basicInformation: {
+          ...prev.basicInformation,
+          address: {
+            ...prev.basicInformation.address,
+            ...newAddress,
+            location: {
+              ...prev.basicInformation.address.location,
+              ...newAddress.location // <-- This line ensures updated lat/lng are applied
+            }
+          }
+        }
+      }));
+    }, []);
 
   const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
     setFormData(prev => ({
@@ -1010,18 +1030,13 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <PropertyAddress
+                // latitude={formData.basicInformation.address.location.latitude}
+                // longitude={formData.basicInformation.address.location.longitude}
                 address={{
-                  flatNo: 0,
-                  showFlatNo: false,
-                  floor: 0,
-                  apartmentName: '',
-                  street: formData.basicInformation.address?.street || '',
-                  city: formData.basicInformation.address?.city || '',
-                  state: formData.basicInformation.address?.state || '',
-                  zipCode: formData.basicInformation.address?.zipCode || '',
+                  ...formData.basicInformation.address,
                   location: {
-                    latitude: formData.basicInformation.address?.location?.latitude || '',
-                    longitude: formData.basicInformation.address?.location?.longitude || ''
+                    latitude: formData.basicInformation.address.location.latitude,
+                    longitude: formData.basicInformation.address.location.longitude
                   }
                 }}
                 onAddressChange={handleAddressChange}

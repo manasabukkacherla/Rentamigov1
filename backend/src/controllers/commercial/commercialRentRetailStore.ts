@@ -105,7 +105,7 @@ export const getAllCommercialRentRetail = async (req: Request, res: Response) =>
 
 export const getCommercialRentRetailById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialRentRetailStore.findOne({ propertyId });
     
     if (!property) {
