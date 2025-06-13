@@ -9,14 +9,14 @@ const generatePropertyId = async (): Promise<string> => {
     
     // Find the property with the highest property ID number
     const highestProperty = await CommercialSellOthers.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
-    }).sort({ propertyId: -1 });
+      'basicInformation.propertyId': { $regex: `^${prefix}\\d+$` }
+    }).sort({ 'basicInformation.propertyId': -1 });
     
     let nextNumber = 1; // Default start number
     
-    if (highestProperty && highestProperty.propertyId) {
+    if (highestProperty) {
       // Extract the numeric part from the existing highest property ID
-      const match = highestProperty.propertyId.match(/(\d+)$/);
+      const match = highestProperty.basicInformation.propertyId?.match(/(\d+)$/);
       if (match && match[1]) {
         // Convert to number and increment by 1
         nextNumber = parseInt(match[1], 10) + 1;
@@ -67,7 +67,10 @@ export const createCommercialSellOthers = async (req: Request, res: Response) =>
 
     // Create the data object with property ID and metadata
     const otherPropertyData = {
-      propertyId,
+      basicInformation: {
+        propertyId,
+        ...formData.basicInformation
+      },
       ...formData,
       metaData: {
         ...formData.metaData,

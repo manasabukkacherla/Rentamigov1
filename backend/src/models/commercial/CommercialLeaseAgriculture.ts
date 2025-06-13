@@ -6,16 +6,16 @@ interface IArea {
   builtUpArea: number;
 }
 
-interface IFloor {
-  floorNumber: number;
-  totalFloors: number;
-}
+// interface IFloor {
+//   floorNumber: number;
+//   totalFloors: number;
+// }
 
 export interface ICommercialLeaseAgriculture extends Document {
   propertyId: string;
   basicInformation: {
     title: string;
-    landType: string[];
+    type: string[];
     address: {
       street: string;
       city: string;
@@ -30,7 +30,18 @@ export interface ICommercialLeaseAgriculture extends Document {
     };
     isCornerProperty: boolean;
   };
-  
+ 
+
+
+  propertyDetails: {
+    area?: IArea;
+    soilType: string;
+    irrigation: boolean;
+    fencing: boolean;
+    cropSuitability: string;
+    waterSource: string;
+    legalClearances: boolean;
+  };
   powerSupply: boolean;
   landDetails: {
     totalArea: number;
@@ -41,21 +52,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     waterSource: string;
     legalClearances: boolean;
   };
-  propertyDetails?: {
-    area?: IArea;
-    floor?: IFloor;
-    facingDirection?: string;
-    furnishingStatus?: string;
-    propertyAmenities?: string[];
-    wholeSpaceAmenities?: string[];
-    waterAvailability?: string;
-    propertyAge?: number;
-    propertyCondition?: string;
-    electricitySupply?: {
-      powerLoad?: number;
-      backup?: boolean;
-    };
-  };
+  leaseTerms: {
   leaseAmount: {
     amount: number;
     duration: number;
@@ -72,32 +69,33 @@ export interface ICommercialLeaseAgriculture extends Document {
     noticePeriod: string;
     noticePeriodUnit: string;
   };
-  maintenanceAmount?: {
-    amount?: number;
-    frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
-  };
-  otherCharges?: {
-    waterCharges?: {
-      type?: "inclusive" | "exclusive";
-      amount?: number;
-    };
-    electricityCharges?: {
-      type?: "inclusive" | "exclusive";
-      amount?: number;
-    };
-    gasCharges?: {
-      type?: "inclusive" | "exclusive";
-      amount?: number;
-    };
-    otherCharges?: {
-      type?: "inclusive" | "exclusive";
-      amount?: number;
-    };
-  };
-  brokerage?: {
-    required?: boolean;
-    amount?: number;
-  };
+};
+  // maintenanceAmount?: {
+  //   amount?: number;
+  //   frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
+  // };
+  // otherCharges?: {
+  //   waterCharges?: {
+  //     type?: "inclusive" | "exclusive";
+  //     amount?: number;
+  //   };
+  //   electricityCharges?: {
+  //     type?: "inclusive" | "exclusive";
+  //     amount?: number;
+  //   };
+  //   gasCharges?: {
+  //     type?: "inclusive" | "exclusive";
+  //     amount?: number;
+  //   };
+  //   otherCharges?: {
+  //     type?: "inclusive" | "exclusive";
+  //     amount?: number;
+  //   };
+  // };
+  // brokerage?: {
+  //   required?: boolean;
+  //   amount?: number;
+  // };
   availability: {
     availableFrom: Date;
     availableImmediately: boolean;
@@ -107,7 +105,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     isPetsAllowed: boolean;
     operatingHours: boolean;
   };
-  contactDetails: {
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
@@ -119,9 +117,10 @@ export interface ICommercialLeaseAgriculture extends Document {
       exterior?: string[];
       interior?: string[];
       floorPlan?: string[];
-      aerial?: string[];
-      soil?: string[];
-      irrigation?: string[];
+      washrooms?: string[];
+      lifts?: string[];
+      emergencyExits?: string[];
+        
     };
     videoTour?: string;
     documents: string[];
@@ -140,7 +139,7 @@ const CommercialLeaseAgriculture = new Schema({
   propertyId: { type: String },
   basicInformation: {
     title: { type: String, default: "Unnamed Property" },
-    landType: { type: [String], default: ["Agricultural"] },
+    type: { type: [String], default: ["Agricultural"] },
     powerSupply: { type: Boolean, default: false },
   address: {
     street: { type: String, default: "Not Specified" },
@@ -169,22 +168,8 @@ const CommercialLeaseAgriculture = new Schema({
       totalArea: { type: Number },
       carpetArea: { type: Number },
       builtUpArea: { type: Number }
-    },
-    floor: {
-      floorNumber: { type: Number },
-      totalFloors: { type: Number }
-    },
-    facingDirection: { type: String },
-    furnishingStatus: { type: String },
-    propertyAmenities: { type: [String] },
-    wholeSpaceAmenities: { type: [String] },
-    waterAvailability: { type: String },
-    propertyAge: { type: Number },
-    propertyCondition: { type: String },
-    electricitySupply: {
-      powerLoad: { type: Number },
-      backup: { type: Boolean, default: false }
     }
+    
   },
   leaseAmount: {
     amount: { type: Number, default: 0 },
@@ -202,32 +187,32 @@ const CommercialLeaseAgriculture = new Schema({
     noticePeriod: { type: String, default: "" },
     noticePeriodUnit: { type: String, default: "months" },
   },
-  maintenanceAmount: {
-    amount: { type: Number },
-    frequency: { type: String }
-  },
-  otherCharges: {
-    electricityCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive']},
-      amount: { type: Number }
-    },
-    waterCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive']},
-      amount: { type: Number }
-    },
-    gasCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive']},
-      amount: { type: Number }
-    },
-    otherCharges: {
-      type: { type: String, enum: ['inclusive', 'exclusive']},
-      amount: { type: Number }
-    }
-  },
-  brokerage: {
-    required: { type: Boolean, default: false },
-    amount: { type: Number },
-  },
+  // maintenanceAmount: {
+  //   amount: { type: Number },
+  //   frequency: { type: String }
+  // },
+  // otherCharges: {
+  //   electricityCharges: {
+  //     type: { type: String, enum: ['inclusive', 'exclusive']},
+  //     amount: { type: Number }
+  //   },
+  //   waterCharges: {
+  //     type: { type: String, enum: ['inclusive', 'exclusive']},
+  //     amount: { type: Number }
+  //   },
+  //   gasCharges: {
+  //     type: { type: String, enum: ['inclusive', 'exclusive']},
+  //     amount: { type: Number }
+  //   },
+  //   otherCharges: {
+  //     type: { type: String, enum: ['inclusive', 'exclusive']},
+  //     amount: { type: Number }
+  //   }
+  // },
+  // brokerage: {
+  //   required: { type: Boolean, default: false },
+  //   amount: { type: Number },
+  // },
   availability: {
     availableFrom: { type: Date },
     availableImmediately: { type: Boolean, default: false },
@@ -238,7 +223,7 @@ const CommercialLeaseAgriculture = new Schema({
     operatingHours: { type: Boolean, default: false },
      
   },
-  contactDetails: {
+  contactInformation: {
     name: { type: String, default: "Not Specified" },
     email: { type: String, default: "not.specified@example.com" },
     phone: { type: String, default: "0000000000" },
@@ -250,9 +235,9 @@ const CommercialLeaseAgriculture = new Schema({
       exterior: { type: [String], default: [] },
       interior: { type: [String], default: [] },
       floorPlan: { type: [String], default: [] },
-      aerial: { type: [String], default: [] },
-      soil: { type: [String], default: [] },
-      irrigation: { type: [String], default: [] }
+      washrooms: { type: [String], default: [] },
+      lifts: { type: [String], default: [] },
+      emergencyExits: { type: [String], default: [] }
     },
     videoTour: { type: String },
     documents: { type: [String], default: [] }
