@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  shedType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -29,14 +29,7 @@ interface IPricingDetails {
   pricetype: "fixed" | "negotiable";
 }
 
-// interface IAvailability {
-//   type: 'immediate' | 'specific';
-//   date?: Date;
-//   preferredSaleDuration?: string;
-//   noticePeriod: string;
-//   isPetsAllowed: boolean;
-//   operatingHours: boolean;
-// }
+
 
 interface IContactInformation {
   name: string;
@@ -143,20 +136,22 @@ export interface ICommercialSellShed extends Document {
 // Schema
 const CommercialSellShedSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSS-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  propertyName: { type: String, default: "Unnamed Property" },
-  shopType: { type: [String], default: [] },
-  address: {
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+  basicInformation: {
+    title: { type: String, default: "Unnamed Property",required:true },
+    type: { type: [String], default: [] },
+    address: {
+      street: { type: String, default: "Not Specified" },
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String,required:true },
+      longitude: { type: String,required:true }
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  coordinates: {
-    latitude: { type: String,required:true },
-    longitude: { type: String,required:true }
-  },
-  isCornerProperty: { type: Boolean, default: false },
   shedDetails: {
       totalArea: { type: Number },
       carpetArea: { type: Number },

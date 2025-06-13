@@ -37,9 +37,10 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define interface that matches backend model structure
 interface FormData {
+  basicInformation:{
   propertyId?: string;
   title: string;
-  commercialType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -47,11 +48,12 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string
   };
   isCornerProperty: boolean;
+},
   propertyDetails: {
     area: {
       totalArea: number;
@@ -135,8 +137,9 @@ const SellOthersMain = () => {
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
+    basicInformation:{
     title: "",
-    commercialType: [],
+    type: [],
     address: {
       street: "",
       city: "",
@@ -144,8 +147,9 @@ const SellOthersMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+  },
     propertyDetails: {
       area: {
         totalArea: 0,
@@ -222,16 +226,16 @@ const SellOthersMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.title}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
+              propertyName={formData.basicInformation.title}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
             <OtherCommercialType
-              onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, commercialType: type as string[] }))}
+              onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type as string[] } }))}
             />
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
             {/* <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
@@ -243,16 +247,16 @@ const SellOthersMain = () => {
                 }))}
               /> */}
             <MapLocation
-              latitude={formData.coordinates.latitude.toString()}
-              longitude={formData.coordinates.longitude.toString()}
-              landmark={formData.landmark}
-              onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
+              latitude={formData.basicInformation.location.latitude.toString()}
+              longitude={formData.basicInformation.location.longitude.toString()}
+              landmark={formData.basicInformation.landmark}
+              onLocationChange={(location) => setFormData((prev) => ({ ...prev, location: location }))}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
               onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
             />
 
             <CornerProperty
-              isCornerProperty={formData.isCornerProperty}
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
                 setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
               }
@@ -496,12 +500,12 @@ const SellOthersMain = () => {
 
       // Create payload matching the backend model structure
       const transformedData = {
-        title: formData.title,
-        commercialType: formData.commercialType,
-        address: formData.address,
-        landmark: formData.landmark,
-        coordinates: formData.coordinates,
-        isCornerProperty: formData.isCornerProperty,
+        title: formData.basicInformation.title,
+        type: formData.basicInformation.type,
+        address: formData.basicInformation.address,
+        landmark: formData.basicInformation.landmark,
+        location: formData.basicInformation.location,
+        isCornerProperty: formData.basicInformation.isCornerProperty,
         propertyDetails: formData.propertyDetails,
         price: formData.price,
         registrationCharges: formData.registrationCharges,

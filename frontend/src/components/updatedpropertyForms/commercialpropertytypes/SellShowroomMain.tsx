@@ -30,7 +30,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  showroomType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -93,7 +93,7 @@ interface IFloor {
 
 interface FormData {
   title: string;
-  showroomType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -148,7 +148,7 @@ interface FormData {
 const SellShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    showroomType: [],
+    type: [],
     address: {
       street: '',
       city: '',
@@ -159,7 +159,7 @@ const SellShowroomMain = () => {
     isCornerProperty: false,
     basicInformation: {
       title: '',
-      showroomType: [],
+      type: [],
       address: {
         street: '',
         city: '',
@@ -212,13 +212,15 @@ const SellShowroomMain = () => {
       pricetype: "fixed",
       area: 0,
       totalprice: 0,
-      pricePerSqft: 0
+      pricePerSqft: 0,
     },
-    registration: {
-      chargestype: "inclusive",
-      registrationAmount: 0,
-      stampDutyAmount: 0
-    },
+      registration: {
+        chargestype: "inclusive",
+        registrationAmount: 0,
+        stampDutyAmount: 0
+      },
+    
+   
     brokerage: {
       required: "no",
       amount: 0
@@ -510,7 +512,7 @@ const SellShowroomMain = () => {
         const transformedData = {
           basicInformation: {
             title: formData.basicInformation?.title || formData.title || 'Commercial Showroom',
-            showroomType: Array.isArray(formData.showroomType) ? formData.showroomType : [],
+            type: Array.isArray(formData.type) ? formData.type : [],
             address: {
               street: formData.basicInformation?.address?.street || formData.address?.street || '',
               city: formData.basicInformation?.address?.city || formData.address?.city || '',

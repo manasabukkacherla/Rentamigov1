@@ -13,24 +13,24 @@ interface IFloor {
 
 export interface ICommercialSellAgriculture extends Document {
   propertyId?: string;
-  propertyName: string;
-  landType?: string[];
-  watersource?: string;
-  powerSupply: boolean;
-  address: {
-    street: string;
+  basicInformation: {
+    title: string;
+    type: string;
+    address: string;
+    landmark: string;
     city: string;
     state: string;
     zipCode: string;
+    location: 
+    { latitude: string; 
+      longitude: string 
+    };
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  
   Agriculturelanddetails: {
     totalArea: number;
+    powersupply?: boolean;
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
@@ -105,23 +105,23 @@ export interface ICommercialSellAgriculture extends Document {
 
 const CommercialSellAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSA-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  propertyName: { type: String, default: "Unnamed Property" },
-  landType: { type: [String], default: ["Agricultural"] },
-  powerSupply: { type: Boolean, default: false },
-  address: {
+  basicInformation: {
+    title: { type: String, default: "Unnamed Property" },
+    type: { type: String, default: "Agricultural" },
     street: { type: String, default: "Not Specified" },
     city: { type: String, default: "Not Specified" },
     state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
-  },
+    zipCode: { type: String, default: "00000" },
   landmark: { type: String },
-  coordinates: {
+  location: {
     latitude: { type: String ,required:true},
     longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
+},
   Agriculturelanddetails: {
     totalArea: { type: Number, default: 0 },
+    powersupply: { type: Boolean, default: false },
     soilType: { type: String },
     irrigation: { type: Boolean, default: false },
     fencing: { type: Boolean, default: false },

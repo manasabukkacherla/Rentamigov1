@@ -54,7 +54,7 @@ const globalStyles = `
 interface FormData {
   basicInformation: {
     title: string;
-    shopType: string[];
+    type: string[];
     address: {
       street: string;
       city: string;
@@ -155,7 +155,7 @@ const SellShopMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      shopType: [],
+      type: [],
       address: {
         street: '',
         city: '',
@@ -399,8 +399,8 @@ const SellShopMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <ShopType
-            shopType={formData.basicInformation.shopType}
-            onShopTypeChange={(type) => handleChange('basicInformation.shopType', type)}
+            type={formData.basicInformation.type}
+            onShopTypeChange={(type) => handleChange('basicInformation.type', type)}
           />
           <CommercialPropertyAddress
             address={formData.basicInformation.address}
@@ -754,9 +754,9 @@ const SellShopMain = () => {
         basicInformation: {
           ...formData.basicInformation,
           // Ensure shopType is an array
-          shopType: Array.isArray(formData.basicInformation.shopType)
-            ? formData.basicInformation.shopType
-            : [formData.basicInformation.shopType].filter(Boolean),
+          type: Array.isArray(formData.basicInformation.type)
+            ? formData.basicInformation.type
+            : [formData.basicInformation.type].filter(Boolean),
           // Convert location coordinates to numbers
           location: {
             latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
