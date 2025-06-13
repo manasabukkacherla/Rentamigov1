@@ -54,9 +54,8 @@ export const createCommercialRentShop = async (req: Request, res: Response) => {
     console.log(formData)
     
     const propertyId = await generatePropertyId();
-    const userId = formData.metadata.userId;
+    const userId = formData.metadata.createdBy;
     const user = await User.findById(userId);
-
     if(!user) {
       res.status(404).json({
         success: false,
@@ -67,14 +66,20 @@ export const createCommercialRentShop = async (req: Request, res: Response) => {
       const userName = user.username;
       const shopData = {
         propertyId,
-        ...formData,
+        basicInformation: formData.basicInformation,
+        shopDetails: formData.shopDetails,
+        rentalTerms: formData.rentalTerms,
+        brokerage: formData.brokerage,
+        availability: formData.availability,
+        contactInformation: formData.contactInformation,
+        media: formData.media,
         metadata: {
-          ...formData.metadata,
-          createdBy: req.user._id,
-          // status: 'draft',
+          createdBy: formData.metadata.createdBy,
           createdAt: new Date(),
-          // updatedAt: new Date(),
-          // isVerified: false
+          propertyType: formData.metadata.propertyType,
+          intent: formData.metadata.intent,
+          propertyName: formData.metadata.propertyName,
+          status: formData.metadata.status
         }
       };
   

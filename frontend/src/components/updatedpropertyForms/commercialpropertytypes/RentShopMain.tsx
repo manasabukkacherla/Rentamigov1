@@ -28,7 +28,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 interface IBasicInformation {
   title: string;
-  shopType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -84,14 +84,6 @@ interface IRentalTerms {
       type: string;
     };
   };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
-  availability: {
-    type: string;
-    date?: string;
-  };
 }
 
 interface IContactInformation {
@@ -119,6 +111,15 @@ interface FormData {
   basicInformation: IBasicInformation;
   shopDetails: IShopDetails;
   rentalTerms: IRentalTerms;
+  
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
+  };
   contactInformation: IContactInformation;
   media: IMedia;
 }
@@ -187,7 +188,7 @@ const RentShopMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      shopType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -241,13 +242,13 @@ const RentShopMain = () => {
           amount: 0
         }
       },
-      brokerage: {
-        required: 'no'
-      },
-      availability: {
-        type: 'immediate',
-        date: ''
-      }
+    },
+    brokerage: {
+      required: 'no'
+    },
+    availability: {
+      type: 'immediate',
+      date: ''
     },
     contactInformation: {
       name: '',
@@ -302,10 +303,10 @@ const RentShopMain = () => {
             }))}
           />
           <ShopType
-            shopType={formData.basicInformation.shopType}
+            Type={formData.basicInformation.Type}
             onShopTypeChange={(types) => setFormData(prev => ({
               ...prev,
-              basicInformation: { ...prev.basicInformation, shopType: types }
+              basicInformation: { ...prev.basicInformation, Type: types }
             }))}
           />
           <CommercialPropertyAddress
@@ -391,10 +392,10 @@ const RentShopMain = () => {
             }))}
           />
           <Brokerage
-            bro={formData.rentalTerms.brokerage}
+            bro={formData.brokerage}
             onBrokerageChange={(brokerage) => setFormData(prev => ({
               ...prev,
-              rentalTerms: { ...prev.rentalTerms, brokerage: brokerage }
+              brokerage: brokerage
             }))}
           />
         </div>
@@ -406,10 +407,10 @@ const RentShopMain = () => {
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
-            availability={formData.rentalTerms.availability as { type: "immediate" | "specific"; date?: string }}
+            availability={formData.availability as { type: "immediate" | "specific"; date?: string }}
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
-              rentalTerms: { ...prev.rentalTerms, availability: availability }
+              availability: availability
             }))}
           />
         </div>
@@ -564,17 +565,34 @@ const RentShopMain = () => {
         };
 
         const transformedData = {
-          ...formData,
+          basicInformation: {
+            title: formData.basicInformation.title,
+            Type: formData.basicInformation.Type,
+            address: formData.basicInformation.address,
+            landmark: formData.basicInformation.landmark,
+            location: {
+              latitude: formData.basicInformation.location.latitude,
+              longitude: formData.basicInformation.location.longitude
+            },
+            isCornerProperty: formData.basicInformation.isCornerProperty
+          },
+          shopDetails: formData.shopDetails,
+          rentalTerms: formData.rentalTerms,
+          brokerage: formData.brokerage,
+          availability: formData.availability,
+          contactInformation: formData.contactInformation,
           media: convertedMedia,
           metadata: {
-            craetedBy: author,
-            createdAt: new Date(),
+            createdBy: author,
+            createdAt: new Date().toISOString(),
             propertyType: 'Commercial',
+            intent: 'rent',
             propertyName: formData.basicInformation.title,
-            intent: 'Rent',
             status: 'Available'
           }
         };
+
+        console.log("transformedData", transformedData)
         
         const response = await axios.post('/api/commercial/rent/shops', transformedData, {
           headers: {

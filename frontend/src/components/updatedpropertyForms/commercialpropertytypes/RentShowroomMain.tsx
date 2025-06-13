@@ -24,7 +24,7 @@ import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
   basicInformation: {
     title: string;
-    showroomType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -146,7 +146,7 @@ const RentShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      showroomType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -394,7 +394,7 @@ const RentShowroomMain = () => {
               ...prev,
               basicInformation: {
                 ...prev.basicInformation,
-                showroomType: Array.isArray(type) ? type : [type]
+                Type: Array.isArray(type) ? type : [type]
               }
             }))}
           />

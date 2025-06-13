@@ -64,125 +64,15 @@ export const createOfficeSpace = async (req: Request, res: Response) => {
         // Prepare office space data with all required fields
         const officeSpaceData = {
             propertyId,
-            basicInformation: {
-                title: formData.basicInformation?.title || "Office Space",
-                officeType: formData.basicInformation?.officeType || ["commercial"],
-                address: {
-                    street: formData.basicInformation?.address?.street || "",
-                    city: formData.basicInformation?.address?.city || "",
-                    state: formData.basicInformation?.address?.state || "",
-                    zipCode: formData.basicInformation?.address?.zipCode || ""
-                },
-                landmark: formData.basicInformation?.landmark || "",
-                location: {
-                    latitude: formData.basicInformation?.location?.latitude || 0,
-                    longitude: formData.basicInformation?.location?.longitude || 0
-                },
-                isCornerProperty: formData.basicInformation?.isCornerProperty || false
-            },
-            officeDetails: {
-                seatingCapacity: parseInt(formData.officeDetails?.seatingCapacity) || 0,
-                cabins: {
-                    available: formData.officeDetails?.cabins?.available || false,
-                    count: parseInt(formData.officeDetails?.cabins?.count) || 0
-                },
-                conferenceRoom: formData.officeDetails?.conferenceRoom || false,
-                meetingRoom: formData.officeDetails?.meetingRoom || false,
-                receptionArea: formData.officeDetails?.receptionArea || false,
-                wifiSetup: formData.officeDetails?.wifiSetup || false,
-                serverRoom: formData.officeDetails?.serverRoom || false,
-                coworkingFriendly: formData.officeDetails?.coworkingFriendly || false
-            },
-            propertyDetails: {
-                area: {
-                    totalArea: parseInt(formData.propertyDetails?.area?.totalArea) || 0,
-                    carpetArea: parseInt(formData.propertyDetails?.area?.carpetArea) || 0,
-                    builtUpArea: parseInt(formData.propertyDetails?.area?.builtUpArea) || 0
-                },
-                floor: {
-                    floorNumber: parseInt(formData.propertyDetails?.floor?.floorNumber) || 0,
-                    totalFloors: parseInt(formData.propertyDetails?.floor?.totalFloors) || 0
-                },
-                facingDirection: formData.propertyDetails?.facingDirection || "",
-                furnishingStatus: formData.propertyDetails?.furnishingStatus || "",
-                propertyAmenities: formData.propertyDetails?.propertyAmenities || [],
-                wholeSpaceAmenities: formData.propertyDetails?.wholeSpaceAmenities || [],
-                electricitySupply: {
-                    powerLoad: parseInt(formData.propertyDetails?.electricitySupply?.powerLoad) || 0,
-                    backup: formData.propertyDetails?.electricitySupply?.backup || false
-                },
-                waterAvailability: formData.propertyDetails?.waterAvailability || "",
-                propertyAge: parseInt(formData.propertyDetails?.propertyAge) || 0,
-                propertyCondition: formData.propertyDetails?.propertyCondition || "new"
-            },
-            rentalTerms: {
-                rentDetails: {
-                    expectedRent: parseInt(formData.rentalTerms?.rentDetails?.expectedRent) || 0,
-                    isNegotiable: formData.rentalTerms?.rentDetails?.isNegotiable || false,
-                    rentType: formData.rentalTerms?.rentDetails?.rentType || "inclusive"
-                },
-                securityDeposit: {
-                    amount: parseInt(formData.rentalTerms?.securityDeposit?.amount) || 0
-                },
-                maintenanceAmount: {
-                    amount: parseInt(formData.rentalTerms?.maintenanceAmount?.amount) || 0,
-                    frequency: formData.rentalTerms?.maintenanceAmount?.frequency || "monthly"
-                },
-                otherCharges: {
-                    water: {
-                        amount: parseInt(formData.rentalTerms?.otherCharges?.water?.amount) || 0,
-                        type: formData.rentalTerms?.otherCharges?.water?.type || "inclusive"
-                    },
-                    electricity: {
-                        amount: parseInt(formData.rentalTerms?.otherCharges?.electricity?.amount) || 0,
-                        type: formData.rentalTerms?.otherCharges?.electricity?.type || "inclusive"
-                    },
-                    gas: {
-                        amount: parseInt(formData.rentalTerms?.otherCharges?.gas?.amount) || 0,
-                        type: formData.rentalTerms?.otherCharges?.gas?.type || "inclusive"
-                    },
-                    others: {
-                        amount: parseInt(formData.rentalTerms?.otherCharges?.others?.amount) || 0,
-                        type: formData.rentalTerms?.otherCharges?.others?.type || "inclusive"
-                    }
-                },
-                brokerage: {
-                    required: formData.rentalTerms?.brokerage?.required || "no",
-                    amount: parseInt(formData.rentalTerms?.brokerage?.amount) || 0
-                },
-                availability: {
-                    type: formData.rentalTerms?.availability?.type || "immediate",
-                    date: formData.rentalTerms?.availability?.date || null
-                }
-            },
-            availability: {
-                availableFrom: formData.availability?.availableFrom || null,
-                availableImmediately: formData.availability?.availableImmediately || true
-            },
-            contactInformation: {
-                name: formData.contactInformation?.name || "",
-                email: formData.contactInformation?.email || "",
-                phone: formData.contactInformation?.phone || "",
-                alternatePhone: formData.contactInformation?.alternatePhone || "",
-                bestTimeToContact: formData.contactInformation?.bestTimeToContact || ""
-            },
-            media: {
-                photos: {
-                    exterior: formData.media?.photos?.exterior || [],
-                    interior: formData.media?.photos?.interior || [],
-                    floorPlan: formData.media?.photos?.floorPlan || [],
-                    washrooms: formData.media?.photos?.washrooms || [],
-                    lifts: formData.media?.photos?.lifts || [],
-                    emergencyExits: formData.media?.photos?.emergencyExits || []
-                },
-                videoTour: formData.media?.videoTour || "",
-                documents: formData.media?.documents || []
-            },
+            ...formData,
             metadata: {
-                creadtedBy: req.user?._id || null,
+                ...formData.metadata,
+                createdBy: formData.metadata.createdBy,
                 createdAt: new Date()
             }
         };
+
+        console.log('createdBy:', formData.metadata.createdBy);
 
         console.log('Prepared office space data:', officeSpaceData);
 

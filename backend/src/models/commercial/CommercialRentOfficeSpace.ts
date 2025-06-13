@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
     title: string;
-    officeType: string[];
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -101,14 +101,6 @@ interface IRentalTerms {
             type: string;
         };
     };
-    brokerage: {
-        required: string;
-        amount?: number;
-    };
-    availability: {
-        type: string;
-        date?: string;
-    };
 }
 
 interface IFloor {
@@ -136,6 +128,15 @@ interface ICommercialRentOfficeSpace extends Document {
         propertyCondition: string;
     };
     rentalTerms: IRentalTerms;
+    
+    brokerage: {
+        required: string;
+        amount?: number;
+    };
+    availability: {
+        type: string;
+        date?: string;
+    };
     contactInformation: IContactInformation;
     media: IMedia;
     metadata: IMetadata;
@@ -146,7 +147,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        officeType: [{ type: String, required: true }],
+        Type: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -226,16 +227,16 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
                 type: { type: String, required: true },
             }
         },
-        brokerage: {
-            required: { type: String, required: true },
-            amount: { type: Number },
-        },
-        availability: {
-            type: { type: String, required: true },
-            date: { type: String },
-        }
     },
-   
+    
+    brokerage: {
+        required: { type: String, required: true },
+        amount: { type: Number },
+    },
+    availability: {
+        type: { type: String, required: true },
+        date: { type: String },
+    },
     contactInformation: {
         name: { type: String, required: true },
         email: { type: String, required: true },
