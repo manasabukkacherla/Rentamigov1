@@ -80,7 +80,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  officeType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -107,11 +107,6 @@ interface IOfficeDetails {
   wifiSetup: boolean;
   serverRoom: boolean;
   coworkingFriendly: boolean;
-}
-
-  interface IAvailability {
-    type: string;
-    date?: string;
 }
 
 interface IContactInformation {
@@ -174,14 +169,6 @@ interface IRentalTerms {
       type: string;
     };
   };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
-  availability: {
-    type: string;
-    date?: string;
-  };
 }
 
 interface IFloor {
@@ -208,7 +195,14 @@ interface FormData {
     propertyCondition: string;
   };
   rentalTerms: IRentalTerms;
-  availability: IAvailability;
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
+  };
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -220,7 +214,7 @@ const RentOfficeSpace = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      officeType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -297,14 +291,10 @@ const RentOfficeSpace = () => {
           type: ''
         }
       },
-      brokerage: {
-        required: '',
-        amount: 0
-      },
-      availability: {
-        type: '',
-        date: ''
-      }
+    },
+    brokerage: {
+      required: '',
+      amount: 0
     },
     availability: {
       type: '',
@@ -370,7 +360,7 @@ const RentOfficeSpace = () => {
 
   const handleOfficeTypeChange = (types: string[]) => {
     if (types && types.length > 0) {
-      setFormData({ ...formData, basicInformation: { ...formData.basicInformation, officeType: types } });
+      setFormData({ ...formData, basicInformation: { ...formData.basicInformation, Type: types } });
     }
   };
 
@@ -491,12 +481,9 @@ const RentOfficeSpace = () => {
   const handleBrokerageChange = (brokerage: Record<string, any>) => {
     setFormData({
       ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        brokerage: {
-          required: brokerage.required || 'no',
-          amount: brokerage.amount || 0
-        }
+      brokerage: {
+        required: brokerage.required || 'no',
+        amount: brokerage.amount || 0
       }
     });
   };
@@ -504,13 +491,6 @@ const RentOfficeSpace = () => {
   const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }) => {
     setFormData({
       ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        availability: {
-          type: availability.type || 'immediate',
-          date: availability.date || new Date().toISOString()
-        }
-      },
       availability: {
         type: availability.type || 'immediate',
         date: availability.date || new Date().toISOString()
@@ -617,7 +597,7 @@ const RentOfficeSpace = () => {
           />
           <Brokerage
             onBrokerageChange={handleBrokerageChange}
-            bro={formData.rentalTerms.brokerage}
+            bro={formData.brokerage}
           />
         </div>
       )
@@ -777,6 +757,8 @@ const RentOfficeSpace = () => {
 
           }
         };
+
+        console.log("transformedData", transformedData);
 
         const response = await axios.post('/api/commercial/rent/office-space', transformedData, {
           headers: {

@@ -75,7 +75,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 interface FormData {
   basicInformation: {
     title: string;
-    plotType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -89,7 +89,7 @@ interface FormData {
     };
     isCornerProperty: boolean;
   };
-  plotDetails: {
+  propertyDetails: {
     totalArea: number;
     zoningType: string;
     boundaryWall: boolean;
@@ -98,29 +98,6 @@ interface FormData {
     roadAccess: string;
     securityRoom: boolean;
     previousConstruction: string;
-    infrastructure: string[];
-  };
-  propertyDetails: {
-    area: {
-      totalArea: number;
-      carpetArea: number;
-      builtUpArea: number;
-    };
-    floor: {
-      floorNumber: number;
-      totalFloors: number;
-    };
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
-    };
-    waterAvailability: string;
-    propertyAge: string;
-    propertyCondition: string;
   };
   rentalTerms: {
     rentDetails: {
@@ -135,32 +112,10 @@ interface FormData {
       amount: number;
       frequency: string;
     };
-    otherCharges: {
-      water: {
-        amount?: number;
-        type: string;
-      };
-      electricity: {
-        amount?: number;
-        type: string;
-      };
-      gas: {
-        amount?: number;
-        type: string;
-      };
-      others: {
-        amount?: number;
-        type: string;
-      };
-    };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
-      type: string;
-      date?: string;
-    };
+  };
+  availability: {
+    type: string;
+    date?: string;
   };
   contactInformation: {
     name: string;
@@ -198,7 +153,7 @@ const RentPlot = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      plotType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -212,7 +167,7 @@ const RentPlot = () => {
       },
       isCornerProperty: false
     },
-    plotDetails: {
+    propertyDetails: {
       totalArea: 0,
       zoningType: '',
       boundaryWall: false,
@@ -221,30 +176,6 @@ const RentPlot = () => {
       roadAccess: '',
       securityRoom: false,
       previousConstruction: '',
-      infrastructure: [],
-      
-    },
-    propertyDetails: {
-      area: {
-        totalArea: 0,
-        carpetArea: 0,
-        builtUpArea: 0
-      },
-      floor: {
-        floorNumber: 0,
-        totalFloors: 0
-      },
-      facingDirection: '',
-      furnishingStatus: '',
-      propertyAmenities: [],
-      wholeSpaceAmenities: [],
-      electricitySupply: {
-        powerLoad: 0,
-        backup: false
-      },
-      waterAvailability: '',
-      propertyAge: '',
-      propertyCondition: ''
     },
     rentalTerms: {
       rentDetails: {
@@ -259,32 +190,10 @@ const RentPlot = () => {
         amount: 0,
         frequency: 'monthly'
       },
-      otherCharges: {
-        water: {
-          amount: 0,
-          type: 'inclusive'
-        },
-        electricity: {
-          amount: 0,
-          type: 'inclusive'
-        },
-        gas: {
-          amount: 0,
-          type: 'inclusive'
-        },
-        others: {
-          amount: 0,
-          type: 'inclusive'
-        }
-      },
-      brokerage: {
-        required: 'no',
-        amount: 0
-      },
-      availability: {
-        type: 'immediate',
-        date: new Date().toISOString()
-      }
+    },
+    availability: {
+      type: 'immediate',
+      date: new Date().toISOString()
     },
     contactInformation: {
       name: '',
@@ -353,7 +262,7 @@ const RentPlot = () => {
       ...formData,
       basicInformation: {
         ...formData.basicInformation,
-        plotType: types
+        Type: types
       }
     });
   };
@@ -373,7 +282,7 @@ const RentPlot = () => {
   const handlePlotDetailsChange = (details: Record<string, any>) => {
     setFormData({
       ...formData,
-      plotDetails: {
+      propertyDetails: {
         totalArea: details.totalArea || 0,
         zoningType: details.zoningType || '',
         boundaryWall: details.boundaryWall || false,
@@ -382,36 +291,6 @@ const RentPlot = () => {
         roadAccess: details.roadAccess || '',
         securityRoom: details.securityRoom || false,
         previousConstruction: details.previousConstruction || '',
-        infrastructure: details.infrastructure || []
-        
-      }
-    });
-  };
-
-  const handlePropertyDetailsChange = (details: Record<string, any>) => {
-    setFormData({
-      ...formData,
-      propertyDetails: {
-        area: {
-          totalArea: details.area?.totalArea || 0,
-          carpetArea: details.area?.carpetArea || 0,
-          builtUpArea: details.area?.builtUpArea || 0
-        },
-        floor: {
-          floorNumber: details.floor?.floorNumber || 0,
-          totalFloors: details.floor?.totalFloors || 0
-        },
-        facingDirection: details.facingDirection || '',
-        furnishingStatus: details.furnishingStatus || '',
-        propertyAmenities: details.propertyAmenities || [],
-        wholeSpaceAmenities: details.wholeSpaceAmenities || [],
-        electricitySupply: {
-          powerLoad: details.electricitySupply?.powerLoad || 0,
-          backup: details.electricitySupply?.backup || false
-        },
-        waterAvailability: details.waterAvailability || '',
-        propertyAge: details.propertyAge || 0,
-        propertyCondition: details.propertyCondition || ''
       }
     });
   };
@@ -455,55 +334,12 @@ const RentPlot = () => {
     });
   };
 
-  const handleOtherChargesChange = (charges: Record<string, any>) => {
-    setFormData({
-      ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        otherCharges: {
-          water: {
-            amount: charges.water?.amount || 0,
-            type: charges.water?.type || 'inclusive'
-          },
-          electricity: {
-            amount: charges.electricity?.amount || 0,
-            type: charges.electricity?.type || 'inclusive'
-          },
-          gas: {
-            amount: charges.gas?.amount || 0,
-            type: charges.gas?.type || 'inclusive'
-          },
-          others: {
-            amount: charges.others?.amount || 0,
-            type: charges.others?.type || 'inclusive'
-          }
-        }
-      }
-    });
-  };
-
-  const handleBrokerageChange = (brokerage: Record<string, any>) => {
-    setFormData({
-      ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        brokerage: {
-          required: brokerage.required || 'no',
-          amount: brokerage.amount || 0
-        }
-      }
-    });
-  };
-
   const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }) => {
     setFormData({
       ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        availability: {
-          type: availability.type || 'immediate',
-          date: availability.date || new Date().toISOString()
-        }
+      availability: {
+        type: availability.type || 'immediate',
+        date: availability.date || new Date().toISOString()
       }
     });
   };
@@ -601,8 +437,8 @@ const RentPlot = () => {
         <div className="bg-gray-100 rounded-xl p-8 shadow-md transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
             availability={{
-              type: formData.rentalTerms.availability.type as "immediate" | "specific",
-              date: formData.rentalTerms.availability.date
+              type: formData.availability.type as "immediate" | "specific",
+              date: formData.availability.date
             }}
             onAvailabilityChange={handleAvailabilityChange}
           />
@@ -733,12 +569,8 @@ const RentPlot = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            userId: author,
+            createdBy: author,
             createdAt: new Date(),
-            propertyType: 'Commercial',
-            propertyName: 'Plot',
-            intent: 'Rent',
-            status: 'Available',
           }
         };
 

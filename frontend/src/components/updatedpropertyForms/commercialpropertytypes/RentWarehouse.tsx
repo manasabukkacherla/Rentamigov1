@@ -25,7 +25,7 @@ import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
   basicInformation: {
     title: string;
-    warehouseType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -105,14 +105,10 @@ interface FormData {
         type: string;
       };
     };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
-      type: string;
-      date?: string;
-    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
   };
   availability: {
     type: string;
@@ -162,7 +158,7 @@ const RentWarehouse = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      warehouseType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -242,14 +238,11 @@ const RentWarehouse = () => {
           type: 'inclusive',
         },
       },
-      brokerage: {
-        required: 'no',
-        amount: 0,
-      },
-      availability: {
-        type: 'immediate',
-        date: '',
-      },
+    },
+    
+    brokerage: {
+      required: 'no',
+      amount: 0,
     },
     availability: {
       type: 'immediate',
@@ -302,7 +295,7 @@ const RentWarehouse = () => {
       ...formData,
       basicInformation: {
         ...formData.basicInformation,
-        warehouseType: types
+        Type: types
       }
     });
   };
@@ -466,12 +459,9 @@ const RentWarehouse = () => {
   const handleBrokerageChange = (brokerage: Record<string, any>) => {
     setFormData({
       ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        brokerage: {
-          required: brokerage.required || 'no',
-          amount: brokerage.amount || 0
-        }
+      brokerage: {
+        required: brokerage.required || 'no',
+        amount: brokerage.amount || 0
       }
     });
   };
@@ -479,13 +469,6 @@ const RentWarehouse = () => {
   const handleAvailabilityChange = (availability: { type: 'immediate' | 'specific'; date?: string | undefined; }) => {
     setFormData({
       ...formData,
-      rentalTerms: {
-        ...formData.rentalTerms,
-        availability: {
-          type: availability.type || 'immediate',
-          date: availability.date || new Date().toISOString()
-        }
-      },
       availability: {
         type: availability.type || 'immediate',
         date: availability.date || new Date().toISOString()
@@ -639,7 +622,7 @@ const RentWarehouse = () => {
             }))}
           />
           <Brokerage
-            bro={formData.rentalTerms.brokerage}
+            bro={formData.brokerage}
             onBrokerageChange={handleBrokerageChange}
           />
         </div>

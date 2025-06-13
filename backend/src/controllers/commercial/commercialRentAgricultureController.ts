@@ -50,18 +50,7 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     const formData = req.body;
 
     // Prefer authenticated user if available
-    let userId: string | undefined = undefined;
-    let user: any = undefined;
-    if (req.user && (req.user as any)._id) {
-      userId = (req.user as any)._id;
-      user = req.user;
-    } else if (formData.metaData && formData.metaData.userId) {
-      userId = formData.metaData.userId;
-      // Optionally: fetch user from DB if needed
-    } else if (formData.metadata && formData.metadata.userId) {
-      userId = formData.metadata.userId;
-      // Optionally: fetch user from DB if needed
-    }
+    const userId = formData.metadata.createdBy;
 
     if (!userId) {
       return res.status(400).json({

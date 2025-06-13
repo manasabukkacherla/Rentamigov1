@@ -490,7 +490,7 @@ const RentAgriculture = () => {
           contactDetails: formData.contactDetails,
           media: convertedMedia,
           metaData: {
-            userId: author,
+            createdBy: author,
             createdAt: new Date(),
             propertyType: 'Commercial',
             propertyName: 'Agriculture',

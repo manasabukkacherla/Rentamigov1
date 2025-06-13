@@ -77,14 +77,6 @@ interface IRentalTerms {
             type: string;
         }
     }
-    brokerage: {
-        required: string;
-        amount?: number;
-    }
-    availability: {
-        type: string;
-        date?: string;
-    }
 }
 
 interface ICommercialRentShed extends Document {
@@ -128,7 +120,15 @@ interface ICommercialRentShed extends Document {
             };
         };          
     };
-    rentalTerms: IRentalTerms;
+    rentalTerms: IRentalTerms; 
+    brokerage: {
+        required: string;
+        amount?: number;
+    }
+    availability: {
+        type: string;
+        date?: string;
+    }
     contactInformation: IContactInformation;
     media: IMedia;
     metadata: IMetadata;
@@ -220,14 +220,14 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
                 type: { type: String, required: true },
             }
         },
-        brokerage: {
-            required: { type: String, required: true },
-            amount: { type: Number },
-        },
-        availability: {
-            type: { type: String, required: true },
-            date: { type: String },
-        }
+    },
+    brokerage: {
+        required: { type: String, required: true },
+        amount: { type: Number },
+    },
+    availability: {
+        type: { type: String, required: true },
+        date: { type: String },
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -249,7 +249,7 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.Mixed, required: false },
+        createdBy: { type: Schema.Types.ObjectId, required: false },
         createdAt: { type: Date, default: Date.now },
         propertyType: { type: String, required: true },
         intent: { type: String, required: true },
