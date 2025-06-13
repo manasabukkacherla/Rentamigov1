@@ -26,7 +26,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormData {
   basicInformation: {
     title: string;
-    landType: string[];
+    type: string[];
     address: {
       street: string;
       city: string;
@@ -62,6 +62,7 @@ interface FormData {
     
 
   };
+  leaseTerms: {
   leaseAmount: {
     amount: number;
     duration: number;
@@ -78,11 +79,20 @@ interface FormData {
     noticePeriod: string;
     noticePeriodUnit: string;
   };
-
-  brokerage: {
-    required: string;
-    amount?: number;
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
   };
+  otherCharges: {
+    water: { amount: number; type: string };
+    electricity: { amount: number; type: string };
+    gas: { amount: number; type: string };
+    others: { amount: number; type: string };
+    brokerage: { required: string; amount?: number };
+  };
+
+};
+
   availability: {
     availableFrom: Date;
     availableImmediately: boolean;
@@ -117,7 +127,8 @@ const LeaseAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      landType: [],
+      type: [],
+      
       address: {
       street: '',
       city: '',
@@ -150,6 +161,7 @@ const LeaseAgricultureMain = () => {
       
 
     },
+    leaseTerms: {
     leaseAmount: {
       amount: 0,
       duration: 0,
@@ -166,11 +178,20 @@ const LeaseAgricultureMain = () => {
       noticePeriod: '',
       noticePeriodUnit: 'months'
     },
-
-    brokerage: {
-      required: "no",
-      amount: 0
+    maintenanceAmount: {
+      amount: 0,
+      frequency: 'Monthly'
     },
+    otherCharges: {
+      water: { amount: 0, type: 'inclusive' },
+      electricity: { amount: 0, type: 'inclusive' },
+      gas: { amount: 0, type: 'inclusive' },
+      others: { amount: 0, type: 'inclusive' },
+      brokerage: { required: 'no', amount: 0 }
+    },
+
+  },
+    
     availability: {
       availableFrom: new Date(),
       availableImmediately: false,
@@ -197,8 +218,9 @@ const LeaseAgricultureMain = () => {
         emergencyExits: []
       },
       videoTour: null,
-      documents: []
-    }
+        documents: []
+      }
+    
   });
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -243,7 +265,7 @@ const LeaseAgricultureMain = () => {
               <AgriculturalLandType
                 onLandTypeChange={(types: string[]) => setFormData(prev => ({
                   ...prev,
-                  landType: types
+                  type: types
                 }))}
               />
             </div>
@@ -315,7 +337,7 @@ const LeaseAgricultureMain = () => {
                 <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
+                    leaseTerms: { ...prev.leaseTerms, leaseAmount: { ...prev.leaseTerms.leaseAmount, ...amount } }
                   }))}
                 />
                 <LeaseTenure
