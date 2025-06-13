@@ -31,7 +31,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  warehouseType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -141,7 +141,7 @@ const SellWarehouseMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      warehouseType: [],
+      type: [],
       address: {
         street: '',
         city: '',
@@ -153,7 +153,7 @@ const SellWarehouseMain = () => {
         latitude: '',
         longitude: ''
       },
-      isCornerProperty: false
+      isCornerProperty: false 
     },
     warehouseDetails: {
       ceilingHeight: 0,

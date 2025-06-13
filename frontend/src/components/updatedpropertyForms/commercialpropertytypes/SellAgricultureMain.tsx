@@ -36,24 +36,28 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Interface that matches the backend model structure
 interface FormData {
-  propertyId?: string;
-  title: string;
-  landType: string[];
-  powerSupply: boolean;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  basicInformation:{ 
+    propertyId?: string;
+    title: string;
+    type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
+
+  }
+ 
   Agriculturelanddetails: {
     totalArea: number;
+    powersupply:boolean;
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
@@ -137,9 +141,9 @@ const SellAgricultureMain = () => {
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
+    basicInformation:{
     title: "",
-    landType: [],
-    powerSupply: false,
+    type: [],
     address: {
       street: "",
       city: "",
@@ -147,10 +151,12 @@ const SellAgricultureMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+  },
     Agriculturelanddetails: {
       totalArea: 0,
+      powersupply: false,
       soilType: "",
       irrigation: false,
       fencing: false,
@@ -229,7 +235,7 @@ const SellAgricultureMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.title}
+              propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
             />
             <AgriculturalLandType
@@ -239,7 +245,7 @@ const SellAgricultureMain = () => {
 
           <div className="space-y-6">
             <CommercialPropertyAddress
-              address={formData.address}
+              address={formData.basicInformation.address}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
             />
             {/* <Landmark
@@ -253,12 +259,12 @@ const SellAgricultureMain = () => {
                 }))}
               /> */}
             <MapLocation
-              latitude={formData.coordinates?.latitude}
-              longitude={formData.coordinates?.longitude}
-              landmark={formData.landmark}
+              latitude={formData.basicInformation?.location?.latitude}
+              longitude={formData.basicInformation?.location?.longitude}
+              landmark={formData.basicInformation.landmark}
               onLocationChange={(location) => setFormData(prev => ({
                 ...prev,
-                coordinates: location
+                location: location
               }))}
               onAddressChange={(address) => setFormData(prev => ({
                 ...prev,
@@ -266,12 +272,15 @@ const SellAgricultureMain = () => {
               }))}
               onLandmarkChange={(landmark) => setFormData(prev => ({
                 ...prev,
-                landmark
+                basicInformation:{
+                  ...prev.basicInformation,
+                  landmark:landmark
+                }
               }))}
             />
 
             <CornerProperty
-              isCornerProperty={formData.isCornerProperty}
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
                 setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
               }
@@ -465,14 +474,14 @@ const SellAgricultureMain = () => {
 
         // Create the payload matching the backend model structure
         const transformedData = {
-          title: formData.title,
-          landType: formData.landType,
-          powerSupply: formData.powerSupply,
-          address: formData.address,
-          landmark: formData.landmark,
-          coordinates: formData.coordinates,
-          isCornerProperty: formData.isCornerProperty,
+          title: formData.basicInformation.title,
+          type: formData.basicInformation.type,
+          address: formData.basicInformation.address,
+          landmark: formData.basicInformation.landmark,
+          location: formData.basicInformation.location,
+          isCornerProperty: formData.basicInformation.isCornerProperty,
           Agriculturelanddetails: formData.Agriculturelanddetails,
+          powerSupply: formData.Agriculturelanddetails.powersupply,
           propertyDetails: formData.propertyDetails,
           price: formData.price,
           registrationCharges: formData.registrationCharges,

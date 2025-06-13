@@ -32,20 +32,22 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define proper interface for form data
 interface FormData {
-  title: string;
-  officeType: string;
-  address: {
-    street: string;
-    city: string;
+  basicInformation: {
+    title: string;
+    type: string;
+    address: {
+      street: string;
+      city: string;
     state: string;
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string
   };
   isCornerProperty: boolean;
+}
   officeDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
   price: {
@@ -110,8 +112,9 @@ const SellOfficeSpaceMain = () => {
 
   // Initialize form data with proper structure
   const [formData, setFormData] = useState<FormData>({
+    basicInformation: {
     title: "",
-    officeType: "",
+    type: "",
     address: {
       street: "",
       city: "",
@@ -119,8 +122,9 @@ const SellOfficeSpaceMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+    },
     officeDetails: {},
     propertyDetails: {},
     price: {
@@ -196,44 +200,46 @@ const SellOfficeSpaceMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.title}
-            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
           />
           <OfficeSpaceType
             onOfficeTypeChange={(types) => {
               if (types && types.length > 0) {
-                setFormData((prev) => ({ ...prev, officeType: types[0] }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: types[0] } }))
               }
             }}
           />
 
           <CommercialPropertyAddress
-            address={formData.address}
-            onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+            address={formData.basicInformation.address}
+            onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
           />
           {/* <Landmark
-            onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+            onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
             onLocationSelect={(location) => setFormData((prev) => ({
               ...prev,
-              coordinates: {
-                latitude: location.latitude,
-                longitude: location.longitude
+              basicInformation: {
+                ...prev.basicInformation,
+                coordinates: {
+                  latitude: location.latitude,
+                  longitude: location.longitude
               }
             }))}
           /> */}
           <MapLocation
-            latitude={formData.coordinates.latitude.toString()}
-            longitude={formData.coordinates.longitude.toString()}
-            landmark={formData.landmark}
-            onLocationChange={(location) => handleChange('coordinates', location)}
-            onAddressChange={(address) => handleChange('address', address)}
-            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty
-            isCornerProperty={formData.isCornerProperty}
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) =>
-              setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+              setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))
             }
           />
         </div>
@@ -473,15 +479,15 @@ const SellOfficeSpaceMain = () => {
       // Create payload for API
       const transformedData = {
         basicInformation: {
-          title: formData.title,
-          officeType: [formData.officeType],
-          address: formData.address,
-          landmark: formData.landmark,
+          title: formData.basicInformation.title,
+          type: [formData.basicInformation.type],
+          address: formData.basicInformation.address,
+          landmark: formData.basicInformation.landmark,
           location: {
-            latitude: formData.coordinates.latitude,
-            longitude: formData.coordinates.longitude
+            latitude: formData.basicInformation.location.latitude,
+            longitude: formData.basicInformation.location.longitude
           },
-          isCornerProperty: formData.isCornerProperty
+          isCornerProperty: formData.basicInformation.isCornerProperty
         },
         officeDetails: formData.officeDetails,
         propertyDetails: formData.propertyDetails,

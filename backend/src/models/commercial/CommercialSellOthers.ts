@@ -12,9 +12,10 @@ interface IFloor {
 }
 
 export interface ICommercialSellOthers extends Document {
-  propertyId?: string;
-  propertyName: string;
-  commercialType: string[];
+  basicInformation:{
+    propertyId?: string;
+    title: string;
+    type: string[];
   address: {
     street: string;
     city: string;
@@ -22,11 +23,13 @@ export interface ICommercialSellOthers extends Document {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
   isCornerProperty: boolean;
+  }
+  
   
   propertyDetails: {
     area: IArea;
@@ -101,21 +104,23 @@ export interface ICommercialSellOthers extends Document {
 }
 
 const CommercialSellOthersSchema: Schema = new Schema({
-  propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  propertyName: { type: String, default: "Unnamed Property" },
-  commercialType: { type: [String], default: ["Other"] },
-  address: {
-    street: { type: String, default: "Not Specified" },
+  basicInformation:{
+    propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
+    title: { type: String, default: "Unnamed Property" },
+    type: { type: [String], default: ["Other"] },
+    address: {
+      street: { type: String, default: "Not Specified" },
     city: { type: String, default: "Not Specified" },
     state: { type: String, default: "Not Specified" },
     zipCode: { type: String, default: "00000" }
   },
   landmark: { type: String },
-  coordinates: {
+  location: {
     latitude: { type: String ,required:true},
     longitude: { type: String ,required:true}
   },
   isCornerProperty: { type: Boolean, default: false },
+},
   propertyDetails: {
     area: {
       totalArea: { type: Number },

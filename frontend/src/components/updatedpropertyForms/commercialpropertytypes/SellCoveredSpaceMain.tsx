@@ -36,8 +36,9 @@ const SellCoveredSpaceMain = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
+    basicInformation: {
     title: "",
-    spaceType: "",
+    type: "",
     address: {
       street: "",
       city: "",
@@ -45,8 +46,9 @@ const SellCoveredSpaceMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+    },
     spaceDetails: {},
     propertyDetails: {},
     price: "",
@@ -62,6 +64,11 @@ const SellCoveredSpaceMain = () => {
       brokeragedetails: false,
       brokerageAmount: 0
     },
+    priceDetails: {
+      Price: 0,
+      isNegotiable: false
+    },
+
     brokerage: {
       required: "",
       amount: 0
@@ -119,31 +126,31 @@ const SellCoveredSpaceMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.title}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
+              propertyName={formData.basicInformation.title}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
             <CoveredOpenSpaceType
-              onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, spaceType: type.toString() }))}
+              onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type.toString() } }))}
             />
           </div>
 
           <div className="space-y-6">
             <CommercialPropertyAddress 
-              address={formData.address}
-              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+              address={formData.basicInformation.address}
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
             />
             {/* <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} /> */}
             <MapLocation  
-              latitude={String(formData.coordinates.latitude)}
-              longitude={String(formData.coordinates.longitude)}
-              landmark={formData.landmark}
-              onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
-              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+              latitude={String(formData.basicInformation.location.latitude)}
+              longitude={String(formData.basicInformation.location.longitude)}
+              landmark={formData.basicInformation.landmark}
+              onLocationChange={(location) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
+              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
             />
 
             <CornerProperty
-              isCornerProperty={formData.isCornerProperty}
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
                 setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
               }
