@@ -473,13 +473,25 @@ const LeaseAgricultureMain = () => {
 
         const metaData = {
           userId: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Agricultural Land',
+          intent: 'Lease',
+          status: 'Available',
         };
 
         const transformedData = {
           ...formData,
           media: convertedMedia,
-          metaData
+          metaData:{
+            ...metaData,
+            userId: author,
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Agricultural Land',
+            intent: 'Lease',
+            status: 'Available',
+          }
         };
 
         const response = await axios.post('/api/commercial/lease/agriculture', transformedData, {

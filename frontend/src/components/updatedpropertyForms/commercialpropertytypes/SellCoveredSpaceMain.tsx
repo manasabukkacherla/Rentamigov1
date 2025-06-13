@@ -36,7 +36,7 @@ const SellCoveredSpaceMain = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    propertyName: "",
+    title: "",
     spaceType: "",
     address: {
       street: "",
@@ -87,8 +87,8 @@ const SellCoveredSpaceMain = () => {
         lifts: [],
         emergencyExits: []
       },
-      videoTour: null,
-      documents: []
+      videoTour: null as File | null,
+      documents: [] as File[]
     }
   })
 
@@ -119,8 +119,8 @@ const SellCoveredSpaceMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+              propertyName={formData.title}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
             />
             <CoveredOpenSpaceType
               onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, spaceType: type.toString() }))}
@@ -134,8 +134,8 @@ const SellCoveredSpaceMain = () => {
             />
             {/* <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} /> */}
             <MapLocation  
-              latitude={formData.coordinates.latitude.toString()}
-              longitude={formData.coordinates.longitude.toString()}
+              latitude={String(formData.coordinates.latitude)}
+              longitude={String(formData.coordinates.longitude)}
               landmark={formData.landmark}
               onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
@@ -178,7 +178,7 @@ const SellCoveredSpaceMain = () => {
           <RegistrationCharges onRegistrationChargesChange={(charges) => {
                 setFormData(prev => ({
                   ...prev,
-                  registration: {
+                  registrationCharges: {
                     chargestype: charges.chargestype,
                     registrationAmount: charges.registrationAmount,
                     stampDutyAmount: charges.stampDutyAmount,
@@ -229,7 +229,7 @@ const SellCoveredSpaceMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+                files: files.map((file: File) => ({ url: URL.createObjectURL(file), file }))
               })),
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
@@ -239,6 +239,8 @@ const SellCoveredSpaceMain = () => {
               media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
+              
+            
 
               setFormData(prev => ({
                 ...prev,
@@ -248,16 +250,17 @@ const SellCoveredSpaceMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.videoTour || null,
-                  documents: media.documents
+                  videoTour: media.videoTour ? (media.videoTour as File) : null,
+                  documents: media.documents as File[]
                 }
               }));
             }}
+            
           />
         </div>
       ),
     },
-  ]
+  ];
 
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
@@ -299,109 +302,10 @@ const SellCoveredSpaceMain = () => {
     }
   }
 
+
   const mapFormDataToBackendFormat = () => {
     // Format address from form data
-    const addressData = formData.address as any;
-    const photoUrls = formData.media.photos;
-
-    // Organize photos by categories - this can be enhanced based on your UI's categorization
-    const photos = {
-      exterior: photoUrls.slice(0, Math.min(2, photoUrls.length)),
-      interior: photoUrls.slice(2, Math.min(4, photoUrls.length)),
-      floorPlan: photoUrls.slice(4, Math.min(5, photoUrls.length)),
-      washrooms: photoUrls.slice(5, Math.min(6, photoUrls.length)),
-      lifts: photoUrls.slice(6, Math.min(7, photoUrls.length)),
-      emergencyExits: photoUrls.slice(7, photoUrls.length)
-    };
-
-    // Get property details
-    const propertyDetailsData = formData.propertyDetails as any;
-
-    return {
-      basicInformation: {
-        title: formData.propertyName,
-        spaceType: [formData.spaceType],
-        address: {
-          street: addressData.street || "",
-          city: addressData.city || "",
-          state: addressData.state || "",
-          zipCode: addressData.zipCode || "",
-        },
-        landmark: formData.landmark,
-        location: {
-          latitude: parseFloat(formData.coordinates.latitude) || 0,
-          longitude: parseFloat(formData.coordinates.longitude) || 0,
-        },
-        isCornerProperty: formData.isCornerProperty,
-      },
-      spaceDetails: {
-        ...(formData.spaceDetails as any)
-      },
-      propertyDetails: {
-        area: {
-          totalArea: parseFloat(formData.area.superBuiltUpAreaSqft) || 0,
-          builtUpArea: parseFloat(formData.area.builtUpAreaSqft) || 0,
-          carpetArea: parseFloat(formData.area.carpetAreaSqft) || 0,
-        },
-        floor: {
-          floorNumber: propertyDetailsData?.floor?.floorNumber || 1,
-          totalFloors: propertyDetailsData?.floor?.totalFloors || 1,
-        },
-        facingDirection: propertyDetailsData?.facingDirection || "North",
-        furnishingStatus: propertyDetailsData?.furnishingStatus || "Unfurnished",
-        propertyAmenities: propertyDetailsData?.propertyAmenities || [],
-        wholeSpaceAmenities: propertyDetailsData?.wholeSpaceAmenities || [],
-        electricitySupply: {
-          powerLoad: propertyDetailsData?.electricitySupply?.powerLoad || 0,
-          backup: propertyDetailsData?.electricitySupply?.backup || false,
-        },
-        waterAvailability: propertyDetailsData?.waterAvailability || [],
-        propertyAge: propertyDetailsData?.propertyAge || 0,
-        propertyCondition: propertyDetailsData?.propertyCondition || "Good",
-        priceDetails: {
-          Price: parseFloat(formData.price) || 0,
-          isNegotiable: false,
-          registrationCharges: {
-            includedInPrice: (formData.registrationCharges as any)?.included || false,
-            amount: (formData.registrationCharges as any)?.amount || 0,
-            stampDuty: (formData.registrationCharges as any)?.stampDuty || 0,
-          },
-          brokerage: {
-            required: (formData.brokerage as any)?.required || "No",
-            amount: (formData.brokerage as any)?.amount || 0,
-          },
-          availability: {
-            type: (formData.availability as any)?.type || "immediate",
-            date: (formData.availability as any)?.date || null,
-            preferredSaleDuration: (formData.availability as any)?.preferredSaleDuration || "",
-            noticePeriod: (formData.availability as any)?.noticePeriod || "",
-            isPetsAllowed: (formData.availability as any)?.isPetsAllowed || false,
-            operatingHours: (formData.availability as any)?.operatingHours || false,
-          }
-        }
-      },
-      availability: {
-        type: (formData.availability as any)?.type || "immediate",
-        date: (formData.availability as any)?.date || null,
-      },
-      contactInformation: {
-        name: (formData.contactDetails as any)?.name || "",
-        email: (formData.contactDetails as any)?.email || "",
-        phone: (formData.contactDetails as any)?.phone || "",
-        alternatePhone: (formData.contactDetails as any)?.alternatePhone || "",
-        bestTimeToContact: (formData.contactDetails as any)?.bestTimeToContact || "",
-      },
-      media: {
-        photos,
-        videoTour: formData.media.video,
-        documents: [],
-      },
-      metadata: {
-        createdBy: "frontend_user", // This will be replaced by actual user ID from auth on backend
-        createdAt: new Date(),
-      },
-    };
-  };
+    // (removed unused addressData, photos, propertyDetailsData)
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -528,6 +432,5 @@ const SellCoveredSpaceMain = () => {
     </div>
   )
 }
-
+}
 export default SellCoveredSpaceMain
-

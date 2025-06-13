@@ -133,17 +133,13 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
-    // updatedAt?: Date;
-    // status: 'active' | 'inactive' | 'sold' | 'rented';
-    // views: number;
-    // favorites: number;
-
-
-    
-    // isVerified: boolean;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
 }
 
-interface ICommercialLeaseOfficeSpace extends Document {
+export interface ICommercialLeaseOfficeSpace extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     officeSpaceDetails: IOfficeSpaceDetails;
@@ -316,11 +312,10 @@ const MediaSchema = new Schema<IMedia>({
 const MetadataSchema = new Schema<IMetadata>({
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
-    // updatedAt: { type: Date },
-    // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
-    // views: { type: Number, default: 0 },
-    // favorites: { type: Number, default: 0 },
-    // isVerified: { type: Boolean, default: false }
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Lease' },
+    propertyName: { type: String,  default: 'Office Space' },
+    status: { type: String, default: 'Available' }
 });
 
 // Main schema

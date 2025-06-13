@@ -84,7 +84,7 @@ interface ContactDetailsType {
 }
 
 interface FormDataType {
-  propertyName: string;
+  title: string;
   shedType: string;
   address: {
     street: string;
@@ -124,7 +124,7 @@ const SellShedMain = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
-    propertyName: "",
+    title: "",
     shedType: "",
     address: {
       street: "",
@@ -177,8 +177,8 @@ const SellShedMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) => handleChange("propertyName", name)}
+            propertyName={formData.title}
+            onPropertyNameChange={(name) => handleChange("title", name)}
           />
           <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
 
@@ -380,9 +380,13 @@ const SellShedMain = () => {
           operatingHours: formData.availability.operatingHours || false
         },
         // Add metadata
-        metaData: {
+        metadata: {
+          createdBy: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') || '{}').id : null,
           createdAt: new Date(),
-          createdBy: sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') || '{}').id : null
+          propertyType: 'Commercial',
+          propertyName: 'Shed',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 

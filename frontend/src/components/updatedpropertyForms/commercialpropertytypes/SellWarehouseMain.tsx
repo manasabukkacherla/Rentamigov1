@@ -585,7 +585,11 @@ const SellWarehouseMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Warehouse',
+            intent: 'Sell',
+            status: 'Available',
           }
         };
 

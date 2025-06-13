@@ -38,8 +38,12 @@ interface IMedia {
 }
 
 interface IMetadata {
-    creadtedBy: Schema.Types.ObjectId | null;
+    createdBy: Schema.Types.ObjectId | string | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface IRentalTerms {
@@ -169,15 +173,15 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
             furnishingStatus: { type: String, required: true },
             totalFloors: { type: Number, required: true },
             propertyOnFloor: { type: String, required: true },
-            facing: { type: String, required: true },
-            propertyAge: { type: String, required: true },
+            facing: { type: String},
+            propertyAge: { type: String },
             superBuiltUpAreaSqft: { type: Number, required: true },
             superBuiltUpAreaSqmt: { type: Number, required: true },
             builtUpAreaSqft: { type: Number, required: true },
             builtUpAreaSqmt: { type: Number, required: true },
             carpetAreaSqft: { type: Number, required: true },
             carpetAreaSqmt: { type: Number, required: true },
-            electricityAvailability: { type: String, required: true },
+            electricityAvailability: { type: String},
             waterAvailability: {
                 borewell: { type: Boolean, required: true },
                 governmentSupply: { type: Boolean, required: true },
@@ -245,9 +249,13 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
-    }
+        createdBy: { type: Schema.Types.Mixed, required: false },
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, required: true },
+        intent: { type: String, required: true },
+        propertyName: { type: String, required: true },
+        status: { type: String, required: true },
+    },
 }, {
     timestamps: true
 });

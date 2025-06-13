@@ -796,4 +796,3 @@ const RentOthers = () => {
 };
 
 export default RentOthers;
-

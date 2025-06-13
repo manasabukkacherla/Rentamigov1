@@ -130,6 +130,10 @@ interface IMetadata {
     userId: Schema.Types.ObjectId | null;
     userName: string;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
 }
 interface IPlotDetails {
     totalPlotArea: number;
@@ -280,7 +284,11 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
     metadata: {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
         userName:{type:String,ref:'User'},
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true

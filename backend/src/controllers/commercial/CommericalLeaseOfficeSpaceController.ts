@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import CommercialLeaseOfficeSpace from '../../models/commercial/CommericalLeaseOfficeSpace';
+import CommercialLeaseOfficeSpace from '../../models/commercial/CommercialLeaseOfficeSpace';
 import _ from "lodash"; // install via: npm i lodash
 
 // Generate a unique property ID for new office space listings

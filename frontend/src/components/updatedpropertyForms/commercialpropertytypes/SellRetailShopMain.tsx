@@ -125,8 +125,11 @@ interface FormDataState {
   metadata?: {
     createdBy?: string;
     createdAt?: Date;
-    status?: string;
     isVerified?: boolean;
+    propertyType?: string;
+    propertyName?: string;
+    intent?: string;
+    status?: string;
   };
 }
 
@@ -675,8 +678,11 @@ const SellRetailShopMain = () => {
         metadata: {
           createdBy: author,
           createdAt: new Date(),
-          status: 'draft',
-          isVerified: false
+          isVerified: false,
+          propertyType: 'Commercial',
+          propertyName: 'Retail Store',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 

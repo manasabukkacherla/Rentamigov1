@@ -510,7 +510,11 @@ const LeaseOthersMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Other Commercial Property',
+            intent: 'Lease',
+            status: 'Available',
           }
         };
 

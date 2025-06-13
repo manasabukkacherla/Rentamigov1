@@ -13,7 +13,7 @@ interface IFloor {
 
 export interface ICommercialRentOthers extends Document {
   propertyId: string;
-  propertyName: string;
+  title: string;
   commercialType: string[];
   address: {
     street: string;
@@ -22,7 +22,7 @@ export interface ICommercialRentOthers extends Document {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
@@ -110,12 +110,16 @@ export interface ICommercialRentOthers extends Document {
   metaData: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
   }
 }
 
 const CommercialRentOthersSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
-  propertyName: { type: String, required: true },
+  title: { type: String, required: true },
   commercialType: { type: [String]  , required: true },
   address: {
     street: { type: String, required: true },
@@ -124,7 +128,7 @@ const CommercialRentOthersSchema: Schema = new Schema({
     zipCode: { type: String, required: true }
   },
   landmark: { type: String },
-  coordinates: {
+  location: {
     latitude: { type: String ,required:true},
     longitude: { type: String ,required:true}
   },
@@ -217,7 +221,11 @@ const CommercialRentOthersSchema: Schema = new Schema({
   },
   metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Others' },
+    status: { type: String, default: 'Available' } 
   }
 });
 

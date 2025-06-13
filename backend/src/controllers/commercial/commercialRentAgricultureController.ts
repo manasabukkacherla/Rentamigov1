@@ -90,7 +90,7 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
       propertyId, // Ensure propertyId is at the root level
       metaData: {
         ...formData.metaData,
-        createdBy: req.user._id,  // Assign the authenticated user's ID
+        createdBy: userId,  // Use the extracted userId
         createdAt: new Date()
       }
     };

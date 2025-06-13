@@ -145,10 +145,12 @@ interface FormData {
     documents: File[];
   };
   metadata?: {
-    createdBy: string;
-    createdAt: Date;
-    userName: string;
     userId: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -774,10 +776,12 @@ const LeasePlotMain = () => {
         ...updatedFormData,
         media: convertedMedia,
         metadata: {
-          createdBy: author,
+          userId: author,
           createdAt: new Date(),
-          userName: author,
-          userId: author 
+          propertyType: 'Commercial',
+          propertyName: 'Plot',
+          intent: 'Lease',
+          status: 'Available',
         }
       };
 

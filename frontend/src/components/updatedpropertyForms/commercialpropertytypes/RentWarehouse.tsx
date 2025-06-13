@@ -140,6 +140,10 @@ interface FormData {
   metadata: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName: 'Warehouse';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
@@ -273,6 +277,10 @@ const RentWarehouse = () => {
     metadata: {
       createdBy: '',
       createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Warehouse',
+      intent: 'Rent',
+      status: 'Available',
     },
   });
 
@@ -781,8 +789,13 @@ const RentWarehouse = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
+            ...formData.metadata,
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Warehouse',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

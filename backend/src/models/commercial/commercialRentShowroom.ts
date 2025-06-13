@@ -121,9 +121,13 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
-interface ICommercialRentShowroom extends Document {
+export interface ICommercialRentShowroom extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     showroomDetails: showRoomDetails;
@@ -252,8 +256,12 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Showroom' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true
@@ -263,10 +271,10 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
 // CommercialRentShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
 CommercialRentShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialRentShowroomSchema.index({ 'basicInformation.state': 1 });
-CommercialRentShowroomSchema.index({ 'rentalDetails.expectedRent': 1 });
+CommercialRentShowroomSchema.index({ 'rentalTerms.expectedRent': 1 });
 CommercialRentShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentShowroomSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-// export { ICommercialRentShowroom, IBasicInformation, IArea, IRentalDetails, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialRentShowroom>('CommercialRentShowroom', CommercialRentShowroomSchema); 
+export const CommercialRentShowroom = model<ICommercialRentShowroom>('CommercialRentShowroom', CommercialRentShowroomSchema);
+export { IBasicInformation, IArea, IRentalDetails, IAvailability, IContactInformation, IMedia, IMetadata };

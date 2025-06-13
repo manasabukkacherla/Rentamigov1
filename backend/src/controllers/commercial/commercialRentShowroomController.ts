@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import _ from 'lodash';
-import CommercialRentShowroom from '../../models/commercial/commericalRentShowroom';
+import { CommercialRentShowroom } from '../../models/commercial/commercialRentShowroom';
 
 // Generate property ID with format RA-COMRSH####
 const generatePropertyId = async (): Promise<string> => {
@@ -97,7 +97,7 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: req.user?._id || null,
+                createdBy: req.user?._id || formData?.metadata?.createdBy || null,
                 createdAt: new Date()
             }
         };
