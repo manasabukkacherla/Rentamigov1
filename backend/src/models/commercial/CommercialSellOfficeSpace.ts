@@ -17,7 +17,7 @@ interface IFloor {
 // Basic Information interface
 interface IBasicInformation {
     title: string;
-    officeType: string[];
+    type: string[];
     address: {
         street: string;
         city: string;
@@ -139,7 +139,7 @@ const CommercialSellOfficeSpaceSchema = new Schema<ICommercialSellOfficeSpace>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        officeType: [{ type: String, required: true }],
+        type: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },

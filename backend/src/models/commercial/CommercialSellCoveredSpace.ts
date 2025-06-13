@@ -10,7 +10,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  spaceType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -97,7 +97,8 @@ interface ICommercialSellCoveredSpace extends Document {
     priceDetails: {
       Price: number;
       isNegotiable: boolean;
-      registrationCharges: {
+    }
+    registrationCharges: {
         includedInPrice: boolean;
         amount?: number;
         stampDuty?: number;
@@ -114,7 +115,7 @@ interface ICommercialSellCoveredSpace extends Document {
         isPetsAllowed: boolean;
         operatingHours: boolean;
       }
-    }
+    
   };
   availability: IAvailability;
   contactInformation: IContactInformation;
@@ -126,8 +127,8 @@ interface ICommercialSellCoveredSpace extends Document {
 const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>({
   propertyId: { type: String, unique: true },
   basicInformation: {
-    title: { type: String, required: true },
-    spaceType: [{ type: String, required: true }],
+    title: { type: String, default: "Unnamed Property",required:true },
+    type: [{ type: String, required: true }],
     address: {
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -207,6 +208,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     priceDetails: {
       Price: { type: Number, required: true },
       isNegotiable: { type: Boolean, default: false },
+    },
       registrationCharges: {
         includedInPrice: { type: Boolean, default: false },
         amount: { type: Number },
@@ -224,7 +226,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
         isPetsAllowed: { type: Boolean, default: false },
         operatingHours: { type: Boolean, default: false },
       }
-    }
+    
   },
   availability: { type: Schema.Types.Mixed, required: true },
   contactInformation: {
