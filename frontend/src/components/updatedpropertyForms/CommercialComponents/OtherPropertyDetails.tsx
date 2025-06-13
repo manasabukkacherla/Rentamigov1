@@ -7,7 +7,7 @@ interface OtherPropertyDetailsProps {
 
 const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) => {
   const [details, setDetails] = useState({
-    propertyType: '',
+    propertyTypeDescription: '',
     specialFeatures: '',
     usageRecommendation: '',
     additionalRequirements: ''
@@ -35,8 +35,8 @@ const OtherPropertyDetails = ({ onDetailsChange }: OtherPropertyDetailsProps) =>
             Property Type Description
           </h4>
           <textarea
-            value={details.propertyType}
-            onChange={(e) => handleChange('propertyType', e.target.value)}
+            value={details.propertyTypeDescription}
+            onChange={(e) => handleChange('propertyTypeDescription', e.target.value)}
             placeholder="Describe the type of property in detail"
             className="w-full px-4 py-3 rounded-lg bg-transparent border border-white/20 focus:border-white outline-none transition-colors duration-200 text-black placeholder:text-black/40 min-h-[150px]"
           />

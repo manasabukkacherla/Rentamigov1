@@ -46,7 +46,7 @@ export const createCommercialRentCoveredSpace = async (req: Request, res: Respon
       ...req.body,
       metadata: {
         ...req.body.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: req.body.metadata.createdBy,
         createdAt: new Date()
       }
     });

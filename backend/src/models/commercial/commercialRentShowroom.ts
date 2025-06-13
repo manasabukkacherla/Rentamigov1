@@ -14,7 +14,7 @@ interface IFloor {
 
 interface IBasicInformation {
     title: string;
-    showroomType: string;
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -86,10 +86,6 @@ interface IRentalDetails {
             type: string;
         };
     };
-    brokerage: {
-        required: boolean;
-        amount: number;
-    };
 }
 
 interface IAvailability {
@@ -133,6 +129,10 @@ export interface ICommercialRentShowroom extends Document {
     showroomDetails: showRoomDetails;
     propertyDetails: propertyDetails;
     rentalTerms: IRentalDetails;
+    brokerage: {
+        required: boolean;
+        amount: number;
+    };
     availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
@@ -144,7 +144,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        showroomType: [{ type: String, required: true }],
+        Type: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -227,10 +227,10 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
                 type: { type: String, required: true }
             }, 
         },
-        brokerage: {
-            required: { type: Boolean, default: false },
-            amount: { type: Number, required: false }
-        }
+    },
+    brokerage: {
+        required: { type: Boolean, default: false },
+        amount: { type: Number, required: false }
     },
     availability: {
         immediate: { type: Boolean, default: false },
