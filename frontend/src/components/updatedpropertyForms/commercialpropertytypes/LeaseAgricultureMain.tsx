@@ -24,21 +24,25 @@ import axios from "axios"
 import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
-  title: string;
-  landType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    landType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    landmark: string;
+    isCornerProperty: boolean;
+
   };
-  landmark: string;
+ 
   powerSupply: boolean;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
   landDetails: {
     totalArea: number;
     soilType: string;
@@ -144,21 +148,23 @@ interface FormData {
 
 const LeaseAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    title: '',
-    landType: [],
-    address: {
+    basicInformation: {
+      title: '',
+      landType: [],
+      address: {
       street: '',
       city: '',
       state: '',
       zipCode: ''
-    },
-    landmark: '',
-    location: {
-      latitude: '',
-      longitude: ''
+      },
+      landmark: '',
+      location: {
+        latitude: '',
+        longitude: ''
+      },
+      isCornerProperty: false,
     },
     powerSupply: false,
-    isCornerProperty: false,
     landDetails: {
       totalArea: 0,
       soilType: '',
@@ -292,10 +298,13 @@ const LeaseAgricultureMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
               <PropertyName
-                propertyName={formData.title}
+                propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-                  title: name
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    title: name
+                  }
                 }))}
               />
               <AgriculturalLandType
@@ -308,22 +317,25 @@ const LeaseAgricultureMain = () => {
 
           <div className="space-y-6">
               <CommercialPropertyAddress
-                address={formData.address}
+                address={formData.basicInformation.address}
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
-                  address
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    address: address
+                  }
                 }))}
               />
               <MapLocation
-                latitude={formData.location.latitude}
-                longitude={formData.location.longitude}
-                landmark={formData.landmark}
+                latitude={formData.basicInformation.location.latitude}
+                longitude={formData.basicInformation.location.longitude}
+                landmark={formData.basicInformation.landmark}
                 onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
                 onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
                 onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
               />
               <CornerProperty
-                isCornerProperty={formData.isCornerProperty}
+                isCornerProperty={formData.basicInformation.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
                   isCornerProperty: isCorner

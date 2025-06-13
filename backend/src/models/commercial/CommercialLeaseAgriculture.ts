@@ -13,20 +13,24 @@ interface IFloor {
 
 export interface ICommercialLeaseAgriculture extends Document {
   propertyId: string;
-  title: string;
-  landType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    landType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  
   powerSupply: boolean;
   landDetails: {
     totalArea: number;
@@ -134,21 +138,23 @@ export interface ICommercialLeaseAgriculture extends Document {
 
 const CommercialLeaseAgriculture = new Schema({
   propertyId: { type: String },
-  title: { type: String, default: "Unnamed Property" },
-  landType: { type: [String], default: ["Agricultural"] },
-  powerSupply: { type: Boolean, default: false },
+  basicInformation: {
+    title: { type: String, default: "Unnamed Property" },
+    landType: { type: [String], default: ["Agricultural"] },
+    powerSupply: { type: Boolean, default: false },
   address: {
     street: { type: String, default: "Not Specified" },
     city: { type: String, default: "Not Specified" },
     state: { type: String, default: "Not Specified" },
     zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String ,required:false},
+      longitude: { type: String ,required: false}
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  location: {
-    latitude: { type: String ,required:false},
-    longitude: { type: String ,required: false}
-  },
-  isCornerProperty: { type: Boolean, default: false },
   landDetails: {
     totalArea: { type: Number, default: 0 },
     soilType: { type: String },

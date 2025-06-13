@@ -2,7 +2,7 @@ import { Schema, model, Document } from 'mongoose';
 
 interface IBasicInformation {
     title: string;
-    shedType: string[];
+    Type: string[];
     address: {
         street: string;
         city: string;
