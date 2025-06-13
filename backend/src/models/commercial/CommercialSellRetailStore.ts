@@ -13,7 +13,7 @@ interface IFloor {
 
 interface IBasicInformation {
   title: string;
-  retailStoreType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -67,14 +67,16 @@ interface IPriceDetails {
     stampDuty: number;
     otherCharges: number;
   };
-  brokerage: {
-    required: string;
-    amount: number;
-  };
-  availability: {
-    type: string;
-    date?: string;
-  };
+}
+
+interface IBrokerage {
+  required: string;
+  amount: number;
+}
+
+interface IAvailability {
+  type: string;
+  date?: string;
 }
 
 interface ICommercialSellRetailStore extends Document {
@@ -107,6 +109,8 @@ interface ICommercialSellRetailStore extends Document {
     possessionStatus: string;
   };
   priceDetails: IPriceDetails;
+  brokerage: IBrokerage;
+  availability: IAvailability;
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -117,7 +121,7 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    retailStoreType: [{ type: String, required: true }],
+    type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -171,17 +175,18 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
       registrationAmount: { type: Number },
       stampDuty: { type: Number },
       otherCharges: { type: Number }
-    },
-    brokerage: {
-      required: { type: String, required: true },
-      amount: { type: Number }
-    },
-    availability: {
+    }
+  },
+  brokerage: {
+    required: { type: String, required: true },
+    amount: { type: Number }
+  },
+  availability: {
       type: { type: String, required: true, enum: ['Ready to Move', 'Under Construction', 'Soon', 
         'Specific Date','Available','Not Available','immediate'] },
       date: { type: String }
-    }
-  },
+    },
+  
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },

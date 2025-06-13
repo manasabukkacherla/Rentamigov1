@@ -38,7 +38,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormDataState {
   basicInformation: {
     title: string;
-    retailStoreType: string[];
+    type: string[];
     address: {
       street: string;
       city: string;
@@ -94,15 +94,15 @@ interface FormDataState {
       stampDuty: number;
       otherCharges: number;
     };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
       type: string;
       date?: string;
     };
-  };
   contactInformation: {
     name: string;
     email: string;
@@ -138,7 +138,7 @@ const SellRetailShopMain = () => {
   const [formData, setFormData] = useState<FormDataState>({
     basicInformation: {
       title: '',
-      retailStoreType: [],
+      type: [],
       address: {
         street: '',
         city: '',
@@ -192,16 +192,17 @@ const SellRetailShopMain = () => {
         registrationAmount: 0,
         stampDuty: 0,
         otherCharges: 0
-      },
-      brokerage: {
-        required: 'No',
-        amount: 0
-      },
-      availability: {
-        type: 'Ready to Move',
-        date: ''
       }
     },
+    brokerage: {
+      required: 'No',
+      amount: 0
+    },
+    availability: {
+        type: 'Ready to Move',
+        date: ''
+      },
+    
     contactInformation: {
       name: '',
       email: '',
@@ -265,7 +266,7 @@ const SellRetailShopMain = () => {
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name: string) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
           />
-          <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: types } })} />
+          <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, type: types } })} />
 
           <CommercialPropertyAddress 
             address={formData.basicInformation.address}
@@ -371,17 +372,15 @@ const SellRetailShopMain = () => {
             </div>
             <div className="text-black">
               <Brokerage 
-              bro={formData.priceDetails.brokerage}
+              bro={formData.brokerage}
               onBrokerageChange={(brokerage) => setFormData({
                 ...formData,
-                priceDetails: {
-                  ...formData.priceDetails,
-                  brokerage: {
+                brokerage: {
                     required: brokerage.required || 'No',
                     amount: parseFloat(brokerage.amount?.toString() || '0')
                   }
-                }
-              })} />
+                })}
+              />
             </div>
           </div>
         </div>
@@ -394,12 +393,9 @@ const SellRetailShopMain = () => {
           <div className="space-y-6">
             <CommercialAvailability onAvailabilityChange={(availability) => setFormData({
               ...formData,
-              priceDetails: {
-                ...formData.priceDetails,
-                availability: {
-                  type: availability.type || 'Ready to Move',
-                  date: availability.date
-                }
+              availability: {
+                type: availability.type || 'Ready to Move',
+                date: availability.date
               }
             })} />
           </div>
@@ -515,7 +511,7 @@ const SellRetailShopMain = () => {
     switch (currentStep) {
       case 0: // Basic Information
         return !!formData.basicInformation.title &&
-          formData.basicInformation.retailStoreType.length > 0 &&
+          formData.basicInformation.type.length > 0 &&
           !!formData.basicInformation.address.street;
       case 1: // Property Details
         return !!formData.retailStoreDetails.location &&
@@ -523,7 +519,7 @@ const SellRetailShopMain = () => {
       case 2: // Pricing Details
         return formData.priceDetails.price > 0;
       case 3: // Availability
-        return !!formData.priceDetails.availability.type;
+        return !!formData.availability.type;
       case 4: // Contact Information
         return !!formData.contactInformation.name &&
           !!formData.contactInformation.email &&
@@ -658,12 +654,12 @@ const SellRetailShopMain = () => {
             otherCharges: parseFloat(formData.priceDetails.registrationCharges.otherCharges.toString())
           },
           brokerage: {
-            required: formData.priceDetails.brokerage.required,
-            amount: formData.priceDetails.brokerage.amount ? parseFloat(formData.priceDetails.brokerage.amount.toString()) : undefined
+            required: formData.brokerage.required,
+            amount: formData.brokerage.amount ? parseFloat(formData.brokerage.amount.toString()) : undefined
           },
           availability: {
-            type: formData.priceDetails.availability.type,
-            date: formData.priceDetails.availability.date
+            type: formData.availability.type,
+            date: formData.availability.date
           }
         },
         contactInformation: {

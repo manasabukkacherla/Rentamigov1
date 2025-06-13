@@ -84,20 +84,22 @@ interface ContactDetailsType {
 }
 
 interface FormDataType {
-  title: string;
-  shedType: string;
-  address: {
-    street: string;
-    city: string;
+  basicInformation: {
+    title: string;
+    type: string;
+    address: {
+      street: string;
+      city: string;
     state: string;
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
   isCornerProperty: boolean;
+}
   shedDetails: Partial<ShedDetailsType>;
   propertyDetails: Partial<PropertyDetailsType>;
   price: string | number;
@@ -124,8 +126,9 @@ const SellShedMain = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
+    basicInformation: {
     title: "",
-    shedType: "",
+    type: "",
     address: {
       street: "",
       city: "",
@@ -133,8 +136,9 @@ const SellShedMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+    },
     shedDetails: {},
     propertyDetails: {},
     price: "",
@@ -177,28 +181,28 @@ const SellShedMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.title}
-            onPropertyNameChange={(name) => handleChange("title", name)}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => handleChange("basicInformation.title", name)}
           />
-          <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
+          <ShedType onShedTypeChange={(type) => handleChange("basicInformation.type", type)} />
 
 
           <CommercialPropertyAddress 
-            address={formData.address}
+            address={formData.basicInformation.address}
             onAddressChange={(address) => handleChange("address", address)} 
           />
           {/* <Landmark onLandmarkChange={(landmark) => handleChange("landmark", landmark)} /> */}
           <MapLocation
-            latitude={formData.coordinates.latitude.toString()}
-            longitude={formData.coordinates.longitude.toString()}
-            landmark={formData.landmark}
-            onLocationChange={(location) => handleChange('coordinates', location)}
-            onAddressChange={(address) => handleChange('address', address)}
-            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty 
-            isCornerProperty={formData.isCornerProperty}
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} 
           />
         </div>

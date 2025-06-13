@@ -26,7 +26,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormData {
   basicInformation: {
     title: string;
-    plotType: string[];
+    type: string[];
     address: {
       street: string;
       city: string;
@@ -163,7 +163,7 @@ const SellPlotMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      plotType: [],
+      type: [],
       address: {
         street: "",
         city: "",
