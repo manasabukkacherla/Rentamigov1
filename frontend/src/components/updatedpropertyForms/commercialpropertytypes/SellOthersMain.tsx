@@ -37,8 +37,8 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define interface that matches backend model structure
 interface FormData {
-  basicInformation:{
   propertyId?: string;
+  basicInformation:{
   title: string;
   type: string[];
   address: {
@@ -75,7 +75,7 @@ interface FormData {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -171,9 +171,10 @@ const SellOthersMain = () => {
       propertyAmenities: [],
       wholeSpaceAmenities: [],
       waterAvailability: "",
-      propertyAge: 0,
+      propertyAge: "",
       propertyCondition: "",
       electricitySupply: {
+        
         powerLoad: 0,
         backup: false
       }
@@ -229,13 +230,14 @@ const SellOthersMain = () => {
               propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
+
             <OtherCommercialType
               onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type as string[] } }))}
             />
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
             {/* <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
@@ -250,9 +252,27 @@ const SellOthersMain = () => {
               latitude={formData.basicInformation.location.latitude.toString()}
               longitude={formData.basicInformation.location.longitude.toString()}
               landmark={formData.basicInformation.landmark}
-              onLocationChange={(location) => setFormData((prev) => ({ ...prev, location: location }))}
-              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+              onLocationChange={(location) => setFormData((prev) => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  location: location
+                }
+              }))}
+              onAddressChange={(address) => setFormData((prev) => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  address
+                }
+              }))}
+              onLandmarkChange={(landmark) => setFormData((prev) => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  landmark
+                }
+              }))}
             />
 
             <CornerProperty
@@ -468,9 +488,19 @@ const SellOthersMain = () => {
   };
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    console.log("Form Data:", formData)
+  // Validate location before submitting
+  const validateLocation = () => {
+    const { latitude, longitude } = formData.basicInformation.location;
+    return latitude && latitude.trim() !== '' && longitude && longitude.trim() !== '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateLocation()) {
+      toast.error('Please select a valid location on the map (latitude and longitude are required).');
+      return;
+    }
+    console.log('Submitting payload:', formData);
     setIsSubmitting(true);
 
     try {
@@ -500,12 +530,7 @@ const SellOthersMain = () => {
 
       // Create payload matching the backend model structure
       const transformedData = {
-        title: formData.basicInformation.title,
-        type: formData.basicInformation.type,
-        address: formData.basicInformation.address,
-        landmark: formData.basicInformation.landmark,
-        location: formData.basicInformation.location,
-        isCornerProperty: formData.basicInformation.isCornerProperty,
+        basicInformation: formData.basicInformation,
         propertyDetails: formData.propertyDetails,
         price: formData.price,
         registrationCharges: formData.registrationCharges,
@@ -535,7 +560,7 @@ const SellOthersMain = () => {
       if (response.data) {
         toast.success('Commercial property successfully listed!');
         // Navigate to dashboard
-        navigate('/dashboard');
+        navigate('/updatePropertyform');
       }
     } catch (error: any) {
       console.error("Error submitting form:", error);

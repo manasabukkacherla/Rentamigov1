@@ -10,7 +10,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  type: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -107,7 +107,7 @@ interface ICommercialShowroom extends Document {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   pricingDetails: IPricingDetails;
@@ -131,7 +131,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    type: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -177,7 +177,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: [{ type: String }],
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String }
   },
   pricingDetails: {

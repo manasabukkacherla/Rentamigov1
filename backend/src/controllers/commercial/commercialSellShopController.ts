@@ -58,7 +58,7 @@ export const createCommercialShop = async (req: Request, res: Response) => {
       ...formData,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: formData.metadata.createdBy,
         createdAt: new Date()
       }
     };

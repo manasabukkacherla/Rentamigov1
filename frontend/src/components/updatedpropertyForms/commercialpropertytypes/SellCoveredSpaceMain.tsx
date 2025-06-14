@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react"
 import PropertyName from "../PropertyName"
 import CoveredOpenSpaceType from "../CommercialComponents/CoveredOpenSpaceType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -22,53 +22,169 @@ import {
   Warehouse,
   ImageIcon,
   UserCircle,
-  ChevronLeft,
   ChevronRight,
-  AlertCircle
+  ChevronLeft,
+  ArrowLeft,
+  Loader2,
+  Locate,
 } from "lucide-react"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
+import { useNavigate } from "react-router-dom"
+
+
+// --- Types for strong typing and error-free state updates ---
+
+type ContactInformation = {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone: string;
+  bestTimeToContact: string;
+};
+
+type SpaceDetails = {
+  totalArea: string;
+  areaUnit: string;
+  coveredArea: string;
+  openArea: string;
+  roadWidth: string;
+  ceilingHeight: string;
+  openSides: string;
+};
+
+type FormDataType = {
+  basicInformation: {
+    title: string;
+    Type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: { latitude: string; longitude: string };
+    isCornerProperty: boolean;
+  };
+  spaceDetails: SpaceDetails;
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      builtUpArea: number;
+      carpetArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string;
+    propertyAge: string;
+    propertyCondition: string;
+  };
+  registration: {
+    chargestype: string;
+    registrationAmount: number;
+    stampDutyAmount: number;
+  };
+  pricingDetails: {
+    propertyPrice: number;
+    pricetype: string;
+  };
+  brokerage: {
+    required: string;
+    amount: number;
+  };
+  availability: {
+    type: string;
+    isPetsAllowed: boolean;
+    operatingHours: boolean;
+    noticePeriod: string;
+    date: string;
+    preferredSaleDuration: string;
+  };
+  contactInformation: ContactInformation;
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+  };
+};
 
 const SellCoveredSpaceMain = () => {
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate()
+
+  const [formData, setFormData] = useState<FormDataType>({
     basicInformation: {
-    title: "",
-    type: "",
-    address: {
-      street: "",
-      city: "",
-      state: "",
-      zipCode: ""
+      title: "",
+      Type: [],
+      address: {
+        street: "",
+        city: "",
+        state: "",
+        zipCode: ""
+      },
+      landmark: "",
+      location: { latitude: "", longitude: "" },
+      isCornerProperty: false,
     },
-    landmark: "",
-    location: { latitude: "", longitude: "" },
-    isCornerProperty: false,
+    spaceDetails: {
+      totalArea: "",
+      areaUnit: "",
+      coveredArea: "",
+      openArea: "",
+      roadWidth: "",
+      ceilingHeight: "",
+      openSides: "",
     },
-    spaceDetails: {},
-    propertyDetails: {},
-    price: "",
-    area: {
-      superBuiltUpAreaSqft: "",
-      builtUpAreaSqft: "",
-      carpetAreaSqft: "",
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        builtUpArea: 0,
+        carpetArea: 0,
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0,
+      },
+      facingDirection: "",
+      furnishingStatus: "",
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false,
+      },
+      waterAvailability: "",
+      propertyAge: "",
+      propertyCondition: "",
     },
-    registrationCharges: {
+    registration: {
       chargestype: "",
       registrationAmount: 0,
       stampDutyAmount: 0,
-      brokeragedetails: false,
-      brokerageAmount: 0
     },
-    priceDetails: {
-      Price: 0,
-      isNegotiable: false
+    pricingDetails: {
+      propertyPrice: 0,
+      pricetype: "",
     },
-
     brokerage: {
       required: "",
       amount: 0
@@ -76,9 +192,12 @@ const SellCoveredSpaceMain = () => {
     availability: {
       type: "immediate",
       isPetsAllowed: false,
-      operatingHours: false
+      operatingHours: false,
+      noticePeriod: "",
+      date: "",
+      preferredSaleDuration: "",
     },
-    contactDetails: {
+    contactInformation: {
       name: "",
       email: "",
       phone: "",
@@ -96,7 +215,7 @@ const SellCoveredSpaceMain = () => {
       },
       videoTour: null as File | null,
       documents: [] as File[]
-    }
+    },
   })
 
   const handleChange = (key: string, value: any) => {
@@ -118,6 +237,15 @@ const SellCoveredSpaceMain = () => {
   const [currentStep, setCurrentStep] = useState(0)
   const formRef = useRef<HTMLDivElement>(null)
 
+  // Helper to convert File[] to string[] (simulate upload, or use URLs if already uploaded)
+  const filesToUrls = (files: File[]): string[] => {
+    // In production, you should upload the file and get the URL from the server
+    // Here, we use a placeholder or local URL
+    return files
+      .filter(f => !!f)
+      .map(f => (typeof f === 'string' ? f : URL.createObjectURL(f)));
+  };
+
   const steps = [
     {
       title: "Basic Information",
@@ -130,17 +258,26 @@ const SellCoveredSpaceMain = () => {
               onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
             <CoveredOpenSpaceType
-              onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type.toString() } }))}
+              onSpaceTypeChange={(Type: string[]) =>
+                setFormData(prev => ({
+                  ...prev,
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    Type: Array.isArray(Type) ? Type : [Type],
+                  },
+                }))
+              }
             />
+
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress 
+            <CommercialPropertyAddress
               address={formData.basicInformation.address}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
             />
             {/* <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} /> */}
-            <MapLocation  
+            <MapLocation
               latitude={String(formData.basicInformation.location.latitude)}
               longitude={String(formData.basicInformation.location.longitude)}
               landmark={formData.basicInformation.landmark}
@@ -165,10 +302,10 @@ const SellCoveredSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CoveredOpenSpaceDetails
-            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, spaceDetails: details }))}
+            onDetailsChange={(details: Record<string, any>) => setFormData((prev) => ({ ...prev, spaceDetails: { ...prev.spaceDetails, ...details } }))}
           />
           <CommercialPropertyDetails
-            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
+            onDetailsChange={(details: Record<string, any>) => setFormData((prev) => ({ ...prev, propertyDetails: { ...prev.propertyDetails, ...details } }))}
           />
         </div>
       ),
@@ -179,30 +316,37 @@ const SellCoveredSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <div className="space-y-4 text-black">
-            <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
+            <Price onPriceChange={(price) => {
+              setFormData(prev => ({
+                ...prev,
+                pricingDetails: {
+                  ...prev.pricingDetails,
+                  propertyPrice: price.propertyPrice,
+                  pricetype: price.pricetype,
+                }
+              }));
+            }} />
           </div>
           <div className="text-black">
-          <RegistrationCharges onRegistrationChargesChange={(charges) => {
-                setFormData(prev => ({
-                  ...prev,
-                  registrationCharges: {
-                    chargestype: charges.chargestype,
-                    registrationAmount: charges.registrationAmount,
-                    stampDutyAmount: charges.stampDutyAmount,
-                    brokeragedetails: false,
-                    brokerageAmount: 0
-                  }
-                }));
-              }} />
+            <RegistrationCharges onRegistrationChargesChange={(charges) => {
+              setFormData(prev => ({
+                ...prev,
+                registration: {
+                  chargestype: charges.chargestype,
+                  registrationAmount: charges.registrationAmount,
+                  stampDutyAmount: charges.stampDutyAmount,
+                }
+              }));
+            }} />
           </div>
           <div className="text-black">
             <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({
-                ...prev,
-                brokerage: {
-                  required: brokerage.required,
-                  amount: brokerage.amount || 0
-                }
-              }))} />
+              ...prev,
+              brokerage: {
+                required: brokerage.required,
+                amount: brokerage.amount || 0
+              }
+            }))} />
           </div>
         </div>
       ),
@@ -221,9 +365,9 @@ const SellCoveredSpaceMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-         <CommercialContactDetails 
-            contactInformation={formData.contactDetails}
-            onContactChange={(contact) => handleChange('contactDetails', contact)} />
+          <CommercialContactDetails
+            contactInformation={formData.contactInformation}
+            onContactChange={(contact) => handleChange('contactInformation', contact)} />
         </div>
       ),
     },
@@ -236,19 +380,18 @@ const SellCoveredSpaceMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map((file: File) => ({ url: URL.createObjectURL(file), file }))
+                files: files
+                  .filter((file): file is File => typeof file !== 'string')
+                  .map((file: File) => ({ url: URL.createObjectURL(file), file }))
               })),
-              videoTour: formData.media.videoTour || null,
-              documents: formData.media.documents
+              videoTour: formData.media.videoTour && typeof formData.media.videoTour !== 'string' ? formData.media.videoTour : null,
+              documents: formData.media.documents.filter((file): file is File => typeof file !== 'string')
             }}
             onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
+              const photos: Record<string, (File | string)[]> = {};
               media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
-              
-            
-
               setFormData(prev => ({
                 ...prev,
                 media: {
@@ -257,91 +400,121 @@ const SellCoveredSpaceMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.videoTour ? (media.videoTour as File) : null,
-                  documents: media.documents as File[]
+                  videoTour: media.videoTour && typeof media.videoTour !== 'string' ? media.videoTour : null,
+                  documents: (media.documents as File[])
                 }
               }));
             }}
-            
+
           />
         </div>
       ),
     },
   ];
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-      // Scroll to top of the form
-      setTimeout(() => {
-        if (formRef.current) {
-          window.scrollTo({
-            top: formRef.current.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleSubmit = async (e?: { preventDefault: () => void }) => {
+    if (e) e.preventDefault();
+    console.log(formData);
+    try {
+      // Convert media files to base64 strings if they exist
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+        },
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+      };
+
+      // Get userId robustly from localStorage
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('Please log in to continue');
+        navigate('/login');
+        return;
+      }
+
+      const userData = JSON.parse(user);
+      const author = userData.id;
+
+      // Transform data for backend
+      const transformedData = {
+        ...formData,
+        basicInformation: {
+          ...formData.basicInformation,
+          location: {
+            latitude: formData.basicInformation.location.latitude,
+            longitude: formData.basicInformation.location.longitude
+          }
+        },
+        media: convertedMedia,
+        // Ensure availability data matches the schema
+        price: formData.pricingDetails.propertyPrice,
+        registration: {
+          chargestype: formData.registration.chargestype,
+          registrationAmount: formData.registration.registrationAmount,
+          stampDutyAmount: formData.registration.stampDutyAmount
+        },
+        brokerage: {
+          required: typeof formData.brokerage?.required === 'boolean'
+            ? (formData.brokerage.required ? 'yes' : 'no')
+            : formData.brokerage?.required || 'no',
+          amount: formData.brokerage?.amount || 0
+        },
+        availability: {
+          type: formData.availability.type || 'immediate',
+          date: formData.availability.date,
+          noticePeriod: formData.availability.noticePeriod,
+          isPetsAllowed: formData.availability.isPetsAllowed || false,
+          operatingHours: formData.availability.operatingHours || false
+        },
+        // Add metadata
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Covered Space',
+          intent: 'Sell',
+          status: 'Available',
         }
-      }, 100);
+      };
+
+
+      console.log('Submitting data:', transformedData);
+
+      // Submit to backend API
+      const response = await axios.post('/api/commercial/sell/covered-space', transformedData);
+
+      if (response.status === 201) {
+        toast.success("Property listed successfully!");
+        // Redirect to some success page or dashboard
+
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error("Failed to list property. Please try again.");
     }
   }
 
   const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-      // Scroll to top of the form
-      setTimeout(() => {
-        if (formRef.current) {
-          window.scrollTo({
-            top: formRef.current.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  }
+    setCurrentStep(currentStep - 1);
+  };
 
-
-  const mapFormDataToBackendFormat = () => {
-    // Format address from form data
-    // (removed unused addressData, photos, propertyDetailsData)
-
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    console.log(formData);
-    setLoading(true);
-    setError(null);
-
-    try {
-      const backendFormData = mapFormDataToBackendFormat();
-      console.log("Formatted data for backend:", backendFormData);
-
-      // Send data to backend API
-      const response = await axios.post(
-        "/api/commercial/sell/covered-space",
-        backendFormData
-      );
-
-      console.log("Response:", response.data);
-      toast.success("Property listed successfully!");
-
-      // Redirect to listing page or dashboard
-    } catch (err: any) {
-      console.error("Error submitting form:", err);
-      const errorMessage = err.response?.data?.error || "Failed to submit property. Please try again.";
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
   };
 
   return (
@@ -351,7 +524,7 @@ const SellCoveredSpaceMain = () => {
         <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex justify-center">
             <div className="flex items-center space-x-2">
-              {steps.map((s, i) => (
+              {steps.map((s: { icon: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; title: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined }, i: number) => (
                 <div
                   key={i}
                   className="flex items-center cursor-pointer"
@@ -439,5 +612,5 @@ const SellCoveredSpaceMain = () => {
     </div>
   )
 }
-}
+
 export default SellCoveredSpaceMain
