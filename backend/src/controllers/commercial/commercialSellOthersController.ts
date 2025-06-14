@@ -14,11 +14,10 @@ const generatePropertyId = async (): Promise<string> => {
     
     let nextNumber = 1; // Default start number
     
-    if (highestProperty && highestProperty.propertyId) {
+    if (highestProperty) {
       // Extract the numeric part from the existing highest property ID
       const match = highestProperty.propertyId.match(/(\d+)$/);
       if (match && match[1]) {
-        // Convert to number and increment by 1
         nextNumber = parseInt(match[1], 10) + 1;
       }
     }
@@ -71,7 +70,7 @@ export const createCommercialSellOthers = async (req: Request, res: Response) =>
       ...formData,
       metaData: {
         ...formData.metaData,
-        createdBy: req.user?._id || null,
+        createdBy: formData.metaData.createdBy,
         createdAt: new Date()
       }
     };
