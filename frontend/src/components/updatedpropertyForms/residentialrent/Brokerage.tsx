@@ -67,7 +67,7 @@ const Brokerage = ({ bro, onBrokerageChange }: BrokerageProps) => {
             </div>
           </div>
 
-          {brokerage.required === "yes" && (
+          {brokerage.required === "no" && (
             <div className="space-y-4 mt-6">
               <div className="flex items-center gap-2 mb-4">
                 <IndianRupee size={20} className="text-black/60" />
