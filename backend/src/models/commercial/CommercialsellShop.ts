@@ -97,7 +97,7 @@ interface ICommercialShop extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   shopDetails: {
@@ -163,7 +163,7 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String }
   },
   shopDetails: {

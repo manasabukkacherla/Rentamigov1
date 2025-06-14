@@ -16,21 +16,21 @@ export interface ICommercialSellOthers extends Document {
   basicInformation:{
     title: string;
     type: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
   }
-  
-  
+
+
   propertyDetails: {
     area: IArea;
     floor: IFloor;
@@ -110,17 +110,17 @@ const CommercialSellOthersSchema: Schema = new Schema({
     type: { type: [String], default: ["Other"] },
     address: {
       street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String, required: true },
+      longitude: { type: String, required: true }
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  location: {
-    latitude: { type: String ,required:true},
-    longitude: { type: String ,required:true}
-  },
-  isCornerProperty: { type: Boolean, default: false },
-},
   propertyDetails: {
     area: {
       totalArea: { type: Number },
@@ -194,8 +194,8 @@ const CommercialSellOthersSchema: Schema = new Schema({
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
-    intent: { type: String,default: 'Sell' },
-    propertyName: { type: String,  default: 'Others' },
+    intent: { type: String, default: 'Sell' },
+    propertyName: { type: String, default: 'Others' },
     status: { type: String, default: 'Available' }
   }
 });

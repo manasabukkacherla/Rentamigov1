@@ -1,5 +1,4 @@
 import { Schema, model, Document, Types } from 'mongoose';
-import { IAvailability } from './CommercialSellWarehouse';
 
 // Interfaces
 interface IArea {
@@ -26,20 +25,20 @@ interface IBasicInformation {
 }
 
 interface ISpaceDetails {
-    totalArea: number;
-    areaUnit: string;
-    coveredArea: number;
-    openArea: number;
-    roadWidth: {
-      value: number;
-      unit: string;
-    } | number;
-    ceilingHeight?: {
-      value: number;
-      unit: string;
-    } | number;
-    noOfOpenSides: string | number;
-  }
+  totalArea: number;
+  areaUnit: string;
+  coveredArea: number;
+  openArea: number;
+  roadWidth: {
+    value: number;
+    unit: string;
+  } | number;
+  ceilingHeight?: {
+    value: number;
+    unit: string;
+  } | number;
+  noOfOpenSides: string | number;
+}
 
 interface IFloor {
   floorNumber: number;
@@ -95,30 +94,28 @@ interface ICommercialSellCoveredSpace extends Document {
     waterAvailability: string[];
     propertyAge: string;
     propertyCondition: string;
-    priceDetails: {
-      Price: number;
-      isNegotiable: boolean;
-    }
-    registrationCharges: {
-        includedInPrice: boolean;
-        amount?: number;
-        stampDuty?: number;
-      };
-      brokerage: {
-        required: string;
-        amount?: number;
-      };
-      availability: {
-        type: "immediate" | "specific";
-        date?: Date;
-        preferredSaleDuration?: string;
-        noticePeriod?: string;
-        isPetsAllowed: boolean;
-        operatingHours: boolean;
-      }
-    
   };
-  availability: IAvailability;
+  pricingDetails: {
+    propertyPrice: number;
+    pricetype: string;
+  };
+  registration: {
+    chargestype: string;
+    registrationAmount: number;
+    stampDutyAmount: number;
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: "immediate" | "specific";
+    date?: Date;
+    preferredSaleDuration?: string;
+    noticePeriod?: string;
+    isPetsAllowed: boolean;
+    operatingHours: boolean;
+  },
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -128,7 +125,7 @@ interface ICommercialSellCoveredSpace extends Document {
 const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>({
   propertyId: { type: String, unique: true },
   basicInformation: {
-    title: { type: String, default: "Unnamed Property",required:true },
+    title: { type: String, default: "Unnamed Property", required: true },
     Type: [{ type: String, required: true }],
     address: {
       street: { type: String, required: true },
@@ -151,38 +148,14 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     roadWidth: {
       type: Schema.Types.Mixed,
       required: true,
-      validate: {
-        validator: function(v: any) {
-          return (
-            typeof v === 'number' || 
-            (typeof v === 'object' && v !== null && 'value' in v && 'unit' in v)
-          );
-        },
-        message: 'roadWidth must be either a number or an object with value and unit properties'
-      }
     },
     ceilingHeight: {
       type: Schema.Types.Mixed,
       required: true,
-      validate: {
-        validator: function(v: any) {
-          return (
-            typeof v === 'number' || 
-            (typeof v === 'object' && v !== null && 'value' in v && 'unit' in v)
-          );
-        },
-        message: 'ceilingHeight must be either a number or an object with value and unit properties'
-      }
     },
-    noOfOpenSides: { 
-      type: Schema.Types.Mixed, 
+    openSides: {
+      type: Schema.Types.Mixed,
       required: true,
-      validate: {
-        validator: function(v: any) {
-          return typeof v === 'string' || typeof v === 'number';
-        },
-        message: 'noOfOpenSides must be either a string or a number'
-      }
     },
   },
   propertyDetails: {
@@ -206,30 +179,28 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     waterAvailability: [{ type: String }],
     propertyAge: { type: String, required: true },
     propertyCondition: { type: String, required: true },
-    priceDetails: {
-      Price: { type: Number, required: true },
-      isNegotiable: { type: Boolean, default: false },
-    },
-      registrationCharges: {
-        includedInPrice: { type: Boolean, default: false },
-        amount: { type: Number },
-        stampDuty: { type: Number },
-      },
-      brokerage: {
-        required: { type: String, required: true },
-        amount: { type: Number },
-      },
-      availability: {
-        type: { type: String, enum: ["immediate", "specific"] },
-        date: { type: Date },
-        preferredSaleDuration: { type: String },
-        noticePeriod: { type: String },
-        isPetsAllowed: { type: Boolean, default: false },
-        operatingHours: { type: Boolean, default: false },
-      }
-    
   },
-  availability: { type: Schema.Types.Mixed },
+  pricingDetails: {
+    propertyPrice: { type: Number, required: true },
+    pricetype: { type: String, required: true },
+  },
+  registration: {
+    chargestype: { type: String, required: true },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number },
+  },
+  brokerage: {
+    required: { type: String, required: true },
+    amount: { type: Number },
+  },
+  availability: {
+    type: { type: String, enum: ["immediate", "specific"] },
+    date: { type: Date },
+    preferredSaleDuration: { type: String },
+    noticePeriod: { type: String },
+    isPetsAllowed: { type: Boolean, default: false },
+    operatingHours: { type: Boolean, default: false },
+  },
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -253,40 +224,40 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
-    intent: { type: String,default: 'Sell' },
-    propertyName: { type: String,  default: 'Covered Space' },
+    intent: { type: String, default: 'Sell' },
+    propertyName: { type: String, default: 'Covered Space' },
     status: { type: String, default: 'Available' }
   },
 });
 
 // Middleware to handle data transformation before validation
-CommercialSellCoveredSpaceSchema.pre('validate', function(next) {
-  if (typeof this.spaceDetails?.roadWidth === 'number') {
-    this.spaceDetails.roadWidth = {
-      value: this.spaceDetails.roadWidth,
-      unit: 'feet'
-    };
-  }
-  
-  if (typeof this.propertyDetails?.ceilingHeight === 'number') {
-    this.propertyDetails.ceilingHeight = {
-      value: this.propertyDetails.ceilingHeight,
-      unit: 'feet'
-    };
-  }
-  
-  // Convert noOfOpenSides from number to string if needed
-  if (typeof this.spaceDetails?.noOfOpenSides === 'number') {
-    this.spaceDetails.noOfOpenSides = this.spaceDetails.noOfOpenSides.toString();
-  }
-  
-  // Set default value for noOfOpenSides if it's not provided
-  if (this.spaceDetails && !this.spaceDetails.noOfOpenSides) {
-    this.spaceDetails.noOfOpenSides = "1";
-  }
-  
-  next();
-});
+// CommercialSellCoveredSpaceSchema.pre('validate', function (next) {
+//   if (typeof this.spaceDetails?.roadWidth === 'number') {
+//     this.spaceDetails.roadWidth = {
+//       value: this.spaceDetails.roadWidth,
+//       unit: 'feet'
+//     };
+//   }
+
+//   if (typeof this.propertyDetails?.ceilingHeight === 'number') {
+//     this.propertyDetails.ceilingHeight = {
+//       value: this.propertyDetails.ceilingHeight,
+//       unit: 'feet'
+//     };
+//   }
+
+//   // Convert noOfOpenSides from number to string if needed
+//   if (typeof this.spaceDetails?.noOfOpenSides === 'number') {
+//     this.spaceDetails.noOfOpenSides = this.spaceDetails.noOfOpenSides.toString();
+//   }
+
+//   // Set default value for noOfOpenSides if it's not provided
+//   if (this.spaceDetails && !this.spaceDetails.noOfOpenSides) {
+//     this.spaceDetails.noOfOpenSides = "1";
+//   }
+
+//   next();
+// });
 
 // Indexes
 // CommercialSellCoveredSpaceSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
