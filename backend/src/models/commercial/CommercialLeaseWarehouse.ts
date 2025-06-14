@@ -3,7 +3,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 // Interfaces
 interface IBasicInformation {
     title: string;
-    warehouseType: string[];
+    type: string[];
     address: {
         street: string;
         city: string;
@@ -151,26 +151,26 @@ export interface ICommercialLeaseWarehouse extends Document {
 
 // Schema
 const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
-    propertyId: { type: String, required: true, unique: true },
+    propertyId: { type: String, unique: false },
     basicInformation: {
-        title: { type: String, required: true },
-        warehouseType: [{ type: String, required: true }],
+        title: { type: String },
+        type: [{ type: String }],
         address: {
-            street: { type: String, required: true },
-            city: { type: String, required: true },
-            state: { type: String, required: true },
-            zipCode: { type: String, required: true },
+            street: { type: String },
+            city: { type: String },
+            state: { type: String },
+            zipCode: { type: String },
         },
-        landmark: { type: String, required: true },
+        landmark: { type: String },
         location: {
-            latitude: { type: String, required: true },
-            longitude: { type: String, required: true },
+            latitude: { type: String },
+            longitude: { type: String },
         },
         isCornerProperty: { type: Boolean }
     },
     coveredSpaceDetails: {
-        totalArea: { type: Number, required: true },
-        ceilingHeight: { type: Number, required: true },
+        totalArea: { type: Number },
+        ceilingHeight: { type: Number },
         loadingDocks: { type: Number, default: 0 },
         dockHeight: { type: Number },
         floorload: { type: Number },
@@ -182,13 +182,13 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
     },
     propertyDetails: {
         area: {
-            totalArea: { type: Number, required: true },
-            builtUpArea: { type: Number, required: true },
-            carpetArea: { type: Number, required: true }
+            totalArea: { type: Number },
+            builtUpArea: { type: Number },
+            carpetArea: { type: Number }
         },
         floor: {
-            floorNumber: { type: Number, required: true },
-            totalFloors: { type: Number, required: true }
+            floorNumber: { type: Number },
+            totalFloors: { type: Number }
         },
         facingDirection: { type: String },
         furnishingStatus: { type: String },
@@ -204,46 +204,46 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
     leaseTerms: {
         leaseDetails: {
             leaseAmount: {
-                amount: { type: Number, required: true },
+                amount: { type: Number },
                 type: { type: String, enum: ['Fixed', 'Negotiable'] },
-                duration: { type: Number, required: true },
-                durationUnit: { type: String, required: true }
+                duration: { type: Number },
+                durationUnit: { type: String }
             }
         },
         tenureDetails: {
-            minimumTenure: { type: Number, required: true },
-            minimumUnit: { type: String, required: true },
-            maximumTenure: { type: Number, required: true },
-            maximumUnit: { type: String, required: true },
-            lockInPeriod: { type: Number, required: true },
-            lockInUnit: { type: String, required: true },
-            noticePeriod: { type: Number, required: true },
-            noticePeriodUnit: { type: String, required: true }
+            minimumTenure: { type: Number },
+            minimumUnit: { type: String },
+            maximumTenure: { type: Number },
+            maximumUnit: { type: String },
+            lockInPeriod: { type: Number },
+            lockInUnit: { type: String },
+            noticePeriod: { type: Number },
+            noticePeriodUnit: { type: String }
         },
         maintenanceAmount: {
-            amount: { type: Number, required: true },
-            frequency: { type: String, enum: ['Monthly', 'Quarterly', 'Yearly', 'Half-Yearly'], required: true }
+            amount: { type: Number },
+            frequency: { type: String, enum: ['Monthly', 'Quarterly', 'Yearly', 'Half-Yearly'] }
         },
         otherCharges: {
             electricityCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             waterCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             gasCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             otherCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             }
         },
         brokerage: {
-            required: { type: String, enum: ['yes', 'no'], required: true },
+            required: { type: String, enum: ['yes', 'no'] },
             amount: { type: Number }
         },
         availability: {
@@ -256,9 +256,9 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
         }
     },
     contactInformation: {
-        name: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, required: true },
+        name: { type: String },
+        email: { type: String },
+        phone: { type: String },
         alternatePhone: { type: String },
         bestTimeToContact: { type: String }
     },

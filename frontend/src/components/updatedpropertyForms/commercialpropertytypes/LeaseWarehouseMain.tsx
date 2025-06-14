@@ -30,7 +30,7 @@ interface MediaType {
 interface FormData {
   [x: string]: any;
   title: string;
-  warehouseType: string[];
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -93,7 +93,7 @@ const LeaseWarehouseMain = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    warehouseType: [] as string[],
+    type: [],
     address: {
       street: '',
       city: '',
@@ -173,7 +173,7 @@ const LeaseWarehouseMain = () => {
               <PropertyName propertyName={formData.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, title: name }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev, warehouseType: type }))} />
+            <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev,type: type }))} />
           </div>
 
           <div className="space-y-6">
@@ -388,6 +388,16 @@ const LeaseWarehouseMain = () => {
     return uploadedMedia;
   };
 
+  // Add convertFileToBase64 function
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // Map frontend form data to backend model structure
   const mapFormDataToBackendModel = async () => {
     // Handle media upload first (this would involve actual file uploads in production)
@@ -600,49 +610,128 @@ const LeaseWarehouseMain = () => {
       preventDefault(e);
     }
 
-    // If not on the last step, move to the next step instead of submitting
-    if (currentStep < steps.length - 1) {
-      handleNext(e as React.MouseEvent);
-      return;
-    }
-
-    // Validate the final step before submitting
-    // if (!validateFinalStep()) {
-    //   toast.error("Please add at least one image or document");
-    //   return;
-    // }
-
     try {
       setIsSubmitting(true);
       toast.loading("Submitting your property listing...");
 
-      // Map form data to backend model structure
-      const backendData = await mapFormDataToBackendModel();
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        navigate('/login');
+        return;
+      }
 
-      // Make API call to create commercial lease warehouse
-      const response = await axios.post(
-        `/api/commercial/lease/warehouse`,
-        backendData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+      const author = JSON.parse(user).id;
+
+      // Convert media files to base64
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+        },
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+      };
+
+      const transformedData = {
+        basicInformation: {
+          title: formData.title || '',
+          type: formData.type || [],
+          address: formData.address || {
+            street: '',
+            city: '',
+            state: '',
+            zipCode: ''
+          },
+          landmark: formData.landmark || '',
+          location: {
+            latitude: formData.coordinates?.latitude || '',
+            longitude: formData.coordinates?.longitude || ''
+          },
+          isCornerProperty: formData.isCornerProperty || false
+        },
+        coveredSpaceDetails: formData.warehouseDetails || {},
+        propertyDetails: formData.propertyDetails || {},
+        leaseTerms: {
+          leaseDetails: {
+            leaseAmount: {
+              amount: formData.leaseAmount?.amount || 0,
+              type: formData.leaseAmount?.type || 'Fixed',
+              duration: formData.leaseAmount?.duration || 0,
+              durationUnit: formData.leaseAmount?.durationUnit || 'years'
+            }
+          },
+          tenureDetails: formData.leaseTenure || {},
+          maintenanceAmount: formData.maintenanceAmount || {
+            amount: 0,
+            frequency: 'Monthly'
+          },
+          otherCharges: {
+            electricityCharges: {
+              type: formData.otherCharges?.electricity?.type || 'inclusive',
+              amount: formData.otherCharges?.electricity?.amount || 0
+            },
+            waterCharges: {
+              type: formData.otherCharges?.water?.type || 'inclusive',
+              amount: formData.otherCharges?.water?.amount || 0
+            },
+            gasCharges: {
+              type: formData.otherCharges?.gas?.type || 'inclusive',
+              amount: formData.otherCharges?.gas?.amount || 0
+            },
+            otherCharges: {
+              type: formData.otherCharges?.others?.type || 'inclusive',
+              amount: formData.otherCharges?.others?.amount || 0
+            }
+          },
+          brokerage: formData.brokerage || {
+            required: 'no',
+            amount: 0
+          },
+          availability: {
+            availableFrom: formData.availability?.date || new Date(),
+            availableImmediately: formData.availability?.availableImmediately || false,
+            leaseDuration: formData.availability?.leaseDuration || '',
+            noticePeriod: formData.availability?.noticePeriod || '',
+            petsAllowed: false,
+            operatingHours: false
           }
+        },
+        contactInformation: {
+          name: formData.contactDetails?.name || '',
+          email: formData.contactDetails?.email || '',
+          phone: formData.contactDetails?.phone || '',
+          alternatePhone: formData.contactDetails?.alternatePhone || '',
+          bestTimeToContact: formData.contactDetails?.bestTimeToContact || ''
+        },
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: formData.title || '',
+          intent: 'Lease',
+          status: 'Available'
         }
-      );
+      };
+
+      const response = await axios.post('/api/commercial/lease/warehouses', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       if (response.data.success) {
         toast.dismiss();
-        toast.success("Property listed successfully!");
-        navigate('/updatePropertyForm');
-      } else {
-        toast.dismiss();
-        toast.error(response.data.error || "Failed to create property listing");
-        console.error('Failed to create property listing:', response.data.error);
+        toast.success('Commercial warehouse listing created successfully!');
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast.dismiss();
-      toast.error(error.response?.data?.details || error.message || "An error occurred while submitting the form");
+      toast.error(error.response?.data?.message || 'Failed to create property listing');
       console.error('Error submitting form:', error);
     } finally {
       setIsSubmitting(false);

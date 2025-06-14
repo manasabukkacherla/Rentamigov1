@@ -26,7 +26,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormData {
   basicInformation: {
     title: string;
-    showroomType: string[];
+    type: string[]; 
     address: {
       street: string;
       city: string;
@@ -162,7 +162,7 @@ const LeaseShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      showroomType: [],
+      type: [],
       address: {
         street: '',
         city: '',
@@ -576,6 +576,7 @@ const LeaseShowroomMain = () => {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setIsSubmitting(true);
+    console.log(formData);
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
