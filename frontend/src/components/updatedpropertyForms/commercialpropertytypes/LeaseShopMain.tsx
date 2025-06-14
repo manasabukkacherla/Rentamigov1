@@ -24,7 +24,7 @@ interface FormData {
   // propertyId: string;
   basicInformation: {
     title: string;
-    shopType: string[];
+    type: string[];
     address: {
       street: string;
       city: string;
@@ -153,8 +153,8 @@ const LeaseShopMain = () => {
     // propertyId: '',
     basicInformation: {
       title: '',
-      shopType: [],
-      address: {
+    type: [],
+      address: {  
         street: '',
         city: '',
         state: '',
@@ -297,7 +297,7 @@ const LeaseShopMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
-          <ShopType shopType={formData.basicInformation.shopType} onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, shopType: type } }))} />
+          <ShopType Type={formData.basicInformation.type} onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type } }))} />
 
           <div className="space-y-8">
             <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
