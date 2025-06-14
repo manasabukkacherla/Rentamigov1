@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PropertyDetails } from '../types';
-import { AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, Gamepad, Shirt, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath, FileWarning as Running, School as Pool, Tent as Tennis, Calculator as Elevator, BatteryCharging, Shield, Target, AlertTriangle, ChevronRight, ChevronLeft, LucideIcon } from 'lucide-react';
+import { AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, Gamepad, Shirt, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath, FileWarning as Running, School as Pool, Tent as Tennis, Calculator as Elevator, BatteryCharging, Shield, Target, AlertTriangle, ChevronRight, ChevronLeft, LucideIcon, Toilet, Users, Coffee, Truck, Sun, FireExtinguisher, Monitor, Wifi, Server, Target as Signage, Building, Car } from 'lucide-react';
+import { Property } from '../App';
 
 // Add IconWrapper component
 const IconWrapper = ({ icon: Icon, className }: { icon: LucideIcon; className?: string }) => {
@@ -21,32 +22,69 @@ document.head.appendChild(styleSheet);
 
 interface AmenitiesTabsProps {
   details: PropertyDetails;
+  property: Property;
 }
 
 const amenityIcons: Record<string, LucideIcon> = {
-  'Air Conditioner': AirVent,
-  'Bed': Bed,
-  'Dining Table': Utensils,
-  'Gas Connection': Flame,
-  'TV': Tv,
-  'Wardrobe': Box,
-  'Refrigerator': Refrigerator,
-  'Sofa': Sofa,
-  'Microwave': Microwave,
-  'Play Station': Gamepad,
-  'Washing Machine': WashingMachine,
-  'CCTV': Camera,
-  'Children Play Area': PlayCircle,
-  'Club House': Building2,
-  'Gym': Dumbbell,
-  'Jacuzzi': Bath,
-  'Jogging Track': Running,
-  'Kids Pool': Pool,
-  'Lawn Tennis Court': Tennis,
-  'Lift': Elevator,
-  'Power Backup': BatteryCharging,
-  'Security': Shield,
-  'Squash Court': Target,
+  'privateWashrooms': Toilet,
+  'commonWashrooms': Users,
+  'pantryCafeteria': Coffee,
+  'passengerLift': Elevator,
+  'freightLift': Truck,
+  'generator': BatteryCharging,
+  'inverter': BatteryCharging,
+  'solar': Sun,
+  'cctv': Camera,
+  'securityGuards': Shield,
+  'gatedAccess': Building2,
+  'fireExtinguishers': FireExtinguisher,
+  'sprinklerSystem': Target,
+  'emergencyExits': Target,
+  'coveredParking': Car,
+  'openParking': Building,
+  'parkingSlots': Car,
+  'receptionArea': Building,
+  'conferenceRooms': Building,
+  'centralizedAC': Monitor,
+  'splitAC': Monitor,
+  'wifi': Wifi,
+  'serverRoom': Server,
+  'naturalLighting': Sun,
+  'commonAreaMaintenance': Building,
+  'landscaping': Building,
+  'waterSupply': Building,
+  'wasteManagement': Building,
+  'businessLounge': Building,
+  'fitnessArea': Dumbbell,
+  'visitorParking': Car,
+  'emergencyServices': AlertTriangle,
+  'wheelchairRamps': Building,
+  'elevators': Elevator,
+  'handrails': Building,
+  'signageBranding': Building,
+  'airConditioning': AirVent,
+  'bed': Bed,
+  'kitchen': Utensils,
+  'gas': Flame,
+  'tv': Tv,
+  'washingMachine': WashingMachine,
+  'refrigerator': Refrigerator,
+  'sofa': Sofa,
+  'microwave': Microwave,
+  'gym': Dumbbell,
+  'pool': Pool,
+  'tennisCourt': Tennis,
+  'lawnTennisCourt': Tennis,
+  'lift': Elevator,
+  'powerBackup': BatteryCharging,
+  'security': Shield,
+  'squashCourt': Target,
+  'playStation': Gamepad,
+  'childrenPlayArea': PlayCircle,
+  'clubHouse': Building2,
+  'jacuzzi': Bath,
+  'joggingTrack': Running,
+  'kidsPool': Pool,
 };
 
 const tabs = [
@@ -58,7 +96,7 @@ const tabs = [
 
 type TabType = typeof tabs[number]['id'];
 
-export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
+export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property }) => {
   const [activeTab, setActiveTab] = useState<TabType>('flat');
   const [autoScrollPaused, setAutoScrollPaused] = useState(false);
   const tabsRef = useRef<HTMLDivElement>(null);
@@ -118,7 +156,10 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
       case 'flat':
         return (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 transition-all duration-500">
-            {details.flatAmenities.map((amenity) => (
+            {property.propertyDetails?.propertyAmenities === undefined && (
+              <p className="text-center text-gray-500">No amenities available</p>
+            )}
+            {property.propertyDetails?.propertyAmenities.map((amenity) => (
               <AmenityCard key={amenity} icon={amenityIcons[amenity] || Box} label={amenity} />
             ))}
           </div>
@@ -126,7 +167,10 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details }) => {
       case 'society':
         return (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 transition-all duration-500">
-            {details.societyAmenities.map((amenity) => (
+            {property.propertyDetails?.wholeSpaceAmenities === undefined && (
+              <p className="text-center text-gray-500">No amenities available</p>
+            )}
+            {property.propertyDetails?.wholeSpaceAmenities.map((amenity) => (
               <AmenityCard key={amenity} icon={amenityIcons[amenity] || Box} label={amenity} />
             ))}
           </div>

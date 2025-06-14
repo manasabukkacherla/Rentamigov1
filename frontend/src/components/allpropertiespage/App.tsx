@@ -6,6 +6,7 @@ import { PropertyCard } from './components/PropertyCard';
 import { FiltersPanel } from './components/FiltersPanel';
 import { VoiceSearch } from './components/VoiceSearch';
 import { searchProperties, formatSearchSummary, formatNearbySuggestion, extractSearchCriteria } from './utils/searchUtils';
+import axios from 'axios';
 
 
 
@@ -49,6 +50,9 @@ function Allproperties() {
       hasFetched = true;
 
       try {
+        const data = await axios.get('/api/allproperties');
+        console.log(data.data);
+
         const [
           agriRes, othersRes, coveredRes, plotRes, retailRes, shedRes, shopRes, showroomRes,
           rentAgriRes, rentCoveredRes, warehouseRes, officeSpaceRes, rentOthersRes, rentOfficeSpaceRes, rentShopRes, rentRetailStoreRes, rentShowroomRes, rentShedRes, rentPlotRes,

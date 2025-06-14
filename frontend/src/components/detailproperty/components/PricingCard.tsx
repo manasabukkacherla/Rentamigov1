@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { IndianRupee, X, ChevronUp } from 'lucide-react';
 import { EnquiryForm } from './EnquiryForm';
+import { Property } from '../App';
 
-export const PricingCard: React.FC = () => {
+export const PricingCard: React.FC<{property: Property}> = ({property}) => {
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [showMobilePricing, setShowMobilePricing] = useState(false);
 
@@ -12,7 +13,7 @@ export const PricingCard: React.FC = () => {
         <div className="text-sm font-medium text-gray-500 mb-1">Monthly Maintenance</div>
         <div className="flex justify-between items-center text-gray-900">
           <span className="font-medium">Amount</span>
-          <span className="text-lg">₹5,000</span>
+          <span className="text-lg">{property.rentalTerms?.rentDetails?.rentType === "exclusive" ? property.rentalTerms?.maintenanceAmount?.amount : "Inclusive"}</span>
         </div>
       </div>
 
@@ -20,7 +21,7 @@ export const PricingCard: React.FC = () => {
         <div className="text-sm font-medium text-gray-500 mb-1">Security Deposit</div>
         <div className="flex justify-between items-center text-gray-900">
           <span className="font-medium">Amount</span>
-          <span className="text-lg">₹40,000</span>
+          <span className="text-lg">{property.rentalTerms?.securityDeposit?.amount}</span>
         </div>
       </div>
 
@@ -29,15 +30,19 @@ export const PricingCard: React.FC = () => {
         <div className="space-y-2 text-gray-900">
           <div className="flex justify-between items-center">
             <span>Water</span>
-            <span>₹500</span>
+            <span>{property.rentalTerms?.otherCharges?.water?.type === "exclusive" ? property.rentalTerms?.otherCharges?.water?.amount : "Inclusive"}</span>
           </div>
           <div className="flex justify-between items-center">
             <span>Electricity</span>
-            <span>₹600</span>
+            <span>{property.rentalTerms?.otherCharges?.electricity?.type === "exclusive" ? property.rentalTerms?.otherCharges?.electricity?.amount : "Inclusive"}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span>Parking</span>
-            <span>₹500</span>
+            <span>Gas</span>
+            <span>{property.rentalTerms?.otherCharges?.gas?.type === "exclusive" ? property.rentalTerms?.otherCharges?.gas?.amount : "Inclusive"}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Others</span>
+            <span>{property.rentalTerms?.otherCharges?.others?.type === "exclusive" ? property.rentalTerms?.otherCharges?.others?.amount : "Inclusive"}</span>
           </div>
         </div>
       </div>
@@ -57,7 +62,7 @@ export const PricingCard: React.FC = () => {
       <div className="hidden lg:block bg-white rounded-lg p-4 shadow-lg sticky top-6">
         <div className="flex items-center gap-2 mb-4">
           <IndianRupee className="w-8 h-5 text-gray-900" />
-          <span className="text-2xl font-bold text-gray-900">25,000</span>
+          <span className="text-2xl font-bold text-gray-900">{property.metadata.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent : property.metadata.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
           <span className="text-gray-500">/month</span>
         </div>
         <PricingContent />
@@ -71,7 +76,7 @@ export const PricingCard: React.FC = () => {
         >
           <div className="flex items-center gap-2">
             <IndianRupee className="w-8 h-5 text-gray-900" />
-            <span className="text-2xl font-bold text-gray-900">25,000</span>
+            <span className="text-2xl font-bold text-gray-900">{property.metadata.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent : property.metadata.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
             <span className="text-gray-500">/month</span>
           </div>
           <ChevronUp className={`w-5 h-5 text-gray-600 transition-transform ${showMobilePricing ? 'rotate-180' : ''}`} />
