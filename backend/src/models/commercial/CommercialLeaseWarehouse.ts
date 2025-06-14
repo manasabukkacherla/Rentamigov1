@@ -132,11 +132,10 @@ interface IMedia {
 interface IMetadata {
     creadtedBy: Schema.Types.ObjectId | null;
     createdAt: Date;
-    // updatedAt?: Date;
-    // status: 'active' | 'inactive' | 'sold' | 'rented';
-    // views: number;
-    // favorites: number;
-    // isVerified: boolean;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
 }
 
 export interface ICommercialLeaseWarehouse extends Document {
@@ -278,11 +277,10 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
         createdAt: { type: Date, default: Date.now },
-        // updatedAt: { type: Date },
-        // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
-        // views: { type: Number, default: 0 },
-        // favorites: { type: Number, default: 0 },
-        // isVerified: { type: Boolean, default: false }
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Lease' },
+        propertyName: { type: String,  default: 'Warehouse' },
+        status: { type: String, default: 'Available' }
     }
 });
 

@@ -269,9 +269,10 @@ app.use("/api/commercial/lease/office-space",CommercialLeaseOfficeSpace);
 app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 //rent routes
+
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
-app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
+app.use("/api/commercial/rent/office-space", commercialRentOfficeSpaceRoutes);
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
 app.use("/api/commercial/rent/covered-space", commercialRentCoveredSpaceRoutes);
 app.use("/api/commercial/rent/shops", commercialRentShop);

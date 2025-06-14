@@ -31,7 +31,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  warehouseType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -119,7 +119,7 @@ interface FormData {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   pricingDetails: IPricingDetails;
@@ -141,7 +141,7 @@ const SellWarehouseMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      warehouseType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -153,7 +153,7 @@ const SellWarehouseMain = () => {
         latitude: '',
         longitude: ''
       },
-      isCornerProperty: false
+      isCornerProperty: false 
     },
     warehouseDetails: {
       ceilingHeight: 0,
@@ -187,7 +187,7 @@ const SellWarehouseMain = () => {
         backup: false
       },
       waterAvailability: [],
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: ''
     },
     pricingDetails: {
@@ -276,7 +276,7 @@ const SellWarehouseMain = () => {
           <WarehouseType
             onWarehouseTypeChange={(types: string[]) => setFormData(prev => ({
               ...prev,
-              basicInformation: { ...prev.basicInformation, warehouseType: types }
+              basicInformation: { ...prev.basicInformation, Type: types }
             }))}
           />
           <CommercialPropertyAddress
@@ -351,8 +351,8 @@ const SellWarehouseMain = () => {
                     powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
                   },
                   propertyAge: typeof details.propertyAge === 'string'
-                    ? parseInt(String(details.propertyAge).split('-')[0], 10) || 0
-                    : Number(details.propertyAge) || prev.propertyDetails.propertyAge
+                    ? details.propertyAge
+                    : prev.propertyDetails.propertyAge
                 }
               }))
             }}
@@ -561,8 +561,8 @@ const SellWarehouseMain = () => {
               ? formData.propertyDetails.waterAvailability[0] || 'scheduled'
               : formData.propertyDetails.waterAvailability,
             propertyAge: typeof formData.propertyDetails.propertyAge === 'string'
-              ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
-              : formData.propertyDetails.propertyAge || 0
+              ? formData.propertyDetails.propertyAge
+              : formData.propertyDetails.propertyAge
           },
           pricingDetails: {
             ...formData.pricingDetails
@@ -585,7 +585,11 @@ const SellWarehouseMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Warehouse',
+            intent: 'Sell',
+            status: 'Available',
           }
         };
 

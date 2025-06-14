@@ -46,7 +46,7 @@ interface PropertyDetailsType {
   furnishingStatus: string;
   propertyAmenities: string[];
   wholeSpaceAmenities: string[];
-  propertyAge: number;
+  propertyAge: string;
   propertyCondition: string;
   waterAvailability: string[];
   electricitySupply: {
@@ -84,20 +84,22 @@ interface ContactDetailsType {
 }
 
 interface FormDataType {
-  propertyName: string;
-  shedType: string;
-  address: {
-    street: string;
-    city: string;
+  basicInformation: {
+    title: string;
+    Type: string[];
+    address: {
+      street: string;
+      city: string;
     state: string;
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
   isCornerProperty: boolean;
+}
   shedDetails: Partial<ShedDetailsType>;
   propertyDetails: Partial<PropertyDetailsType>;
   price: string | number;
@@ -124,8 +126,9 @@ const SellShedMain = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
-    propertyName: "",
-    shedType: "",
+    basicInformation: {
+    title: "",
+    Type: [],
     address: {
       street: "",
       city: "",
@@ -133,14 +136,15 @@ const SellShedMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+    },
     shedDetails: {},
     propertyDetails: {},
     price: "",
     registrationCharges: {},
     brokerage: {
-      required: "",
+      required:"no",
       amount: 0
     },
     availability: {
@@ -177,29 +181,29 @@ const SellShedMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) => handleChange("propertyName", name)}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => handleChange("basicInformation.title", name)}
           />
-          <ShedType onShedTypeChange={(type) => handleChange("shedType", type)} />
+          <ShedType onShedTypeChange={(Type:string[]) => handleChange("basicInformation.Type", Type)} />
 
 
           <CommercialPropertyAddress 
-            address={formData.address}
-            onAddressChange={(address) => handleChange("address", address)} 
+            address={formData.basicInformation.address}
+            onAddressChange={(address) => handleChange("basicInformation.address", address)} 
           />
           {/* <Landmark onLandmarkChange={(landmark) => handleChange("landmark", landmark)} /> */}
           <MapLocation
-            latitude={formData.coordinates.latitude.toString()}
-            longitude={formData.coordinates.longitude.toString()}
-            landmark={formData.landmark}
-            onLocationChange={(location) => handleChange('coordinates', location)}
-            onAddressChange={(address) => handleChange('address', address)}
-            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty 
-            isCornerProperty={formData.isCornerProperty}
-            onCornerPropertyChange={(isCorner) => handleChange("isCornerProperty", isCorner)} 
+            isCornerProperty={formData.basicInformation.isCornerProperty}
+            onCornerPropertyChange={(isCorner) => handleChange("basicInformation.isCornerProperty", isCorner)} 
           />
         </div>
       ),
@@ -230,9 +234,14 @@ const SellShedMain = () => {
             />
           </div>
           <div className="text-black">
-            <Brokerage 
-              bro={formData.brokerage}
-              onBrokerageChange={(brokerage) => handleChange("brokerage", brokerage)} 
+          <Brokerage bro={formData.brokerage}
+              onBrokerageChange={(brokerage) => setFormData(prev => ({
+                ...prev,
+                brokerage: {
+                  required: brokerage.required as "yes" | "no",
+                  amount: brokerage.amount
+                }
+              }))}
             />
           </div>
         </div>
@@ -334,8 +343,21 @@ const SellShedMain = () => {
     }, 100);
   }
 
-  const handleChange = (key: string, value: string | boolean | Record<string, any>) => {
-    setFormData((prev) => ({ ...prev, [key]: value }))
+  const handleChange = (key: string, value: any) => {
+    setFormData((prev) => {
+      const keys = key.split('.');
+      if (keys.length === 1) {
+        return { ...prev, [key]: value };
+      }
+      const newData = { ...prev };
+      let current: any = newData;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+      return newData;
+    });
   }
 
   // Function to convert File to base64 string
@@ -366,11 +388,44 @@ const SellShedMain = () => {
         documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
       };
 
+      // Get userId robustly from localStorage
+      const userRaw = localStorage.getItem('user');
+      let userId = null;
+      if (userRaw) {
+        try {
+          const parsed = JSON.parse(userRaw);
+          userId = parsed.id || parsed._id || null;
+        } catch (e) {
+          userId = null;
+        }
+      }
+      console.log('User from localStorage:', userRaw);
+      console.log('UserId being sent:', userId);
+
       // Transform data for backend
       const transformedData = {
         ...formData,
+        basicInformation: {
+          ...formData.basicInformation,
+          location: {
+            latitude: formData.basicInformation.location.latitude,
+            longitude: formData.basicInformation.location.longitude
+          }
+        },
         media: convertedMedia,
         // Ensure availability data matches the schema
+        price: formData.price,
+        registrationCharges: {
+          included: formData.registrationCharges.included,
+          amount: formData.registrationCharges.amount,
+          stampDuty: formData.registrationCharges.stampDuty
+        },
+        brokerage: {
+          required: typeof formData.brokerage?.required === 'boolean'
+            ? (formData.brokerage.required ? 'yes' : 'no')
+            : formData.brokerage?.required || 'no',
+          amount: formData.brokerage?.amount || 0
+        },
         availability: {
           type: formData.availability.type || 'immediate',
           date: formData.availability.date,
@@ -381,10 +436,15 @@ const SellShedMain = () => {
         },
         // Add metadata
         metaData: {
+          createdBy: userId,
           createdAt: new Date(),
-          createdBy: sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user') || '{}').id : null
+          propertyType: 'Commercial',
+          propertyName: 'Shed',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
+
 
       console.log('Submitting data:', transformedData);
 

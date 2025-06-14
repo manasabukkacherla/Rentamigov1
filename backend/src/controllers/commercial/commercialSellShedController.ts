@@ -53,7 +53,7 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     const shedData = req.body;
     
     // Basic validation - ensure required fields exist
-    if (!shedData.propertyName) {
+    if (!shedData.basicInformation?.title) {
       return res.status(400).json({
         success: false,
         error: 'Missing required field: property name'
@@ -96,7 +96,6 @@ export const createCommercialShed = async (req: Request, res: Response) => {
       data: {
         propertyId: shed.propertyId,
         _id: shed._id,
-        propertyName: shed.propertyName,
         metaData: shed.metaData
       }
     });
@@ -184,7 +183,7 @@ export const getAllCommercialSheds = async (req: Request, res: Response) => {
     
     // Execute query with projection for list view
     const sheds = await CommercialShed.find(query)
-      .select('propertyId propertyName shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metaData')
+      .select('propertyId basicInformation.title shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metaData')
       .sort(sortQuery)
       .skip(skip)
       .limit(limitNum)

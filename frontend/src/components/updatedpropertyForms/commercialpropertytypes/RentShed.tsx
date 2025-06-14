@@ -111,14 +111,14 @@ interface FormData {
         type: string;
       };
     };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
-      type: string;
-      date?: string;
-    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
   };
   contactInformation: {
     name: string;
@@ -142,6 +142,10 @@ interface FormData {
   metadata: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName: 'Shed';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
@@ -307,14 +311,14 @@ const RentShed = () => {
           type: 'inclusive'
         }
       },
-      brokerage: {
-        required: 'no',
-        amount: 0
-      },
-      availability: {
-        type: 'immediate',
-        date: new Date().toISOString()
-      }
+    },
+    brokerage: {
+      required: 'no',
+      amount: 0
+    },
+    availability: {
+      type: 'immediate',
+      date: new Date().toISOString()
     },
     contactInformation: {
       name: '',
@@ -337,7 +341,11 @@ const RentShed = () => {
     },
     metadata: {
       createdBy: '',
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Shed',
+      intent: 'Rent',
+      status: 'Available',
     }
   });
 
@@ -512,15 +520,12 @@ const RentShed = () => {
             });
           }} />
 
-          <Brokerage bro={formData.rentalTerms.brokerage} onBrokerageChange={(brokerage) => {
+          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => {
             setFormData({
               ...formData,
-              rentalTerms: {
-                ...formData.rentalTerms,
-                brokerage: {
-                  required: brokerage.required || 'no',
-                  amount: Number(brokerage.amount) || 0
-                }
+              brokerage: {
+                required: brokerage.required || 'no',
+                amount: Number(brokerage.amount) || 0
               }
             });
           }} />
@@ -532,14 +537,11 @@ const RentShed = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <AvailabilityDate availability={formData.rentalTerms.availability as { type: "immediate" | "specific"; date?: string }} onAvailabilityChange={(availability) => setFormData({
+          <AvailabilityDate availability={formData.availability as { type: "immediate" | "specific"; date?: string }} onAvailabilityChange={(availability) => setFormData({
             ...formData,
-            rentalTerms: {
-              ...formData.rentalTerms,
-              availability: {
-                type: availability.type || 'immediate',
-                date: availability.date || new Date().toISOString()
-              }
+            availability: {
+              type: availability.type || 'immediate',
+              date: availability.date || new Date().toISOString()
             }
           })} />
         </div>
@@ -699,7 +701,11 @@ const RentShed = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Shed',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

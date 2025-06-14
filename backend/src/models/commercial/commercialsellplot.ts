@@ -9,14 +9,13 @@ interface IArea {
 
 interface IBasicInformation {
     title: string;
-    plotType: string;
+    type: string;
     address: string;
     landmark: string;
     city: string;
     state: string;
     zipCode: string;
-    latitude: string;
-    longitude: string;
+    location: { latitude: string; longitude: string };
     isCornerProperty: boolean;
 }
 
@@ -107,6 +106,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface ICommercialPlot extends Document {
@@ -128,14 +131,13 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        plotType: { type: String, required: true },
+        type: { type: String, required: true },
         address: { type: String, required: true },
         landmark: { type: String, required: true },
+        location: { latitude: String, longitude: String },
         city: { type: String, required: true },
         state: { type: String, required: true },
         zipCode: { type: String, required: true },
-         latitude: { type: String, required: true },
-        longitude: { type: String, required: true },
     
         isCornerProperty: { type: Boolean, default: false }
     },
@@ -221,7 +223,11 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     },
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Sell' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true

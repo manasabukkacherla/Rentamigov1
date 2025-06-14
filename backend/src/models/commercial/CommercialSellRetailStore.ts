@@ -13,7 +13,7 @@ interface IFloor {
 
 interface IBasicInformation {
   title: string;
-  retailStoreType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -52,29 +52,34 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IPriceDetails {
   price: number;
-  pricePerSqft: number;
-  isNegotiable: boolean;
-  registrationCharges: {
-    registrationAmount: number;
-    stampDuty: number;
-    otherCharges: number;
-  };
-  brokerage: {
-    required: string;
-    amount: number;
-  };
-  availability: {
-    type: string;
-    date?: string;
-  };
+  pricetype: "fixed" | "negotiable";
+}
+
+interface IBrokerage {
+  required: "Yes" | "No";
+  amount: number;
+}
+interface IRegistrationCharges {
+  type: "inclusive" | "exclusive";
+  registrationAmount: number;
+  stampDutyAmount: number;
+}
+
+interface IAvailability {
+  type: string;
+  date?: string;
 }
 
 interface ICommercialSellRetailStore extends Document {
-  propertyId: string;
+  propertyId?: string;
   
   basicInformation: IBasicInformation;
   retailStoreDetails: {
@@ -97,12 +102,15 @@ interface ICommercialSellRetailStore extends Document {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     ownershipType: string;
     possessionStatus: string;
   };
   priceDetails: IPriceDetails;
+  registrationCharges: IRegistrationCharges;
+  brokerage: IBrokerage;
+  availability: IAvailability;
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -113,7 +121,7 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    retailStoreType: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -154,29 +162,31 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: [{ type: String }],
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type: String, required: true }, // Accepts range values like "10-15"
     propertyCondition: { type: String, required: true },
     ownershipType: { type: String, required: true },
     possessionStatus: { type: String, required: true }
   },
   priceDetails: {
-    price: { type: Number, required: true },
-    pricePerSqft: { type: Number, required: true },
-    isNegotiable: { type: Boolean, default: false },
-    registrationCharges: {
-      registrationAmount: { type: Number },
-      stampDuty: { type: Number },
-      otherCharges: { type: Number }
-    },
-    brokerage: {
-      required: { type: String, required: true },
-      amount: { type: Number }
-    },
-    availability: {
-      type: { type: String, required: true, enum: ['Ready to Move', 'Under Construction', 'Soon', 'Specific Date'] },
-      date: { type: String }
-    }
+    price: { type: Number, default: 0, required: true },
+    pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
   },
+  registrationCharges: {
+    type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number },
+  }
+  ,
+  brokerage: {
+    required: { type: String, enum: ['Yes', 'No'], required: true },
+    amount: { type: Number }
+  },
+  availability: {
+      type: { type: String, enum: ['Ready to Move', 'Under Construction', 'Soon', 
+        'Specific Date','Available','Not Available','immediate'] },
+      date: { type: String }
+    },
+  
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -197,8 +207,12 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
     documents: [{ type: String }] 
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Retail Store' },
+    status: { type: String, default: 'Available' }
     
   }
 }, {

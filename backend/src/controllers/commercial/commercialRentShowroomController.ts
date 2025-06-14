@@ -6,7 +6,7 @@ import { CommercialRentShowroom } from '../../models/commercial/commercialRentSh
 const generatePropertyId = async (): Promise<string> => {
     try {
         // Prefix for the commercial rent showroom property ID
-        const prefix = "RA-COMRESH";
+        const prefix = "RA-COMRESR";
 
         // Find the showroom with the highest property ID number
         const highestShowroom = await CommercialRentShowroom.findOne({
@@ -97,7 +97,7 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: req.user?._id || null,
+                createdBy: formData.metadata.createdBy,
                 createdAt: new Date()
             }
         };

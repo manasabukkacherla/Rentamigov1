@@ -17,7 +17,7 @@ const uploadFields = [
 ];
 
 // Create a new commercial shop listing
-commercialSellShopRoutes.post('/create', authenticateUser, fileUpload.fields(uploadFields), createCommercialShop);
+commercialSellShopRoutes.post('/', createCommercialShop);
 commercialSellShopRoutes.get('/', getAllCommercialSellShop);
 commercialSellShopRoutes.get('/:propertyId', getCommercialSellShopById);
 commercialSellShopRoutes.put('/:id', updateCommercialSellShop);

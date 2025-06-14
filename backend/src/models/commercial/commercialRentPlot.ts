@@ -2,7 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 interface IBasicInformation {
     title: string;
-    plotType: string[];
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -41,6 +41,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface IRentalTerms {
@@ -56,39 +60,13 @@ interface IRentalTerms {
         amount?: number;
         frequency?: string;
     }
-    otherCharges?: {
-        water?: {
-            amount?: number;
-            type?: string;
-        }
-        electricity?: {
-            amount?: number;
-            type?: string;
-        }
-        gas?: {
-            amount?: number;
-            type?: string;
-        }
-        others?: {
-            amount?: number;
-            type?: string;
-        }
-    }
-    brokerage?: {
-        required: string;
-        amount?: number;
-    }
-    availability?: {
-        type: string;
-        date?: string;
-    }
 }
 
 interface ICommercialRentPlot extends Document {
     propertyId: string;
 
     basicInformation: IBasicInformation;
-    plotDetails: {
+    propertyDetails: {
         totalArea: number;
         zoningType: string;
         boundaryWall?: boolean;
@@ -97,32 +75,12 @@ interface ICommercialRentPlot extends Document {
         roadAccess: string;
         securityRoom: boolean;  
         previousConstruction: string;
-        infrastructure: string[];
-        
     },
-    propertyDetails?: {
-        area?: {
-            totalArea?: number;
-            carpetArea?: number;
-            builtUpArea?: number;
-        };
-        floor?: {
-            floorNumber?: number;
-            totalFloors: number;
-        };
-        facingDirection?: string;
-        furnishingStatus?: string;
-        propertyAmenities?: string[];
-        wholeSpaceAmenities?: string[];
-        electricitySupply?: {
-          powerLoad?: number;
-          backup?: boolean;
-        };
-        waterAvailability?: string;
-        propertyAge?: string;
-        propertyCondition?: string;
-      };
     rentalTerms: IRentalTerms;
+    availability?: {
+        type: string;
+        date?: string;
+    }
     contactInformation: IContactInformation;
     media: IMedia;
     metadata: IMetadata;
@@ -133,7 +91,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        plotType: { type: [String], required: true },
+        Type: { type: [String], required: true },
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -147,7 +105,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         },
         isCornerProperty: { type: Boolean }
     },
-    plotDetails: {
+    propertyDetails: {
         totalArea: { type: Number},
         zoningType: { type: String },
         boundaryWall: { type: Boolean },
@@ -155,31 +113,8 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         electricity: { type: Boolean },
         roadAccess: { type: String },
         securityRoom: { type: Boolean },
-        previousConstruction: { type: String, required: true },
-        infrastructure: [{type:String,required:true}]
+        previousConstruction: { type: String, required: false },
     },
-    propertyDetails: {
-        area: { 
-          totalArea: { type: Number},
-          carpetArea: { type: Number },
-          builtUpArea: { type: Number },
-        },
-        floor: { 
-          floorNumber: { type: Number },
-          totalFloors: { type: Number },
-        },
-        facingDirection: { type: String },
-        furnishingStatus: { type: String },
-        propertyAmenities: { type: [String] },
-        wholeSpaceAmenities: { type: [String] },
-        electricitySupply: { 
-          powerLoad: { type: Number },
-          backup: { type: Boolean },
-        },
-        waterAvailability: { type: String },
-        propertyAge: { type: String },
-        propertyCondition: { type: String },
-      },  
     rentalTerms: {
         rentDetails: {
             expectedRent: { type: Number ,required:true},
@@ -193,32 +128,10 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
             amount: { type: Number },
             frequency: { type: String },
         },
-        otherCharges: {
-            water: {
-                amount: { type: Number },
-                type: { type: String, required: true },
-            },
-            electricity: {
-                amount: { type: Number },
-                type: { type: String },
-            },
-            gas: {
-                amount: { type: Number },
-                type: { type: String},
-            },
-            others: {
-                amount: { type: Number },
-                type: { type: String},
-            }
-        },
-        brokerage: {
-            required: { type: String },
-            amount: { type: Number },
-        },
-        availability: {
-            type: { type: String, required: true },
-            date: { type: String },
-        }
+    },
+    availability: {
+        type: { type: String, required: true },
+        date: { type: String },
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -240,8 +153,12 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' } 
     }
 }, {
     timestamps: true

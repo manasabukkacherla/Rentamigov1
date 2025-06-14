@@ -22,8 +22,8 @@ import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle,
 import MapLocation from '../CommercialComponents/MapLocation';
 
 interface FormData {
-  propertyName: string;
-  spaceType: string[];
+  title: string; 
+  spaceType: string[]; 
   address: {
     street: string;
     city: string;
@@ -86,7 +86,7 @@ const LeaseCoveredSpaceMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
+    title: '',
     spaceType: [],
     address: {
       street: '',
@@ -161,7 +161,7 @@ const LeaseCoveredSpaceMain = () => {
       icon: <MapPin className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          <div className="space-y-8"><PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+          <div className="space-y-8"><PropertyName propertyName={formData.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
             <CoveredOpenSpaceType onSpaceTypeChange={(type) => setFormData(prev => ({ ...prev, spaceType: type }))} />
           </div>
 
@@ -424,7 +424,7 @@ const LeaseCoveredSpaceMain = () => {
     // Create the backend data object with proper mapping
     const backendData = {
       basicInformation: {
-        title: formData.propertyName || '',
+        title: formData.title || '',
         shedType: formData.spaceType || [],
         address: {
           street: formData.address.street || '',
@@ -519,11 +519,12 @@ const LeaseCoveredSpaceMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        status: 'active',
-        views: 0,
-        favorites: 0,
-        isVerified: false,
-        createdBy: localStorage.getItem('userId') || null
+        userId: localStorage.getItem('userId') || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: 'Covered Space',
+        intent: 'Lease',
+        status: 'Available',
       }
     };
 
@@ -594,7 +595,7 @@ const LeaseCoveredSpaceMain = () => {
     // Add validation logic based on the current step
     switch (currentStep) {
       case 0: // Basic Information
-        return !!formData.propertyName &&
+        return !!formData.title &&
           formData.spaceType.length > 0 &&
           !!formData.address.street &&
           !!formData.address.city &&

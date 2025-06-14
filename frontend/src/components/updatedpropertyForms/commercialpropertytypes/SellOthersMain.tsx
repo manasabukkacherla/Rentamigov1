@@ -38,8 +38,9 @@ import MapLocation from "../CommercialComponents/MapLocation"
 // Define interface that matches backend model structure
 interface FormData {
   propertyId?: string;
-  propertyName: string;
-  commercialType: string[];
+  basicInformation:{
+  title: string;
+  type: string[];
   address: {
     street: string;
     city: string;
@@ -47,11 +48,12 @@ interface FormData {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string
   };
   isCornerProperty: boolean;
+},
   propertyDetails: {
     area: {
       totalArea: number;
@@ -73,7 +75,7 @@ interface FormData {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -124,6 +126,10 @@ interface FormData {
   metaData?: {
     createdBy: string;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -131,8 +137,9 @@ const SellOthersMain = () => {
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
-    commercialType: [],
+    basicInformation:{
+    title: "",
+    type: [],
     address: {
       street: "",
       city: "",
@@ -140,8 +147,9 @@ const SellOthersMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+  },
     propertyDetails: {
       area: {
         totalArea: 0,
@@ -163,9 +171,10 @@ const SellOthersMain = () => {
       propertyAmenities: [],
       wholeSpaceAmenities: [],
       waterAvailability: "",
-      propertyAge: 0,
+      propertyAge: "",
       propertyCondition: "",
       electricitySupply: {
+        
         powerLoad: 0,
         backup: false
       }
@@ -218,16 +227,17 @@ const SellOthersMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+              propertyName={formData.basicInformation.title}
+              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
+
             <OtherCommercialType
-              onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, commercialType: type as string[] }))}
+              onCommercialTypeChange={(type) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type as string[] } }))}
             />
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
             {/* <Landmark
                 onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
                 onLocationSelect={(location) => setFormData((prev) => ({
@@ -239,16 +249,34 @@ const SellOthersMain = () => {
                 }))}
               /> */}
             <MapLocation
-              latitude={formData.coordinates.latitude.toString()}
-              longitude={formData.coordinates.longitude.toString()}
-              landmark={formData.landmark}
-              onLocationChange={(location) => setFormData((prev) => ({ ...prev, coordinates: location }))}
-              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
-              onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+              latitude={formData.basicInformation.location.latitude.toString()}
+              longitude={formData.basicInformation.location.longitude.toString()}
+              landmark={formData.basicInformation.landmark}
+              onLocationChange={(location) => setFormData((prev) => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  location: location
+                }
+              }))}
+              onAddressChange={(address) => setFormData((prev) => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  address
+                }
+              }))}
+              onLandmarkChange={(landmark) => setFormData((prev) => ({
+                ...prev,
+                basicInformation: {
+                  ...prev.basicInformation,
+                  landmark
+                }
+              }))}
             />
 
             <CornerProperty
-              isCornerProperty={formData.isCornerProperty}
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
                 setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
               }
@@ -460,9 +488,19 @@ const SellOthersMain = () => {
   };
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    console.log("Form Data:", formData)
+  // Validate location before submitting
+  const validateLocation = () => {
+    const { latitude, longitude } = formData.basicInformation.location;
+    return latitude && latitude.trim() !== '' && longitude && longitude.trim() !== '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateLocation()) {
+      toast.error('Please select a valid location on the map (latitude and longitude are required).');
+      return;
+    }
+    console.log('Submitting payload:', formData);
     setIsSubmitting(true);
 
     try {
@@ -492,12 +530,7 @@ const SellOthersMain = () => {
 
       // Create payload matching the backend model structure
       const transformedData = {
-        propertyName: formData.propertyName,
-        commercialType: formData.commercialType,
-        address: formData.address,
-        landmark: formData.landmark,
-        coordinates: formData.coordinates,
-        isCornerProperty: formData.isCornerProperty,
+        basicInformation: formData.basicInformation,
         propertyDetails: formData.propertyDetails,
         price: formData.price,
         registrationCharges: formData.registrationCharges,
@@ -509,7 +542,11 @@ const SellOthersMain = () => {
         media: convertedMedia,
         metaData: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Other',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 
@@ -523,7 +560,7 @@ const SellOthersMain = () => {
       if (response.data) {
         toast.success('Commercial property successfully listed!');
         // Navigate to dashboard
-        navigate('/dashboard');
+        navigate('/updatePropertyform');
       }
     } catch (error: any) {
       console.error("Error submitting form:", error);

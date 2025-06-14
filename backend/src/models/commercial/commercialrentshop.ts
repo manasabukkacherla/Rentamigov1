@@ -2,7 +2,7 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 interface IBasicInformation {
   title: string;
-  shopType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -39,8 +39,12 @@ interface IMedia {
 }
 
 interface IMetadata {
-  creadtedBy: Schema.Types.ObjectId | null;
+  createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IRentalTerms {
@@ -74,14 +78,6 @@ interface IRentalTerms {
           type: string;
         }
     }
-    brokerage: {
-      required: string;
-      amount?: number;
-    }
-    availability: {
-      type: string;
-      date?: string;
-    }
 }
 
 interface ICommercialrentShop extends Document {
@@ -98,6 +94,14 @@ interface ICommercialrentShop extends Document {
     previousBusiness: string;
   };
   rentalTerms: IRentalTerms;
+  brokerage: {
+    required: string;
+    amount?: number;
+  }
+  availability: {
+    type: string;
+    date?: string;
+  }
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -108,7 +112,7 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    shopType: [{ type: String, required: true }],
+    Type: [{ type: String }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -162,14 +166,14 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
             type: { type: String, required: true},
         }
     },
-    brokerage: {
-        required: { type: String, required: true },
-        amount: { type: Number },
-    },
-    availability: {
-        type: { type: String, required: true },
-        date: { type: String },
-    }
+  },
+  brokerage: {
+    required: { type: String, required: true },
+    amount: { type: Number },
+},
+  availability: {
+    type: { type: String, required: true },
+    date: { type: String },
   },
   contactInformation: {
     name: { type: String, required: true },
@@ -191,8 +195,12 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
     documents: [{ type: String }] 
   },
   metadata: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Shop' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true
@@ -200,8 +208,8 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
 
 // Indexes
 // CommercialrentShopSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialrentShopSchema.index({ 'basicInformation.city': 1 });
-CommercialrentShopSchema.index({ 'basicInformation.state': 1 });
+// CommercialrentShopSchema.index({ 'basicInformation.city': 1 });
+// CommercialrentShopSchema.index({ 'basicInformation.state': 1 });
 CommercialrentShopSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces

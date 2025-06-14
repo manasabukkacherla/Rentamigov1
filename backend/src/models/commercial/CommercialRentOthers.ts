@@ -11,10 +11,9 @@ interface IFloor {
   totalFloors: number;
 }
 
-export interface ICommercialRentOthers extends Document {
-  propertyId: string;
-  propertyName: string;
-  commercialType: string[];
+interface IBasicInformation {
+  title: string;
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -22,11 +21,49 @@ export interface ICommercialRentOthers extends Document {
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
   isCornerProperty: boolean;
+}
+
+interface IRentalTerms {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  }
+  securityDeposit: {
+    amount: number;
+  }
+  maintenanceAmount?: {
+    amount?: number;
+    frequency?: string;
+  }
+  otherCharges: {
+      water: {
+        amount?: number;
+        type: string;
+      }
+      electricity: {
+        amount?: number;
+        type: string;
+      }
+      gas: {
+        amount?: number;
+        type: string;
+      }
+      others: {
+        amount?: number;
+        type: string;
+      }
+  }
+}
+
+export interface ICommercialRentOthers extends Document {
+  propertyId: string;
+  basicInformation: IBasicInformation;
   
   propertyDetails: {
     area: IArea;
@@ -49,36 +86,13 @@ export interface ICommercialRentOthers extends Document {
       backup: boolean;
     };
   };
-  rent: {
-    expectedRent: number;
-    isNegotiable: boolean;
-    rentType: 'inclusive' | 'exclusive';
-  };
-  securityDeposit: {
-    amount: number;
-  };
-  maintenanceAmount?: {
-    amount: number;
-    frequency: 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
-  };
-  otherCharges: {
-    water: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
-    };
-    electricity: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
-    };
-    gas: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
-    };
-    others: {
-      type: 'inclusive' | 'exclusive';
-      amount?: number;
-    };
-  };
+  otherDetails: {
+    propertyTypeDescription: string,
+    specialFeatures: string,
+    usageRecommendation: string,
+    additionalRequirements: string
+  },
+  rentalTerms: IRentalTerms;
   brokerage: {
     required: string;
     amount?: number;
@@ -87,7 +101,7 @@ export interface ICommercialRentOthers extends Document {
     type: 'immediate' | 'specific';
     date?: Date;
   };
-  contactDetails: {
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
@@ -110,25 +124,31 @@ export interface ICommercialRentOthers extends Document {
   metaData: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
   }
 }
 
 const CommercialRentOthersSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
-  propertyName: { type: String, required: true },
-  commercialType: { type: [String]  , required: true },
-  address: {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zipCode: { type: String, required: true }
+  basicInformation: {
+    title: { type: String, required: true },
+    Type: { type: [String]  , required: true },
+    address: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String ,required:true},
+      longitude: { type: String ,required:true}
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  coordinates: {
-    latitude: { type: String ,required:true},
-    longitude: { type: String ,required:true}
-  },
-  isCornerProperty: { type: Boolean, default: false },
   propertyDetails: {
     area: {
       totalArea: { type: Number },
@@ -157,35 +177,43 @@ const CommercialRentOthersSchema: Schema = new Schema({
       backup: { type: Boolean, default: false }
     }
   },
-  rent: {
-    expectedRent: { type: Number, required: true },
-    isNegotiable: { type: Boolean, default: false },
-    rentType: { type: String, enum: ['inclusive', 'exclusive'], required: true }
-  },
-  securityDeposit: {
-    amount: { type: Number }
-  },
-  maintenanceAmount: {
-    amount: { type: Number },
-    frequency: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly'] }
-  },
-  otherCharges: {
-    water: {
-      type: { type: String, enum: ['inclusive', 'exclusive'] },
+  rentalTerms:  {
+    rentDetails: {
+      expectedRent: { type: Number, required: true },
+      isNegotiable: { type: Boolean, default: false },
+      rentType: { type: String, enum: ['inclusive', 'exclusive'], required: true }
+    },
+    securityDeposit: {
       amount: { type: Number }
     },
-    electricity: {
-      type: { type: String, enum: ['inclusive', 'exclusive'] },
-      amount: { type: Number }
+    maintenanceAmount: {
+      amount: { type: Number },
+      frequency: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly'] }
     },
-    gas: {
-      type: { type: String, enum: ['inclusive', 'exclusive'] },
-      amount: { type: Number }
+    otherCharges: {
+      water: {
+        amount: { type: Number },
+        type: { type: String, required: true},
+      },
+      electricity: {
+        amount: { type: Number },
+        type: { type: String, required: true},
+      },
+      gas: {
+        amount: { type: Number },
+        type: { type: String, required: true},
+      },
+      others: {
+        amount: { type: Number },
+        type: { type: String, required: true},
+      }
     },
-    others: {
-      type: { type: String, enum: ['inclusive', 'exclusive'] },
-      amount: { type: Number }
-    }
+  },
+  otherDetails: {
+    propertyTypeDescription: { type: String },
+    specialFeatures: { type: String },
+    usageRecommendation: { type: String },
+    additionalRequirements: { type: String }
   },
   brokerage: {
     required: { type: String },
@@ -195,7 +223,7 @@ const CommercialRentOthersSchema: Schema = new Schema({
     type: { type: String, enum: ['immediate', 'specific'], required: true },
     date: { type: Date }
   },
-  contactDetails: {
+  contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },
     phone: { type: String, required: true },
@@ -217,7 +245,11 @@ const CommercialRentOthersSchema: Schema = new Schema({
   },
   metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Others' },
+    status: { type: String, default: 'Available' } 
   }
 });
 

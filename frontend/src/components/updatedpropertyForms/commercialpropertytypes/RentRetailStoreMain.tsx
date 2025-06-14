@@ -54,7 +54,7 @@ const globalStyles = `
 interface FormData {
   basicInformation: {
     title: string;
-    retailStoreType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -129,14 +129,14 @@ interface FormData {
         type: string;
       };
     };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
-      type: string;
-      date?: string;
-    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
   };
   contactInformation: {
     name: string;
@@ -157,12 +157,15 @@ interface FormData {
     videoTour?: File | null;
     documents: File[];
   };
-  metadata: {
+   metadata:  {
     createdBy: string;
     createdAt: Date;
-  };
-}
-
+    propertyType: 'Commercial';
+    propertyName: 'Retail Store';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
+};
+};
 interface MediaUploadProps {
   images: Array<{ category: string; files: Array<{ url: string; file: File }> }>;
   video?: { url: string; file: File };
@@ -196,7 +199,7 @@ const RentRetailStoreMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      retailStoreType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -271,14 +274,14 @@ const RentRetailStoreMain = () => {
           type: 'inclusive'
         }
       },
-      brokerage: {
-        required: 'no',
-        amount: 0
-      },
-      availability: {
-        type: 'immediate',
-        date: ''
-      }
+    },
+    brokerage: {
+      required: 'no',
+      amount: 0
+    },
+    availability: {
+      type: 'immediate',
+      date: ''
     },
     contactInformation: {
       name: '',
@@ -301,7 +304,11 @@ const RentRetailStoreMain = () => {
     },
     metadata: {
       createdBy: '',
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Retail Store',
+      intent: 'Rent',
+      status: 'Available'
     }
   });
 
@@ -361,7 +368,7 @@ const RentRetailStoreMain = () => {
                 onPropertyNameChange={(name) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
               />
               <RetailStoreType
-                onRetailTypeChange={(type) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: type } })}
+                onRetailTypeChange={(type) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, Type: type } })}
               />
               <CommercialPropertyAddress
                 address={formData.basicInformation.address}
@@ -531,16 +538,13 @@ const RentRetailStoreMain = () => {
                 }} />
                 {/* <div className="border-t border-gray-200 my-4"></div> */}
                 <Brokerage
-                bro={formData.rentalTerms.brokerage}
+                bro={formData.brokerage}
                 onBrokerageChange={(brokerage) => {
                   setFormData({
                     ...formData,
-                    rentalTerms: {
-                      ...formData.rentalTerms,
-                      brokerage: {
-                        required: brokerage.required,
-                        amount: brokerage.amount
-                      }
+                    brokerage: {
+                      required: brokerage.required,
+                      amount: brokerage.amount
                     }
                   });
                 }} />
@@ -556,8 +560,8 @@ const RentRetailStoreMain = () => {
       content: renderFormSection(
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
-          availability={formData.rentalTerms.availability as { type: "immediate" | "specific"; date?: string }}
-           onAvailabilityChange={(availability) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, availability } })} />
+          availability={formData.availability as { type: "immediate" | "specific"; date?: string }}
+           onAvailabilityChange={(availability) => setFormData({ ...formData, availability })} />
         </div>
       )
     },
@@ -677,6 +681,7 @@ const RentRetailStoreMain = () => {
       if (user) {
         const author = JSON.parse(user).id;
 
+
         // Convert media files to base64
         const convertFileToBase64 = (file: File): Promise<string> => {
           return new Promise((resolve, reject) => {
@@ -704,8 +709,8 @@ const RentRetailStoreMain = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
-            createdBy: author,
-            createdAt: new Date()
+            ...formData.metadata,
+            createdBy: JSON.parse(user).id,
           }
         };
 

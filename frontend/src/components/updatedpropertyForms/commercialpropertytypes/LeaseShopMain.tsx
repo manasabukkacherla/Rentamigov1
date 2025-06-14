@@ -628,13 +628,17 @@ const LeaseShopMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Lease',
+            status: 'Available'
           }
         };
 
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial/lease-shops', transformedData, {
+        const response = await axios.post('/api/commercial/lease/shops', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

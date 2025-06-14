@@ -14,7 +14,7 @@ interface IFloor {
 
 interface IBasicInformation {
     title: string;
-    showroomType: string;
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -86,10 +86,6 @@ interface IRentalDetails {
             type: string;
         };
     };
-    brokerage: {
-        required: boolean;
-        amount: number;
-    };
 }
 
 interface IAvailability {
@@ -121,6 +117,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 export interface ICommercialRentShowroom extends Document {
@@ -129,6 +129,10 @@ export interface ICommercialRentShowroom extends Document {
     showroomDetails: showRoomDetails;
     propertyDetails: propertyDetails;
     rentalTerms: IRentalDetails;
+    brokerage: {
+        required: boolean;
+        amount: number;
+    };
     availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
@@ -140,7 +144,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        showroomType: [{ type: String, required: true }],
+        Type: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -223,10 +227,10 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
                 type: { type: String, required: true }
             }, 
         },
-        brokerage: {
-            required: { type: Boolean, default: false },
-            amount: { type: Number, required: false }
-        }
+    },
+    brokerage: {
+        required: { type: Boolean, default: false },
+        amount: { type: Number, required: false }
     },
     availability: {
         immediate: { type: Boolean, default: false },
@@ -252,8 +256,12 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Showroom' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true

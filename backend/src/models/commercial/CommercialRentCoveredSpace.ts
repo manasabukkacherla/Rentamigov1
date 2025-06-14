@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  spaceType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -72,15 +72,6 @@ interface IRentalTerms {
       type: string;
     };
   };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
-  availability: {
-    type: string;
-    availableFrom: string;
-    availableImmediately: boolean;
-  };
 }
 
 interface IContactInformation {
@@ -107,6 +98,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
 }
 
 export interface ICommercialRentCoveredSpace extends Document {
@@ -129,6 +124,14 @@ export interface ICommercialRentCoveredSpace extends Document {
     propertyCondition: string;
   };
   rentalTerms: IRentalTerms;
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date: Date;
+  };
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -139,17 +142,17 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    spaceType: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: {
       street: { type: String, required: true },
       city: { type: String, required: true },
       state: { type: String, required: true },
       zipCode: { type: String, required: true },
     },
-    landmark: { type: String, required: true },
+    landmark: { type: String },
     location: {
-      latitude: { type: String, required: true },
-      longitude: { type: String, required: true },
+      latitude: { type: String },
+      longitude: { type: String },
     },
     isCornerProperty: { type: Boolean },
   },
@@ -217,15 +220,14 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
         type: { type: String, required: true },
       },
     },
-    brokerage: {
-      required: { type: String, required: true },
-      amount: { type: Number },
-    },
-    availability: {
-      type: { type: String, required: true },
-      availableFrom: { type: String, required: true },
-      availableImmediately: { type: Boolean, required: true },
-    },
+  },
+  brokerage: {
+    required: { type: String, required: true },
+    amount: { type: Number },
+  },
+  availability: {
+    type: { type: String, required: true },
+    date: { type: Date, required: false },
   },
   contactInformation: {
     name: { type: String, required: true },
@@ -235,8 +237,12 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     bestTimeToContact: { type: String },
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'}, 
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Covered Space' },
+    status: { type: String, default: 'Available' }
   },
 }, {
   timestamps: true,
