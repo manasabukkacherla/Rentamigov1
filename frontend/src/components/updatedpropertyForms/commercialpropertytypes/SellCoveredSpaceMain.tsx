@@ -31,23 +31,10 @@ import {
 import axios from "axios"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
+import { useNavigate } from "react-router-dom"
 
 
 // --- Types for strong typing and error-free state updates ---
-type MediaPhotos = {
-  exterior: (File | string)[];
-  interior: (File | string)[];
-  floorPlan: (File | string)[];
-  washrooms: (File | string)[];
-  lifts: (File | string)[];
-  emergencyExits: (File | string)[];
-};
-
-type Media = {
-  photos: MediaPhotos;
-  videoTour: File | string | null;
-  documents: (File | string)[];
-};
 
 type ContactInformation = {
   name: string;
@@ -57,43 +44,6 @@ type ContactInformation = {
   bestTimeToContact: string;
 };
 
-type PropertyDetails = {
-  ceilingHeight: string;
-  area: string;
-  floor: string;
-  facingDirection: string;
-  furnishingStatus: string;
-  propertyAmenities: string[];
-  wholeSpaceAmenities: string[];
-  electricitySupply: string;
-  waterAvailability: string[];
-  propertyAge: string;
-  propertyCondition: string;
-  priceDetails: {
-    Price: number;
-    isNegotiable: boolean;
-  };
-  registrationCharges: {
-    included: boolean;
-    amount: number;
-    stampDuty: number;
-  };
-  brokerage: {
-    required: string;
-    amount: number;
-  };
-  availability: {
-    type: string;
-    isPetsAllowed: boolean;
-    operatingHours: boolean;
-  };
-  contactInformation: ContactInformation;
-  media: Media;
-  metadata: {
-    createdBy: string;
-  };
-};
-
 type SpaceDetails = {
   totalArea: string;
   areaUnit: string;
@@ -101,7 +51,7 @@ type SpaceDetails = {
   openArea: string;
   roadWidth: string;
   ceilingHeight: string;
-  noOfOpenSides: string;
+  openSides: string;
 };
 
 type FormDataType = {
@@ -119,21 +69,36 @@ type FormDataType = {
     isCornerProperty: boolean;
   };
   spaceDetails: SpaceDetails;
-  propertyDetails: PropertyDetails;
-  price: string;
-  area: {
-    superBuiltUpAreaSqft: string;
-    builtUpAreaSqft: string;
-    carpetAreaSqft: string;
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      builtUpArea: number;
+      carpetArea: number;
+    };
+    floor: {
+      floorNumber: number;
+      totalFloors: number;
+    };
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
+    waterAvailability: string;
+    propertyAge: string;
+    propertyCondition: string;
   };
-  registrationCharges: {
-    included: boolean;
-    amount: number;
-    stampDuty: number;
+  registration: {
+    chargestype: string;
+    registrationAmount: number;
+    stampDutyAmount: number;
   };
-  priceDetails: {
-    Price: number;
-    isNegotiable: boolean;
+  pricingDetails: {
+    propertyPrice: number;
+    pricetype: string;
   };
   brokerage: {
     required: string;
@@ -143,21 +108,33 @@ type FormDataType = {
     type: string;
     isPetsAllowed: boolean;
     operatingHours: boolean;
+    noticePeriod: string;
+    date: string;
+    preferredSaleDuration: string;
   };
-  contactDetails: ContactInformation;
-  media: Media;
-  metadata: {
-    createdBy: string;
+  contactInformation: ContactInformation;
+  media: {
+    photos: {
+      exterior: File[];
+      interior: File[];
+      floorPlan: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
   };
 };
 
 const SellCoveredSpaceMain = () => {
   const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState<FormDataType>({
     basicInformation: {
       title: "",
-      Type: [""],
+      Type: [],
       address: {
         street: "",
         city: "",
@@ -175,77 +152,39 @@ const SellCoveredSpaceMain = () => {
       openArea: "",
       roadWidth: "",
       ceilingHeight: "",
-      noOfOpenSides: "",
+      openSides: "",
     },
     propertyDetails: {
-      ceilingHeight: "",
-      area: "",
-      floor: "",
+      area: {
+        totalArea: 0,
+        builtUpArea: 0,
+        carpetArea: 0,
+      },
+      floor: {
+        floorNumber: 0,
+        totalFloors: 0,
+      },
       facingDirection: "",
       furnishingStatus: "",
       propertyAmenities: [],
       wholeSpaceAmenities: [],
-      electricitySupply: "",
-      waterAvailability: [],
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false,
+      },
+      waterAvailability: "",
       propertyAge: "",
       propertyCondition: "",
-      priceDetails: {
-        Price: 0,
-        isNegotiable: false
-      },
-      registrationCharges: {
-        included: false,
-        amount: 0,
-        stampDuty: 0
-      },
-      brokerage: {
-        required: "",
-        amount: 0
-      },
-      availability: {
-        type: "immediate",
-        isPetsAllowed: false,
-        operatingHours: false
-      },
-      contactInformation: {
-        name: "",
-        email: "",
-        phone: "",
-        alternatePhone: "",
-        bestTimeToContact: ""
-      },
-      media: {
-        photos: {
-          exterior: [],
-          interior: [],
-          floorPlan: [],
-          washrooms: [],
-          lifts: [],
-          emergencyExits: []
-        },
-        videoTour: null,
-        documents: []
-      },
-      metadata: {
-        createdBy: "demo-user"
-      },
     },
-    price: "",
-    area: {
-      superBuiltUpAreaSqft: "",
-      builtUpAreaSqft: "",
-      carpetAreaSqft: "",
+    registration: {
+      chargestype: "",
+      registrationAmount: 0,
+      stampDutyAmount: 0,
     },
-    registrationCharges: {
-      included: false,
-      amount: 0,
-      stampDuty: 0
+    pricingDetails: {
+      propertyPrice: 0,
+      pricetype: "",
     },
-    priceDetails: {
-      Price: 0,
-      isNegotiable: false
-    },
-
     brokerage: {
       required: "",
       amount: 0
@@ -253,9 +192,12 @@ const SellCoveredSpaceMain = () => {
     availability: {
       type: "immediate",
       isPetsAllowed: false,
-      operatingHours: false
+      operatingHours: false,
+      noticePeriod: "",
+      date: "",
+      preferredSaleDuration: "",
     },
-    contactDetails: {
+    contactInformation: {
       name: "",
       email: "",
       phone: "",
@@ -274,9 +216,6 @@ const SellCoveredSpaceMain = () => {
       videoTour: null as File | null,
       documents: [] as File[]
     },
-    metadata: {
-      createdBy: "demo-user" // TODO: Replace with actual user ID if available
-    }
   })
 
   const handleChange = (key: string, value: any) => {
@@ -319,18 +258,17 @@ const SellCoveredSpaceMain = () => {
               onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
             <CoveredOpenSpaceType
-              onSpaceTypeChange={(Type:string[]) => 
+              onSpaceTypeChange={(Type: string[]) =>
                 setFormData(prev => ({
                   ...prev,
                   basicInformation: {
                     ...prev.basicInformation,
                     Type: Array.isArray(Type) ? Type : [Type],
                   },
-                }))     
-            } 
-/>
-           
-          
+                }))
+              }
+            />
+
           </div>
 
           <div className="space-y-6">
@@ -378,21 +316,28 @@ const SellCoveredSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <div className="space-y-4 text-black">
-            <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
+            <Price onPriceChange={(price) => {
+              setFormData(prev => ({
+                ...prev,
+                pricingDetails: {
+                  ...prev.pricingDetails,
+                  propertyPrice: price.propertyPrice,
+                  pricetype: price.pricetype,
+                }
+              }));
+            }} />
           </div>
           <div className="text-black">
-            <RegistrationCharges
-              onRegistrationChargesChange={(charges) =>
-                setFormData((prev) => ({
-                  ...prev,
-                  registrationCharges: {
-                    included: charges.included,
-                    amount: charges.amount,
-                    stampDuty: charges.stampDuty
-                  }
-                }))
-              }
-            />
+            <RegistrationCharges onRegistrationChargesChange={(charges) => {
+              setFormData(prev => ({
+                ...prev,
+                registration: {
+                  chargestype: charges.chargestype,
+                  registrationAmount: charges.registrationAmount,
+                  stampDutyAmount: charges.stampDutyAmount,
+                }
+              }));
+            }} />
           </div>
           <div className="text-black">
             <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({
@@ -421,8 +366,8 @@ const SellCoveredSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CommercialContactDetails
-            contactInformation={formData.contactDetails}
-            onContactChange={(contact) => handleChange('contactDetails', contact)} />
+            contactInformation={formData.contactInformation}
+            onContactChange={(contact) => handleChange('contactInformation', contact)} />
         </div>
       ),
     },
@@ -467,96 +412,102 @@ const SellCoveredSpaceMain = () => {
     },
   ];
 
-
-
-
-  const mapFormDataToBackendFormat = () => {
-    // Map formData to backend format and ensure all required fields are present and correctly structured
-    const {
-      registrationCharges,
-      priceDetails,
-      brokerage,
-      availability,
-      contactDetails,
-      media,
-      propertyDetails,
-      metadata,
-      ...rest
-    } = formData;
-
-    // Ensure all photo arrays are arrays of strings (URLs) and never contain objects/empty objects
-    const photos = Object.fromEntries(
-      Object.entries(media.photos).map(([key, files]) => [
-        key,
-        files
-          .filter(f => typeof f === 'string' || f instanceof File)
-          .map(f => typeof f === 'string' ? f : URL.createObjectURL(f))
-          .filter(f => typeof f === 'string' && f.trim() !== ''),
-      ]),
-    );
-
-    // Compose contactInformation as required by backend
-    const contactInformation = {
-      name: contactDetails.name || "demo name",
-      email: contactDetails.email || "demo@email.com",
-      phone: contactDetails.phone || "0000000000",
-      // Optionally add alternatePhone, bestTimeToContact if backend supports
-    };
-
-    // Compose propertyDetails as required by backend
-    const backendPropertyDetails = {
-      ...propertyDetails,
-      availability: {
-        ...(propertyDetails.availability || {}),
-        type: propertyDetails.availability?.type || availability.type || "immediate",
-        isPetsAllowed: propertyDetails.availability?.isPetsAllowed ?? availability.isPetsAllowed,
-        operatingHours: propertyDetails.availability?.operatingHours ?? availability.operatingHours,
-      },
-      brokerage: {
-        ...(propertyDetails.brokerage || {}),
-        required: propertyDetails.brokerage?.required || brokerage.required || "yes",
-        amount: propertyDetails.brokerage?.amount ?? brokerage.amount ?? 0,
-      },
-      priceDetails: {
-        ...(propertyDetails.priceDetails || {}),
-        Price: (propertyDetails.priceDetails?.Price ?? priceDetails.Price ?? 0),
-        isNegotiable: propertyDetails.priceDetails?.isNegotiable ?? priceDetails.isNegotiable ?? false,
-      },
-    };
-
-    return {
-      ...rest,
-      registrationCharges: {
-        included: registrationCharges.included,
-        amount: registrationCharges.amount,
-        stampDuty: registrationCharges.stampDuty,
-      },
-      propertyDetails: backendPropertyDetails,
-      contactInformation,
-      media: {
-        photos,
-        videoTour: media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : (media.videoTour ? URL.createObjectURL(media.videoTour as File) : undefined),
-        documents: filesToUrls(media.documents as File[]),
-      },
-      metadata: {
-        createdBy: metadata.createdBy && metadata.createdBy.trim() !== '' ? metadata.createdBy : "demo-user",
-      },
-    };
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
-  const handleSubmit = async () => {
-    setLoading(true);
+  const handleSubmit = async (e?: { preventDefault: () => void }) => {
+    if (e) e.preventDefault();
+    console.log(formData);
     try {
-      const response = await axios.post(
-        "/api/commercial/sell/covered-space",
-        mapFormDataToBackendFormat()
-      );
-      console.log("Response:", response.data);
-      toast.success("Property listed successfully!");
-    } finally {
-      setLoading(false);
+      // Convert media files to base64 strings if they exist
+      const convertedMedia = {
+        photos: {
+          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+        },
+        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+      };
+
+      // Get userId robustly from localStorage
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('Please log in to continue');
+        navigate('/login');
+        return;
+      }
+
+      const userData = JSON.parse(user);
+      const author = userData.id;
+
+      // Transform data for backend
+      const transformedData = {
+        ...formData,
+        basicInformation: {
+          ...formData.basicInformation,
+          location: {
+            latitude: formData.basicInformation.location.latitude,
+            longitude: formData.basicInformation.location.longitude
+          }
+        },
+        media: convertedMedia,
+        // Ensure availability data matches the schema
+        price: formData.pricingDetails.propertyPrice,
+        registration: {
+          chargestype: formData.registration.chargestype,
+          registrationAmount: formData.registration.registrationAmount,
+          stampDutyAmount: formData.registration.stampDutyAmount
+        },
+        brokerage: {
+          required: typeof formData.brokerage?.required === 'boolean'
+            ? (formData.brokerage.required ? 'yes' : 'no')
+            : formData.brokerage?.required || 'no',
+          amount: formData.brokerage?.amount || 0
+        },
+        availability: {
+          type: formData.availability.type || 'immediate',
+          date: formData.availability.date,
+          noticePeriod: formData.availability.noticePeriod,
+          isPetsAllowed: formData.availability.isPetsAllowed || false,
+          operatingHours: formData.availability.operatingHours || false
+        },
+        // Add metadata
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Covered Space',
+          intent: 'Sell',
+          status: 'Available',
+        }
+      };
+
+
+      console.log('Submitting data:', transformedData);
+
+      // Submit to backend API
+      const response = await axios.post('/api/commercial/sell/covered-space', transformedData);
+
+      if (response.status === 201) {
+        toast.success("Property listed successfully!");
+        // Redirect to some success page or dashboard
+
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error("Failed to list property. Please try again.");
     }
-  };
+  }
 
   const handlePrevious = () => {
     setCurrentStep(currentStep - 1);
@@ -566,100 +517,100 @@ const SellCoveredSpaceMain = () => {
     setCurrentStep(currentStep + 1);
   };
 
-    return (
-      <div ref={formRef} className="min-h-screen bg-white">
-        {/* Progress indicator */}
-        <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-4">
-            <div className="flex justify-center">
-              <div className="flex items-center space-x-2">
-                {steps.map((s: { icon: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; title: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined }, i: number) => (
-                  <div
-                    key={i}
-                    className="flex items-center cursor-pointer"
-                    onClick={() => setCurrentStep(i)}
-                  >
-                    <div className="flex flex-col items-center group">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                          }`}
-                      >
-                        {s.icon}
-                      </div>
-                      <span
-                        className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                          }`}
-                      >
-                        {s.title}
-                      </span>
+  return (
+    <div ref={formRef} className="min-h-screen bg-white">
+      {/* Progress indicator */}
+      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4">
+          <div className="flex justify-center">
+            <div className="flex items-center space-x-2">
+              {steps.map((s: { icon: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; title: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined }, i: number) => (
+                <div
+                  key={i}
+                  className="flex items-center cursor-pointer"
+                  onClick={() => setCurrentStep(i)}
+                >
+                  <div className="flex flex-col items-center group">
+                    <div
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+                        }`}
+                    >
+                      {s.icon}
                     </div>
-                    {i < steps.length - 1 && (
-                      <div className="flex items-center mx-1">
-                        <div
-                          className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
-                            }`}
-                        ></div>
-                      </div>
-                    )}
+                    <span
+                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                        }`}
+                    >
+                      {s.title}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  {i < steps.length - 1 && (
+                    <div className="flex items-center mx-1">
+                      <div
+                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                          }`}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Form Content */}
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Covered Space</h1>
-          </div>
-          <div className="mb-8">
-            <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
-            <p className="text-gray-600">Please fill in the details for your property</p>
-          </div>
-
-          {steps[currentStep].component}
+      {/* Form Content */}
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Covered Space</h1>
         </div>
-        {/* Navigation Buttons */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+          <p className="text-gray-600">Please fill in the details for your property</p>
+        </div>
+
+        {steps[currentStep].component}
+      </div>
+      {/* Navigation Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
+          <button
+            type="button"
+            onClick={handlePrevious}
+            disabled={currentStep === 0}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+              : "bg-white text-black hover:bg-black hover:text-white"
+              }`}
+          >
+            <ChevronLeft className="w-5 h-5 mr-2" />
+            Previous
+          </button>
+          {currentStep < steps.length - 1 ? (
             <button
               type="button"
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                : "bg-white text-black hover:bg-black hover:text-white"
-                }`}
+              onClick={handleNext}
+              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
             >
-              <ChevronLeft className="w-5 h-5 mr-2" />
-              Previous
+              Next
+              <ChevronRight className="w-5 h-5 ml-2" />
             </button>
-            {currentStep < steps.length - 1 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-              >
-                Next
-                <ChevronRight className="w-5 h-5 ml-2" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={loading}
-                className={`flex items-center px-6 py-2 rounded-lg ${loading ? "bg-gray-600" : "bg-black hover:bg-gray-800"
-                  } text-white transition-all duration-200`}
-              >
-                {loading ? "Submitting..." : "Submit"}
-                {!loading && <ChevronRight className="w-5 h-5 ml-2" />}
-              </button>
-            )}
-          </div>
+          ) : (
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={loading}
+              className={`flex items-center px-6 py-2 rounded-lg ${loading ? "bg-gray-600" : "bg-black hover:bg-gray-800"
+                } text-white transition-all duration-200`}
+            >
+              {loading ? "Submitting..." : "Submit"}
+              {!loading && <ChevronRight className="w-5 h-5 ml-2" />}
+            </button>
+          )}
         </div>
       </div>
-    )
-  }
+    </div>
+  )
+}
 
 export default SellCoveredSpaceMain

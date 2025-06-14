@@ -67,92 +67,92 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
     // Generate a unique property ID
     const propertyId = await generatePropertyId();
 
-    // Map frontend fields to backend schema
-    const mapPayload = (body: any) => {
-      // Map registrationCharges.included -> includedInPrice
-      if (body.propertyDetails && body.propertyDetails.registrationCharges) {
-        body.propertyDetails.registrationCharges.includedInPrice = body.propertyDetails.registrationCharges.included;
-        delete body.propertyDetails.registrationCharges.included;
-      }
-      // Ensure waterAvailability is an array
-      if (body.propertyDetails && body.propertyDetails.waterAvailability && !Array.isArray(body.propertyDetails.waterAvailability)) {
-        body.propertyDetails.waterAvailability = [body.propertyDetails.waterAvailability];
-      }
-      // Map area fields in propertyDetails.area
-      if (body.propertyDetails && body.propertyDetails.area) {
-        if (body.propertyDetails.area.superBuiltUpAreaSqft !== undefined) {
-          body.propertyDetails.area.totalArea = Number(body.propertyDetails.area.superBuiltUpAreaSqft) || 0;
-        }
-        if (body.propertyDetails.area.builtUpAreaSqft !== undefined) {
-          body.propertyDetails.area.builtUpArea = Number(body.propertyDetails.area.builtUpAreaSqft) || 0;
-        }
-        if (body.propertyDetails.area.carpetAreaSqft !== undefined) {
-          body.propertyDetails.area.carpetArea = Number(body.propertyDetails.area.carpetAreaSqft) || 0;
-        }
-      }
-      // Map area fields in spaceDetails
-      if (body.spaceDetails) {
-        if (body.spaceDetails.totalArea !== undefined) {
-          body.spaceDetails.totalArea = Number(body.spaceDetails.totalArea) || 0;
-        }
-        if (body.spaceDetails.coveredArea !== undefined) {
-          body.spaceDetails.coveredArea = Number(body.spaceDetails.coveredArea) || 0;
-        }
-        if (body.spaceDetails.openArea !== undefined) {
-          body.spaceDetails.openArea = Number(body.spaceDetails.openArea) || 0;
-        }
-        if (body.spaceDetails.roadWidth !== undefined && typeof body.spaceDetails.roadWidth !== 'object') {
-          body.spaceDetails.roadWidth = Number(body.spaceDetails.roadWidth) || 0;
-        }
-        if (body.spaceDetails.ceilingHeight !== undefined && typeof body.spaceDetails.ceilingHeight !== 'object') {
-          body.spaceDetails.ceilingHeight = Number(body.spaceDetails.ceilingHeight) || 0;
-        }
-        if (body.spaceDetails.noOfOpenSides !== undefined && typeof body.spaceDetails.noOfOpenSides !== 'string') {
-          body.spaceDetails.noOfOpenSides = String(body.spaceDetails.noOfOpenSides);
-        }
-      }
-      // Ensure numbers for floor fields
-      if (body.propertyDetails && body.propertyDetails.floor) {
-        if (body.propertyDetails.floor.floorNumber !== undefined) {
-          body.propertyDetails.floor.floorNumber = Number(body.propertyDetails.floor.floorNumber) || 0;
-        }
-        if (body.propertyDetails.floor.totalFloors !== undefined) {
-          body.propertyDetails.floor.totalFloors = Number(body.propertyDetails.floor.totalFloors) || 0;
-        }
-      }
-      // Ensure numbers for priceDetails
-      if (body.propertyDetails && body.propertyDetails.priceDetails) {
-        if (body.propertyDetails.priceDetails.Price !== undefined) {
-          body.propertyDetails.priceDetails.Price = Number(body.propertyDetails.priceDetails.Price) || 0;
-        }
-      }
-      // Ensure numbers for brokerage amount
-      if (body.propertyDetails && body.propertyDetails.brokerage) {
-        if (body.propertyDetails.brokerage.amount !== undefined) {
-          body.propertyDetails.brokerage.amount = Number(body.propertyDetails.brokerage.amount) || 0;
-        }
-      }
-      // Ensure numbers for registrationCharges
-      if (body.propertyDetails && body.propertyDetails.registrationCharges) {
-        if (body.propertyDetails.registrationCharges.amount !== undefined) {
-          body.propertyDetails.registrationCharges.amount = Number(body.propertyDetails.registrationCharges.amount) || 0;
-        }
-        if (body.propertyDetails.registrationCharges.stampDuty !== undefined) {
-          body.propertyDetails.registrationCharges.stampDuty = Number(body.propertyDetails.registrationCharges.stampDuty) || 0;
-        }
-      }
-      return body;
-    };
+    // // Map frontend fields to backend schema
+    // const mapPayload = (body: any) => {
+    //   // Map registrationCharges.included -> includedInPrice
+    //   if (body.propertyDetails && body.propertyDetails.registrationCharges) {
+    //     body.propertyDetails.registrationCharges.includedInPrice = body.propertyDetails.registrationCharges.included;
+    //     delete body.propertyDetails.registrationCharges.included;
+    //   }
+    //   // Ensure waterAvailability is an array
+    //   if (body.propertyDetails && body.propertyDetails.waterAvailability && !Array.isArray(body.propertyDetails.waterAvailability)) {
+    //     body.propertyDetails.waterAvailability = [body.propertyDetails.waterAvailability];
+    //   }
+    //   // Map area fields in propertyDetails.area
+    //   if (body.propertyDetails && body.propertyDetails.area) {
+    //     if (body.propertyDetails.area.superBuiltUpAreaSqft !== undefined) {
+    //       body.propertyDetails.area.totalArea = Number(body.propertyDetails.area.superBuiltUpAreaSqft) || 0;
+    //     }
+    //     if (body.propertyDetails.area.builtUpAreaSqft !== undefined) {
+    //       body.propertyDetails.area.builtUpArea = Number(body.propertyDetails.area.builtUpAreaSqft) || 0;
+    //     }
+    //     if (body.propertyDetails.area.carpetAreaSqft !== undefined) {
+    //       body.propertyDetails.area.carpetArea = Number(body.propertyDetails.area.carpetAreaSqft) || 0;
+    //     }
+    //   }
+    //   // Map area fields in spaceDetails
+    //   if (body.spaceDetails) {
+    //     if (body.spaceDetails.totalArea !== undefined) {
+    //       body.spaceDetails.totalArea = Number(body.spaceDetails.totalArea) || 0;
+    //     }
+    //     if (body.spaceDetails.coveredArea !== undefined) {
+    //       body.spaceDetails.coveredArea = Number(body.spaceDetails.coveredArea) || 0;
+    //     }
+    //     if (body.spaceDetails.openArea !== undefined) {
+    //       body.spaceDetails.openArea = Number(body.spaceDetails.openArea) || 0;
+    //     }
+    //     if (body.spaceDetails.roadWidth !== undefined && typeof body.spaceDetails.roadWidth !== 'object') {
+    //       body.spaceDetails.roadWidth = Number(body.spaceDetails.roadWidth) || 0;
+    //     }
+    //     if (body.spaceDetails.ceilingHeight !== undefined && typeof body.spaceDetails.ceilingHeight !== 'object') {
+    //       body.spaceDetails.ceilingHeight = Number(body.spaceDetails.ceilingHeight) || 0;
+    //     }
+    //     if (body.spaceDetails.noOfOpenSides !== undefined && typeof body.spaceDetails.noOfOpenSides !== 'string') {
+    //       body.spaceDetails.noOfOpenSides = String(body.spaceDetails.noOfOpenSides);
+    //     }
+    //   }
+    //   // Ensure numbers for floor fields
+    //   if (body.propertyDetails && body.propertyDetails.floor) {
+    //     if (body.propertyDetails.floor.floorNumber !== undefined) {
+    //       body.propertyDetails.floor.floorNumber = Number(body.propertyDetails.floor.floorNumber) || 0;
+    //     }
+    //     if (body.propertyDetails.floor.totalFloors !== undefined) {
+    //       body.propertyDetails.floor.totalFloors = Number(body.propertyDetails.floor.totalFloors) || 0;
+    //     }
+    //   }
+    //   // Ensure numbers for priceDetails
+    //   if (body.propertyDetails && body.propertyDetails.priceDetails) {
+    //     if (body.propertyDetails.priceDetails.Price !== undefined) {
+    //       body.propertyDetails.priceDetails.Price = Number(body.propertyDetails.priceDetails.Price) || 0;
+    //     }
+    //   }
+    //   // Ensure numbers for brokerage amount
+    //   if (body.propertyDetails && body.propertyDetails.brokerage) {
+    //     if (body.propertyDetails.brokerage.amount !== undefined) {
+    //       body.propertyDetails.brokerage.amount = Number(body.propertyDetails.brokerage.amount) || 0;
+    //     }
+    //   }
+    //   // Ensure numbers for registrationCharges
+    //   if (body.propertyDetails && body.propertyDetails.registrationCharges) {
+    //     if (body.propertyDetails.registrationCharges.amount !== undefined) {
+    //       body.propertyDetails.registrationCharges.amount = Number(body.propertyDetails.registrationCharges.amount) || 0;
+    //     }
+    //     if (body.propertyDetails.registrationCharges.stampDuty !== undefined) {
+    //       body.propertyDetails.registrationCharges.stampDuty = Number(body.propertyDetails.registrationCharges.stampDuty) || 0;
+    //     }
+    //   }
+    //   return body;
+    // };
 
-    const mappedBody = mapPayload({ ...req.body });
+    // const mappedBody = mapPayload({ ...req.body });
 
     // Create a new commercial sell covered space document
     const newCoveredSpace = new CommercialSellCoveredSpace({
       propertyId,
-      ...mappedBody,
+      ...req.body,
       metadata: {
-        ...mappedBody.metadata,
-        createdBy: req.user?._id || null,
+        ...req.body.metadata,
+        createdBy: req.body.metadata.createdBy,
         createdAt: new Date()
       }
     });

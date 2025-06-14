@@ -15,6 +15,7 @@ interface PriceProps {
 
 const Price = ({ onPriceChange }: PriceProps) => {
   const [price, setPrice] = useState<PriceData>({
+    amount: "",
     propertyPrice: 0,
       pricetype: "fixed",
       area: 0,

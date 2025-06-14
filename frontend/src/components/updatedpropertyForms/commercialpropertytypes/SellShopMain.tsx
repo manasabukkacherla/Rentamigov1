@@ -399,136 +399,13 @@ const SellShopMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <ShopType
-            type={formData.basicInformation.Type}
+            Type={formData.basicInformation.Type}
             onShopTypeChange={(type) => handleChange('basicInformation.type', type)}
           />
           <CommercialPropertyAddress
             address={formData.basicInformation.address}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
           />
-          {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-              <div className="flex items-center mb-8">
-                <MapPin className="text-black mr-3" size={28} />
-                <h3 className="text-2xl font-semibold text-black">Map Location</h3>
-              </div>
-              <div className="bg-white p-6 rounded-lg space-y-6">
-                <div>
-                  <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Use the map below to set your property's location. Click on the map or search for an address.
-                  </p>
-                  <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
-                    <iframe
-                      id="map-iframe"
-                      src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${formData.basicInformation.location.longitude || '78.9629'}!3d${formData.basicInformation.location.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${formData.basicInformation.location.latitude || '20.5937'},${formData.basicInformation.location.longitude || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
-                      width="100%"
-                      height="100%"
-                      style={{ border: 0 }}
-                      allowFullScreen
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                      className="rounded-xl"
-                      title="Property Location Map"
-                    ></iframe>
-
-                    <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                      <button
-                        onClick={() => getCurrentLocation()}
-                        className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                        aria-label="Get current location"
-                        type="button"
-                      >
-                        <Locate className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm font-medium">My Location</span>
-                      </button>
-
-                      <button
-                        onClick={() => openLocationPicker()}
-                        className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                        aria-label="Select location"
-                        type="button"
-                      >
-                        <Navigation className="w-5 h-5 text-blue-600" />
-                        <span className="text-sm font-medium">Select Location</span>
-                      </button>
-                    </div>
-
-                    <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
-                      Powered by Google Maps
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
-                        Latitude
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          id="latitude"
-                          value={formData.basicInformation.location.latitude}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (!isNaN(Number(value)) || value === '-' || value === '') {
-                              handleChange('basicInformation.location', {
-                                ...formData.basicInformation.location,
-                                latitude: value
-                              });
-
-                              // Update iframe when latitude changes
-                              updateMapLocation(
-                                value,
-                                formData.basicInformation.location.longitude || '78.9629'
-                              );
-                            }
-                          }}
-                          placeholder="Enter latitude (e.g., 17.683301)"
-                          className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                        />
-                        <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                      </div>
-                    </div>
-                    <div>
-                      <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
-                        Longitude
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          id="longitude"
-                          value={formData.basicInformation.location.longitude}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            if (!isNaN(Number(value)) || value === '-' || value === '') {
-                              handleChange('basicInformation.location', {
-                                ...formData.basicInformation.location,
-                                longitude: value
-                              });
-
-                              // Update iframe when longitude changes
-                              updateMapLocation(
-                                formData.basicInformation.location.latitude || '20.5937',
-                                value
-                              );
-                            }
-                          }}
-                          placeholder="Enter longitude (e.g., 83.019301)"
-                          className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                        />
-                        <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-xs text-gray-500">
-                    Enter coordinates manually or use the map above to set the location.
-                  </p>
-                </div>
-              </div>
-            </div> */}
           <MapLocation
             latitude={formData.basicInformation.location.latitude}
             longitude={formData.basicInformation.location.longitude}
