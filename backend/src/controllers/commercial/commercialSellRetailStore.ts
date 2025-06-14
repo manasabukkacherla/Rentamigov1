@@ -22,7 +22,7 @@ const generatePropertyId = async (): Promise<string> => {
     let nextNumber = 1;
     
     if (highestShop) {
-      const match = highestShop.propertyId.match(/(\d+)$/);
+      const match = highestShop?.propertyId?.match(/(\d+)$/);
       if (match && match[1]) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
@@ -67,37 +67,34 @@ export const createCommercialSellRetailStore = async (req: AuthenticatedRequest,
     const propertyId = await generatePropertyId();
     console.log('Generated property ID:', propertyId);
 
-    // Prepare metadata with defaults
+    // Prepare metadata and always set createdBy from backend
     const metadata = {
-      // status: 'draft',
-      // createdAt: new Date(),
-      // isVerified: false,
-      ...formData.metadata
+      ...formData.metadata,
+      createdBy: req.user?._id || null,
+      createdAt: new Date()
     };
 
-    // Set the createdBy field from the authenticated user if available
-    // if (req.user && req.user._id) {
-    //   metadata.createdBy = req.user._id;
-    //   console.log('Using authenticated user ID:', req.user._id);
-    // } else if (formData.metadata && formData.metadata.createdBy) {
-    //   // Preserve the createdBy from the frontend if present
-    //   console.log('Using client-provided createdBy:', formData.metadata.createdBy);
-    // } else {
-    //   console.log('No user authentication or createdBy provided');
-    //   return res.status(401).json({
-    //     success: false,
-    //     error: 'Authentication required - user information missing'
-    //   });
-    // }
+    // Log received values for debugging
+    console.log('Received price:', formData.priceDetails?.price);
+    console.log('Received pricePerSqft:', formData.priceDetails?.pricePerSqft);
+    console.log('Received registrationCharges:', formData.registrationCharges);
+    console.log('metadata to save:', metadata);
 
     const shopData = {
       propertyId,
       ...formData,
-      metadata: {
-        ...formData.metadata,
-        createdBy: req.user?._id || null,
-        createdAt: new Date()
-      }
+      priceDetails: {
+        ...formData.priceDetails,
+        price: formData.priceDetails?.price,
+        pricetype: formData.priceDetails?.pricetype
+      },
+      registrationCharges: {
+        ...formData.registrationCharges,
+        type: formData.registrationCharges?.type,
+        registrationAmount: formData.registrationCharges?.registrationAmount,
+        stampDutyAmount: formData.registrationCharges?.stampDutyAmount,
+      },
+      metadata
     };
 
     console.log('Prepared shop data metadata:', shopData.metadata);

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react"
 import PropertyName from "../PropertyName"
 import CoveredOpenSpaceType from "../CommercialComponents/CoveredOpenSpaceType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -22,35 +22,214 @@ import {
   Warehouse,
   ImageIcon,
   UserCircle,
-  ChevronLeft,
   ChevronRight,
-  AlertCircle
+  ChevronLeft,
+  ArrowLeft,
+  Loader2,
+  Locate,
 } from "lucide-react"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
 
-const SellCoveredSpaceMain = () => {
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [formData, setFormData] = useState({
-    basicInformation: {
-    title: "",
-    type: "",
+
+// --- Types for strong typing and error-free state updates ---
+type MediaPhotos = {
+  exterior: (File | string)[];
+  interior: (File | string)[];
+  floorPlan: (File | string)[];
+  washrooms: (File | string)[];
+  lifts: (File | string)[];
+  emergencyExits: (File | string)[];
+};
+
+type Media = {
+  photos: MediaPhotos;
+  videoTour: File | string | null;
+  documents: (File | string)[];
+};
+
+type ContactInformation = {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone: string;
+  bestTimeToContact: string;
+};
+
+type PropertyDetails = {
+  ceilingHeight: string;
+  area: string;
+  floor: string;
+  facingDirection: string;
+  furnishingStatus: string;
+  propertyAmenities: string[];
+  wholeSpaceAmenities: string[];
+  electricitySupply: string;
+  waterAvailability: string[];
+  propertyAge: string;
+  propertyCondition: string;
+  priceDetails: {
+    Price: number;
+    isNegotiable: boolean;
+  };
+  registrationCharges: {
+    included: boolean;
+    amount: number;
+    stampDuty: number;
+  };
+  brokerage: {
+    required: string;
+    amount: number;
+  };
+  availability: {
+    type: string;
+    isPetsAllowed: boolean;
+    operatingHours: boolean;
+  };
+  contactInformation: ContactInformation;
+  media: Media;
+  metadata: {
+    createdBy: string;
+  };
+};
+
+type SpaceDetails = {
+  totalArea: string;
+  areaUnit: string;
+  coveredArea: string;
+  openArea: string;
+  roadWidth: string;
+  ceilingHeight: string;
+  noOfOpenSides: string;
+};
+
+type FormDataType = {
+  basicInformation: {
+    title: string;
+    Type: string[];
     address: {
-      street: "",
-      city: "",
-      state: "",
-      zipCode: ""
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: { latitude: string; longitude: string };
+    isCornerProperty: boolean;
+  };
+  spaceDetails: SpaceDetails;
+  propertyDetails: PropertyDetails;
+  price: string;
+  area: {
+    superBuiltUpAreaSqft: string;
+    builtUpAreaSqft: string;
+    carpetAreaSqft: string;
+  };
+  registrationCharges: {
+    included: boolean;
+    amount: number;
+    stampDuty: number;
+  };
+  priceDetails: {
+    Price: number;
+    isNegotiable: boolean;
+  };
+  brokerage: {
+    required: string;
+    amount: number;
+  };
+  availability: {
+    type: string;
+    isPetsAllowed: boolean;
+    operatingHours: boolean;
+  };
+  contactDetails: ContactInformation;
+  media: Media;
+  metadata: {
+    createdBy: string;
+  };
+};
+
+const SellCoveredSpaceMain = () => {
+  const [loading, setLoading] = useState(false)
+
+  const [formData, setFormData] = useState<FormDataType>({
+    basicInformation: {
+      title: "",
+      Type: [""],
+      address: {
+        street: "",
+        city: "",
+        state: "",
+        zipCode: ""
+      },
+      landmark: "",
+      location: { latitude: "", longitude: "" },
+      isCornerProperty: false,
     },
-    landmark: "",
-    location: { latitude: "", longitude: "" },
-    isCornerProperty: false,
+    spaceDetails: {
+      totalArea: "",
+      areaUnit: "",
+      coveredArea: "",
+      openArea: "",
+      roadWidth: "",
+      ceilingHeight: "",
+      noOfOpenSides: "",
     },
-    spaceDetails: {},
-    propertyDetails: {},
+    propertyDetails: {
+      ceilingHeight: "",
+      area: "",
+      floor: "",
+      facingDirection: "",
+      furnishingStatus: "",
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      electricitySupply: "",
+      waterAvailability: [],
+      propertyAge: "",
+      propertyCondition: "",
+      priceDetails: {
+        Price: 0,
+        isNegotiable: false
+      },
+      registrationCharges: {
+        included: false,
+        amount: 0,
+        stampDuty: 0
+      },
+      brokerage: {
+        required: "",
+        amount: 0
+      },
+      availability: {
+        type: "immediate",
+        isPetsAllowed: false,
+        operatingHours: false
+      },
+      contactInformation: {
+        name: "",
+        email: "",
+        phone: "",
+        alternatePhone: "",
+        bestTimeToContact: ""
+      },
+      media: {
+        photos: {
+          exterior: [],
+          interior: [],
+          floorPlan: [],
+          washrooms: [],
+          lifts: [],
+          emergencyExits: []
+        },
+        videoTour: null,
+        documents: []
+      },
+      metadata: {
+        createdBy: "demo-user"
+      },
+    },
     price: "",
     area: {
       superBuiltUpAreaSqft: "",
@@ -58,11 +237,9 @@ const SellCoveredSpaceMain = () => {
       carpetAreaSqft: "",
     },
     registrationCharges: {
-      chargestype: "",
-      registrationAmount: 0,
-      stampDutyAmount: 0,
-      brokeragedetails: false,
-      brokerageAmount: 0
+      included: false,
+      amount: 0,
+      stampDuty: 0
     },
     priceDetails: {
       Price: 0,
@@ -96,6 +273,9 @@ const SellCoveredSpaceMain = () => {
       },
       videoTour: null as File | null,
       documents: [] as File[]
+    },
+    metadata: {
+      createdBy: "demo-user" // TODO: Replace with actual user ID if available
     }
   })
 
@@ -118,6 +298,15 @@ const SellCoveredSpaceMain = () => {
   const [currentStep, setCurrentStep] = useState(0)
   const formRef = useRef<HTMLDivElement>(null)
 
+  // Helper to convert File[] to string[] (simulate upload, or use URLs if already uploaded)
+  const filesToUrls = (files: File[]): string[] => {
+    // In production, you should upload the file and get the URL from the server
+    // Here, we use a placeholder or local URL
+    return files
+      .filter(f => !!f)
+      .map(f => (typeof f === 'string' ? f : URL.createObjectURL(f)));
+  };
+
   const steps = [
     {
       title: "Basic Information",
@@ -130,17 +319,27 @@ const SellCoveredSpaceMain = () => {
               onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
             />
             <CoveredOpenSpaceType
-              onSpaceTypeChange={(type) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: type.toString() } }))}
-            />
+              onSpaceTypeChange={(Type:string[]) => 
+                setFormData(prev => ({
+                  ...prev,
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    Type: Array.isArray(Type) ? Type : [Type],
+                  },
+                }))     
+            } 
+/>
+           
+          
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress 
+            <CommercialPropertyAddress
               address={formData.basicInformation.address}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
             />
             {/* <Landmark onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))} /> */}
-            <MapLocation  
+            <MapLocation
               latitude={String(formData.basicInformation.location.latitude)}
               longitude={String(formData.basicInformation.location.longitude)}
               landmark={formData.basicInformation.landmark}
@@ -165,10 +364,10 @@ const SellCoveredSpaceMain = () => {
       component: (
         <div className="space-y-6">
           <CoveredOpenSpaceDetails
-            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, spaceDetails: details }))}
+            onDetailsChange={(details: Record<string, any>) => setFormData((prev) => ({ ...prev, spaceDetails: { ...prev.spaceDetails, ...details } }))}
           />
           <CommercialPropertyDetails
-            onDetailsChange={(details) => setFormData((prev) => ({ ...prev, propertyDetails: details }))}
+            onDetailsChange={(details: Record<string, any>) => setFormData((prev) => ({ ...prev, propertyDetails: { ...prev.propertyDetails, ...details } }))}
           />
         </div>
       ),
@@ -182,27 +381,27 @@ const SellCoveredSpaceMain = () => {
             <Price onPriceChange={(price) => setFormData((prev) => ({ ...prev, price: price.amount }))} />
           </div>
           <div className="text-black">
-          <RegistrationCharges onRegistrationChargesChange={(charges) => {
-                setFormData(prev => ({
+            <RegistrationCharges
+              onRegistrationChargesChange={(charges) =>
+                setFormData((prev) => ({
                   ...prev,
                   registrationCharges: {
-                    chargestype: charges.chargestype,
-                    registrationAmount: charges.registrationAmount,
-                    stampDutyAmount: charges.stampDutyAmount,
-                    brokeragedetails: false,
-                    brokerageAmount: 0
+                    included: charges.included,
+                    amount: charges.amount,
+                    stampDuty: charges.stampDuty
                   }
-                }));
-              }} />
+                }))
+              }
+            />
           </div>
           <div className="text-black">
             <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData(prev => ({
-                ...prev,
-                brokerage: {
-                  required: brokerage.required,
-                  amount: brokerage.amount || 0
-                }
-              }))} />
+              ...prev,
+              brokerage: {
+                required: brokerage.required,
+                amount: brokerage.amount || 0
+              }
+            }))} />
           </div>
         </div>
       ),
@@ -221,7 +420,7 @@ const SellCoveredSpaceMain = () => {
       icon: <UserCircle className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-         <CommercialContactDetails 
+          <CommercialContactDetails
             contactInformation={formData.contactDetails}
             onContactChange={(contact) => handleChange('contactDetails', contact)} />
         </div>
@@ -236,19 +435,18 @@ const SellCoveredSpaceMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map((file: File) => ({ url: URL.createObjectURL(file), file }))
+                files: files
+                  .filter((file): file is File => typeof file !== 'string')
+                  .map((file: File) => ({ url: URL.createObjectURL(file), file }))
               })),
-              videoTour: formData.media.videoTour || null,
-              documents: formData.media.documents
+              videoTour: formData.media.videoTour && typeof formData.media.videoTour !== 'string' ? formData.media.videoTour : null,
+              documents: formData.media.documents.filter((file): file is File => typeof file !== 'string')
             }}
             onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
+              const photos: Record<string, (File | string)[]> = {};
               media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
-              
-            
-
               setFormData(prev => ({
                 ...prev,
                 media: {
@@ -257,187 +455,211 @@ const SellCoveredSpaceMain = () => {
                     ...prev.media.photos,
                     ...photos
                   },
-                  videoTour: media.videoTour ? (media.videoTour as File) : null,
-                  documents: media.documents as File[]
+                  videoTour: media.videoTour && typeof media.videoTour !== 'string' ? media.videoTour : null,
+                  documents: (media.documents as File[])
                 }
               }));
             }}
-            
+
           />
         </div>
       ),
     },
   ];
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1)
-      // Scroll to top of the form
-      setTimeout(() => {
-        if (formRef.current) {
-          window.scrollTo({
-            top: formRef.current.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  }
 
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1)
-      // Scroll to top of the form
-      setTimeout(() => {
-        if (formRef.current) {
-          window.scrollTo({
-            top: formRef.current.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  }
 
 
   const mapFormDataToBackendFormat = () => {
-    // Format address from form data
-    // (removed unused addressData, photos, propertyDetailsData)
+    // Map formData to backend format and ensure all required fields are present and correctly structured
+    const {
+      registrationCharges,
+      priceDetails,
+      brokerage,
+      availability,
+      contactDetails,
+      media,
+      propertyDetails,
+      metadata,
+      ...rest
+    } = formData;
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    console.log(formData);
+    // Ensure all photo arrays are arrays of strings (URLs) and never contain objects/empty objects
+    const photos = Object.fromEntries(
+      Object.entries(media.photos).map(([key, files]) => [
+        key,
+        files
+          .filter(f => typeof f === 'string' || f instanceof File)
+          .map(f => typeof f === 'string' ? f : URL.createObjectURL(f))
+          .filter(f => typeof f === 'string' && f.trim() !== ''),
+      ]),
+    );
+
+    // Compose contactInformation as required by backend
+    const contactInformation = {
+      name: contactDetails.name || "demo name",
+      email: contactDetails.email || "demo@email.com",
+      phone: contactDetails.phone || "0000000000",
+      // Optionally add alternatePhone, bestTimeToContact if backend supports
+    };
+
+    // Compose propertyDetails as required by backend
+    const backendPropertyDetails = {
+      ...propertyDetails,
+      availability: {
+        ...(propertyDetails.availability || {}),
+        type: propertyDetails.availability?.type || availability.type || "immediate",
+        isPetsAllowed: propertyDetails.availability?.isPetsAllowed ?? availability.isPetsAllowed,
+        operatingHours: propertyDetails.availability?.operatingHours ?? availability.operatingHours,
+      },
+      brokerage: {
+        ...(propertyDetails.brokerage || {}),
+        required: propertyDetails.brokerage?.required || brokerage.required || "yes",
+        amount: propertyDetails.brokerage?.amount ?? brokerage.amount ?? 0,
+      },
+      priceDetails: {
+        ...(propertyDetails.priceDetails || {}),
+        Price: (propertyDetails.priceDetails?.Price ?? priceDetails.Price ?? 0),
+        isNegotiable: propertyDetails.priceDetails?.isNegotiable ?? priceDetails.isNegotiable ?? false,
+      },
+    };
+
+    return {
+      ...rest,
+      registrationCharges: {
+        included: registrationCharges.included,
+        amount: registrationCharges.amount,
+        stampDuty: registrationCharges.stampDuty,
+      },
+      propertyDetails: backendPropertyDetails,
+      contactInformation,
+      media: {
+        photos,
+        videoTour: media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : (media.videoTour ? URL.createObjectURL(media.videoTour as File) : undefined),
+        documents: filesToUrls(media.documents as File[]),
+      },
+      metadata: {
+        createdBy: metadata.createdBy && metadata.createdBy.trim() !== '' ? metadata.createdBy : "demo-user",
+      },
+    };
+  };
+
+  const handleSubmit = async () => {
     setLoading(true);
-    setError(null);
-
     try {
-      const backendFormData = mapFormDataToBackendFormat();
-      console.log("Formatted data for backend:", backendFormData);
-
-      // Send data to backend API
       const response = await axios.post(
         "/api/commercial/sell/covered-space",
-        backendFormData
+        mapFormDataToBackendFormat()
       );
-
       console.log("Response:", response.data);
       toast.success("Property listed successfully!");
-
-      // Redirect to listing page or dashboard
-    } catch (err: any) {
-      console.error("Error submitting form:", err);
-      const errorMessage = err.response?.data?.error || "Failed to submit property. Please try again.";
-      setError(errorMessage);
-      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div ref={formRef} className="min-h-screen bg-white">
-      {/* Progress indicator */}
-      <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4">
-          <div className="flex justify-center">
-            <div className="flex items-center space-x-2">
-              {steps.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex items-center cursor-pointer"
-                  onClick={() => setCurrentStep(i)}
-                >
-                  <div className="flex flex-col items-center group">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-                        }`}
-                    >
-                      {s.icon}
-                    </div>
-                    <span
-                      className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
-                        }`}
-                    >
-                      {s.title}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className="flex items-center mx-1">
+  const handlePrevious = () => {
+    setCurrentStep(currentStep - 1);
+  };
+
+  const handleNext = () => {
+    setCurrentStep(currentStep + 1);
+  };
+
+    return (
+      <div ref={formRef} className="min-h-screen bg-white">
+        {/* Progress indicator */}
+        <div className="sticky top-0 z-50 bg-white border-b border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4">
+            <div className="flex justify-center">
+              <div className="flex items-center space-x-2">
+                {steps.map((s: { icon: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; title: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined }, i: number) => (
+                  <div
+                    key={i}
+                    className="flex items-center cursor-pointer"
+                    onClick={() => setCurrentStep(i)}
+                  >
+                    <div className="flex flex-col items-center group">
                       <div
-                        className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${i <= currentStep ? "bg-black text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"
                           }`}
-                      ></div>
+                      >
+                        {s.icon}
+                      </div>
+                      <span
+                        className={`text-xs mt-1 font-medium transition-colors duration-200 ${i <= currentStep ? "text-black" : "text-gray-500 group-hover:text-gray-700"
+                          }`}
+                      >
+                        {s.title}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {i < steps.length - 1 && (
+                      <div className="flex items-center mx-1">
+                        <div
+                          className={`w-12 h-1 transition-colors duration-200 ${i < currentStep ? "bg-black" : "bg-gray-200"
+                            }`}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Form Content */}
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Covered Space</h1>
-        </div>
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
-          <p className="text-gray-600">Please fill in the details for your property</p>
-        </div>
+        {/* Form Content */}
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Covered Space</h1>
+          </div>
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
+            <p className="text-gray-600">Please fill in the details for your property</p>
+          </div>
 
-        {steps[currentStep].component}
-      </div>
-      {/* Navigation Buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
-          <button
-            type="button"
-            onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
-              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-              : "bg-white text-black hover:bg-black hover:text-white"
-              }`}
-          >
-            <ChevronLeft className="w-5 h-5 mr-2" />
-            Previous
-          </button>
-          {currentStep < steps.length - 1 ? (
+          {steps[currentStep].component}
+        </div>
+        {/* Navigation Buttons */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200">
+          <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
             <button
               type="button"
-              onClick={handleNext}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
+              className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-white text-black hover:bg-black hover:text-white"
+                }`}
             >
-              Next
-              <ChevronRight className="w-5 h-5 ml-2" />
+              <ChevronLeft className="w-5 h-5 mr-2" />
+              Previous
             </button>
-          ) : (
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={loading}
-              className={`flex items-center px-6 py-2 rounded-lg ${loading ? "bg-gray-600" : "bg-black hover:bg-gray-800"
-                } text-white transition-all duration-200`}
-            >
-              {loading ? "Submitting..." : "Submit"}
-              {!loading && <ChevronRight className="w-5 h-5 ml-2" />}
-            </button>
-          )}
+            {currentStep < steps.length - 1 ? (
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
+              >
+                Next
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </button>
+            ) : (
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={loading}
+                className={`flex items-center px-6 py-2 rounded-lg ${loading ? "bg-gray-600" : "bg-black hover:bg-gray-800"
+                  } text-white transition-all duration-200`}
+              >
+                {loading ? "Submitting..." : "Submit"}
+                {!loading && <ChevronRight className="w-5 h-5 ml-2" />}
+              </button>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  )
-}
-}
+    )
+  }
+
 export default SellCoveredSpaceMain

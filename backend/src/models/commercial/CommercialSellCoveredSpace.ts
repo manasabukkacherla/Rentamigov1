@@ -10,7 +10,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  type: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -34,7 +34,7 @@ interface ISpaceDetails {
       value: number;
       unit: string;
     } | number;
-    ceilingHeight: {
+    ceilingHeight?: {
       value: number;
       unit: string;
     } | number;
@@ -81,6 +81,7 @@ interface ICommercialSellCoveredSpace extends Document {
   basicInformation: IBasicInformation;
   spaceDetails: ISpaceDetails;
   propertyDetails: {
+    ceilingHeight?: any;
     area: IArea;
     floor: IFloor;
     facingDirection: string;
@@ -92,7 +93,7 @@ interface ICommercialSellCoveredSpace extends Document {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     priceDetails: {
       Price: number;
@@ -128,7 +129,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
   propertyId: { type: String, unique: true },
   basicInformation: {
     title: { type: String, default: "Unnamed Property",required:true },
-    type: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: {
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -203,7 +204,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
       backup: { type: Boolean, default: false },
     },
     waterAvailability: [{ type: String }],
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type: String, required: true },
     propertyCondition: { type: String, required: true },
     priceDetails: {
       Price: { type: Number, required: true },
@@ -219,7 +220,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
         amount: { type: Number },
       },
       availability: {
-        type: { type: String, enum: ["immediate", "specific"], required: true },
+        type: { type: String, enum: ["immediate", "specific"] },
         date: { type: Date },
         preferredSaleDuration: { type: String },
         noticePeriod: { type: String },
@@ -228,7 +229,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
       }
     
   },
-  availability: { type: Schema.Types.Mixed, required: true },
+  availability: { type: Schema.Types.Mixed },
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -249,7 +250,7 @@ const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>
     documents: [{ type: String }],
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Sell' },
@@ -267,9 +268,9 @@ CommercialSellCoveredSpaceSchema.pre('validate', function(next) {
     };
   }
   
-  if (typeof this.spaceDetails?.ceilingHeight === 'number') {
-    this.spaceDetails.ceilingHeight = {
-      value: this.spaceDetails.ceilingHeight,
+  if (typeof this.propertyDetails?.ceilingHeight === 'number') {
+    this.propertyDetails.ceilingHeight = {
+      value: this.propertyDetails.ceilingHeight,
       unit: 'feet'
     };
   }

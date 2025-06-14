@@ -59,6 +59,7 @@ const generatePropertyId = async (): Promise<string> => {
 
 // Create a new commercial sell others property
 export const createCommercialSellOthers = async (req: Request, res: Response) => {
+  console.log('DEBUG: Received body for CommercialSellOthers:', JSON.stringify(req.body, null, 2));
   try {
     const formData = req.body;
     

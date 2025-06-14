@@ -12,8 +12,8 @@ interface IFloor {
 }
 
 export interface ICommercialSellOthers extends Document {
+  propertyId?: string;
   basicInformation:{
-    propertyId?: string;
     title: string;
     type: string[];
   address: {
@@ -45,7 +45,7 @@ export interface ICommercialSellOthers extends Document {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string; // Accepts range values like "10-15"
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -104,8 +104,8 @@ export interface ICommercialSellOthers extends Document {
 }
 
 const CommercialSellOthersSchema: Schema = new Schema({
+  propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   basicInformation:{
-    propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
     title: { type: String, default: "Unnamed Property" },
     type: { type: [String], default: ["Other"] },
     address: {
@@ -142,7 +142,7 @@ const CommercialSellOthersSchema: Schema = new Schema({
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
     electricitySupply: {
       powerLoad: { type: Number },

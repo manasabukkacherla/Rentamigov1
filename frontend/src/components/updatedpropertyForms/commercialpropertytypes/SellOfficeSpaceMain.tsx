@@ -34,7 +34,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormData {
   basicInformation: {
     title: string;
-    type: string;
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -44,7 +44,7 @@ interface FormData {
   landmark: string;
   location: {
     latitude: string;
-    longitude: string
+      longitude: string;
   };
   isCornerProperty: boolean;
 }
@@ -114,7 +114,7 @@ const SellOfficeSpaceMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
     title: "",
-    type: "",
+    Type: [],
     address: {
       street: "",
       city: "",
@@ -206,7 +206,7 @@ const SellOfficeSpaceMain = () => {
           <OfficeSpaceType
             onOfficeTypeChange={(types) => {
               if (types && types.length > 0) {
-                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, type: types[0] } }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, officeType: types } }))
               }
             }}
           />
@@ -445,6 +445,12 @@ const SellOfficeSpaceMain = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
+    // Registration Charges validation (required if included is true or if amount/stampDuty are filled)
+    if (!formData.registrationCharges || (formData.registrationCharges.included && (!formData.registrationCharges.amount || !formData.registrationCharges.stampDuty))) {
+      toast.error('Please fill out all required registration charges fields.');
+      return;
+    }
+    e.preventDefault();
     console.log("Form Data:", formData);
 
     try {
@@ -480,7 +486,7 @@ const SellOfficeSpaceMain = () => {
       const transformedData = {
         basicInformation: {
           title: formData.basicInformation.title,
-          type: [formData.basicInformation.type],
+          Type: formData.basicInformation.Type,
           address: formData.basicInformation.address,
           landmark: formData.basicInformation.landmark,
           location: {
