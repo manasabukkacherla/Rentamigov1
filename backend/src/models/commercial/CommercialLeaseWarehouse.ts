@@ -168,6 +168,8 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
         },
         isCornerProperty: { type: Boolean }
     },
+
+    
     coveredSpaceDetails: {
         totalArea: { type: Number },
         ceilingHeight: { type: Number },
