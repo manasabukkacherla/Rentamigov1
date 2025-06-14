@@ -13,7 +13,7 @@ interface IFloor {
 
 interface IBasicInformation {
   title: string;
-  type: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -60,18 +60,17 @@ interface IMetadata {
 
 interface IPriceDetails {
   price: number;
-  pricePerSqft: number;
-  isNegotiable: boolean;
-  registrationCharges: {
-    registrationAmount: number;
-    stampDuty: number;
-    otherCharges: number;
-  };
+  pricetype: "fixed" | "negotiable";
 }
 
 interface IBrokerage {
-  required: string;
+  required: "Yes" | "No";
   amount: number;
+}
+interface IRegistrationCharges {
+  type: "inclusive" | "exclusive";
+  registrationAmount: number;
+  stampDutyAmount: number;
 }
 
 interface IAvailability {
@@ -80,7 +79,7 @@ interface IAvailability {
 }
 
 interface ICommercialSellRetailStore extends Document {
-  propertyId: string;
+  propertyId?: string;
   
   basicInformation: IBasicInformation;
   retailStoreDetails: {
@@ -103,12 +102,13 @@ interface ICommercialSellRetailStore extends Document {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     ownershipType: string;
     possessionStatus: string;
   };
   priceDetails: IPriceDetails;
+  registrationCharges: IRegistrationCharges;
   brokerage: IBrokerage;
   availability: IAvailability;
   contactInformation: IContactInformation;
@@ -121,7 +121,7 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    type: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -162,27 +162,27 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: [{ type: String }],
-    propertyAge: { type: Number, required: true },
+    propertyAge: { type: String, required: true }, // Accepts range values like "10-15"
     propertyCondition: { type: String, required: true },
     ownershipType: { type: String, required: true },
     possessionStatus: { type: String, required: true }
   },
   priceDetails: {
-    price: { type: Number, required: true },
-    pricePerSqft: { type: Number, required: true },
-    isNegotiable: { type: Boolean, default: false },
-    registrationCharges: {
-      registrationAmount: { type: Number },
-      stampDuty: { type: Number },
-      otherCharges: { type: Number }
-    }
+    price: { type: Number, default: 0, required: true },
+    pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
   },
+  registrationCharges: {
+    type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number },
+  }
+  ,
   brokerage: {
-    required: { type: String, required: true },
+    required: { type: String, enum: ['Yes', 'No'], required: true },
     amount: { type: Number }
   },
   availability: {
-      type: { type: String, required: true, enum: ['Ready to Move', 'Under Construction', 'Soon', 
+      type: { type: String, enum: ['Ready to Move', 'Under Construction', 'Soon', 
         'Specific Date','Available','Not Available','immediate'] },
       date: { type: String }
     },
