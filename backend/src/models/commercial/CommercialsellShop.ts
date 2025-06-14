@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  type: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -130,7 +130,7 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    type: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },

@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  type: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -55,23 +55,10 @@ interface IFloor {
 
 export interface ICommercialSellShed extends Document {
   propertyId?: string;
-  propertyName: string;
-  shopType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  basicInformation: IBasicInformation;
   shedDetails: {
     totalArea: number;
-    
+    builtUpArea: number;
     carpetArea: number;
     entranceWidth: number;
     ceilingHeight: number;
@@ -83,7 +70,7 @@ export interface ICommercialSellShed extends Document {
     facingDetails: IFloor;
     facingDirection: string;
     furnishingStatus: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
       propertyAmenities: string[];
       wholeSpaceAmenities: string[];
@@ -137,8 +124,8 @@ export interface ICommercialSellShed extends Document {
 const CommercialSellShedSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSS-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   basicInformation: {
-    title: { type: String, default: "Unnamed Property",required:true },
-    type: { type: [String], default: [] },
+    title: { type: String, default: "Unnamed Property" },
+    Type: { type: [String], default: [] },
     address: {
       street: { type: String, default: "Not Specified" },
       city: { type: String, default: "Not Specified" },
@@ -156,7 +143,14 @@ const CommercialSellShedSchema: Schema = new Schema({
       totalArea: { type: Number },
       carpetArea: { type: Number },
       entranceWidth: { type: Number },
-      ceilingHeight: { type: Number },
+      ceilingHeight: { type: Schema.Types.Mixed,
+        validate: {
+          validator: function(v: any) {
+            return typeof v === 'number' || (typeof v === 'object' && v.hasOwnProperty('value') && v.hasOwnProperty('unit'));
+          },
+          message: 'ceilingHeight must be either a number or an object with value and unit properties'
+        }
+       },
       additionalDetails: { type: String }
   },
   propertyDetails: {
@@ -171,7 +165,7 @@ const CommercialSellShedSchema: Schema = new Schema({
     },
     facingDirection: { type: String },
     furnishingStatus: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
@@ -225,7 +219,7 @@ const CommercialSellShedSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Sell' },

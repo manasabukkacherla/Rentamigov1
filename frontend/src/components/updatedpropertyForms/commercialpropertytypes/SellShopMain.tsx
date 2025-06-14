@@ -54,7 +54,7 @@ const globalStyles = `
 interface FormData {
   basicInformation: {
     title: string;
-    type: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -87,7 +87,7 @@ interface FormData {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   shopDetails: {
@@ -155,7 +155,7 @@ const SellShopMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      type: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -188,7 +188,7 @@ const SellShopMain = () => {
         backup: false
       },
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: ''
     },
     shopDetails: {
@@ -399,7 +399,7 @@ const SellShopMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <ShopType
-            type={formData.basicInformation.type}
+            type={formData.basicInformation.Type}
             onShopTypeChange={(type) => handleChange('basicInformation.type', type)}
           />
           <CommercialPropertyAddress
@@ -754,9 +754,9 @@ const SellShopMain = () => {
         basicInformation: {
           ...formData.basicInformation,
           // Ensure shopType is an array
-          type: Array.isArray(formData.basicInformation.type)
-            ? formData.basicInformation.type
-            : [formData.basicInformation.type].filter(Boolean),
+          Type: Array.isArray(formData.basicInformation.Type)
+            ? formData.basicInformation.Type
+            : [formData.basicInformation.Type].filter(Boolean),
           // Convert location coordinates to numbers
           location: {
             latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
@@ -766,9 +766,7 @@ const SellShopMain = () => {
         propertyDetails: {
           ...formData.propertyDetails,
           // Fix propertyAge to ensure it's a number
-          propertyAge: typeof formData.propertyDetails.propertyAge === 'string'
-            ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
-            : formData.propertyDetails.propertyAge || 0
+          propertyAge: formData.propertyDetails.propertyAge || ''
         },
         shopDetails: formData.shopDetails,
         pricingDetails: formData.pricingDetails,
@@ -816,7 +814,7 @@ const SellShopMain = () => {
 
       // Send the data to the backend
       ///api/commercial/sell/shops
-      const response = await axios.post('/api/commercial/sell/shops', transformedData, {
+      const response = await axios.post('http://localhost:8000/api/commercial/sell/shops', transformedData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
