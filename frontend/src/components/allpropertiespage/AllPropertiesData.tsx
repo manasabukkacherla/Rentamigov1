@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
-// import { Property } from './types';
+import { Property } from './types';
 interface AllPropertiesData {
   id: string;
   title: string;
   propertyType: string;
   propertyName: string;
-  // listingType: string;
+  listingType: string;
   price: number;
   location: string;
-  // image: string;
+  image: string;  
   intent: string;
   status: string;
-  // bhkType: string;
-  // bathrooms: number;
-  // furnishing: string;
+  bhkType: string;
+  bathrooms: number;
+  furnishing: string;
   area: number; 
 }
 interface AllPropertiesDataProps {
@@ -31,14 +31,18 @@ export const AllPropertiesData: React.FC<AllPropertiesDataProps> = ({ onProperti
     id: item._id?.toString() || item.propertyId || '',
     title: item.basicInformation?.title || item.title || item.pgDetails?.name || 'Unnamed Property',
     propertyName: item.metadata?.propertyName || '',
-    // image: item.media?.photos?.exterior || '',
+    image: item.media?.photos?.exterior || '',
     // Add other common fields here
     propertyType: item.metadata?.propertyType || '',
+    listingType: item.metadata?.listingType || '',
     intent: item.metadata?.intent || '',
     location: item.basicInformation?.address.location || '',  
     price: item.pricing?.price || 0,
     area: item.propertySize || 0,
     status: item.metadata?.status || '',
+    bhkType: item.metadata?.bhkType || '',
+    bathrooms: item.propertyDetails?.bathrooms || item.propertyDetails?.washrooms || 0,
+    furnishing: item.propertyDetails?.furnishing || 'Unfurnished',
       });
 
   useEffect(() => {

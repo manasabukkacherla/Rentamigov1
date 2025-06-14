@@ -1,3 +1,4 @@
+// import express from 'express';
 
 // // Commercial Rent Models
 // import ICommercialRentAgriculture from '../../../../backend/src/models/commercial/CommercialRentAgriculture';
@@ -55,71 +56,73 @@
 // const normalizeProperty = (item: any) => ({
 //   id: item._id?.toString() || item.propertyId || '',
 //   title: item.basicInformation?.title || item.basicInformation?.propertyName || item.pgDetails?.name || 'Unnamed Property',
-//   type:item.metadata?.propertyType || '',
+//   type: item.metadata?.propertyType || '',
 //   propertyName: item.metadata?.propertyName || '',
-//   // location:item.basicInformation?.address.location || '',
-//   area:item.propertySize || '',
-//   bathrooms:item.propertyDetails?.washrooms || item.propertyDetails?.bathrooms || 0,
-//   bedrooms:item.propertyDetails?.bedrooms || 0,
+//   area: item.propertySize || '',
+//   bathrooms: item.propertyDetails?.washrooms || item.propertyDetails?.bathrooms || 0,
+//   bedrooms: item.propertyDetails?.bedrooms || 0,
 //   exteriorImage: item.media?.photos.exterior || '',
 // });
 
-// // const router = express.Router();
+// const router = express.Router();
 
-// const getAllProperties = async () => {
+// router.get('/all', async (req: any, res: any) => {
+//   const { page = 1, limit = 10 } = req.query; // Pagination params
+//   const skip = (page - 1) * limit;
+
 //   try {
 //     const results = await Promise.allSettled([
 //       // Commercial Rent
-//       ICommercialRentAgriculture.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentCoveredSpace.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentOfficeSpace.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentOthers.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentRetailStore.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentShed.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentWarehouse.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentPlot.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialRentShop.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       CommercialRentShowroom.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentAgriculture.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentCoveredSpace.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentOfficeSpace.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentOthers.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentRetailStore.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentShed.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentWarehouse.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentPlot.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialRentShop.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       CommercialRentShowroom.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
 
 //       // Commercial Sell
-//       ICommercialSellAgriculture.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellCoveredSpace.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//        ICommercialSellOfficeSpace.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellOthers.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellRetailStore.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellShed.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellWarehouse.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialPlot.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellShop.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialSellShowroom.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellAgriculture.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellCoveredSpace.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellOfficeSpace.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellOthers.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellRetailStore.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellShed.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellWarehouse.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialPlot.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellShop.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialSellShowroom.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
 
 //       // Commercial Lease
-//       ICommercialLeaseAgriculture.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialLeaseOthers.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialLeaseRetailStore.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialLeaseShop.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialLeasePlot.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ICommercialLeaseShowroom.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       CommercialLeaseCoveredSpace.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       CommercialLeaseOfficeSpace.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       CommercialLeaseWarehouse.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       CommercialLeaseShed.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialLeaseAgriculture.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialLeaseOthers.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialLeaseRetailStore.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialLeaseShop.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialLeasePlot.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ICommercialLeaseShowroom.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       CommercialLeaseCoveredSpace.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       CommercialLeaseOfficeSpace.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       CommercialLeaseWarehouse.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       CommercialLeaseShed.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
 
 //       // Residential Rent
-//       IResidentialRentApartment.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       IResidentialRentBuilderFloor.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       IResidentialRentIndependent.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialRentApartment.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialRentBuilderFloor.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialRentIndependent.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
 
 //       // Residential Sale
-//       IResidentialSaleApartment.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       IResidentialSaleBuilderFloor.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ISaleIndependentHouse.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       ISalePlot.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialSaleApartment.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialSaleBuilderFloor.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ISaleIndependentHouse.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       ISalePlot.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
 
 //       // Residential Lease
-//       IResidentialLeaseApartment.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       IResidentialLeaseBuilderFloor.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-//       IResidentialLeaseIndependentHouse.find().limit(10).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialLeaseApartment.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialLeaseBuilderFloor.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+//       IResidentialLeaseIndependentHouse.find().skip(skip).limit(limit).select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
 //     ]);
 
 //     // Check for any rejected promise
@@ -248,4 +251,4 @@
 //   }
 // });
 
-// // export default router;
+// export default router;

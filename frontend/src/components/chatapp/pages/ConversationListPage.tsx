@@ -232,6 +232,7 @@ const ConversationListPage: React.FC = () => {
                 currentUserId={userId}
                 otherUserId={getOtherUser(selectedConversation.participants, userId)?._id || ""}
                 otherUsername={getDisplayName(getOtherUser(selectedConversation.participants, userId))}
+                 isEmpDash={true}
               />
 
               <button

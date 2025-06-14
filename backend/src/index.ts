@@ -99,7 +99,7 @@ import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShow
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
-// import allpropertiesData from "../../frontend/src/components/allpropertiespage/allpropertiesData";
+import allPropertiesRoutes from "./routes/allPropertiesRoutes";
 
 dotenv.config();
 
@@ -280,7 +280,7 @@ app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
 
-// app.use("/api/all",allpropertiesData);
+app.use("/api/all", allPropertiesRoutes);
 
 // PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);

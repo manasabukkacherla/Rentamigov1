@@ -1,4 +1,5 @@
 // client/src/pages/ChatPage.tsx
+import { useLocation } from "react-router-dom";
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -24,6 +25,9 @@ const ChatPage: React.FC = () => {
   const [conversation, setConversation] = useState<any>(null);
 
   const currentUserId = sessionStorage.getItem("userId") || "";
+const location = useLocation();
+const queryParams = new URLSearchParams(location.search);
+const isEmpDash = queryParams.get("empDash") === "true";
 
   const getDisplayName = (user: User | null): string => {
     if (!user) return "Unknown User";
@@ -221,6 +225,7 @@ const ChatPage: React.FC = () => {
         otherUserId={otherUserId}
         otherUsername={displayName}
         onConversationUpdate={(updatedConv) => setConversation(updatedConv)}
+        isEmpDash={true} 
       />
     </div>
   );
