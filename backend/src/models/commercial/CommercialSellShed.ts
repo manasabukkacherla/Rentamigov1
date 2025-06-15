@@ -127,7 +127,7 @@ interface IMedia {
     videoTour?: string;
     documents: string[];
   };
-  metaData: IMetadata;
+  metadata: IMetadata;
 }
 
 // Schema
@@ -230,7 +230,7 @@ const CommercialSellShedSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData: {
+  metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },

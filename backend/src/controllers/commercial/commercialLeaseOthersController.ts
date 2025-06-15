@@ -69,9 +69,9 @@ export const createCommercialLeaseOthers = async (req: Request, res: Response) =
     const leasePropertyData = {
       propertyId,
       ...formData,
-      metaData: {
-        ...formData.metaData,
-        createdBy: req.user?._id || null,
+      metadata: {
+        ...formData.metadata,
+        createdBy: formData.metadata.createdBy,
         createdAt: new Date()
       }
     };
@@ -98,7 +98,7 @@ export const createCommercialLeaseOthers = async (req: Request, res: Response) =
 // Get all commercial lease others properties
 export const getAllCommercialLeaseOthers = async (req: Request, res: Response) => {
   try {
-    const leaseProperties = await CommercialLeaseOthers.find({}).sort({ 'metaData.createdAt': -1 });
+    const leaseProperties = await CommercialLeaseOthers.find({}).sort({ 'metadata.createdAt': -1 });
     
     res.status(200).json({
       success: true,

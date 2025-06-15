@@ -12,23 +12,27 @@ const getFurnishingStatus = (property: Property) => {
   // console.log("intent:", property.metadata?.intent);
   // console.log("propertyName:", property.metadata?.propertyName);
 
-  if (property?.metadata?.intent === "rent" && property?.metadata?.propertyName === "Shop") {
+  if (property.metadata?.intent === "rent" && property.metadata?.propertyName === "Shop") {
     return "Fully furnished";
   }
-  return property?.propertyDetails?.furnishingStatus || "Not specified";
+  return property.propertyDetails?.furnishingStatus || "Not specified";
 };
 
 const getSize = (property: Property) => {
   // console.log("intent:", property.metadata?.intent);
   // console.log("propertyName:", property.metadata?.propertyName);
 
-  if (property?.metadata?.intent === "rent" && property?.metadata?.propertyName === "Shop") {
-    return property?.shopDetails?.frontageWidth || "Not specified";
+  if (property.metadata?.intent === "rent" && property.metadata?.propertyName === "Shop") {
+    return property.shopDetails?.frontageWidth || "Not specified";
   }
-  return property?.propertyDetails?.area?.totalArea || "Not specified";
+  return property.propertyDetails?.area?.totalArea || "Not specified";
 };
 
 const getAvailableFrom = (property: Property) => {
+  console.log("availability:", property.availability);
+  return property.availability?.type === "immediate" || property.availability?.immediate === true
+    ? "Immediate"
+    : property.availability?.date || "Not specified";
   const formatDateString = (dateString: string | undefined): string => {
     if (!dateString) return "Not specified";
     try {
@@ -55,6 +59,7 @@ const getAvailableFrom = (property: Property) => {
 
   // For other intents (rent), use regular availability
   return property?.availability?.type === "immediate" || property?.availability?.immediate === true ? "Immediate" : formatDateString(property?.availability?.date);
+
 };
 
 export const BasicInfo: React.FC<BasicInfoProps> = ({ property }) => {
@@ -63,20 +68,18 @@ export const BasicInfo: React.FC<BasicInfoProps> = ({ property }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gray-100 px-6 py-4 rounded-lg">
           <h3 className="text-sm text-gray-600">Type</h3>
-          {property?.basicInformation?.Type?.length > 0 ? (
-            <ul className="list-disc pl-4 space-y-1">
-              {property?.basicInformation?.Type?.map((type: string) => (
-                <li 
-                  key={type} 
-                  className="text-sm font-medium text-black-800"
-                >
-                  {type}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm font-medium text-gray-900">Not specified</p>
-          )}
+          <ul className="list-disc pl-4 space-y-1">
+            {property.basicInformation?.Type?.map((type: string) => (
+              <li 
+                key={type} 
+                className="text-sm font-medium text-black-800"
+              >
+                {type}
+              </li>
+            )) || (
+              <li className="text-sm font-medium text-gray-900">Not specified</li>
+            )}
+          </ul>
         </div>
         <div className="bg-gray-100 px-6 py-4 rounded-lg">
           <h3 className="text-sm text-gray-600">Furnishing Status</h3>

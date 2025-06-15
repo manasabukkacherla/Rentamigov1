@@ -110,7 +110,6 @@ export const getCommercialSellShopById = async (req: Request, res: Response) => 
     }
     
     res.status(200).json({
-      success: true,
       message: 'Commercial sell shop property retrieved successfully',
       data: property
     });

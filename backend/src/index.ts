@@ -54,7 +54,9 @@ import commercialPlotRoutes from "./routes/commercial/commercialPlotRoutes";
 import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouseRoutes";
-import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
+// import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
+
+import commercialRentOfficeSpaceRoutes from "./routes/commercial/commercialRoutes";
 import commercialRentShop from "./routes/commercial/commercialRentShop";
 import commercialRentRetailStore from "./routes/commercial/commercialRentRetailStore";
 import commercialSellAgricultureRoutes from "./routes/commercial/commercialSellAgricultureRoutes";

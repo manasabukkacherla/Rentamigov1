@@ -12,54 +12,23 @@ interface AuthenticatedRequest extends Request {
 
 // Helper function to generate a unique property ID
 const generatePropertyId = async (): Promise<string> => {
-    try {
-        // Prefix for the commercial office space property ID
-        const prefix = "RA-COMRECS";
+  try {
+    const timestamp = Date.now();
+    const randomNum = Math.floor(Math.random() * 10000);
+    const propertyId = `RA-COMRECS-${timestamp}-${randomNum}`;
 
-        // Find the office space with the highest property ID number
-        const highestOfficeSpace = await CommercialRentCoveredSpace.findOne({
-            propertyId: { $regex: `^${prefix}\\d+$` }
-        }).sort({ propertyId: -1 });
-
-        let nextNumber = 1; // Default start number
-
-        if (highestOfficeSpace) {
-            // Extract the numeric part from the existing highest property ID
-            const match = highestOfficeSpace.propertyId.match(/(\d+)$/);
-            if (match && match[1]) {
-                // Convert to number and increment by 1
-                nextNumber = parseInt(match[1], 10) + 1;
-            }
-        }
-
-        // Create the property ID with the sequence number
-        const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-
-        // Check if this exact ID somehow exists
-        const existingWithExactId = await CommercialRentCoveredSpace.findOne({ propertyId });
-
-        if (existingWithExactId) {
-            // In case of collision, recursively try the next number
-            console.log(`Property ID ${propertyId} already exists, trying next number`);
-
-            const forcedNextNumber = nextNumber + 1;
-            const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
-
-            const forcedExisting = await CommercialRentCoveredSpace.findOne({ propertyId: forcedPropertyId });
-
-            if (forcedExisting) {
-                return generatePropertyId();
-            }
-
-            return forcedPropertyId;
-        }
-
-        return propertyId;
-    } catch (error) {
-        console.error('Error generating property ID:', error);
-        const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMRECS${timestamp}`;
+    // Check if this ID already exists
+    const existingProperty = await CommercialRentCoveredSpace.findOne({ propertyId });
+    if (existingProperty) {
+      // If ID exists, try again recursively
+      return generatePropertyId();
     }
+
+    return propertyId;
+  } catch (error) {
+    // If there's an error, return a timestamp-based ID as fallback
+    return `RA-COMRECS-${Date.now()}`;
+  }
 };
 
 // Create a new commercial rent covered space listing

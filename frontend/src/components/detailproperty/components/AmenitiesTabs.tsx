@@ -486,38 +486,6 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property 
           }
         }
         break;
-      case 'Others':
-        if (property.otherDetails) {
-          if (property.otherDetails.propertyTypeDescription) {
-            features.push({
-              icon: Building,
-              label: 'Property Type',
-              value: property.otherDetails.propertyTypeDescription
-            });
-          }
-          if (property.otherDetails.specialFeatures) {
-            features.push({
-              icon: Box,
-              label: 'Special Features',
-              value: property.otherDetails.specialFeatures
-            });
-          }
-          if (property.otherDetails.usageRecommendation) {
-            features.push({
-              icon: Building2,
-              label: 'Usage Recommendation',
-              value: property.otherDetails.usageRecommendation
-            });
-          }
-          if (property.otherDetails.additionalRequirements) {
-            features.push({
-              icon: AlertTriangle,
-              label: 'Additional Requirements',
-              value: property.otherDetails.additionalRequirements
-            });
-          }
-        }
-        break;
 
       default:
         // Add other property types as needed
@@ -531,7 +499,6 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property 
 
     return features;
   };
-
 
   const FeatureCard = ({ icon: Icon, label, value }: Feature) => (
     <div className="group flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-100">
@@ -565,10 +532,10 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property 
       case 'flat':
         return (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 transition-all duration-500">
-            {property?.propertyDetails?.propertyAmenities === undefined && (
+            {property.propertyDetails?.propertyAmenities === undefined && (
               <p className="text-center text-gray-500">No amenities available</p>
             )}
-            {property?.propertyDetails?.propertyAmenities?.map((amenity) => (
+            {property.propertyDetails?.propertyAmenities.map((amenity) => (
               <AmenityCard key={amenity} icon={amenityIcons[amenity] || Box} label={amenity} />
             ))}
           </div>
@@ -576,10 +543,10 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property 
       case 'society':
         return (
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 transition-all duration-500">
-            {property?.propertyDetails?.wholeSpaceAmenities === undefined && (
+            {property.propertyDetails?.wholeSpaceAmenities === undefined && (
               <p className="text-center text-gray-500">No amenities available</p>
             )}
-            {property?.propertyDetails?.wholeSpaceAmenities?.map((amenity) => (
+            {property.propertyDetails?.wholeSpaceAmenities.map((amenity) => (
               <AmenityCard key={amenity} icon={amenityIcons[amenity] || Box} label={amenity} />
             ))}
           </div>

@@ -5,52 +5,45 @@ import { ICommercialSellShed } from '../../models/commercial/CommercialSellShed'
 // Generate property ID with format RA-COMSHED-XXXX
 const generatePropertyId = async (): Promise<string> => {
   try {
-      // Prefix for the commercial sell office space property ID
-      const prefix = "RA-COMSESD";
-
-      // Find the office space with the highest property ID number
-      const highestOfficeSpace = await CommercialShed.findOne({
-          propertyId: { $regex: `^${prefix}\\d+$` }
-      }).sort({ propertyId: -1 });
-
-      let nextNumber = 1; // Default start number
-
-      if (highestOfficeSpace) {
-          // Extract the numeric part from the existing highest property ID
-          const match = highestOfficeSpace.propertyId?.match(/(\d+)$/);
-          if (match && match[1]) {
-              // Convert to number and increment by 1
-              nextNumber = parseInt(match[1], 10) + 1;
-          }
+    const prefix = "RA-COMSESD";
+    
+    // Find the shed with the highest property ID number
+    const highestShed = await CommercialShed.findOne({
+      propertyId: { $regex: `^${prefix}-\\d+$` }
+    }).sort({ propertyId: -1 }).lean();
+    
+    let nextNumber = 1;
+    
+    if (highestShed && highestShed.propertyId) {
+      const match = highestShed.propertyId?.match(/-(\d+)$/);
+      if (match && match[1]) {
+        nextNumber = parseInt(match[1], 10) + 1;
       }
-
-      // Create the property ID with the sequence number
-      const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-
-      // Check if this exact ID somehow exists
-      const existingWithExactId = await CommercialShed.findOne({ propertyId });
-
-      if (existingWithExactId) {
-          // In case of collision, recursively try the next number
-          console.log(`Property ID ${propertyId} already exists, trying next number`);
-
-          const forcedNextNumber = nextNumber + 1;
-          const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
-
-          const forcedExisting = await CommercialShed.findOne({ propertyId: forcedPropertyId });
-
-          if (forcedExisting) {
-              return generatePropertyId();
-          }
-
-          return forcedPropertyId;
+    }
+    
+    const propertyId = `${prefix}-${nextNumber.toString().padStart(4, '0')}`;
+    
+    // Verify the generated ID doesn't already exist
+    const existingWithExactId = await CommercialShed.findOne({ propertyId }).lean();
+    if (existingWithExactId) {
+      // Try the next sequential ID to avoid collisions
+      const forcedNextId = `${prefix}-${(nextNumber + 1).toString().padStart(4, '0')}`;
+      const forcedExisting = await CommercialShed.findOne({ propertyId: forcedNextId }).lean();
+      
+      if (forcedExisting) {
+        // If still colliding, generate a completely new ID
+        return generatePropertyId();
       }
-
-      return propertyId;
+      
+      return forcedNextId;
+    }
+    
+    return propertyId;
   } catch (error) {
-      console.error('Error generating property ID:', error);
-      const timestamp = Date.now().toString().slice(-8);
-      return `RA-COMSESD${timestamp}`;
+    console.error('Error generating property ID:', error);
+    // Fallback to timestamp-based ID if there's an error
+    const timestamp = Date.now().toString().slice(-8);
+    return `RA-COMSESD-${timestamp}`;
   }
 };
 
@@ -78,8 +71,8 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     const propertyId = await generatePropertyId();
     
     // Add metadata and property ID
-    shedData.metaData = {
-      createdBy: shedData.metaData?.createdBy, 
+    shedData.metadata = {
+      createdBy: shedData.metadata?.createdBy, 
       createdAt: new Date(),
       // status: 'pending',
       // isVerified: false,
@@ -103,7 +96,7 @@ export const createCommercialShed = async (req: Request, res: Response) => {
       data: {
         propertyId: shed.propertyId,
         _id: shed._id,
-        metaData: shed.metaData
+        metadata: shed.metadata
       }
     });
 
@@ -190,7 +183,7 @@ export const getAllCommercialSheds = async (req: Request, res: Response) => {
     
     // Execute query with projection for list view
     const sheds = await CommercialShed.find(query)
-      .select('propertyId basicInformation.title shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metaData')
+      .select('propertyId basicInformation.title shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metadata')
       .sort(sortQuery)
       .skip(skip)
       .limit(limitNum)
@@ -235,8 +228,8 @@ export const getCommercialShedById = async (req: Request, res: Response) => {
     
     // Update view count
     await CommercialShed.updateOne(
-      
-      { $inc: { 'metaData.views': 1 } }
+      {propertyId},
+      { $inc: { 'metadata.views': 1 } }
     );
     
     return res.status(200).json({
@@ -272,7 +265,7 @@ export const updateCommercialShed = async (req: Request, res: Response) => {
 
     const shed = await CommercialShed.findById(req.params.id);
     const userId = req.body.userId;
-    if (shed?.metaData?.createdBy?.toString() !== userId) {
+    if (shed?.metadata?.createdBy?.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
@@ -329,7 +322,7 @@ export const deleteCommercialShed = async (req: Request, res: Response) => {
     const deletedShed = await CommercialShed.findOneAndDelete(query);
     const userId = req.body.userId;
 
-    if (deletedShed?.metaData?.createdBy?.toString() !== userId) {
+    if (deletedShed?.metadata?.createdBy?.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this listing'

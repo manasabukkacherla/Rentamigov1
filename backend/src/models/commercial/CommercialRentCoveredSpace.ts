@@ -236,18 +236,6 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     alternatePhone: { type: String },
     bestTimeToContact: { type: String },
   },
-  media: {
-    photos: {
-      exterior: { type: [String], default: [] },
-      interior: { type: [String], default: [] },
-      floorPlan: { type: [String], default: [] },
-      washrooms: { type: [String], default: [] },
-      lifts: { type: [String], default: [] },
-      emergencyExits: { type: [String], default: [] }
-    },
-    videoTour: { type: String, default: null },
-    documents: { type: [String], default: [] }
-  },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'}, 
     createdAt: { type: Date, default: Date.now },

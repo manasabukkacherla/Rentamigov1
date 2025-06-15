@@ -448,7 +448,7 @@ const SellShedMain = () => {
         //const user = sessionStorage.getItem('user');
       // if (user) {
       //   const author = JSON.parse(user).id;
-        metaData: {
+        metadata: {
           createdBy: author,
           createdAt: new Date(),
           propertyType: 'Commercial',

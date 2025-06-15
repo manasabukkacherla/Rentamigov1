@@ -215,7 +215,6 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
       }
       
       res.status(200).json({
-        success: true,
         message: 'Commercial sell office space property retrieved successfully',
         data: property
       });
