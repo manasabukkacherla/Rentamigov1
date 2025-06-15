@@ -71,12 +71,8 @@ export const createShed = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: req.user?.id || null,
+                createdBy: formData.metadata.createdBy,
                 createdAt: new Date(),
-                // status: 'active',
-                // views: 0,
-                // favorites: 0,
-                // isVerified: false
             }
         };
 

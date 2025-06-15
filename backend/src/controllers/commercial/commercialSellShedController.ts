@@ -71,8 +71,8 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     const propertyId = await generatePropertyId();
     
     // Add metadata and property ID
-    shedData.metaData = {
-      createdBy: shedData.metaData?.createdBy, 
+    shedData.metadata = {
+      createdBy: shedData.metadata?.createdBy, 
       createdAt: new Date(),
       // status: 'pending',
       // isVerified: false,
@@ -96,7 +96,7 @@ export const createCommercialShed = async (req: Request, res: Response) => {
       data: {
         propertyId: shed.propertyId,
         _id: shed._id,
-        metaData: shed.metaData
+        metadata: shed.metadata
       }
     });
 
@@ -183,7 +183,7 @@ export const getAllCommercialSheds = async (req: Request, res: Response) => {
     
     // Execute query with projection for list view
     const sheds = await CommercialShed.find(query)
-      .select('propertyId basicInformation.title shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metaData')
+      .select('propertyId basicInformation.title shedDetails.totalArea pricingDetails.propertyPrice media.photos.exterior metadata')
       .sort(sortQuery)
       .skip(skip)
       .limit(limitNum)
@@ -228,8 +228,8 @@ export const getCommercialShedById = async (req: Request, res: Response) => {
     
     // Update view count
     await CommercialShed.updateOne(
-      
-      { $inc: { 'metaData.views': 1 } }
+      {propertyId},
+      { $inc: { 'metadata.views': 1 } }
     );
     
     return res.status(200).json({
@@ -265,7 +265,7 @@ export const updateCommercialShed = async (req: Request, res: Response) => {
 
     const shed = await CommercialShed.findById(req.params.id);
     const userId = req.body.userId;
-    if (shed?.metaData?.createdBy?.toString() !== userId) {
+    if (shed?.metadata?.createdBy?.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
@@ -322,7 +322,7 @@ export const deleteCommercialShed = async (req: Request, res: Response) => {
     const deletedShed = await CommercialShed.findOneAndDelete(query);
     const userId = req.body.userId;
 
-    if (deletedShed?.metaData?.createdBy?.toString() !== userId) {
+    if (deletedShed?.metadata?.createdBy?.toString() !== userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to delete this listing'

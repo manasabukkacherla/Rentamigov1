@@ -54,7 +54,7 @@ export const createCommercialSellOthers = async (req: Request, res: Response) =>
     const otherPropertyData = {
       ...formData,
       propertyId,
-      metaData: {
+      metadata: {
         ...formData.metadata,
         createdBy: formData.metadata.createdBy,
         createdAt: new Date(),
@@ -148,7 +148,7 @@ export const updateCommercialSellOthers = async (req: Request, res: Response) =>
     }
 
     // Authorization check
-    if (existingDoc.metaData?.createdBy?.toString() !== userId.toString()) {
+    if (existingDoc.metadata?.createdBy?.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'You are not authorized to update this property.',
@@ -205,7 +205,7 @@ export const deleteCommercialSellOthers = async (req: Request, res: Response) =>
     }
 
     // Authorization check
-    if (docToDelete.metaData?.createdBy?.toString() !== userId.toString()) {
+    if (docToDelete.metadata?.createdBy?.toString() !== userId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'You are not authorized to delete this property.',
