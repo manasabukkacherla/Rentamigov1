@@ -96,7 +96,7 @@ export interface ICommercialSellOthers extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData?: {
+  metadata?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     propertyType: string;
@@ -193,7 +193,7 @@ const CommercialSellOthersSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData: {
+  metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
