@@ -102,10 +102,9 @@ interface FormData {
   pricingDetails: {
     propertyPrice: number;
     pricetype: string;
-    pricecalculator: {
-      area: number;
-      totalprice: number;
-    };
+    area: number;
+    totalprice: number;
+    pricePerSqft: number;
   };
   registration: {
     chargestype: string;
@@ -203,10 +202,9 @@ const SellShopMain = () => {
     pricingDetails: {
       propertyPrice: 0,
       pricetype: "fixed",
-      pricecalculator: {
-        area: 0,
-        totalprice: 0,
-      }
+      area: 0,
+      totalprice: 0,
+      pricePerSqft: 0
     },
     registration: {
       chargestype: '',
@@ -454,10 +452,8 @@ const SellShopMain = () => {
                 ...prev.pricingDetails,
                 propertyPrice: price.propertyPrice,
                 pricetype: price.pricetype,
-                pricecalculator: {
-                  area: price.area || 0,
-                  totalprice: price.totalprice || 0
-                }
+                area: price.area || 0,
+                totalprice: price.totalprice || 0,
               }
             }));
           }} />
@@ -469,10 +465,9 @@ const SellShopMain = () => {
                 ...prev,
                 pricingDetails: {
                   ...prev.pricingDetails,
-                  pricecalculator: {
-                    area: data.area || 0,
-                    totalprice: data.totalprice || 0
-                  }
+                  area: data.area || 0,
+                  totalprice: data.totalprice || 0,
+                  pricePerSqft: data.pricePerSqft || 0
                 }
               }));
             }}
@@ -646,7 +641,13 @@ const SellShopMain = () => {
           propertyAge: formData.propertyDetails.propertyAge || ''
         },
         shopDetails: formData.shopDetails,
-        pricingDetails: formData.pricingDetails,
+        pricingDetails:{
+          propertyPrice: formData.pricingDetails.propertyPrice,
+          pricetype: formData.pricingDetails.pricetype,
+          area: formData.pricingDetails.area,
+          totalprice: formData.pricingDetails.totalprice,
+          pricePerSqft: formData.pricingDetails.pricePerSqft
+        },
         registration: {
           ...formData.registration,
           // Convert chargestype to expected enum values
