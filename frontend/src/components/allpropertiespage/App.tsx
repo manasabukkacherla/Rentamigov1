@@ -1,12 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { MapPin, ChevronDown, X, Home, Search, Filter, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Property, Filters, BHKType, FurnishingType, ListingType, PropertyIntent, PropertyStatus, PropertyType } from './types';
+import { Property, Filters, FurnishingType, ListingType, PropertyIntent, PropertyStatus, PropertyType } from './types';
 import { PropertyCard } from './components/PropertyCard';
 import { FiltersPanel } from './components/FiltersPanel';
 import { VoiceSearch } from './components/VoiceSearch';
 import { searchProperties, formatSearchSummary, formatNearbySuggestion, extractSearchCriteria } from './utils/searchUtils';
 import axios from 'axios';
+
+
 
 
 
@@ -266,7 +268,6 @@ function Allproperties() {
     listingTypes: [],
     propertyTypes: [],
     furnishingTypes: [],
-    bhkTypes: [],
     sharingTypes: [],
     priceRange: {
       min: null,
