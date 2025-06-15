@@ -151,6 +151,13 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
+<<<<<<< HEAD
+=======
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
+>>>>>>> cdf25fb77ef8e07917b4e14f5ed008974b884195
 }
 
 interface ILeaseBuilderFloor extends Document {
@@ -309,7 +316,19 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+<<<<<<< HEAD
     createdAt: { type: Date, default: Date.now }
+=======
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    propertyName: { type: String, default:'Builder Floor' },
+    intent: { type: String, default: 'Lease' },
+    status: { 
+      type: String, 
+      enum: ['Available', 'Leased', 'Under Maintenance'], 
+      default: 'Available' 
+    }
+>>>>>>> cdf25fb77ef8e07917b4e14f5ed008974b884195
   }
 });
 

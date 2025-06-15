@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -237,7 +237,7 @@ interface IResidentialLeaseApartment extends Document {
 const ResidentialLeaseApartmentSchema = new Schema<IResidentialLeaseApartment>({
   propertyId: { type: String, required: false, unique: false },
   basicInformation: {
-    propertyName: { type: String },
+    title: { type: String },
     address: {
       flatNo: { type: Number },
       showFlatNo: { type: Boolean },

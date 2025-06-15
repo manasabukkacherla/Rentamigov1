@@ -79,6 +79,7 @@ export interface Property {
   propertyId: string;
   title: string;
   type: PropertyType;
+  propertyName: string;
   listingType: ListingType;
   price: number;
   location: string;

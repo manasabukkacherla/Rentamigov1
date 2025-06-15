@@ -124,6 +124,12 @@ interface pricedetails {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
+  updatedBy: Schema.Types.ObjectId | string;
+  updatedAt: Date;
 }
 
 interface availability {
@@ -296,6 +302,12 @@ const ResidentialSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    intent: { type: String, default: 'Sale' },
+    propertyName: { type: String, default: 'Apartment' },
+    status: { type: String, default: 'Available' },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    updatedAt: { type: Date, default: Date.now },
 
   }
 }, {

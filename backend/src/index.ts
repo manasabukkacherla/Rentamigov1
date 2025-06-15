@@ -99,7 +99,7 @@ import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShow
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
-import allpropertiesData from "./routes/allpropertiesData";
+import allPropertiesRoutes from "./routes/allPropertiesRoutes";
 
 dotenv.config();
 
@@ -272,7 +272,11 @@ app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
+<<<<<<< HEAD
 app.use("/api/commercial/rent/office-space", commercialRentOfficeSpaceRoutes);
+=======
+app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
+>>>>>>> cdf25fb77ef8e07917b4e14f5ed008974b884195
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
 app.use("/api/commercial/rent/covered-space", commercialRentCoveredSpaceRoutes);
 app.use("/api/commercial/rent/shops", commercialRentShop);
@@ -281,7 +285,7 @@ app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
 
-app.use("/api/all",allpropertiesData);
+app.use("/api/all", allPropertiesRoutes);
 
 // PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);

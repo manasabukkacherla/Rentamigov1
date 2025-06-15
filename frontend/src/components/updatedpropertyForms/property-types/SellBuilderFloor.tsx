@@ -51,7 +51,7 @@ interface Address {
 }
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -169,6 +169,15 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
+}
+
 interface FormData {
   basicInformation: IBasicInformation
   propertySize: number
@@ -221,6 +230,7 @@ interface FormData {
     date?: string;
   };
   media: IMedia
+  metadata: IMetadata
 }
 
 const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFloorProps) => {
@@ -233,7 +243,7 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -391,6 +401,14 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
       },
       videoTour: undefined,
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Sell",
+      status: "Available"
     }
   })
 
@@ -457,9 +475,9 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
 
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <PropertyName
-                propertyName={formData.basicInformation.propertyName}
+                propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) =>
-                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))
+                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))
                 }
               />
             </div>
@@ -811,7 +829,11 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Builder Floor",
+          intent: "Sell",
+          status: "Available"
         }
       };
 

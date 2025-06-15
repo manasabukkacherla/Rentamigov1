@@ -156,6 +156,15 @@ interface Media {
   documents: (File | string)[];
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
+}
+
 interface FormData {
   propertyId?: string;
   basicInformation: BasicInformation;
@@ -166,10 +175,7 @@ interface FormData {
   availability: Availability;
   contactInformation: ContactInformation;
   media: Media;
-  metadata?: {
-    createdBy?: string | null;
-    createdAt: Date;
-  };
+  metadata: IMetadata;
 }
 
 const convertFileToBase64 = (file: File): Promise<string> => {
@@ -348,7 +354,11 @@ const SellPlot = () => {
     },
     metadata: {
       createdBy:"",
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Plot",
+      intent: "Sale",
+      status: "active"
     }
   });
 
@@ -776,6 +786,14 @@ const SellPlot = () => {
           alternatePhone: formData.contactInformation.alternatePhone || "",
           preferredContactTime: formData.contactInformation.preferredContactTime || "",
           bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
+        },
+        metadata: {
+          createdBy: "",
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Plot",
+          intent: "Sale",
+          status: "active"
         }
       };
 
@@ -841,6 +859,10 @@ const SellPlot = () => {
         metadata: {
           createdBy: author || "", // Pass the correct field for backend validation
           createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Plot",
+          intent: "Sale",
+          status: "active"
         }
       };
 

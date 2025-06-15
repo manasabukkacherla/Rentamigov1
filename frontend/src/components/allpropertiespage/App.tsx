@@ -303,81 +303,8 @@ function Allproperties() {
         id: item._id || item.propertyId || '',
         propertyId: item.propertyId || '',
         title: item.basicInformation?.title || item.title || item.pgDetails?.name || 'Unnamed Property',
-        type: isPG
-          ? 'PG' as PropertyType  // PG type classification
-          : isCommercialSaleWarehouse
-            ? 'Commercial Sale Warehouse' as PropertyType  // Added classification for Commercial Sale Warehouse
-            : isCommercialSaleShowroom
-              ? 'Commercial Sale Showroom' as PropertyType  // Added classification for Commercial Sale Showroom
-              : isCommercialSaleShop
-                ? 'Commercial Sale Shop' as PropertyType  // Added classification for Commercial Sale Shop
-                : isResidentialSaleIndependentHouse
-                  ? 'Residential Sale Independent House' as PropertyType
-                  : isResidentialSalePlot
-                    ? 'Residential Sale Plot' as PropertyType
-                    : isResidentialRentApartment
-                      ? 'Residential Apartment (Rent)' as PropertyType
-                      : isResidentialApartmentSale
-                        ? 'Residential Apartment (Sale)' as PropertyType
-                        : isResidentialSaleBuilderFloor
-                          ? 'Residential Sale Builder Floor' as PropertyType
-                          : isResidentialRentBuilderFloor
-                            ? 'Residential Rent Builder Floor' as PropertyType
-                            : isResidentialRentIndependentHouse
-                              ? 'Residential Rent Independent House' as PropertyType
-                              : isResidentialLeaseIndependentHouse
-                                ? 'Residential Lease Independent House' as PropertyType
-                                : isResidentialLeaseApartment
-                                  ? 'Residential Lease Apartment' as PropertyType // Correct classification for Lease Apartments
-                                  : isResidentialLeaseBuilderFloor
-                                    ? 'Residential Lease Builder Floor' as PropertyType
-                                    : isShowroom
-                                      ? 'Showroom' as PropertyType
-                                      : isShed
-                                        ? 'Shed' as PropertyType
-                                        : isRetail
-                                          ? 'Retail Store' as PropertyType
-                                          : isShop
-                                            ? 'Shop' as PropertyType
-                                            : isPlot
-                                              ? 'Plot' as PropertyType
-                                              : isCovered
-                                                ? 'Warehouse' as PropertyType
-                                                : isRentAgri
-                                                  ? 'Agricultural Land (Rent)' as PropertyType
-                                                  : isRentCovered
-                                                    ? 'Covered Space (Rent)' as PropertyType
-                                                    : isWarehouse
-                                                      ? 'Warehouse' as PropertyType
-                                                      : isOfficeSpace
-                                                        ? 'Office Space' as PropertyType
-                                                        : isRentWarehouse
-                                                          ? 'Warehouse (Rent)' as PropertyType
-                                                          : isRentOfficeSpace
-                                                            ? 'Office Space (Rent)' as PropertyType
-                                                            : isRentShop
-                                                              ? 'Shop (Rent)' as PropertyType
-                                                              : isRentShowroom
-                                                                ? 'Showroom (Rent)' as PropertyType
-                                                                : isRentShed
-                                                                  ? 'Shed (Rent)' as PropertyType
-                                                                  : isRentPlot
-                                                                    ? 'Plot (Rent)' as PropertyType
-                                                                    : isSellShop
-                                                                      ? 'Shop (Sell)' as PropertyType
-                                                                      : isSellAgriculture
-                                                                        ? 'Agriculture (Sell)' as PropertyType
-                                                                        : isSellOfficeSpace
-                                                                          ? 'Office Space (Sell)' as PropertyType
-                                                                          : isSellRetailStore
-                                                                            ? 'Retail Store (Sell)' as PropertyType
-                                                                            : isSellPlot
-                                                                              ? 'Plot (Sell)' as PropertyType
-                                                                              : isRentOthers
-                                                                                ? 'Standalone Building (Rent)' as PropertyType
-                                                                                : isOther
-                                                                                  ? 'Standalone Building' as PropertyType
-                                                                                  : 'Agricultural' as PropertyType,
+        propertyName:item.metadata?.propertyName ||'',
+        type: item.metadata?.propertyType || '',
         listingType: 'Owner' as ListingType,
         price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
         location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}` || item.pgDetails?.address || '',
@@ -385,7 +312,7 @@ function Allproperties() {
         image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
         postedDate: item.metadata?.createdAt?.slice(0, 10) || '',
         status: (item.availability?.type || 'Available') as PropertyStatus,
-        intent: isSellOfficeSpace || isSellRetailStore || isSellPlot ? 'Sale' as PropertyIntent : 'Lease' as PropertyIntent,
+        intent: item.metadata?.intent || '',
         bhkType: item.propertyDetails?.bhkType || '1 BHK',  // Default BHK Type
         bathrooms: item.propertyDetails?.bathrooms || 1,  // Default number of bathrooms
         furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',  // Default furnishing
