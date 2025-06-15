@@ -131,8 +131,9 @@ export const getOfficeSpaceById = async (req: Request, res: Response) => {
             });
         }
 
-        res.status(200).json({
+        res.status(201).json({
             success: true,
+            message: 'Office space listing retrieved successfully',
             data: officeSpace
         });
     } catch (error) {
