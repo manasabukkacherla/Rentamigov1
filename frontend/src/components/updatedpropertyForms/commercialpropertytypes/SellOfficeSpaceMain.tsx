@@ -50,19 +50,19 @@ interface FormData {
 }
   officeDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
-  price: {
-    expectedPrice: number;
-    isNegotiable: boolean;
+  pricingDetails: {
+    propertyPrice: number;
+    pricetype: "fixed" | "negotiable";
   };
   area: {
     totalArea: number;
     builtUpArea: number;
     carpetArea: number;
   };
-  registrationCharges: {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
+  registration: {
+    chargestype: 'inclusive' | 'exclusive',
+    registrationAmount?: number,
+    stampDutyAmount?: number
   };
   brokerage: {
     required: string;
@@ -127,17 +127,19 @@ const SellOfficeSpaceMain = () => {
     },
     officeDetails: {},
     propertyDetails: {},
-    price: {
-      expectedPrice: 0,
-      isNegotiable: false
+    pricingDetails: {
+      propertyPrice: 0,
+      pricetype: "fixed"
     },
     area: {
       totalArea: 0,
       builtUpArea: 0,
       carpetArea: 0
     },
-    registrationCharges: {
-      included: false
+    registration: {
+      chargestype: "inclusive",
+      registrationAmount: 0,
+      stampDutyAmount: 0
     },
     brokerage: {
       required: "No"
@@ -206,7 +208,7 @@ const SellOfficeSpaceMain = () => {
           <OfficeSpaceType
             onOfficeTypeChange={(types) => {
               if (types && types.length > 0) {
-                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, officeType: types } }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, Type: types } }))
               }
             }}
           />
@@ -282,9 +284,9 @@ const SellOfficeSpaceMain = () => {
             <Price onPriceChange={(price) =>
               setFormData((prev) => ({
                 ...prev,
-                price: {
-                  expectedPrice: parseFloat(price.propertyPrice.toString()),
-                  isNegotiable: price.pricetype === 'negotiable'
+                pricingDetails: {
+                  propertyPrice: price.propertyPrice,
+                  pricetype: price.pricetype
                 }
               }))
             } />
@@ -297,10 +299,10 @@ const SellOfficeSpaceMain = () => {
                 onRegistrationChargesChange={(charges) =>
                   setFormData((prev) => ({
                     ...prev,
-                    registrationCharges: {
-                      included: charges.included,
-                      amount: charges.amount,
-                      stampDuty: charges.stampDuty
+                    registration: {
+                      chargestype: charges.chargestype,
+                      registrationAmount: charges.registrationAmount,
+                      stampDutyAmount: charges.stampDutyAmount
                     }
                   }))
                 }
@@ -445,12 +447,6 @@ const SellOfficeSpaceMain = () => {
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    // Registration Charges validation (required if included is true or if amount/stampDuty are filled)
-    if (!formData.registrationCharges || (formData.registrationCharges.included && (!formData.registrationCharges.amount || !formData.registrationCharges.stampDuty))) {
-      toast.error('Please fill out all required registration charges fields.');
-      return;
-    }
-    e.preventDefault();
     console.log("Form Data:", formData);
 
     try {
@@ -497,8 +493,15 @@ const SellOfficeSpaceMain = () => {
         },
         officeDetails: formData.officeDetails,
         propertyDetails: formData.propertyDetails,
-        price: formData.price,
-        registrationCharges: formData.registrationCharges,
+        pricingDetails:{
+            propertyPrice: formData.pricingDetails.propertyPrice,
+            pricetype: formData.pricingDetails.pricetype
+        },
+        registration: {
+           chargestype: formData.registration.chargestype,
+           registrationAmount: formData.registration.registrationAmount,
+           stampDutyAmount: formData.registration.stampDutyAmount
+        },
         brokerage: formData.brokerage,
         availability: formData.availability,
         contactInformation: formData.contactDetails,

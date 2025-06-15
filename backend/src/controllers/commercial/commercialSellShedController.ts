@@ -72,7 +72,7 @@ export const createCommercialShed = async (req: Request, res: Response) => {
     
     // Add metadata and property ID
     shedData.metaData = {
-      creadtedBy: shedData.metaData?.creadtedBy, 
+      createdBy: shedData.metaData?.createdBy, 
       createdAt: new Date(),
       // status: 'pending',
       // isVerified: false,
@@ -349,4 +349,3 @@ export const deleteCommercialShed = async (req: Request, res: Response) => {
     });
   }
 };
-
