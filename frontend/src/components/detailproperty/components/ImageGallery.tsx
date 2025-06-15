@@ -11,7 +11,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onImageSelec
   const [showModal, setShowModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const categories = ['kitchen', 'bathroom', 'hall', 'bedroom', 'storeroom'];
+  const categories = ['exterior', 'interior', 'floorPlan', 'washrooms', 'lifts', 'emergencyExits'];
 
   const filteredImages = selectedCategory 
     ? images.filter(img => img.category === selectedCategory)
@@ -51,9 +51,18 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onImageSelec
               </button>
             </div>
 
-            <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2 hide-scrollbar">
+              <style>{`
+                .hide-scrollbar::-webkit-scrollbar {
+                  display: none;
+                }
+                .hide-scrollbar {
+                  -ms-overflow-style: none;
+                  scrollbar-width: none;
+                }
+              `}</style>
               <button
-                className={`px-4 py-2 rounded-full ${
+                className={`px-4 py-2 rounded-full flex-shrink-0 ${
                   !selectedCategory ? 'bg-gray-100 text-gray-900' : 'bg-gray-700 text-gray-100'
                 }`}
                 onClick={() => setSelectedCategory(null)}
@@ -63,7 +72,7 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onImageSelec
               {categories.map((category) => (
                 <button
                   key={category}
-                  className={`px-4 py-2 rounded-full capitalize ${
+                  className={`px-4 py-2 rounded-full capitalize flex-shrink-0 ${
                     selectedCategory === category ? 'bg-gray-100 text-gray-900' : 'bg-gray-700 text-gray-100'
                   }`}
                   onClick={() => setSelectedCategory(category)}
@@ -74,22 +83,28 @@ export const ImageGallery: React.FC<ImageGalleryProps> = ({ images, onImageSelec
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {filteredImages.map((image) => (
-                <div
-                  key={image.id}
-                  className="aspect-video cursor-pointer rounded-lg overflow-hidden"
-                  onClick={() => {
-                    onImageSelect(image.url);
-                    setShowModal(false);
-                  }}
-                >
-                  <img
-                    src={image.url}
-                    alt={image.category}
-                    className="w-full h-full object-cover hover:opacity-90 transition grayscale hover:grayscale-0"
-                  />
+              {filteredImages.length > 0 ? (
+                filteredImages.map((image) => (
+                  <div
+                    key={image.id}
+                    className="aspect-video cursor-pointer rounded-lg overflow-hidden"
+                    onClick={() => {
+                      onImageSelect(image.url);
+                      setShowModal(false);
+                    }}
+                  >
+                    <img
+                      src={image.url}
+                      alt={image.category}
+                      className="w-full h-full object-cover hover:opacity-90 transition grayscale hover:grayscale-0"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 text-center py-8 text-gray-500">
+                  <p>No images found</p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

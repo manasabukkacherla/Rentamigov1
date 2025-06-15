@@ -1,5 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Building2, Bath, Bed, MapPin, IndianRupee, ChevronLeft, ChevronRight, Heart, Share2, Star, ArrowRight, Check, Clock, Home, Castle, Building, Warehouse, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Property } from '../App';
+import axios from 'axios';
 
 const properties = [
   {
@@ -81,14 +83,40 @@ const propertyTypeIcons: Record<string, React.FC> = {
   'Penthouse': Castle,
 };
 
-export const SimilarProperties: React.FC = () => {
+let similarprops = [
+  'All',
+  'Shop',
+  'Retail Store',
+  'Showroom',
+  'Office Space',
+  'Warehouse',
+  'Covered Space',
+  'Other'
+];
+
+export const SimilarProperties: React.FC<{ propertyType: string }> = ({ propertyType }) => {
+
+  useEffect(() => {
+    const fetchSimilarProperties = async () => {
+      try {
+        const response = await axios.get(``);
+        const data = response.data;
+        console.log(data);
+      }
+      catch (error) {
+        console.log(error);
+      }
+    }
+    fetchSimilarProperties();
+  }, [propertyType]);
+
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [autoScrollPaused, setAutoScrollPaused] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [savedProperties, setSavedProperties] = useState<number[]>([]);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
-  const filters = ['All', 'Apartment', 'Villa', 'Condo', 'Penthouse'];
+  const filters = similarprops;
 
   const filteredProperties = activeFilter && activeFilter !== 'All'
     ? properties.filter(property => property.type === activeFilter)

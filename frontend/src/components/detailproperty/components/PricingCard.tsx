@@ -62,7 +62,7 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
       <div className="hidden lg:block bg-white rounded-lg p-4 shadow-lg sticky top-6">
         <div className="flex items-center gap-2 mb-4">
           <IndianRupee className="w-8 h-5 text-gray-900" />
-          <span className="text-2xl font-bold text-gray-900">{property.metadata.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent : property.metadata.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
+          <span className="text-2xl font-bold text-gray-900">{property.metadata?.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent || property.rentalTerms?.expectedRent : property.metadata?.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
           <span className="text-gray-500">/month</span>
         </div>
         <PricingContent />
@@ -76,7 +76,7 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
         >
           <div className="flex items-center gap-2">
             <IndianRupee className="w-8 h-5 text-gray-900" />
-            <span className="text-2xl font-bold text-gray-900">{property.metadata.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent : property.metadata.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
+            <span className="text-2xl font-bold text-gray-900">{property.metadata?.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent || property.rentalTerms?.expectedRent : property.metadata?.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
             <span className="text-gray-500">/month</span>
           </div>
           <ChevronUp className={`w-5 h-5 text-gray-600 transition-transform ${showMobilePricing ? 'rotate-180' : ''}`} />
