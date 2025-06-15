@@ -26,7 +26,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormData {
   basicInformation: {
     title: string;
-    type: string[];
+   Type: string[];
     address: {
       street: string;
       city: string;
@@ -157,7 +157,7 @@ const LeaseRetailStoreMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      type: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -296,7 +296,7 @@ const LeaseRetailStoreMain = () => {
             <RetailStoreType
               onRetailTypeChange={(types) => setFormData(prev => ({
                 ...prev,
-                basicInformation: { ...prev.basicInformation, retailStoreType: types }
+                basicInformation: { ...prev.basicInformation, Type: types }
               }))}
             />
           </div>

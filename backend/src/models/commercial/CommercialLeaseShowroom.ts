@@ -13,13 +13,13 @@ interface IFloor {
 }
 
 interface IBasicInformation {
-    title: string;
-    type: string;
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
+    title?: string;
+    Type?: string[];
+    address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        zipCode?: string;
     };
     landmark: string;
     location: {
@@ -169,7 +169,7 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
     propertyId: { type: String, unique: false },
     basicInformation: {
         title: { type: String },
-       type: [{ type: String }],
+        Type: [{ type: String }],
         address: {
             street: { type: String },
             city: { type: String },
@@ -184,7 +184,7 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
         isCornerProperty: { type: Boolean, default: false }
     },
     showroomDetails: {
-        totalSpace: { type: Number },
+        totalSpace: { type: Number  },
         frontageWidth: { type: Number },
         ceilingHeight: { type: Number },
         glassFrontage: { type: Boolean, default: false },
@@ -240,29 +240,29 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
                 noticePeriodUnit: {type: String },
             },
             maintenanceAmount: {
-                amount: { type: Number ,required: false},
-                frequency: { type: String ,required: false},
+                amount: { type: Number },
+                frequency: { type: String },
             },
             otherCharges: {
                 water: {
                     amount: { type: Number },
-                    type: { type: String},
+                    type: { type: String },
                 },
                 electricity: {
                     amount: { type: Number },
-                    type: { type: String},
+                    type: { type: String },
                 },
                 gas: {
                     amount: { type: Number },
-                    type: { type: String},
+                    type: { type: String },
                 },
                 others: {
                     amount: { type: Number },
-                    type: { type: String},
+                    type: { type: String },
                 }
             },
             brokerage: {
-                required: { type: String ,default:'no'},
+                required: { type: String, default:'no'},
                 amount: { type: Number }
             },
             availability: {

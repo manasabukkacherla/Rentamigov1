@@ -29,7 +29,7 @@ interface MediaType {
 // Define interfaces based on the backend model (CommercialLeaseShed.ts)
 interface FormDataType {
   propertyName: string;
-  type: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -175,7 +175,7 @@ const LeaseShedMain = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
     propertyName: '',
-    type: [],
+    Type: [],
     address: {
       street: '',
       city: '',
@@ -283,7 +283,7 @@ const LeaseShedMain = () => {
               <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <ShedType onShedTypeChange={(type) => setFormData((prev) => ({ ...prev, type: type }))} />
+            <ShedType onShedTypeChange={(type) => setFormData((prev) => ({ ...prev, Type: type }))} />
           </div>
 
           <div className="space-y-6">
@@ -422,8 +422,8 @@ const LeaseShedMain = () => {
         if (!formData.propertyName.trim()) {
           errors.propertyName = 'Property name is required';
         }
-          if (formData.type.length === 0) {
-          errors.type = 'Please select at least one shed type';
+        if (formData.Type.length === 0) {
+          errors.Type = 'Please select at least one shed type';
         }
         if (!formData.address.street) {
           errors.street = 'Street address is required';

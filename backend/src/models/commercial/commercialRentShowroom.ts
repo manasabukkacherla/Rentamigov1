@@ -89,8 +89,8 @@ interface IRentalDetails {
 }
 
 interface IAvailability {
-    immediate: boolean;
-    specificDate: Date;
+    type: string;
+    date: Date;
 };
 
 interface IContactInformation {
@@ -233,8 +233,8 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         amount: { type: Number, required: false }
     },
     availability: {
-        immediate: { type: Boolean, default: false },
-        specificDate: { type: Date },
+        type: { type: String, default: "immediate" },
+        date: { type: Date },
     },
     contactInformation: {
         name: { type: String, required: true },

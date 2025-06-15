@@ -76,10 +76,6 @@ export const createCommercialRentShop = async (req: Request, res: Response) => {
         metadata: {
           createdBy: formData.metadata.createdBy,
           createdAt: new Date(),
-          propertyType: formData.metadata.propertyType,
-          intent: formData.metadata.intent,
-          propertyName: formData.metadata.propertyName,
-          status: formData.metadata.status
         }
       };
   

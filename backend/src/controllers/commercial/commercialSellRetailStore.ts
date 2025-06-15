@@ -57,67 +57,48 @@ const generatePropertyId = async (): Promise<string> => {
 
 export const createCommercialSellRetailStore = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    console.log('==== COMMERCIAL SELL RETAIL STORE - CREATE REQUEST ====');
-    console.log('Headers:', req.headers);
-    console.log('User object in request:', req.user);
-    
     const formData = req.body;
-    console.log('Received form data keys:', Object.keys(formData));
-    
     const propertyId = await generatePropertyId();
-    console.log('Generated property ID:', propertyId);
 
-    // Prepare metadata and always set createdBy from backend
+    // Prepare metadata
     const metadata = {
       ...formData.metadata,
-      createdBy: req.user?._id || null,
-      createdAt: new Date()
+      createdBy: formData.metadata.createdBy,
+      createdAt: new Date(),
     };
 
-    // Log received values for debugging
-    console.log('Received price:', formData.priceDetails?.price);
-    console.log('Received pricePerSqft:', formData.priceDetails?.pricePerSqft);
-    console.log('Received registrationCharges:', formData.registrationCharges);
-    console.log('metadata to save:', metadata);
-
+    // Construct the data object according to the Mongoose schema
     const shopData = {
-      propertyId,
       ...formData,
-      priceDetails: {
-        ...formData.priceDetails,
-        price: formData.priceDetails?.price,
-        pricetype: formData.priceDetails?.pricetype
-      },
-      registrationCharges: {
-        ...formData.registrationCharges,
-        type: formData.registrationCharges?.type,
-        registrationAmount: formData.registrationCharges?.registrationAmount,
-        stampDutyAmount: formData.registrationCharges?.stampDutyAmount,
-      },
-      metadata
+      propertyId,
+      metadata,
     };
 
-    console.log('Prepared shop data metadata:', shopData.metadata);
-
-    // Create new shop listing
     const shop = new CommercialSellRetailStore(shopData);
     await shop.save();
-    console.log('Shop saved successfully with ID:', shop._id);
 
     res.status(201).json({
       success: true,
       message: 'Commercial sell retail store listing created successfully',
       data: {
         _id: shop._id,
-        propertyId: shop.propertyId
-      }
+        propertyId: shop.propertyId,
+      },
     });
   } catch (error: any) {
     console.error('Error creating commercial sell retail store:', error);
-    res.status(500).json({ 
+    // Mongoose validation errors are helpful to send back to the client
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.errors,
+      });
+    }
+    res.status(500).json({
       success: false,
       error: 'Failed to create commercial sell retail store',
-      details: error.message 
+      details: error.message,
     });
   }
 };

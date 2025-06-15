@@ -2,128 +2,131 @@ import { Schema, model, Document, Types } from 'mongoose';
 
 // Interfaces
 interface IBasicInformation {
-    title: string;
-    type: string[];
+    propertyId: string;
+    basicInformation: {
+    title?: string;
+    Type?: string[];
     address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
+        street?: string;
+        city?: string;
+        state?: string;
+        zipCode?: string;
     };
-    landmark: string;
-    location: {
-        latitude: string;
-        longitude: string;
+    landmark?: string;
+    location?: {
+        latitude?: string;
+        longitude?: string;
     };
     isCornerProperty: boolean;
 }
+}
 
 interface ICoveredSpaceDetails {
-    totalArea: number;
-    ceilingHeight: number;
-    loadingDocks: number;
-    dockHeight: number;
-    floorload: number;
-    firesafety: boolean;
-    security: boolean;
-    access247: boolean;
-    truckparking: boolean;
-    parking: boolean;
+    totalArea?: number;
+    ceilingHeight?: number;
+    loadingDocks?: number;
+    dockHeight?: number;
+    floorload?: number;
+    firesafety?: boolean;
+    security?: boolean;
+    access247?: boolean;
+    truckparking?: boolean;
+    parking?: boolean;
 }
 
 interface IPropertyDetails {
     area: {
-        totalArea: number;
-        builtUpArea: number;
-        carpetArea: number;
+        totalArea?: number;
+        builtUpArea?: number;
+        carpetArea?: number;
     };
     floor: {
-        floorNumber: number;
-        totalFloors: number;
+        floorNumber?: number;
+        totalFloors?: number;
     };
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    electricitySupply: {
-        powerLoad: number;
-        backup: boolean;
+    facingDirection?: string;
+    furnishingStatus?: string;
+    propertyAmenities?: string[];
+    wholeSpaceAmenities?: string[];
+    electricitySupply?: {
+        powerLoad?: number;
+        backup?: boolean;
     };
-    propertyAge: string;
-    propertyCondition: string;
+    propertyAge?: string;
+    propertyCondition?: string;
 }
 
 interface ILeaseTerms {
     leaseDetails: {
-        leaseAmount: {
-            amount: number;
+        leaseAmount?: {
+            amount?: number;
             type?: 'Fixed' | 'Negotiable';
-            duration: number;
-            durationUnit: string;
+            duration?: number;
+            durationUnit?: string;
         };
     };
     tenureDetails: {
-        minimumTenure: number;
-        minimumUnit: string;
-        maximumTenure: number;
-        maximumUnit: string;
-        lockInPeriod: number;
-        lockInUnit: string;
-        noticePeriod: number;
-        noticePeriodUnit: string;
+        minimumTenure?: number;
+        minimumUnit?: string;
+        maximumTenure?: number;
+        maximumUnit?: string;
+        lockInPeriod?: number;
+        lockInUnit?: string;
+        noticePeriod?: number;
+        noticePeriodUnit?: string;
     };
-    maintenanceAmount: {
-        amount: number;
-        frequency: 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly';
+    maintenanceAmount?: {
+        amount?: number;
+        frequency?: 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly';
     };
     otherCharges: {
         electricityCharges: {
-            type: 'inclusive' | 'exclusive';
+            type?: 'inclusive' | 'exclusive';
             amount?: number;
         };
         waterCharges: {
-            type: 'inclusive' | 'exclusive';
+            type?: 'inclusive' | 'exclusive';
             amount?: number;
         };
         gasCharges: {
-            type: 'inclusive' | 'exclusive';
+            type?: 'inclusive' | 'exclusive';
             amount?: number;
         };
         otherCharges: {
-            type: 'inclusive' | 'exclusive';
+            type?: 'inclusive' | 'exclusive';
             amount?: number;
         };
     };
     brokerage: {
-        required: 'yes' | 'no';
+        required?: 'yes' | 'no';
         amount?: number;
     };
     availability: {
-        availableFrom: Date;
-        availableImmediately: boolean;
-        leaseDuration: string;
-        noticePeriod: string;
-        petsAllowed: boolean;
-        operatingHours: boolean;
+        availableFrom?: Date;
+        availableImmediately?: boolean;
+        leaseDuration?: string;
+        noticePeriod?: string;
+        petsAllowed?: boolean;
+        operatingHours?: boolean;
     };
 }
 
 interface IContactInformation {
-    name: string;
-    email: string;
-    phone: string;
+    name?: string;
+    email?: string;
+    phone?: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
 }
 
 interface IMedia {
-    photos: {
-        exterior: string[];
-        interior: string[];
-        floorPlan: string[];
-        washrooms: string[];
-        lifts: string[];
-        emergencyExits: string[];
+    photos?: {
+        exterior?: string[];
+        interior?: string[];
+        floorPlan?: string[];
+        washrooms?: string[];
+        lifts?: string[];
+        emergencyExits?: string[];
     };
     videoTour?: string;
     documents: string[];
@@ -154,7 +157,7 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
     propertyId: { type: String, unique: false },
     basicInformation: {
         title: { type: String },
-        type: [{ type: String }],
+        Type: [{ type: String }],
         address: {
             street: { type: String },
             city: { type: String },
@@ -245,7 +248,7 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
             }
         },
         brokerage: {
-            required: { type: String, enum: ['yes', 'no'] },
+            required: { type: String, enum: ['yes', 'no']},
             amount: { type: Number }
         },
         availability: {

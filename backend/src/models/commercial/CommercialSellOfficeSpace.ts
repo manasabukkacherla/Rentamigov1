@@ -48,16 +48,16 @@ interface IOfficeDetails {
 }
 
 // Price interface
-interface IPrice {
-    expectedPrice: number;
-    isNegotiable: boolean;
+interface IPricingDetails {
+   propertyPrice: number;
+  pricetype: "fixed" | "negotiable";
 }
 
 // Registration Charges interface
-interface IRegistrationCharges {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
+interface IRegistration {
+    chargestype: 'inclusive' | 'exclusive',
+    registrationAmount?: number,
+    stampDutyAmount?: number
 }
 
 // Brokerage interface
@@ -125,8 +125,8 @@ interface ICommercialSellOfficeSpace extends Document {
         propertyAge: string;
         propertyCondition: string;
     };
-    price: IPrice;
-    registrationCharges: IRegistrationCharges;
+    pricingDetails: IPricingDetails;
+    registration: IRegistration;
     brokerage: IBrokerage;
     availability: IAvailability;
     contactInformation: IContactInformation;
@@ -188,14 +188,14 @@ const CommercialSellOfficeSpaceSchema = new Schema<ICommercialSellOfficeSpace>({
         propertyAge: { type:String, required: true },
         propertyCondition: { type: String, required: true }
     },
-    price: {
-        expectedPrice: { type: Number, required: true },
-        isNegotiable: { type: Boolean, default: false }
+    pricingDetails: {
+        propertyPrice: { type: Number, required: true },
+        pricetype: { type: String, enum: ['fixed', 'negotiable'], default: 'fixed' }
     },
-    registrationCharges: {
-        included: { type: Boolean, default: false },
-        amount: { type: Number, default: 0 },
-        stampDuty: { type: Number, default: 0 },
+    registration: {
+        chargestype: { type: String, enum: ['inclusive', 'exclusive'], default: 'inclusive' },
+        registrationAmount: { type: Number },
+        stampDutyAmount: { type: Number },
     },
     brokerage: {
         required: { type: String, required: true },
