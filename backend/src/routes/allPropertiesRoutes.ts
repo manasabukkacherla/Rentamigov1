@@ -67,17 +67,17 @@ const normalizeProperty = (item: any) => ({
         propertyId: item.propertyId || '',
         title: item.basicInformation?.title || item.title || item.pgDetails?.name || 'Unnamed Property',
         location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}` || item.pgDetails?.address || '',
-        propertyName: item.metadata?.propertyName || '',
-        type: item.metadata?.propertyType || '',
+        propertyName: item.metadata?.propertyName || item.metaData?.propertyName || '',
+        type: item.metadata?.propertyType || item.metaData?.propertyType || '',
         listingType: 'Owner',
-        price: item.rent?.expectedRent || item.leaseAmount?.amount || 0,
-        area: item.propertyDetails?.area?.totalArea || 0,
-        image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
+        price: item.rent?.expectedRent || item.rentalTerms?.rentDetails?.expectedRent || item.pricingDetails?.propertyPrice || item.priceDetails?.propertyPrice || item.price?.expectedPrice || item.leaseTerms?.leaseAmount?.amount || item.leaseAmount?.amount || 0,
+        area: item.propertyDetails?.area?.totalArea || item.propertySize || 0,
+        image: item.media?.photos?.exterior?.[0] || "blob:http://localhost:3000/47fe0059-f8af-4e32-bc84-c63db1f40b94",
         postedDate: item.metadata?.createdAt instanceof Date ? item.metadata.createdAt.toISOString().slice(0, 10): '',
-        status: (item.availability?.type || 'Available') ,
-        intent: item.metadata?.intent || '',
+        status: (item.metadata?.status || item.metaData?.status || 'Available') ,
+        intent: item.metadata?.intent || item.metaData?.intent || '',
         // bhkType: item.propertyDetails?.bhkType || '1 BHK',
-        bathrooms: item.propertyDetails?.bathrooms || 0,
+        // bathrooms: item.propertyDetails?.bathrooms || 0,
         furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',
 });
 
@@ -91,57 +91,56 @@ router.get('/all', async (req: any, res: any) => {
     // const filter='_id basicInformation.title metadata.propertyType metadata.propertyName propertyDetails.area.totalArea propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'
     const results = await Promise.allSettled([
       // Commercial Rent
-      CommercialRentAgriculture.find().select('_id propertyId title basicInformation.address metaData.propertyName metaData.propertyType rent.expectedRent Agriculturelanddetails.totalArea media.photos.exterior metaData.createdAt availability.type metaData.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentCoveredSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt availability.type metadata.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentOfficeSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt rentalTerms.availability.type metadata.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentOthers.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metaData.createdAt availability.type metaData.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentRetailStore.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt availability.type metadata.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentShed.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.propertySize media.photos.exterior metadata.createdAt availability.type metadata.intent propertyDetails.washrooms propertyDetails.furnishingStatus'),
+      // CommercialRentAgriculture.find().select('_id propertyId title basicInformation.address metaData.propertyName metaData.propertyType rent.expectedRent Agriculturelanddetails.totalArea media.photos.exterior metaData.createdAt availability.type metaData.intent propertyDetails.furnishingStatus'),
+      CommercialRentCoveredSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
+      CommercialRentOfficeSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
+      CommercialRentOthers.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metadata.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialRentRetailStore.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
+      CommercialRentShed.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.propertySize media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialRentWarehouse.find().select('_id propertyId basicInformation.title basicInformation.propertyName basicInformation.address metadata.propertyType metadata.propertyName metadata.intent rent.expectedRent availability.type propertyDetails.furnishingStatus propertyDetails.bathrooms propertyDetails.area.totalArea media.photos.exterior'),
-      CommercialRentPlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt availability.type metadata.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentShop.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt availability.type metadata.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
-      CommercialRentShowroom.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt availability.type metadata.intent propertyDetails.bathrooms propertyDetails.furnishingStatus'),
+      CommercialRentPlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
+      CommercialRentShop.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
+      CommercialRentShowroom.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
 
       // Commercial Sell
-      CommercialSellAgriculture.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      CommercialSellCoveredSpace.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      CommercialSellOfficeSpace.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      CommercialSellOthers.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      CommercialSellRetailStore.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialSellShed.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialSellWarehouse.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialPlot.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialSellShop.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialSellShowroom.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+      // CommercialSellAgriculture.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType price.expectedPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellCoveredSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellOfficeSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellOthers.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellRetailStore.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType priceDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellShed.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellWarehouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialPlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellShop.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
+      CommercialSellShowroom.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
 
       // // Commercial Lease
-      // CommercialLeaseAgriculture.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseOthers.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseRetailStore.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseShop.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeasePlot.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseShowroom.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseCoveredSpace.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseOfficeSpace.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseShed.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // CommercialLeaseWarehouse.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
+      CommercialLeaseAgriculture.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseOthers.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseRetailStore.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseShop.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeasePlot.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseShowroom.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseCoveredSpace.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseOfficeSpace.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseShed.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseWarehouse.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metaData.status metaData.intent propertyDetails.furnishingStatus'),
+      
 
-      // // Residential Rent
-      // ResidentialRentApartment.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // ResidentialRentBuilderFloor.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // ResidentialRentIndependent.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-
-      // // Residential Sale
-      // ResidentialSaleApartment.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // ResidentialSaleBuilderFloor.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // SaleIndependentHouse.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // SalePlot.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-
-      // // Residential Lease
-      // ResidentialLeaseApartment.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // ResidentialLeaseBuilderFloor.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-      // ResidentialLeaseIndependentHouse.find().select('_id basicInformation.title metadata.propertyType metadata.propertyName propertySize propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'),
-    ]);
+      // Residential Rent
+      ResidentialRentApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialRentBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialRentIndependent.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      
+      ResidentialSaleApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialSaleBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      SaleIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      SalePlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      
+      ResidentialLeaseApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialLeaseIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus')
+      ]);
 
     // Check for any rejected promise
     const failed = results.find(r => r.status === 'rejected');
@@ -156,7 +155,7 @@ router.get('/all', async (req: any, res: any) => {
 
     // Destructure and normalize results
     const [
-      rentAgriculture,
+      // rentAgriculture,
       rentCoveredSpace,
       rentOfficeSpace,
       rentOthers,
@@ -168,39 +167,39 @@ router.get('/all', async (req: any, res: any) => {
       rentShowroom,
 
       // sellAgriculture,
-      // sellCoveredSpace,
-      // sellOfficeSpace,
-      // sellOthers,
-      // sellRetailStore,
-      // sellShed,
-      // sellWarehouse,
-      // sellPlot,
-      // sellShop,
-      // sellShowroom,
+      sellCoveredSpace,
+      sellOfficeSpace,
+      sellOthers,
+      sellRetailStore,
+      sellShed,
+      sellWarehouse,
+      sellPlot,
+      sellShop,
+      sellShowroom,
 
-      // leaseAgriculture,
-      // leaseOthers,
-      // leaseRetailStore,
-      // leaseShop,
-      // leasePlot,
-      // leaseShowroom,
-      // leaseCoveredSpace,
-      // leaseOfficeSpace,
-      // leaseWarehouse,
-      // leaseShed,
+      leaseAgriculture,
+      leaseOthers,
+      leaseRetailStore,
+      leaseShop,
+      leasePlot,
+      leaseShowroom,
+      leaseCoveredSpace,
+      leaseOfficeSpace,
+      leaseWarehouse,
+      leaseShed,
 
-      // resRentApartment,
-      // resRentBuilderFloor,
-      // resRentIndependent,
+      resRentApartment,
+      resRentBuilderFloor,
+      resRentIndependent,
 
-      // resSaleApartment,
-      // resSaleBuilderFloor,
-      // resSaleIndependentHouse,
-      // resSalePlot,
+      resSaleApartment,
+      resSaleBuilderFloor,
+      resSaleIndependentHouse,
+      resSalePlot,
 
-      // resLeaseApartment,
-      // resLeaseBuilderFloor,
-      // resLeaseIndependentHouse
+      resLeaseApartment,
+      resLeaseBuilderFloor,
+      resLeaseIndependentHouse
     ] = results.map(r => (r.status === 'fulfilled' ? r.value.map(normalizeProperty) : []));
 
     return res.status(200).json({
@@ -208,7 +207,7 @@ router.get('/all', async (req: any, res: any) => {
       message: 'All properties fetched successfully',
       data: {
         commercialRent: {
-          agriculture: rentAgriculture,
+          // agriculture: rentAgriculture,
           coveredSpace: rentCoveredSpace,
           officeSpace: rentOfficeSpace,
           others: rentOthers,
@@ -219,46 +218,46 @@ router.get('/all', async (req: any, res: any) => {
           shop: rentShop,
           showroom: rentShowroom
         },
-        // commercialSale: {
-        //   agriculture: sellAgriculture,
-        //   coveredSpace: sellCoveredSpace,
-        //   officeSpace: sellOfficeSpace,
-        //   others: sellOthers,
-        //   retailStore: sellRetailStore,
-        //   shed: sellShed,
-        //   warehouse: sellWarehouse,
-        //   plot: sellPlot,
-        //   shop: sellShop,
-        //   showroom: sellShowroom
-        // },
-        // commercialLease: {
-        //   agriculture: leaseAgriculture,
-        //   others: leaseOthers,
-        //   retailStore: leaseRetailStore,
-        //   shop: leaseShop,
-        //   plot: leasePlot,
-        //   showroom: leaseShowroom,
-        //   coveredSpace: leaseCoveredSpace,
-        //   officeSpace: leaseOfficeSpace,
-        //   warehouse: leaseWarehouse,
-        //   shed: leaseShed
-        // },
-        // residentialRent: {
-        //   apartment: resRentApartment,
-        //   builderFloor: resRentBuilderFloor,
-        //   independent: resRentIndependent
-        // },
-        // residentialSale: {
-        //   apartment: resSaleApartment,
-        //   builderFloor: resSaleBuilderFloor,
-        //   independentHouse: resSaleIndependentHouse,
-        //   plot: resSalePlot
-        // },
-        // residentialLease: {
-        //   apartment: resLeaseApartment,
-        //   builderFloor: resLeaseBuilderFloor,
-        //   independentHouse: resLeaseIndependentHouse
-        // }
+        commercialSale: {
+          // agriculture: sellAgriculture,
+          coveredSpace: sellCoveredSpace,
+          officeSpace: sellOfficeSpace,
+          others: sellOthers,
+          retailStore: sellRetailStore,
+          shed: sellShed,
+          warehouse: sellWarehouse,
+          plot: sellPlot,
+          shop: sellShop,
+          showroom: sellShowroom
+        },
+        commercialLease: {
+          agriculture: leaseAgriculture,
+          others: leaseOthers,
+          retailStore: leaseRetailStore,
+          shop: leaseShop,
+          plot: leasePlot,
+          showroom: leaseShowroom,
+          coveredSpace: leaseCoveredSpace,
+          officeSpace: leaseOfficeSpace,
+          warehouse: leaseWarehouse,
+          shed: leaseShed
+        },
+        residentialRent: {
+          apartment: resRentApartment,
+          builderFloor: resRentBuilderFloor,
+          independent: resRentIndependent
+        },
+        residentialSale: {
+          apartment: resSaleApartment,
+          builderFloor: resSaleBuilderFloor,
+          independentHouse: resSaleIndependentHouse,
+          plot: resSalePlot
+        },
+        residentialLease: {
+          apartment: resLeaseApartment,
+          builderFloor: resLeaseBuilderFloor,
+          independentHouse: resLeaseIndependentHouse
+        }
       }
     });
   } catch (err) {
