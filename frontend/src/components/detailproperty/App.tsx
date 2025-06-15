@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ImageGallery } from './components/ImageGallery';
+import { PropertyMedia, PropertyImage } from './types';
 import { BasicInfo } from './components/BasicInfo';
 import { AmenitiesTabs } from './components/AmenitiesTabs';
 import { PricingCard } from './components/PricingCard';
@@ -159,6 +160,49 @@ export interface Property {
         type: string;
       }
     }
+    expectedRent?: number;
+  };
+  leaseTerms?: {
+    leaseDetails: {
+      leaseAmount: {
+        amount: number;
+        type?: 'Fixed' | 'Negotiable';
+        duration: number;
+        durationUnit: string;
+      };
+    };
+    tenureDetails: {
+      minimumTenure: number;
+      minimumUnit: string;
+      maximumTenure: number;
+      maximumUnit: string;
+      lockInPeriod: number;
+      lockInUnit: string;
+      noticePeriod: number;
+      noticePeriodUnit: string;
+    };
+    maintenanceAmount: {
+      amount: number;
+      frequency: 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly';
+    };
+    otherCharges: {
+      electricityCharges: {
+        type: 'inclusive' | 'exclusive';
+        amount?: number;
+      };
+      waterCharges: {
+        type: 'inclusive' | 'exclusive';
+        amount?: number;
+      };
+      gasCharges: {
+        type: 'inclusive' | 'exclusive';
+        amount?: number;
+      };
+      otherCharges: {
+        type: 'inclusive' | 'exclusive';
+        amount?: number;
+      };
+    };
   };
   pricingDetails?: {
     propertyPrice: number;
@@ -211,19 +255,91 @@ export interface Property {
   };
 }
 
+
+
+function formatImages(media: PropertyMedia): PropertyImage[] {
+  const images: PropertyImage[] = [];
+  let id = 0;
+  
+  // Add exterior images
+  media.photos?.exterior?.forEach(url => {
+    images.push({
+      id: `exterior-${id++}`,
+      url,
+      category: 'exterior'
+    });
+  });
+  
+  // Add interior images
+  media.photos?.interior?.forEach(url => {
+    images.push({
+      id: `interior-${id++}`,
+      url,
+      category: 'interior'
+    });
+  });
+  
+  // Add floor plan images
+  media.photos?.floorPlan?.forEach(url => {
+    images.push({
+      id: `floorPlan-${id++}`,
+      url,
+      category: 'floorPlan'
+    });
+  });
+  
+  // Add optional image categories if they exist
+  if (media.photos?.washrooms?.length) {
+    media.photos.washrooms.forEach(url => {
+      images.push({
+        id: `washrooms-${id++}`,
+        url,
+        category: 'washrooms'
+      });
+    });
+  }
+  
+  if (media.photos?.lifts?.length) {
+    media.photos.lifts.forEach(url => {
+      images.push({
+        id: `lifts-${id++}`,
+        url,
+        category: 'lifts'
+      });
+    });
+  }
+  
+  if (media.photos?.emergencyExits?.length) {
+    media.photos.emergencyExits.forEach(url => {
+      images.push({
+        id: `emergencyExits-${id++}`,
+        url,
+        category: 'emergencyExits'
+      });
+    });
+  }
+  
+  return images;
+}
+
 function Propdetail() {
   const { id: propertyId } = useParams<{ id: string }>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const allMedia = [propertyData.video, ...propertyData.images.map((img: { url: any; }) => img.url)];
   const [property, setProperty] = useState<Property>({} as Property);
   const [loading, setLoading] = useState(true);
-
+  const [propertyMedia, setPropertyMedia] = useState<PropertyMedia>({} as PropertyMedia);
+  const Media = [
+    propertyMedia?.videoTour || '',
+    ...(propertyMedia?.photos ? Object.values(propertyMedia.photos).flat() : []),
+  ].filter((mediaUrl) => mediaUrl); 
+  
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % allMedia.length);
+    setCurrentIndex((prev) => (prev + 1) % Media.length);
   };
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + allMedia.length) % allMedia.length);
+    setCurrentIndex((prev) => (prev - 1 + Media.length) % Media.length);
   };
 
   const categoryCodes: Record<string, string> = {
@@ -280,6 +396,7 @@ function Propdetail() {
         const response = await axios.get(`/api/${category}/${listing}/${type}/${propertyId}`);
         console.log(response.data);
         setProperty(response.data.data);
+        setPropertyMedia(response.data.data.media);
         console.log(property);
         setLoading(false);
       } catch (err) {
@@ -308,9 +425,9 @@ function Propdetail() {
           <div className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="flex-grow relative group">
-                {allMedia[currentIndex].includes('vimeo.com') ? (
+                {Media[currentIndex]?.includes('vimeo.com') ? (
                   <iframe
-                    src={allMedia[currentIndex]}
+                    src={Media[currentIndex]}
                     className="w-full aspect-video rounded-lg"
                     frameBorder="0"
                     allow="autoplay; fullscreen"
@@ -318,7 +435,7 @@ function Propdetail() {
                   />
                 ) : (
                   <img
-                    src={allMedia[currentIndex]}
+                    src={Media[currentIndex]}
                     alt="Property"
                     className="w-full aspect-video rounded-lg object-cover"
                   />
@@ -339,7 +456,7 @@ function Propdetail() {
               </div>
               <div className="hidden md:block">
                 <ImageGallery
-                  images={propertyData.images}
+                  images={formatImages(propertyMedia)}
                   onImageSelect={(url) => setCurrentIndex(allMedia.indexOf(url))}
                 />
               </div>
@@ -353,12 +470,12 @@ function Propdetail() {
             <AmenitiesTabs details={propertyData} property={property} />
             <LocationMap property={property} />
             {/* <NearbyPlaces /> */}
-            <SimilarProperties />
+            <SimilarProperties propertyType={property.metadata?.propertyType} />
             <LatestInsights />
             {/* <Reviews /> */}
           </div>
           <div className="lg:w-[30%]">
-            <PricingCard property={property}/>
+            <PricingCard property={property} />
           </div>
         </div>
       </div>

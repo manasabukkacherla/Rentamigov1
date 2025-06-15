@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PropertyDetails } from '../types';
-import { AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, Gamepad, Shirt, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath, FileWarning as Running, School as Pool, Tent as Tennis, Calculator as Elevator, BatteryCharging, Shield, Target, AlertTriangle, ChevronRight, ChevronLeft, LucideIcon, Toilet, Users, Coffee, Truck, Sun, FireExtinguisher, Monitor, Wifi, Server, Target as Signage, Building, Car } from 'lucide-react';
+import { AirVent, Bed, Utensils, Flame, Tv, Box, Refrigerator, Sofa, Microwave, Gamepad, Shirt, WashingMachine, Camera, PlayCircle, Building2, Dumbbell, Bath, FileWarning as Running, School as Pool, Tent as Tennis, Calculator as Elevator, BatteryCharging, Shield, AlertTriangle, ChevronRight, ChevronLeft, LucideIcon, Toilet, Users, Coffee, Truck, Sun, FireExtinguisher, Monitor, Wifi, Server, Building, Car, Clock, MapPin, Wind as WindowIcon, MapPin as RoadIcon } from 'lucide-react';
 import { Property } from '../App';
 
 // Add IconWrapper component
@@ -38,8 +38,8 @@ const amenityIcons: Record<string, LucideIcon> = {
   'securityGuards': Shield,
   'gatedAccess': Building2,
   'fireExtinguishers': FireExtinguisher,
-  'sprinklerSystem': Target,
-  'emergencyExits': Target,
+  'sprinklerSystem': AlertTriangle,
+  'emergencyExits': AlertTriangle,
   'coveredParking': Car,
   'openParking': Building,
   'parkingSlots': Car,
@@ -61,7 +61,7 @@ const amenityIcons: Record<string, LucideIcon> = {
   'wheelchairRamps': Building,
   'elevators': Elevator,
   'handrails': Building,
-  'signageBranding': Building,
+  'signageBranding': Building2,
   'airConditioning': AirVent,
   'bed': Bed,
   'kitchen': Utensils,
@@ -78,20 +78,24 @@ const amenityIcons: Record<string, LucideIcon> = {
   'lift': Elevator,
   'powerBackup': BatteryCharging,
   'security': Shield,
-  'squashCourt': Target,
+  'squashCourt': AlertTriangle,
   'playStation': Gamepad,
   'childrenPlayArea': PlayCircle,
   'clubHouse': Building2,
   'jacuzzi': Bath,
   'joggingTrack': Running,
   'kidsPool': Pool,
+  'window': WindowIcon,
+  'road': RoadIcon,
+  'clock': Clock,
+  'mapPin': MapPin,
 };
 
 const tabs = [
   { id: 'flat', label: 'Flat Amenities', icon: Building2 },
   { id: 'society', label: 'Society Amenities', icon: Shield },
   { id: 'restrictions', label: 'Restrictions', icon: AlertTriangle },
-  { id: 'features', label: 'Features', icon: Target }
+  { id: 'features', label: 'Features', icon: Building }
 ] as const;
 
 type TabType = typeof tabs[number]['id'];
@@ -142,14 +146,386 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property 
     setActiveTab(tabs[newIndex].id);
   };
 
+  interface Feature {
+    icon: LucideIcon;
+    label: string;
+    value: string | boolean;
+  }
+
+  const getFeatures = (property: Property): Feature[] => {
+    const features: Feature[] = [];
+    
+    switch (property.metadata?.propertyName) {
+      case 'Shop':
+        if (property.shopDetails) {
+          if (property.shopDetails.frontageWidth) {
+            features.push({
+              icon: Building,
+              label: 'Frontage Width',
+              value: `${property.shopDetails.frontageWidth} ft`
+            });
+          }
+          if (property.shopDetails.heightOfShop) {
+            features.push({
+              icon: Building,
+              label: 'Shop Height',
+              value: `${property.shopDetails.heightOfShop} ft`
+            });
+          }
+          if (property.shopDetails.displayWindow) {
+            features.push({
+              icon: WindowIcon,
+              label: 'Display Window',
+              value: true
+            });
+          }
+          if (property.shopDetails.attachedStorageRoom) {
+            features.push({
+              icon: Box,
+              label: 'Storage Room',
+              value: true
+            });
+          }
+          if (property.shopDetails.averageFootTraffic) {
+            features.push({
+              icon: Users,
+              label: 'Foot Traffic',
+              value: property.shopDetails.averageFootTraffic
+            });
+          }
+          if (property.shopDetails.customerParking) {
+            features.push({
+              icon: Car,
+              label: 'Customer Parking',
+              value: true
+            });
+          }
+          if (property.shopDetails.previousBusiness) {
+            features.push({
+              icon: Building2,
+              label: 'Previous Business',
+              value: property.shopDetails.previousBusiness
+            });
+          }
+        }
+        break;
+
+      case 'Retail Store':
+        if (property.retailStoreDetails) {
+          if (property.retailStoreDetails.location) {
+            features.push({
+              icon: MapPin,
+              label: 'Location',
+              value: property.retailStoreDetails.location
+            });
+          }
+          if (property.retailStoreDetails.anchorStores) {
+            features.push({
+              icon: Building2,
+              label: 'Anchor Stores',
+              value: true
+            });
+          }
+          if (property.retailStoreDetails.footfallData) {
+            features.push({
+              icon: Users,
+              label: 'Footfall Data',
+              value: property.retailStoreDetails.footfallData
+            });
+          }
+          if (property.retailStoreDetails.signageAllowed) {
+            features.push({
+              icon: Building2,
+              label: 'Signage Allowed',
+              value: true
+            });
+          }
+          if (property.retailStoreDetails.sharedWashrooms) {
+            features.push({
+              icon: Bath,
+              label: 'Shared Washrooms',
+              value: true
+            });
+          }
+          if (property.retailStoreDetails.fireExit) {
+            features.push({
+              icon: FireExtinguisher,
+              label: 'Fire Exit',
+              value: true
+            });
+          }
+        }
+        break;
+
+      case 'Showroom':
+        if (property.showroomDetails) {
+          if (property.showroomDetails.totalSpace) {
+            features.push({
+              icon: Building,
+              label: 'Total Space',
+              value: `${property.showroomDetails.totalSpace} sqft`
+            });
+          }
+          if (property.showroomDetails.frontageWidth) {
+            features.push({
+              icon: Building,
+              label: 'Frontage Width',
+              value: `${property.showroomDetails.frontageWidth} ft`
+            });
+          }
+          if (property.showroomDetails.ceilingHeight) {
+            features.push({
+              icon: Building,
+              label: 'Ceiling Height',
+              value: `${property.showroomDetails.ceilingHeight} ft`
+            });
+          }
+          if (property.showroomDetails.glassFrontage) {
+            features.push({
+              icon: WindowIcon,
+              label: 'Glass Frontage',
+              value: true
+            });
+          }
+          if (property.showroomDetails.lightingType) {
+            features.push({
+              icon: Sun,
+              label: 'Lighting Type',
+              value: property.showroomDetails.lightingType
+            });
+          }
+          if (property.showroomDetails.acInstalled) {
+            features.push({
+              icon: AirVent,
+              label: 'AC Installed',
+              value: true
+            });
+          }
+          if (property.showroomDetails.nearbyCompetitors?.present) {
+            features.push({
+              icon: Building2,
+              label: 'Nearby Competitors',
+              value: property.showroomDetails.nearbyCompetitors.brandNames
+            });
+          }
+          if (property.showroomDetails.displayRacks) {
+            features.push({
+              icon: Box,
+              label: 'Display Racks',
+              value: true
+            });
+          }
+        }
+        break;
+
+      case 'Office Space':
+        if (property.officeDetails) {
+          if (property.officeDetails.seatingCapacity) {
+            features.push({
+              icon: Users,
+              label: 'Seating Capacity',
+              value: `${property.officeDetails.seatingCapacity} persons`
+            });
+          }
+          if (property.officeDetails.cabins?.available) {
+            features.push({
+              icon: Building,
+              label: 'Cabins',
+              value: property.officeDetails.cabins.count ? `${property.officeDetails.cabins.count} cabins` : true
+            });
+          }
+          if (property.officeDetails.conferenceRoom) {
+            features.push({
+              icon: Building,
+              label: 'Conference Room',
+              value: true
+            });
+          }
+          if (property.officeDetails.meetingRoom) {
+            features.push({
+              icon: Building,
+              label: 'Meeting Room',
+              value: true
+            });
+          }
+          if (property.officeDetails.receptionArea) {
+            features.push({
+              icon: Building,
+              label: 'Reception Area',
+              value: true
+            });
+          }
+          if (property.officeDetails.wifiSetup) {
+            features.push({
+              icon: Wifi,
+              label: 'WiFi Setup',
+              value: true
+            });
+          }
+          if (property.officeDetails.serverRoom) {
+            features.push({
+              icon: Server,
+              label: 'Server Room',
+              value: true
+            });
+          }
+          if (property.officeDetails.coworkingFriendly) {
+            features.push({
+              icon: Building,
+              label: 'Coworking Friendly',
+              value: true
+            });
+          }
+        }
+        break;
+
+      case 'Warehouse':
+        if (property.warehouseDetails) {
+          if (property.warehouseDetails.access24x7) {
+            features.push({
+              icon: Clock,
+              label: '24x7 Access',
+              value: true
+            });
+          }
+          if (property.warehouseDetails.ceilingHeight) {
+            features.push({
+              icon: Building,
+              label: 'Ceiling Height',
+              value: `${property.warehouseDetails.ceilingHeight} ft`
+            });
+          }
+          if (property.warehouseDetails.totalArea) {
+            features.push({
+              icon: Building,
+              label: 'Total Area',
+              value: `${property.warehouseDetails.totalArea} sqft`
+            });
+          }
+          if (property.warehouseDetails.docks) {
+            features.push({
+              icon: Truck,
+              label: 'Docks',
+              value: `${property.warehouseDetails.docks.count} docks (${property.warehouseDetails.docks.height} ft)`
+            });
+          }
+          if (property.warehouseDetails.floorLoadCapacity) {
+            features.push({
+              icon: Building,
+              label: 'Floor Load Capacity',
+              value: `${property.warehouseDetails.floorLoadCapacity} kg/sqft`
+            });
+          }
+          if (property.warehouseDetails.fireSafety) {
+            features.push({
+              icon: FireExtinguisher,
+              label: 'Fire Safety',
+              value: true
+            });
+          }
+          if (property.warehouseDetails.securityPersonnel) {
+            features.push({
+              icon: Shield,
+              label: 'Security Personnel',
+              value: true
+            });
+          }
+          if (property.warehouseDetails.truckParking) {
+            features.push({
+              icon: Car,
+              label: 'Truck Parking',
+              value: true
+            });
+          }
+        }
+        break;
+
+      case 'Covered Space':
+        if (property.spaceDetails) {
+          if (property.spaceDetails.totalArea) {
+            features.push({
+              icon: Building,
+              label: 'Total Area',
+              value: `${property.spaceDetails.totalArea} ${property.spaceDetails.areaUnit}`
+            });
+          }
+          if (property.spaceDetails.coveredArea) {
+            features.push({
+              icon: Building,
+              label: 'Covered Area',
+              value: `${property.spaceDetails.coveredArea} ${property.spaceDetails.areaUnit}`
+            });
+          }
+          if (property.spaceDetails.openArea) {
+            features.push({
+              icon: Building,
+              label: 'Open Area',
+              value: `${property.spaceDetails.openArea} ${property.spaceDetails.areaUnit}`
+            });
+          }
+          if (property.spaceDetails.roadWidth) {
+            features.push({
+              icon: RoadIcon,
+              label: 'Road Width',
+              value: `${property.spaceDetails.roadWidth} ${property.spaceDetails.roadWidthUnit}`
+            });
+          }
+          if (property.spaceDetails.ceilingHeight) {
+            features.push({
+              icon: Building,
+              label: 'Ceiling Height',
+              value: `${property.spaceDetails.ceilingHeight} ${property.spaceDetails.ceilingHeightUnit}`
+            });
+          }
+          if (property.spaceDetails.noOfOpenSides) {
+            features.push({
+              icon: Building,
+              label: 'Open Sides',
+              value: `${property.spaceDetails.noOfOpenSides} sides`
+            });
+          }
+        }
+        break;
+
+      default:
+        // Add other property types as needed
+        features.push({
+          icon: Box,
+          label: 'No features available',
+          value: true
+        });
+        break;
+    }
+
+    return features;
+  };
+
+  const FeatureCard = ({ icon: Icon, label, value }: Feature) => (
+    <div className="group flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-100">
+      <div className="w-12 h-12 bg-white group-hover:bg-gray-50 rounded-lg flex items-center justify-center transition-colors">
+        <IconWrapper icon={Icon} className="w-6 h-6 text-gray-900" />
+      </div>
+      <div className="text-center">
+        <p className="text-sm font-medium text-gray-900 group-hover:text-gray-700">{label}</p>
+        {typeof value === 'string' ? (
+          <p className="text-sm text-gray-500">{value}</p>
+        ) : (
+          <span className="text-sm text-gray-500">✓</span>
+        )}
+      </div>
+    </div>
+  );
+
   const AmenityCard = ({ icon: Icon, label }: { icon: LucideIcon; label: string }) => (
     <div className="group flex flex-col items-center gap-3 p-4 bg-gray-50 rounded-xl hover:bg-white hover:shadow-lg transition-all duration-300 border border-gray-100">
       <div className="w-12 h-12 bg-white group-hover:bg-gray-50 rounded-lg flex items-center justify-center transition-colors">
         <IconWrapper icon={Icon} className="w-6 h-6 text-gray-900" />
       </div>
-      <span className="text-center text-sm font-medium text-gray-900 group-hover:text-gray-700">{label}</span>
+      <span className="text-sm font-medium text-gray-900 group-hover:text-gray-700">{label}</span>
     </div>
   );
+
+  // console.log(property.showroomDetails?.totalSpace)
 
   const getTabContent = () => {
     switch (activeTab) {
@@ -193,9 +569,9 @@ export const AmenitiesTabs: React.FC<AmenitiesTabsProps> = ({ details, property 
         );
       case 'features':
         return (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 transition-all duration-500">
-            {details.features.map((feature) => (
-              <AmenityCard key={feature} icon={Target} label={feature} />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+            {getFeatures(property).map((feature, index) => (
+              <FeatureCard key={index} {...feature} />
             ))}
           </div>
         );

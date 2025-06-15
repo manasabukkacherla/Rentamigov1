@@ -14,26 +14,12 @@ export interface PropertyMedia {
 }
 
 export interface PropertyImage {
-  id: string;
   url: string;
   category: keyof PropertyMedia['photos'];
   title?: string;
 }
 
-export interface PropertyDetails {
-  // Basic information
-  configuration: string;
-  furnishingStatus: string;
-  size: string;
-  availabilityDate: string;
-
-  // Media
-  video: string;
+export interface ImageGalleryProps {
   images: PropertyImage[];
-
-  // Amenities and features
-  flatAmenities: string[];
-  societyAmenities: string[];
-  restrictions: string[];
-  features: string[];
+  onImageSelect: (url: string) => void;
 }
