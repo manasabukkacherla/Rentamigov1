@@ -7,54 +7,134 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [showMobilePricing, setShowMobilePricing] = useState(false);
 
-  const PricingContent = () => (
-    <div className="space-y-4">
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="text-sm font-medium text-gray-500 mb-1">Monthly Maintenance</div>
-        <div className="flex justify-between items-center text-gray-900">
-          <span className="font-medium">Amount</span>
-          <span className="text-lg">{property.rentalTerms?.rentDetails?.rentType === "exclusive" ? property.rentalTerms?.maintenanceAmount?.amount : "Inclusive"}</span>
-        </div>
-      </div>
+  const PricingContent = () => {
+    if (property?.metadata?.intent === "sale" || property?.metadata?.intent === "Sale" || property?.metadata?.intent === "Sell" || property?.metadata?.intent === "sell") {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="text-sm font-medium text-gray-500 mb-1">Property Price</div>
+            <div className="flex justify-between items-center text-gray-900">
+              <span className="font-medium">Amount</span>
+              <span className="text-lg">{property?.pricingDetails?.propertyPrice || property?.priceDetails?.propertyPrice || "Not specified"}</span>
+            </div>
+          </div>
 
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="text-sm font-medium text-gray-500 mb-1">Security Deposit</div>
-        <div className="flex justify-between items-center text-gray-900">
-          <span className="font-medium">Amount</span>
-          <span className="text-lg">{property.rentalTerms?.securityDeposit?.amount}</span>
-        </div>
-      </div>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="text-sm font-medium text-gray-500 mb-1">Price Type</div>
+            <div className="flex justify-between items-center text-gray-900">
+              <span className="font-medium">Type</span>
+              <span className="text-lg">{property?.pricingDetails?.pricetype || property?.priceDetails?.pricetype || "Not specified"}</span>
+            </div>
+          </div>
 
-      <div className="bg-gray-50 p-3 rounded-lg">
-        <div className="text-sm font-medium text-gray-500 mb-2">Other Charges</div>
-        <div className="space-y-2 text-gray-900">
-          <div className="flex justify-between items-center">
-            <span>Water</span>
-            <span>{property.rentalTerms?.otherCharges?.water?.type === "exclusive" ? property.rentalTerms?.otherCharges?.water?.amount : "Inclusive"}</span>
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="text-sm font-medium text-gray-500 mb-1">Registration Details</div>
+            <div className="space-y-2 text-gray-900">
+              <div className="flex justify-between items-center">
+                <span>Charges Type</span>
+                <span>{property?.registration?.chargestype || "Not specified"}</span>
+              </div>
+              {property?.registration?.chargestype === "exclusive" && (
+                <>
+                  <div className="flex justify-between items-center">
+                    <span>Registration Amount</span>
+                    <span>{property?.registration?.registrationAmount || "Not specified"}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span>Stamp Duty Amount</span>
+                    <span>{property?.registration?.stampDutyAmount || "Not specified"}</span>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-          <div className="flex justify-between items-center">
-            <span>Electricity</span>
-            <span>{property.rentalTerms?.otherCharges?.electricity?.type === "exclusive" ? property.rentalTerms?.otherCharges?.electricity?.amount : "Inclusive"}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Gas</span>
-            <span>{property.rentalTerms?.otherCharges?.gas?.type === "exclusive" ? property.rentalTerms?.otherCharges?.gas?.amount : "Inclusive"}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Others</span>
-            <span>{property.rentalTerms?.otherCharges?.others?.type === "exclusive" ? property.rentalTerms?.otherCharges?.others?.amount : "Inclusive"}</span>
+
+          {property?.pricingDetails?.totalprice ? (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm font-medium text-gray-500 mb-1">Total Price</div>
+              <div className="flex justify-between items-center text-gray-900">
+                <span className="font-medium">Total</span>
+                <span className="text-lg">{property?.pricingDetails?.totalprice}</span>
+              </div>
+            </div>
+          ) : property?.registration?.chargestype === "inclusive" ? (
+            <div className="bg-gray-50 p-3 rounded-lg">
+              <div className="text-sm font-medium text-gray-500 mb-1">Brokerage Details</div>
+              <div className="space-y-2 text-gray-900">
+                <div className="flex justify-between items-center">
+                  <span>Required</span>
+                  <span>{property?.brokerage?.required || "Not specified"}</span>
+                </div>
+                {property?.brokerage?.required === "yes" && property?.brokerage?.amount && (
+                  <div className="flex justify-between items-center">
+                    <span>Amount</span>
+                    <span>{property?.brokerage?.amount}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : null}
+
+          <button 
+            onClick={() => setShowEnquiry(true)}
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+            Enquire Now
+          </button>
+        </div>
+      );
+    }
+
+    // For rent properties
+    return (
+      <div className="space-y-4">
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="text-sm font-medium text-gray-500 mb-1">Monthly Maintenance</div>
+          <div className="flex justify-between items-center text-gray-900">
+            <span className="font-medium">Amount</span>
+            <span className="text-lg">{property?.rentalTerms?.rentDetails?.rentType === "exclusive" ? property?.rentalTerms?.maintenanceAmount?.amount : "Inclusive"}</span>
           </div>
         </div>
-      </div>
 
-      <button 
-        onClick={() => setShowEnquiry(true)}
-        className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition"
-      >
-        Enquire Now
-      </button>
-    </div>
-  );
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="text-sm font-medium text-gray-500 mb-1">Security Deposit</div>
+          <div className="flex justify-between items-center text-gray-900">
+            <span className="font-medium">Amount</span>
+            <span className="text-lg">{property?.rentalTerms?.securityDeposit?.amount}</span>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <div className="text-sm font-medium text-gray-500 mb-2">Other Charges</div>
+          <div className="space-y-2 text-gray-900">
+            <div className="flex justify-between items-center">
+              <span>Water</span>
+              <span>{property?.rentalTerms?.otherCharges?.water?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.water?.amount : "Inclusive"}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Electricity</span>
+              <span>{property?.rentalTerms?.otherCharges?.electricity?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.electricity?.amount : "Inclusive"}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Gas</span>
+              <span>{property?.rentalTerms?.otherCharges?.gas?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.gas?.amount : "Inclusive"}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span>Others</span>
+              <span>{property?.rentalTerms?.otherCharges?.others?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.others?.amount : "Inclusive"}</span>
+            </div>
+          </div>
+        </div>
+
+        <button 
+          onClick={() => setShowEnquiry(true)}
+          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+        >
+          Enquire Now
+        </button>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -62,8 +142,8 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
       <div className="hidden lg:block bg-white rounded-lg p-4 shadow-lg sticky top-6">
         <div className="flex items-center gap-2 mb-4">
           <IndianRupee className="w-8 h-5 text-gray-900" />
-          <span className="text-2xl font-bold text-gray-900">{property.metadata?.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent || property.rentalTerms?.expectedRent : property.metadata?.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
-          <span className="text-gray-500">/month</span>
+          <span className="text-2xl font-bold text-gray-900">{property?.metadata?.intent === "rent" || property?.metadata?.intent === "Rent" ? property?.rentalTerms?.rentDetails?.expectedRent || property?.rentalTerms?.expectedRent : property?.pricingDetails?.propertyPrice || property?.priceDetails?.propertyPrice || "Not specified"}</span>
+          <span className="text-gray-500">{property?.metadata?.intent === "rent" || property?.metadata?.intent === "Rent" ? "/month" : ""}</span>
         </div>
         <PricingContent />
       </div>
@@ -76,8 +156,8 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
         >
           <div className="flex items-center gap-2">
             <IndianRupee className="w-8 h-5 text-gray-900" />
-            <span className="text-2xl font-bold text-gray-900">{property.metadata?.intent === "rent" || "Rent" ? property.rentalTerms?.rentDetails?.expectedRent || property.rentalTerms?.expectedRent : property.metadata?.intent === "sale" || "Sale" ? property.pricingDetails?.propertyPrice : ""}</span>
-            <span className="text-gray-500">/month</span>
+            <span className="text-2xl font-bold text-gray-900">{property?.metadata?.intent === "rent" || property?.metadata?.intent === "Rent" ? property?.rentalTerms?.rentDetails?.expectedRent || property?.rentalTerms?.expectedRent : property?.pricingDetails?.propertyPrice || property?.priceDetails?.propertyPrice || "Not specified"}</span>
+            <span className="text-gray-500">{property?.metadata?.intent === "rent" || property?.metadata?.intent === "Rent" ? "/month" : ""}</span>
           </div>
           <ChevronUp className={`w-5 h-5 text-gray-600 transition-transform ${showMobilePricing ? 'rotate-180' : ''}`} />
         </button>

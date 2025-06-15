@@ -111,6 +111,7 @@ export const getCommercialSellOthersById = async (req: Request, res: Response) =
     }
     
     res.status(200).json({
+      success: true,
       message: 'Commercial sell others property retrieved successfully',
       data: property
     });

@@ -211,6 +211,18 @@ export interface Property {
     totalprice: number;
     pricePerSqft: number;
   };
+  priceDetails?: {
+    propertyPrice: number;
+    pricetype: "fixed" | "negotiable";
+    area: number;
+    totalprice: number;
+    pricePerSqft: number;
+  };
+  registration?: {
+    chargestype: "inclusive" | "exclusive";
+    registrationAmount?: number;
+    stampDutyAmount?: number;
+  }
   brokerage: {
     required: string;
     amount?: number;
@@ -219,6 +231,8 @@ export interface Property {
     type: string;
     date?: string;
     immediate?: boolean;
+    availableFrom?: string;
+    availableImmediately?: boolean;
     preferredSaleDuration?: string;
     noticePeriod?: string;
     isPetsAllowed?: boolean;
@@ -260,36 +274,36 @@ export interface Property {
 function formatImages(media: PropertyMedia): PropertyImage[] {
   const images: PropertyImage[] = [];
   let id = 0;
-  
+
   // Add exterior images
-  media.photos?.exterior?.forEach(url => {
+  media?.photos?.exterior?.forEach(url => {
     images.push({
       id: `exterior-${id++}`,
       url,
       category: 'exterior'
     });
   });
-  
+
   // Add interior images
-  media.photos?.interior?.forEach(url => {
+  media?.photos?.interior?.forEach(url => {
     images.push({
       id: `interior-${id++}`,
       url,
       category: 'interior'
     });
   });
-  
+
   // Add floor plan images
-  media.photos?.floorPlan?.forEach(url => {
+  media?.photos?.floorPlan?.forEach(url => {
     images.push({
       id: `floorPlan-${id++}`,
       url,
       category: 'floorPlan'
     });
   });
-  
+
   // Add optional image categories if they exist
-  if (media.photos?.washrooms?.length) {
+  if (media?.photos?.washrooms?.length) {
     media.photos.washrooms.forEach(url => {
       images.push({
         id: `washrooms-${id++}`,
@@ -298,8 +312,8 @@ function formatImages(media: PropertyMedia): PropertyImage[] {
       });
     });
   }
-  
-  if (media.photos?.lifts?.length) {
+
+  if (media?.photos?.lifts?.length) {
     media.photos.lifts.forEach(url => {
       images.push({
         id: `lifts-${id++}`,
@@ -308,8 +322,8 @@ function formatImages(media: PropertyMedia): PropertyImage[] {
       });
     });
   }
-  
-  if (media.photos?.emergencyExits?.length) {
+
+  if (media?.photos?.emergencyExits?.length) {
     media.photos.emergencyExits.forEach(url => {
       images.push({
         id: `emergencyExits-${id++}`,
@@ -318,7 +332,7 @@ function formatImages(media: PropertyMedia): PropertyImage[] {
       });
     });
   }
-  
+
   return images;
 }
 
@@ -332,8 +346,8 @@ function Propdetail() {
   const Media = [
     propertyMedia?.videoTour || '',
     ...(propertyMedia?.photos ? Object.values(propertyMedia.photos).flat() : []),
-  ].filter((mediaUrl) => mediaUrl); 
-  
+  ].filter((mediaUrl) => mediaUrl);
+
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % Media.length);
   };
@@ -394,11 +408,15 @@ function Propdetail() {
 
       try {
         const response = await axios.get(`/api/${category}/${listing}/${type}/${propertyId}`);
-        console.log(response.data);
-        setProperty(response.data.data);
-        setPropertyMedia(response.data.data.media);
-        console.log(property);
-        setLoading(false);
+        console.log(response);
+        if (response.data.success) {
+          setProperty(response.data.data);
+          setPropertyMedia(response.data.data.media);
+          setLoading(false);
+        } else {
+          console.log("response.data.message");
+          setLoading(false);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -407,16 +425,18 @@ function Propdetail() {
     fetchPropertyDetails();
   }, [propertyId]);
 
+  console.log(property);
+
   return (
     <div className="min-h-screen bg-gray-100 pb-24 lg:pb-0">
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-8">
         {/* Property Header */}
         <div className="bg-white rounded-xl shadow-lg p-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">{property.basicInformation?.title}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">{property?.basicInformation?.title}</h1>
           {/* <h1 className="text-2xl font-bold text-gray-900 mb-2">Prestige</h1> */}
           <div className="flex items-center gap-2 text-gray-600">
             <MapPin className="w-5 h-10" />
-            <p>{property.basicInformation?.address?.city}, {property.basicInformation?.address?.state}</p>
+            <p>{property?.basicInformation?.address?.city}, {property?.basicInformation?.address?.state}</p>
             {/* <p>Bangalore, Karnataka</p> */}
           </div>
         </div>
@@ -470,7 +490,7 @@ function Propdetail() {
             <AmenitiesTabs details={propertyData} property={property} />
             <LocationMap property={property} />
             {/* <NearbyPlaces /> */}
-            <SimilarProperties propertyType={property.metadata?.propertyType} />
+            <SimilarProperties propertyType={property?.metadata?.propertyType} />
             <LatestInsights />
             {/* <Reviews /> */}
           </div>
