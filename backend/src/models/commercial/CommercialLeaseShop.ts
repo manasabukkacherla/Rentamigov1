@@ -138,7 +138,7 @@ interface ICommercialLeaseShop extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   leaseTerms: ILeaseTerms;
@@ -194,7 +194,7 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
       backup: { type: Boolean, default: false },
     },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
   },
   leaseTerms: {
