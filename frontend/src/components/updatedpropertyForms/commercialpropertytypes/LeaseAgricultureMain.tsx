@@ -24,24 +24,29 @@ import axios from "axios"
 import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
-  title: string;
-  landType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    landmark: string;
+    isCornerProperty: boolean;
+
   };
-  landmark: string;
+ 
   powerSupply: boolean;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
   landDetails: {
     totalArea: number;
-    soilType: string;
+    type: string;
+    
     irrigation: boolean;
     fencing: boolean;
     cropSuitability: string;
@@ -54,22 +59,10 @@ interface FormData {
       carpetArea: number;
       builtUpArea: number;
     };
-    floor: {
-      floorNumber: number;
-      totalFloors: number;
-    };
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    waterAvailability: string;
-    propertyAge: number;
-    propertyCondition: string;
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
-    };
+    
+
   };
+  leaseTerms: {
   leaseAmount: {
     amount: number;
     duration: number;
@@ -88,30 +81,18 @@ interface FormData {
   };
   maintenanceAmount: {
     amount: number;
-    frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    frequency: string;
   };
   otherCharges: {
-    water: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-    electricity: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-    gas: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-    others: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
+    water: { amount: number; type: string };
+    electricity: { amount: number; type: string };
+    gas: { amount: number; type: string };
+    others: { amount: number; type: string };
+    brokerage: { required: string; amount?: number };
   };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
+
+};
+
   availability: {
     availableFrom: Date;
     availableImmediately: boolean;
@@ -121,7 +102,7 @@ interface FormData {
     isPetsAllowed: boolean;
     operatingHours: boolean;
   };
-  contactDetails: {
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
@@ -133,9 +114,9 @@ interface FormData {
       exterior: File[];
       interior: File[];
       floorPlan: File[];
-      aerial: File[];
-      soil: File[];
-      irrigation: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
     };
     videoTour: File | null;
     documents: File[];
@@ -144,24 +125,27 @@ interface FormData {
 
 const LeaseAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    title: '',
-    landType: [],
-    address: {
+    basicInformation: {
+      title: '',
+      type: [],
+      
+      address: {
       street: '',
       city: '',
       state: '',
       zipCode: ''
-    },
-    landmark: '',
-    location: {
-      latitude: '',
-      longitude: ''
+      },
+      landmark: '',
+      location: {
+        latitude: '',
+        longitude: ''
+      },
+      isCornerProperty: false,
     },
     powerSupply: false,
-    isCornerProperty: false,
     landDetails: {
       totalArea: 0,
-      soilType: '',
+      type: '',
       irrigation: false,
       fencing: false,
       cropSuitability: '',
@@ -174,22 +158,10 @@ const LeaseAgricultureMain = () => {
         carpetArea: 0,
         builtUpArea: 0
       },
-      floor: {
-        floorNumber: 0,
-        totalFloors: 0
-      },
-      facingDirection: '',
-      furnishingStatus: '',
-      propertyAmenities: [],
-      wholeSpaceAmenities: [],
-      waterAvailability: '',
-      propertyAge: 0,
-      propertyCondition: '',
-      electricitySupply: {
-        powerLoad: 0,
-        backup: false
-      }
+      
+
     },
+    leaseTerms: {
     leaseAmount: {
       amount: 0,
       duration: 0,
@@ -208,30 +180,18 @@ const LeaseAgricultureMain = () => {
     },
     maintenanceAmount: {
       amount: 0,
-      frequency: 'monthly'
+      frequency: 'Monthly'
     },
     otherCharges: {
-      water: {
-        type: 'inclusive',
-        amount: 0
-      },
-      electricity: {
-        type: 'inclusive',
-        amount: 0
-      },
-      gas: {
-        type: 'inclusive',
-        amount: 0
-      },
-      others: {
-        type: 'inclusive',
-        amount: 0
-      }
+      water: { amount: 0, type: 'inclusive' },
+      electricity: { amount: 0, type: 'inclusive' },
+      gas: { amount: 0, type: 'inclusive' },
+      others: { amount: 0, type: 'inclusive' },
+      brokerage: { required: 'no', amount: 0 }
     },
-    brokerage: {
-      required: "no",
-      amount: 0
-    },
+
+  },
+    
     availability: {
       availableFrom: new Date(),
       availableImmediately: false,
@@ -241,7 +201,7 @@ const LeaseAgricultureMain = () => {
       isPetsAllowed: false,
       operatingHours: false,
     },
-    contactDetails: {
+    contactInformation: {
       name: '',
       email: '',
       phone: '',
@@ -253,13 +213,14 @@ const LeaseAgricultureMain = () => {
         exterior: [],
         interior: [],
         floorPlan: [],
-        aerial: [],
-        soil: [],
-        irrigation: []
+        washrooms: [],
+        lifts: [],
+        emergencyExits: []
       },
       videoTour: null,
-      documents: []
-    }
+        documents: []
+      }
+    
   });
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -292,38 +253,44 @@ const LeaseAgricultureMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
               <PropertyName
-                propertyName={formData.title}
+                propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-                  title: name
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    title: name
+                  }
                 }))}
               />
               <AgriculturalLandType
                 onLandTypeChange={(types: string[]) => setFormData(prev => ({
                   ...prev,
-                  landType: types
+                  type: types
                 }))}
               />
             </div>
 
           <div className="space-y-6">
               <CommercialPropertyAddress
-                address={formData.address}
+                address={formData.basicInformation.address}
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
-                  address
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    address: address
+                  }
                 }))}
               />
               <MapLocation
-                latitude={formData.location.latitude}
-                longitude={formData.location.longitude}
-                landmark={formData.landmark}
+                latitude={formData.basicInformation.location.latitude}
+                longitude={formData.basicInformation.location.longitude}
+                landmark={formData.basicInformation.landmark}
                 onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
                 onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
                 onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
               />
               <CornerProperty
-                isCornerProperty={formData.isCornerProperty}
+                isCornerProperty={formData.basicInformation.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
                   isCornerProperty: isCorner
@@ -370,7 +337,7 @@ const LeaseAgricultureMain = () => {
                 <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
+                    leaseTerms: { ...prev.leaseTerms, leaseAmount: { ...prev.leaseTerms.leaseAmount, ...amount } }
                   }))}
                 />
                 <LeaseTenure
@@ -400,10 +367,10 @@ const LeaseAgricultureMain = () => {
       component: (
         <div className="space-y-6">
             <CommercialContactDetails
-              contactInformation={formData.contactDetails}
+              contactInformation={formData.contactInformation}
               onContactChange={(contact) => setFormData(prev => ({
                 ...prev,
-                contactDetails: { ...prev.contactDetails, ...contact }
+                contactInformation: { ...prev.contactInformation, ...contact }
               }))}
             />
           </div>
@@ -463,9 +430,9 @@ const LeaseAgricultureMain = () => {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
             interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
             floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            aerial: await Promise.all((formData.media?.photos?.aerial ?? []).map(convertFileToBase64)),
-            soil: await Promise.all((formData.media?.photos?.soil ?? []).map(convertFileToBase64)),
-            irrigation: await Promise.all((formData.media?.photos?.irrigation ?? []).map(convertFileToBase64))
+            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
           },
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))

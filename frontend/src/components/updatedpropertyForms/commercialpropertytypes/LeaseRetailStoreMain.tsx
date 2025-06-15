@@ -40,7 +40,8 @@ interface FormData {
     };
     isCornerProperty: boolean;
   };
-  retailStoreDetails: {
+  propertyDetails: {
+    retailStoreDetails: {
     location: string;
     anchorStores: boolean;
     footfallData: string;
@@ -48,7 +49,6 @@ interface FormData {
     sharedWashrooms: boolean;
     fireExit: boolean;
   };
-  propertyDetails: {
     area: {
       totalArea: number;
       carpetArea: number;
@@ -71,15 +71,13 @@ interface FormData {
     propertyCondition: string;
   };
   leaseTerms: {
-    leaseDetails: {
       leaseAmount: {
         amount: number;
         type: string;
         duration: number;
         durationUnit: string;
       };
-    };
-    tenureDetails: {
+    leaseTenure: {
       minimumTenure: number;
       minimumUnit: string;
       maximumTenure: number;
@@ -123,14 +121,15 @@ interface FormData {
       isPetsAllowed: boolean;
       operatingHours: boolean;
     };
-  };
+  },
+  
   contactInformation: {
     name: string;
     email: string;
     phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
-  };
+    },
   media: {
     photos: {
       exterior: File[];
@@ -172,7 +171,8 @@ const LeaseRetailStoreMain = () => {
       },
       isCornerProperty: false
     },
-    retailStoreDetails: {
+    propertyDetails: {
+      retailStoreDetails: {
       location: '',
       anchorStores: false,
       footfallData: '',
@@ -180,7 +180,6 @@ const LeaseRetailStoreMain = () => {
       sharedWashrooms: false,
       fireExit: false
     },
-    propertyDetails: {
       area: {
         totalArea: 0,
         carpetArea: 0,
@@ -203,23 +202,21 @@ const LeaseRetailStoreMain = () => {
       propertyCondition: ''
     },
     leaseTerms: {
-      leaseDetails: {
         leaseAmount: {
           amount: 0,
           type: 'fixed',
           duration: 0,
           durationUnit: 'years'
         },
-      },
-      tenureDetails: {
-        minimumTenure: 0,
-        minimumUnit: 'years',
-        maximumTenure: 0,
-        maximumUnit: 'years',
-        lockInPeriod: 0,
-        lockInUnit: 'years',
-        noticePeriod: 0,
-        noticePeriodUnit: 'months'
+        leaseTenure: {
+          minimumTenure: 0,
+          minimumUnit: 'years',
+          maximumTenure: 0,
+          maximumUnit: 'years',
+          lockInPeriod: 0,
+          lockInUnit: 'years',
+          noticePeriod: 0,
+          noticePeriodUnit: 'months'
       },
       maintenanceAmount: {
         amount: 0,
@@ -254,7 +251,7 @@ const LeaseRetailStoreMain = () => {
         noticePeriod: '',
         isPetsAllowed: false,
         operatingHours: false,
-      }
+      },
     },
     contactInformation: {
       name: '',
@@ -333,7 +330,7 @@ const LeaseRetailStoreMain = () => {
           <RetailStoreDetails
             onDetailsChange={(details) => setFormData(prev => ({
               ...prev,
-              retailStoreDetails: { ...prev.retailStoreDetails, ...details }
+              propertyDetails: { ...prev.propertyDetails, retailStoreDetails: { ...prev.propertyDetails.retailStoreDetails, ...details } }
             }))}
           />
           <CommercialPropertyDetails
@@ -366,16 +363,13 @@ const LeaseRetailStoreMain = () => {
                 ...prev,
                 leaseTerms: {
                   ...prev.leaseTerms,
-                  leaseDetails: {
-                    ...prev.leaseTerms.leaseDetails,
                     leaseAmount: {
                       amount: amount.amount || 0,
                       type: amount.type || 'fixed',
                       duration: amount.duration || 0,
                       durationUnit: amount.durationUnit || 'years'
-                    },
-
-                  }
+                    }
+                  
                 }
               }))}
             />
@@ -384,11 +378,7 @@ const LeaseRetailStoreMain = () => {
                 ...prev,
                 leaseTerms: {
                   ...prev.leaseTerms,
-                  leaseDetails: {
-                    ...prev.leaseTerms.leaseDetails,
-                    // leaseDuration: tenure.leaseDuration || '',
-                  },
-                  tenureDetails: {
+                  leaseTenure: {
                     minimumTenure: Number(tenure.minimumTenure) || 0,
                     minimumUnit: tenure.minimumUnit || 'years',
                     maximumTenure: Number(tenure.maximumTenure) || 0,
@@ -414,11 +404,7 @@ const LeaseRetailStoreMain = () => {
                 }
               }))}
             />
-            {/* </div>
-            </div>
-             */}
             <div className="space-y-4">
-
               <div className="border-t border-gray-200 my-4"></div>
               <OtherCharges
                 otherCharges={formData.leaseTerms.otherCharges}
@@ -458,14 +444,16 @@ const LeaseRetailStoreMain = () => {
             leaseTerms: {
               ...prev.leaseTerms,
               availability: {
-                ...prev.leaseTerms.availability,
-                ...availability,
-                date: availability.availableImmediately ? new Date() : availability.date
+                date: availability.availableImmediately ? new Date() : availability.date,
+                availableImmediately: availability.availableImmediately,
+                preferredSaleDuration: availability.preferredSaleDuration,
+                noticePeriod: availability.noticePeriod,
+                isPetsAllowed: availability.isPetsAllowed,
+                operatingHours: availability.operatingHours
               }
             }
           }))}
         />
-
       ),
     },
     {
@@ -567,14 +555,32 @@ const LeaseRetailStoreMain = () => {
         };
 
         const transformedData = {
-          ...formData,
+          basicInformation: {
+            title: formData.basicInformation.title || '',
+            type: Array.isArray(formData.basicInformation.type) ? formData.basicInformation.type : [],
+            address: {
+              street: formData.basicInformation.address.street || '',
+              city: formData.basicInformation.address.city || '',
+              state: formData.basicInformation.address.state || '',
+              zipCode: formData.basicInformation.address.zipCode || ''
+            },
+            landmark: formData.basicInformation.landmark || '',
+            location: {
+              latitude: formData.basicInformation.location.latitude || '',
+              longitude: formData.basicInformation.location.longitude || ''
+            },
+            isCornerProperty: formData.basicInformation.isCornerProperty || false
+          },
+          propertyDetails: formData.propertyDetails,
           leaseTerms: {
             ...formData.leaseTerms,
+            availability: formData.leaseTerms.availability,
             brokerage: {
               required: formData.leaseTerms.brokerage.required || 'no',
               amount: formData.leaseTerms.brokerage.amount || 0
             }
           },
+          contactInformation: formData.contactInformation,
           media: convertedMedia,
           metadata: {
             createdBy: author,
@@ -586,6 +592,8 @@ const LeaseRetailStoreMain = () => {
             status: 'Available',
           }
         };
+
+        console.log('Sending data:', JSON.stringify(transformedData, null, 2));
 
         const response = await axios.post('/api/commercial/lease/retail-store', transformedData, {
           headers: {
@@ -605,7 +613,6 @@ const LeaseRetailStoreMain = () => {
     } finally {
       setIsSubmitting(false);
     }
-    console.log(formData);
   };
 
   const handleNext = () => {

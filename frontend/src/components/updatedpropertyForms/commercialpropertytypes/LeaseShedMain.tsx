@@ -68,25 +68,26 @@ interface FormDataType {
     propertyAge?: string | number | null;
     propertyCondition?: string;
   };
-  leaseAmount: {
-    amount?: number | null;
-    type?: string;
-    duration?: number | null;
-    durationUnit?: string;
-  };
-  leaseTenure: {
-    min?: number | null;
-    max?: number | null;
-    minUnit?: string;
-    maxUnit?: string;
-    lockInPeriod?: number | null;
-    lockInUnit?: string;
-    noticePeriod?: number | null;
-    noticePeriodUnit?: string;
-  };
-  maintenanceAmount: {
-    amount: number;
-    frequency: string;
+  leaseTerms: {
+    leaseAmount: {
+      amount: number;
+      type: string;
+      duration: number;
+      durationUnit: string;
+    };
+    leaseTenure: {
+      min: number;
+      max: number;
+      minUnit: string;
+      maxUnit: string;
+      lockInPeriod: number;
+      lockInUnit: string;
+      noticePeriod: number;
+      noticePeriodUnit: string;
+    };
+    maintenanceAmount: {
+      amount: number;
+      frequency: string;
   };
   otherCharges: {
     water: { type: string; amount: number };
@@ -109,7 +110,8 @@ interface FormDataType {
       restrictions?: string;
     };
   };
-  contactDetails: {
+};
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
@@ -127,6 +129,12 @@ interface FormDataType {
     };
     videoTour: File | null;
     documents: File[];
+  };
+  metadata: {
+    createdBy: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+    status: string;
   };
 }
 
@@ -179,21 +187,43 @@ const LeaseShedMain = () => {
     isCornerProperty: false,
     shedDetails: {},
     propertyDetails: {},
-    leaseAmount: {},
-    leaseTenure: {},
-    maintenanceAmount: {
-      amount: 0,
-      frequency: 'monthly'
-    },
-    otherCharges: {
+    leaseTerms: {
+      leaseAmount: {
+        amount: 0,
+        type: 'Fixed',
+        duration: 1,
+        durationUnit: 'month'
+      },
+      leaseTenure: {
+        min: 1,
+        max: 3,
+        minUnit: 'year',
+        maxUnit: 'year',
+        lockInPeriod: 1,
+        lockInUnit: 'year',
+        noticePeriod: 1,
+        noticePeriodUnit: 'month'
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: 'monthly'
+      },
+      otherCharges: {
       water: { type: 'inclusive', amount: 0 },
       electricity: { type: 'inclusive', amount: 0 },
       gas: { type: 'inclusive', amount: 0 },
       others: { type: 'inclusive', amount: 0 }
-    },
+      },
     brokerage: { required: 'no', amount: 0 },
-    availability: {},
-    contactDetails: {
+    availability: {
+      availableImmediately: false,
+      availableFrom: new Date(),
+      leaseDuration: '1 year',
+      noticePeriod: '1 month',
+      petsAllowed: false,
+    },
+  },
+    contactInformation: {
       name: '',
       email: '',
       phone: '',
@@ -211,6 +241,12 @@ const LeaseShedMain = () => {
       },
       videoTour: null,
       documents: []
+    },
+    metadata: {
+      createdBy: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: 'active',
     }
   });
 
@@ -302,9 +338,9 @@ const LeaseShedMain = () => {
             console.log("Setting tenure values:", updatedTenure);
             setFormData((prev) => ({ ...prev, leaseTenure: updatedTenure }));
           }} />
-          <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData((prev) => ({ ...prev, maintenanceAmount: maintenance }))} />
-          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => setFormData((prev) => ({ ...prev, otherCharges: charges }))} />
-          <Brokerage bro={formData.brokerage} onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, brokerage }))} />
+          <MaintenanceAmount maintenanceAmount={formData.leaseTerms.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData((prev) => ({ ...prev, leaseTerms: { ...prev.leaseTerms, maintenanceAmount: maintenance } }))} />
+          <OtherCharges otherCharges={formData.leaseTerms.otherCharges} onOtherChargesChange={(charges) => setFormData((prev) => ({ ...prev, leaseTerms: { ...prev.leaseTerms, otherCharges: charges } }))} />
+          <Brokerage bro={formData.leaseTerms.brokerage} onBrokerageChange={(brokerage) => setFormData((prev) => ({ ...prev, leaseTerms: { ...prev.leaseTerms, brokerage: brokerage } }))} />
         </div>
       ),
     },
@@ -322,7 +358,7 @@ const LeaseShedMain = () => {
       icon: <User className="w-6 h-6" />,
       component: renderFormSection(
         <div className="space-y-6">
-          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactDetails: contact }))} />
+          <CommercialContactDetails contactInformation={formData.contactInformation} onContactChange={(contact) => setFormData((prev) => ({ ...prev, contactInformation: contact }))} />
         </div>
       ),
     },
@@ -417,31 +453,31 @@ const LeaseShedMain = () => {
         }
         break;
       case 2: // Lease Terms
-        if (!formData.leaseAmount.amount) {
+        if (!formData.leaseTerms.leaseAmount.amount) {
           errors.leaseAmount = 'Lease amount is required';
         }
-        if (!formData.leaseAmount.type) {
+        if (!formData.leaseTerms.leaseAmount.type) {
           errors.leaseType = 'Lease type is required';
         }
-        if (!formData.leaseTenure.min) {
+        if (!formData.leaseTerms.leaseTenure.min) {
           errors.minTenure = 'Minimum tenure is required';
         }
-        if (!formData.leaseTenure.max) {
+        if (!formData.leaseTerms.leaseTenure.max) {
           errors.maxTenure = 'Maximum tenure is required';
         }
         break;
       case 4: // Contact Information
-        if (!formData.contactDetails.name) {
+        if (!formData.contactInformation.name) {
           errors.name = 'Name is required';
         }
-        if (!formData.contactDetails.email) {
+        if (!formData.contactInformation.email) {
           errors.email = 'Email is required';
-        } else if (!validateEmail(formData.contactDetails.email)) {
+        } else if (!validateEmail(formData.contactInformation.email)) {
           errors.email = 'Please enter a valid email address';
         }
-        if (!formData.contactDetails.phone) {
+        if (!formData.contactInformation.phone) {
           errors.phone = 'Phone number is required';
-        } else if (!validatePhone(formData.contactDetails.phone)) {
+        } else if (!validatePhone(formData.contactInformation.phone)) {
           errors.phone = 'Please enter a valid 10-digit phone number';
         }
         break;
@@ -505,7 +541,7 @@ const LeaseShedMain = () => {
     e.preventDefault();
 
     console.log('Form Data for submission:', formData);
-    console.log('LeaseTenure values for submission:', formData.leaseTenure);
+    console.log('LeaseTenure values for submission:', formData.leaseTerms.leaseTenure);
 
     setIsSubmitting(true);
 
@@ -518,248 +554,246 @@ const LeaseShedMain = () => {
 
       const author = JSON.parse(user).id;
 
-      // Transform media data
-      // const processMediaData = async () => {
-      //   const convertedPhotos: Record<string, string[]> = {
-      //     exterior: [],
-      //     interior: [],
-      //     floorPlan: [],
-      //     washrooms: [],
-      //     lifts: [],
-      //     emergencyExits: []
-      //   };
 
-      //   // Debug the media categories
-      //   // console.log("Media images categories:", formData.media.images.map(cat => cat.category));
+      const processMediaData = async () => {
+        const convertedPhotos: Record<string, string[]> = {
+          exterior: [],
+          interior: [],
+          floorPlan: [],
+          washrooms: [],
+          lifts: [],
+          emergencyExits: []
+        };
 
-      //   // Helper function to normalize category names
-      //   const normalizeCategory = (category: string): string => {
-      //     // Map any variations of category names to the correct keys in convertedPhotos
-      //     const categoryMap: Record<string, string> = {
-      //       'exterior': 'exterior',
-      //       'interior': 'interior',
-      //       'floorplan': 'floorPlan',
-      //       'floorPlan': 'floorPlan',
-      //       'floor plan': 'floorPlan',
-      //       'washrooms': 'washrooms',
-      //       'lifts': 'lifts',
-      //       'emergencyexits': 'emergencyExits',
-      //       'emergencyExits': 'emergencyExits',
-      //       'emergency exits': 'emergencyExits'
-      //     };
+        // Debug the media categories
+        // console.log("Media images categories:", formData.media.images.map(cat => cat.category));
 
-      //     return categoryMap[category.toLowerCase()] || category.toLowerCase();
-      //   };
-      //   // Process images
-      //   for (const category in formData.media.photos) {
-      //     const originalCategory = category;
-      //     const normalizedCategory = normalizeCategory(originalCategory);
+        // Helper function to normalize category names
+        const normalizeCategory = (category: string): string => {
+          // Map any variations of category names to the correct keys in convertedPhotos
+          const categoryMap: Record<string, string> = {
+            'exterior': 'exterior',
+            'interior': 'interior',
+            'floorplan': 'floorPlan',
+            'floorPlan': 'floorPlan',
+            'floor plan': 'floorPlan',
+            'washrooms': 'washrooms',
+            'lifts': 'lifts',
+            'emergencyexits': 'emergencyExits',
+            'emergencyExits': 'emergencyExits',
+            'emergency exits': 'emergencyExits'
+          };
 
-      //     console.log(`Processing category: ${originalCategory} -> normalized to: ${normalizedCategory}`);
-      //     if (normalizedCategory in convertedPhotos) {
-      //       const filePromises = formData.media.photos[category].map((f: { file: File; url: string; }) =>
-      //         f.file ? convertFileToBase64(f.file) : f.url
-      //       );
-      //       convertedPhotos[normalizedCategory as keyof typeof convertedPhotos] = await Promise.all(filePromises);
-      //       console.log(`Converted ${convertedPhotos[normalizedCategory as keyof typeof convertedPhotos].length} files for ${normalizedCategory}`);
-      //     } else {
-      //       console.log(`Category not found: ${originalCategory} (normalized: ${normalizedCategory})`);
-      //     }
-      //   }
+          return categoryMap[category.toLowerCase()] || category.toLowerCase();
+        };
+        // Process images
+        for (const category in formData.media.photos) {
+          const originalCategory = category;
+          const normalizedCategory = normalizeCategory(originalCategory);
 
-      //   // Process video
-      //   let videoTour = '';
-      //   if (formData.media.videoTour?.file) {
-      //     videoTour = await convertFileToBase64(formData.media.videoTour.file);
-      //   } else if (formData.media.videoTour?.url) {
-      //     videoTour = formData.media.videoTour.url;
-      //   }
+          console.log(`Processing category: ${originalCategory} -> normalized to: ${normalizedCategory}`);
+          if (normalizedCategory in convertedPhotos) {
+            const filePromises = formData.media.photos[category as keyof typeof formData.media.photos].map((file: File) =>
+              convertFileToBase64(file)
+            );
+            convertedPhotos[normalizedCategory as keyof typeof convertedPhotos] = await Promise.all(filePromises);
+            console.log(`Converted ${convertedPhotos[normalizedCategory as keyof typeof convertedPhotos].length} files for ${normalizedCategory}`);
+          } else {
+            console.log(`Category not found: ${originalCategory} (normalized: ${normalizedCategory})`);
+          }
+        }
 
-      //   // Process documents
-      //   const documents = await Promise.all(
-      //     formData.media.documents.map(doc =>
-      //       doc.file ? convertFileToBase64(doc.file) : doc.type
-      //     )
-      //   );
+        // Process video
+        let videoTour = '';
+        if (formData.media.videoTour) {
+          videoTour = await convertFileToBase64(formData.media.videoTour);
+        }
 
-      //   return {
-      //     photos: convertedPhotos,
-      //     videoTour,
-      //     documents
-      //   };
-      // };
+        // Process documents
+        const documents = await Promise.all(
+          formData.media.documents.map(doc => 
+            typeof doc === 'string' ? doc : convertFileToBase64(doc)
+          )
+        );
 
-      // // Ensure proper capitalization for enum values
-      // const leaseAmountType = formData.leaseAmount.type ?
-      //   formData.leaseAmount.type.charAt(0).toUpperCase() + formData.leaseAmount.type.slice(1) : 'Fixed';
+        return {
+          photos: convertedPhotos,
+          videoTour,
+          documents
+        };
+      };
 
-      // // Fix maintenance frequency format to match backend expectations
-      // let maintenanceFrequency = '';
-      // if (formData.maintenanceAmount.frequency) {
-      //   // Convert frequencies to match backend enum exactly
-      //   const frequencyMap: Record<string, string> = {
-      //     'monthly': 'Monthly',
-      //     'quarterly': 'Quarterly',
-      //     'yearly': 'Yearly',
-      //     'half-yearly': 'Half-Yearly',
-      //     'half yearly': 'Half-Yearly'
-      //   };
-      //   maintenanceFrequency = frequencyMap[formData.maintenanceAmount.frequency.toLowerCase()] || 'Monthly';
-      // } else {
-      //   maintenanceFrequency = 'Monthly';
-      // }
+      // Ensure proper capitalization for enum values
+      const leaseAmountType = formData.leaseTerms.leaseAmount.type ?
+        formData.leaseTerms.leaseAmount.type.charAt(0).toUpperCase() + formData.leaseTerms.leaseAmount.type.slice(1) : 'Fixed';
 
-      // console.log("Original frequency:", formData.maintenanceAmount.frequency);
-      // console.log("Mapped frequency:", maintenanceFrequency);
+      // Fix maintenance frequency format to match backend expectations
+      let maintenanceFrequency = '';
+      if (formData.leaseTerms.maintenanceAmount.frequency) {
+        // Convert frequencies to match backend enum exactly
+        const frequencyMap: Record<string, string> = {
+          'monthly': 'Monthly',
+          'quarterly': 'Quarterly',
+          'yearly': 'Yearly',
+          'half-yearly': 'Half-Yearly',
+          'half yearly': 'Half-Yearly'
+        };
+        maintenanceFrequency = frequencyMap[formData.leaseTerms.maintenanceAmount.frequency.toLowerCase()] || 'Monthly';
+      } else {
+        maintenanceFrequency = 'Monthly';
+      }
 
-      // const mediaData = await processMediaData();
+      console.log("Original frequency:", formData.leaseTerms.maintenanceAmount.frequency);
+      console.log("Mapped frequency:", maintenanceFrequency);
 
-      // // Fix the additionaldetails field mapping
-      // const shedDetails = {
-      //   totalArea: formData.shedDetails.totalArea || 0,
-      //   carpetArea: formData.shedDetails.carpetArea || 0,
-      //   height: formData.shedDetails.height || 0,
-      //   entranceWidth: formData.shedDetails.entranceWidth || 0,
-      //   additionaldetails: formData.shedDetails.additionalDetails || '' // Map from additionalDetails to additionaldetails
-      // };
+      const mediaData = await processMediaData();
 
-      // // Check the leaseTenure values before creating the payload
-      // console.log("LeaseTenure values for payload:", {
-      //   min: formData.leaseTenure.min,
-      //   max: formData.leaseTenure.max,
-      //   minType: typeof formData.leaseTenure.min,
-      //   maxType: typeof formData.leaseTenure.max
-      // });
+      // Fix the additionaldetails field mapping
+      const shedDetails = {
+        totalArea: formData.shedDetails.totalArea || 0,
+        carpetArea: formData.shedDetails.carpetArea || 0,
+        height: formData.shedDetails.height || 0,
+        entranceWidth: formData.shedDetails.entranceWidth || 0,
+        additionaldetails: formData.shedDetails.additionalDetails || '' // Map from additionalDetails to additionaldetails
+      };
 
-      // // Convert form data to match backend model
-      // const payload = {
-      //   basicInformation: {
-      //     title: formData.propertyName,
-      //     shedType: formData.shedType,
-      //     address: {
-      //       street: formData.address.street || '',
-      //       city: formData.address.city || '',
-      //       state: formData.address.state || '',
-      //       zipCode: formData.address.zipCode || ''
-      //     },
-      //     landmark: formData.landmark,
-      //     location: {
-      //       latitude: parseFloat(formData.coordinates.latitude) || 0,
-      //       longitude: parseFloat(formData.coordinates.longitude) || 0
-      //     },
-      //     isCornerProperty: formData.isCornerProperty
-      //   },
-      //   shedDetails: shedDetails,
-      //   propertyDetails: {
-      //     area: {
-      //       totalArea: formData.propertyDetails.area?.totalArea || 0,
-      //       builtUpArea: formData.propertyDetails.area?.builtUpArea || 0,
-      //       carpetArea: formData.propertyDetails.area?.carpetArea || 0
-      //     },
-      //     floor: {
-      //       floorNumber: formData.propertyDetails.floor?.floorNumber || 0,
-      //       totalFloors: formData.propertyDetails.floor?.totalFloors || 0
-      //     },
-      //     facingDirection: formData.propertyDetails.facingDirection || '',
-      //     furnishingStatus: formData.propertyDetails.furnishingStatus || '',
-      //     propertyAmenities: formData.propertyDetails.propertyAmenities || [],
-      //     wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || [],
-      //     electricitySupply: {
-      //       powerLoad: formData.propertyDetails.electricitySupply?.powerLoad || 0,
-      //       backup: formData.propertyDetails.electricitySupply?.backup || false
-      //     },
-      //     waterAvailability: formData.propertyDetails.waterAvailability || '',
-      //     propertyAge: formData.propertyDetails.propertyAge ? Number(formData.propertyDetails.propertyAge) : 0,
-      //     propertyCondition: formData.propertyDetails.propertyCondition || ''
-      //   },
-      //   leaseTerms: {
-      //     leaseDetails: {
-      //       leaseAmount: {
-      //         amount: formData.leaseAmount.amount || 0,
-      //         type: leaseAmountType as 'Fixed' | 'Negotiable',
-      //         duration: formData.leaseAmount.duration || 1,
-      //         durationUnit: formData.leaseAmount.durationUnit || 'month'
-      //       }
-      //     },
-      //     tenureDetails: {
-      //       minimumTenure: formData.leaseTenure.min !== null && formData.leaseTenure.min !== undefined ? Number(formData.leaseTenure.min) : 1,
-      //       minimumUnit: formData.leaseTenure.minUnit || 'year',
-      //       maximumTenure: formData.leaseTenure.max !== null && formData.leaseTenure.max !== undefined ? Number(formData.leaseTenure.max) : 3,
-      //       maximumUnit: formData.leaseTenure.maxUnit || 'year',
-      //       lockInPeriod: formData.leaseTenure.lockInPeriod !== null && formData.leaseTenure.lockInPeriod !== undefined ? Number(formData.leaseTenure.lockInPeriod) : 1,
-      //       lockInUnit: formData.leaseTenure.lockInUnit || 'year',
-      //       noticePeriod: formData.leaseTenure.noticePeriod !== null && formData.leaseTenure.noticePeriod !== undefined ? Number(formData.leaseTenure.noticePeriod) : 1,
-      //       noticePeriodUnit: formData.leaseTenure.noticePeriodUnit || 'month'
-      //     },
-      //     maintenanceAmount: {
-      //       amount: formData.maintenanceAmount.amount || 0,
-      //       frequency: maintenanceFrequency as 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly'
-      //     },
-      //     otherCharges: {
-      //       waterCharges: {
-      //         type: formData.otherCharges.waterCharges?.type || 'inclusive',
-      //         amount: formData.otherCharges.waterCharges?.amount || 0
-      //       },
-      //       electricityCharges: {
-      //         type: formData.otherCharges.electricityCharges?.type || 'inclusive',
-      //         amount: formData.otherCharges.electricityCharges?.amount || 0
-      //       },
-      //       gasCharges: {
-      //         type: formData.otherCharges.gasCharges?.type || 'inclusive',
-      //         amount: formData.otherCharges.gasCharges?.amount || 0
-      //       },
-      //       otherCharges: {
-      //         type: formData.otherCharges.otherCharges?.type || 'inclusive',
-      //         amount: formData.otherCharges.otherCharges?.amount || 0
-      //       }
-      //     },
-      //     brokerage: {
-      //       required: formData.brokerage.required?.toLowerCase() || 'no',
-      //       amount: formData.brokerage.amount
-      //     },
-      //     availability: {
-      //       availableImmediately: formData.availability.availableImmediately || false,
-      //       availableFrom: formData.availability.availableFrom || new Date(),
-      //       leaseDuration: formData.availability.leaseDuration || '1 year',
-      //       noticePeriod: formData.availability.noticePeriod || '1 month',
-      //       petsAllowed: formData.availability.petsAllowed || false,
-      //       operatingHours: {
-      //         restricted: formData.availability.operatingHours?.restricted || false,
-      //         restrictions: formData.availability.operatingHours?.restrictions || ''
-      //       }
-      //     }
-      //   },
-      //   contactInformation: {
-      //     name: formData.contactDetails.name || '',
-      //     email: formData.contactDetails.email || '',
-      //     phone: formData.contactDetails.phone || '',
-      //     alternatePhone: formData.contactDetails.alternatePhone,
-      //     bestTimeToContact: formData.contactDetails.bestTimeToContact
-      //   },
-      //   media: mediaData,
-      //   metadata: {
-      //     createdBy: author,
-      //     createdAt: new Date(),
-      //     updatedAt: new Date(),
-      //     status: 'active',
-      //     views: 0,
-      //     favorites: 0,
-      //     isVerified: false
-      //   }
-      // };
+      // Check the leaseTenure values before creating the payload
+      console.log("LeaseTenure values for payload:", {
+        min: formData.leaseTerms.leaseTenure.min,
+        max: formData.leaseTerms.leaseTenure.max,
+        minType: typeof formData.leaseTerms.leaseTenure.min,
+        maxType: typeof formData.leaseTerms.leaseTenure.max
+      });
 
-      // console.log('Payload:', payload);
+      // Convert form data to match backend model
+      const payload = {
+        basicInformation: {
+          title: formData.propertyName,
+          type: formData.type,
+          address: {
+            street: formData.address.street || '',
+            city: formData.address.city || '',
+            state: formData.address.state || '',
+            zipCode: formData.address.zipCode || ''
+          },
+          landmark: formData.landmark,
+          location: {
+            latitude: parseFloat(formData.coordinates.latitude) || 0,
+            longitude: parseFloat(formData.coordinates.longitude) || 0
+          },
+          isCornerProperty: formData.isCornerProperty
+        },
+        shedDetails: shedDetails,
+        propertyDetails: {
+          area: {
+            totalArea: formData.propertyDetails.area?.totalArea || 0,
+            builtUpArea: formData.propertyDetails.area?.builtUpArea || 0,
+            carpetArea: formData.propertyDetails.area?.carpetArea || 0
+          },
+          floor: {
+            floorNumber: formData.propertyDetails.floor?.floorNumber || 0,
+            totalFloors: formData.propertyDetails.floor?.totalFloors || 0
+          },
+          facingDirection: formData.propertyDetails.facingDirection || '',
+          furnishingStatus: formData.propertyDetails.furnishingStatus || '',
+          propertyAmenities: formData.propertyDetails.propertyAmenities || [],
+          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || [],
+          electricitySupply: {
+            powerLoad: formData.propertyDetails.electricitySupply?.powerLoad || 0,
+            backup: formData.propertyDetails.electricitySupply?.backup || false
+          },
+          waterAvailability: formData.propertyDetails.waterAvailability || '',
+          propertyAge: formData.propertyDetails.propertyAge ? Number(formData.propertyDetails.propertyAge) : 0,
+          propertyCondition: formData.propertyDetails.propertyCondition || ''
+        },
+        leaseTerms: {
+          leaseDetails: {
+            leaseAmount: {
+              amount: formData.leaseTerms.leaseAmount.amount || 0,
+              type: leaseAmountType as 'Fixed' | 'Negotiable',
+              duration: formData.leaseTerms.leaseAmount.duration || 1,
+              durationUnit: formData.leaseTerms.leaseAmount.durationUnit || 'month'
+            }
+          },
+          tenureDetails: {
+            minimumTenure: formData.leaseTerms.leaseTenure.min !== null && formData.leaseTerms.leaseTenure.min !== undefined ? Number(formData.leaseTerms.leaseTenure.min) : 1,
+            minimumUnit: formData.leaseTerms.leaseTenure.minUnit || 'year',
+            maximumTenure: formData.leaseTerms.leaseTenure.max !== null && formData.leaseTerms.leaseTenure.max !== undefined ? Number(formData.leaseTerms.leaseTenure.max) : 3,
+            maximumUnit: formData.leaseTerms.leaseTenure.maxUnit,
+            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod !== null && formData.leaseTerms.leaseTenure.lockInPeriod !== undefined ? Number(formData.leaseTerms.leaseTenure.lockInPeriod) : 1,
+            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || 'year',
+            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod !== null && formData.leaseTerms.leaseTenure.noticePeriod !== undefined ? Number(formData.leaseTerms.leaseTenure.noticePeriod) : 1,
+            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || 'month'
+          },
+          maintenanceAmount: {
+            amount: formData.leaseTerms.maintenanceAmount.amount || 0,
+            frequency: maintenanceFrequency as 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly'
+          },
+          otherCharges: {
+            waterCharges: {
+              type: formData.leaseTerms.otherCharges.water.type || 'inclusive',
+              amount: formData.leaseTerms.otherCharges.water.amount || 0
+            },
+            electricityCharges: {
+              type: formData.leaseTerms.otherCharges.electricity.type || 'inclusive',
+              amount: formData.leaseTerms.otherCharges.electricity.amount || 0
+            },
+            gas: {
+              type: formData.leaseTerms.otherCharges.gas?.type || 'inclusive',
+              amount: formData.leaseTerms.otherCharges.gas?.amount || 0
+            },
+            others: {
+              type: formData.leaseTerms.otherCharges.others?.type || 'inclusive',
+              amount: formData.leaseTerms.otherCharges.others?.amount || 0
+            }
+          },
+          brokerage: {
+                required: formData.leaseTerms.brokerage.required?.toLowerCase() || 'no',
+            amount: formData.leaseTerms.brokerage.amount
+          },
+          availability: {
+            availableImmediately: formData.leaseTerms.availability.availableImmediately || false,
+            availableFrom: formData.leaseTerms.availability.availableFrom || new Date(),
+            leaseDuration: formData.leaseTerms.availability.leaseDuration || '1 year',
+            noticePeriod: formData.leaseTerms.availability.noticePeriod || '1 month',
+            petsAllowed: formData.leaseTerms.availability.petsAllowed || false,
+            operatingHours: {
+              restricted: formData.leaseTerms.availability.operatingHours?.restricted || false,
+              restrictions: formData.leaseTerms.availability.operatingHours?.restrictions || ''
+            }
+          }
+        },
+        contactInformation: {
+          name: formData.contactInformation.name || '',
+          email: formData.contactInformation.email || '',
+          phone: formData.contactInformation.phone || '',
+          alternatePhone: formData.contactInformation.alternatePhone,
+          bestTimeToContact: formData.contactInformation.bestTimeToContact
+        },
+        media: mediaData,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          status: 'active',
+          views: 0,
+          favorites: 0,
+          isVerified: false
+        }
+      };
 
-      // // Using the correct API endpoint pattern based on other similar components
-      // // Looking at similar files, we'll use the plural form
-      // const response = await axios.post('/api/commercial/lease/sheds', payload);
+      console.log('Payload:', payload);
 
-      // if (response.status === 201) {
-      //   toast.success('Property listed successfully!');
-      //   navigate('/dashboard');
-      // } else {
-      //   toast.error('Failed to list property. Please try again.');
-      // }
+      // Using the correct API endpoint pattern based on other similar components
+      // Looking at similar files, we'll use the plural form
+      const response = await axios.post('/api/commercial/lease/sheds', payload);
+
+      if (response.status === 201) {
+        toast.success('Property listed successfully!');
+        navigate('/dashboard');
+      } else {
+        toast.error('Failed to list property. Please try again.');
+      }
     } catch (error) {
       console.error('Error submitting property:', error);
       toast.error('An error occurred. Please try again later.');

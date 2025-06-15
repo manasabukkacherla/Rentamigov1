@@ -576,6 +576,7 @@ const LeaseShowroomMain = () => {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setIsSubmitting(true);
+    console.log(formData);
     try {
       const user = sessionStorage.getItem('user');
       if (user) {

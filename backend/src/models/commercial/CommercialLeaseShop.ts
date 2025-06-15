@@ -284,7 +284,7 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
     status: { type: String, default: 'Available' }
   }
 }, {
-  timestamps: true
+  timestamps: false
 });
 
 // Indexes

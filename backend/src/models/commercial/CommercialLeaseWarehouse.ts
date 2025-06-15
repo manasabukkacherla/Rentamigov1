@@ -154,7 +154,7 @@ export interface ICommercialLeaseWarehouse extends Document {
 
 // Schema
 const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
-    propertyId: { type: String, required: true, unique: true },
+    propertyId: { type: String, unique: false },
     basicInformation: {
         title: { type: String },
         Type: [{ type: String }],
@@ -171,6 +171,8 @@ const CommercialLeaseWarehouseSchema = new Schema<ICommercialLeaseWarehouse>({
         },
         isCornerProperty: { type: Boolean }
     },
+
+    
     coveredSpaceDetails: {
         totalArea: { type: Number },
         ceilingHeight: { type: Number },

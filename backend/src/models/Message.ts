@@ -18,13 +18,18 @@ const MessageSchema: Schema = new Schema(
   {
     // 'senderId' is a reference to a User document.
     senderId: {
-  type: mongoose.Schema.Types.Mixed,  // 👈 allows ObjectId or "bot"
-  required: true,
-},
-receiverId: {
-  type: mongoose.Schema.Types.Mixed,  // 👈 allows ObjectId or "bot"
-  required: true,
-},
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
+    // 'receiverId' is a reference to a User document.
+    receiverId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+
     // 'roomId' is a string that identifies the conversation room.
     roomId: { type: String, required: true },
 

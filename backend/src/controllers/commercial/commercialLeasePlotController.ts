@@ -258,7 +258,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 
         // Generate property ID
         const propertyId = await generatePropertyId();
-
+        console.log("Property ID:", propertyId);
         // Create the complete plot data
         const plotData = {
             propertyId,
