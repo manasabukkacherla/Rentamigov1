@@ -27,10 +27,9 @@ interface IBasicInformation {
 interface IPricingDetails {
   propertyPrice: number;
   pricetype: "fixed" | "negotiable";
-  pricecalculator: {
-    area: number;
-    totalprice: number;
-  };
+  area: number;
+  totalprice: number;
+  pricePerSqft: number;
 }
 
 interface IAvailability {
@@ -178,10 +177,9 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   pricingDetails: {
     propertyPrice: { type: Number, required: true },
     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
-    pricecalculator: {
-      area: { type: Number, required: true },
-      totalprice: { type: Number, required: true },
-    },
+    area: { type: Number, required: true },
+    totalprice: { type: Number, required: true },
+    pricePerSqft: { type: Number, required: true },
   },
   registration: {
     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
