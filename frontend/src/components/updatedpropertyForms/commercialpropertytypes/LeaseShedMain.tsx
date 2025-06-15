@@ -669,7 +669,7 @@ const LeaseShedMain = () => {
       const payload = {
         basicInformation: {
           title: formData.propertyName,
-          type: formData.type,
+          Type: formData.Type,
           address: {
             street: formData.address.street || '',
             city: formData.address.city || '',

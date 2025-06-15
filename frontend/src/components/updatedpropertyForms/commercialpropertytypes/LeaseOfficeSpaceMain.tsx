@@ -39,7 +39,7 @@ interface OfficeDetails {
 
 interface FormData {
   title: string;
-  officeType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -103,7 +103,7 @@ const LeaseOfficeSpaceMain = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    officeType: [] as string[],
+    Type: [] as string[],
     address: {
       street: '',
       city: '',
@@ -194,7 +194,7 @@ const LeaseOfficeSpaceMain = () => {
               <PropertyName propertyName={formData.title} onPropertyNameChange={(propertyName) => setFormData(prev => ({ ...prev, title: propertyName }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <OfficeSpaceType onOfficeTypeChange={(type) => setFormData(prev => ({ ...prev, officeType: type }))} />
+            <OfficeSpaceType onOfficeTypeChange={(type) => setFormData(prev => ({ ...prev, Type: type }))} />
           </div>
 
           <div className="space-y-6">
@@ -340,7 +340,7 @@ const LeaseOfficeSpaceMain = () => {
     switch (currentStep) {
       case 0: // Basic Information
         return !!formData.title &&
-          formData.officeType.length > 0 &&
+          formData.Type.length > 0 &&
           !!formData.address.street &&
           !!formData.address.city &&
           !!formData.address.state &&
@@ -607,7 +607,7 @@ const LeaseOfficeSpaceMain = () => {
       propertyId: propertyId,
       basicInformation: {
         title: formData.title || '',
-        officeType: formData.officeType || [],
+        Type: formData.Type || [],
         address: {
           street: formData.address.street || '',
           city: formData.address.city || '',

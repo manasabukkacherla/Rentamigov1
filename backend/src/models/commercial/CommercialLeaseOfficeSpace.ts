@@ -15,7 +15,7 @@ export interface ICommercialLeaseOfficeSpace extends Document {
   propertyId: string;
   basicInformation: {
     title: string;
-    type: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -146,7 +146,7 @@ const CommercialLeaseOfficeSpaceSchema = new Schema<ICommercialLeaseOfficeSpace>
   propertyId: { type: String, required: false, unique: false },
   basicInformation: {
     title: { type: String, required: false },
-    type: { type: [String], required: false },
+    Type: { type: [String], required: false },
     address: {
       street: { type: String, required: false },
       city: { type: String, required: false },

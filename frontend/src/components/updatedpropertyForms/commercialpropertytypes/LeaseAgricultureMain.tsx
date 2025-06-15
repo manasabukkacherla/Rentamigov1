@@ -43,25 +43,26 @@ interface FormData {
   };
  
   powerSupply: boolean;
-  landDetails: {
-    totalArea: number;
-    type: string;
-    
-    irrigation: boolean;
-    fencing: boolean;
-    cropSuitability: string;
-    waterSource: string;
-    legalClearances: boolean;
-  };
+ 
   propertyDetails: {
     area: {
       totalArea: number;
       carpetArea: number;
       builtUpArea: number;
     };
-    
+   landDetails: {
+      totalArea: number;
+      type: string;
+      
+      irrigation: boolean;
+      fencing: boolean;
+      cropSuitability: string;
+      waterSource: string;
+      legalClearances: boolean;
+
 
   };
+},
   leaseTerms: {
   leaseAmount: {
     amount: number;
@@ -143,24 +144,23 @@ const LeaseAgricultureMain = () => {
       isCornerProperty: false,
     },
     powerSupply: false,
-    landDetails: {
-      totalArea: 0,
-      type: '',
-      irrigation: false,
-      fencing: false,
-      cropSuitability: '',
-      waterSource: '',
-      legalClearances: false
-    },
-    propertyDetails: {
+      propertyDetails: {
       area: {
         totalArea: 0,
         carpetArea: 0,
         builtUpArea: 0
       },
-      
-
+      landDetails: {
+        totalArea: 0,
+        type: '',
+        irrigation: false,
+        fencing: false,
+        cropSuitability: '',
+        waterSource: '',
+        legalClearances: false
+      }
     },
+    
     leaseTerms: {
     leaseAmount: {
       amount: 0,
@@ -308,7 +308,7 @@ const LeaseAgricultureMain = () => {
             <AgriculturalLandDetails
               onDetailsChange={(details) => setFormData(prev => ({
                 ...prev,
-                landDetails: { ...prev.landDetails, ...details }
+                propertyDetails: { ...prev.propertyDetails, ...details }
               }))}
             />
             {/* <CommercialPropertyDetails

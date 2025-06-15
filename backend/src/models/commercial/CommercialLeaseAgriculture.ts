@@ -154,7 +154,16 @@ const CommercialLeaseAgriculture = new Schema({
     },
     isCornerProperty: { type: Boolean, default: false },
   },
-  landDetails: {
+
+
+  
+  propertyDetails: {
+    area: {
+      totalArea: { type: Number },
+      carpetArea: { type: Number },
+      builtUpArea: { type: Number }
+    },
+    landDetails: {
     totalArea: { type: Number, default: 0 },
     soilType: { type: String },
     irrigation: { type: Boolean, default: false },
@@ -162,15 +171,9 @@ const CommercialLeaseAgriculture = new Schema({
     cropSuitability: { type: String },
     waterSource: { type: String },
     legalClearances: { type: Boolean, default: false }
-  },
-  propertyDetails: {
-    area: {
-      totalArea: { type: Number },
-      carpetArea: { type: Number },
-      builtUpArea: { type: Number }
-    }
     
-  },
+  }
+},
   leaseAmount: {
     amount: { type: Number, default: 0 },
     duration: { type: Number, default: 0 },

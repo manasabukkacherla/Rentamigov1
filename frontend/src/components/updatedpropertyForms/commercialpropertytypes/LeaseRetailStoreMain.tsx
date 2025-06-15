@@ -557,7 +557,7 @@ const LeaseRetailStoreMain = () => {
         const transformedData = {
           basicInformation: {
             title: formData.basicInformation.title || '',
-            type: Array.isArray(formData.basicInformation.type) ? formData.basicInformation.type : [],
+            type: Array.isArray(formData.basicInformation.Type) ? formData.basicInformation.Type : [],
             address: {
               street: formData.basicInformation.address.street || '',
               city: formData.basicInformation.address.city || '',

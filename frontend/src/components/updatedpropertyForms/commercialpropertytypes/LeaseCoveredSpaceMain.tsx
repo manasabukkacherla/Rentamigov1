@@ -24,7 +24,7 @@ import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
   basicInformation: {
     title: string;
-    landType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -41,7 +41,13 @@ interface FormData {
  
   powerSupply: boolean;
 
-  landDetails: {
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+    landDetails: {
     totalArea: number;
     type: string;
     irrigation: boolean;
@@ -51,14 +57,8 @@ interface FormData {
     legalClearances: boolean;
   };
 
-  propertyDetails: {
-    area: {
-      totalArea: number;
-      carpetArea: number;
-      builtUpArea: number;
-    };
-  };
 
+  },
   leaseTerms: {
   leaseAmount: {
     amount: number;
@@ -124,7 +124,8 @@ interface FormData {
     videoTour: File | null;
     documents: File[];
   };
-}
+};
+
 
 const LeaseCoveredSpaceMain = () => {
   const navigate = useNavigate();
@@ -132,7 +133,7 @@ const LeaseCoveredSpaceMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      landType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -144,21 +145,22 @@ const LeaseCoveredSpaceMain = () => {
       isCornerProperty: false,
     },
     powerSupply: false,
-    landDetails: {
-      totalArea: 0,
-      type: '',
-      irrigation: false,
-      fencing: false,
-      cropSuitability: '',
-      waterSource: '',
-      legalClearances: false,
-    },
+    
     propertyDetails: {
       area: {
         totalArea: 0,
         carpetArea: 0,
         builtUpArea: 0,
-      }
+      },
+      landDetails: {
+        totalArea: 0,
+        type: '',
+        irrigation: false,
+        fencing: false,
+        cropSuitability: '',
+        waterSource: '',
+        legalClearances: false,
+      },
     },
     leaseTerms: {
     leaseAmount: {
@@ -267,7 +269,7 @@ const LeaseCoveredSpaceMain = () => {
       icon: <Building2 className="w-6 h-6" />,
       content: (
         <div className="space-y-8"><CoveredOpenSpaceDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, spaceDetails: details }))} />
-          <CommercialPropertyDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, propertyDetails: details }))} />
+          <CommercialPropertyDetails onDetailsChange={(details) => setFormData(prev => ({ ...prev, propertyDetails: { ...prev.propertyDetails, ...details } }))} />
         </div>
       )
     },
@@ -505,13 +507,13 @@ const LeaseCoveredSpaceMain = () => {
     };
 
     // Format the lease type and frequency values
-    const leaseType = formatEnumValue(formData.leaseTerms.leaseAmount?.type, 'leaseType');
+    const leaseType = formatEnumValue(formData.leaseTerms.leaseAmount?.durationType, 'leaseType');
     const maintenanceFrequency = formatEnumValue(formData.leaseTerms.maintenanceAmount?.frequency, 'frequency');
 
     // Enhanced debugging for property age and other charges
     console.log('Frontend Form Data:', formData);
-    console.log('Property Age (raw):', formData.propertyDetails?.propertyAge);
-    console.log('Property Age Type:', typeof formData.propertyDetails?.propertyAge);
+    console.log('Property Age (raw):', formData.propertyDetails?.landDetails?.cropSuitability);
+    console.log('Property Age Type:', typeof formData.propertyDetails?.landDetails?.cropSuitability);
     console.log('Other Charges (Full Object):', formData.leaseTerms.otherCharges);
 
     // Helper function to handle charge types and amounts
@@ -543,14 +545,14 @@ const LeaseCoveredSpaceMain = () => {
     const backendData = {
       basicInformation: {
         title: formData.basicInformation.title || '',
-        shedType: formData.basicInformation.type || [],
+        Type: formData.basicInformation.Type || [],
         address: {
           street: formData.basicInformation.address.street || '',
           city: formData.basicInformation.address.city || '',
           state: formData.basicInformation.address.state || '',
           zipCode: formData.basicInformation.address.zipCode || ''
         },
-        landmark: formData.landmark || '',
+        landmark: formData.basicInformation.landmark || '',
         location: {
           latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
           longitude: parseFloat(formData.basicInformation.location.longitude) || 0
@@ -559,13 +561,13 @@ const LeaseCoveredSpaceMain = () => {
       },
       coveredSpaceDetails: {
         totalArea: Number(formData.propertyDetails?.area?.totalArea) || 0,
-        sqaurefeet: formData.propertyDetails?.area?.squareFeet || String(formData.propertyDetails?.area?.totalArea || '0'),
-        coveredarea: Number(formData.propertyDetails?.area?.coveredArea) || 0,
-        roadwidth: Number(formData.propertyDetails?.area?.roadWidth) || 0,
-        roadfeet: formData.propertyDetails?.area?.roadWidthUnit || '',
-        ceilingheight: Number(formData.propertyDetails?.area?.ceilingHeight) || 0,
-        ceilingfeet: formData.propertyDetails?.area?.ceilingHeightUnit || '',
-        noofopenslides: Number(formData.propertyDetails?.area?.openSides) || 0
+        sqaurefeet: formData.propertyDetails?.area?.builtUpArea || String(formData.propertyDetails?.area?.totalArea || '0'),
+        coveredarea: Number(formData.propertyDetails?.area?.carpetArea) || 0,
+        roadwidth: Number(formData.propertyDetails?.area?.totalArea) || 0,
+        roadfeet: formData.propertyDetails?.area?.builtUpArea || '',
+        ceilingheight: Number(formData.propertyDetails?.area?.totalArea) || 0,
+        ceilingfeet: formData.propertyDetails?.area?.builtUpArea || '',
+        noofopenslides: Number(formData.propertyDetails?.area?.totalArea) || 0
       },
       propertyDetails: {
         area: {
@@ -573,43 +575,20 @@ const LeaseCoveredSpaceMain = () => {
           builtUpArea: Number(formData.propertyDetails?.area?.builtUpArea) || 0,
           carpetArea: Number(formData.propertyDetails?.area?.carpetArea) || 0
         },
-        floor: {
-          floorNumber: Number(formData.propertyDetails?.floor?.floorNumber) || 0,
-          totalFloors: Number(formData.propertyDetails?.floor?.totalFloors) || 0
-        },
-        facingDirection: formData.propertyDetails?.facingDirection || '',
-        furnishingStatus: formData.propertyDetails?.furnishingStatus || '',
-        propertyAmenities: Array.isArray(formData.propertyDetails?.propertyAmenities)
-          ? formData.propertyDetails.propertyAmenities
-          : [],
-        wholeSpaceAmenities: Array.isArray(formData.propertyDetails?.wholeSpaceAmenities)
-          ? formData.propertyDetails.wholeSpaceAmenities
-          : [],
-        electricitySupply: {
-          powerLoad: Number(formData.propertyDetails?.electricitySupply?.powerLoad) || 0,
-          backup: Boolean(formData.propertyDetails?.electricitySupply?.backup)
-        },
-        propertyAge: String(formData.propertyDetails?.propertyAge || formData.propertyDetails?.age || '0-5'),
-        propertyCondition: formData.propertyDetails?.propertyCondition || formData.propertyDetails?.condition || ''
+       
+       
       },
       leaseTerms: {
-        leaseDetails: {
-          leaseAmount: {
-            amount: Number(formData.leaseTerms.leaseAmount?.amount) || 0,
-            type: leaseType || 'Fixed',
-            duration: Number(formData.leaseTerms.leaseAmount?.duration) || 1,
-            durationUnit: (formData.leaseTerms.leaseAmount?.durationUnit || 'Month').toLowerCase()
-          }
-        },
+        
         tenureDetails: {
-          minimumTenure: Number(formData.leaseTenure?.minimumTenure) || 0,
-          minimumUnit: (formData.leaseTenure?.minimumUnit || '').toLowerCase(),
-          maximumTenure: Number(formData.leaseTenure?.maximumTenure) || 0,
-          maximumUnit: (formData.leaseTenure?.maximumUnit || '').toLowerCase(),
-          lockInPeriod: Number(formData.leaseTenure?.lockInPeriod) || 0,
-          lockInUnit: (formData.leaseTenure?.lockInUnit || '').toLowerCase(),
-          noticePeriod: Number(formData.leaseTenure?.noticePeriod) || 0,
-          noticePeriodUnit: (formData.leaseTenure?.noticePeriodUnit || '').toLowerCase()
+          minimumTenure: Number(formData.leaseTerms.leaseTenure?.minimumTenure) || 0,
+          minimumUnit: (formData.leaseTerms.leaseTenure?.minimumUnit || '').toLowerCase(),
+          maximumTenure: Number(formData.leaseTerms.leaseTenure?.maximumTenure) || 0,
+          maximumUnit: (formData.leaseTerms.leaseTenure?.maximumUnit || '').toLowerCase(),
+          lockInPeriod: Number(formData.leaseTerms.leaseTenure?.lockInPeriod) || 0,
+          lockInUnit: (formData.leaseTerms.leaseTenure?.lockInUnit || '').toLowerCase(),
+          noticePeriod: Number(formData.leaseTerms.leaseTenure?.noticePeriod) || 0,
+          noticePeriodUnit: (formData.leaseTerms.leaseTenure?.noticePeriodUnit || '').toLowerCase()
         },
         maintenanceAmount: {
           amount: Number(formData.leaseTerms.maintenanceAmount?.amount) || 0,
@@ -649,7 +628,6 @@ const LeaseCoveredSpaceMain = () => {
 
     // Log for debugging
     console.log('Backend Data:', backendData);
-    console.log('Property Age in Backend Data:', backendData.propertyDetails.propertyAge);
     console.log('Property Details in Backend Data:', backendData.propertyDetails);
     console.log('Other Charges in Backend Data:', backendData.leaseTerms.otherCharges);
 
@@ -681,8 +659,7 @@ const LeaseCoveredSpaceMain = () => {
       const backendData = await mapFormDataToBackendModel();
 
       // Make API call to create commercial lease covered space
-      const response = await axios.post(
-        `/api/commercial/lease/covered-space`,
+      const response = await axios.post('/api/commercial/lease/covered-space',
         backendData,
         {
           headers: {
@@ -715,7 +692,7 @@ const LeaseCoveredSpaceMain = () => {
     switch (currentStep) {
       case 0: // Basic Information
         return !!formData.basicInformation.title &&
-          formData.basicInformation.type.length > 0 &&
+          formData.basicInformation.Type.length > 0 &&
           !!formData.basicInformation.address.street &&
           !!formData.basicInformation.address.city &&
           !!formData.basicInformation.address.state &&
