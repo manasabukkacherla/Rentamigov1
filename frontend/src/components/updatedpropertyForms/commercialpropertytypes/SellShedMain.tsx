@@ -54,14 +54,18 @@ interface PropertyDetailsType {
     backup: boolean;
   };
 }
-
-interface RegistrationChargesType {
-  included: boolean;
-  amount?: number;
-  stampDuty?: number;
+interface Pricing {
+  propertyPrice: number;
+  pricetype: "fixed" | "negotiable";
 }
 
-interface BrokerageType {
+interface Registration {
+  chargestype: 'inclusive' | 'exclusive';
+  registrationAmount?: number;
+  stampDutyAmount?: number;
+}
+
+interface Brokerage {
   required: string;
   amount?: number;
 }
@@ -102,9 +106,9 @@ interface FormDataType {
 }
   shedDetails: Partial<ShedDetailsType>;
   propertyDetails: Partial<PropertyDetailsType>;
-  price: string | number;
-  registrationCharges: Partial<RegistrationChargesType>;
-  brokerage: BrokerageType;
+  pricingDetails: Pricing;
+  registration: Partial<Registration>;
+  brokerage: Brokerage;
   availability: AvailabilityType;
   contactDetails: ContactDetailsType;
   media: {
@@ -141,8 +145,15 @@ const SellShedMain = () => {
     },
     shedDetails: {},
     propertyDetails: {},
-    price: "",
-    registrationCharges: {},
+    pricingDetails: {
+      propertyPrice: 0,
+      pricetype: "fixed"
+    },
+     registration: {
+      chargestype: 'inclusive',
+      registrationAmount: 0,
+      stampDutyAmount: 0
+    },
     brokerage: {
       required:"no",
       amount: 0
@@ -225,12 +236,13 @@ const SellShedMain = () => {
       component: (
         <div className="space-y-6">
           <div className="space-y-4 text-black">
-            <Price onPriceChange={(price) => handleChange("price", price.amount)} />
+            <Price onPriceChange={(price) => handleChange("pricingDetails.propertyPrice", price.propertyPrice)} />
+              
           </div>
 
           <div className="text-black">
             <RegistrationCharges
-              onRegistrationChargesChange={(charges) => handleChange("registrationCharges", charges)}
+              onRegistrationChargesChange={(charges) => handleChange("registration", charges)}
             />
           </div>
           <div className="text-black">
@@ -372,9 +384,15 @@ const SellShedMain = () => {
 
   const handleSubmit = async (e?: { preventDefault: () => void }) => {
     if (e) e.preventDefault();
+    let author=null
+    const user = sessionStorage.getItem('user');
+    if (user) {
+      author = JSON.parse(user).id;
+    }
     console.log(formData);
     try {
       // Convert media files to base64 strings if they exist
+      
       const convertedMedia = {
         photos: {
           exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
@@ -389,19 +407,8 @@ const SellShedMain = () => {
       };
 
       // Get userId robustly from localStorage
-      const userRaw = localStorage.getItem('user');
-      let userId = null;
-      if (userRaw) {
-        try {
-          const parsed = JSON.parse(userRaw);
-          userId = parsed.id || parsed._id || null;
-        } catch (e) {
-          userId = null;
-        }
-      }
-      console.log('User from localStorage:', userRaw);
-      console.log('UserId being sent:', userId);
-
+      
+      
       // Transform data for backend
       const transformedData = {
         ...formData,
@@ -414,11 +421,14 @@ const SellShedMain = () => {
         },
         media: convertedMedia,
         // Ensure availability data matches the schema
-        price: formData.price,
-        registrationCharges: {
-          included: formData.registrationCharges.included,
-          amount: formData.registrationCharges.amount,
-          stampDuty: formData.registrationCharges.stampDuty
+        pricingDetails:{
+          propertyPrice: formData.pricingDetails.propertyPrice,
+          pricetype: formData.pricingDetails.pricetype
+        },
+        registration: {
+          chargestype: formData.registration?.chargestype || 'inclusive',
+          registrationAmount: formData.registration?.registrationAmount || 0,
+          stampDutyAmount: formData.registration?.stampDutyAmount || 0
         },
         brokerage: {
           required: typeof formData.brokerage?.required === 'boolean'
@@ -435,8 +445,11 @@ const SellShedMain = () => {
           operatingHours: formData.availability.operatingHours || false
         },
         // Add metadata
+        //const user = sessionStorage.getItem('user');
+      // if (user) {
+      //   const author = JSON.parse(user).id;
         metaData: {
-          createdBy: userId,
+          createdBy: author,
           createdAt: new Date(),
           propertyType: 'Commercial',
           propertyName: 'Shed',

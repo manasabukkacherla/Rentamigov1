@@ -59,7 +59,7 @@ interface IMetadata {
 }
 
 interface IPriceDetails {
-  price: number;
+  propertyPrice: number;
   pricetype: "fixed" | "negotiable";
 }
 
@@ -67,10 +67,10 @@ interface IBrokerage {
   required: "Yes" | "No";
   amount: number;
 }
-interface IRegistrationCharges {
-  type: "inclusive" | "exclusive";
-  registrationAmount: number;
-  stampDutyAmount: number;
+interface IRegistration {
+  chargestype: "inclusive" | "exclusive";
+  registrationAmount?: number;
+  stampDutyAmount?: number;
 }
 
 interface IAvailability {
@@ -108,7 +108,7 @@ interface ICommercialSellRetailStore extends Document {
     possessionStatus: string;
   };
   priceDetails: IPriceDetails;
-  registrationCharges: IRegistrationCharges;
+  registration: IRegistration;
   brokerage: IBrokerage;
   availability: IAvailability;
   contactInformation: IContactInformation;
@@ -168,11 +168,11 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
     possessionStatus: { type: String, required: true }
   },
   priceDetails: {
-    price: { type: Number, default: 0, required: true },
-    pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
+    propertyPrice: { type: Number, default: 0, required: true },
+    pricetype: { type: String, enum: ['fixed', 'negotiable'] },
   },
-  registrationCharges: {
-    type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+  registration: {
+    chargestype: { type: String, enum: ['inclusive', 'exclusive'] },
     registrationAmount: { type: Number },
     stampDutyAmount: { type: Number },
   }

@@ -10,6 +10,19 @@ interface IFloor {
   floorNumber: number;
   totalFloors: number;
 }
+interface IPricingDetails {
+  propertyPrice: number;
+  pricetype: "fixed" | "negotiable";
+}
+interface IRegistration {
+  chargestype: 'inclusive' | 'exclusive',
+  registrationAmount?: number,
+  stampDutyAmount?: number
+}
+interface IBrokerage {
+  required: string;
+  amount?: number;
+}
 
 export interface ICommercialSellOthers extends Document {
   propertyId?: string;
@@ -52,19 +65,9 @@ export interface ICommercialSellOthers extends Document {
       backup: boolean;
     };
   };
-  price: {
-    expectedPrice: number;
-    isNegotiable: boolean;
-  };
-  registrationCharges: {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
+  pricingDetails: IPricingDetails;
+  registration: IRegistration;
+  brokerage: IBrokerage;
   availability: {
     type: 'immediate' | 'specific';
     date?: Date;
@@ -149,14 +152,14 @@ const CommercialSellOthersSchema: Schema = new Schema({
       backup: { type: Boolean, default: false }
     }
   },
-  price: {
-    expectedPrice: { type: Number, default: 0 },
-    isNegotiable: { type: Boolean, default: false }
+  pricingDetails: {
+    propertyPrice: { type: Number, required: true },
+    pricetype: { type: String, enum: ['fixed', 'negotiable'], default: 'fixed' }
   },
-  registrationCharges: {
-    included: { type: Boolean, default: false },
-    amount: { type: Number },
-    stampDuty: { type: Number }
+  registration: {
+    chargestype: { type: String, enum: ['inclusive', 'exclusive'], default: 'inclusive' },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number }
   },
   brokerage: {
     required: { type: String },
