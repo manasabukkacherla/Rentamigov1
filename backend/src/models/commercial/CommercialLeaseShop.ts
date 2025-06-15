@@ -39,8 +39,12 @@ interface IMedia {
 }
 
 interface IMetadata {
-  createdBy: string;
-  createdAt: string;
+  createdBy: Schema.Types.ObjectId | null;
+  createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
 }
 
 interface ILeaseTerms {
@@ -92,7 +96,7 @@ interface ILeaseTerms {
         availability: {
             date: Date,
             type: string,
-            preferredSaleDuration: String,
+            leaseDuration: String,
             noticePeriod: String,
             isPetsAllowed: Boolean,
             operatingHours:  Boolean,
@@ -239,9 +243,9 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
         amount: { type: Number }
     },
     availability: {
-        date: { type: Date, required: true },
-        type: { type: String, required: true },
-        preferredSaleDuration: { type: String, required: true },
+        date: { type: Date},
+        type: { type: String,default:"Available" },
+        leaseDuration: { type: String, required: true },
         noticePeriod: { type: String, required: true },
         isPetsAllowed: { type: Boolean, required: true },
         operatingHours: { type: Boolean, required: true},
@@ -267,9 +271,13 @@ const CommercialLeaseShopSchema = new Schema<ICommercialLeaseShop>({
     documents: [{ type: String }] 
   },
   metadata: {
-    createdBy: { type: String, required: true },
-    createdAt: { type: String, required: true },
-  },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Lease' },
+    propertyName: { type: String,  default: 'Shop' },
+    status: { type: String, default: 'Available' }
+  }
 }, {
   timestamps: true
 });

@@ -37,26 +37,22 @@ router.post(
           .json({ message: "Content and userId are required." });
       }
 
-      // Create the message
+      // 1. Save the message
       const message: IMessage = new Message({ text, senderId, receiverId });
       await message.save();
 
-      // Update or create conversation
+      // 2. Prepare roomId
       const roomId = `${senderId}_${receiverId}`;
-      console.log("Creating/updating conversation with roomId:", roomId);
-      console.log("Participants:", [senderId, receiverId]);
-
-      // Find the conversation or create a new one
       let conversation = await Conversation.findOne({ roomId });
 
+      const senderIdObj = new mongoose.Types.ObjectId(senderId);
+      const receiverIdObj = new mongoose.Types.ObjectId(receiverId);
+
       if (conversation) {
-        // Update existing conversation
+        // 3. Update lastMessage
         conversation.lastMessage = text;
 
-        // Make sure both participants are in the array
-        const senderIdObj = new mongoose.Types.ObjectId(senderId);
-        const receiverIdObj = new mongoose.Types.ObjectId(receiverId);
-
+        // Ensure both participants are in the array
         if (!conversation.participants.some((p) => p.equals(senderIdObj))) {
           conversation.participants.push(senderIdObj);
         }
@@ -64,16 +60,25 @@ router.post(
           conversation.participants.push(receiverIdObj);
         }
 
+        // 4. Revert to "pending" if a new message comes after resolution
+        if (
+          conversation.status === "resolved" &&
+          (!conversation.lastResolvedAt ||
+            new Date(message.createdAt) > new Date(conversation.lastResolvedAt))
+        ) {
+          conversation.status = "pending";
+          conversation.lastResolvedAt = null;
+          console.log("Conversation status auto-reverted to 'pending'");
+        }
+
         await conversation.save();
       } else {
-        // Create new conversation
+        // 5. Create new conversation
         conversation = new Conversation({
           roomId,
-          participants: [
-            new mongoose.Types.ObjectId(senderId),
-            new mongoose.Types.ObjectId(receiverId),
-          ],
+          participants: [senderIdObj, receiverIdObj],
           lastMessage: text,
+          status: "pending",
         });
         await conversation.save();
       }
@@ -82,7 +87,6 @@ router.post(
         "Conversation after update:",
         JSON.stringify(conversation, null, 2)
       );
-      console.log("Number of participants:", conversation.participants.length);
 
       res.status(201).json({
         success: "Message and conversation updated successfully",
@@ -90,6 +94,7 @@ router.post(
         conversation,
       });
     } catch (error) {
+      console.error("Error sending message:", error);
       res.status(500).json({ message: "Server error", error });
     }
   }

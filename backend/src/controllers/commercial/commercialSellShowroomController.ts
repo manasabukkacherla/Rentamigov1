@@ -100,7 +100,8 @@ export const getAllShowrooms = async (req: Request, res: Response) => {
 // Get single commercial showroom listing
 export const getShowroom = async (req: Request, res: Response) => {
   try {
-    const showroom = await CommercialShowroom.findById(req.params.id);
+    const propertyId = req.params.propertyId;
+    const showroom = await CommercialShowroom.findOne({ propertyId });
 
     if (!showroom) {
       return res.status(404).json({
@@ -126,6 +127,14 @@ export const getShowroom = async (req: Request, res: Response) => {
 export const updateShowroom = async (req: Request, res: Response) => {
   try {
     const showroom = await CommercialShowroom.findById(req.params.id);
+    const userId = req.body.userId; 
+
+    if (showroom?.metadata?.createdBy?.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to update this listing'
+      });
+    }
 
     if (!showroom) {
       return res.status(404).json({
@@ -167,6 +176,7 @@ export const updateShowroom = async (req: Request, res: Response) => {
 export const deleteShowroom = async (req: Request, res: Response) => {
   try {
     const showroom = await CommercialShowroom.findById(req.params.id);
+    const userId = req.body.userId;
 
     if (!showroom) {
       return res.status(404).json({
@@ -175,6 +185,12 @@ export const deleteShowroom = async (req: Request, res: Response) => {
       });
     }
 
+    if (showroom?.metadata?.createdBy?.toString() !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to delete this listing'
+      });
+    }
     await showroom.deleteOne();
 
     res.status(200).json({

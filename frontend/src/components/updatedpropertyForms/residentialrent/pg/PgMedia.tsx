@@ -1,5 +1,5 @@
 import React, { useState, useRef, ChangeEvent, useEffect } from 'react';
-import { Image as ImageIcon, Video, X, Camera, Users, Home, Plus, ChevronDown, ChevronUp, AlertCircle, Tag, Key, Lightbulb, Upload } from 'lucide-react';
+import { Image as ImageIcon, Video, X, Camera, Users, Home, Plus, ChevronDown, ChevronUp, AlertCircle, Key, Lightbulb } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { uploadPgMediaToS3 } from '../../../../utils/pgMediaUploader';
 
@@ -44,27 +44,29 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   const defaultPhotoTags = ['Exterior', 'Interior', 'Room', 'Bathroom', 'Kitchen', 'Common Area'];
   const defaultVideoTags = ['Room Tour', 'Facility Tour', 'Amenities', 'Overview'];
-  
+
+
+
   // Check file size for videos
   const checkVideoFileSize = (file: File): void => {
     if (file.type.startsWith('video/') && file.size > 50 * 1024 * 1024) { // 50MB limit for videos
       throw new Error(`Video file size exceeds 50MB limit: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
     }
   };
-  
+
   // Process media items and update parent component
   const processAndUpdateMediaItems = async (items: MediaItem[]) => {
     try {
       setError(''); // Clear any previous errors
-      
+
       const photoItems = items.filter(item => item.type === 'photo');
       const videoItems = items.filter(item => item.type === 'video');
-      
+
       console.log(`Processing ${photoItems.length} photos and ${videoItems.length} videos`);
-      
+
       // Check video file sizes
       for (const item of videoItems) {
         if (item.file) {
@@ -78,7 +80,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           }
         }
       }
-      
+
       // Check video formats
       for (const item of videoItems) {
         if (item.file && !['video/mp4', 'video/webm', 'video/quicktime'].includes(item.file.type)) {
@@ -86,81 +88,55 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           toast.error(`Unsupported video format: ${item.file.type}. Please use MP4, WebM, or MOV format.`);
         }
       }
-      
-      // If no propertyId is available, we'll just process the media locally
-      // and update the UI with preview URLs instead of uploading to S3
-      
-      if (propertyId) {
-        // If propertyId is available, upload to S3
-        // Show loading toast
-        toast.loading('Uploading media to server...', { id: 'media-upload' });
-        
-        // Prepare items for S3 upload
-        const itemsToUpload = items.map(item => ({
-          id: item.id,
-          type: item.type,
-          file: item.file,
-          title: item.title,
-          tags: item.tags,
-          roomType: item.roomType,
-          category: item.category
+
+      // Always upload to S3 regardless of whether propertyId is available
+      // Show loading toast
+      toast.loading('Uploading media to server...', { id: 'media-upload' });
+
+      // Prepare items for S3 upload
+      const itemsToUpload = items.map(item => ({
+        id: item.id,
+        type: item.type,
+        file: item.file,
+        title: item.title,
+        tags: item.tags,
+        roomType: item.roomType,
+        category: item.category
+      }));
+
+      try {
+        // Upload to S3 - propertyId is now optional in the function
+        const uploadedItems = await uploadPgMediaToS3(itemsToUpload, propertyId);
+
+        // Show success toast
+        toast.success(`Successfully uploaded ${uploadedItems.length} files`, { id: 'media-upload' });
+
+        // Update local state with uploaded items
+        setMediaItems(items.map(item => {
+          const uploadedItem = uploadedItems.find(ui => ui.id === item.id);
+          if (uploadedItem) {
+            return {
+              ...item,
+              url: uploadedItem.url, // Use the S3 URL
+              uploaded: true
+            };
+          }
+          return item;
         }));
-        
-        try {
-          // Upload to S3
-          const uploadedItems = await uploadPgMediaToS3(propertyId, itemsToUpload);
-          
-          // Show success toast
-          toast.success(`Successfully uploaded ${uploadedItems.length} files`, { id: 'media-upload' });
-          
-          // Update local state with uploaded items
-          setMediaItems(items.map(item => {
-            const uploadedItem = uploadedItems.find(ui => ui.id === item.id);
-            if (uploadedItem) {
-              return {
-                ...item,
-                url: uploadedItem.url, // Use the S3 URL
-                uploaded: true
-              };
-            }
-            return item;
-          }));
-          
-          // Update parent component with uploaded items
-          onMediaItemsChange(uploadedItems);
-        } catch (uploadError: any) {
-          console.error('Error uploading to S3:', uploadError);
-          toast.error(`Error uploading: ${uploadError.message}`, { id: 'media-upload' });
-          setError(uploadError.message || 'Failed to upload media to server');
-        }
-      } else {
-        // If no propertyId, just process locally and use preview URLs
-        console.log('No propertyId available, processing media locally');
-        
-        // Update local state with the new items
-        setMediaItems(items);
-        
-        // Update parent component with the new items
-        // Convert to format expected by parent component
-        const parentFormatItems = items.map(item => ({
-          id: item.id,
-          type: item.type,
-          url: item.preview, // Use the preview URL since we don't have S3 URLs yet
-          title: item.title,
-          tags: item.tags,
-          roomType: item.roomType,
-          category: item.category
-        }));
-        
-        onMediaItemsChange(parentFormatItems);
-        toast.success(`Added ${items.length} media files for later upload`);
+
+        // Update parent component with uploaded items
+        onMediaItemsChange(uploadedItems);
+      } catch (uploadError: any) {
+        console.error('Error uploading to S3:', uploadError);
+        toast.error(`Error uploading: ${uploadError.message}`, { id: 'media-upload' });
+        setError(uploadError.message || 'Failed to upload media to server');
       }
     } catch (error: any) {
       console.error('Error processing media items:', error);
       setError(error.message || 'Failed to process media items');
     }
   };
-  
+
   const roomTypeOptions: RoomTypeOption[] = [
     { id: 'single', label: 'Single Room', icon: <Home className="h-4 w-4" /> },
     { id: 'double', label: 'Double Share Room', icon: <Users className="h-4 w-4" /> },
@@ -168,6 +144,10 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
     { id: 'four', label: 'Four Share Room', icon: <Users className="h-4 w-4" /> },
     { id: 'five', label: 'Five Share Room', icon: <Users className="h-4 w-4" /> },
     { id: 'custom', label: 'Custom Share Room', icon: <Users className="h-4 w-4" /> },
+    { id: 'lifts', label: 'Lifts', icon: <Lightbulb className="h-4 w-4" /> },
+    { id: 'dining', label: 'Dining Hall', icon: <Users className="h-4 w-4" /> },
+    { id: 'staircases', label: 'Staircases', icon: <Home className="h-4 w-4" /> },
+    { id: 'kitchen', label: 'Kitchen Area', icon: <Key className="h-4 w-4" /> }
 
     // custom/multi-share will be handled separately
   ];
@@ -190,14 +170,14 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   const startCamera = async (roomType: string) => {
     setSelectedRoomType(roomType);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
+      const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: 'environment' },
-        audio: false 
+        audio: false
       });
-      
+
       setCameraStream(stream);
       setCameraActive(true);
-      
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
       }
@@ -219,25 +199,25 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
+
       // Set canvas dimensions to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
+
       // Draw current video frame to canvas
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        
+
         // Get base64 data directly from canvas
         const base64Data = canvas.toDataURL('image/jpeg', 0.9);
-        
+
         // Convert canvas to file for preview
         canvas.toBlob((blob) => {
           if (blob) {
             const capturedFileName = `captured-photo-${Date.now()}.jpg`;
             const file = new File([blob], capturedFileName, { type: 'image/jpeg' });
-            
+
             // Create media item for the captured photo with base64 data
             const newMediaItem: MediaItem = {
               id: `captured-${Date.now()}`,
@@ -247,11 +227,11 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
               title: batchTitle || `${getRoomTypeLabel(selectedRoomType)} Photo`,
               tags: [],
               roomType: selectedRoomType || undefined,
-              category: selectedRoomType === 'lifts' || selectedRoomType === 'dining' || 
-                       selectedRoomType === 'staircases' || selectedRoomType === 'kitchen' ? 
-                       selectedRoomType : undefined
+              category: selectedRoomType === 'lifts' || selectedRoomType === 'dining' ||
+                selectedRoomType === 'staircases' || selectedRoomType === 'kitchen' ?
+                selectedRoomType : undefined
             };
-            
+
             const updatedItems = [...mediaItems, newMediaItem];
             setMediaItems(updatedItems);
             processAndUpdateMediaItems(updatedItems);
@@ -280,14 +260,14 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>, roomType?: string, category?: string) => {
     setError('');
     const files = Array.from(e.target.files || []);
-    
+
     if (files.length === 0) {
       setError('Please select at least one file');
       return;
     }
 
     const title = batchTitle || `${category || getRoomTypeLabel(roomType || selectedRoomType)} ${selectedType === 'photo' ? 'Photo' : 'Video'}`;
-    
+
     // Validate file types
     const invalidFiles = files.filter(file => {
       if (selectedType === 'photo') {
@@ -301,34 +281,34 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       setError(`Invalid files selected: ${invalidFiles.length} file(s) are not ${selectedType}s`);
       return;
     }
-    
+
     // Validate video file sizes and formats
     if (selectedType === 'video') {
       // Check for unsupported video formats
-      const unsupportedVideos = files.filter(file => 
+      const unsupportedVideos = files.filter(file =>
         !['video/mp4', 'video/webm', 'video/quicktime'].includes(file.type)
       );
-      
+
       if (unsupportedVideos.length > 0) {
         setError(`Unsupported video format(s). Please use MP4, WebM, or MOV formats only.`);
         return;
       }
-      
+
       // Check for oversized videos
       const oversizedVideos = files.filter(file => file.size > 100 * 1024 * 1024); // 100MB limit
-      
+
       if (oversizedVideos.length > 0) {
         setError(`Video file(s) exceed the 100MB size limit. Please compress your videos.`);
         return;
       }
-      
+
       // Warning for large videos
       const largeVideos = files.filter(file => file.size > 20 * 1024 * 1024); // 20MB threshold
-      
+
       if (largeVideos.length > 0) {
         console.warn(`Large video file(s) detected (${largeVideos.length}). These may take longer to process.`);
       }
-      
+
       // Limit the number of videos that can be uploaded at once
       if (files.length > 6) {
         setError(`Please upload a maximum of 6 videos at a time to avoid processing issues.`);
@@ -350,20 +330,20 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
         category: category
       };
     });
-    
+
     try {
       // Show appropriate loading message based on number of videos
       if (selectedType === 'video' && files.length > 1) {
         const duration = files.length > 3 ? 10000 : 5000; // Longer duration for more videos
-        const message = files.length > 3 
-          ? `Processing ${files.length} videos. This may take several minutes...` 
+        const message = files.length > 3
+          ? `Processing ${files.length} videos. This may take several minutes...`
           : `Processing ${files.length} videos. This may take a moment...`;
-        
+
         toast.loading(message, {
           id: 'video-processing',
           duration: duration
         });
-        
+
         // For larger batches of videos (4-6), show additional info
         if (files.length > 3) {
           console.log(`Processing ${files.length} videos. Uploading to S3 may take several minutes.`);
@@ -377,40 +357,40 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           }, duration);
         }
       }
-      
+
       if (e.target) {
         e.target.value = '';
       }
-      
+
       // Dismiss loading toast if it was shown
       if (selectedType === 'video' && files.length > 1) {
         toast.success(`Successfully processed ${files.length} videos`, {
           id: 'video-processing'
         });
       }
-      
+
       // Process and add the new media items
       setMediaItems(prevItems => [...prevItems, ...newMediaItems]);
       processAndUpdateMediaItems([...mediaItems, ...newMediaItems]);
-      
+
     } catch (error: any) {
       console.error('Error handling file selection:', error);
       setError(error.message || 'Failed to process selected files');
-      
+
       // Dismiss loading toast with error if it was shown
       if (selectedType === 'video' && files.length > 1) {
         toast.error(`Error processing videos: ${error.message || 'Unknown error'}`, {
           id: 'video-processing'
         });
       }
-      
+
       // Clean up object URLs for failed uploads
       newMediaItems.forEach(item => {
         if (item.preview) {
           URL.revokeObjectURL(item.preview);
         }
       });
-      
+
       // Reset the file input
       if (e.target) {
         e.target.value = '';
@@ -473,7 +453,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
       const convertedItems = propMediaItems.map(item => {
         // If the item already has a preview and file, use it as is
         if (item.preview && item.file) return item;
-        
+
         // Otherwise, create a MediaItem from the parent format
         return {
           id: item.id || `imported-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -487,11 +467,11 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           category: item.category
         };
       });
-      
+
       setMediaItems(convertedItems);
     }
   }, []);
-  
+
   // Cleanup previews when component unmounts
   React.useEffect(() => {
     return () => {
@@ -504,11 +484,11 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
   const renderRoomTypeMediaUploader = (roomType: RoomTypeOption) => {
     const roomItems = getMediaItemsByRoomType(roomType.id);
     const isExpanded = expandedSection === roomType.id;
-    
+
     return (
       <div key={roomType.id} className="border border-gray-200 rounded-lg overflow-hidden mb-4 bg-white">
         {/* Header */}
-        <div 
+        <div
           className={`flex items-center justify-between p-4 cursor-pointer ${isExpanded ? 'bg-gray-50 border-b border-gray-200' : ''}`}
           onClick={() => toggleSection(roomType.id)}
         >
@@ -538,22 +518,20 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
               <div className="flex space-x-4">
                 <button
                   onClick={() => setSelectedType('photo')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                    selectedType === 'photo'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${selectedType === 'photo'
                       ? 'bg-black text-white'
                       : 'bg-gray-200 text-black hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   <ImageIcon className="w-4 h-4" />
                   <span>Photos</span>
                 </button>
                 <button
                   onClick={() => setSelectedType('video')}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${
-                    selectedType === 'video'
+                  className={`flex items-center space-x-2 px-4 py-2 rounded-md transition-colors ${selectedType === 'video'
                       ? 'bg-black text-white'
                       : 'bg-gray-200 text-black hover:bg-gray-300'
-                  }`}
+                    }`}
                 >
                   <Video className="w-4 h-4" />
                   <span>Videos</span>
@@ -574,7 +552,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-200 file:text-black hover:file:bg-gray-300 cursor-pointer"
                   />
                 </div>
-                
+
                 {selectedType === 'photo' && (
                   <div className="flex-none">
                     <label className="block text-sm font-medium mb-1">Take Photo</label>
@@ -613,7 +591,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
                         </div>
                       </div>
                     ))}
-                    
+
                     {/* Add more button */}
                     <div className="flex items-center justify-center aspect-square rounded-md border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer transition-colors">
                       <input
@@ -643,18 +621,18 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
     return (
       <div className="mt-8 space-y-6">
         <h2 className="text-xl font-bold text-gray-900">Room Configuration Galleries</h2>
-        
+
         {roomTypeOptions.map(roomType => {
           const roomItems = getMediaItemsByRoomType(roomType.id);
           if (roomItems.length === 0) return null;
-          
+
           return (
             <div key={roomType.id} className="bg-white rounded-lg shadow p-4 border border-gray-200">
               <div className="flex items-center gap-2 mb-4">
                 {roomType.icon}
                 <h3 className="font-medium text-gray-900">{roomType.label} ({roomItems.length})</h3>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {roomItems.map(item => (
                   <div key={item.id} className="relative aspect-square rounded-md overflow-hidden">
@@ -753,7 +731,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           <div className="w-full max-w-2xl bg-white rounded-lg overflow-hidden">
             <div className="p-4 bg-gray-100 flex justify-between items-center">
               <h3 className="font-medium">Taking photo for {getRoomTypeLabel(selectedRoomType)}</h3>
-              <button 
+              <button
                 onClick={stopCamera}
                 className="p-1 rounded-full hover:bg-gray-200"
               >
@@ -761,14 +739,14 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
               </button>
             </div>
             <div className="relative bg-black">
-              <video 
-                ref={videoRef} 
-                autoPlay 
-                playsInline 
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
                 className="w-full h-64 md:h-80 object-cover"
               />
               <canvas ref={canvasRef} className="hidden" />
-              
+
               <div className="absolute bottom-4 left-0 right-0 flex justify-center">
                 <button
                   onClick={capturePhoto}
@@ -802,7 +780,7 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
           </div>
         </div>
       )}
-      
+
       {/* Media Summary */}
       {mediaItems.length > 0 && (
         <div className="mt-6 pt-4 border-t border-gray-200">
@@ -820,13 +798,13 @@ const PgMedia: React.FC<PgMediaProps> = ({ selectedShares, customShare, mediaIte
               Total Size: {(mediaItems.reduce((acc, item) => acc + (item.file ? item.file.size : 0), 0) / (1024 * 1024)).toFixed(1)} MB
             </div>
           </div>
-          
+
           {/* Room Type Distribution */}
           <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
             {roomTypeOptions.map(roomType => {
               const count = mediaItems.filter(item => item.roomType === roomType.id).length;
               if (count === 0) return null;
-              
+
               return (
                 <div key={roomType.id} className="flex items-center space-x-2 bg-gray-50 p-2 rounded">
                   {roomType.icon}

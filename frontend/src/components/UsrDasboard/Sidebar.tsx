@@ -141,81 +141,73 @@ export function Sidebar({ onNewNotification }: SidebarProps) {
       </button>
 
       {/* Sidebar */}
-      <aside
-        id="sidebar"
-        className={`fixed top-0 left-0 h-full bg-white border-r border-black/10 z-40
-          transform transition-transform duration-300 ease-in-out
-          ${
-            isMobileMenuOpen
-              ? "translate-x-0"
-              : "-translate-x-full lg:translate-x-0"
-          }
-          w-64`}
-      >
-        {/* Navigation */}
-
-        <nav className="mt-14 lg:mt-16">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive =
-              location.pathname === item.path ||
-              location.pathname === `/Userdashboard/${item.path}`;
-
-            return (
-              <NavLink
-                key={item.path}
-                to={
-                  item.path.startsWith("/")
-                    ? item.path
-                    : `/Userdashboard/${item.path}`
-                }
-                className={`
-    flex items-center px-4 py-3 text-black/70 hover:bg-black/5 transition-colors
-    text-sm sm:text-base relative no-underline
+     <aside
+  id="sidebar"
+  className={`fixed top-0 left-0 h-full bg-white border-r border-black/10 z-40
+    transform transition-transform duration-300 ease-in-out
     ${
-      isActive
-        ? "bg-black/5 border-r-4 border-black text-black font-medium"
-        : ""
+      isMobileMenuOpen
+        ? "translate-x-0"
+        : "-translate-x-full lg:translate-x-0"
     }
+    w-64 flex flex-col justify-between
   `}
-                style={{ textDecoration: "none" }} // ✅ Ensures no underline
-              >
-                <Icon className="w-5 h-5 mr-3" />
-                <span>{item.label}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
+>
+  {/* Top Section: Nav */}
+  <div>
+    <nav className="mt-14 lg:mt-16 flex flex-col gap-y-2 px-2">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive =
+          location.pathname === item.path ||
+          location.pathname === `/Userdashboard/${item.path}`;
 
-        {/* Bottom Section with User Info and Logout */}
-        <div className="absolute bottom-0 left-0 right-0 border-t border-black/10">
-          {/* User Info */}
-          <div className="p-4 border-b border-black/10">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium">
-                JD
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-black truncate">
-                  John Doe
-                </p>
-                <p className="text-xs text-black/60 truncate">
-                  john@example.com
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-black/5 transition-colors text-sm sm:text-base"
+        return (
+          <NavLink
+            key={item.path}
+            to={
+              item.path.startsWith("/")
+                ? item.path
+                : `/Userdashboard/${item.path}`
+            }
+            className={`flex items-center px-4 py-2 rounded-md text-black/70 hover:bg-black/5 transition-colors text-sm sm:text-base no-underline ${
+              isActive
+                ? "bg-black/5 border-r-4 border-black text-black font-semibold"
+                : ""
+            }`}
           >
-            <LogOut className="w-5 h-5 mr-3" />
-            <span>Logout</span>
-          </button>
+            <Icon className="w-5 h-5 mr-3" />
+            <span>{item.label}</span>
+          </NavLink>
+        );
+      })}
+    </nav>
+  </div>
+
+  {/* Bottom Section: User Info + Logout */}
+  <div className="border-t border-black/10">
+    <div className="p-4 border-b border-black/10">
+      <div className="flex items-center space-x-3">
+        <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center text-white font-medium">
+          JD
         </div>
-      </aside>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-black truncate">John Doe</p>
+          <p className="text-xs text-black/60 truncate">john@example.com</p>
+        </div>
+      </div>
+    </div>
+
+    <button
+      onClick={handleLogout}
+      className="w-full flex items-center px-4 py-3 text-red-500 hover:bg-black/5 transition-colors text-sm sm:text-base"
+    >
+      <LogOut className="w-5 h-5 mr-3" />
+      <span>Logout</span>
+    </button>
+  </div>
+</aside>
+
 
       {/* Overlay */}
       {isMobileMenuOpen && (

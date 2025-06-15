@@ -118,9 +118,9 @@ export const getAllCommercialLeaseOthers = async (req: Request, res: Response) =
 // Get a single commercial lease others property by ID
 export const getCommercialLeaseOthersById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const propertyId = req.params.propertyId;
     
-    const leaseProperty = await CommercialLeaseOthers.findOne({ propertyId: id });
+    const leaseProperty = await CommercialLeaseOthers.findOne({ propertyId });
     
     if (!leaseProperty) {
       return res.status(404).json({

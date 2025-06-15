@@ -95,26 +95,24 @@ interface FormData {
       frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
     };
     otherCharges: {
-      electricity: {
+      electricityCharges: {
         type: "inclusive" | "exclusive";
-        amount: number;
+        amount?: number;
       };
-      water: {
+      waterCharges: {
         type: "inclusive" | "exclusive";
-        amount: number;
+        amount?: number;
       };
-      gas: {
+      gasCharges: {
         type: "inclusive" | "exclusive";
-        amount: number;
+        amount?: number;
       };
-      others: {
-        type: "inclusive" | "exclusive";
-        amount: number;
-      };
+      otherCharges: "inclusive" | "exclusive";
+      amount?: number;
     };
   };
-  brokerage: {
-    required: string;
+  brokerage?: {
+    required: boolean;
     amount?: number;
   };
   availability: {
@@ -132,6 +130,7 @@ interface FormData {
     phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
+    preferredContactTime?: string;
   };
   media: {
     photos: {
@@ -146,10 +145,12 @@ interface FormData {
     documents: File[];
   };
   metadata?: {
-    //createdBy: string;
-    createdAt: Date;
-    //userName: string;
     userId: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -265,26 +266,24 @@ const LeasePlotMain = () => {
         frequency: "monthly"
       },
       otherCharges: {
-        electricity : {
+        electricityCharges: {
           type: "inclusive",
           amount: 0
         },
-        water: {
+        waterCharges: {
           type: "inclusive",
           amount: 0
         },
-        gas: {
+        gasCharges: {
           type: "inclusive",
           amount: 0
         },
-        others: {
-          type: "inclusive",
-          amount: 0
-        }
+        otherCharges: "inclusive",
+        amount: 0
       }
     },
     brokerage: {
-      required: "no",
+      required: false,
       amount: 0
     },
     availability: {
@@ -302,6 +301,7 @@ const LeasePlotMain = () => {
       phone: "",
       alternatePhone: "",
       bestTimeToContact: "",
+      preferredContactTime: ""
     },
     media: {
       photos: {
@@ -349,19 +349,17 @@ const LeasePlotMain = () => {
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
-          <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => handleChange('basicInformation.address', address)} />
+          <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} address={formData.basicInformation.address}
+            
+          />
           <MapLocation
             latitude={formData.basicInformation.coordinates.latitude}
             longitude={formData.basicInformation.coordinates.longitude}
-            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
-          />
+            landmark={formData.basicInformation.landmark}          />
           <CornerProperty
-            isCornerProperty={formData.basicInformation.isCornerProperty}
-            onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
-          />
+            onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} isCornerProperty={false}          />
         </div>
       ),
     },
@@ -483,10 +481,14 @@ const LeasePlotMain = () => {
       title: "Contact Information",
       icon: <UserCircle className="w-5 h-5" />,
       content: (
-        <CommercialContactDetails 
-          contactInformation={formData.contactInformation} 
-          onContactChange={(contact) => handleChange('contactInformation', contact)}
-        />
+        <CommercialContactDetails
+          onContactChange={(contact) => handleChange('contactInformation', contact)} contactInformation={{
+            name: "",
+            phone: "",
+            email: "",
+            alternatePhone: undefined,
+            bestTimeToContact: undefined
+          }}          />
       ),
     },
     {
@@ -714,22 +716,20 @@ const LeasePlotMain = () => {
             frequency: formData.leaseDetails.maintenanceCharges.frequency || "monthly"
           },
           otherCharges: {
-            electricity: {
-              type: formData.leaseDetails.otherCharges.electricity.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.electricity.amount || 0
+            electricityCharges: {
+              type: formData.leaseDetails.otherCharges.electricityCharges.type || "inclusive",
+              amount: formData.leaseDetails.otherCharges.electricityCharges.amount || 0
             },
-            water: {
-              type: formData.leaseDetails.otherCharges.water.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.water.amount || 0
+            waterCharges: {
+              type: formData.leaseDetails.otherCharges.waterCharges.type || "inclusive",
+              amount: formData.leaseDetails.otherCharges.waterCharges.amount || 0
             },
-            gas: {
-              type: formData.leaseDetails.otherCharges.gas.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.gas.amount || 0
+            gasCharges: {
+              type: formData.leaseDetails.otherCharges.gasCharges.type || "inclusive",
+              amount: formData.leaseDetails.otherCharges.gasCharges.amount || 0
             },
-            others: {
-              type: formData.leaseDetails.otherCharges.others.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.others.amount || 0
-            }
+            otherCharges: formData.leaseDetails.otherCharges.otherCharges || "inclusive",
+            amount: formData.leaseDetails.otherCharges.amount || 0
           }
         },
         brokerage: formData.brokerage ? {
@@ -750,6 +750,7 @@ const LeasePlotMain = () => {
           email: formData.contactInformation.email || "",
           phone: formData.contactInformation.phone || "",
           alternatePhone: formData.contactInformation.alternatePhone || "",
+          preferredContactTime: formData.contactInformation.preferredContactTime || "",
           bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
         }
       };
@@ -775,16 +776,18 @@ const LeasePlotMain = () => {
         ...updatedFormData,
         media: convertedMedia,
         metadata: {
-          //createdBy: author,
+          userId: author,
           createdAt: new Date(),
-          //userName: author,
-          userId: author // Ensure userId is present for backend validation
+          propertyType: 'Commercial',
+          propertyName: 'Plot',
+          intent: 'Lease',
+          status: 'Available',
         }
       };
 
       console.log("Submitting data:", transformedData);
 
-      const response = await axios.post('/api/commercial/lease/plot', transformedData, {
+      const response = await axios.post('http://localhost:8000/api/commercial/lease/plots', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

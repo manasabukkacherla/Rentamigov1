@@ -14,7 +14,7 @@ interface IFloor {
 
 interface IBasicInformation {
     title: string;
-    showroomType: string;
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -57,6 +57,7 @@ interface propertyDetails {
     propertyCondition: string;
 }
 interface IRentalDetails {
+    rent:{
     expectedRent: number;
     rentType: "inclusive" | "exclusive";
     isNegotiable: boolean;
@@ -86,15 +87,12 @@ interface IRentalDetails {
             type: string;
         };
     };
-    brokerage: {
-        required: boolean;
-        amount: number;
-    };
+};
 }
 
 interface IAvailability {
-    immediate: boolean;
-    specificDate: Date;
+    type: string;
+    date: Date;
 };
 
 interface IContactInformation {
@@ -121,14 +119,22 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
-interface ICommercialRentShowroom extends Document {
+export interface ICommercialRentShowroom extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     showroomDetails: showRoomDetails;
     propertyDetails: propertyDetails;
     rentalTerms: IRentalDetails;
+    brokerage: {
+        required: boolean;
+        amount: number;
+    };
     availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
@@ -140,7 +146,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        showroomType: [{ type: String, required: true }],
+        Type: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -190,6 +196,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         propertyCondition: { type: String, required: false, default: 'new' }
     },
     rentalTerms: {
+        rent:{
         expectedRent: { type: Number, required: true },
         rentType: { type: String, enum: ['inclusive', 'exclusive'], required: true },
         isNegotiable: { type: Boolean, default: false },
@@ -223,14 +230,15 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
                 type: { type: String, required: true }
             }, 
         },
-        brokerage: {
-            required: { type: Boolean, default: false },
-            amount: { type: Number, required: false }
-        }
+    },
+    },
+    brokerage: {
+        required: { type: Boolean, default: false },
+        amount: { type: Number, required: false }
     },
     availability: {
-        immediate: { type: Boolean, default: false },
-        specificDate: { type: Date },
+        type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+        date: { type: Date },
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -252,8 +260,12 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Rent' },
+        propertyName: { type: String,  default: 'Showroom' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true
@@ -261,12 +273,12 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
 
 // Indexes
 // CommercialRentShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialRentShowroomSchema.index({ 'basicInformation.city': 1 });
-CommercialRentShowroomSchema.index({ 'basicInformation.state': 1 });
-CommercialRentShowroomSchema.index({ 'rentalDetails.expectedRent': 1 });
+CommercialRentShowroomSchema.index({ 'basicInformation.address.city': 1 });
+CommercialRentShowroomSchema.index({ 'basicInformation.address.state': 1 });
+CommercialRentShowroomSchema.index({ 'rentalTerms.rent.expectedRent': 1 });
 CommercialRentShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentShowroomSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-// export { ICommercialRentShowroom, IBasicInformation, IArea, IRentalDetails, IAvailability, IContactInformation, IMedia, IMetadata };
-export default model<ICommercialRentShowroom>('CommercialRentShowroom', CommercialRentShowroomSchema); 
+export const CommercialRentShowroom = model<ICommercialRentShowroom>('CommercialRentShowroom', CommercialRentShowroomSchema);
+export { IBasicInformation, IArea, IRentalDetails, IAvailability, IContactInformation, IMedia, IMetadata };

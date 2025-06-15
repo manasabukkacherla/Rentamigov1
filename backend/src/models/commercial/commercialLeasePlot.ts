@@ -1,208 +1,321 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, Types } from 'mongoose';
 
-interface ILocation {
-  latitude: string;
-  longitude: string;
+// Interfaces
+interface IArea {
+    totalArea?: number;
+    carpetArea: number;
+    builtUpArea: number;
 }
 
-interface IAddress {
-  houseName: string;
-  street: string;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  pinCode: string;
-  location: ILocation;
-  locationLabel: string;
+interface IBasicInformation {
+    title: string;
+    plotType: string[];
+    address:{
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+    };
+    landmark?: string;
+    coordinates: {
+        latitude: string;
+        longitude: string;
+    };
+    isCornerProperty: boolean;
 }
 
-interface ISize {
-  totalArea: string;
-  coveredArea: string;
-  plotArea: string;
+interface IFloor {
+    floorNumber: number;
+    totalFloors: number;
 }
 
-interface IRestrictions {
-  foodPreference: string;
-  petsAllowed: string;
-  tenantType: string;
+interface IPropertyDetails {
+    area?: IArea;
+    floor?: IFloor;
+    facingDirection?: string;
+    furnishingStatus?: string;
+    propertyAmenities?: string[];
+    wholeSpaceAmenities?: string[];
+    electricitySupply?: {
+        powerLoad: number;
+        backup: boolean;
+    };
+    waterAvailability?: string;
 }
 
-interface IOtherCharge {
-  amount: number;
-  type: string;
+interface ILeaseDetails {
+    leaseAmount: number;
+    leaseduration: {
+        duration: number;
+        type: string;
+        amountType: "fixed" | "negotiable";  
+    };
+    leasetenure: {
+        minimumTenure: {
+            duration: number;
+            type: string;
+        };
+        maximumTenure: {
+            duration: number;
+            type: string;
+        };
+        lockInPeriod: {
+            duration: number;
+            type: string;
+        };
+        noticePeriod: {
+            duration: number;
+            type: string;
+        };
+    };
+    maintenanceCharges?: {
+        amount? : number;
+        frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    };
+    otherCharges?: {
+        electricityCharges?: {
+            type?: "inclusive" | "exclusive";
+            amount?: number;
+        };
+        waterCharges?   : {
+            type?: "inclusive" | "exclusive"; 
+            amount?: number;
+        };
+        gasCharges?: {
+            type?: "inclusive" | "exclusive";
+            amount?: number;
+        };
+        otherCharges?: "inclusive" | "exclusive";
+        amount?: number;
+    };
 }
 
-interface ILeaseTerms {
-  leaseAmount: any;
-  leaseTenure: {
-    minimumTenure: number;
-    minimumUnit: string;
-    maximumTenure: number;
-    maximumUnit: string;
-    lockInPeriod: number;
-    lockInUnit: string;
-    noticePeriod: number;
-    noticePeriodUnit: string;
-  };
-  maintenanceAmount: {
-    amount: number;
-    frequency: string;
-  };
-  otherCharges: {
-    water: IOtherCharge;
-    electricity: IOtherCharge;
-    gas: IOtherCharge;
-    others: IOtherCharge;
-  };
-  brokerage: {
-    required: string;
-    amount: number;
-  };
+interface IBrokerage {
+    required?: boolean;
+    amount?: number;
 }
 
 interface IAvailability {
-  date: Date;
-  type: string;
+    date?: Date;
+    type?: string;
+    availabilityStatus: string;
+    leaseDuration?: string;
+    noticePeriod?: string;
+    isPetsAllowed?: boolean;
+    operatingHours?: boolean;
+}
+
+interface IContactInformation {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
 }
 
 interface IMedia {
-  photos: {
-    exterior: string[];
-    interior: string[];
-    floorPlan: string[];
-    Kitchen: string[];
-    Halls: string[];
-    Bedrooms: string[];
-    Storerooms: string[];
-    Washrooms: string[];
-    lifts: string[];
-    emergencyExits: string[];
-  };
-  videoTour: string | null;
-  documents: string[];
+    photos: {
+        exterior: string[];
+        interior: string[];
+        floorPlan: string[];
+        washroom: string[];
+        lift: string[];
+        emergencyExit: string[];
+    };
+    videoTour?: string;
+    documents: string[];
 }
 
 interface IMetadata {
-  createdBy: Schema.Types.ObjectId;
-  createdAt: Date;
+   createdBy: Schema.Types.ObjectId | null;
+    userName: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
+}
+interface IPlotDetails {
+    totalPlotArea: number;
+    zoningType: string;
+    infrastructure: string[];
+    roadAccess: string;
+    securityRoom: boolean;
+    previousConstruction: string;  
+    zoningInformation: string;
 }
 
-export interface ILeaseIndependentHouse extends Document {
-  propertyId: string;
-  propertyName: string;
-  propertyAddress: IAddress;
-  size: ISize;
-  restrictions: IRestrictions;
-  features: string[];
-  flatAmenities: string[];
-  societyAmenities: string[];
-  leaseTerms: ILeaseTerms;
-  availability: IAvailability;
-  media: IMedia;
-  metadata: IMetadata;
+interface ICommercialLeasePlot extends Document {
+    propertyId: string;
+    basicInformation: IBasicInformation;
+    propertyDetails: IPropertyDetails;
+    plotDetails: IPlotDetails;
+    leaseDetails: ILeaseDetails;
+    brokerage?: IBrokerage;
+    availability: IAvailability;
+    contactInformation: IContactInformation;
+    media: IMedia;
+    metadata: IMetadata;
 }
 
-const LeaseIndependentHouseSchema = new Schema<ILeaseIndependentHouse>({
-  propertyId: { type: String, required: true, unique: true },
-  propertyName: { type: String, required: true },
-  propertyAddress: {
-    houseName: { type: String, required: true },
-    street: { type: String, required: true },
-    address: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zipCode: { type: String, required: true },
-    pinCode: { type: String, required: true },
-    location: {
-      latitude: { type: String, required: true },
-      longitude: { type: String, required: true },
+// Schema
+const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
+    propertyId: { type: String, required: true, unique: true },
+    basicInformation: {
+        title: { type: String, required: true },
+        plotType: { type: [String], required: true },
+        address: { type: {
+            street: { type: String, required: true },
+            city: { type: String, required: true },
+            state: { type: String, required: true },
+            zipCode: { type: String, required: true },
+        },
+        required: true },
+        landmark: { type: String },
+        coordinates: { type: {
+            latitude: { type: String, required: true },
+            longitude: { type: String, required: true },
+        },
+        required: true },
+        isCornerProperty: { type: Boolean, default: false }
     },
-    locationLabel: { type: String, required: true },
-  },
-  size: {
-    totalArea: { type: String, required: true },
-    coveredArea: { type: String, required: true },
-    plotArea: { type: String, required: true },
-  },
-  restrictions: {
-    foodPreference: { type: String, required: true },
-    petsAllowed: { type: String, required: true },
-    tenantType: { type: String, required: true },
-  },
-  features: { type: [String], default: [] },
-  flatAmenities: { type: [String], default: [] },
-  societyAmenities: { type: [String], default: [] },
-  leaseTerms: {
-    leaseAmount: { type: Schema.Types.Mixed, required: true },
-    leaseTenure: {
-      minimumTenure: { type: Number, required: true },
-      minimumUnit: { type: String, required: true },
-      maximumTenure: { type: Number, required: true },
-      maximumUnit: { type: String, required: true },
-      lockInPeriod: { type: Number, required: true },
-      lockInUnit: { type: String, required: true },
-      noticePeriod: { type: Number, required: true },
-      noticePeriodUnit: { type: String, required: true },
+    propertyDetails: {
+        area: {
+            totalArea: { type: Number },
+            carpetArea: { type: Number },
+            builtUpArea: { type: Number}
+        },
+        floor: {
+            floorNumber: { type: Number },
+            totalFloors: { type: Number }
+        },
+        facingDirection: { type: String },
+        furnishingStatus: { type: String },
+        propertyAmenities: { type: [String] },
+        wholeSpaceAmenities: { type: [String] }
     },
-    maintenanceAmount: {
-      amount: { type: Number, required: true },
-      frequency: { type: String, required: true },
+    plotDetails: {
+        totalPlotArea: { type: Number, required: true },
+        zoningType: { type: String, required: true },
+        infrastructure: { type: [String] },
+        roadAccess: { type: String, required: true },
+        securityRoom: { type: Boolean, default: false },
+        previousConstruction: { type: String, required: true }
     },
-    otherCharges: {
-      water: {
-        amount: { type: Number, required: true },
-        type: { type: String, required: true },
-      },
-      electricity: {
-        amount: { type: Number, required: true },
-        type: { type: String, required: true },
-      },
-      gas: {
-        amount: { type: Number, required: true },
-        type: { type: String, required: true },
-      },
-      others: {
-        amount: { type: Number, required: true },
-        type: { type: String, required: true },
-      },
+    leaseDetails: {
+        leaseAmount: { type: Number, required: true },
+        leaseduration: {
+            duration: { type: Number, required: true },
+            type: { type: String, enum: ['month', 'year'], required: true },
+            amountType: { type: String, enum: ['fixed', 'negotiable'], required: true }
+        },
+        leasetenure: {
+            minimumTenure: {
+                duration: { type: Number, required: true },
+                type: { type: String, enum: ['month', 'year'], required: true }
+            },
+            maximumTenure: {
+                duration: { type: Number, required: true },
+                type: { type: String, enum: ['month', 'year'], required: true }
+            },
+            lockInPeriod: {
+                duration: { type: Number, required: true },
+                type: { type: String, enum: ['month', 'year'], required: true }
+            },
+            noticePeriod: {
+                duration: { type: Number, required: true },
+                type: { type: String, enum: ['month', 'year'], required: true }
+            }
+        },
+        maintenanceCharges: {
+            amount: { type: Number, required: true },
+            frequency: { type: String, enum: ['monthly', 'quarterly', 'half-yearly', 'yearly']}
+        },
+        otherCharges: {
+            electricityCharges: {
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
+                amount: { type: Number }
+            },
+            waterCharges: {
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
+                amount: { type: Number }
+            },
+            gasCharges: {
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
+                amount: { type: Number }
+            },
+            otherCharges: { type: String, enum: ['inclusive', 'exclusive'] },
+            amount: { type: Number }
+        }
     },
     brokerage: {
-      required: { type: String, required: true },
-      amount: { type: Number, required: true },
+        required: { type: Boolean },
+        amount: { type: Number }
     },
-  },
-  availability: {
-    date: { type: Date, required: true },
-    type: { type: String, required: true },
-  },
-  media: {
-    photos: {
-      exterior: [{ type: String }],
-      interior: [{ type: String }],
-      floorPlan: [{ type: String }],
-      Kitchen: [{ type: String }],
-      Halls: [{ type: String }],
-      Bedrooms: [{ type: String }],
-      Storerooms: [{ type: String }],
-      Washrooms: [{ type: String }],
-      lifts: [{ type: String }],
-      emergencyExits: [{ type: String }],
+    availability: {
+        date: { type: Date },
+        type: { type: String,default:"Available" },
+        availabilityStatus: { type: String, required: true },
+        leaseDuration: { type: String },
+        noticePeriod: { type: String },
+        isPetsAllowed: { type: Boolean, default: false },
+        operatingHours: {type:Boolean,default:false}
     },
-    videoTour: { type: String },
-    documents: [{ type: String }],
-  },
-  metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now },
-  },
+    contactInformation: {
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String, required: true },
+        alternatePhone: { type: String },
+        preferredContactTime: { type: String },
+        bestTimeToContact: { type: String }
+    },
+    media: {
+        photos: {
+            exterior: [{ type: String }],
+            interior: [{ type: String }],
+            floorPlan: [{ type: String }],
+            washroom: [{ type: String }],
+            lift: [{ type: String }],
+            emergencyExit: [{ type: String }]
+        },
+        videoTour: { type: String },
+        documents: [{ type: String }]
+    },
+    metadata: {
+        userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        userName:{type:String,ref:'User'},
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Lease' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' }
+    }
 }, {
-  timestamps: true,
+    timestamps: true
 });
 
-LeaseIndependentHouseSchema.index({ propertyId: 1 }, { unique: true });
-LeaseIndependentHouseSchema.index({ 'propertyAddress.city': 1 });
-LeaseIndependentHouseSchema.index({ 'leaseTerms.leaseAmount': 1 });
+// Indexes
+// CommercialLeasePlotSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
+CommercialLeasePlot.index({ 'basicInformation.city': 1 });
+CommercialLeasePlot.index({ 'leaseDetails.leaseAmount': 1 });
+CommercialLeasePlot.index({ 'plotDetails.totalArea': 1 });
 
-export default model<ILeaseIndependentHouse>('LeaseIndependentHouse', LeaseIndependentHouseSchema);
+// Create and export model
+const LeasePlot = model<ICommercialLeasePlot>('CommercialLeasePlot', CommercialLeasePlot);
+export default LeasePlot;
+
+// Export interfaces
+export {
+    ICommercialLeasePlot,
+    IBasicInformation,
+    IPropertyDetails,
+    IArea,
+    IFloor,
+    IPlotDetails,
+    ILeaseDetails,
+    IBrokerage,
+    IAvailability,
+    IContactInformation,
+    IMedia,
+    IMetadata
+}; 

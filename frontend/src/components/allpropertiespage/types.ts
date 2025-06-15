@@ -7,7 +7,19 @@ export type PropertyType =
   | 'Studio'
   | 'Penthouse'
   | 'Standalone Building'
-  | 'Agricultural'; // ✅ Added
+  | 'Agricultural'
+  | 'Office Space'
+  | 'Retail Store'
+  | 'Shop'
+  | 'Warehouse'
+  | 'Shed'
+  | 'Covered Space'
+  | 'Showroom'
+  | 'Plot';
+
+export type PropertyCategory = 'Residential' | 'Commercial';
+
+export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
 
 export type ListingType = 'Owner' | 'Agent' | 'PG' | 'RentAmigo';
 
@@ -34,7 +46,137 @@ export type SharingType =
 
 export type PropertyStatus = 'Available' | 'Rented' | 'Under Maintenance';
 
-export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
+// Commercial Property Types
+export interface CommercialPropertyType {
+  Agriculture: {
+    landDetails: {
+      totalArea: number;
+    };
+  };
+  CoveredSpace: {
+    area: {
+      totalArea: number;
+    };
+  };
+  OfficeSpace: {
+    area: {
+      totalArea: number;
+    };
+  };
+  Others: {
+    area: {
+      totalArea: number;
+    };
+  };
+  RetailStore: {
+    area: {
+      totalArea: number;
+    };
+  };
+  Shed: {
+    propertySize: number;
+  };
+  Warehouse: {
+    area: {
+      totalArea: number;
+    };
+  };
+  Plot: {
+    area: {
+      totalArea: number;
+    };
+  };
+  Shop: {
+    area: {
+      totalArea: number;
+    };
+  };
+  Showroom: {
+    area: {
+      totalArea: number;
+    };
+  };
+}
+
+// Base Property Interface
+export interface BaseProperty {
+  _id?: string;
+  propertyId: string;
+  title: string;
+  basicInformation?: {
+    title?: string;
+    address?: {
+      city?: string;
+      state?: string;
+    };
+  };
+  metadata?: {
+    propertyName?: string;
+    propertyType?: PropertyType;
+    intent?: PropertyIntent;
+    createdAt?: Date;
+  };
+  propertyDetails?: {
+    area?: {
+      totalArea?: number;
+    };
+    bathrooms?: number;
+    furnishingStatus?: FurnishingType;
+  };
+  media?: {
+    photos?: {
+      exterior?: string[];
+    };
+  };
+  rent?: {
+    expectedRent: number;
+  };
+  leaseAmount?: {
+    amount: number;
+  };
+  availability?: {
+    type: PropertyStatus;
+  };
+}
+
+// Unified Property Card Interface
+export interface Property {
+  id: string;
+  propertyId: string;
+  title: string;
+  location: string;
+  propertyName: string;
+  type: PropertyType;
+  listingType: ListingType;
+  price: number;
+  area: number;
+  image: string;
+  postedDate: string;
+  status: PropertyStatus;
+  intent: PropertyIntent;
+  bathrooms: number;
+  furnishing: FurnishingType;
+}
+
+// Property Response Interface
+export interface PropertyResponse {
+  success: boolean;
+  message: string;
+  data: {
+    commercialRent: {
+      agriculture: Property[];
+      coveredSpace: Property[];
+      officeSpace: Property[];
+      others: Property[];
+      retailStore: Property[];
+      shed: Property[];
+      warehouse: Property[];
+      plot: Property[];
+      shop: Property[];
+      showroom: Property[];
+    };
+  };
+}
 
 // Search Criteria used in filters/search
 export interface SearchCriteria {
@@ -76,12 +218,14 @@ export interface Filters {
 // Unified Property Card Interface
 export interface Property {
   id: string;
+  propertyId: string;
   title: string;
   type: PropertyType;
+  propertyName: string;
   listingType: ListingType;
   price: number;
   location: string;
-  bhkType: BHKType;
+  // bhkType: BHKType;
   bathrooms: number;
   furnishing: FurnishingType;
   area: number;

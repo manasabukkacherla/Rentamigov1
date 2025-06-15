@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import CommercialLeaseWarehouse from '../../models/commercial/CommericalLeaseWarehouse';
+import CommercialLeaseWarehouse from '../../models/commercial/CommercialLeaseWarehouse';
 import _ from 'lodash';
 
 // Generate property ID with format RA-COMLEWHXXXX
@@ -118,7 +118,8 @@ export const getAllLeaseWarehouses = async (req: Request, res: Response) => {
 // Get a single commercial lease warehouse by ID
 export const getLeaseWarehouseById = async (req: Request, res: Response) => {
     try {
-        const warehouse = await CommercialLeaseWarehouse.findById(req.params.id);
+        const propertyId = req.params.propertyId;
+        const warehouse = await CommercialLeaseWarehouse.findOne({ propertyId });
 
         if (!warehouse) {
             return res.status(404).json({
@@ -126,6 +127,7 @@ export const getLeaseWarehouseById = async (req: Request, res: Response) => {
                 error: 'Commercial lease warehouse not found'
             });
         }
+      
 
         res.status(200).json({
             success: true,

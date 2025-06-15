@@ -9,13 +9,14 @@ import PropertySize from "../PropertySize"
 import PropertyFeatures from "../PropertyFeatures"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
-import MediaUpload from "../MediaUpload"
+import PropertyMediaUpload from "../PropertyMediaUpload"
 import AvailabilityDate from "../AvailabilityDate"
 import Restrictions from "../Restrictions"
 import FinalSteps from "../FinalSteps"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
+import ResidentialPropertyMediaUpload from '../ResidentialPropertyMediaUpload'
 
 // interface ApartmentProps {
 //   propertyId: string
@@ -38,7 +39,7 @@ interface Address {
 }
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -139,6 +140,15 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Appartment';
+  intent: 'Rent';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
+}
+
 interface IMedia {
   photos: {
     exterior: (File | string)[];
@@ -183,18 +193,20 @@ interface FormData {
     date: string;
   };
   media: IMedia;
-}
+  metadata: IMetadata;
+};
 
 const Apartment = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [propertyId, setPropertyId] = useState<string | undefined>(undefined)
   const formRef = useRef<HTMLDivElement>(null)
 
-  const initialFormData= {
+  const initialFormData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -303,24 +315,32 @@ const Apartment = () => {
     },
     media: {
       photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: [],
-        bedrooms: [],
-        halls: [],
-        storerooms: [],
-        kitchen: []
+        exterior: [] as (File | string)[],
+        interior: [] as (File | string)[],
+        floorPlan: [] as (File | string)[],
+        washrooms: [] as (File | string)[],
+        lifts: [] as (File | string)[],
+        emergencyExits: [] as (File | string)[],
+        bedrooms: [] as (File | string)[],
+        halls: [] as (File | string)[],
+        storerooms: [] as (File | string)[],
+        kitchen: [] as (File | string)[]
       },
-      videoTour: undefined,
-      documents: []
-    }
+      videoTour: undefined as (File | string | undefined),
+      documents: [] as (File | string)[]
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: 'Residential',
+      propertyName: 'Appartment',
+      intent: 'Rent',
+      status: 'Available'
+    },
   }
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -429,19 +449,27 @@ const Apartment = () => {
     },
     media: {
       photos: {
-        exterior: [],
-        interior: [],
-        floorPlan: [],
-        washrooms: [],
-        lifts: [],
-        emergencyExits: [],
-        bedrooms: [],
-        halls: [],
-        storerooms: [],
-        kitchen: []
+        exterior: [] as (File | string)[],
+        interior: [] as (File | string)[],
+        floorPlan: [] as (File | string)[],
+        washrooms: [] as (File | string)[],
+        lifts: [] as (File | string)[],
+        emergencyExits: [] as (File | string)[],
+        bedrooms: [] as (File | string)[],
+        halls: [] as (File | string)[],
+        storerooms: [] as (File | string)[],
+        kitchen: [] as (File | string)[]
       },
-      videoTour: undefined,
-      documents: []
+      videoTour: undefined as (File | string | undefined),
+      documents: [] as (File | string)[]
+    },
+    metadata: {
+      createdBy: '',
+      createdAt: new Date(),
+      propertyType: 'Residential',
+      propertyName: 'Appartment',
+      intent: 'Rent',
+      status: 'Available'
     }
   })
 
@@ -500,8 +528,8 @@ const Apartment = () => {
       content: (
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
           />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -644,36 +672,17 @@ const Apartment = () => {
       ),
     },
     {
-      title: "Property Media",
+      title: "Media",
       icon: <Image className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
           <div className="space-y-8">
-            <MediaUpload
-              initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: media.photos.exterior,
-                      interior: media.photos.interior,
-                      floorPlan: media.photos.floorPlan,
-                      washrooms: media.photos.washrooms,
-                      lifts: media.photos.lifts,
-                      emergencyExits: media.photos.emergencyExits,
-                      bedrooms: media.photos.bedrooms,
-                      halls: media.photos.halls,
-                      storerooms: media.photos.storerooms,
-                      kitchen: media.photos.kitchen
-                    },
-                    videoTour: media.videoTour,
-                    documents: media.documents
-                  }
-                }));
-              }}
+            <ResidentialPropertyMediaUpload
+              propertyType="apartment"
+              propertyId={propertyId}
+              value={formData.media}
+              onChange={(media) => setFormData(prev => ({ ...prev, media }))}
             />
-
           </div>
         </div>
       ),
@@ -726,64 +735,66 @@ const Apartment = () => {
   const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
+    console.log("Final formData before submit", formData);
 
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
         const author = JSON.parse(user).id;
 
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
+        // Process media items to ensure we only send URLs to the backend
+        const processMediaForSubmission = (media: IMedia) => {
+          // Debug the incoming media object
+          console.log('Processing media for submission:', {
+            hasVideoTour: !!media.videoTour,
+            videoTourType: media.videoTour ? typeof media.videoTour : 'undefined',
+            videoTourValue: media.videoTour
           });
-        };
-
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
-            if (file instanceof File) {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
-            }
-          }
-          return results;
-        };
-
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
+          
+          // Ensure videoTour is properly extracted from media object
+          const videoTourUrl = media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined;
+          
+          // Log the videoTour URL for debugging
+          console.log('VideoTour URL for submission:', videoTourUrl);
+          
+          const processedMedia = {
+            photos: {
+              exterior: media.photos.exterior.filter(item => typeof item === 'string') as string[],
+              interior: media.photos.interior.filter(item => typeof item === 'string') as string[],
+              floorPlan: media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
+              washrooms: media.photos.washrooms.filter(item => typeof item === 'string') as string[],
+              lifts: media.photos.lifts.filter(item => typeof item === 'string') as string[],
+              emergencyExits: media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
+              bedrooms: media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
+              halls: media.photos.halls.filter(item => typeof item === 'string') as string[],
+              storerooms: media.photos.storerooms.filter(item => typeof item === 'string') as string[],
+              kitchen: media.photos.kitchen.filter(item => typeof item === 'string') as string[]
+            },
+            videoTour: videoTourUrl,
+            documents: media.documents.filter(doc => typeof doc === 'string') as string[]
+          };
+          
+          // Final check of processed media
+          console.log('Final processed media for backend:', {
+            hasVideoTour: !!processedMedia.videoTour,
+            videoTourValue: processedMedia.videoTour,
+            photoCategories: Object.keys(processedMedia.photos),
+            documentCount: processedMedia.documents.length
+          });
+          
+          return processedMedia;
         };
 
         const transformedData = {
           ...formData,
-          media: convertedMedia,
+          media: processMediaForSubmission(formData.media),
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Residential',
+            propertyName: 'Appartment',
+            intent: 'Rent',
+            status: 'Available'
           }
         };
 
@@ -794,7 +805,9 @@ const Apartment = () => {
         });
 
         if (response.data.success) {
-          toast.success('Apartment listing created successfully!');
+          // Set the propertyId from the response
+          setPropertyId(response.data.propertyId);
+          toast.success('Property listing created successfully!');
           setFormData({...initialFormData} as FormData);
         }
       } else {

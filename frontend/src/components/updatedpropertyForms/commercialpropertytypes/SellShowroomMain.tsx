@@ -30,7 +30,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  showroomType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -92,8 +92,8 @@ interface IFloor {
 }
 
 interface FormData {
-  propertyName: string;
-  showroomType: string[];
+  title: string;
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -127,7 +127,7 @@ interface FormData {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number | null;
+    propertyAge: string;
     propertyCondition: string;
   };
   pricingDetails: IPricingDetails;
@@ -147,8 +147,8 @@ interface FormData {
 
 const SellShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    showroomType: [],
+    title: '',
+    Type: [],
     address: {
       street: '',
       city: '',
@@ -159,7 +159,7 @@ const SellShowroomMain = () => {
     isCornerProperty: false,
     basicInformation: {
       title: '',
-      showroomType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -204,7 +204,7 @@ const SellShowroomMain = () => {
         backup: false
       },
       waterAvailability: [],
-      propertyAge: null,
+      propertyAge: '',
       propertyCondition: ''
     },
     pricingDetails: {
@@ -212,13 +212,15 @@ const SellShowroomMain = () => {
       pricetype: "fixed",
       area: 0,
       totalprice: 0,
-      pricePerSqft: 0
+      pricePerSqft: 0,
     },
-    registration: {
-      chargestype: "inclusive",
-      registrationAmount: 0,
-      stampDutyAmount: 0
-    },
+      registration: {
+        chargestype: "inclusive",
+        registrationAmount: 0,
+        stampDutyAmount: 0
+      },
+    
+   
     brokerage: {
       required: "no",
       amount: 0
@@ -284,13 +286,17 @@ const SellShowroomMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.propertyName}
-              onPropertyNameChange={(name) => setFormData({ ...formData, propertyName: name })}
+              propertyName={formData.title}
+              onPropertyNameChange={(name) => setFormData({ ...formData, title: name })}
             />
             <ShowroomType
-              onTypeChange={(type) => setFormData(prev => ({
+              onTypeChange={(Type) => setFormData(prev => ({
                 ...prev,
-                showroomType: Array.isArray(type) ? type : [type]
+                Type: Array.isArray(Type) ? Type : [Type],
+                basicInformation: {
+                  ...prev.basicInformation,
+                  Type: Array.isArray(Type) ? Type : [Type],
+                },
               }))}
             />
           </div>
@@ -298,7 +304,10 @@ const SellShowroomMain = () => {
             address={formData.basicInformation.address}
             onAddressChange={(address) => setFormData(prev => ({
               ...prev,
-              address
+              basicInformation: {
+                ...prev.basicInformation,
+                address
+              }
             }))}
           />
           {/* <Landmark
@@ -308,10 +317,19 @@ const SellShowroomMain = () => {
             }))}
           /> */}
           <MapLocation
-            latitude={formData.basicInformation.location.latitude.toString()}
-            longitude={formData.basicInformation.location.longitude.toString()}
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
             landmark={formData.basicInformation.landmark}
-            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onLocationChange={(location) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                location: {
+                  latitude: location.latitude,
+                  longitude: location.longitude
+                }
+              }
+            }))}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
@@ -349,7 +367,7 @@ const SellShowroomMain = () => {
                 const propertyDetails = {
                   ...prev.propertyDetails,
                   ...modifiedDetails,
-                  propertyAge: Number(modifiedDetails.propertyAge) // Convert to number
+                  propertyAge: modifiedDetails.propertyAge // Convert to number
                 };
                 return {
                   ...prev,
@@ -509,8 +527,8 @@ const SellShowroomMain = () => {
 
         const transformedData = {
           basicInformation: {
-            title: formData.basicInformation?.title || formData.propertyName || 'Commercial Showroom',
-            showroomType: Array.isArray(formData.showroomType) ? formData.showroomType : [],
+            title: formData.basicInformation?.title || formData.title || 'Commercial Showroom',
+            Type: Array.isArray(formData.basicInformation?.Type) ? formData.basicInformation?.Type : [],
             address: {
               street: formData.basicInformation?.address?.street || formData.address?.street || '',
               city: formData.basicInformation?.address?.city || formData.address?.city || '',
@@ -519,18 +537,18 @@ const SellShowroomMain = () => {
             },
             landmark: formData.basicInformation?.landmark || formData.landmark || '',
             location: {
-              latitude: typeof formData.basicInformation?.location?.latitude === 'number'
-                ? formData.basicInformation.location.latitude : 0,
-              longitude: typeof formData.basicInformation?.location?.longitude === 'number'
-                ? formData.basicInformation.location.longitude : 0
+              latitude: typeof formData.basicInformation?.location?.latitude === 'string'
+                ? formData.basicInformation.location.latitude : '',
+              longitude: typeof formData.basicInformation?.location?.longitude === 'string'
+                ? formData.basicInformation.location.longitude : ''
             },
             isCornerProperty: formData.basicInformation?.isCornerProperty || formData.isCornerProperty || false
           },
           propertyDetails: {
             ...formData.propertyDetails,
             propertyAge: typeof formData.propertyDetails?.propertyAge === 'string'
-              ? parseInt(String(formData.propertyDetails.propertyAge).split('-')[0], 10) || 0
-              : formData.propertyDetails?.propertyAge || 0
+              ? formData.propertyDetails.propertyAge
+              : formData.propertyDetails?.propertyAge || ''
           },
           showroomDetails: formData.showroomDetails,
           pricingDetails: formData.pricingDetails,
@@ -558,7 +576,11 @@ const SellShowroomMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Showroom',
+            intent: 'Sell',
+            status: 'Available',
           }
         };
 

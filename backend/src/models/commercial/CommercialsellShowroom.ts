@@ -10,7 +10,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  showroomType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -34,8 +34,8 @@ interface IPricingDetails {
 }
 
 interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
+  type: 'immediate' | 'specific';
+  date?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
@@ -69,6 +69,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -103,7 +107,7 @@ interface ICommercialShowroom extends Document {
       backup: boolean;
     };
     waterAvailability: string[];
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   pricingDetails: IPricingDetails;
@@ -127,7 +131,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    showroomType: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -146,7 +150,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
     frontageWidth: { type: Number, required: true },
     ceilingHeight: { type: Number, required: true },
     glassFrontage: { type: Boolean, default: false },
-    lightingType: { type: String, enum: ['warm', 'cool', 'natural'] },
+    lightingType: { type: String, enum: ['warm', 'cool', 'natural','immediate',``] },
     acInstalled: { type: Boolean, default: false },
     nearbyCompetitors: {
       present: { type: Boolean, default: false },
@@ -173,7 +177,7 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: [{ type: String }],
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String }
   },
   pricingDetails: {
@@ -193,8 +197,8 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
     amount: { type: Number }
   },
   availability: {
-    availableFrom: { type: String },
-    availableImmediately: { type: Boolean, required: true },
+    type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
+    date: { type: Date },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
     petsAllowed: { type: Boolean, default: false },
@@ -224,7 +228,11 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Showroom' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true
@@ -232,8 +240,8 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
 
 // Indexes
 // CommercialShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialShowroomSchema.index({ 'basicInformation.city': 1 });
-CommercialShowroomSchema.index({ 'basicInformation.state': 1 });
+CommercialShowroomSchema.index({ 'basicInformation.address.city': 1 });
+CommercialShowroomSchema.index({ 'basicInformation.address.state': 1 });
 CommercialShowroomSchema.index({ 'pricingDetails.propertyPrice': 1 });
 CommercialShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialShowroomSchema.index({ 'metadata.createdAt': -1 });

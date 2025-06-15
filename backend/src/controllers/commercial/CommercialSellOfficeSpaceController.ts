@@ -158,7 +158,8 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
                 documents: formData.media?.documents || []
             },
             metadata: {
-                createdBy: req.user?._id || null,
+                ...(formData.metadata || {}),
+                createdBy: req.user?._id || (formData.metadata?.createdBy ?? null),
                 createdAt: new Date()
             }
         };
@@ -206,7 +207,7 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
   
   export const getSellOfficeSpaceById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
+      const propertyId = req.params.propertyId;
       const property = await CommercialSellOfficeSpace.findOne({ propertyId });
       
       if (!property) {

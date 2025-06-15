@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  shopType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -35,8 +35,8 @@ interface IPricingDetails {
 
 interface IAvailability {
   
-  availableImmediately: boolean;
-  availableFrom?: Date;
+  type: 'immediate' | 'specific';
+  date?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
@@ -70,7 +70,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
-  // status?: 'active' | 'inactive' | 'deleted';
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -94,7 +97,7 @@ interface ICommercialShop extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
   };
   shopDetails: {
@@ -127,7 +130,7 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    shopType: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -160,7 +163,7 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String }
   },
   shopDetails: {
@@ -192,8 +195,8 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     amount: { type: Number, required: false }
   },
   availability: {
-    availableFrom: { type: Date, required: false },
-    availableImmediately: { type: Boolean, required: true },
+    type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
+    date: { type: Date, required: false },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
     petsAllowed: { type: Boolean, required: true },
@@ -221,6 +224,10 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Shop' },
+    status: { type: String, default: 'Available' }
     // status: { type: String, enum: ['active', 'inactive', 'deleted'], default: 'active' }
   }
 }, {

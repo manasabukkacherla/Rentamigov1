@@ -38,7 +38,7 @@ interface OfficeDetails {
 }
 
 interface FormData {
-  propertyName: string;
+  title: string;
   officeType: string[];
   address: {
     street: string;
@@ -72,10 +72,10 @@ interface FormData {
   };
   availability: {
     date: Date;
-    availableImmediately: boolean;
+    type: string;
     leaseDuration: string;
     noticePeriod: string;
-    isPetsAllowed: boolean;
+    petsAllowed: boolean;
   };
   contactDetails: {
     name: string;
@@ -102,7 +102,7 @@ const LeaseOfficeSpaceMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
+    title: '',
     officeType: [] as string[],
     address: {
       street: '',
@@ -145,10 +145,10 @@ const LeaseOfficeSpaceMain = () => {
     },
     availability: {
       date: new Date(),
-      availableImmediately: false,
+      type: 'immediate',
       leaseDuration: '',
       noticePeriod: '',
-      isPetsAllowed: false
+      petsAllowed: false
     },
     contactDetails: {
       name: '',
@@ -191,7 +191,7 @@ const LeaseOfficeSpaceMain = () => {
         <div className="space-y-6">
           <div className="space-y-6">
             <div className="relative">
-              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+              <PropertyName propertyName={formData.title} onPropertyNameChange={(propertyName) => setFormData(prev => ({ ...prev, title: propertyName }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
             <OfficeSpaceType onOfficeTypeChange={(type) => setFormData(prev => ({ ...prev, officeType: type }))} />
@@ -265,10 +265,10 @@ const LeaseOfficeSpaceMain = () => {
             ...prev,
             availability: {
               date: availability.date || new Date(),
-              availableImmediately: availability.availableImmediately || false,
+              type: availability.type|| 'immediate',
               leaseDuration: availability.preferredSaleDuration || '',
               noticePeriod: availability.noticePeriod || '',
-              isPetsAllowed: availability.petsAllowed || false
+              petsAllowed: availability.petsAllowed || false
             }
           }))} />
         </div>
@@ -339,7 +339,7 @@ const LeaseOfficeSpaceMain = () => {
     // Add validation logic based on the current step
     switch (currentStep) {
       case 0: // Basic Information
-        return !!formData.propertyName &&
+        return !!formData.title &&
           formData.officeType.length > 0 &&
           !!formData.address.street &&
           !!formData.address.city &&
@@ -606,7 +606,7 @@ const LeaseOfficeSpaceMain = () => {
     const backendData = {
       propertyId: propertyId,
       basicInformation: {
-        title: formData.propertyName || '',
+        title: formData.title || '',
         officeType: formData.officeType || [],
         address: {
           street: formData.address.street || '',
@@ -689,10 +689,10 @@ const LeaseOfficeSpaceMain = () => {
         },
         availability: {
           date: formData.availability?.date || new Date(),
-          availableImmediately: Boolean(formData.availability?.availableImmediately),
+          type: formData.availability?.type || 'immediate',
           leaseDuration: formData.availability?.leaseDuration || '',
           noticePeriod: formData.availability?.noticePeriod || '',
-          isPetsAllowed: Boolean(formData.availability?.isPetsAllowed)
+          petsAllowed: Boolean(formData.availability?.petsAllowed)
         }
       },
       contactInformation: {
@@ -704,11 +704,12 @@ const LeaseOfficeSpaceMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        status: 'active',
-        views: 0,
-        favorites: 0,
-        isVerified: false,
-        createdBy: localStorage.getItem('userId') || null
+        createdBy: localStorage.getItem('_Id') || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: 'Office Space',
+        intent: 'Lease',
+        status: 'Available',
       }
     };
 

@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  warehouseType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -30,11 +30,6 @@ interface IPricingDetails {
   area: number;
   totalprice: number;
   pricePerSqft: number;
-}
-
-interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
 }
 
 interface IContactInformation {
@@ -61,48 +56,44 @@ interface IMedia {
 interface IMetadata {
   creadtedBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 
 interface IRentalTerms {
-    rentDetails: {
-        expectedRent: number;
-        isNegotiable: boolean;
-        rentType: string;
+  rent: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  }
+  securityDeposit: {
+    amount: number;
+  }
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  }
+  otherCharges: {
+    water: {
+      amount?: number;
+      type: string;
     }
-    securityDeposit: {
-        amount: number;
+    electricity: {
+      amount?: number;
+      type: string;
     }
-    maintenanceAmount: {
-        amount: number;
-        frequency: string;
+    gas: {
+      amount?: number;
+      type: string;
     }
-    otherCharges: {
-        water: {
-            amount?: number;
-            type: string;
-        }
-        electricity: {
-            amount?: number;
-            type: string;
-        }
-        gas: {
-            amount?: number;
-            type: string;
-        }
-        others: {
-            amount?: number;
-            type: string;
-        }
+    others: {
+      amount?: number;
+      type: string;
     }
-    brokerage: {
-        required: string;
-        amount?: number;
-    }
-    availability: {
-        type: string;
-        date?: string;
-    }
+  }
 }
 
 
@@ -142,9 +133,16 @@ interface ICommercialWarehouse extends Document {
     propertyAge: string;
     propertyCondition: string;
   };
- 
+
   rentalTerms: IRentalTerms;
-  availability: IAvailability;
+  brokerage: {
+    required: string;
+    amount?: number;
+  }
+  availability: {
+    type: string;
+    date?: Date;
+  }
   contactInformation: IContactInformation;
   media: IMedia;
   metadata: IMetadata;
@@ -156,8 +154,8 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    warehouseType: [{ type: String, required: true }],
-    address: { 
+    Type: [{ type: String, required: true }],
+    address: {
       street: { type: String, required: true },
       city: { type: String, required: true },
       state: { type: String, required: true },
@@ -179,9 +177,9 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
       count: { type: Number, default: 0 },
     },
     floorLoadCapacity: { type: Number, required: true },
-    fireSafety: { type: Boolean},
+    fireSafety: { type: Boolean },
     securityPersonnel: [{ type: Boolean }],
-    truckParking: { type: Boolean},
+    truckParking: { type: Boolean },
   },
   propertyDetails: {
     area: {
@@ -204,48 +202,48 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     waterAvailability: { type: String },
     propertyAge: { type: String },
     propertyCondition: { type: String }
-    },
+  },
   rentalTerms: {
-    rentDetails: {
-        expectedRent: { type: Number, required: true },
-        isNegotiable: { type: Boolean, default: false },
-        rentType: { type: String, required: true },
+    rent: {
+      expectedRent: { type: Number, required: true },
+      isNegotiable: { type: Boolean, default: false },
+      rentType: { type: String, required: true },
     },
     securityDeposit: {
-        amount: { type: Number, required: true },
+      amount: { type: Number, required: true },
     },
     maintenanceAmount: {
-        amount: { type: Number },
-        frequency: { type: String},
+      amount: { type: Number },
+      frequency: { type: String },
     },
     otherCharges: {
-        water: {
-            amount: { type: Number },
-            type: { type: String, required: true},
-        },
-        electricity: {
-            amount: { type: Number },
-            type: { type: String, required: true},
-        },
-        gas: {
-            amount: { type: Number },
-            type: { type: String, required: true},
-        },
-        others: {
-            amount: { type: Number },
-            type: { type: String, required: true},
-        }
-    },
-    brokerage: {
-        required: { type: String, required: true },
+      water: {
         amount: { type: Number },
-    },
-    availability: {
         type: { type: String, required: true },
-        date: { type: String },
-    }
+      },
+      electricity: {
+        amount: { type: Number },
+        type: { type: String, required: true },
+      },
+      gas: {
+        amount: { type: Number },
+        type: { type: String, required: true },
+      },
+      others: {
+        amount: { type: Number },
+        type: { type: String, required: true },
+      }
+    },
   },
 
+  brokerage: {
+    required: { type: String, required: true },
+    amount: { type: Number },
+  },
+  availability: {
+    type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+    date: { type: Date },
+  },
   contactInformation: {
     name: { type: String, required: true },
     email: { type: String, required: true },
@@ -266,8 +264,12 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     documents: [{ type: String }]
   },
   metadata: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String, default: 'Rent' },
+    propertyName: { type: String, default: 'Warehouse' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true
@@ -275,12 +277,12 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
 
 // Indexes
 // CommercialRentWarehouseSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialRentWarehouseSchema.index({ 'basicInformation.city': 1 });
-CommercialRentWarehouseSchema.index({ 'basicInformation.state': 1 });
-CommercialRentWarehouseSchema.index({ 'pricingDetails.propertyPrice': 1 });
+CommercialRentWarehouseSchema.index({ 'basicInformation.address.city': 1 });
+CommercialRentWarehouseSchema.index({ 'basicInformation.address.state': 1 });
+CommercialRentWarehouseSchema.index({ 'rentalTerms.rent.expectedRent': 1 });
 CommercialRentWarehouseSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentWarehouseSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
-export { ICommercialWarehouse, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };
+export { ICommercialWarehouse, IBasicInformation, IArea, IPricingDetails, IContactInformation, IMedia, IMetadata };
 export default model<ICommercialWarehouse>('CommercialRentWarehouse', CommercialRentWarehouseSchema); 

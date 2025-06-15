@@ -146,6 +146,11 @@ interface FormData {
   metadata?: {
     createdBy: string;
     createdAt: Date;
+    userId: string;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -573,7 +578,12 @@ const LeaseRetailStoreMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            userId: author,
+            propertyType: 'Commercial',
+            propertyName: 'Retail Store',
+            intent: 'Lease',
+            status: 'Available',
           }
         };
 

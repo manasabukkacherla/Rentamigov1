@@ -55,20 +55,22 @@ const globalStyles = `
 
 // Define interface for form data structure based on the backend model
 interface FormData {
-  propertyName: string;
-  commercialType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    Type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
   otherDetails: {
     propertyTypeDescription?: string;
     specialFeatures?: string;
@@ -89,42 +91,44 @@ interface FormData {
     furnishingStatus: string;
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
+    electricitySupply: {
+      powerLoad: number | null;
+      backup: boolean;
+    };
     waterAvailability: string;
     propertyAge: string;
     propertyCondition: string;
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
+  };
+  rentalTerms: {
+    rentDetails: {
+      expectedRent: number;
+      isNegotiable: boolean;
+      rentType: 'inclusive' | 'exclusive';
     };
-  };
-  rent: {
-    expectedRent: number;
-    isNegotiable: boolean;
-    rentType: 'inclusive' | 'exclusive';
-  };
-  securityDeposit: {
-    amount: number;
-  };
-  maintenanceAmount: {
-    amount: number;
-    frequency: 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
-  };
-  otherCharges: {
-    water: {
-      type: 'inclusive' | 'exclusive';
+    securityDeposit: {
       amount: number;
     };
-    electricity: {
-      type: 'inclusive' | 'exclusive';
+    maintenanceAmount: {
       amount: number;
+      frequency: 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
     };
-    gas: {
-      type: 'inclusive' | 'exclusive';
-      amount: number;
-    };
-    others: {
-      type: 'inclusive' | 'exclusive';
-      amount: number;
+    otherCharges: {
+      water: {
+        type: 'inclusive' | 'exclusive';
+        amount: number;
+      };
+      electricity: {
+        type: 'inclusive' | 'exclusive';
+        amount: number;
+      };
+      gas: {
+        type: 'inclusive' | 'exclusive';
+        amount: number;
+      };
+      others: {
+        type: 'inclusive' | 'exclusive';
+        amount: number;
+      };
     };
   };
   brokerage: {
@@ -135,7 +139,7 @@ interface FormData {
     type: 'immediate' | 'specific';
     date?: string;
   };
-  contactDetails: {
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
@@ -158,25 +162,25 @@ interface FormData {
 }
 
 // Error display component for validation errors
-const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
-  if (Object.keys(errors).length === 0) return null;
+// const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
+//   if (Object.keys(errors).length === 0) return null;
 
-  return (
-    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
-      <div className="flex items-center">
-        <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
-      </div>
-      <ul className="mt-2 list-disc list-inside text-red-600">
-        {Object.values(errors).map((error, index) => (
-          <li key={index} className="text-sm">{error}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
+//   return (
+//     <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+//       <div className="flex items-center">
+//         <svg className="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+//         </svg>
+//         <h3 className="text-red-800 font-medium">Please fix the following errors:</h3>
+//       </div>
+//       <ul className="mt-2 list-disc list-inside text-red-600">
+//         {Object.values(errors).map((error, index) => (
+//           <li key={index} className="text-sm">{error}</li>
+//         ))}
+//       </ul>
+//     </div>
+//   );
+// };
 
 const convertFileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -191,17 +195,19 @@ const RentOthers = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    commercialType: [],
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    basicInformation: {
+      title: '',
+      Type: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: { latitude: '', longitude: '' },
+      isCornerProperty: false,
     },
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
     otherDetails: {
       propertyTypeDescription: '',
       specialFeatures: '',
@@ -222,43 +228,45 @@ const RentOthers = () => {
       furnishingStatus: '',
       propertyAmenities: [],
       wholeSpaceAmenities: [],
+      electricitySupply: {
+        powerLoad: null,
+        backup: false
+      },
       waterAvailability: '',
       propertyAge: '',
-      propertyCondition: '',
-      electricitySupply: {
-        powerLoad: 0,
-        backup: false
-      }
+      propertyCondition: 'new'
     },
-    rent: {
-      expectedRent: 0,
-      isNegotiable: false,
-      rentType: 'inclusive'
-    },
-    securityDeposit: {
-      amount: 0
-    },
-    maintenanceAmount: {
-      amount: 0,
-      frequency: 'monthly'
-    },
-    otherCharges: {
-      water: {
-        type: 'inclusive',
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: 'inclusive'
+      },
+      securityDeposit: {
         amount: 0
       },
-      electricity: {
-        type: 'inclusive',
-        amount: 0
+      maintenanceAmount: {
+        amount: 0,
+        frequency: 'monthly'
       },
-      gas: {
-        type: 'inclusive',
-        amount: 0
+      otherCharges: {
+        water: {
+          type: 'inclusive',
+          amount: 0
+        },
+        electricity: {
+          type: 'inclusive',
+          amount: 0
+        },
+        gas: {
+          type: 'inclusive',
+          amount: 0
+        },
+        others: {
+          type: 'inclusive',
+          amount: 0
+        }
       },
-      others: {
-        type: 'inclusive',
-        amount: 0
-      }
     },
     brokerage: {
       required: '',
@@ -267,7 +275,7 @@ const RentOthers = () => {
     availability: {
       type: 'immediate'
     },
-    contactDetails: {
+    contactInformation: {
       name: '',
       email: '',
       phone: '',
@@ -317,24 +325,6 @@ const RentOthers = () => {
     setFormData(prev => ({ ...prev, address }));
   };
 
-  const handleLandmarkChange = (landmark: string) => {
-    setFormData(prev => ({ ...prev, landmark }));
-  };
-
-  const handleLatitudeChange = (lat: string) => {
-    setFormData(prev => ({
-      ...prev,
-      coordinates: { ...prev.coordinates, latitude: lat }
-    }));
-  };
-
-  const handleLongitudeChange = (lng: string) => {
-    setFormData(prev => ({
-      ...prev,
-      coordinates: { ...prev.coordinates, longitude: lng }
-    }));
-  };
-
   const handleCornerPropertyChange = (isCorner: boolean) => {
     setFormData(prev => ({ ...prev, isCornerProperty: isCorner }));
   };
@@ -356,7 +346,7 @@ const RentOthers = () => {
   const handleRentChange = (rent: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      rent: { ...prev.rent, ...rent }
+      rentalTerms: { ...prev.rentalTerms, ...rent }
     }));
   };
 
@@ -364,11 +354,11 @@ const RentOthers = () => {
     setFormData(prev => {
       const updated = { ...prev };
 
-      if (!updated.maintenanceAmount) {
-        updated.maintenanceAmount = { amount: 0, frequency: 'monthly' };
+      if (!updated.rentalTerms.maintenanceAmount) {
+        updated.rentalTerms.maintenanceAmount = { amount: 0, frequency: 'monthly' };
       } else {
-        updated.maintenanceAmount = {
-          ...updated.maintenanceAmount,
+        updated.rentalTerms.maintenanceAmount = {
+          ...updated.rentalTerms.maintenanceAmount,
           ...maintenance
         };
       }
@@ -380,14 +370,14 @@ const RentOthers = () => {
   const handleSecurityDepositChange = (deposit: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      securityDeposit: { ...prev.securityDeposit, ...deposit }
+      rentalTerms: { ...prev.rentalTerms, ...deposit }
     }));
   };
 
   const handleOtherChargesChange = (charges: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      otherCharges: { ...prev.otherCharges, ...charges }
+      rentalTerms: { ...prev.rentalTerms, ...charges }
     }));
   };
 
@@ -411,7 +401,7 @@ const RentOthers = () => {
   const handleContactChange = (contact: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      contactDetails: { ...prev.contactDetails, ...contact }
+      contactInformation: { ...prev.contactInformation, ...contact }
     }));
   };
 
@@ -446,12 +436,12 @@ const RentOthers = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const renderFormSection = (content: React.ReactNode) => (
-    <div className="space-y-4">
-      <ErrorDisplay errors={formErrors} />
-      {content}
-    </div>
-  );
+  // const renderFormSection = (content: React.ReactNode) => (
+  //   <div className="space-y-4">
+  //     <ErrorDisplay errors={formErrors} />
+  //     {content}
+  //   </div>
+  // );
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -473,32 +463,32 @@ const RentOthers = () => {
     {
       title: 'Basic Information',
       icon: <Store className="w-5 h-5" />,
-      content: renderFormSection(
+      content: (
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={handlePropertyNameChange}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
           <OtherCommercialType
-            onCommercialTypeChange={handleCommercialTypeChange}
+            onCommercialTypeChange={(types) => handleChange('basicInformation.Type', types)}
           />
           <CommercialPropertyAddress
-            address={formData.address}
-            onAddressChange={handleAddressChange}
+            address={formData.basicInformation.address}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
           />
           {/* <Landmark
             onLandmarkChange={handleLandmarkChange}
           /> */}
           <MapLocation
-            latitude={formData.coordinates.latitude.toString()}
-            longitude={formData.coordinates.longitude.toString()}
-            landmark={formData.landmark}
-            onLocationChange={(location) => handleChange('coordinates', location)}
-            onAddressChange={(address) => handleChange('address', address)}
-            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
           <CornerProperty
-            isCornerProperty={formData.isCornerProperty}
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={handleCornerPropertyChange}
           />
         </div>
@@ -507,27 +497,29 @@ const RentOthers = () => {
     {
       title: 'Property Details',
       icon: <Building2 className="w-5 h-5" />,
-      content: renderFormSection(
+      content: (
         <div className="space-y-6">
           <OtherPropertyDetails onDetailsChange={handleOtherDetailsChange} />
-          <CommercialPropertyDetails onDetailsChange={handlePropertyDetailsChange} />
+          <CommercialPropertyDetails
+            onDetailsChange={(details) => setFormData({ ...formData, propertyDetails: details })}
+          />
         </div>
       )
     },
     {
       title: 'Rental Terms',
       icon: <DollarSign className="w-5 h-5" />,
-      content: renderFormSection(
+      content: (
         <div className="space-y-6">
 
-          <Rent onRentChange={handleRentChange} rentDetails={formData.rent} />
-          {formData.rent.rentType === 'exclusive' && (
-            <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={handleMaintenanceAmountChange} />
+          <Rent onRentChange={handleRentChange} rentDetails={formData.rentalTerms.rentDetails} />
+          {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
+            <MaintenanceAmount maintenanceAmount={formData.rentalTerms.maintenanceAmount} onMaintenanceAmountChange={handleMaintenanceAmountChange} />
           )}
-          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} deposit={formData.securityDeposit} />
+          <SecurityDeposit onSecurityDepositChange={handleSecurityDepositChange} deposit={formData.rentalTerms.securityDeposit} />
 
 
-          <OtherCharges onOtherChargesChange={handleOtherChargesChange} otherCharges={formData.otherCharges} />
+          <OtherCharges onOtherChargesChange={handleOtherChargesChange} otherCharges={formData.rentalTerms.otherCharges} />
           <Brokerage onBrokerageChange={handleBrokerageChange} bro={formData.brokerage} />
         </div>
       )
@@ -535,7 +527,7 @@ const RentOthers = () => {
     {
       title: 'Availability',
       icon: <Calendar className="w-5 h-5" />,
-      content: renderFormSection(
+      content: (
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate availability={formData.availability} onAvailabilityChange={handleAvailabilityChange} />
         </div>
@@ -544,16 +536,16 @@ const RentOthers = () => {
     {
       title: 'Contact Information',
       icon: <UserCircle className="w-5 h-5" />,
-      content: renderFormSection(
+      content: (
         <div className="space-y-6">
-          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={handleContactChange} />
+          <CommercialContactDetails contactInformation={formData.contactInformation} onContactChange={handleContactChange} />
         </div>
       )
     },
     {
       title: 'Property Media',
       icon: <ImageIcon className="w-5 h-5" />,
-      content: renderFormSection(
+      content: (
         <div className="space-y-6">
           <CommercialMediaUpload
             Media={{
@@ -576,7 +568,7 @@ const RentOthers = () => {
                   photos: {
                     exterior: photos['exterior'] || [],  // Fallback to empty array if no files
                     interior: photos['interior'] || [],
-                    floorPlan: photos['floorPlan'] || [], 
+                    floorPlan: photos['floorPlan'] || [],
                     washrooms: photos['washrooms'] || [],
                     lifts: photos['lifts'] || [],
                     emergencyExits: photos['emergencyExits'] || [],
@@ -682,7 +674,6 @@ const RentOthers = () => {
         if (response.data.success) {
           // Show success message and redirect
           toast.success('Commercial rent others listing created successfully!');
-          navigate('/dashboard'); // Redirect to dashboard or appropriate page
         }
       } else {
         toast.error('User not logged in');
@@ -796,4 +787,3 @@ const RentOthers = () => {
 };
 
 export default RentOthers;
-

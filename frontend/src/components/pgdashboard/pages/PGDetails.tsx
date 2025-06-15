@@ -340,80 +340,95 @@ const PGDetails: React.FC = () => {
       </div>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-      {/* Room Images */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Room Images</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {pg.media.mediaItems
-            .filter(item => 
-              // Checking for room type based on selected sharing configuration
-              (selectedSharing === 0 && item.roomType === 'single') || // Single room
-              (selectedSharing === 1 && item.roomType === 'double') || // Double room
-              (selectedSharing === 2 && item.roomType === 'triple') || // Triple room
-              (selectedSharing === 3 && item.roomType === 'four') || // Four room
-              (selectedSharing === 4 && item.roomType === 'five') || // Five room
-              (selectedSharing === 5 && item.roomType === 'custom') // Custom room (added for custom sharing)
+    <div className="p-6 space-y-8">
+
+  {/* Room Videos */}
+ <h3 className="text-lg font-medium text-gray-900 mb-4">Room Videos</h3>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+  {pg.media.mediaItems
+    .filter(item =>
+      item.type === "video" &&
+      (
+        (selectedSharing === 0 && item.roomType === 'single') ||
+        (selectedSharing === 1 && item.roomType === 'double') ||
+        (selectedSharing === 2 && item.roomType === 'triple') ||
+        (selectedSharing === 3 && item.roomType === 'four') ||
+        (selectedSharing === 4 && item.roomType === 'five') ||
+        (selectedSharing === 5 && item.roomType === 'custom')
+      )
+    )
+    .map((video, index) => (
+      <video
+        key={`${selectedSharing}-${index}`}
+        controls
+        className="w-full h-64 object-cover rounded-lg"
+      >
+        <source src={video.url} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    ))}
+</div>
+
+
+  {/* Room Images & Amenities */}
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+    {/* Room Images */}
+    <div>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Room Images</h3>
+      <div className="grid grid-cols-2 gap-4">
+        {pg.media.mediaItems
+          .filter(item =>
+            item.type === "photo" &&
+            (
+              (selectedSharing === 0 && item.roomType === 'single') ||
+              (selectedSharing === 1 && item.roomType === 'double') ||
+              (selectedSharing === 2 && item.roomType === 'triple') ||
+              (selectedSharing === 3 && item.roomType === 'four') ||
+              (selectedSharing === 4 && item.roomType === 'five') ||
+              (selectedSharing === 5 && item.roomType === 'custom')
             )
-            .map((image, index) => (
-              <img
-                key={index}
-                src={image.url}
-                alt={`Room Image ${index + 1}`}
-                className="w-full h-48 object-cover rounded-lg"
-              />
-            ))}
-        </div>
-      </div>
-
-      {/* Room Amenities */}
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Room Amenities</h3>
-        <div className="grid grid-cols-2 gap-4">
-          {/* Single Room Amenities */}
-          {selectedSharing === 0 && pg.roomConfiguration.singleRoomAmenities?.map((amenity, index) => (
-            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
-            </div>
+          )
+          .map((image, index) => (
+            <img
+              key={index}
+              src={image.url}
+              alt={image.title || `Room Image ${index + 1}`}
+              className="w-full h-48 object-cover rounded-lg"
+              onError={(e) => e.currentTarget.style.display = 'none'}
+            />
           ))}
-
-          {/* Double Room Amenities */}
-          {selectedSharing === 1 && pg.roomConfiguration.doubleShareRoomAmenities?.map((amenity, index) => (
-            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
-            </div>
-          ))}
-
-          {/* Triple Room Amenities */}
-          {selectedSharing === 2 && pg.roomConfiguration.tripleShareRoomAmenities?.map((amenity, index) => (
-            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
-            </div>
-          ))}
-
-          {/* Four Room Amenities */}
-          {selectedSharing === 3 && pg.roomConfiguration.fourShareRoomAmenities?.map((amenity, index) => (
-            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
-            </div>
-          ))}
-
-          {/* Five Room Amenities */}
-          {selectedSharing === 4 && pg.roomConfiguration.fiveShareRoomAmenities?.map((amenity, index) => (
-            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
-            </div>
-          ))}
-
-          {/* Custom Room Amenities */}
-          {selectedSharing === 5 && pg.roomConfiguration.customShareRoomAmenities?.map((amenity, index) => (
-            <div key={index} className="flex items-center p-3 bg-gray-50 rounded-lg">
-              <span className="text-gray-900">{amenity.replace('-', ' ')}</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
+
+    {/* Room Amenities */}
+    <div>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Room Amenities</h3>
+      <div className="grid grid-cols-2 gap-4">
+        {selectedSharing === 0 && pg.roomConfiguration.singleRoomAmenities?.map((amenity, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg text-gray-900">{amenity.replace(/-/g, ' ')}</div>
+        ))}
+        {selectedSharing === 1 && pg.roomConfiguration.doubleShareRoomAmenities?.map((amenity, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg text-gray-900">{amenity.replace(/-/g, ' ')}</div>
+        ))}
+        {selectedSharing === 2 && pg.roomConfiguration.tripleShareRoomAmenities?.map((amenity, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg text-gray-900">{amenity.replace(/-/g, ' ')}</div>
+        ))}
+        {selectedSharing === 3 && pg.roomConfiguration.fourShareRoomAmenities?.map((amenity, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg text-gray-900">{amenity.replace(/-/g, ' ')}</div>
+        ))}
+        {selectedSharing === 4 && pg.roomConfiguration.fiveShareRoomAmenities?.map((amenity, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg text-gray-900">{amenity.replace(/-/g, ' ')}</div>
+        ))}
+        {selectedSharing === 5 && pg.roomConfiguration.customShareRoomAmenities?.map((amenity, index) => (
+          <div key={index} className="p-3 bg-gray-50 rounded-lg text-gray-900">{amenity.replace(/-/g, ' ')}</div>
+        ))}
+      </div>
+    </div>
+
+  </div>
+</div>
+
   </div>
 )}
 

@@ -627,7 +627,11 @@ const LeaseShopMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Lease',
+            status: 'Available'
           }
         };
 

@@ -180,50 +180,60 @@ const Sidebar: React.FC<SidebarProps> = ({
         lg:top-0 pt-0 lg:pt-0
       `}
       >
-        {/* Desktop Header */}
-        <div className="hidden lg:flex p-4 items-center justify-between">
-          <h1 className="text-xl font-bold text-black">PropManager</h1>
-        </div>
+       <div className="flex flex-col h-full justify-between">
+  {/* Header */}
+  <div>
+    <div className="p-2">
+      <h1 className="text-xl font-bold text-black">PropManager</h1>
+    </div>
 
-        <nav className="mt-8">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onSectionChange(item.id)}
-                className={`w-full flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 transition-colors ${
-                  activeSection === item.id ? "bg-gray-100 text-black" : ""
-                }`}
-              >
-                <Icon className="w-5 h-5 mr-3" />
-                <span>{item.label}</span>
-              </button>
-            );
-          })}
-
-          {/* Chat Support Button */}
+    {/* Menu */}
+    <div className="flex flex-col gap-y-4 px-2 mt-2">
+      {menuItems.map((item) => {
+        const Icon = item.icon;
+        return (
           <button
-            onClick={toggleChatbot}
-            className={`w-full flex items-center px-6 py-3 text-gray-600 hover:bg-gray-100 transition-colors ${
-              showChatbot ? "bg-gray-100 text-black" : ""
+            key={item.id}
+            onClick={() => onSectionChange(item.id)}
+            className={`w-full flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ${
+              activeSection === item.id ? "bg-gray-100 text-black" : ""
             }`}
           >
-            <MessageCircle className="w-5 h-5 mr-3" />
-            <span>Chat Support</span>
+            <Icon className="w-5 h-5 mr-3" />
+            <span>{item.label}</span>
           </button>
-        </nav>
+        );
+      })}
+    </div>
 
-        {/* Desktop Logout Button */}
-        <div className="hidden lg:block absolute bottom-0 w-full p-4 border-t border-gray-200">
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </button>
-        </div>
+    {/* Chat Support */}
+    <div className="px-3 py-2">
+      <button
+        onClick={toggleChatbot}
+        className={`w-full flex items-center text-gray-600 hover:bg-gray-100 py-2 px-2 rounded-lg transition-colors ${
+          showChatbot ? "bg-gray-100 text-black" : ""
+        }`}
+      >
+        <MessageCircle className="w-5 h-5 mr-3" />
+        <span>Chat Support</span>
+      </button>
+    </div>
+  </div>
+
+  {/* Logout */}
+  <div className="px-3 py-2 border-t border-gray-200 mb-4">
+    <button
+      onClick={handleLogout}
+      className="flex items-center justify-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 rounded-lg transition-colors"
+    >
+      <LogOut className="w-4 h-4 mr-2" />
+      Logout
+    </button>
+  </div>
+</div>
+
+
+        
       </div>
 
       {/* Chat Support View */}

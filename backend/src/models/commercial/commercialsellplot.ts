@@ -9,14 +9,15 @@ interface IArea {
 
 interface IBasicInformation {
     title: string;
-    plotType: string;
-    address: string;
+    Type: string;
+    address: {  
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
     landmark: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    latitude: string;
-    longitude: string;
+    location: { latitude: string; longitude: string };
     isCornerProperty: boolean;
 }
 
@@ -75,8 +76,8 @@ interface IBrokerage {
 }
 
 interface IAvailability {
-    availableFrom?: Date;
-    availableImmediately?: boolean;
+    date?: Date;
+    type?: string;
     availabilityStatus: string;
     possessionDate: string;
     leaseDuration?: string;
@@ -107,6 +108,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface ICommercialPlot extends Document {
@@ -128,20 +133,20 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        plotType: { type: String, required: true },
-        address: { type: String, required: true },
+        Type: { type: String, required: true },
+        address:{   
+          street: { type: String, required: true },
+          city: { type: String, required: true },
+          state: { type: String, required: true },
+          zipCode: { type: String, required: true }
+        },
         landmark: { type: String, required: true },
-        city: { type: String, required: true },
-        state: { type: String, required: true },
-        zipCode: { type: String, required: true },
-         latitude: { type: String, required: true },
-        longitude: { type: String, required: true },
-    
+        location: { latitude: String, longitude: String },
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
-        totalArea: { type: Number, required: true },
-        zoningType: { type: String, required: true },
+        totalArea: { type: Number},
+        zoningType: { type: String },
         plotFacing: { type: String },
         roadWidth: { type: Number },
         landmarkProximity: [{ type: String }],
@@ -193,8 +198,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         amount: { type: Number }
     },
     availability: {
-        availableFrom: { type: Date },
-        availableImmediately: { type: Boolean, default: false },
+        type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
+        date: { type: Date },
         availabilityStatus: { type: String, required: true },
         possessionDate: { type: String, required: true },
         leaseDuration: { type: String },
@@ -220,8 +225,12 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         videoTour: { type: String }
     },
     metadata: {
-        creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Sell' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true

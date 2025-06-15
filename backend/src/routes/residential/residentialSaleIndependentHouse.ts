@@ -1,17 +1,18 @@
 import express from 'express';
 import {
    createSaleIndependentHouse,
-//    getAllRentIndependentHouse,
-//    updateRentIndependentHouse,
-//    deleteRentIndependentHouse,
-   getUserIndependentHouses
+   getAllSaleIndependentHouse,
+   getSaleIndependentHouseById,
+   updateSaleIndependentHouse,
+   deleteSaleIndependentHouse,
 } from '../../controllers/residential/residentialSaleIndependentHouse';
 
 const router = express.Router();
 
 router.post('/', createSaleIndependentHouse as express.RequestHandler);
-// router.get('/', getAllRentIndependentHouse as express.RequestHandler);
-// router.put('/:id', updateRentIndependentHouse as express.RequestHandler);
-// router.delete('/:id', deleteRentIndependentHouse as express.RequestHandler);
+ router.get('/', getAllSaleIndependentHouse as express.RequestHandler);
+ router.put('/:id', updateSaleIndependentHouse as express.RequestHandler);
+ router.delete('/:id', deleteSaleIndependentHouse as express.RequestHandler);
+ router.get('/:propertyId', getSaleIndependentHouseById as express.RequestHandler);
 
 export default router;

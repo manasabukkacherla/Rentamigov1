@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  warehouseType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -33,8 +33,8 @@ interface IPricingDetails {
 }
 
 interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
+  type: 'immediate' | 'specific';
+  date?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
@@ -68,6 +68,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -129,7 +133,7 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    warehouseType: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -175,7 +179,7 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String }
   },
   pricingDetails: {
@@ -195,8 +199,8 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
     amount: { type: Number }
   },
   availability: {
-    availableFrom: { type: String },
-    availableImmediately: { type: Boolean, required: true },
+    type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+    date: { type: Date },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
     petsAllowed: { type: Boolean, default: false },
@@ -226,7 +230,11 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Warehouse' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true
@@ -234,8 +242,8 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
 
 // Indexes
 // CommercialWarehouseSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialWarehouseSchema.index({ 'basicInformation.city': 1 });
-CommercialWarehouseSchema.index({ 'basicInformation.state': 1 });
+CommercialWarehouseSchema.index({ 'basicInformation.address.city': 1 });
+CommercialWarehouseSchema.index({ 'basicInformation.address.state': 1 });
 CommercialWarehouseSchema.index({ 'pricingDetails.propertyPrice': 1 });
 CommercialWarehouseSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialWarehouseSchema.index({ 'metadata.createdAt': -1 });

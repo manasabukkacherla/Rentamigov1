@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 import _ from 'lodash';
-import CommercialRentShowroom from '../../models/commercial/commericalRentShowroom';
+import { CommercialRentShowroom } from '../../models/commercial/commercialRentShowroom';
 
 // Generate property ID with format RA-COMRSH####
 const generatePropertyId = async (): Promise<string> => {
     try {
         // Prefix for the commercial rent showroom property ID
-        const prefix = "RA-COMRSH";
+        const prefix = "RA-COMRESR";
 
         // Find the showroom with the highest property ID number
         const highestShowroom = await CommercialRentShowroom.findOne({
@@ -54,7 +54,7 @@ const generatePropertyId = async (): Promise<string> => {
         console.error('Error generating property ID:', error);
         // Fallback to timestamp-based ID if there's an error
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMRSH${timestamp}`;
+        return `RA-COMRESH${timestamp}`;
     }
 };
 
@@ -97,7 +97,7 @@ export const createRentShowroom = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: req.user?._id || null,
+                createdBy: formData.metadata.createdBy,
                 createdAt: new Date()
             }
         };
@@ -152,7 +152,7 @@ export const getAllCommercialRentShowroom = async (req: Request, res: Response) 
   
   export const getCommercialRentShowroomById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
+      const propertyId = req.params.propertyId;
       const property = await CommercialRentShowroom.findOne({ propertyId });
       
       if (!property) {

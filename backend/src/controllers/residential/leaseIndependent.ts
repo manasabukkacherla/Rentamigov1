@@ -4,45 +4,65 @@ import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-RESLEIH";
-    const highest = await LeaseIndependentHouse.findOne({
-      propertyId: { $regex: `^${prefix}\d+$` },
-    }).sort({ propertyId: -1 });
-
-    let nextNumber = 1;
-    if (highest) {
-      const match = highest.propertyId.match(/(\d+)$/);
-      if (match && match[1]) {
-        nextNumber = parseInt(match[1], 10) + 1;
+      const prefix = "RA-RESLEIH";
+  
+      const highestShowroom = await LeaseIndependentHouse.findOne({
+        propertyId: { $regex: `^${prefix}\\d+$` }
+      }).sort({ propertyId: -1 });
+  
+      let nextNumber = 1;
+  
+      if (highestShowroom) {
+        const match = highestShowroom.propertyId.match(/(\d+)$/);
+        if (match && match[1]) {
+          nextNumber = parseInt(match[1], 10) + 1;
+        }
       }
+  
+      const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+  
+      const existingWithExactId = await LeaseIndependentHouse.findOne({ propertyId });
+  
+      if (existingWithExactId) {
+        console.log(`Property ID ${propertyId} already exists, trying next number`);
+  
+        const forcedNextNumber = nextNumber + 1;
+        const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+  
+        const forcedExisting = await LeaseIndependentHouse.findOne({ propertyId: forcedPropertyId });
+  
+        if (forcedExisting) {
+          return generatePropertyId();
+        }
+  
+        return forcedPropertyId;
+      }
+  
+      return propertyId;
+    } catch (error) {
+      console.error('Error generating property ID:', error);
+      const timestamp = Date.now().toString().slice(-8);
+      return `RA-RESLEIH${timestamp}`;
     }
-
-    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-    const existing = await LeaseIndependentHouse.findOne({ propertyId });
-    if (existing) {
-      return generatePropertyId();
-    }
-    return propertyId;
-  } catch (error) {
-    console.error('Error generating property ID:', error);
-    const timestamp = Date.now().toString().slice(-8);
-    return `RA-RESLEIH${timestamp}`;
-  }
 };
 
 export const createLeaseIndependentHouse = async (req: Request, res: Response) => {
   try {
     const formData = req.body;
     const propertyId = await generatePropertyId();
-    console.log(formData);
-    const property = new LeaseIndependentHouse({
+    console.log("formData", formData);
+    console.log("propertyId", propertyId);
+    const propertyData = JSON.parse(JSON.stringify({
       ...req.body,
       propertyId,
       metadata: {
         ...req.body.metadata,
         createdAt: new Date()
       }
-    });
+    }));
+    const property = new LeaseIndependentHouse(propertyData);
+
+    console.log("propertyData", propertyData);
 
     await property.save();
     res.status(201).json({
@@ -78,8 +98,8 @@ export const getAllLeaseIndependentHouses = async (req: Request, res: Response) 
 
 export const getLeaseIndependentHouseById = async (req: Request, res: Response) => {
   try {
-    const id  = req.params._id;
-    const property = await LeaseIndependentHouse.findOne({ propertyId: id });
+    const propertyId  = req.params.propertyId;
+    const property = await LeaseIndependentHouse.findOne({ propertyId });
 
     if (!property) {
       return res.status(404).json({

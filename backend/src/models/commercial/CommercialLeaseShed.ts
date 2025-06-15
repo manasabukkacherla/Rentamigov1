@@ -93,8 +93,8 @@ interface ILeaseTerms {
         amount?: number;
     };
     availability: {
-        availableFrom: Date;
-        availableImmediately: boolean;
+        date: Date;
+        type: string;
         leaseDuration: string;
         noticePeriod: string;
         petsAllowed: boolean;
@@ -129,14 +129,13 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
-    // updatedAt?: Date;
-    // status: 'active' | 'inactive' | 'sold' | 'rented';
-    // views: number;
-    // favorites: number;
-    // isVerified: boolean;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
 }
 
-interface ICommercialLeaseShed extends Document {
+export interface ICommercialLeaseShed extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     shedDetails: IShedDetails;
@@ -239,10 +238,10 @@ const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
             amount: { type: Number }
         },
         availability: {
-            availableFrom: { type: Date, required: true },
-            availableImmediately: { type: Boolean, default: false },
-            leaseDuration: { type: String, required: true },
-            noticePeriod: { type: String, required: true },
+            date: { type: Date },
+            type: { type: String,default:"Available" },
+            leaseDuration: { type: String },
+            noticePeriod: { type: String },
             petsAllowed: { type: Boolean, default: false },
             operatingHours: {
                 restricted: { type: Boolean, default: false },
@@ -272,11 +271,10 @@ const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
         createdAt: { type: Date, default: Date.now },
-        // updatedAt: { type: Date },
-        // status: { type: String, enum: ['active', 'inactive', 'sold', 'rented'], default: 'active' },
-        // views: { type: Number, default: 0 },
-        // favorites: { type: Number, default: 0 },
-        // isVerified: { type: Boolean, default: false }
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Lease' },
+        propertyName: { type: String,  default: 'Shed' },
+        status: { type: String, default: 'Available' }
     }
 }, { timestamps: true });
 
@@ -287,5 +285,4 @@ CommercialLeaseShedSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShedSchema.index({ 'metadata.createdAt': -1 });
 
 export const CommercialLeaseShed = model<ICommercialLeaseShed>('CommercialLeaseShed', CommercialLeaseShedSchema);
-export type { ICommercialLeaseShed, IBasicInformation, IShedDetails, IPropertyDetails, ILeaseTerms, IContactInformation, IMedia, IMetadata };
-
+// export type { ICommercialLeaseShed, IBasicInformation, IShedDetails, IPropertyDetails, ILeaseTerms, IContactInformation, IMedia, IMetadata };

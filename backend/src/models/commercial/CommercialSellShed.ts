@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  shedType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -29,14 +29,7 @@ interface IPricingDetails {
   pricetype: "fixed" | "negotiable";
 }
 
-// interface IAvailability {
-//   type: 'immediate' | 'specific';
-//   date?: Date;
-//   preferredSaleDuration?: string;
-//   noticePeriod: string;
-//   isPetsAllowed: boolean;
-//   operatingHours: boolean;
-// }
+
 
 interface IContactInformation {
   name: string;
@@ -49,6 +42,10 @@ interface IContactInformation {
 interface IMetadata {
   createdBy: Types.ObjectId;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -58,23 +55,10 @@ interface IFloor {
 
 export interface ICommercialSellShed extends Document {
   propertyId?: string;
-  propertyName: string;
-  shopType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  basicInformation: IBasicInformation;
   shedDetails: {
     totalArea: number;
-    
+    builtUpArea: number;
     carpetArea: number;
     entranceWidth: number;
     ceilingHeight: number;
@@ -86,7 +70,7 @@ export interface ICommercialSellShed extends Document {
     facingDetails: IFloor;
     facingDirection: string;
     furnishingStatus: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
       propertyAmenities: string[];
       wholeSpaceAmenities: string[];
@@ -133,34 +117,40 @@ export interface ICommercialSellShed extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData: {
-    createdBy: Schema.Types.ObjectId | null;
-    createdAt: Date;
-  }
+  metaData: IMetadata;
 }
 
 // Schema
 const CommercialSellShedSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSS-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  propertyName: { type: String, default: "Unnamed Property" },
-  shopType: { type: [String], default: [] },
-  address: {
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+  basicInformation: {
+    title: { type: String, default: "Unnamed Property" },
+    Type: { type: [String], default: [] },
+    address: {
+      street: { type: String, default: "Not Specified" },
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String,required:true },
+      longitude: { type: String,required:true }
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  coordinates: {
-    latitude: { type: String,required:true },
-    longitude: { type: String,required:true }
-  },
-  isCornerProperty: { type: Boolean, default: false },
   shedDetails: {
       totalArea: { type: Number },
       carpetArea: { type: Number },
       entranceWidth: { type: Number },
-      ceilingHeight: { type: Number },
+      ceilingHeight: { type: Schema.Types.Mixed,
+        validate: {
+          validator: function(v: any) {
+            return typeof v === 'number' || (typeof v === 'object' && v.hasOwnProperty('value') && v.hasOwnProperty('unit'));
+          },
+          message: 'ceilingHeight must be either a number or an object with value and unit properties'
+        }
+       },
       additionalDetails: { type: String }
   },
   propertyDetails: {
@@ -175,7 +165,7 @@ const CommercialSellShedSchema: Schema = new Schema({
     },
     facingDirection: { type: String },
     furnishingStatus: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
@@ -229,8 +219,12 @@ const CommercialSellShedSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Shed' },
+    status: { type: String, default: 'Available' }
   }
 });
 

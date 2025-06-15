@@ -1,28 +1,43 @@
 import { Request, Response } from 'express';
 import LeaseApartment from '../../models/residential/residentialLeaseAppartment';
-import _ from 'lodash';
+import _, { property } from 'lodash';
 
-// Generate Property ID for Lease Apartment
 const generatePropertyId = async (): Promise<string> => {
   try {
     const prefix = "RA-RESLEAP";
-    const highest = await LeaseApartment.findOne({
-      propertyId: { $regex: `^${prefix}\d+$` },
+
+    const highestShowroom = await LeaseApartment.findOne({
+      propertyId: { $regex: `^${prefix}\\d+$` }
     }).sort({ propertyId: -1 });
 
     let nextNumber = 1;
-    if (highest) {
-      const match = highest.propertyId.match(/(\d+)$/);
+
+    if (highestShowroom) {
+      const match = highestShowroom.propertyId.match(/(\d+)$/);
       if (match && match[1]) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
     }
 
     const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-    const existing = await LeaseApartment.findOne({ propertyId });
-    if (existing) {
-      return generatePropertyId();
+
+    const existingWithExactId = await LeaseApartment.findOne({ propertyId });
+
+    if (existingWithExactId) {
+      console.log(`Property ID ${propertyId} already exists, trying next number`);
+
+      const forcedNextNumber = nextNumber + 1;
+      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+
+      const forcedExisting = await LeaseApartment.findOne({ propertyId: forcedPropertyId });
+
+      if (forcedExisting) {
+        return generatePropertyId();
+      }
+
+      return forcedPropertyId;
     }
+
     return propertyId;
   } catch (error) {
     console.error('Error generating property ID:', error);
@@ -34,29 +49,43 @@ const generatePropertyId = async (): Promise<string> => {
 // Create Lease Apartment
 export const createLeaseApartment = async (req: Request, res: Response) => {
   try {
+    // Log the incoming request body
+    console.log('Incoming request body:', req.body);
+
     const formData = req.body;
     const propertyId = await generatePropertyId();
-    console.log(formData);
-    const property = new LeaseApartment({
+    console.log('Property ID:', propertyId);
+
+    // Create new property with the generated ID and metadata
+    const propertyData = JSON.parse(JSON.stringify({
       ...req.body,
       propertyId,
       metadata: {
         ...req.body.metadata,
         createdAt: new Date()
       }
-    });
+    }));
+    console.log('Property data before save:', JSON.stringify(propertyData, null, 2));
 
-    await property.save();
+    const property = new LeaseApartment(propertyData);
+
+    await property.save()
+
     res.status(201).json({
       success: true,
       message: 'Lease Apartment created successfully',
-      data: property,
+      propertyId: property.propertyId,
+      data: property
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating lease apartment:', error);
+
+    // Send more detailed error information
     res.status(500).json({
       success: false,
       error: 'Failed to create lease apartment',
+      details: error.message,
+      validationErrors: error.errors
     });
   }
 };
@@ -64,7 +93,11 @@ export const createLeaseApartment = async (req: Request, res: Response) => {
 // Get All Lease Apartments
 export const getAllLeaseApartments = async (req: Request, res: Response) => {
   try {
-    const properties = await LeaseApartment.find({}).sort({ 'metadata.createdAt': -1 });
+    const properties = await LeaseApartment.find({})
+      .sort({ 'metadata.createdAt': -1 })
+      .lean() // Use lean() for better performance
+      .exec();
+
     res.status(200).json({
       success: true,
       message: 'Fetched all lease apartments successfully',
@@ -82,8 +115,10 @@ export const getAllLeaseApartments = async (req: Request, res: Response) => {
 // Get Lease Apartment by Property ID
 export const getLeaseApartmentById = async (req: Request, res: Response) => {
   try {
-    const id = req.params._id;
-    const property = await LeaseApartment.findOne({ propertyId: id });
+    const propertyId = req.params.propertyId;
+    const property = await LeaseApartment.findOne({ propertyId })
+      .lean()
+      .exec();
 
     if (!property) {
       return res.status(404).json({
@@ -130,6 +165,7 @@ export const updateLeaseApartment = async (req: Request, res: Response) => {
     const updated = await LeaseApartment.findByIdAndUpdate(id, { $set: merged }, {
       new: true,
       runValidators: true,
+      lean: true // Use lean() for better performance
     });
 
     res.status(200).json({ success: true, message: 'Updated successfully', data: updated });
@@ -142,7 +178,9 @@ export const updateLeaseApartment = async (req: Request, res: Response) => {
 // Delete Lease Apartment
 export const deleteLeaseApartment = async (req: Request, res: Response) => {
   try {
-    const deleted = await LeaseApartment.findByIdAndDelete(req.params.id);
+    const deleted = await LeaseApartment.findByIdAndDelete(req.params.id)
+      .lean()
+      .exec();
 
     if (!deleted) {
       return res.status(404).json({ success: false, message: 'Property not found' });

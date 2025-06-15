@@ -3,7 +3,7 @@ import ResidentialSaleIndependentHouse from '../../models/residential/saleIndepe
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RS-RESISIP";
+        const prefix = "RS-RESSEIH";
 
         const highestShowroom = await ResidentialSaleIndependentHouse.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
@@ -41,7 +41,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-RESREAP${timestamp}`;
+        return `RA-RESSEIH${timestamp}`;
     }
 };
 
@@ -76,7 +76,7 @@ export const createSaleIndependentHouse = async (req: Request, res: Response) =>
   }
 };
 
-export const getAllRentApartments = async (req: Request, res: Response) => {
+export const getAllSaleIndependentHouse = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -118,9 +118,9 @@ export const getAllRentApartments = async (req: Request, res: Response) => {
   }
 };
 
-export const getRentApartmentById = async (req: Request, res: Response) => {
+export const getSaleIndependentHouseById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleIndependentHouse.findById(req.params.id);
+    const apartment = await ResidentialSaleIndependentHouse.findOne({propertyId: req.params.propertyId});
     
     if (!apartment) {
       return res.status(404).json({
@@ -143,7 +143,7 @@ export const getRentApartmentById = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRentApartment = async (req: Request, res: Response) => {
+export const updateSaleIndependentHouse = async (req: Request, res: Response) => {
   try {
     const apartment = await ResidentialSaleIndependentHouse.findById(req.params.id);
     const userId = req.body.userId;
@@ -189,7 +189,7 @@ export const updateRentApartment = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteRentApartment = async (req: Request, res: Response) => {
+export const deleteSaleIndependentHouse = async (req: Request, res: Response) => {
   try {
     const residentialSaleIndependentHouse = await ResidentialSaleIndependentHouse.findById(req.params.id);
     const userId = req.body.userId;

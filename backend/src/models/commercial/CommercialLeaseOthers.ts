@@ -10,24 +10,26 @@ interface IFloor {
   floorNumber: number;
   totalFloors: number;
 }
+interface basicInformation{
+    title: string;
+    commercialType: string[];
+    address: {
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+    };
+    landmark: string;
+    location: {
+        latitude: string;
+        longitude: string;
+    };
+    isCornerProperty: boolean;
+}
 
 export interface ICommercialLeaseOthers extends Document {
   propertyId?: string;
-  title: string;
-  commercialType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
-  
+  basicInformation:basicInformation;
   otherDetails: {
     propertyTypeDescription: string;
     specialFeatures: string;
@@ -43,13 +45,17 @@ export interface ICommercialLeaseOthers extends Document {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
       backup: boolean;
     };
   };
+  
+  
+  
+ 
   
   leaseAmount: {
     amount: number;
@@ -100,9 +106,8 @@ export interface ICommercialLeaseOthers extends Document {
   };
   
   availability: {
-    availableFrom: Date;
-    availableImmediately: boolean;
-    availabilityStatus: string;
+    date: Date;
+    type: string;
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
@@ -136,25 +141,31 @@ export interface ICommercialLeaseOthers extends Document {
   metaData?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
 const CommercialLeaseOthersSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CLO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  title: { type: String, default: "Unnamed Property" },
-  commercialType: { type: [String], default: ["Other"] },
-  address: {
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+  basicInformation: {
+    title: { type: String, default: "Unnamed Property" },
+    commercialType: { type: [String], default: ["Other"] },
+    address: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true }
   },
   landmark: { type: String },
   location: {
-    latitude: { type: String ,required:true},
-    longitude: { type: String ,required:true}
+      latitude: { type: String},
+      longitude: { type: String}
   },
-  isCornerProperty: { type: Boolean, default: false },
+  isCornerProperty: { type: Boolean, default: false }
+  },
   
   otherDetails: {
     propertyTypeDescription: { type: String },
@@ -178,7 +189,7 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
     electricitySupply: {
       powerLoad: { type: Number },
@@ -234,9 +245,8 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   },
   
   availability: {
-    availableFrom: { type: Date },
-    availableImmediately: { type: Boolean, default: false },
-    availabilityStatus: { type: String },
+    date: { type: Date },
+    type: { type: String,default:"Available" },
     leaseDuration: { type: String },
     noticePeriod: { type: String },
     isPetsAllowed: { type: Boolean, default: false },
@@ -269,7 +279,11 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   
   metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Lease' },
+    propertyName: { type: String,  default: 'Others' },
+    status: { type: String, default: 'Available' }
   }
 });
 

@@ -151,6 +151,10 @@ interface FormData {
   metadata?: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName: string;
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
@@ -280,7 +284,14 @@ const LeaseShowroomMain = () => {
       videoTour: null,
       documents: []
     },
-    metadata: undefined
+    metadata:{
+      createdBy: '',
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: '',
+      intent: 'Rent',
+      status: 'Available'
+    }
   });
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -588,7 +599,11 @@ const LeaseShowroomMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Rent',
+            status: 'Available'
           }
         };
 

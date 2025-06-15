@@ -58,12 +58,69 @@ export const createRentBuilderFloor = async (req: Request, res: Response) => {
       }
     };
 
+    // Initialize media structure if not present
+    if (!builderFloorData.media) {
+      builderFloorData.media = {
+        photos: {
+          exterior: [],
+          interior: [],
+          floorPlan: [],
+          washrooms: [],
+          lifts: [],
+          emergencyExits: [],
+          bedrooms: [],
+          halls: [],
+          storerooms: [],
+          kitchen: []
+        },
+        documents: [],
+        videoTour: '',
+        mediaItems: []  // Initialize empty mediaItems array
+      };
+      console.log('Initialized empty media structure in createRentBuilderFloor');
+    } else {
+      // Ensure all required media properties exist
+      if (!builderFloorData.media.photos) {
+        builderFloorData.media.photos = {};
+      }
+      // Initialize photo categories
+      ['exterior', 'interior', 'floorPlan', 'washrooms', 'lifts', 
+       'emergencyExits', 'bedrooms', 'halls', 'storerooms', 'kitchen'].forEach(category => {
+        if (!builderFloorData.media.photos[category]) {
+          builderFloorData.media.photos[category] = [];
+        }
+      });
+      
+      // Initialize other media properties
+      if (!builderFloorData.media.documents) builderFloorData.media.documents = [];
+      if (!builderFloorData.media.videoTour) builderFloorData.media.videoTour = '';
+      if (!builderFloorData.media.mediaItems) {
+        builderFloorData.media.mediaItems = [];
+        console.log('Initialized empty mediaItems array in existing media');
+      }
+    }
+
+    console.log('Builder floor data before save:', JSON.stringify({
+      propertyId: builderFloorData.propertyId,
+      mediaItemsLength: builderFloorData.media?.mediaItems?.length || 0
+    }));
+
     const builderFloor = new ResidentialRentBuilderFloor(builderFloorData);
+    
+    // Explicitly ensure mediaItems is set
+    if (!builderFloor.media.mediaItems) {
+      builderFloor.media.mediaItems = [];
+    }
+    
     await builderFloor.save();
+    
+    // Verify mediaItems was saved correctly
+    const savedBuilderFloor = await ResidentialRentBuilderFloor.findOne({ propertyId });
+    console.log('Saved builder floor mediaItems:', savedBuilderFloor?.media?.mediaItems?.length || 0);
 
     res.status(201).json({
       success: true,
-      message: 'Builder Floor listing created successfully',
+      message: 'Builder floor listing created successfully',
       data: builderFloor
     });
   } catch (error) {
@@ -120,7 +177,7 @@ export const getAllRentBuilderFloors = async (req: Request, res: Response) => {
 
 export const getRentBuilderFloorById = async (req: Request, res: Response) => {
   try {
-    const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);
+    const builderFloor = await ResidentialRentBuilderFloor.findOne({propertyId: req.params.propertyId});
     
     if (!builderFloor) {
       return res.status(404).json({

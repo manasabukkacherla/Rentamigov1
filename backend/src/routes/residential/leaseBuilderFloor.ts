@@ -4,15 +4,20 @@ import {
   getAllLeaseBuilderFloors,
   getLeaseBuilderFloorById,
   updateLeaseBuilderFloor,
-  deleteLeaseBuilderFloor
+  deleteLeaseBuilderFloor,
+  searchLeaseBuilderFloors
 } from '../../controllers/residential/leaseBuilderFloor';
 
-const Router = express.Router();
+const router = express.Router();
 
-Router.post('/', createLeaseBuilderFloor);
-Router.get('/', getAllLeaseBuilderFloors);
-Router.get('/:id', getLeaseBuilderFloorById);
-Router.put('/:id', updateLeaseBuilderFloor);
-Router.delete('/:id', deleteLeaseBuilderFloor);
+// Public routes
+router.get('/search', searchLeaseBuilderFloors);
+router.get('/', getAllLeaseBuilderFloors);
+router.get('/:propertyId', getLeaseBuilderFloorById);
 
-export default Router;
+// Protected routes - require authentication
+router.post('/', createLeaseBuilderFloor);
+router.put('/:id', updateLeaseBuilderFloor);
+router.delete('/:id', deleteLeaseBuilderFloor);
+
+export default router;

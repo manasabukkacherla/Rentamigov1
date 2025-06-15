@@ -14,7 +14,7 @@ import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
 import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import OtherCharges from "../residentialrent/OtherCharges"
-import MediaUpload from "../MediaUpload"
+import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { useNavigate } from "react-router-dom"
@@ -32,7 +32,7 @@ const customStyles = `
 
 interface FormData {
   basicInformation: {
-    propertyName: string
+    title: string
     propertyAddress: {
       houseName: string;
       street: string;
@@ -187,24 +187,33 @@ interface FormData {
     };
     videoTour?: File | string;
     documents: (File | string)[];
+  },
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Independent House';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   }
 }
 
 interface IndependentHouseProps {
-  propertyId: string
-  onSubmit?: (formData: any) => void
+  propertyId?: string;
+  onSubmit?: (formData: FormData) => void;
 }
 
-const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
+const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initialPropertyId, onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
   const formRef = useRef<HTMLDivElement>(null)
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
       propertyAddress: {
         houseName: "",
         street: "",
@@ -359,6 +368,14 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
       },
       videoTour: undefined,
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Independent House",
+      intent: "Rent",
+      status: "Available"
     }
   })
 
@@ -372,9 +389,9 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
 
 
             <PropertyName
-              propertyName={formData.basicInformation.propertyName}
+              propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) =>
-                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))
               }
             />
           </div>
@@ -601,30 +618,12 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
         <div className="space-y-8">
 
           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-          <MediaUpload
-              initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: media.photos.exterior,
-                      interior: media.photos.interior,
-                      floorPlan: media.photos.floorPlan,
-                      washrooms: media.photos.washrooms,
-                      lifts: media.photos.lifts,
-                      emergencyExits: media.photos.emergencyExits,
-                      bedrooms: media.photos.bedrooms,
-                      halls: media.photos.halls,
-                      storerooms: media.photos.storerooms,
-                      kitchen: media.photos.kitchen
-                    },
-                    videoTour: media.videoTour,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+          <ResidentialPropertyMediaUpload
+                propertyType="independenthouse"
+                propertyId={propertyId}
+                value={formData.media}
+                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+              />
           </div>
         </div>
       ),
@@ -679,79 +678,88 @@ const IndependentHouse = ({ propertyId, onSubmit }: IndependentHouseProps) => {
   const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
+    console.log(formData);
 
     try {
       const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
-
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
-          });
-        };
-
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
-            if (file instanceof File) {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
-            }
-          }
-          return results;
-        };
-
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
-        };
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date()
-          }
-        };
-
-        const response = await axios.post('/api/residential/rent/independent-house', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          toast.success('Independent House listing created successfully!');
-          setFormData({...initialFormData} as FormData);
-        }
-      } else {
+      if (!user) {
         navigate('/login');
+        return;
+      }
+
+      const author = JSON.parse(user).id;
+
+      // Convert media files to base64
+      const convertFileToBase64 = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
+      };
+
+      // Helper function to convert array of files to base64
+      const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+        const results: string[] = [];
+        for (const file of files) {
+          if (file instanceof File) {
+            const base64 = await convertFileToBase64(file);
+            results.push(base64);
+          } else {
+            results.push(file); // Already a string (URL)
+          }
+        }
+        return results;
+      };
+
+      const convertedMedia = {
+        photos: {
+          exterior: await convertFilesToBase64(formData.media.photos.exterior),
+          interior: await convertFilesToBase64(formData.media.photos.interior),
+          floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+          washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+          lifts: await convertFilesToBase64(formData.media.photos.lifts),
+          emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+          bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+          halls: await convertFilesToBase64(formData.media.photos.halls),
+          storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+          kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
+        },
+        videoTour: formData.media.videoTour
+          ? formData.media.videoTour instanceof File
+            ? await convertFileToBase64(formData.media.videoTour)
+            : formData.media.videoTour
+          : undefined,
+        documents: await convertFilesToBase64(formData.media.documents)
+      };
+
+      const transformedData = {
+        ...formData,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Independent House",
+          intent: "Rent",
+          status: "Available"
+        }
+      };
+
+      const response = await axios.post('/api/residential/rent/independent-house', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.success) {
+        setPropertyId(response.data.propertyId);
+        toast.success('Property listing created successfully!');
+        setFormData(initialFormData);
+        if (onSubmit) {
+          onSubmit(formData);
+        }
       }
     } catch (error) {
       console.error('Error submitting form:', error);

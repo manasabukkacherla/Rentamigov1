@@ -49,17 +49,81 @@ const generatePropertyId = async (): Promise<string> => {
 export const createRentApartment = async (req: Request, res: Response) => {
   try {
     const propertyId = await generatePropertyId();
-    const apartmentData = {
+    
+    // Deep copy the request body to avoid reference issues
+    const apartmentData = JSON.parse(JSON.stringify({
       ...req.body,
       propertyId,
       metadata: {
         ...req.body.metadata,
         createdAt: new Date()
       }
-    };
+    }));
+
+    // Initialize media structure if not present
+    if (!apartmentData.media) {
+      apartmentData.media = {
+        photos: {
+          exterior: [],
+          interior: [],
+          floorPlan: [],
+          washrooms: [],
+          lifts: [],
+          emergencyExits: [],
+          bedrooms: [],
+          halls: [],
+          storerooms: [],
+          kitchen: []
+        },
+        documents: [],
+        videoTour: '',
+        mediaItems: []  // Initialize empty mediaItems array
+      };
+      console.log('Initialized empty media structure in createRentApartment');
+    } else {
+      // Ensure all required properties exist
+      if (!apartmentData.media.photos) {
+        apartmentData.media.photos = {};
+      }
+      // Initialize all photo categories
+      ['exterior', 'interior', 'floorPlan', 'washrooms', 'lifts', 
+       'emergencyExits', 'bedrooms', 'halls', 'storerooms', 'kitchen'].forEach(category => {
+        if (!apartmentData.media.photos[category]) {
+          apartmentData.media.photos[category] = [];
+        }
+      });
+      
+      // Initialize other media properties
+      if (!apartmentData.media.documents) apartmentData.media.documents = [];
+      if (!apartmentData.media.videoTour) apartmentData.media.videoTour = '';
+      
+      // CRITICAL: Always ensure mediaItems exists as an array
+      apartmentData.media.mediaItems = Array.isArray(apartmentData.media.mediaItems) 
+        ? apartmentData.media.mediaItems 
+        : [];
+      
+      console.log('Ensured mediaItems is an array with length:', apartmentData.media.mediaItems.length);
+    }
+
+    console.log('Apartment data before save:', JSON.stringify({
+      propertyId: apartmentData.propertyId,
+      mediaItemsLength: apartmentData.media?.mediaItems?.length || 0
+    }));
 
     const apartment = new ResidentialRentApartment(apartmentData);
+    
+    // Double-check mediaItems is properly initialized before save
+    if (!apartment.media.mediaItems) {
+      apartment.media.mediaItems = [];
+      // Explicitly mark the field as modified for Mongoose
+      apartment.markModified('media.mediaItems');
+    }
+    
     await apartment.save();
+    
+    // Verify mediaItems was saved correctly
+    const savedApartment = await ResidentialRentApartment.findOne({ propertyId });
+    console.log('Saved apartment mediaItems:', savedApartment?.media?.mediaItems?.length || 0);
 
     res.status(201).json({
       success: true,
@@ -118,9 +182,23 @@ export const getAllRentApartments = async (req: Request, res: Response) => {
   }
 };
 
+// Helper function to ensure mediaItems exists
+const ensureMediaItemsExists = async (apartmentId: string): Promise<void> => {
+  try {
+    // Update the apartment to ensure mediaItems field exists
+    await ResidentialRentApartment.updateOne(
+      { _id: apartmentId, 'media.mediaItems': { $exists: false } },
+      { $set: { 'media.mediaItems': [] } }
+    );
+  } catch (error) {
+    console.error('Error ensuring mediaItems exists:', error);
+  }
+};
+
+// Update the getRentApartmentById function to ensure mediaItems exists
 export const getRentApartmentById = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.id);
+    const apartment = await ResidentialRentApartment.findOne({propertyId: req.params.propertyId});
     
     if (!apartment) {
       return res.status(404).json({
@@ -129,9 +207,15 @@ export const getRentApartmentById = async (req: Request, res: Response) => {
       });
     }
 
+    // Ensure mediaItems exists
+    await ensureMediaItemsExists(req.params.propertyId);
+    
+    // Re-fetch to get updated data
+    const updatedApartment = await ResidentialRentApartment.findOne({propertyId: req.params.propertyId});
+
     res.status(200).json({
       success: true,
-      data: apartment
+      data: updatedApartment
     });
   } catch (error) {
     console.error('Error fetching apartment:', error);

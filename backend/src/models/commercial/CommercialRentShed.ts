@@ -38,12 +38,16 @@ interface IMedia {
 }
 
 interface IMetadata {
-    creadtedBy: Schema.Types.ObjectId | null;
+    createdBy: Schema.Types.ObjectId | string | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface IRentalTerms {
-    rentDetails: {
+    rent: {
         expectedRent: number;
         isNegotiable: boolean;
         rentType: string;
@@ -73,14 +77,6 @@ interface IRentalTerms {
             type: string;
         }
     }
-    brokerage: {
-        required: string;
-        amount?: number;
-    }
-    availability: {
-        type: string;
-        date?: string;
-    }
 }
 
 interface ICommercialRentShed extends Document {
@@ -91,7 +87,7 @@ interface ICommercialRentShed extends Document {
         propertySize: number;
         propertyFeatures: {
             bedrooms: number;
-            washrooms: number;
+            bathrooms: number;
             balconies: number;
             hasParking: boolean;
             parkingDetails?: {
@@ -124,7 +120,15 @@ interface ICommercialRentShed extends Document {
             };
         };          
     };
-    rentalTerms: IRentalTerms;
+    rentalTerms: IRentalTerms; 
+    brokerage: {
+        required: string;
+        amount?: number;
+    }
+    availability: {
+        type: string;
+        date?: Date;
+    }
     contactInformation: IContactInformation;
     media: IMedia;
     metadata: IMetadata;
@@ -152,7 +156,7 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         propertySize: { type: Number, required: true },
         propertyFeatures: {
             bedrooms: { type: Number, required: true },
-            washrooms: { type: Number, required: true },
+            bathrooms: { type: Number, required: true },
             balconies: { type: Number, required: true },
             hasParking: { type: Boolean, required: true },
             parkingDetails: {
@@ -169,15 +173,15 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
             furnishingStatus: { type: String, required: true },
             totalFloors: { type: Number, required: true },
             propertyOnFloor: { type: String, required: true },
-            facing: { type: String, required: true },
-            propertyAge: { type: String, required: true },
+            facing: { type: String},
+            propertyAge: { type: String },
             superBuiltUpAreaSqft: { type: Number, required: true },
             superBuiltUpAreaSqmt: { type: Number, required: true },
             builtUpAreaSqft: { type: Number, required: true },
             builtUpAreaSqmt: { type: Number, required: true },
             carpetAreaSqft: { type: Number, required: true },
             carpetAreaSqmt: { type: Number, required: true },
-            electricityAvailability: { type: String, required: true },
+            electricityAvailability: { type: String},
             waterAvailability: {
                 borewell: { type: Boolean, required: true },
                 governmentSupply: { type: Boolean, required: true },
@@ -186,7 +190,7 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         },
     },
     rentalTerms: {
-        rentDetails: {
+        rent: {
             expectedRent: { type: Number, required: true },
             isNegotiable: { type: Boolean, default: false },
             rentType: { type: String, required: true },
@@ -216,14 +220,14 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
                 type: { type: String, required: true },
             }
         },
-        brokerage: {
-            required: { type: String, required: true },
-            amount: { type: Number },
-        },
-        availability: {
-            type: { type: String, required: true },
-            date: { type: String },
-        }
+    },
+    brokerage: {
+        required: { type: String, required: true },
+        amount: { type: Number },
+    },
+    availability: {
+        type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+        date: { type: Date },
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -245,9 +249,13 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
-    }
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String, default: 'Rent' },
+        propertyName: { type: String, default: 'Shed' },
+        status: { type: String, default: 'Available' }
+      }
 }, {
     timestamps: true
 });

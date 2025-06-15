@@ -6,7 +6,7 @@ import User  from '../../models/signup';
 // Helper function to generate Property ID
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMLEAAG";
+    const prefix = "RA-COMLEAG";
     const highestShop = await CommercialLeaseAgriculture.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
     }).sort({ propertyId: -1 });
@@ -78,13 +78,16 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
         message: 'Failed to generate property ID.'
       });
     }
+    
+    console.log(propertyId);
 
     // Add metadata with userId and user (like Sell controller)
     const agricultureData = {
+      propertyId,
       ...formData,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+       // createdBy: req.user?._id || null,
         createdAt: new Date()
       }
     };
@@ -130,7 +133,7 @@ export const getAllCommercialLeaseAgriculture = async (req: Request, res: Respon
 // Get Commercial Rent Agriculture by ID
 export const getCommercialLeaseAgricultureById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialLeaseAgriculture.findOne({ propertyId });
 
     if (!property) {

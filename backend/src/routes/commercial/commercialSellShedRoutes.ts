@@ -1,16 +1,13 @@
 import express from 'express';
-import upload, { convertToBase64 } from '../../middleware/fileUpload';
-import { createCommercialSellShed, getAllSellShed, getSellShedById, deleteSellShed, updateSellShed 
-} from '../../controllers/commercial/commercialSellShedController';
+import { createCommercialShed, updateCommercialShed, deleteCommercialShed, getAllCommercialSheds, getCommercialShedById } from '../../controllers/commercial/commercialSellShedController';
 
-const router = express.Router();
+const commercialSellShedRoutes = express.Router();
 
+// Routes
+commercialSellShedRoutes.post('/', createCommercialShed);
+commercialSellShedRoutes.get('/', getAllCommercialSheds);
+commercialSellShedRoutes.get('/:propertyId', getCommercialShedById);
+commercialSellShedRoutes.put('/:id', updateCommercialShed);
+commercialSellShedRoutes.delete('/:id', deleteCommercialShed);
 
-router.post('/', createCommercialSellShed);
-router.get('/', getAllSellShed);
-// router.get('/filter', getShedsByFilters);
-router.get('/:id', getSellShedById);
-router.put('/:id', updateSellShed);
-router.delete('/:id', deleteSellShed);
-
-export default router; 
+export default commercialSellShedRoutes; 
