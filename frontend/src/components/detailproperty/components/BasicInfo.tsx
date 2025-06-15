@@ -4,7 +4,6 @@ import { Property } from '../App';
 
 
 interface BasicInfoProps {
-  details: PropertyDetails;
   property: Property;
 }
 
@@ -46,16 +45,19 @@ const getAvailableFrom = (property: Property) => {
   };
 
   if (property?.metadata?.intent === "sale" || property?.metadata?.intent === "Sale" || property?.metadata?.intent === "Sell") {
-    return property?.availability?.availableImmediately === true
-      ? "Immediate"
-      : formatDateString(property?.availability?.availableFrom);
+    return property?.availability?.availableImmediately === true ? "Immediate" : formatDateString(property?.availability?.availableFrom);
   }
-  return property?.availability?.type === "immediate" || property?.availability?.immediate === true
-    ? "Immediate"
-    : formatDateString(property?.availability?.date);
+
+  // For lease properties, check lease terms availability
+  if (property?.metadata?.intent === "lease" || property?.metadata?.intent === "Lease") {
+    return property?.leaseTerms?.availability?.availableImmediately === true ? "Immediate" : formatDateString(property?.leaseTerms?.availability?.date?.toString());
+  }
+
+  // For other intents (rent), use regular availability
+  return property?.availability?.type === "immediate" || property?.availability?.immediate === true ? "Immediate" : formatDateString(property?.availability?.date);
 };
 
-export const BasicInfo: React.FC<BasicInfoProps> = ({ details, property }) => {
+export const BasicInfo: React.FC<BasicInfoProps> = ({ property }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 basic-info">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">

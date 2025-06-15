@@ -165,12 +165,12 @@ export interface Property {
   leaseTerms?: {
     leaseDetails: {
       leaseAmount: {
-        amount: number;
-        type?: 'Fixed' | 'Negotiable';
-        duration: number;
-        durationUnit: string;
-      };
-    };
+        amount: number,
+        type: string,
+        duration: number,
+        durationUnit: string,
+      },
+    },
     tenureDetails: {
       minimumTenure: number;
       minimumUnit: string;
@@ -180,29 +180,44 @@ export interface Property {
       lockInUnit: string;
       noticePeriod: number;
       noticePeriodUnit: string;
-    };
+    },
     maintenanceAmount: {
-      amount: number;
-      frequency: 'Monthly' | 'Quarterly' | 'Yearly' | 'Half-Yearly';
-    };
+      amount: number,
+      frequency: string,
+    },
     otherCharges: {
-      electricityCharges: {
-        type: 'inclusive' | 'exclusive';
-        amount?: number;
-      };
-      waterCharges: {
-        type: 'inclusive' | 'exclusive';
-        amount?: number;
-      };
-      gasCharges: {
-        type: 'inclusive' | 'exclusive';
-        amount?: number;
-      };
-      otherCharges: {
-        type: 'inclusive' | 'exclusive';
-        amount?: number;
-      };
-    };
+      water: {
+        amount?: number,
+        type: string,
+      },
+      electricity: {
+        amount?: number,
+        type: string,
+      },
+      gas: {
+        amount?: number,
+        type: string,
+      },
+      others: {
+        amount?: number,
+        type: string,
+      }
+    },
+    brokerage: {
+      required: string,
+      amount?: number,
+    },
+    availability: {
+      date: Date,
+      availableImmediately: Boolean,
+      preferredSaleDuration: String,
+      noticePeriod: String,
+      isPetsAllowed: Boolean,
+      operatingHours: {
+        restricted: Boolean,
+        restrictions: String
+      }
+    },
   };
   pricingDetails?: {
     propertyPrice: number;
@@ -486,7 +501,7 @@ function Propdetail() {
 
         <div className="flex flex-col lg:flex-row gap-8 justify-center">
           <div className="lg:w-[65%] space-y-8">
-            <BasicInfo details={propertyData} property={property} />
+            <BasicInfo property={property} />
             <AmenitiesTabs details={propertyData} property={property} />
             <LocationMap property={property} />
             {/* <NearbyPlaces /> */}
