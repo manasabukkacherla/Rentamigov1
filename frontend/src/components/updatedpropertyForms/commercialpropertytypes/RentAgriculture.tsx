@@ -85,7 +85,7 @@ interface FormData {
     longitude: string;
   };
   isCornerProperty: boolean;
-  Agriculturelanddetails: {
+  propertyDetails: {
     totalArea: number;
     soilType: string;
     irrigation: boolean;
@@ -152,7 +152,7 @@ const RentAgriculture = () => {
       longitude: ''
     },
     isCornerProperty: false,
-    Agriculturelanddetails: {
+    propertyDetails: {
       totalArea: 0,
       soilType: '',
       irrigation: false,
@@ -257,7 +257,7 @@ const RentAgriculture = () => {
   const handleLandDetailsChange = (details: Record<string, any>) => {
     setFormData(prev => ({
       ...prev,
-      Agriculturelanddetails: { ...prev.Agriculturelanddetails, ...details }
+      propertyDetails: { ...prev.propertyDetails, ...details }
     }));
   };
 
@@ -483,7 +483,7 @@ const RentAgriculture = () => {
           landmark: formData.landmark,
           location: formData.location,
           isCornerProperty: formData.isCornerProperty,
-          Agriculturelanddetails: formData.Agriculturelanddetails,
+          propertyDetails: formData.propertyDetails,
           rent: formData.rent,
           securityDeposit: formData.securityDeposit,
           availability: formData.availability,

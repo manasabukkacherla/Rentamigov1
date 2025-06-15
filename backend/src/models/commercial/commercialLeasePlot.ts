@@ -96,8 +96,8 @@ interface IBrokerage {
 }
 
 interface IAvailability {
-    availableFrom?: Date;
-    availableImmediately?: boolean;
+    date?: Date;
+    type?: string;
     availabilityStatus: string;
     leaseDuration?: string;
     noticePeriod?: string;
@@ -127,7 +127,7 @@ interface IMedia {
 }
 
 interface IMetadata {
-    userId: Schema.Types.ObjectId | null;
+   createdBy: Schema.Types.ObjectId | null;
     userName: string;
     createdAt: Date;
     propertyType: string;
@@ -253,8 +253,8 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
         amount: { type: Number }
     },
     availability: {
-        availableFrom: { type: Date },
-        availableImmediately: { type: Boolean, default: false },
+        date: { type: Date },
+        type: { type: String,default:"Available" },
         availabilityStatus: { type: String, required: true },
         leaseDuration: { type: String },
         noticePeriod: { type: String },
@@ -286,7 +286,7 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
         userName:{type:String,ref:'User'},
         createdAt: { type: Date, default: Date.now },
         propertyType: { type: String, default: 'Commercial' },
-        intent: { type: String,default: 'Rent' },
+        intent: { type: String,default: 'Lease' },
         propertyName: { type: String,  default: 'Plot' },
         status: { type: String, default: 'Available' }
     }

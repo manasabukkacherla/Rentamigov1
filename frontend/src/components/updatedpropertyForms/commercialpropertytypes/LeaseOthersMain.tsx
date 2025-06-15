@@ -25,7 +25,7 @@ import MapLocation from "../CommercialComponents/MapLocation";
 
 interface FormData {
   title: string;
-  commercialType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -106,7 +106,7 @@ interface FormData {
 const LeaseOthersMain = () => {
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    commercialType: [],
+    Type: [],
     address: {
       street: '',
       city: '',

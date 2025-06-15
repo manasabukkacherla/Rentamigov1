@@ -100,8 +100,8 @@ interface ILeaseTerms {
         amount?: number;
     };
     availability: {
-        availableFrom: Date;
-        availableImmediately: boolean;
+        date: Date;
+        type: string;
         leaseDuration: string;
         noticePeriod: string;
         petsAllowed: boolean;
@@ -279,8 +279,8 @@ const LeaseTermsSchema = new Schema<ILeaseTerms>({
         amount: { type: Number }
     },
     availability: {
-        availableFrom: { type: Date },
-        availableImmediately: { type: Boolean, default: true },
+        date: { type: Date },
+        type: { type: String ,default:"Available"},
         leaseDuration: { type: String },
         noticePeriod: { type: String },
         petsAllowed: { type: Boolean, default: false },

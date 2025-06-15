@@ -72,10 +72,10 @@ interface FormData {
   };
   availability: {
     date: Date;
-    availableImmediately: boolean;
+    type: string;
     leaseDuration: string;
     noticePeriod: string;
-    isPetsAllowed: boolean;
+    petsAllowed: boolean;
   };
   contactDetails: {
     name: string;
@@ -145,10 +145,10 @@ const LeaseOfficeSpaceMain = () => {
     },
     availability: {
       date: new Date(),
-      availableImmediately: false,
+      type: 'immediate',
       leaseDuration: '',
       noticePeriod: '',
-      isPetsAllowed: false
+      petsAllowed: false
     },
     contactDetails: {
       name: '',
@@ -265,10 +265,10 @@ const LeaseOfficeSpaceMain = () => {
             ...prev,
             availability: {
               date: availability.date || new Date(),
-              availableImmediately: availability.availableImmediately || false,
+              type: availability.type|| 'immediate',
               leaseDuration: availability.preferredSaleDuration || '',
               noticePeriod: availability.noticePeriod || '',
-              isPetsAllowed: availability.petsAllowed || false
+              petsAllowed: availability.petsAllowed || false
             }
           }))} />
         </div>
@@ -689,10 +689,10 @@ const LeaseOfficeSpaceMain = () => {
         },
         availability: {
           date: formData.availability?.date || new Date(),
-          availableImmediately: Boolean(formData.availability?.availableImmediately),
+          type: formData.availability?.type || 'immediate',
           leaseDuration: formData.availability?.leaseDuration || '',
           noticePeriod: formData.availability?.noticePeriod || '',
-          isPetsAllowed: Boolean(formData.availability?.isPetsAllowed)
+          petsAllowed: Boolean(formData.availability?.petsAllowed)
         }
       },
       contactInformation: {
@@ -704,7 +704,7 @@ const LeaseOfficeSpaceMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        userId: localStorage.getItem('userId') || null,
+        createdBy: localStorage.getItem('_Id') || null,
         createdAt: new Date(),
         propertyType: 'Commercial',
         propertyName: 'Office Space',

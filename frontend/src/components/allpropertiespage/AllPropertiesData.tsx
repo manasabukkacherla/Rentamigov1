@@ -11,7 +11,7 @@ interface AllPropertiesData {
   image: string;  
   intent: string;
   status: string;
-  bhkType: string;
+  // bhkType: string;
   bathrooms: number;
   furnishing: string;
   area: number; 
@@ -40,7 +40,7 @@ export const AllPropertiesData: React.FC<AllPropertiesDataProps> = ({ onProperti
     price: item.pricing?.price || 0,
     area: item.propertySize || 0,
     status: item.metadata?.status || '',
-    bhkType: item.metadata?.bhkType || '',
+    // bhkType: item.metadata?.bhkType || '',
     bathrooms: item.propertyDetails?.bathrooms || item.propertyDetails?.washrooms || 0,
     furnishing: item.propertyDetails?.furnishing || 'Unfurnished',
       });

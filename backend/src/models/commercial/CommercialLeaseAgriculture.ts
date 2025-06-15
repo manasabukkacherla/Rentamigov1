@@ -11,23 +11,27 @@ interface IFloor {
   totalFloors: number;
 }
 
+interface basicInformation {
+    title: string;
+    Type: string[];
+    powerSupply: boolean;
+    address: {
+        street: string;
+        city: string;
+        state: string;
+        zipCode: string;
+    };
+    landmark: string;
+    location: {
+        latitude: string;
+        longitude: string;
+    };
+    isCornerProperty: boolean;
+}
+
 export interface ICommercialLeaseAgriculture extends Document {
   propertyId: string;
-  title: string;
-  landType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
-  powerSupply: boolean;
+  basicInformation:basicInformation;
   landDetails: {
     totalArea: number;
     soilType: string;
@@ -95,8 +99,8 @@ export interface ICommercialLeaseAgriculture extends Document {
     amount?: number;
   };
   availability: {
-    availableFrom: Date;
-    availableImmediately: boolean;
+    date: Date;
+    type: string;
     availabilityStatus: string;
     leaseDuration: string;
     noticePeriod: string;
@@ -134,21 +138,24 @@ export interface ICommercialLeaseAgriculture extends Document {
 
 const CommercialLeaseAgriculture = new Schema({
   propertyId: { type: String },
-  title: { type: String, default: "Unnamed Property" },
-  landType: { type: [String], default: ["Agricultural"] },
-  powerSupply: { type: Boolean, default: false },
-  address: {
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+  basicInformation:{
+    title: { type: String, required: true },
+    Type: [{ type: String, required: true }],
+    powerSupply: { type: Boolean, default: false },
+    address: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true }
   },
   landmark: { type: String },
   location: {
-    latitude: { type: String ,required:false},
-    longitude: { type: String ,required: false}
+      latitude: { type: String,required:true },
+      longitude: { type: String,required:true }
   },
-  isCornerProperty: { type: Boolean, default: false },
+  isCornerProperty: { type: Boolean, default: false }
+  },
+  // landType: { type: [String], default: ["Agricultural"] },
   landDetails: {
     totalArea: { type: Number, default: 0 },
     soilType: { type: String },
@@ -223,9 +230,8 @@ const CommercialLeaseAgriculture = new Schema({
     amount: { type: Number },
   },
   availability: {
-    availableFrom: { type: Date },
-    availableImmediately: { type: Boolean, default: false },
-    availabilityStatus: { type: String },
+    date: { type: Date },
+    type: { type: String,default:"Available" },
     leaseDuration: { type: String },
     noticePeriod: { type: String },
     isPetsAllowed: { type: Boolean, default: false },

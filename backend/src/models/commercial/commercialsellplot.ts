@@ -9,12 +9,14 @@ interface IArea {
 
 interface IBasicInformation {
     title: string;
-    type: string;
-    address: string;
+    Type: string;
+    address: {  
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
     landmark: string;
-    city: string;
-    state: string;
-    zipCode: string;
     location: { latitude: string; longitude: string };
     isCornerProperty: boolean;
 }
@@ -74,8 +76,8 @@ interface IBrokerage {
 }
 
 interface IAvailability {
-    availableFrom?: Date;
-    availableImmediately?: boolean;
+    date?: Date;
+    type?: string;
     availabilityStatus: string;
     possessionDate: string;
     leaseDuration?: string;
@@ -131,14 +133,15 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        type: { type: String, required: true },
-        address: { type: String, required: true },
+        Type: { type: String, required: true },
+        address:{   
+          street: { type: String, required: true },
+          city: { type: String, required: true },
+          state: { type: String, required: true },
+          zipCode: { type: String, required: true }
+        },
         landmark: { type: String, required: true },
         location: { latitude: String, longitude: String },
-        city: { type: String, required: true },
-        state: { type: String, required: true },
-        zipCode: { type: String, required: true },
-    
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
@@ -195,8 +198,8 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         amount: { type: Number }
     },
     availability: {
-        availableFrom: { type: Date },
-        availableImmediately: { type: Boolean, default: false },
+        type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
+        date: { type: Date },
         availabilityStatus: { type: String, required: true },
         possessionDate: { type: String, required: true },
         leaseDuration: { type: String },

@@ -83,7 +83,7 @@ export interface Property {
   listingType: ListingType;
   price: number;
   location: string;
-  bhkType: BHKType;
+  // bhkType: BHKType;
   bathrooms: number;
   furnishing: FurnishingType;
   area: number;

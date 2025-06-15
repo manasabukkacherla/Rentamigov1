@@ -47,7 +47,7 @@ interface IMetadata {
 }
 
 interface IRentalTerms {
-    rentDetails: {
+    rent: {
         expectedRent: number;
         isNegotiable: boolean;
         rentType: string;
@@ -87,7 +87,7 @@ interface ICommercialRentShed extends Document {
         propertySize: number;
         propertyFeatures: {
             bedrooms: number;
-            washrooms: number;
+            bathrooms: number;
             balconies: number;
             hasParking: boolean;
             parkingDetails?: {
@@ -127,7 +127,7 @@ interface ICommercialRentShed extends Document {
     }
     availability: {
         type: string;
-        date?: string;
+        date?: Date;
     }
     contactInformation: IContactInformation;
     media: IMedia;
@@ -156,7 +156,7 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         propertySize: { type: Number, required: true },
         propertyFeatures: {
             bedrooms: { type: Number, required: true },
-            washrooms: { type: Number, required: true },
+            bathrooms: { type: Number, required: true },
             balconies: { type: Number, required: true },
             hasParking: { type: Boolean, required: true },
             parkingDetails: {
@@ -190,7 +190,7 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         },
     },
     rentalTerms: {
-        rentDetails: {
+        rent: {
             expectedRent: { type: Number, required: true },
             isNegotiable: { type: Boolean, default: false },
             rentType: { type: String, required: true },
@@ -226,8 +226,8 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         amount: { type: Number },
     },
     availability: {
-        type: { type: String, required: true },
-        date: { type: String },
+        type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+        date: { type: Date },
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -249,13 +249,13 @@ const CommercialRentShedSchema = new Schema<ICommercialRentShed>({
         documents: [{ type: String }]
     },
     metadata: {
-        createdBy: { type: Schema.Types.ObjectId, required: false },
+        createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
         createdAt: { type: Date, default: Date.now },
-        propertyType: { type: String, required: true },
-        intent: { type: String, required: true },
-        propertyName: { type: String, required: true },
-        status: { type: String, required: true },
-    },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String, default: 'Rent' },
+        propertyName: { type: String, default: 'Shed' },
+        status: { type: String, default: 'Available' }
+      }
 }, {
     timestamps: true
 });

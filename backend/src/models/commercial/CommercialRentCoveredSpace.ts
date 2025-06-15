@@ -42,7 +42,7 @@ interface IFloor {
 }
 
 interface IRentalTerms {
-  rentDetails: {
+  rent: {
     expectedRent: number;
     isNegotiable: boolean;
     rentType: string;
@@ -165,13 +165,13 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     roadWidthUnit: { type: String, required: true },
     ceilingHeight: { type: Number, required: true },
     ceilingHeightUnit: { type: String, required: true },
-    noOfOpenSides: { type: Number, required: true }, // ✅ Changed to Number
+    noOfOpenSides: { type: Number, required: true }, 
   },
   propertyDetails: {
     area: {
-      totalArea: { type: Number, required: true }, // ✅ Changed to Number
-      builtUpArea: { type: Number, required: true }, // ✅ Changed to Number
-      carpetArea: { type: Number, required: true }, // ✅ Changed to Number
+      totalArea: { type: Number, required: true }, 
+      builtUpArea: { type: Number, required: true }, 
+      carpetArea: { type: Number, required: true }, 
     },
     floor: {
       floorNumber: { type: Number, required: true },
@@ -190,7 +190,7 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     propertyCondition: { type: String, required: true },
   },
   rentalTerms: {
-    rentDetails: {
+    rent: {
       expectedRent: { type: Number, required: true },
       isNegotiable: { type: Boolean, default: false },
       rentType: { type: String, required: true },
@@ -226,8 +226,8 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     amount: { type: Number },
   },
   availability: {
-    type: { type: String, required: true },
-    date: { type: Date, required: false },
+    type: { type: String, default:"Available" },
+    date: { type: Date},
   },
   contactInformation: {
     name: { type: String, required: true },

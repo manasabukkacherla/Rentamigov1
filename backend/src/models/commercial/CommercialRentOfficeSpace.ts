@@ -71,7 +71,7 @@ interface IMetadata {
 }
 
 interface IRentalTerms {
-    rentDetails: {
+    rent: {
         expectedRent: number;
         isNegotiable: boolean;
         rentType: string;
@@ -197,7 +197,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         propertyCondition: { type: String }
     },
     rentalTerms: {
-        rentDetails: {
+        rent: {
             expectedRent: { type: Number, required: true },
             isNegotiable: { type: Boolean, default: false },
             rentType: { type: String, required: true },
@@ -234,7 +234,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         amount: { type: Number },
     },
     availability: {
-        type: { type: String, required: true },
+        type: { type: String, default:"Available" },
         date: { type: String },
     },
     contactInformation: {

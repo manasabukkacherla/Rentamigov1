@@ -60,7 +60,7 @@ interface FormData {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number | null;
+    propertyAge: string;
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
@@ -112,9 +112,8 @@ interface FormData {
   };
   
   availability: {
-    availableFrom: Date | null;
-    availableImmediately: boolean;
-    availabilityStatus: string;
+    type: string;
+    date?: Date;
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
@@ -137,9 +136,9 @@ interface FormData {
       exterior: File[];
       interior: File[];
       floorPlan: File[];
-      aerial: File[];
-      surroundings: File[];
-      documents: File[];
+      washrooms: File[];
+      lifts: File[];
+      emergencyExits: File[];
     };
     videoTour: File | null;
     documents: File[];
@@ -183,7 +182,7 @@ const CommercialLeaseOthersForm = () => {
       propertyAmenities: [],
       wholeSpaceAmenities: [],
       waterAvailability: '',
-      propertyAge: null,
+      propertyAge: '',
       propertyCondition: '',
       electricitySupply: {
         powerLoad: 0,
@@ -221,9 +220,8 @@ const CommercialLeaseOthersForm = () => {
       amount: 0,
     },
     availability: {
-      availableFrom: null,
-      availableImmediately: true,
-      availabilityStatus: 'Available',
+      type: 'immediate',
+      date: new Date(),
       leaseDuration: '',
       noticePeriod: '',
       isPetsAllowed: false,
@@ -244,9 +242,9 @@ const CommercialLeaseOthersForm = () => {
         exterior: [],
         interior: [],
         floorPlan: [],
-        aerial: [],
-        surroundings: [],
-        documents: []
+        emergencyExits: [],
+        washrooms: [],
+        lifts: [],
       },
       videoTour: null,
       documents: []
@@ -291,6 +289,7 @@ const CommercialLeaseOthersForm = () => {
             </div>
             <div className="space-y-6">
               <CommercialPropertyAddress
+                address={formData.address}
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
                   address
@@ -310,6 +309,7 @@ const CommercialLeaseOthersForm = () => {
                 }))}
               />
               <CornerProperty
+                isCornerProperty={formData.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
                   isCornerProperty: isCorner
@@ -407,6 +407,7 @@ const CommercialLeaseOthersForm = () => {
               <h4 className="text-lg font-medium text-black mb-4">Additional Charges</h4>
               <div className="space-y-4">
                 <MaintenanceAmount 
+                  maintenanceAmount={formData.maintenanceAmount}
                   onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                     ...prev,
                     maintenanceAmount: { ...prev.maintenanceAmount, ...maintenance }
@@ -414,6 +415,7 @@ const CommercialLeaseOthersForm = () => {
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <OtherCharges 
+                  otherCharges={formData.otherCharges}
                   onOtherChargesChange={(charges) => setFormData(prev => ({
                     ...prev,
                     otherCharges: { ...prev.otherCharges, ...charges }
@@ -421,6 +423,7 @@ const CommercialLeaseOthersForm = () => {
                 />
                 <div className="border-t border-gray-200 my-4"></div>
                 <Brokerage 
+                  bro={formData.brokerage}
                   onBrokerageChange={(brokerage) => setFormData(prev => ({
                     ...prev,
                     brokerage: { ...prev.brokerage, ...brokerage }
@@ -463,6 +466,7 @@ const CommercialLeaseOthersForm = () => {
           </div>
           <div className="space-y-6">
             <CommercialContactDetails 
+            contactInformation={formData.contactDetails}
               onContactChange={(contactDetails) => {
                 const updatedContactDetails = contactDetails as Partial<typeof formData.contactDetails>;
                 setFormData(prev => ({
@@ -485,22 +489,48 @@ const CommercialLeaseOthersForm = () => {
             <h3 className="text-xl font-semibold text-black">Media Upload</h3>
           </div>
           <div className="space-y-6">
-            <CommercialMediaUpload 
-              onMediaChange={(media) => {
-                const processedMedia = {
-                  ...formData.media,
-                  ...media,
-                  documents: Array.isArray(media.documents) ? 
-                    media.documents.map(doc => doc.file || doc) : 
-                    formData.media.documents
-                };
-                
-                setFormData(prev => ({
-                  ...prev,
-                  media: processedMedia
-                }));
-              }} 
-            />
+          <CommercialMediaUpload
+            Media={{
+              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                category,
+                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+              })),
+              videoTour: formData.media.videoTour || null,
+              documents: formData.media.documents
+            }}
+            onMediaChange={(media) => {
+              const photosByCategory: Record<string, File[]> = {
+                exterior: [],
+                interior: [],
+                floorPlan: [],
+                washrooms: [],
+                lifts: [],
+                emergencyExits: []
+              };
+
+              media.photos.forEach(({ category, files }) => {
+                if (category in photosByCategory) {
+                  photosByCategory[category] = files.map(f => f.file);
+                }
+              });
+
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photosByCategory.exterior,
+                    interior: photosByCategory.interior,
+                    floorPlan: photosByCategory.floorPlan,
+                    washrooms: photosByCategory.washrooms,
+                    lifts: photosByCategory.lifts,
+                    emergencyExits: photosByCategory.emergencyExits
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
           </div>
         </div>
       ),
@@ -526,9 +556,9 @@ const CommercialLeaseOthersForm = () => {
           exterior: await Promise.all(formData.media.photos.exterior.map(convertFileToBase64)),
           interior: await Promise.all(formData.media.photos.interior.map(convertFileToBase64)),
           floorPlan: await Promise.all(formData.media.photos.floorPlan.map(convertFileToBase64)),
-          aerial: await Promise.all(formData.media.photos.aerial.map(convertFileToBase64)),
-          surroundings: await Promise.all(formData.media.photos.surroundings.map(convertFileToBase64)),
-          documents: await Promise.all(formData.media.photos.documents.map(convertFileToBase64))
+          washrooms: await Promise.all(formData.media.photos.washrooms.map(convertFileToBase64)),
+          lifts: await Promise.all(formData.media.photos.lifts.map(convertFileToBase64)),
+          emergencyExits: await Promise.all(formData.media.photos.emergencyExits.map(convertFileToBase64))
         },
         videoTour: formData.media.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
         documents: await Promise.all(formData.media.documents.map(convertFileToBase64))

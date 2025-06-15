@@ -57,6 +57,7 @@ interface propertyDetails {
     propertyCondition: string;
 }
 interface IRentalDetails {
+    rent:{
     expectedRent: number;
     rentType: "inclusive" | "exclusive";
     isNegotiable: boolean;
@@ -86,11 +87,12 @@ interface IRentalDetails {
             type: string;
         };
     };
+};
 }
 
 interface IAvailability {
-    immediate: boolean;
-    specificDate: Date;
+    type: string;
+    date: Date;
 };
 
 interface IContactInformation {
@@ -194,6 +196,7 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
         propertyCondition: { type: String, required: false, default: 'new' }
     },
     rentalTerms: {
+        rent:{
         expectedRent: { type: Number, required: true },
         rentType: { type: String, enum: ['inclusive', 'exclusive'], required: true },
         isNegotiable: { type: Boolean, default: false },
@@ -228,13 +231,14 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
             }, 
         },
     },
+    },
     brokerage: {
         required: { type: Boolean, default: false },
         amount: { type: Number, required: false }
     },
     availability: {
-        immediate: { type: Boolean, default: false },
-        specificDate: { type: Date },
+        type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+        date: { type: Date },
     },
     contactInformation: {
         name: { type: String, required: true },
@@ -269,9 +273,9 @@ const CommercialRentShowroomSchema = new Schema<ICommercialRentShowroom>({
 
 // Indexes
 // CommercialRentShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialRentShowroomSchema.index({ 'basicInformation.city': 1 });
-CommercialRentShowroomSchema.index({ 'basicInformation.state': 1 });
-CommercialRentShowroomSchema.index({ 'rentalTerms.expectedRent': 1 });
+CommercialRentShowroomSchema.index({ 'basicInformation.address.city': 1 });
+CommercialRentShowroomSchema.index({ 'basicInformation.address.state': 1 });
+CommercialRentShowroomSchema.index({ 'rentalTerms.rent.expectedRent': 1 });
 CommercialRentShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentShowroomSchema.index({ 'metadata.createdAt': -1 });
 

@@ -35,8 +35,8 @@ interface IPricingDetails {
 
 interface IAvailability {
   
-  availableImmediately: boolean;
-  availableFrom?: Date;
+  type: 'immediate' | 'specific';
+  date?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
@@ -195,8 +195,8 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     amount: { type: Number, required: false }
   },
   availability: {
-    availableFrom: { type: Date, required: false },
-    availableImmediately: { type: Boolean, required: true },
+    type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
+    date: { type: Date, required: false },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
     petsAllowed: { type: Boolean, required: true },

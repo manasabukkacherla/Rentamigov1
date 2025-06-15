@@ -116,8 +116,8 @@ interface ILeaseTerms {
 }
 
 interface IAvailability {
-    immediate: boolean;
-    specificDate: Date;
+    type: string;
+    date: Date;
 
 };
 
@@ -267,7 +267,7 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
             },
             availability: {
                 date: { type: Date, required: true },
-                availableImmediately: { type: Boolean, required: true },
+                type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
                 preferredSaleDuration: { type: String, required: true },
                 noticePeriod: { type: String, required: true },
                 isPetsAllowed: { type: Boolean, required: true },

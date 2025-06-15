@@ -34,8 +34,8 @@ interface IPricingDetails {
 }
 
 interface IAvailability {
-  availableFrom?: string;
-  availableImmediately: boolean;
+  type: 'immediate' | 'specific';
+  date?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
@@ -197,8 +197,8 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
     amount: { type: Number }
   },
   availability: {
-    availableFrom: { type: String },
-    availableImmediately: { type: Boolean, required: true },
+    type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
+    date: { type: Date },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
     petsAllowed: { type: Boolean, default: false },
@@ -240,8 +240,8 @@ const CommercialShowroomSchema = new Schema<ICommercialShowroom>({
 
 // Indexes
 // CommercialShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialShowroomSchema.index({ 'basicInformation.city': 1 });
-CommercialShowroomSchema.index({ 'basicInformation.state': 1 });
+CommercialShowroomSchema.index({ 'basicInformation.address.city': 1 });
+CommercialShowroomSchema.index({ 'basicInformation.address.state': 1 });
 CommercialShowroomSchema.index({ 'pricingDetails.propertyPrice': 1 });
 CommercialShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialShowroomSchema.index({ 'metadata.createdAt': -1 });

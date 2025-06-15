@@ -281,7 +281,7 @@ app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
 
-app.use("/api/all", allPropertiesRoutes);
+app.use("/api/allproperties", allPropertiesRoutes);
 
 // PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);

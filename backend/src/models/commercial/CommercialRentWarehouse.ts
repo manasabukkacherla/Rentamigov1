@@ -64,7 +64,7 @@ interface IMetadata {
 
 
 interface IRentalTerms {
-  rentDetails: {
+  rent: {
     expectedRent: number;
     isNegotiable: boolean;
     rentType: string;
@@ -141,7 +141,7 @@ interface ICommercialWarehouse extends Document {
   }
   availability: {
     type: string;
-    date?: string;
+    date?: Date;
   }
   contactInformation: IContactInformation;
   media: IMedia;
@@ -204,7 +204,7 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     propertyCondition: { type: String }
   },
   rentalTerms: {
-    rentDetails: {
+    rent: {
       expectedRent: { type: Number, required: true },
       isNegotiable: { type: Boolean, default: false },
       rentType: { type: String, required: true },
@@ -241,8 +241,8 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
     amount: { type: Number },
   },
   availability: {
-    type: { type: String, required: true },
-    date: { type: String },
+    type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+    date: { type: Date },
   },
   contactInformation: {
     name: { type: String, required: true },
@@ -277,9 +277,9 @@ const CommercialRentWarehouseSchema = new Schema<ICommercialWarehouse>({
 
 // Indexes
 // CommercialRentWarehouseSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
-CommercialRentWarehouseSchema.index({ 'basicInformation.city': 1 });
-CommercialRentWarehouseSchema.index({ 'basicInformation.state': 1 });
-CommercialRentWarehouseSchema.index({ 'pricingDetails.propertyPrice': 1 });
+CommercialRentWarehouseSchema.index({ 'basicInformation.address.city': 1 });
+CommercialRentWarehouseSchema.index({ 'basicInformation.address.state': 1 });
+CommercialRentWarehouseSchema.index({ 'rentalTerms.rent.expectedRent': 1 });
 CommercialRentWarehouseSchema.index({ 'propertyDetails.area.totalArea': 1 });
 CommercialRentWarehouseSchema.index({ 'metadata.createdAt': -1 });
 

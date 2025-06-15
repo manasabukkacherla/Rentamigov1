@@ -15,7 +15,7 @@ export interface ICommercialSellOthers extends Document {
   propertyId?: string;
   basicInformation:{
     title: string;
-    type: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -107,7 +107,7 @@ const CommercialSellOthersSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   basicInformation:{
     title: { type: String, default: "Unnamed Property" },
-    type: { type: [String], default: ["Other"] },
+    Type: { type: [String], default: ["Other"] },
     address: {
       street: { type: String, default: "Not Specified" },
       city: { type: String, default: "Not Specified" },
