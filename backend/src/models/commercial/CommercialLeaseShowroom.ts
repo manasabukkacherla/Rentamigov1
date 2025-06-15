@@ -166,7 +166,7 @@ interface ICommercialLeaseShowroom extends Document {
 
 // Schema
 const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
-    propertyId: { type: String, required: true, unique: true },
+    propertyId: { type: String, unique: false },
     basicInformation: {
         title: { type: String },
         Type: [{ type: String }],
@@ -303,11 +303,11 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
             status: { type: String, default: 'Available' }
           }
         }, {
-          timestamps: true
+          timestamps: false
         });
 
 // Indexes
-// CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
+// CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: false }); // Removed duplicate index
 CommercialLeaseShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseShowroomSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });

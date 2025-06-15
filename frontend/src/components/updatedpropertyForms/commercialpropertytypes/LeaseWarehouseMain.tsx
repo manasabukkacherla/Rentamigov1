@@ -391,6 +391,16 @@ const LeaseWarehouseMain = () => {
     return uploadedMedia;
   };
 
+  // Add convertFileToBase64 function
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // Map frontend form data to backend model structure
   const mapFormDataToBackendModel = async () => {
     // Handle media upload first (this would involve actual file uploads in production)
@@ -603,18 +613,6 @@ const LeaseWarehouseMain = () => {
       preventDefault(e);
     }
 
-    // If not on the last step, move to the next step instead of submitting
-    if (currentStep < steps.length - 1) {
-      handleNext(e as React.MouseEvent);
-      return;
-    }
-
-    // Validate the final step before submitting
-    // if (!validateFinalStep()) {
-    //   toast.error("Please add at least one image or document");
-    //   return;
-    // }
-
     try {
       setIsSubmitting(true);
       toast.loading("Submitting your property listing...");
@@ -636,16 +634,12 @@ const LeaseWarehouseMain = () => {
 
       if (response.data.success) {
         toast.dismiss();
-        toast.success("Property listed successfully!");
-        navigate('/updatePropertyForm');
-      } else {
-        toast.dismiss();
-        toast.error(response.data.error || "Failed to create property listing");
-        console.error('Failed to create property listing:', response.data.error);
+        toast.success('Commercial warehouse listing created successfully!');
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast.dismiss();
-      toast.error(error.response?.data?.details || error.message || "An error occurred while submitting the form");
+      toast.error(error.response?.data?.message || 'Failed to create property listing');
       console.error('Error submitting form:', error);
     } finally {
       setIsSubmitting(false);

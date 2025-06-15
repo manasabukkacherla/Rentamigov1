@@ -7,8 +7,8 @@ const generatePropertyId = async (): Promise<string> => {
   const prefix = "RA-COMSEOT";
   try {
     const highestProperty = await CommercialSellOthers.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
-    }).sort({ propertyId: -1 });
+      'basicInformation.propertyId': { $regex: `^${prefix}\\d+$` }
+    }).sort({ 'basicInformation.propertyId': -1 });
     
     let nextNumber = 1;
     

@@ -6,16 +6,13 @@ import MessageList from "./MessageList"; // We'll create this component next.
 import MessageInput from "./MessageInput"; // Already built in previous chapter.
 import ChatNotification from "./ChatNotification"; // Already built.
 import { SocketContext } from "@/socketContext";
-import { predefinedFAQs } from "./predefinedFAQs";
-import Fuse from "fuse.js";
+
 interface ChatProps {
   currentUserId: string;
   otherUserId: string;
   otherUsername: string;
-  onConversationUpdate?: (updatedConversation: any) => void;
-  isEmpDash?: boolean; // 👈 Add this line
+  onConversationUpdate?: (updatedConversation: any) => void; 
 }
-
 
 interface Message {
   senderId: string;
@@ -48,7 +45,6 @@ const Chat: React.FC<ChatProps> = ({
   const [error, setError] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isOnline, setIsOnline] = useState(false);
-const [botFallbackSent, setBotFallbackSent] = useState(false);
 
   // fetching the chat messages using roomid
   useEffect(() => {
@@ -134,93 +130,33 @@ const [botFallbackSent, setBotFallbackSent] = useState(false);
   }, [socket, otherUserId]);
 
   // Function to send a message.
-
-
-const handleSendMessage = (text: string) => {
-  if (!text.trim()) return;
-
-  const trimmedText = text.trim();
-
-  // Stop bot reply if fallback was already sent
-  if (botFallbackSent) {
+ const handleSendMessage = (text: string) => {
+  if (socket && text.trim()) {
     const messageData = {
       senderId: currentUserId,
       receiverId: otherUserId,
       roomId,
-      text: trimmedText,
+      text,
       createdAt: new Date().toISOString(),
       read: false,
     };
 
     socket.emit("chatMessage", messageData);
+
+    // Update local message list
     setMessages((prev) => [...prev, { ...messageData, read: true }]);
-    return;
-  }
 
-  const messageData = {
-    senderId: currentUserId,
-    receiverId: otherUserId,
-    roomId,
-    text: trimmedText,
-    createdAt: new Date().toISOString(),
-    read: false,
-  };
-
-  socket.emit("chatMessage", messageData);
-  setMessages((prev) => [...prev, { ...messageData, read: true }]);
-
-  const fuse = new Fuse(predefinedFAQs, {
-    keys: ["question"],
-    threshold: 0.4,
-  });
-
-  const result = fuse.search(trimmedText);
-  const matchedFAQ = result.length > 0 ? result[0].item : null;
-
-  if (matchedFAQ) {
-    const botMessage = {
-      senderId: "bot",
-      receiverId: currentUserId,
-      roomId,
-      text: matchedFAQ.answer,
-      createdAt: new Date().toISOString(),
-      read: true,
-    };
-
-    setTimeout(() => {
-      socket.emit("chatMessage", botMessage);
-      setMessages((prev) => [...prev, botMessage]);
-    }, 600);
-  } else {
-    const fallbackMessage = {
-      senderId: "bot",
-      receiverId: currentUserId,
-      roomId,
-      text: "Thank you for your query. Our team will respond within 24 hours.",
-      createdAt: new Date().toISOString(),
-      read: true,
-    };
-
-    setTimeout(() => {
-      socket.emit("chatMessage", fallbackMessage);
-      setMessages((prev) => [...prev, fallbackMessage]);
-      setBotFallbackSent(true); // ⛔ Prevent all future bot replies
-    }, 600);
-
+    // 🔄 Notify parent (ChatPage) to possibly update the conversation status to "pending"
     if (onConversationUpdate) {
       onConversationUpdate({
         roomId,
-        lastMessage: trimmedText,
+        lastMessage: text,
         status: "pending",
         lastResolvedAt: null,
       });
     }
   }
 };
-
-
-
-
 
 
   // Function to handle typing indicator
