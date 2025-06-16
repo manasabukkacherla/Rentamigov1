@@ -33,7 +33,7 @@ export const predefinedFAQs = [
   },
   {
     question: "good morning",
-    answer: "Good morning! Hope you’re having a great day. How can I help?",
+    answer: "Good morning! Hope you're having a great day. How can I help?",
   },
   {
     question: "good evening",
