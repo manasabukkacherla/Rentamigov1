@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import {CommercialLeaseShed} from '../../models/commercial/CommercialLeaseShed';
+import { CommercialLeaseShed } from '../../models/commercial/CommercialLeaseShed';
 import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
@@ -71,8 +71,12 @@ export const createShed = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: formData.metadata.createdBy,
+                createdBy: req.user?.id || null,
                 createdAt: new Date(),
+                // status: 'active',
+                // views: 0,
+                // favorites: 0,
+                // isVerified: false
             }
         };
 

@@ -228,7 +228,6 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
             }
         },
     },
-    
     brokerage: {
         required: { type: String, required: true },
         amount: { type: Number },
