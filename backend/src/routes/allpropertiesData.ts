@@ -34,7 +34,7 @@ import ICommercialLeaseShowroom from '../models/commercial/CommercialLeaseShowro
 import CommercialLeaseCoveredSpace from '../models/commercial/CommercialLeaseCoveredSpace';
 import CommercialLeaseOfficeSpace from '../models/commercial/CommercialLeaseOfficeSpace';
 import CommercialLeaseWarehouse from '../models/commercial/CommercialLeaseWarehouse';
-import {CommercialLeaseShed} from '../models/commercial/CommercialLeaseShed';
+import { CommercialLeaseShed } from '../models/commercial/CommercialLeaseShed';
 
 // Residential Rent Models
 import IResidentialRentApartment from '../models/residential/residentialRentApartment';

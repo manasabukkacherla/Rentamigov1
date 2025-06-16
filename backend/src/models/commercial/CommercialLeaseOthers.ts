@@ -99,19 +99,18 @@ export interface ICommercialLeaseOthers extends Document {
       required: string;
       amount?: number;
     };
-    availability: {
-      availableFrom: Date;
-      availableImmediately: boolean;
-      availabilityStatus: string;
-      leaseDuration: string;
-      noticePeriod: string;
-      isPetsAllowed: boolean;
-      operatingHours: {   
-        restricted: boolean;
-      };
   };
 
-  
+  availability: {
+    availableFrom: Date;
+    availableImmediately: boolean;
+    availabilityStatus: string;
+    leaseDuration: string;
+    noticePeriod: string;
+    isPetsAllowed: boolean;
+    operatingHours: {   
+      restricted: boolean;
+    };
   };
 
   contactInformation: {
@@ -135,7 +134,7 @@ export interface ICommercialLeaseOthers extends Document {
     documents: string[];
   };
 
-  metadata?: {
+  metaData?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     propertyType: string;
@@ -195,16 +194,14 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   },
 
   leaseTerms: {
-    leaseDetails: {
-      leaseAmount: {
-        amount: { type: Number, default: 0 },
-        type: { type: String },
-        duration: { type: Number, default: 1 },
-        durationUnit: { type: String },
-        isNegotiable: { type: Boolean, default: false }
-      }
+    leaseAmount: {
+      amount: { type: Number, default: 0 },
+      duration: { type: Number, default: 1 },
+      durationType: { type: String, default: 'years' },
+      isNegotiable: { type: Boolean, default: false }
     },
-    tenureDetails: {
+
+    leaseTenure: {
       minimumTenure: { type: String, default: '1' },
       minimumUnit: { type: String, default: 'years' },
       maximumTenure: { type: String, default: '1' },
@@ -214,10 +211,12 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
       noticePeriod: { type: String, default: '1' },
       noticePeriodUnit: { type: String, default: 'years' }
     },
+
     maintenanceAmount: {
       amount: { type: Number },
       frequency: { type: String, enum: ["monthly", "quarterly", "half-yearly", "yearly"] }
     },
+
     otherCharges: {
       electricityCharges: {
         type: { type: String, enum: ["inclusive", "exclusive"] },
@@ -236,21 +235,23 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
         amount: { type: Number }
       }
     },
+
     brokerage: {
       required: { type: String },
       amount: { type: Number }
-    },
-    availability: {
-      availableFrom: { type: Date },
-      availableImmediately: { type: Boolean, default: false },
-      availabilityStatus: { type: String },
-      leaseDuration: { type: String },
-      noticePeriod: { type: String },
-      petsAllowed: { type: Boolean, default: false },
-      operatingHours: {
-        restricted: { type: Boolean, default: false },
-        restrictions: { type: String }
-      }
+    }
+  },
+
+  availability: {
+    availableFrom: { type: Date },
+    availableImmediately: { type: Boolean, default: false },
+    availabilityStatus: { type: String },
+    leaseDuration: { type: String },
+    noticePeriod: { type: String },
+    isPetsAllowed: { type: Boolean, default: false },
+    operatingHours: {
+      restricted: { type: Boolean, default: false },
+      restrictions: { type: String }
     }
   },
 
@@ -275,7 +276,7 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
 
-  metadata: {
+  metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },

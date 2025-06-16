@@ -97,7 +97,7 @@ brokerage: {
   amount ?: number;
   required: string;
 };
-
+  };
 availability: {
   availableFrom: Date;
   availableImmediately: boolean;
@@ -109,7 +109,6 @@ availability: {
     restricted: boolean;
   };
 };
-  };
 contactInformation: {
   name: string;
   email: string;
@@ -206,7 +205,7 @@ const LeaseOthersMain = () => {
         amount: 0,
         required: "no"
       },
-    
+    },
     availability: {
       availableFrom: new Date(),
       availableImmediately: false,
@@ -217,7 +216,6 @@ const LeaseOthersMain = () => {
       operatingHours: {
         restricted: false
       }
-    },
     },
     contactInformation: {
       name: '',
@@ -390,7 +388,7 @@ const LeaseOthersMain = () => {
               bro={formData.leaseTerms.brokerage}
               onBrokerageChange={(brokerage) => setFormData(prev => ({
                 ...prev,
-                leaseTerms: { ...prev.leaseTerms, ...brokerage }
+                leaseTerms: { ...prev.leaseTerms, brokerage }
               }))}
             />
           </div>

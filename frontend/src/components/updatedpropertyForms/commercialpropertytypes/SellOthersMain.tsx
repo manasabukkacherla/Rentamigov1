@@ -123,7 +123,7 @@ interface FormData {
     videoTour: File | null;
     documents: File[];
   };
-  metadata?: {
+  metaData?: {
     createdBy: string;
     createdAt: Date;
     propertyType: string;
