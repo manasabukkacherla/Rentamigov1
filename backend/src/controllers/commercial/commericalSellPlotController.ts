@@ -3,6 +3,7 @@ import _ from 'lodash';
 import SellPlot from '../../models/commercial/commercialsellplot';
 import mongoose from 'mongoose';
 
+
 interface AuthenticatedRequest extends Request {
     user: {
         _id: string;
@@ -59,10 +60,10 @@ const transformPlotData = (formData: any) => {
     // Basic Information
     if (formData.basicInformation) {
         transformedData.basicInformation = {
-            title: formData.basicInformation.propertyName,
-            plotType: Array.isArray(formData.basicInformation.plotType)
-                ? formData.basicInformation.plotType[0]
-                : formData.basicInformation.plotType || 'Commercial',
+            title: formData.basicInformation.title,
+            Type: Array.isArray(formData.basicInformation.Type)
+                ? formData.basicInformation.Type[0]
+                : formData.basicInformation.Type || 'Commercial',
             address: formData.basicInformation.address.street,
             landmark: formData.basicInformation.landmark,
             city: formData.basicInformation.address.city,
@@ -77,89 +78,35 @@ const transformPlotData = (formData: any) => {
     // Plot Details
     if (formData.plotDetails) {
         // Ensure totalArea is always set with a valid number
-        const totalArea = formData.plotDetails.totalArea || formData.plotDetails.plotArea || 0;
+        const totalArea = formData.plotDetails.totalArea || 0;
 
         // Ensure zoningType is set with a valid string value
         const zoningType = formData.plotDetails.zoningType ||
-            formData.plotDetails.landUseZoning ||
             'commercial';
 
         transformedData.plotDetails = {
             totalArea: totalArea,
-            lengthOfPlot: formData.plotDetails.lengthOfPlot || 0,
-            widthOfPlot: formData.plotDetails.widthOfPlot || 0,
-            plotFacing: formData.plotDetails.plotFacing || '',
-            roadWidth: formData.plotDetails.roadWidth || 0,
             zoningType: zoningType,
-            floorAreaRatio: formData.plotDetails.floorAreaRatio || 0,
-            landmarkProximity: formData.plotDetails.landmarkProximity || [],
-            approvals: formData.plotDetails.approvals || [],
-            infrastructure: {
-                boundaryWall: Boolean(formData.plotDetails.boundaryWall),
-                waterConnection: false,
-                electricityConnection: false
-            },
-            security: {
-                securityRoom: false
-            },
-            previousConstruction: false
+            boundaryWall: Boolean(formData.plotDetails.boundaryWall),
+            waterSewer: formData.plotDetails.waterSewer || false,
+            electricity: formData.plotDetails.electricity || false,
+            roadAccess: formData.plotDetails.roadAccess || '',
+            securityRoom: formData.plotDetails.securityRoom || false,
+            previousConstruction: formData.plotDetails.previousConstruction || false,
+            
         };
     } else {
         // If plotDetails is missing, create a minimal object with required fields
         transformedData.plotDetails = {
             totalArea: 0,
             zoningType: 'commercial',
-            infrastructure: {
-                boundaryWall: false,
-                waterConnection: false,
-                electricityConnection: false
-            },
-            security: {
-                securityRoom: false
-            },
-            previousConstruction: false
-        };
-    }
-
-    // Property Details
-    if (formData.propertyDetails) {
-        transformedData.propertyDetails = {
-            area: {
-                totalArea: formData.propertyDetails.area.totalArea || 0,
-                carpetArea: formData.propertyDetails.area.carpetArea || 0,
-                builtUpArea: formData.propertyDetails.area.builtUpArea || 0
-            },
-            zoning: formData.plotDetails?.zoningType || formData.plotDetails?.landUseZoning || 'Commercial',
-            facingDirection: formData.propertyDetails.facingDirection || '',
-            waterAvailability: formData.propertyDetails.waterAvailability || '',
-            ownershipType: formData.propertyDetails.ownershipType || '',
-            propertyCondition: formData.propertyDetails.propertyCondition || '',
-            permissibleFAR: formData.plotDetails?.floorAreaRatio || 0,
-            permissibleHeight: 0,
-            groundCoverage: 0,
-            setback: {
-                front: 0,
-                rear: 0,
-                sides: 0
-            }
-        };
-    } else {
-        // Create default property details if missing
-        transformedData.propertyDetails = {
-            area: {
-                totalArea: 0,
-                carpetArea: 0,
-                builtUpArea: 0
-            },
-            zoning: 'Commercial',
-            permissibleFAR: 0,
-            permissibleHeight: 0,
-            groundCoverage: 0,
-            setback: {
-                front: 0,
-                rear: 0,
-                sides: 0
-            }
+            boundaryWall: false,
+            waterSewer: false,
+            electricity: false,
+            roadAccess: '',
+            securityRoom: false,
+            previousConstruction: false,
+           
         };
     }
 
@@ -183,24 +130,9 @@ const transformPlotData = (formData: any) => {
     }
 
     // Registration - this is missing in many cases, so ensure it's always defined
-    const registrationType =
-        (formData.registration?.type ||
-            formData.registration?.chargesType ||
-            'inclusive');
-
-    transformedData.registration = {
-        type: registrationType,
-        registrationCharges: formData.registration?.registrationAmount || 0,
-        stampDutyCharges: formData.registration?.stampDutyAmount || 0
-    };
-
-    // Brokerage
-    if (formData.brokerage) {
-        transformedData.brokerage = {
-            required: formData.brokerage.required || 'no',
-            amount: formData.brokerage.amount || 0
-        };
-    }
+   
+    
+    
 
     // Availability
     if (formData.availability) {
@@ -287,7 +219,7 @@ export const createPlot = async (req: Request, res: Response) => {
         console.log('Received plot data:', formData);
 
         // Validate required fields
-        if (!formData.basicInformation || !formData.basicInformation.propertyName) {
+        if (!formData.basicInformation || !formData.basicInformation.title) {
             return res.status(400).json({
                 success: false,
                 error: 'Property name is required'
@@ -357,7 +289,7 @@ export const getAllPlots = async (req: Request, res: Response) => {
 export const getPlotById = async (req: Request, res: Response) => {
     try {
         const propertyId = req.params.propertyId;
-        const plot = await SellPlot.findById({propertyId})
+        const plot = await SellPlot.findOne({ propertyId })
             .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
@@ -382,57 +314,7 @@ export const getPlotById = async (req: Request, res: Response) => {
     }
 };
 
-
-export const updatePlotById = async (req: Request, res: Response) => {
-    try {
-        const documentId = req.params.id; 
-        const incomingData = req.body?.data;
-        if (!incomingData) {
-          return res.status(400).json({
-            success: false,
-            message: "No data provided for update.",
-          });
-        }
-    
-        const cleanedData = JSON.parse(
-          JSON.stringify(incomingData, (key, value) => {
-            if (key === "_id" || key === "__v") return undefined;
-            return value;
-          })
-        );
-    
-       
-        const existingDoc = await SellPlot.findById(documentId);
-        if (!existingDoc) {
-          return res.status(404).json({
-            success: false,
-            message: "Property not found",
-          });
-        }
-    
-        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
-    
-        const updatedDoc = await SellPlot.findByIdAndUpdate(
-          documentId,
-          { $set: mergedData },
-          { new: true, runValidators: true }
-        );
-    
-        res.status(200).json({
-          success: true,
-          message: "sell plot updated successfully.",
-          data: updatedDoc,
-        });
-      } catch (error: any) {
-        console.error("Update error:", error);
-        res.status(500).json({
-          success: false,
-          message: error instanceof Error ? error.message : "Unknown update error",
-        });
-      }
-    };
-  
-  export const deleteSellPlotById = async (req: Request, res: Response) => {
+export const deleteSellPlotById = async (req: Request, res: Response) => {
     try {
         const data = await SellPlot.findByIdAndDelete(req.params.id);
 

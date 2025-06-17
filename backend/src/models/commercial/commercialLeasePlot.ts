@@ -5,7 +5,7 @@ export interface ICommercialLeasePlot extends Document {
     propertyId: string;
     basicInformation: {
         title: string;
-        type: string[];
+        Type: string[];
         address:{
             street: string;
             city: string;
@@ -13,20 +13,21 @@ export interface ICommercialLeasePlot extends Document {
             zipCode: string;
         };
         landmark?: string;
-        coordinates: {
+        location: {
             latitude: string;
             longitude: string;
         };
         isCornerProperty: boolean;
     };
-    propertyDetails: {
-        totalPlotArea: number;
+    plotDetails: {
+        totalArea: number;
         zoningType: string;
-        infrastructure: string[];
+        boundaryWall?: boolean;
+        waterSewer?: boolean;
+        electricity?: boolean;
         roadAccess: string;
-        securityRoom: boolean;
-        previousConstruction: string;  
-        zoningInformation: string;
+        securityRoom: boolean;  
+        previousConstruction: string;
     };
     leaseTerms: {
         leaseAmount: number;
@@ -83,7 +84,7 @@ export interface ICommercialLeasePlot extends Document {
         documents: string[];
     };
     metadata: {
-        userId: Schema.Types.ObjectId | null;
+        createdBy: Schema.Types.ObjectId | null;
         userName: string;
         createdAt: Date;
         propertyType: string;
@@ -98,73 +99,76 @@ export interface ICommercialLeasePlot extends Document {
 const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
     propertyId: { type: String, required: false, unique: false },
     basicInformation: {
-        title: { type: String, required: false },
-        plotType: { type: [String], required: false },
+        title: { type: String, required: false, default: '' },
+        Type: [{ type: String, required: false, default: '' }],
         address: { type: {
-            street: { type: String, required: false },
-            city: { type: String, required: false },
-            state: { type: String, required: false },
-            zipCode: { type: String, required: false },
+            street: { type: String, required: false, default: '' },
+            city: { type: String, required: false, default: '' },
+            state: { type: String, required: false, default: '' },
+            zipCode: { type: String, required: false, default: '' },
         },
-        required: false },
-        landmark: { type: String },
-        coordinates: { type: {
-            latitude: { type: String, required: false },
-            longitude: { type: String, required: false },
+        required: false, default: undefined },
+        landmark: { type: String, default: '' },
+        location: { type: {
+            latitude: { type: String, required: false, default: '' },
+            longitude: { type: String, required: false, default: '' },
         },
-        required: false },
+        required: false, default: undefined },
         isCornerProperty: { type: Boolean, default: false }
     },
-    propertyDetails: {
-        totalPlotArea: { type: Number, required: false },
-        zoningType: { type: String, required: false },
-        infrastructure: { type: [String] },
-        roadAccess: { type: String, required: false },
+    plotDetails: {
+        totalPlotArea: { type: Number, required: false, default: 0 },
+        zoningType: { type: String, required: false, default: 'commercial' },
+        boundaryWall: { type: Boolean, default: false },
+        waterSewer: { type: Boolean, default: false },
+        electricity: { type: Boolean, default: false },
+        roadAccess: { type: String, required: false, default: '' },
         securityRoom: { type: Boolean, default: false },
-        previousConstruction: { type: String, required: false }
+        previousConstruction: { type: String, required: false, default: '' }
     },
     leaseTerms: {
-        leaseAmount: { type: Number, required: false },
+        leaseAmount: { type: Number, required: false, default: 0 },
         leaseduration: {
-            duration: { type: Number, required: false },
-            type: { type: String, enum: ['month', 'year'], required: false },
-            amountType: { type: String, enum: ['fixed', 'negotiable'], required: false }
+            duration: { type: Number, required: false, default: 0 },
+            type: { type: String, enum: ['month', 'year'], required: false, default: 'month' },
+            amountType: { type: String, enum: ['fixed', 'negotiable'], required: false, default: 'fixed' }
         },
         leasetenure: {
             minimumTenure: {
-                duration: { type: Number, required: false },
-                type: { type: String, enum: ['month', 'year'], required: false }
+                duration: { type: Number, required: false, default: 0 },
+                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
             },
             maximumTenure: {
-                duration: { type: Number, required: false },
-                type: { type: String, enum: ['month', 'year'], required: false }
+                duration: { type: Number, required: false, default: 0 },
+                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
             },
             lockInPeriod: {
-                duration: { type: Number, required: false },
-                type: { type: String, enum: ['month', 'year'], required: false }
+                duration: { type: Number, required: false, default: 0 },
+                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
             },
             noticePeriod: {
-                duration: { type: Number, required: false },
-                type: { type: String, enum: ['month', 'year'], required: false }
+                duration: { type: Number, required: false, default: 0 },
+                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
             }
-        }
+        },
+       
     },
     availability: {
-        availableFrom: { type: Date },
+        availableFrom: { type: Date, default: Date.now },
         availableImmediately: { type: Boolean, default: false },
-        availabilityStatus: { type: String, required: false },
-        leaseDuration: { type: String },
-        noticePeriod: { type: String },
+        availabilityStatus: { type: String, required: false, default: 'later' },
+        leaseDuration: { type: String, default: '' },
+        noticePeriod: { type: String, default: '' },
         isPetsAllowed: { type: Boolean, default: false },
-        operatingHours: {type:Boolean,default:false}
+        operatingHours: { type: Boolean, default: false }
     },
     contactInformation: {
-        name: { type: String, required: false },
-        email: { type: String, required: false },
-        phone: { type: String, required: false },
-        alternatePhone: { type: String },
-        preferredContactTime: { type: String },
-        bestTimeToContact: { type: String }
+        name: { type: String, required: false, default: '' },
+        email: { type: String, required: false, default: '' },
+        phone: { type: String, required: false, default: '' },
+        alternatePhone: { type: String, default: '' },
+        preferredContactTime: { type: String, default: '' },
+        bestTimeToContact: { type: String, default: '' }
     },
     media: {
         photos: {
