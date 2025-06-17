@@ -681,7 +681,7 @@ const PlotManagement: React.FC = () => {
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">Price</h3>
-                    <p className="text-lg font-semibold text-black">{type === 'agriculture' ? property?.pricingDetails?.propertyPrice || '' : listing === 'rent' ? rentplotproperty?.rentalTerms?.rentDetails.expectedRent || '' : saleplotproperty?.pricingDetails?.pricePerSqFt || ''} </p>
+                    <p className="text-lg font-semibold text-black">{type === 'agriculture' ? property?.price?.expectedPrice  : listing === 'rent' ? rentplotproperty?.rentalTerms?.rentDetails.expectedRent || '' : saleplotproperty?.pricingDetails?.pricePerSqFt || ''} </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">{type === 'agriculture' ? 'Land Type' : 'price type'}</h3>
