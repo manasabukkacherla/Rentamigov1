@@ -27,7 +27,7 @@ interface FormData {
   propertyId?: string;
   basicInformation: {
     title: string;
-    type: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -35,16 +35,18 @@ interface FormData {
       zipCode: string;
     };
     landmark: string;
-    coordinates: {
+    location: {
       latitude: string;
       longitude: string;
     };
     isCornerProperty: boolean;
   };
-  propertyDetails: {
+  plotDetails: {
     totalPlotArea: number;
     zoningType: string;
-    infrastructure: string[];
+    boundaryWall?: boolean;
+    waterSewer?: boolean;
+    electricity?: boolean;
     roadAccess: string;
     securityRoom: boolean;
     previousConstruction: string;
@@ -106,7 +108,7 @@ interface FormData {
     documents: File[];
   };
   metadata?: {
-    userId: string;
+    createdBy: string;
     createdAt: Date;
     propertyType: string;
     propertyName: string;
@@ -160,7 +162,7 @@ const LeasePlotMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      type: [],
+      Type: [],
       address: {
         street: "",
         city: "",
@@ -168,16 +170,18 @@ const LeasePlotMain = () => {
         zipCode: ""
       },
       landmark: "",
-      coordinates: {
+       location: {
         latitude: "",
         longitude: ""
       },
       isCornerProperty: false,
     },
-    propertyDetails: {
+    plotDetails: {
       totalPlotArea: 0,
       zoningType: "commercial",
-      infrastructure: [],
+      boundaryWall: false,
+      waterSewer: false,
+      electricity: false,
       roadAccess: "",
       securityRoom: false,
       previousConstruction: ""
@@ -243,6 +247,7 @@ const LeasePlotMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
+  
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -261,6 +266,7 @@ const LeasePlotMain = () => {
   };
 
   // Define form steps
+  
   const steps = [
     {
       title: "Basic Information",
@@ -272,16 +278,16 @@ const LeasePlotMain = () => {
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
-          <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.type', type)} />
+          <PlotType onPlotTypeChange={(Type) => handleChange('basicInformation.type', Type)} />
           <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} address={formData.basicInformation.address}
             
           />
           <MapLocation
-            latitude={formData.basicInformation.coordinates.latitude}
-            longitude={formData.basicInformation.coordinates.longitude}
-            onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            landmark={formData.basicInformation.landmark}          />
+            landmark={formData.basicInformation.landmark}/>
           <CornerProperty
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} isCornerProperty={false}          />
         </div>
@@ -301,17 +307,19 @@ const LeasePlotMain = () => {
               builtUpArea: details.builtUpArea || 0
             };
 
-            // Update propertyDetails with area information
-            handleChange('propertyDetails', {
-              ...formData.propertyDetails,
+            // Update plotDetails with area information
+            handleChange('plotDetails', {
+              ...formData.plotDetails,
               area: updatedArea,
             });
 
             // Update plotDetails with plot-specific information
-            handleChange('propertyDetails', {
-              ...formData.propertyDetails,
+            handleChange('plotDetails', {
+              ...formData.plotDetails,
               totalPlotArea: details.totalPlotArea || details.totalArea || 0,
-              infrastructure: details.infrastructure || [],
+              boundaryWall: details.boundaryWall || false,
+              waterSewer: details.waterSewer || false,
+              electricity: details.electricity || false,
               roadAccess: details.roadAccess || "",
               securityRoom: details.securityRoom || false,
               previousConstruction: details.previousConstruction || "",
@@ -327,8 +335,8 @@ const LeasePlotMain = () => {
               <div className="grid grid-cols-1 gap-3">
                 <label className="block text-md font-medium mb-2 text-black">Zoning Type</label>
                 <select
-                  value={formData.propertyDetails.zoningType}
-                  onChange={(e) => handleChange('propertyDetails.zoningType', e.target.value)}
+                  value={formData.plotDetails.zoningType}
+                  onChange={(e) => handleChange('plotDetails.zoningType', e.target.value)}
                   className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
                   required
                 >
@@ -338,7 +346,7 @@ const LeasePlotMain = () => {
                   <option value="industrial" className="text-black bg-white">Industrial</option>
                   <option value="mixed" className="text-black bg-white">Mixed Use</option>
                 </select>
-                {!formData.propertyDetails.zoningType && (
+                {!formData.plotDetails.zoningType && (
                   <p className="text-red-500 text-sm">This field is required</p>
                 )}
               </div>
@@ -489,7 +497,7 @@ const LeasePlotMain = () => {
 
     // Check basic information
     if (!formData.basicInformation.title) errors.push("Property name");
-          if (!formData.basicInformation.type || formData.basicInformation.type.length === 0) errors.push("Plot type");
+          if (!formData.basicInformation.Type || formData.basicInformation.Type.length === 0) errors.push("Plot type");
     if (!formData.basicInformation.landmark) errors.push("Landmark");
 
     // Check address
@@ -500,17 +508,19 @@ const LeasePlotMain = () => {
     if (!address.zipCode) errors.push("Zip code");
 
     // Check property details
-    if (formData.propertyDetails.totalPlotArea <= 0) errors.push("Total area");
-    if (formData.propertyDetails.zoningType) errors.push("Zoning type");
-    if (formData.propertyDetails.infrastructure.length === 0) errors.push("Infrastructure");
-    if (formData.propertyDetails.roadAccess) errors.push("Road access");
-    if (formData.propertyDetails.securityRoom) errors.push("Security room");
-    if (formData.propertyDetails.previousConstruction) errors.push("Previous construction");
+    if (formData.plotDetails.totalPlotArea <= 0) errors.push("Total area");
+    if (formData.plotDetails.zoningType) errors.push("Zoning type");
+    if (formData.plotDetails.boundaryWall) errors.push("Boundary wall");
+    if (formData.plotDetails.waterSewer) errors.push("Water sewer");
+    if (formData.plotDetails.electricity) errors.push("Electricity");
+    if (formData.plotDetails.roadAccess) errors.push("Road access");
+    if (formData.plotDetails.securityRoom) errors.push("Security room");
+    if (formData.plotDetails.previousConstruction) errors.push("Previous construction");
 
     // Check plot details
-    if (!formData.propertyDetails.zoningType) errors.push("Zoning type");
-    if (!formData.propertyDetails.roadAccess) errors.push("Road access");
-    if (!formData.propertyDetails.previousConstruction) errors.push("Previous construction");
+    if (!formData.plotDetails.zoningType) errors.push("Zoning type");
+    if (!formData.plotDetails.roadAccess) errors.push("Road access");
+    if (!formData.plotDetails.previousConstruction) errors.push("Previous construction");
 
     // Check lease details
     if (formData.leaseTerms.leaseAmount <= 0) errors.push("Lease amount");
@@ -554,17 +564,17 @@ const LeasePlotMain = () => {
       return;
     }
 
-    if (!formData.propertyDetails.totalPlotArea || formData.propertyDetails.totalPlotArea <= 0) {
+    if (!formData.plotDetails.totalPlotArea || formData.plotDetails.totalPlotArea <= 0) {
       toast.error('Total plot area is required and must be greater than 0');
       setIsSubmitting(false);
       return;
     }
 
-    if (!formData.leaseTerms.leaseAmount || formData.leaseTerms.leaseAmount <= 0) {
-      toast.error('Lease amount is required and must be greater than 0');
-      setIsSubmitting(false);
-      return;
-    }
+    // if (!formData.leaseTerms.leaseAmount || formData.leaseTerms.leaseAmount <= 0) {
+    //   toast.error('Lease amount is required and must be greater than 0');
+    //   setIsSubmitting(false);
+    //   return;
+    // }
 
     if (!formData.contactInformation.name || !formData.contactInformation.phone) {
       toast.error('Contact information is required');
@@ -585,13 +595,13 @@ const LeasePlotMain = () => {
       console.log("User authenticated, ID:", author);
 
       // Ensure coordinates are valid numbers for the backend
-      const safeCoordinates = {
-        latitude: typeof formData.basicInformation.coordinates.latitude === 'string'
-          ? parseFloat(formData.basicInformation.coordinates.latitude) || 0
-          : formData.basicInformation.coordinates.latitude || 0,
-        longitude: typeof formData.basicInformation.coordinates.longitude === 'string'
-          ? parseFloat(formData.basicInformation.coordinates.longitude) || 0
-          : formData.basicInformation.coordinates.longitude || 0
+      const safelocation = {
+        latitude: typeof formData.basicInformation.location.latitude === 'string'
+          ? parseFloat(formData.basicInformation.location.latitude) || 0
+          : formData.basicInformation.location.latitude || 0,
+        longitude: typeof formData.basicInformation.location.longitude === 'string'
+          ? parseFloat(formData.basicInformation.location.longitude) || 0
+          : formData.basicInformation.location.longitude || 0
       };
 
       // Generate a unique propertyId if not already set
@@ -600,28 +610,23 @@ const LeasePlotMain = () => {
       const updatedFormData = {
         basicInformation: {
           title: formData.basicInformation.title,
-          type: formData.basicInformation.type,
+          Type: formData.basicInformation.Type,
           address: formData.basicInformation.address,
           landmark: formData.basicInformation.landmark,
-          coordinates: safeCoordinates,
+          location:safelocation,
           isCornerProperty: formData.basicInformation.isCornerProperty
         },
-        propertyDetails: {
-          totalPlotArea: formData.propertyDetails.totalPlotArea || 0,
-          zoningType: formData.propertyDetails.zoningType || "commercial",
-          infrastructure: formData.propertyDetails.infrastructure || [],
-          roadAccess: formData.propertyDetails.roadAccess || "",
-          securityRoom: formData.propertyDetails.securityRoom || false,
-          previousConstruction: formData.propertyDetails.previousConstruction || ""
-        },
         plotDetails: {
-          totalPlotArea: formData.propertyDetails.totalPlotArea || 0,
-          zoningType: formData.propertyDetails.zoningType || "commercial",
-          infrastructure: formData.propertyDetails.infrastructure || [],
-          roadAccess: formData.propertyDetails.roadAccess || "",
-          securityRoom: formData.propertyDetails.securityRoom || false,
-          previousConstruction: formData.propertyDetails.previousConstruction || ""
+          totalPlotArea: formData.plotDetails.totalPlotArea || 0,
+          zoningType: formData.plotDetails.zoningType || "commercial",
+          boundaryWall: formData.plotDetails.boundaryWall || false,
+          waterSewer: formData.plotDetails.waterSewer || false,
+          electricity: formData.plotDetails.electricity || false,
+          roadAccess: formData.plotDetails.roadAccess || "",
+          securityRoom: formData.plotDetails.securityRoom || false,
+          previousConstruction: formData.plotDetails.previousConstruction || ""
         },
+        
         leaseTerms: {
           leaseAmount: formData.leaseTerms.leaseAmount || 0,
           leaseduration: {
@@ -689,7 +694,7 @@ const LeasePlotMain = () => {
         propertyId: formData.propertyId || `CLPLOT-${Date.now().toString().slice(-8)}`,
         basicInformation: {
           title: formData.basicInformation.title || "",
-          type: formData.basicInformation.type || [],
+          Type: formData.basicInformation.Type || [],
           address: {
             street: formData.basicInformation.address.street || "",
             city: formData.basicInformation.address.city || "",
@@ -697,19 +702,21 @@ const LeasePlotMain = () => {
             zipCode: formData.basicInformation.address.zipCode || ""
           },
           landmark: formData.basicInformation.landmark || "",
-          coordinates: {
-            latitude: formData.basicInformation.coordinates.latitude || "",
-            longitude: formData.basicInformation.coordinates.longitude || ""
+          location: {
+            latitude: formData.basicInformation.location.latitude || "",
+            longitude: formData.basicInformation.location.longitude || ""
           },
           isCornerProperty: formData.basicInformation.isCornerProperty || false
         },
-        propertyDetails: {
-          totalPlotArea: formData.propertyDetails.totalPlotArea || 0,
-          zoningType: formData.propertyDetails.zoningType || "commercial",
-          infrastructure: formData.propertyDetails.infrastructure || [],
-          roadAccess: formData.propertyDetails.roadAccess || "",
-          securityRoom: formData.propertyDetails.securityRoom || false,
-          previousConstruction: formData.propertyDetails.previousConstruction || ""
+        plotDetails: {
+          totalPlotArea: formData.plotDetails.totalPlotArea || 0,
+          zoningType: formData.plotDetails.zoningType || "commercial",
+          boundaryWall: formData.plotDetails.boundaryWall || false,
+          waterSewer: formData.plotDetails.waterSewer || false,
+          electricity: formData.plotDetails.electricity || false,
+          roadAccess: formData.plotDetails.roadAccess || "",
+          securityRoom: formData.plotDetails.securityRoom || false,
+          previousConstruction: formData.plotDetails.previousConstruction || ""
         },
         leaseTerms: {
           leaseAmount: formData.leaseTerms.leaseAmount || 0,
@@ -756,7 +763,7 @@ const LeasePlotMain = () => {
         },
         media: convertedMedia,
         metadata: {
-          userId: author,
+          createdBy: author,
           createdAt: new Date(),
           propertyType: 'Commercial',
           propertyName: 'Plot',

@@ -15,12 +15,14 @@ export interface ICommercialSellAgriculture extends Document {
   propertyId?: string;
   basicInformation: {
     title: string;
-    type: string;
-    address: string;
+    Type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
     landmark: string;
-    city: string;
-    state: string;
-    zipCode: string;
     location: 
     { latitude: string; 
       longitude: string 
@@ -38,33 +40,9 @@ export interface ICommercialSellAgriculture extends Document {
     waterSource: string;
     legalClearances: boolean;
   };
-  propertyDetails?: {
-    area?: IArea;
-    floor?: IFloor;
-    facingDirection?: string;
-    furnishingStatus?: string;
-    propertyAmenities?: string[];
-    wholeSpaceAmenities?: string[];
-    waterAvailability?: string;
-    propertyAge?: number;
-    propertyCondition?: string;
-    electricitySupply?: {
-      powerLoad?: number;
-      backup?: boolean;
-    };
-  };
   price: {
     expectedPrice: number;
     isNegotiable: boolean;
-  };
-  registrationCharges?: {
-    included?: boolean;
-    amount?: number;
-    stampDuty?: number;
-  };
-  brokerage?: {
-    required?: string;
-    amount?: number;
   };
   availability: {
     type: 'immediate' | 'specific';
@@ -93,7 +71,7 @@ export interface ICommercialSellAgriculture extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData: {
+  metadata: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     propertyType: string;
@@ -107,11 +85,13 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSA-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   basicInformation: {
     title: { type: String, default: "Unnamed Property" },
-    type: { type: String, default: "Agricultural" },
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" },
+    Type: [{ type: String, required: true }],
+    address:{
+      street: { type: String, default: "Not Specified" },
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
   landmark: { type: String },
   location: {
     latitude: { type: String ,required:true},
@@ -129,40 +109,9 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
     waterSource: { type: String },
     legalClearances: { type: Boolean, default: false }
   },
-  propertyDetails: {
-    area: {
-      totalArea: { type: Number },
-      carpetArea: { type: Number },
-      builtUpArea: { type: Number }
-    },
-    floor: {
-      floorNumber: { type: Number },
-      totalFloors: { type: Number }
-    },
-    facingDirection: { type: String },
-    furnishingStatus: { type: String },
-    propertyAmenities: { type: [String] },
-    wholeSpaceAmenities: { type: [String] },
-    waterAvailability: { type: String },
-    propertyAge: { type: Number },
-    propertyCondition: { type: String },
-    electricitySupply: {
-      powerLoad: { type: Number },
-      backup: { type: Boolean, default: false }
-    }
-  },
   price: {
     expectedPrice: { type: Number, default: 0 },
     isNegotiable: { type: Boolean, default: false }
-  },
-  registrationCharges: {
-    included: { type: Boolean, default: false },
-    amount: { type: Number },
-    stampDuty: { type: Number }
-  },
-  brokerage: {
-    required: { type: String },
-    amount: { type: Number }
   },
   availability: {
     type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
@@ -191,7 +140,7 @@ const CommercialSellAgricultureSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData: {
+  metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },

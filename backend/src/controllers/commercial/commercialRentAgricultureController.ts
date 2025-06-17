@@ -50,14 +50,9 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     const formData = req.body;
 
     // Prefer authenticated user if available
-    const userId = formData.metadata.createdBy;
+    const userId = formData.metadata?.createdBy;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not authenticated or user ID is missing in request.'
-      });
-    }
+   
 
     // Ensure powerSupply is explicitly set from the request body
     // if (typeof formData.powerSupply !== 'boolean') {
@@ -77,9 +72,9 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     const agricultureData = {
       ...formData,
       propertyId, // Ensure propertyId is at the root level
-      metaData: {
-        ...formData.metaData,
-        createdBy: userId,  // Use the extracted userId
+      metadata: {
+        ...formData.metadata,
+        createdBy: formData.metadata.createdBy,  // Use the extracted userId
         createdAt: new Date()
       }
     };
@@ -102,7 +97,7 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
 // Get all Commercial Rent Agriculture
 export const getAllCommercialRentAgriculture = async (req: Request, res: Response) => {
   try {
-    const properties = await CommercialRentAgriculture.find().sort({ 'metaData.createdAt': -1 });
+    const properties = await CommercialRentAgriculture.find().sort({ 'metadata.createdAt': -1 });
 
     res.status(200).json({
       success: true,

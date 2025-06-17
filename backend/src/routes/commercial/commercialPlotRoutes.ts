@@ -2,7 +2,9 @@ import express from 'express';
 import {
     createPlot,
     getAllPlots,
-    getPlotById
+    getPlotById,
+    // updatePlotById,
+    // deletePlotById
 } from '../../controllers/commercial/commericalSellPlotController';
 import { authenticateUser } from '../../middleware/auth';
 
@@ -16,5 +18,8 @@ router.get('/', getAllPlots as express.RequestHandler);
 
 // Get a specific commercial plot by ID
 router.get('/:propertyId', getPlotById as express.RequestHandler);
+
+// Update a plot listing
+
 
 export default router;
