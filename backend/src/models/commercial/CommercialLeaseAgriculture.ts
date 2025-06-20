@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 interface IArea {
   totalArea: number;
@@ -15,7 +15,7 @@ export interface ICommercialLeaseAgriculture extends Document {
   propertyId: string;
   basicInformation: {
     title: string;
-    type: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -29,29 +29,21 @@ export interface ICommercialLeaseAgriculture extends Document {
       longitude: string;
     };
     isCornerProperty: boolean;
+    powerSupply: string;
   };
  
 
 
-  propertyDetails: {
-    area?: IArea;
-    soilType: string;
-    irrigation: boolean;
-    fencing: boolean;
-    cropSuitability: string;
-    waterSource: string;
-    legalClearances: boolean;
-  };
-  powerSupply: boolean;
-  landDetails: {
+  Agriculturelanddetails: {
     totalArea: number;
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
     cropSuitability: string;
-    waterSource: string;
+    waterSource?: string;
     legalClearances: boolean;
   };
+  
   leaseTerms: {
   leaseAmount: {
     amount: number;
@@ -70,32 +62,7 @@ export interface ICommercialLeaseAgriculture extends Document {
     noticePeriodUnit: string;
   };
 };
-  // maintenanceAmount?: {
-  //   amount?: number;
-  //   frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
-  // };
-  // otherCharges?: {
-  //   waterCharges?: {
-  //     type?: "inclusive" | "exclusive";
-  //     amount?: number;
-  //   };
-  //   electricityCharges?: {
-  //     type?: "inclusive" | "exclusive";
-  //     amount?: number;
-  //   };
-  //   gasCharges?: {
-  //     type?: "inclusive" | "exclusive";
-  //     amount?: number;
-  //   };
-  //   otherCharges?: {
-  //     type?: "inclusive" | "exclusive";
-  //     amount?: number;
-  //   };
-  // };
-  // brokerage?: {
-  //   required?: boolean;
-  //   amount?: number;
-  // };
+  
   availability: {
     availableFrom: Date;
     availableImmediately: boolean;
@@ -115,11 +82,6 @@ export interface ICommercialLeaseAgriculture extends Document {
   media: {
     photos: {
       exterior?: string[];
-      interior?: string[];
-      floorPlan?: string[];
-      washrooms?: string[];
-      lifts?: string[];
-      emergencyExits?: string[];
         
     };
     videoTour?: string;
@@ -139,8 +101,8 @@ const CommercialLeaseAgriculture = new Schema({
   propertyId: { type: String },
   basicInformation: {
     title: { type: String, default: "Unnamed Property" },
-    type: { type: [String], default: ["Agricultural"] },
-    powerSupply: { type: Boolean, default: false },
+    Type: { type: [String], default: ["Agricultural"] },
+    powerSupply: { type: String, enum: ['Available', 'Not Available'], default: "Available" },
   address: {
     street: { type: String, default: "Not Specified" },
     city: { type: String, default: "Not Specified" },
@@ -153,9 +115,10 @@ const CommercialLeaseAgriculture = new Schema({
       longitude: { type: String ,required: false}
     },
     isCornerProperty: { type: Boolean, default: false },
+    
   },
-  landDetails: {
-    totalArea: { type: Number, default: 0 },
+  Agriculturelanddetails: {
+    totalArea: { type: Number, required: true },
     soilType: { type: String },
     irrigation: { type: Boolean, default: false },
     fencing: { type: Boolean, default: false },
@@ -163,56 +126,26 @@ const CommercialLeaseAgriculture = new Schema({
     waterSource: { type: String },
     legalClearances: { type: Boolean, default: false }
   },
-  propertyDetails: {
-    area: {
-      totalArea: { type: Number },
-      carpetArea: { type: Number },
-      builtUpArea: { type: Number }
-    }
-    
+  leaseTerms:{
+    leaseAmount: {
+      amount: { type: Number, default: 0 },
+      duration: { type: Number, default: 0 },
+      durationType: { type: String, default: "months" },
+      isNegotiable: { type: Boolean, default: false },
+    },
+    leaseTenure: {
+      minimumTenure: { type: String, default: "" },
+      minimumUnit: { type: String, default: "months" },
+      maximumTenure: { type: String, default: "" },
+      maximumUnit: { type: String, default: "months" },
+      lockInPeriod: { type: String, default: "" },
+      lockInUnit: { type: String, default: "months" },
+      noticePeriod: { type: String, default: "" },
+      noticePeriodUnit: { type: String, default: "months" },
+    },
   },
-  leaseAmount: {
-    amount: { type: Number, default: 0 },
-    duration: { type: Number, default: 0 },
-    durationType: { type: String, default: "months" },
-    isNegotiable: { type: Boolean, default: false },
-  },
-  leaseTenure: {
-    minimumTenure: { type: String, default: "" },
-    minimumUnit: { type: String, default: "months" },
-    maximumTenure: { type: String, default: "" },
-    maximumUnit: { type: String, default: "months" },
-    lockInPeriod: { type: String, default: "" },
-    lockInUnit: { type: String, default: "months" },
-    noticePeriod: { type: String, default: "" },
-    noticePeriodUnit: { type: String, default: "months" },
-  },
-  // maintenanceAmount: {
-  //   amount: { type: Number },
-  //   frequency: { type: String }
-  // },
-  // otherCharges: {
-  //   electricityCharges: {
-  //     type: { type: String, enum: ['inclusive', 'exclusive']},
-  //     amount: { type: Number }
-  //   },
-  //   waterCharges: {
-  //     type: { type: String, enum: ['inclusive', 'exclusive']},
-  //     amount: { type: Number }
-  //   },
-  //   gasCharges: {
-  //     type: { type: String, enum: ['inclusive', 'exclusive']},
-  //     amount: { type: Number }
-  //   },
-  //   otherCharges: {
-  //     type: { type: String, enum: ['inclusive', 'exclusive']},
-  //     amount: { type: Number }
-  //   }
-  // },
-  // brokerage: {
-  //   required: { type: Boolean, default: false },
-  //   amount: { type: Number },
-  // },
+  
+ 
   availability: {
     availableFrom: { type: Date },
     availableImmediately: { type: Boolean, default: false },
@@ -233,11 +166,6 @@ const CommercialLeaseAgriculture = new Schema({
   media: {
     photos: {
       exterior: { type: [String], default: [] },
-      interior: { type: [String], default: [] },
-      floorPlan: { type: [String], default: [] },
-      washrooms: { type: [String], default: [] },
-      lifts: { type: [String], default: [] },
-      emergencyExits: { type: [String], default: [] }
     },
     videoTour: { type: String },
     documents: { type: [String], default: [] }
@@ -251,5 +179,6 @@ const CommercialLeaseAgriculture = new Schema({
     status: { type: String, default: 'Available' }
   }
 });
+
 
 export default mongoose.model<ICommercialLeaseAgriculture>('CommercialLeaseAgriculture', CommercialLeaseAgriculture); 

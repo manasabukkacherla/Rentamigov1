@@ -156,6 +156,89 @@ interface propertyRentPlot {
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
 };
+interface leaseagriculture {
+  basicInformation: {
+    title: string;
+    landType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    landmark: string;
+    isCornerProperty: boolean;
+    powerSupply: string;
+
+  };
+ 
+  Agriculturelanddetails: {
+    totalArea?:Number;
+    soilType: string;
+    irrigation: boolean;
+    fencing: boolean;
+    cropSuitability: string;
+    waterSource: string;
+    legalClearances: boolean;
+  };
+
+  
+  leaseTerms: {
+  leaseAmount: {
+    amount: number;
+    duration: number;
+    durationType: string;
+    isNegotiable: boolean;
+  };
+  leaseTenure: {
+    minimumTenure: string;
+    minimumUnit: string;
+    maximumTenure: string;
+    maximumUnit: string;
+    lockInPeriod: string;
+    lockInUnit: string;
+    noticePeriod: string;
+    noticePeriodUnit: string;
+  };
+  
+};
+
+  availability: {
+    availableFrom: Date;
+    availableImmediately: boolean;
+    availabilityStatus: string;
+    leaseDuration: string;
+    noticePeriod: string;
+    isPetsAllowed: boolean;
+    operatingHours: boolean;
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+  };
+  media: {
+    photos: {
+      exterior: File[];
+    };
+    videoTour: File | null;
+    documents: File[];
+  };
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
+  };
+}
 
 
 interface plotsale {
@@ -278,6 +361,7 @@ const PlotManagement: React.FC = () => {
   const [property, setProperty] = useState<AgricultureProperty | null>(null);
   const [rentplotproperty, setRentplotproperty] = useState<propertyRentPlot | null>(null);
   const [saleplotproperty, setSaleplotproperty] = useState<plotsale | null>(null);
+  const [leaseagricultureproperty, setLeaseagricultureproperty] = useState<leaseagriculture | null>(null);
   const [loading, setLoading] = useState(true);
   const [propertyMedia, setPropertyMedia] = useState<PropertyMedia>({} as PropertyMedia);
 
@@ -351,6 +435,9 @@ const PlotManagement: React.FC = () => {
     if (listing === 'sale' && type == 'plot') {
       if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
     }
+    if (listing === 'lease' && type == 'agriculture') {
+      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+    }
     return (
       <div>
         <h3>Commercial Plot Details</h3>
@@ -406,6 +493,7 @@ const PlotManagement: React.FC = () => {
         setRentplotproperty(response.data.data);
         setSaleplotproperty(response.data.data);
         setPropertyMedia(response.data.data.media);
+        setLeaseagricultureproperty(response.data.data);
 
         setLoading(false);
 
@@ -681,7 +769,8 @@ const PlotManagement: React.FC = () => {
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">Price</h3>
-                    <p className="text-lg font-semibold text-black">{type === 'agriculture' ? property?.price?.expectedPrice  : listing === 'rent' ? rentplotproperty?.rentalTerms?.rentDetails.expectedRent || '' : saleplotproperty?.pricingDetails?.pricePerSqFt || ''} </p>
+                    <p className="text-lg font-semibold text-black">
+                      {type === 'agriculture' ?( listing !== 'lease' ? property?.price?.expectedPrice: leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount ): (listing === 'rent' ? rentplotproperty?.rentalTerms?.rentDetails.expectedRent || '' : saleplotproperty?.pricingDetails?.pricePerSqFt || '')} </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">{type === 'agriculture' ? 'Land Type' : 'price type'}</h3>
@@ -781,7 +870,7 @@ const PlotManagement: React.FC = () => {
                 </div>
                 </>}
                 {
-                  type=="agriculture" &&
+                  type=="agriculture" && listing!="lease" &&
                   <>
                   <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
                   <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
@@ -795,21 +884,36 @@ const PlotManagement: React.FC = () => {
                   </div>
                   </>
                 }
+                {
+                  type=="agriculture" && listing=="lease" &&
+                  <>
+                  <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                    <div className="text-gray-600 font-semibold">Lease Amount</div>
+                    <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
 
+                    <div className="text-gray-600 font-semibold">Lease Duration</div>
+                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.durationType}</div>
 
+                    <div className="text-gray-600 font-semibold">Minium Tenure</div>
+                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
 
+                    <div className="text-gray-600 font-semibold">Maximum Tenure</div>
+                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.maximumTenure}</div>
 
+                    <div className="text-gray-600 font-semibold">Lock In Period</div>
+                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</div>
 
-
-
-
-
-
-
-
-
-
+                    <div className="text-gray-600 font-semibold">Notice Period</div>
+                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.noticePeriod}</div>
                   </div>
+                  </div>
+                  </>
+                }
+
+
+                </div>
                 </div>
               </div>
             </div>
