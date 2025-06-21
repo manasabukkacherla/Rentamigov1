@@ -5,8 +5,8 @@ export interface ICommercialLeasePlot extends Document {
     propertyId: string;
     basicInformation: {
         title: string;
-        Type: string[];
-        address:{
+        plotType: string[];
+        address: {
             street: string;
             city: string;
             state: string;
@@ -26,34 +26,27 @@ export interface ICommercialLeasePlot extends Document {
         waterSewer?: boolean;
         electricity?: boolean;
         roadAccess: string;
-        securityRoom: boolean;  
+        securityRoom: boolean;
         previousConstruction: string;
     };
     leaseTerms: {
-        leaseAmount: number;
-        leaseduration: {
+        leaseAmount: {
+            amount: number;
             duration: number;
-            type: string;
-            amountType: "fixed" | "negotiable";  
+            durationType: string;
+            amountType: "fixed" | "negotiable";
         };
-        leasetenure: {
-            minimumTenure: {
-                duration: number;
-                type: string;
-            };
-            maximumTenure: {
-                duration: number;
-                type: string;
-            };
-            lockInPeriod: {
-                duration: number;
-                type: string;
-            };
-            noticePeriod: {
-                duration: number;
-                type: string;
-            };
+        leaseTenure: {
+            minimumTenure: string;
+            minimumUnit: string;
+            maximumTenure: string;
+            maximumUnit: string;
+            lockInPeriod: string;
+            lockInUnit: string;
+            noticePeriod: string;
+            noticePeriodUnit: string;
         };
+
     };
     availability: {
         availableFrom?: Date;
@@ -74,11 +67,6 @@ export interface ICommercialLeasePlot extends Document {
     media: {
         photos: {
             exterior: string[];
-            interior: string[];
-            floorPlan: string[];
-            washroom: string[];
-            lift: string[];
-            emergencyExit: string[];
         };
         videoTour?: string;
         documents: string[];
@@ -100,20 +88,18 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
     propertyId: { type: String, required: false, unique: false },
     basicInformation: {
         title: { type: String, required: false, default: '' },
-        Type: [{ type: String, required: false, default: '' }],
-        address: { type: {
+        plotType: [{ type: String, required: false }],
+        address: {
             street: { type: String, required: false, default: '' },
             city: { type: String, required: false, default: '' },
             state: { type: String, required: false, default: '' },
             zipCode: { type: String, required: false, default: '' },
         },
-        required: false, default: undefined },
         landmark: { type: String, default: '' },
-        location: { type: {
+        location: {
             latitude: { type: String, required: false, default: '' },
             longitude: { type: String, required: false, default: '' },
         },
-        required: false, default: undefined },
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
@@ -127,31 +113,26 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
         previousConstruction: { type: String, required: false, default: '' }
     },
     leaseTerms: {
-        leaseAmount: { type: Number, required: false, default: 0 },
-        leaseduration: {
-            duration: { type: Number, required: false, default: 0 },
-            type: { type: String, enum: ['month', 'year'], required: false, default: 'month' },
-            amountType: { type: String, enum: ['fixed', 'negotiable'], required: false, default: 'fixed' }
+        leaseAmount: {
+            amount: { type: Number, required: true, default: 0 },
+            duration: { type: Number, required: true, default: 0 },
+            durationType: { type: String, enum: ['month', 'year'], required: true, default: 'month' },
+            amountType: { type: String, enum: ['fixed', 'negotiable'], required: true, default: 'fixed' },
         },
-        leasetenure: {
-            minimumTenure: {
-                duration: { type: Number, required: false, default: 0 },
-                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
-            },
-            maximumTenure: {
-                duration: { type: Number, required: false, default: 0 },
-                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
-            },
-            lockInPeriod: {
-                duration: { type: Number, required: false, default: 0 },
-                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
-            },
-            noticePeriod: {
-                duration: { type: Number, required: false, default: 0 },
-                type: { type: String, enum: ['month', 'year'], required: false, default: 'month' }
-            }
+        leaseTenure: {
+            minimumTenure: { type: String, default: "0" },
+            minimumUnit: { type: String, default: "months" },
+            maximumTenure: { type: String, default: "0" },
+            maximumUnit: { type: String, default: "months" },
+            lockInPeriod: { type: String, default: "0" },
+            lockInUnit: { type: String, default: "months" },
+            noticePeriod: { type: String, default: "0" },
+            noticePeriodUnit: { type: String, default: "months" },
         },
-       
+
+
+
+
     },
     availability: {
         availableFrom: { type: Date, default: Date.now },
@@ -167,17 +148,12 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
         email: { type: String, required: false, default: '' },
         phone: { type: String, required: false, default: '' },
         alternatePhone: { type: String, default: '' },
-        preferredContactTime: { type: String, default: '' },
         bestTimeToContact: { type: String, default: '' }
     },
     media: {
         photos: {
             exterior: [{ type: String }],
-            interior: [{ type: String }],
-            floorPlan: [{ type: String }],
-            washroom: [{ type: String }],
-            lift: [{ type: String }],
-            emergencyExit: [{ type: String }]
+            
         },
         videoTour: { type: String },
         documents: [{ type: String }]
@@ -186,8 +162,8 @@ const CommercialLeasePlot = new Schema<ICommercialLeasePlot>({
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
         createdAt: { type: Date, default: Date.now },
         propertyType: { type: String, default: 'Commercial' },
-        intent: { type: String,default: 'Rent' },
-        propertyName: { type: String,  default: 'Plot' },
+        intent: { type: String, default: 'Rent' },
+        propertyName: { type: String, default: 'Plot' },
         status: { type: String, default: 'Available' }
     }
 });

@@ -59,19 +59,21 @@ const transformPlotData = (formData: any) => {
     if (formData.basicInformation) {
         transformedData.basicInformation = {
             title: formData.basicInformation.title ?? '',
-            Type: Array.isArray(formData.basicInformation.Type)
-                ? formData.basicInformation.Type
-                : (formData.basicInformation.Type != null ? [formData.basicInformation.Type] : []),
+            plotType: Array.isArray(formData.basicInformation.plotType)
+                ? formData.basicInformation.plotType
+                : (formData.basicInformation.plotType != null ? [formData.basicInformation.plotType] : []),
             address: {
                 street: formData.basicInformation.address?.street ?? '',
                 city: formData.basicInformation.address?.city ?? '',
                 state: formData.basicInformation.address?.state ?? '',
-                zipCode: formData.basicInformation.address?.zipCode ?? ''
+                zipCode: formData.basicInformation.address?.zipCode ?? '',
+                _id: formData.basicInformation.address?._id ?? ''
             },
             landmark: formData.basicInformation.landmark ?? '',
             location: {
                 latitude: formData.basicInformation.location?.latitude ?? '',
-                longitude: formData.basicInformation.location?.longitude ?? ''
+                longitude: formData.basicInformation.location?.longitude ?? '',
+                _id: formData.basicInformation.location?._id ?? ''
             },
             isCornerProperty: formData.basicInformation.isCornerProperty ?? false
         };
@@ -100,32 +102,28 @@ const transformPlotData = (formData: any) => {
     // Lease Details
     if (formData.leaseTerms) {
         transformedData.leaseTerms = {
-            leaseAmount: defaultIfEmpty(formData.leaseTerms.leaseAmount, 0),
-            leaseduration: {
-                duration: defaultIfEmpty(formData.leaseTerms.leaseduration?.duration, 0),
-                type: defaultIfEmpty(formData.leaseTerms.leaseduration?.type, 'month'),
-                amountType: defaultIfEmpty(formData.leaseTerms.leaseduration?.amountType, 'fixed')
+            leaseAmount: {
+                amount: formData.leaseTerms.leaseAmount?.amount ?? 0,
+                duration: formData.leaseTerms.leaseAmount?.duration ?? 0,
+                durationType: formData.leaseTerms.leaseAmount?.durationType ?? "month",
+
+                amountType: formData.leaseTerms.leaseAmount?.amountType ?? "fixed",
             },
-            leasetenure: {
-                minimumTenure: {
-                    duration: defaultIfEmpty(formData.leaseTerms.leasetenure?.minimumTenure?.duration, 0),
-                    type: defaultIfEmpty(formData.leaseTerms.leasetenure?.minimumTenure?.type, 'month')
-                },
-                maximumTenure: {
-                    duration: defaultIfEmpty(formData.leaseTerms.leasetenure?.maximumTenure?.duration, 0),
-                    type: defaultIfEmpty(formData.leaseTerms.leasetenure?.maximumTenure?.type, 'month')
-                },
-                lockInPeriod: {
-                    duration: defaultIfEmpty(formData.leaseTerms.leasetenure?.lockInPeriod?.duration, 0),
-                    type: defaultIfEmpty(formData.leaseTerms.leasetenure?.lockInPeriod?.type, 'month')
-                },
-                noticePeriod: {
-                    duration: defaultIfEmpty(formData.leaseTerms.leasetenure?.noticePeriod?.duration, 0),
-                    type: defaultIfEmpty(formData.leaseTerms.leasetenure?.noticePeriod?.type, 'month')
-                }
-            },
-        };
+            leaseTenure: {
+                minimumTenure: formData.leaseTerms.leaseTenure?.minimumTenure ?? "",
+                minimumUnit: formData.leaseTerms.leaseTenure?.minimumUnit ?? "",
+                maximumTenure: formData.leaseTerms.leaseTenure?.maximumTenure ?? "",
+                maximumUnit: formData.leaseTerms.leaseTenure?.maximumUnit ?? "",
+                lockInPeriod: formData.leaseTerms.leaseTenure?.lockInPeriod ?? "",
+                lockInUnit: formData.leaseTerms.leaseTenure?.lockInUnit ?? "",
+                noticePeriod: formData.leaseTerms.leaseTenure?.noticePeriod ?? "",
+                noticePeriodUnit: formData.leaseTerms.leaseTenure?.noticePeriodUnit ?? ""
+            }
+        }
     }
+        
+        
+    
 
     // Brokerage
     
@@ -150,7 +148,6 @@ const transformPlotData = (formData: any) => {
             email: formData.contactInformation.email ?? '',
             phone: formData.contactInformation.phone ?? '',
             alternatePhone: formData.contactInformation.alternatePhone ?? '',
-            preferredContactTime: formData.contactInformation.preferredContactTime ?? '',
             bestTimeToContact: formData.contactInformation.bestTimeToContact ?? ''
         };
     }
@@ -162,21 +159,6 @@ const transformPlotData = (formData: any) => {
                 exterior: Array.isArray(formData.media.photos?.exterior)
                     ? formData.media.photos.exterior
                     : [],
-                interior: Array.isArray(formData.media.photos?.interior)
-                    ? formData.media.photos.interior
-                    : [],
-                floorPlan: Array.isArray(formData.media.photos?.floorPlan)
-                    ? formData.media.photos.floorPlan
-                    : [],
-                washroom: Array.isArray(formData.media.photos?.washroom)
-                    ? formData.media.photos.washroom
-                    : [],
-                lift: Array.isArray(formData.media.photos?.lift)
-                    ? formData.media.photos.lift
-                    : [],
-                emergencyExit: Array.isArray(formData.media.photos?.emergencyExit)
-                    ? formData.media.photos.emergencyExit
-                    : []
             },
             videoTour: formData.media.videoTour ?? '',
             documents: Array.isArray(formData.media.documents)

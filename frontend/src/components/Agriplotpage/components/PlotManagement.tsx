@@ -175,9 +175,9 @@ interface leaseagriculture {
     powerSupply: string;
 
   };
- 
+
   Agriculturelanddetails: {
-    totalArea?:Number;
+    totalArea?: Number;
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
@@ -186,26 +186,26 @@ interface leaseagriculture {
     legalClearances: boolean;
   };
 
-  
+
   leaseTerms: {
-  leaseAmount: {
-    amount: number;
-    duration: number;
-    durationType: string;
-    isNegotiable: boolean;
+    leaseAmount: {
+      amount: number;
+      duration: number;
+      durationType: string;
+      isNegotiable: boolean;
+    };
+    leaseTenure: {
+      minimumTenure: string;
+      minimumUnit: string;
+      maximumTenure: string;
+      maximumUnit: string;
+      lockInPeriod: string;
+      lockInUnit: string;
+      noticePeriod: string;
+      noticePeriodUnit: string;
+    };
+
   };
-  leaseTenure: {
-    minimumTenure: string;
-    minimumUnit: string;
-    maximumTenure: string;
-    maximumUnit: string;
-    lockInPeriod: string;
-    lockInUnit: string;
-    noticePeriod: string;
-    noticePeriodUnit: string;
-  };
-  
-};
 
   availability: {
     availableFrom: Date;
@@ -249,7 +249,7 @@ interface plotsale {
     landmark: string;
     city: string;
     state: string;
-    zipCode?: string;
+    zipCode: string;
     isCornerProperty: boolean;
   };
   plotDetails: {
@@ -314,7 +314,89 @@ interface plotsale {
   updatedAt: string; // ISO datetime
 }
 
+interface leaseplotproperty {
+  propertyId?: string;
+  basicInformation: {
+    title: string;
+    plotType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+      _id: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+      _id: string;
+    };
+    isCornerProperty: boolean;
+  };
+  plotDetails: {
+    totalPlotArea: number;
+    zoningType: string;
+    boundaryWall?: boolean;
+    waterSewer?: boolean;
+    electricity?: boolean;
+    roadAccess: string;
+    securityRoom: boolean;
+    previousConstruction: string;
+  };
 
+  leaseTerms: {
+    leaseAmount: {
+      amount: number;
+      duration: number;
+      durationType: string;
+      amountType: "fixed" | "negotiable";
+    };
+    leaseTenure: {
+      minimumTenure: string,
+      minimumUnit: string,
+      maximumTenure: string,
+      maximumUnit: string,
+      lockInPeriod: string,
+      lockInUnit: string,
+      noticePeriod: string,
+      noticePeriodUnit: string,
+    };
+  }
+  availability: {
+    availableFrom?: Date;
+    availableImmediately?: boolean;
+    availabilityStatus: string;
+    leaseDuration?: string;
+    noticePeriod?: string;
+    isPetsAllowed?: boolean;
+    operatingHours?: boolean;
+  };
+  contactInformation: {
+    name: string;
+    email: string;
+    phone: string;
+    alternatePhone?: string;
+    bestTimeToContact?: string;
+
+  };
+  media: {
+    photos: {
+      exterior: File[];
+
+    };
+    videoTour?: File | null;
+    documents: File[];
+  };
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
+  };
+}
 
 
 
@@ -362,6 +444,7 @@ const PlotManagement: React.FC = () => {
   const [rentplotproperty, setRentplotproperty] = useState<propertyRentPlot | null>(null);
   const [saleplotproperty, setSaleplotproperty] = useState<plotsale | null>(null);
   const [leaseagricultureproperty, setLeaseagricultureproperty] = useState<leaseagriculture | null>(null);
+  const [leaseplotproperty, setLeaseplotproperty] = useState<leaseplotproperty | null>(null);
   const [loading, setLoading] = useState(true);
   const [propertyMedia, setPropertyMedia] = useState<PropertyMedia>({} as PropertyMedia);
 
@@ -494,6 +577,7 @@ const PlotManagement: React.FC = () => {
         setSaleplotproperty(response.data.data);
         setPropertyMedia(response.data.data.media);
         setLeaseagricultureproperty(response.data.data);
+        setLeaseplotproperty(response.data.data);
 
         setLoading(false);
 
@@ -581,7 +665,22 @@ const PlotManagement: React.FC = () => {
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex items-center text-gray-600">
                   <MapPin className="h-4 w-4 mr-1" />
-                  <span className="text-sm">{type === 'agriculture' ? property?.basicInformation?.address?.city || '' : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : saleplotproperty?.basicInformation?.address}, {type === 'agriculture' ? property?.basicInformation?.address?.state || '' : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : saleplotproperty?.basicInformation?.address}</span>
+                  <span className="text-sm">
+                    {(() => {
+                      if (type === 'agriculture') {
+                        const address = property?.basicInformation?.address;
+                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                      } else if (listing === 'rent') {
+                        const address = rentplotproperty?.basicInformation?.address;
+                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                      } else {
+                        const address = saleplotproperty?.basicInformation;
+
+                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+
+                      }
+                    })()}
+                  </span>
                 </div>
               </div>
             </>
@@ -733,7 +832,7 @@ const PlotManagement: React.FC = () => {
                   <MapPin className="h-6 w-6 text-gray-400 mt-1" />
                   <div>
                     <h2 className="text-2xl font-bold text-black mb-2">Property Address</h2>
-                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : saleplotproperty?.basicInformation?.address}, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : saleplotproperty?.basicInformation?.address}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : saleplotproperty?.basicInformation?.address}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : saleplotproperty?.basicInformation?.address}</p>
+                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : saleplotproperty?.basicInformation?.isCornerProperty}, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : saleplotproperty?.basicInformation?.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : saleplotproperty?.basicInformation?.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : saleplotproperty?.basicInformation?.zipCode}</p>
                   </div>
                 </div>
               </div>
@@ -765,21 +864,69 @@ const PlotManagement: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">Total Area</h3>
-                    <p className="text-lg font-semibold text-black">{type === 'agriculture' ? property?.Agriculturelanddetails?.totalArea || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.totalArea || '' : saleplotproperty?.plotDetails?.totalArea || ''}</p>
+                    <p className="text-lg font-semibold text-black">
+                      {type === 'agriculture' ? property?.Agriculturelanddetails?.totalArea || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.totalArea || '' : listing === 'sale' ? saleplotproperty?.plotDetails.totalArea : leaseplotproperty?.plotDetails.totalPlotArea || ''}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">Price</h3>
                     <p className="text-lg font-semibold text-black">
-                      {type === 'agriculture' ?( listing !== 'lease' ? property?.price?.expectedPrice: leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount ): (listing === 'rent' ? rentplotproperty?.rentalTerms?.rentDetails.expectedRent || '' : saleplotproperty?.pricingDetails?.pricePerSqFt || '')} </p>
+                      {(() => {
+                        if (type === 'agriculture') {
+                          return listing !== 'lease'
+                            ? property?.price?.expectedPrice || property?.rent?.expectedRent || 'N/A'
+                            : leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount || 'N/A';
+                        }
+                        if (listing === 'rent') {
+                          return rentplotproperty?.rentalTerms?.rentDetails?.expectedRent || 'N/A';
+                        }
+                        if (listing === 'sale') {
+                          return saleplotproperty?.pricingDetails?.propertyPrice
+                            ?? saleplotproperty?.pricingDetails?.totalPrice
+                            ?? saleplotproperty?.pricingDetails?.pricePerSqFt
+                            ?? 'N/A';
+                        }
+                        if (listing === 'lease') {
+                          return leaseplotproperty?.leaseTerms?.leaseAmount?.amount || 'N/A';
+                        }
+                        return 'N/A';
+                      })()}
+                    </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">{type === 'agriculture' ? 'Land Type' : 'price type'}</h3>
-                    <p className="text-lg font-semibold text-black">{type === 'agriculture' ? property?.Agriculturelanddetails?.soilType || '' : listing === 'rent' ? rentplotproperty?.rentalTerms?.rentDetails.rentType || '' : saleplotproperty?.pricingDetails?.priceType || ''}</p>
+                    <p className="text-lg font-semibold text-black">{(() => {
+                      if (type === 'agriculture') {
+                        return property?.Agriculturelanddetails?.soilType || 'N/A';
+                      }
+                      if (listing === 'rent') {
+                        return rentplotproperty?.rentalTerms?.rentDetails?.rentType || 'N/A';
+                      }
+                      if (listing === 'sale') {
+                        return saleplotproperty?.pricingDetails?.priceType || 'N/A';
+                      }
+                      if (listing === 'lease') {
+                        return leaseplotproperty?.leaseTerms?.leaseAmount?.amountType || 'N/A';
+                      }
+                      return 'N/A';
+                    })()}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">{type === 'agriculture' ? 'Soil Type' : 'Zoning Type'}</h3>
-                    <p className="text-lg font-semibold text-black">{
-                      type === 'agriculture' ? property?.Agriculturelanddetails?.soilType || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.zoningType || '' : saleplotproperty?.plotDetails?.zoningType || ''}</p>
+                    <p className="text-lg font-semibold text-black">{(() => {
+                      if (type === 'agriculture') {
+                        return property?.Agriculturelanddetails?.soilType || 'N/A';
+                      }
+                      if (listing === 'rent') {
+                        return rentplotproperty?.propertyDetails?.zoningType || 'N/A';
+                      }
+                      if (listing === 'sale') {
+                        return saleplotproperty?.plotDetails?.zoningType || 'N/A';
+                      }
+                      if (listing === 'lease') {
+                        return leaseplotproperty?.leaseTerms?.leaseAmount?.amountType || 'N/A';
+                      }
+                      return 'N/A';
+                    })()}</p>
                   </div>
                 </div>
 
@@ -854,66 +1001,120 @@ const PlotManagement: React.FC = () => {
 
                       </>
 
-                }
-                {listing=="rent" && type=="plots" &&
-                
-                <>
-                <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                  <div className="text-gray-600 font-semibold">Excepted rent</div>
-                  <div className="text-black font-bold">₹{rentplotproperty?.rentalTerms?.rentDetails?.expectedRent}</div>
+                    }
+                    {listing == "rent" && type == "plots" &&
 
-                  <div className="text-gray-600 font-semibold">Rent Type</div>
-                  <div className="text-black font-bold">{rentplotproperty?.rentalTerms?.rentDetails?.rentType}</div>
-                </div>
-                </div>
-                </>}
-                {
-                  type=="agriculture" && listing!="lease" &&
-                  <>
-                  <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                    <div className="text-gray-600 font-semibold">Property Price</div>
-                    <div className="text-black font-bold">₹{property?.price?.expectedPrice}</div>
+                      <>
+                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                            <div className="text-gray-600 font-semibold">Excepted rent</div>
+                            <div className="text-black font-bold">₹{rentplotproperty?.rentalTerms?.rentDetails?.expectedRent}</div>
 
-                    <div className="text-gray-600 font-semibold">Price Type</div>
-                    <div className="text-black font-bold">{property?.price?.isNegotiable ? "Not Negotiable" : "Negotiable"}</div>
+                            <div className="text-gray-600 font-semibold">Rent Type</div>
+                            <div className="text-black font-bold">{rentplotproperty?.rentalTerms?.rentDetails?.rentType}</div>
+                          </div>
+                        </div>
+                      </>}
+                    {
+                      type == "agriculture" && listing != "lease" &&
+                      <>
+                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                            <div className="text-gray-600 font-semibold">Property Price</div>
+                            <div className="text-black font-bold">₹{property?.price?.expectedPrice || property?.rent?.expectedRent}</div>
+
+                            <div className="text-gray-600 font-semibold">Price Type</div>
+                            <div className="text-black font-bold">{property?.price?.isNegotiable ? "Not Negotiable" : "Negotiable"}</div>
+                          </div>
+                        </div>
+                      </>
+                    }
+                    {
+                      type == "agriculture" && listing == "lease" &&
+                      <>
+                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                            <div className="text-gray-600 font-semibold">Lease Amount</div>
+                            <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
+
+                            <div className="text-gray-600 font-semibold">Lease Duration</div>
+                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.durationType}</div>
+
+                            <div className="text-gray-600 font-semibold">Minium Tenure</div>
+                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
+
+                            <div className="text-gray-600 font-semibold">Maximum Tenure</div>
+                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.maximumTenure}</div>
+
+                            <div className="text-gray-600 font-semibold">Lock In Period</div>
+                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</div>
+
+                            <div className="text-gray-600 font-semibold">Notice Period</div>
+                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.noticePeriod}</div>
+                          </div>
+                        </div>
+                      </>
+                    }
+
+                    {listing === 'lease' && type !== "agriculture" && (
+                      <>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Amount:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amount}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Duration:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.duration}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Duration Type:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.durationType}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Amount Type:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amountType}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Minimum Tenure:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumTenure}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Minimum Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumUnit}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Maximum Tenure:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumTenure}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Maximum Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumUnit}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Lock In Period:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Lock In Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInUnit}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Notice Period:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriod}</span>
+                        </div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-black font-semibold">Lease Notice Period Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriodUnit}</span>
+                        </div>
+
+                      </>
+                    )}
+
+
                   </div>
-                  </div>
-                  </>
-                }
-                {
-                  type=="agriculture" && listing=="lease" &&
-                  <>
-                  <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                    <div className="text-gray-600 font-semibold">Lease Amount</div>
-                    <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
-
-                    <div className="text-gray-600 font-semibold">Lease Duration</div>
-                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.durationType}</div>
-
-                    <div className="text-gray-600 font-semibold">Minium Tenure</div>
-                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
-
-                    <div className="text-gray-600 font-semibold">Maximum Tenure</div>
-                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.maximumTenure}</div>
-
-                    <div className="text-gray-600 font-semibold">Lock In Period</div>
-                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</div>
-
-                    <div className="text-gray-600 font-semibold">Notice Period</div>
-                    <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.noticePeriod}</div>
-                  </div>
-                  </div>
-                  </>
-                }
-
-
-                </div>
                 </div>
               </div>
             </div>
