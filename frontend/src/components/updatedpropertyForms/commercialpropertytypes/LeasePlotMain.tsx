@@ -27,7 +27,7 @@ interface FormData {
   propertyId?: string;
   basicInformation: {
     title: string;
-    Type: string[];
+    plotType: string[];
     address: {
       street: string;
       city: string;
@@ -53,29 +53,21 @@ interface FormData {
   };
 
   leaseTerms: {
-    leaseAmount: number;
-    leaseduration: {
+    leaseAmount: {
+      amount: number;
       duration: number;
-      type: string;
+      durationType: string;
       amountType: "fixed" | "negotiable";
     };
-    leasetenure: {
-      minimumTenure: {
-        duration: number;
-        type: string;
-      };
-      maximumTenure: {
-        duration: number;
-        type: string;
-      };
-      lockInPeriod: {
-        duration: number;
-        type: string;
-      };
-      noticePeriod: {
-        duration: number;
-        type: string;
-      };
+    leaseTenure: {
+      minimumTenure: string,
+      minimumUnit: string,
+      maximumTenure: string,
+      maximumUnit: string,
+      lockInPeriod: string,
+      lockInUnit: string,
+      noticePeriod: string,
+      noticePeriodUnit: string,
     };
   }
   availability: {
@@ -93,16 +85,12 @@ interface FormData {
     phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
-    preferredContactTime?: string;
+    
   };
   media: {
     photos: {
       exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      washroom: File[];
-      lift: File[];
-      emergencyExit: File[];
+      
     };
     videoTour?: File | null;
     documents: File[];
@@ -162,7 +150,7 @@ const LeasePlotMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      Type: [],
+      plotType: [],
       address: {
         street: "",
         city: "",
@@ -189,30 +177,24 @@ const LeasePlotMain = () => {
     },
 
   leaseTerms: {
-      leaseAmount: 0,
-      leaseduration: {
+      leaseAmount: {
+        amount: 0,
         duration: 0,
-        type: "month",
+        durationType: "month",
         amountType: "fixed"
       },
-      leasetenure: {
-        minimumTenure: {
-          duration: 0,
-          type: "month"
-        },
-        maximumTenure: {
-          duration: 0,
-          type: "month"
-        },
-        lockInPeriod: {
-          duration: 0,
-          type: "month"
-        },
-        noticePeriod: {
-          duration: 0,
-          type: "month"
-        }
-      }
+      leaseTenure: {
+        minimumTenure: "",
+        minimumUnit: "",
+        maximumTenure: "",
+        maximumUnit: "",
+        lockInPeriod: "",
+        lockInUnit: "",
+        noticePeriod: "",
+        noticePeriodUnit: "",
+      },
+      
+      
     },
     availability: {
       availableFrom: new Date(),
@@ -228,17 +210,12 @@ const LeasePlotMain = () => {
       email: "",
       phone: "",
       alternatePhone: "",
-      bestTimeToContact: "",
-      preferredContactTime: ""
+      bestTimeToContact: ""
     },
     media: {
       photos: {
         exterior: [],
-        interior: [],
-        floorPlan: [],
-        washroom: [],
-        lift: [],
-        emergencyExit: []
+        
       },
       videoTour: null,
       documents: []
@@ -278,16 +255,19 @@ const LeasePlotMain = () => {
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
-          <PlotType onPlotTypeChange={(Type) => handleChange('basicInformation.type', Type)} />
+          <PlotType onPlotTypeChange={(Type) => handleChange('basicInformation.plotType', Type)} />
           <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} address={formData.basicInformation.address}
             
           />
           <MapLocation
             latitude={formData.basicInformation.location.latitude}
             longitude={formData.basicInformation.location.longitude}
+            landmark={formData.basicInformation.landmark}
             onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            landmark={formData.basicInformation.landmark}/>
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+            />
+
           <CornerProperty
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} isCornerProperty={false}          />
         </div>
@@ -368,36 +348,13 @@ const LeasePlotMain = () => {
             <LeaseAmount
               onLeaseAmountChange={(amount) => handleChange('leaseTerms', {
                 ...formData.leaseTerms,
-                leaseAmount: amount.leaseAmount,
-                leaseduration: {
-                  ...formData.leaseTerms.leaseduration,
-                  duration: amount.leaseTenure || 0,
-                  type: amount.leaseTermType || 'month',
-                  amountType: 'fixed'
-                }
+                leaseAmount: amount
               })}
             />
             <LeaseTenure
               onLeaseTenureChange={(tenure) => handleChange('leaseTerms', {
                 ...formData.leaseTerms,
-                leasetenure: {
-                  minimumTenure: {
-                    duration: tenure.minimumTenure.duration || 0,
-                    type: tenure.minimumTenure.durationType || 'month'
-                  },
-                  maximumTenure: {
-                    duration: tenure.maximumTenure.duration || 0,
-                    type: tenure.maximumTenure.durationType || 'month'
-                  },
-                  lockInPeriod: {
-                    duration: tenure.lockInPeriod.duration || 0,
-                    type: tenure.lockInPeriod.durationType || 'month'
-                  },
-                  noticePeriod: {
-                    duration: tenure.noticePeriod.duration || 1,
-                    type: tenure.noticePeriod.durationType || 'month'
-                  }
-                }
+                leaseTenure: tenure
               })}
             />
           </div>
@@ -420,8 +377,8 @@ const LeasePlotMain = () => {
             name: "",
             phone: "",
             email: "",
-            alternatePhone: undefined,
-            bestTimeToContact: undefined
+            alternatePhone: "",
+            bestTimeToContact: ""
           }}          />
       ),
     },
@@ -497,7 +454,7 @@ const LeasePlotMain = () => {
 
     // Check basic information
     if (!formData.basicInformation.title) errors.push("Property name");
-          if (!formData.basicInformation.Type || formData.basicInformation.Type.length === 0) errors.push("Plot type");
+          if (!formData.basicInformation.plotType || formData.basicInformation.plotType.length === 0) errors.push("Plot type");
     if (!formData.basicInformation.landmark) errors.push("Landmark");
 
     // Check address
@@ -523,7 +480,7 @@ const LeasePlotMain = () => {
     if (!formData.plotDetails.previousConstruction) errors.push("Previous construction");
 
     // Check lease details
-    if (formData.leaseTerms.leaseAmount <= 0) errors.push("Lease amount");
+    if (formData.leaseTerms.leaseAmount.amount <= 0) errors.push("Lease amount");
 
     // Check contact information
     if (!formData.contactInformation.name) errors.push("Contact name");
@@ -610,7 +567,7 @@ const LeasePlotMain = () => {
       const updatedFormData = {
         basicInformation: {
           title: formData.basicInformation.title,
-          Type: formData.basicInformation.Type,
+          plotType: formData.basicInformation.plotType,
           address: formData.basicInformation.address,
           landmark: formData.basicInformation.landmark,
           location:safelocation,
@@ -628,28 +585,21 @@ const LeasePlotMain = () => {
         },
         
         leaseTerms: {
-          leaseAmount: formData.leaseTerms.leaseAmount || 0,
-          leaseduration: {
-            duration: formData.leaseTerms.leaseduration.duration || 0,
-            type: formData.leaseTerms.leaseduration.type || "month",
+          leaseAmount: {
+            amount: formData.leaseTerms.leaseAmount.amount || 0,
+            duration: formData.leaseTerms.leaseAmount.duration || 0,
+            durationType: formData.leaseTerms.leaseAmount.durationType || "month",
+            amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
           },
-          leasetenure: {
-            minimumTenure: {
-              duration: formData.leaseTerms.leasetenure.minimumTenure.duration || 0,
-              type: formData.leaseTerms.leasetenure.minimumTenure.type || "month"
-            },
-            maximumTenure: {
-              duration: formData.leaseTerms.leasetenure.maximumTenure.duration || 0,
-              type: formData.leaseTerms.leasetenure.maximumTenure.type || "month"
-            },
-            lockInPeriod: {
-              duration: formData.leaseTerms.leasetenure.lockInPeriod.duration || 0,
-              type: formData.leaseTerms.leasetenure.lockInPeriod.type || "month"
-            },
-            noticePeriod: {
-              duration: formData.leaseTerms.leasetenure.noticePeriod.duration || 0,
-              type: formData.leaseTerms.leasetenure.noticePeriod.type || "month"
-            }
+          leaseTenure: {
+            minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure ||"",
+            minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
+            maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
+            maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
+            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
+            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
+            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
+            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
           },
           
         },
@@ -668,7 +618,6 @@ const LeasePlotMain = () => {
           email: formData.contactInformation.email || "",
           phone: formData.contactInformation.phone || "",
           alternatePhone: formData.contactInformation.alternatePhone || "",
-          preferredContactTime: formData.contactInformation.preferredContactTime || "",
           bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
         }
       };
@@ -680,11 +629,6 @@ const LeasePlotMain = () => {
       const convertedMedia = {
         photos: {
           exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washroom: await Promise.all((formData.media?.photos?.washroom ?? []).map(convertFileToBase64)),
-          lift: await Promise.all((formData.media?.photos?.lift ?? []).map(convertFileToBase64)),
-          emergencyExit: await Promise.all((formData.media?.photos?.emergencyExit ?? []).map(convertFileToBase64))
         },
         videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
         documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
@@ -694,7 +638,7 @@ const LeasePlotMain = () => {
         propertyId: formData.propertyId || `CLPLOT-${Date.now().toString().slice(-8)}`,
         basicInformation: {
           title: formData.basicInformation.title || "",
-          Type: formData.basicInformation.Type || [],
+          plotType: formData.basicInformation.plotType || [],
           address: {
             street: formData.basicInformation.address.street || "",
             city: formData.basicInformation.address.city || "",
@@ -719,29 +663,21 @@ const LeasePlotMain = () => {
           previousConstruction: formData.plotDetails.previousConstruction || ""
         },
         leaseTerms: {
-          leaseAmount: formData.leaseTerms.leaseAmount || 0,
-          leaseduration: {
-            duration: formData.leaseTerms.leaseduration.duration || 0,
-            type: formData.leaseTerms.leaseduration.type || "month",
-            amountType: "fixed"
+          leaseAmount: {
+            amount: formData.leaseTerms.leaseAmount.amount || 0,
+            duration: formData.leaseTerms.leaseAmount.duration || 0,
+            durationType: formData.leaseTerms.leaseAmount.durationType || "month",
+            amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
           },
-          leasetenure: {
-            minimumTenure: {
-              duration: formData.leaseTerms.leasetenure.minimumTenure.duration || 0,
-              type: formData.leaseTerms.leasetenure.minimumTenure.type || "month"
-            },
-            maximumTenure: {
-              duration: formData.leaseTerms.leasetenure.maximumTenure.duration || 0,
-              type: formData.leaseTerms.leasetenure.maximumTenure.type || "month"
-            },
-            lockInPeriod: {
-              duration: formData.leaseTerms.leasetenure.lockInPeriod.duration || 0,
-              type: formData.leaseTerms.leasetenure.lockInPeriod.type || "month"
-            },
-            noticePeriod: {
-              duration: formData.leaseTerms.leasetenure.noticePeriod.duration || 0,
-              type: formData.leaseTerms.leasetenure.noticePeriod.type || "month"
-            }
+          leaseTenure: {
+            minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure || "",
+            minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
+            maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
+            maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
+            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
+            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
+            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
+            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
           }
         },
         availability: {
@@ -758,7 +694,6 @@ const LeasePlotMain = () => {
           email: formData.contactInformation.email || "",
           phone: formData.contactInformation.phone || "",
           alternatePhone: formData.contactInformation.alternatePhone || "",
-          preferredContactTime: formData.contactInformation.preferredContactTime || "",
           bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
         },
         media: convertedMedia,
