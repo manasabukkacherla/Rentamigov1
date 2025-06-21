@@ -1,7 +1,7 @@
 // File Path: backend/src/routes/user.ts
 
 import express, { Request, Response, NextFunction } from 'express';
-import User from '../models/user'; // Adjust the path as necessary
+import User from '../models/signup'; // Adjust the path as necessary
 // import { IUser } from '../models/user'; // Import the IUser interface if needed
 
 const router = express.Router();

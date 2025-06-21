@@ -1,0 +1,103 @@
+{
+  "propertyName": "Downtown Commercial Space",
+  "commercialType": "Mixed Use Space",
+  "address": {
+    "street": "123 Business Avenue",
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "zipCode": "400001"
+  },
+  "landmark": "Near City Central Mall",
+  "coordinates": {
+    "latitude": "19.0760",
+    "longitude": "72.8777"
+  },
+  "isCornerProperty": true,
+  "propertyDetails": {
+    "area": {
+      "totalArea": 2500,
+      "carpetArea": 2100,
+      "builtUpArea": 2300
+    },
+    "floor": {
+      "floorNumber": 3,
+      "totalFloors": 12
+    },
+    "otherDetails": {
+      "propertyTypeDescription": "Multi-purpose commercial space suitable for various business types",
+      "specialFeatures": ["High Ceiling", "Modern Architecture", "Open Floor Plan"],
+      "usageRecommendation": "Ideal for retail, office or creative studio",
+      "additionalRequirements": "Tenant responsible for interior modifications with approval"
+    },
+    "facingDirection": "East",
+    "furnishingStatus": "Semi-Furnished",
+    "propertyAmenities": ["24/7 Security", "Power Backup", "Reserved Parking", "High-Speed Internet"],
+    "wholeSpaceAmenities": ["Conference Room", "Pantry Area", "Reception Area"],
+    "waterAvailability": "24/7",
+    "propertyAge": 5,
+    "propertyCondition": "Excellent",
+    "electricitySupply": {
+      "powerLoad": 15,
+      "backup": true
+    }
+  },
+  "rent": {
+    "expectedRent": 85000,
+    "isNegotiable": true,
+    "rentType": "exclusive"
+  },
+  "securityDeposit": {
+    "amount": 250000
+  },
+  "maintenanceAmount": {
+    "amount": 5000,
+    "frequency": "monthly"
+  },
+  "otherCharges": {
+    "water": {
+      "type": "inclusive"
+    },
+    "electricity": {
+      "type": "exclusive",
+      "amount": 0
+    },
+    "gas": {
+      "type": "exclusive",
+      "amount": 0
+    },
+    "others": {
+      "type": "exclusive",
+      "amount": 2000
+    }
+  },
+  "brokerage": {
+    "required": "Yes",
+    "amount": 85000
+  },
+  "availability": {
+    "type": "immediate"
+  },
+  "contactDetails": {
+    "name": "Rajesh Kumar",
+    "email": "rajesh.kumar@example.com",
+    "phone": "9876543210",
+    "alternatePhone": "9876543211",
+    "bestTimeToContact": "10 AM to 6 PM"
+  },
+  "media": {
+    "photos": {
+      "exterior": ["https://example.com/photos/exterior1.jpg", "https://example.com/photos/exterior2.jpg"],
+      "interior": ["https://example.com/photos/interior1.jpg", "https://example.com/photos/interior2.jpg"],
+      "floorPlan": ["https://example.com/photos/floorplan.jpg"],
+      "washrooms": ["https://example.com/photos/washroom1.jpg"],
+      "lifts": ["https://example.com/photos/lift1.jpg"],
+      "emergencyExits": ["https://example.com/photos/emergency1.jpg"],
+      "others": ["https://example.com/photos/other1.jpg", "https://example.com/photos/other2.jpg"]
+    },
+    "videoTour": "https://example.com/video/property-tour.mp4",
+    "documents": ["https://example.com/docs/property-details.pdf", "https://example.com/docs/floor-plan.pdf"]
+  },
+  "metaData": {
+    "createdBy": "64f73de7b6e7d3fca91a7c67"
+  }
+} 
