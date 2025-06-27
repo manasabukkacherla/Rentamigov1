@@ -111,6 +111,7 @@ export function Dashboard() {
   const [selectedMetricIndex, setSelectedMetricIndex] = useState<number | null>(null);
   const [username, setUsername] = useState<string>('User'); // Default value
   const [role, setRole] = useState<string>(''); // Default value
+  const [objectId, setObjectId] = useState<string>('');
 
   useEffect(() => {
     // Retrieve and parse user data from sessionStorage
@@ -121,6 +122,7 @@ export function Dashboard() {
         const userData = JSON.parse(storedUser);
         if (userData.username) setUsername(userData.username);
         if (userData.role) setRole(userData.role);
+        if (userData.objectId) setObjectId(userData.objectId); // Now this will work!
 
         // ✅ Log session data to verify
         console.log("Session User Data:", userData);
@@ -129,6 +131,7 @@ export function Dashboard() {
       }
     }
   }, []);
+
   
   // Function to get a random notification from the demo list
   const getRandomNotification = () => {
@@ -301,3 +304,4 @@ export function Dashboard() {
     </div>
   );
 }
+
