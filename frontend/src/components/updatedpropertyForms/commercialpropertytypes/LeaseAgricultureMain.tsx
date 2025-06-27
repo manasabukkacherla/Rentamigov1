@@ -24,6 +24,7 @@ import axios from "axios"
 import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
+<<<<<<< HEAD
   basicInformation:{
   title: string;
   Type: string[];
@@ -44,6 +45,29 @@ interface FormData {
 
   landDetails: {
     totalArea: number;
+=======
+  basicInformation: {
+    title: string;
+    landType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    landmark: string;
+    isCornerProperty: boolean;
+    powerSupply: string;
+
+  };
+ 
+  Agriculturelanddetails: {
+    totalArea?:Number;
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
@@ -51,6 +75,7 @@ interface FormData {
     waterSource: string;
     legalClearances: boolean;
   };
+<<<<<<< HEAD
   propertyDetails: {
     area: {
       totalArea: number;
@@ -73,6 +98,11 @@ interface FormData {
       backup: boolean;
     };
   };
+=======
+
+  
+  leaseTerms: {
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
   leaseAmount: {
     amount: number;
     duration: number;
@@ -89,32 +119,9 @@ interface FormData {
     noticePeriod: string;
     noticePeriodUnit: string;
   };
-  maintenanceAmount: {
-    amount: number;
-    frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
-  };
-  otherCharges: {
-    water: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-    electricity: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-    gas: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-    others: {
-      type: "inclusive" | "exclusive";
-      amount: number;
-    };
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
+  
+};
+
   availability: {
     date: Date;
     type: string;
@@ -124,7 +131,7 @@ interface FormData {
     isPetsAllowed: boolean;
     operatingHours: boolean;
   };
-  contactDetails: {
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
@@ -134,29 +141,48 @@ interface FormData {
   media: {
     photos: {
       exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      aerial: File[];
-      soil: File[];
-      irrigation: File[];
     };
     videoTour: File | null;
     documents: File[];
+  };
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
 const LeaseAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
+<<<<<<< HEAD
     basicInformation:{
     title: '',
     Type: [],
     powerSupply: false,
     address: {
+=======
+    basicInformation: {
+      title: '',
+      landType: [] as string[],
+      powerSupply: 'Available',
+      address: {
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
       street: '',
       city: '',
       state: '',
       zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: '',
+        longitude: ''
+      },
+      isCornerProperty: false,
     },
+<<<<<<< HEAD
     landmark: '',
     location: {
       latitude: '',
@@ -166,6 +192,9 @@ const LeaseAgricultureMain = () => {
   },
   
     landDetails: {
+=======
+    Agriculturelanddetails: {
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
       totalArea: 0,
       soilType: '',
       irrigation: false,
@@ -174,6 +203,7 @@ const LeaseAgricultureMain = () => {
       waterSource: '',
       legalClearances: false
     },
+<<<<<<< HEAD
     propertyDetails: {
       area: {
         totalArea: 0,
@@ -196,6 +226,9 @@ const LeaseAgricultureMain = () => {
         backup: false
       }
     },
+=======
+    leaseTerms: {
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
     leaseAmount: {
       amount: 0,
       duration: 0,
@@ -212,32 +245,10 @@ const LeaseAgricultureMain = () => {
       noticePeriod: '',
       noticePeriodUnit: 'months'
     },
-    maintenanceAmount: {
-      amount: 0,
-      frequency: 'monthly'
-    },
-    otherCharges: {
-      water: {
-        type: 'inclusive',
-        amount: 0
-      },
-      electricity: {
-        type: 'inclusive',
-        amount: 0
-      },
-      gas: {
-        type: 'inclusive',
-        amount: 0
-      },
-      others: {
-        type: 'inclusive',
-        amount: 0
-      }
-    },
-    brokerage: {
-      required: "no",
-      amount: 0
-    },
+    
+
+  },
+    
     availability: {
       date: new Date(),
       type: '',
@@ -247,7 +258,7 @@ const LeaseAgricultureMain = () => {
       isPetsAllowed: false,
       operatingHours: false,
     },
-    contactDetails: {
+    contactInformation: {
       name: '',
       email: '',
       phone: '',
@@ -257,15 +268,13 @@ const LeaseAgricultureMain = () => {
     media: {
       photos: {
         exterior: [],
-        interior: [],
-        floorPlan: [],
-        aerial: [],
-        soil: [],
-        irrigation: []
       },
       videoTour: null,
-      documents: []
-    }
+        documents: []
+      },
+     
+      
+    
   });
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -274,10 +283,13 @@ const LeaseAgricultureMain = () => {
   const formRef = useRef<HTMLDivElement>(null);
 
   // Adapter function to convert from component output to FormData structure
+  const handleLandTypeChange = (types: string[]) => {
+    setFormData(prev => ({ ...prev, landType: types }));
+  };
   const handleLeaseTenureChange = (tenure: any) => {
     setFormData(prev => ({
       ...prev,
-      leaseTenure: {
+        leaseTenure: {
         minimumTenure: String(tenure.minimumTenure?.duration || ''),
         minimumUnit: tenure.minimumTenure?.durationType || 'months',
         maximumTenure: String(tenure.maximumTenure?.duration || ''),
@@ -287,7 +299,8 @@ const LeaseAgricultureMain = () => {
         noticePeriod: String(tenure.noticePeriod?.duration || ''),
         noticePeriodUnit: tenure.noticePeriod?.durationType || 'months'
       }
-    }));
+    }
+    ));
   };
 
   const steps = [
@@ -301,12 +314,17 @@ const LeaseAgricultureMain = () => {
                 propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
+<<<<<<< HEAD
                   basicInformation:{
+=======
+                  basicInformation: {
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
                     ...prev.basicInformation,
                     title: name
                   }
                 }))}
               />
+<<<<<<< HEAD
               <AgriculturalLandType
                 onLandTypeChange={(types: string[]) => setFormData(prev => ({
                   ...prev,
@@ -315,6 +333,11 @@ const LeaseAgricultureMain = () => {
                     Type: types
                   }
                 }))}
+=======
+              
+              <AgriculturalLandType onLandTypeChange={handleLandTypeChange}
+                
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
               />
             </div>
 
@@ -323,9 +346,15 @@ const LeaseAgricultureMain = () => {
                 address={formData.basicInformation.address}
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
+<<<<<<< HEAD
                   basicInformation:{
                     ...prev.basicInformation,
                     address
+=======
+                  basicInformation: {
+                    ...prev.basicInformation,
+                    address: address
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
                   }
                 }))}
               />
@@ -333,20 +362,32 @@ const LeaseAgricultureMain = () => {
                 latitude={formData.basicInformation.location.latitude}
                 longitude={formData.basicInformation.location.longitude}
                 landmark={formData.basicInformation.landmark}
+<<<<<<< HEAD
                 onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation:{...prev.basicInformation,location} }))}
                 onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation:{...prev.basicInformation,address} }))}
                 onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation:{...prev.basicInformation,landmark} }))}
+=======
+                onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
+                onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
+                onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
               />
               <CornerProperty
                 isCornerProperty={formData.basicInformation.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
+<<<<<<< HEAD
                   basicInformation:{
                     ...prev.basicInformation,
                     isCornerProperty: isCorner
                   }
+=======
+                  basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
                 }))}
               />
+              
+            
             </div>
           </div>
       ),
@@ -357,25 +398,14 @@ const LeaseAgricultureMain = () => {
       component: (
         <div className="space-y-6">
             <AgriculturalLandDetails
-              onDetailsChange={(details) => setFormData(prev => ({
+             onDetailsChange={(details) =>
+              setFormData(prev => ({
                 ...prev,
-                landDetails: { ...prev.landDetails, ...details }
-              }))}
+                Agriculturelanddetails: { ...prev.Agriculturelanddetails, ...details }
+              }))
+            }
             />
-            {/* <CommercialPropertyDetails
-              onDetailsChange={(details) => setFormData(prev => ({
-                ...prev,
-                propertyDetails: {
-                  ...prev.propertyDetails,
-                  ...details,
-                  propertyAge: details.propertyAge ?? 0,
-                  electricitySupply: {
-                    ...prev.propertyDetails.electricitySupply,
-                    powerLoad: details.electricitySupply?.powerLoad ?? 0
-                  }
-                }
-              }))}
-            /> */}
+           
           </div>
       ),
     },
@@ -388,11 +418,14 @@ const LeaseAgricultureMain = () => {
                 <LeaseAmount
                   onLeaseAmountChange={(amount) => setFormData(prev => ({
                     ...prev,
-                    leaseAmount: { ...prev.leaseAmount, ...amount }
+                    leaseTerms: { ...prev.leaseTerms, leaseAmount: { ...prev.leaseTerms.leaseAmount, ...amount } }
                   }))}
                 />
                 <LeaseTenure
-                  onLeaseTenureChange={handleLeaseTenureChange}
+                  onLeaseTenureChange={(tenure) => setFormData(prev => ({
+                    ...prev,
+                    leaseTerms: { ...prev.leaseTerms, leaseTenure: { ...prev.leaseTerms.leaseTenure, ...tenure } }
+                  }))}
                 />
               </div>
             </div>
@@ -418,10 +451,10 @@ const LeaseAgricultureMain = () => {
       component: (
         <div className="space-y-6">
             <CommercialContactDetails
-              contactInformation={formData.contactDetails}
+              contactInformation={formData.contactInformation}
               onContactChange={(contact) => setFormData(prev => ({
                 ...prev,
-                contactDetails: { ...prev.contactDetails, ...contact }
+                contactInformation: { ...prev.contactInformation, ...contact }
               }))}
             />
           </div>
@@ -445,10 +478,9 @@ const LeaseAgricultureMain = () => {
                     ...prev.media,
                     photos: {
                       ...prev.media.photos,
-                      ...photos
+                      exterior: photos.exterior || [],
                     },
-                    videoTour: media.video?.file || null,
-                    documents: media.documents.map(d => d.file)
+                   
                   }
                 }));
               }}
@@ -479,17 +511,16 @@ const LeaseAgricultureMain = () => {
         const convertedMedia = {
           photos: {
             exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            aerial: await Promise.all((formData.media?.photos?.aerial ?? []).map(convertFileToBase64)),
-            soil: await Promise.all((formData.media?.photos?.soil ?? []).map(convertFileToBase64)),
-            irrigation: await Promise.all((formData.media?.photos?.irrigation ?? []).map(convertFileToBase64))
           },
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+<<<<<<< HEAD
         const metaData = {
+=======
+        const metadata = {
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
           createdBy: author,
           createdAt: new Date(),
           propertyType: 'Commercial',
@@ -500,6 +531,7 @@ const LeaseAgricultureMain = () => {
 
         const transformedData = {
           ...formData,
+<<<<<<< HEAD
           media: convertedMedia,
           metaData:{
             ...metaData,
@@ -510,6 +542,76 @@ const LeaseAgricultureMain = () => {
             intent: 'Lease',
             status: 'Available',
           }
+=======
+      basicInformation:{
+        ...formData.basicInformation,
+        title: formData.basicInformation.title,
+        landType: formData.basicInformation.landType,
+        address: {
+          street: formData.basicInformation.address.street,
+          city: formData.basicInformation.address.city,
+          state: formData.basicInformation.address.state,
+          zipCode: formData.basicInformation.address.zipCode
+        },
+        landmark: formData.basicInformation.landmark,
+        location: {
+          latitude: formData.basicInformation.location.latitude,
+          longitude: formData.basicInformation.location.longitude
+        },
+        isCornerProperty: formData.basicInformation.isCornerProperty,
+      },
+      Agriculturelanddetails:{
+        ...formData.Agriculturelanddetails,
+        totalArea: formData.Agriculturelanddetails.totalArea,
+        soilType: formData.Agriculturelanddetails.soilType,
+        irrigation: formData.Agriculturelanddetails.irrigation,
+        fencing: formData.Agriculturelanddetails.fencing,
+        cropSuitability: formData.Agriculturelanddetails.cropSuitability,
+        waterSource: formData.Agriculturelanddetails.waterSource,
+        legalClearances: formData.Agriculturelanddetails.legalClearances
+      },
+      leaseTerms:{
+        ...formData.leaseTerms,
+        leaseAmount: {
+          amount: formData.leaseTerms.leaseAmount.amount,
+          duration: formData.leaseTerms.leaseAmount.duration,
+          durationType: formData.leaseTerms.leaseAmount.durationType,
+          isNegotiable: formData.leaseTerms.leaseAmount.isNegotiable
+        },
+        leaseTenure: {
+          minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure,
+          minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit,
+          maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure,
+          maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit,
+          lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod,
+          lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit,
+          noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod,
+          noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit
+        }
+      },
+      availability:{
+        ...formData.availability,
+        availableFrom: formData.availability.availableFrom,
+        availableImmediately: formData.availability.availableImmediately,
+        availabilityStatus: formData.availability.availabilityStatus,
+        leaseDuration: formData.availability.leaseDuration,
+        noticePeriod: formData.availability.noticePeriod,
+        isPetsAllowed: formData.availability.isPetsAllowed,
+        operatingHours: formData.availability.operatingHours
+      },
+      contactInformation:{
+        ...formData.contactInformation,
+        name: formData.contactInformation.name,
+        email: formData.contactInformation.email,
+        phone: formData.contactInformation.phone,
+        alternatePhone: formData.contactInformation.alternatePhone,
+        bestTimeToContact: formData.contactInformation.bestTimeToContact
+      },
+      media:convertedMedia,
+      metadata: metadata
+      
+
+>>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
         };
 
         const response = await axios.post('/api/commercial/lease/agriculture', transformedData, {

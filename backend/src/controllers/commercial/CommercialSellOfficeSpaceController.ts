@@ -72,7 +72,7 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
             propertyId,
             basicInformation: {
                 title: formData.basicInformation?.title || "Office Space for Sale",
-                officeType: formData.basicInformation?.officeType || ["commercial"],
+                Type: formData.basicInformation?.Type || [], 
                 address: {
                     street: formData.basicInformation?.address?.street || "",
                     city: formData.basicInformation?.address?.city || "",
@@ -121,14 +121,14 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
                 propertyAge: parseInt(formData.propertyDetails?.propertyAge) || 0,
                 propertyCondition: formData.propertyDetails?.propertyCondition || "new"
             },
-            price: {
-                expectedPrice: parseInt(formData.price?.expectedPrice) || 0,
-                isNegotiable: formData.price?.isNegotiable || false
+            pricingDetails: {
+                propertyPrice: parseInt(formData.pricingDetails?.propertyPrice) || 0, // Ensure correct mapping from frontend
+                pricetype: formData.pricingDetails?.pricetype || 'fixed'
             },
-            registrationCharges: {
-                included: formData.registrationCharges?.included || false,
-                amount: parseInt(formData.registrationCharges?.amount) || 0,
-                stampDuty: parseInt(formData.registrationCharges?.stampDuty) || 0
+            registration: {
+                chargestype: formData.registrationCharges?.chargestype || 'inclusive',
+                registrationAmount: parseInt(formData.registrationCharges?.registrationAmount) || 0,
+                stampDutyAmount: parseInt(formData.registrationCharges?.stampDutyAmount) || 0
             },
             brokerage: {
                 required: formData.brokerage?.required || "no",
@@ -158,8 +158,8 @@ export const createSellOfficeSpace = async (req: Request, res: Response) => {
                 documents: formData.media?.documents || []
             },
             metadata: {
-                ...(formData.metadata || {}),
-                createdBy: req.user?._id || (formData.metadata?.createdBy ?? null),
+                ...formData.metadata,
+                createdBy:formData.metadata.createdBy,
                 createdAt: new Date()
             }
         };
@@ -215,6 +215,7 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
       }
       
       res.status(200).json({
+        success: true,
         message: 'Commercial sell office space property retrieved successfully',
         data: property
       });

@@ -82,14 +82,14 @@ interface FormData {
       backup: boolean;
     };
   };
-  price: {
-    expectedPrice: number;
-    isNegotiable: boolean;
+  pricingDetails: {
+    propertyPrice: number;
+    pricetype: "fixed" | "negotiable";
   };
-  registrationCharges: {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
+  registration: {
+    chargestype: 'inclusive' | 'exclusive',
+    registrationAmount?: number,
+    stampDutyAmount?: number
   };
   brokerage: {
     required: string;
@@ -179,12 +179,14 @@ const SellOthersMain = () => {
         backup: false
       }
     },
-    price: {
-      expectedPrice: 0,
-      isNegotiable: false
+    pricingDetails: {
+      propertyPrice: 0,
+      pricetype: "fixed"
     },
-    registrationCharges: {
-      included: false
+    registration: {
+      chargestype: 'inclusive',
+      registrationAmount: 0,
+      stampDutyAmount: 0
     },
     brokerage: {
       required: "No",
@@ -325,9 +327,9 @@ const SellOthersMain = () => {
             <Price onPriceChange={(price) =>
               setFormData((prev) => ({
                 ...prev,
-                price: {
-                  expectedPrice: parseFloat(price.propertyPrice.toString()),
-                  isNegotiable: price.pricetype === 'negotiable'
+                pricingDetails: {
+                  propertyPrice: parseFloat(price.propertyPrice.toString()),
+                  pricetype: price.pricetype
                 }
               }))
             } />
@@ -338,10 +340,10 @@ const SellOthersMain = () => {
               onRegistrationChargesChange={(charges) =>
                 setFormData((prev) => ({
                   ...prev,
-                  registrationCharges: {
-                    included: charges.included,
-                    amount: charges.amount,
-                    stampDuty: charges.stampDuty
+                  registration: {
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount
                   }
                 }))
               }
@@ -507,7 +509,7 @@ const SellOthersMain = () => {
       const user = sessionStorage.getItem('user');
       if (!user) {
         toast.error('You must be logged in to create a property listing');
-        // navigate('/login');
+        setIsSubmitting(false);
         return;
       }
 
@@ -530,19 +532,10 @@ const SellOthersMain = () => {
 
       // Create payload matching the backend model structure
       const transformedData = {
-        basicInformation: formData.basicInformation,
-        propertyDetails: formData.propertyDetails,
-        price: formData.price,
-        registrationCharges: formData.registrationCharges,
-        brokerage: formData.brokerage,
-        availability: formData.availability,
-        petsAllowed: formData.petsAllowed,
-        operatingHoursRestrictions: formData.operatingHoursRestrictions,
-        contactDetails: formData.contactDetails,
+        ...formData,
         media: convertedMedia,
-        metaData: {
+        metadata: {
           createdBy: author,
-          createdAt: new Date(),
           propertyType: 'Commercial',
           propertyName: 'Other',
           intent: 'Sell',

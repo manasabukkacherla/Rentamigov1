@@ -36,7 +36,7 @@ interface IBasicInformation {
     city: string;
     state: string;
     zipCode: string;
-  };
+  }
   landmark: string;
   location: {
     latitude: string;

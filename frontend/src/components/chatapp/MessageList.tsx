@@ -120,68 +120,72 @@ const MessageList: React.FC<MessageListProps> = ({
 
             {dateMessages.map((msg, index) => {
               const isCurrentUser = msg.senderId === currentUserId;
-const isBot = msg.senderId === "bot";
-
-return (
-  <div
-    key={index}
-    style={{
-      display: "flex",
-      justifyContent: isCurrentUser ? "flex-end" : "flex-start",
-      marginBottom: "8px",
-    }}
-  >
-    <div
-      style={{
-        maxWidth: "70%",
-        padding: "12px 16px",
-        borderRadius: isCurrentUser
-          ? "18px 18px 4px 18px"
-          : isBot
-          ? "18px"
-          : "18px 18px 18px 4px",
-        backgroundColor: isCurrentUser
-          ? "#0084ff"
-          : isBot
-          ? "#fff9c4" // light yellow
-          : "#ffffff",
-        color: isCurrentUser ? "#ffffff" : "#000000",
-        boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
-        position: "relative",
-      }}
-    >
-      <div style={{ wordBreak: "break-word" }}>{msg.text}</div>
-      {msg.createdAt && (
-        <div
-          style={{
-            fontSize: "0.7rem",
-            color: isCurrentUser
-              ? "rgba(255, 255, 255, 0.7)"
-              : "#999",
-            marginTop: "4px",
-            textAlign: "right",
-          }}
-        >
-          {formatTime(msg.createdAt)}
-        </div>
-      )}
-      {isCurrentUser && (
-        <div
-          style={{
-            position: "absolute",
-            bottom: "-16px",
-            right: "4px",
-            fontSize: "0.7rem",
-            color: "#0084ff",
-          }}
-        >
-          {msg.read ? "Read" : "Sent"}
-        </div>
-      )}
-    </div>
-  </div>
-);
-
+              return (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    justifyContent: isCurrentUser ? "flex-end" : "flex-start",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      maxWidth: "70%",
+                      padding: "12px 16px",
+                      borderRadius: isCurrentUser
+                        ? "18px 18px 4px 18px"
+                        : "18px 18px 18px 4px",
+                      backgroundColor: isCurrentUser ? "#0084ff" : "#ffffff",
+                      color: isCurrentUser ? "#ffffff" : "#000000",
+                      boxShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
+                      position: "relative",
+                    }}
+                  >
+                    <div style={{ wordBreak: "break-word" }}>{msg.text}</div>
+                    {msg.createdAt && (
+                      <div
+                        style={{
+                          fontSize: "0.7rem",
+                          color: isCurrentUser
+                            ? "rgba(255, 255, 255, 0.7)"
+                            : "#999",
+                          marginTop: "4px",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatTime(msg.createdAt)}
+                      </div>
+                    )}
+                    {!msg.read && isCurrentUser && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "-16px",
+                          right: "4px",
+                          fontSize: "0.7rem",
+                          color: "#0084ff",
+                        }}
+                      >
+                        Sent
+                      </div>
+                    )}
+                    {msg.read && isCurrentUser && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "-16px",
+                          right: "4px",
+                          fontSize: "0.7rem",
+                          color: "#0084ff",
+                        }}
+                      >
+                        Read
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
             })}
           </div>
         ))

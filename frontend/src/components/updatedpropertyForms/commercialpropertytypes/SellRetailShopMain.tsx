@@ -20,6 +20,7 @@ import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon,
 import axios from "axios"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
+import PriceDetails from "../CommercialComponents/PriceDetails"
 // interface MediaFile {
 //   url: string;
 //   file: File;
@@ -85,11 +86,11 @@ interface FormDataState {
     possessionStatus: string;
   };
   priceDetails: {
-    price: number;
-    pricetype: "fixed" | "negotiable";
+    propertyPrice: number;
+    pricetype: string;
   };
-    registrationCharges: {
-      type: "inclusive" | "exclusive";
+    registration: {
+      chargestype: string;
       registrationAmount?: number;
       stampDutyAmount?: number;
   };
@@ -183,13 +184,14 @@ const SellRetailShopMain = () => {
       possessionStatus: 'Ready to Move'
     },
     priceDetails: {
-      price: 0,
+      propertyPrice: 0,
       pricetype: 'fixed',
     },
-    registrationCharges: {
+    registration: {
+      chargestype: 'inclusive',
       registrationAmount: 0,
       stampDutyAmount: 0,
-      type: 'inclusive',
+      
     },
     brokerage: {
       required: 'No',
@@ -341,13 +343,12 @@ const SellRetailShopMain = () => {
       component: (
         <div className="space-y-6">
           <div className="space-y-4 text-black">
-    <Price onPriceChange={(price) => setFormData(prev => ({
-        ...prev,
-    priceDetails: {
-      ...prev.priceDetails,
-      price: price.amount !== undefined && price.amount !== null && price.amount !== '' && !isNaN(Number(price.amount))
-        ? Number(price.amount)
-        : prev.priceDetails.price 
+        <Price onPriceChange={(price) => setFormData(prev => ({
+           ...prev,
+          priceDetails: {
+            ...prev.priceDetails,
+            propertyPrice:price.propertyPrice,
+            pricetype: price.pricetype || 'fixed'
   }
 }))} />
           </div>
@@ -356,15 +357,15 @@ const SellRetailShopMain = () => {
           <div className="space-y-4 text-black">
             <div className="text-black">
               <RegistrationCharges
-                onRegistrationChargesChange={(charges) => setFormData({
-                  ...formData,
-                    registrationCharges: {
-                      type: charges.type || 'inclusive',
-                      registrationAmount: parseFloat(charges.registrationAmount?.toString() || '0'),
-                      stampDutyAmount: parseFloat(charges.stampDutyAmount?.toString() || '0'),
-                    }
-                })}
-              />
+                onRegistrationChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    ...prev.registration,
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
+                  }
+                }))} />  
             </div>
             <div className="text-black">
               <Brokerage 
@@ -513,7 +514,7 @@ const SellRetailShopMain = () => {
         return !!formData.retailStoreDetails.location &&
           formData.propertyDetails.area.totalArea > 0;
       case 2: // Pricing Details
-        return formData.priceDetails.price > 0;
+        return formData.priceDetails.propertyPrice > 0;
       case 3: // Availability
         return !!formData.availability.type;
       case 4: // Contact Information
@@ -527,7 +528,7 @@ const SellRetailShopMain = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     // Debug: log price before validation
-    console.log('DEBUG price before validation:', formData.priceDetails.price);
+    console.log('DEBUG price before validation:', formData.priceDetails.propertyPrice);
     e.preventDefault();
     console.log('Form Data:', formData);
 
@@ -576,15 +577,6 @@ const SellRetailShopMain = () => {
       console.log('Sending data to backend with author ID:', author);
 
       const transformedData = {
-  priceDetails: {
-    price: formData.priceDetails.price,
-    pricetype: formData.priceDetails.pricetype
-  },
-  registrationCharges: {
-    type: formData.registrationCharges.type,
-    registrationAmount: formData.registrationCharges.registrationAmount,
-    stampDutyAmount: formData.registrationCharges.stampDutyAmount
-  },
         basicInformation: {
           ...formData.basicInformation,
           Type: Array.isArray(formData.basicInformation.Type)
@@ -654,9 +646,17 @@ const SellRetailShopMain = () => {
             backup: formData.propertyDetails.electricitySupply.backup
           },
           waterAvailability: formData.propertyDetails.waterAvailability,
-          registrationAmount: formData.registrationCharges.registrationAmount ? parseFloat(formData.registrationCharges.registrationAmount.toString()) : undefined,
-          stampDutyAmount: formData.registrationCharges.stampDutyAmount ? parseFloat(formData.registrationCharges.stampDutyAmount.toString()) : undefined,
         },
+          priceDetails: {
+            propertyPrice: parseFloat(formData.priceDetails.propertyPrice.toString()),
+            pricetype: formData.priceDetails.pricetype=='fixed'?'fixed':'negotiable'
+          },
+          registration: {
+            chargestype: formData.registration.chargestype=='inclusive'?'inclusive':'exclusive',
+            registrationAmount: formData.registration.registrationAmount ? parseFloat(formData.registration.registrationAmount.toString()) : 0,
+            stampDutyAmount: formData.registration.stampDutyAmount ? parseFloat(formData.registration.stampDutyAmount.toString()) : 0,
+          },
+        
           brokerage: {
             required: formData.brokerage.required === "Yes" ? "Yes" : "No",
             amount: formData.brokerage.amount ? parseFloat(formData.brokerage.amount.toString()) : undefined
@@ -694,9 +694,7 @@ const SellRetailShopMain = () => {
       });
 
       console.log('Sending transformedData:', JSON.stringify(transformedData, null, 2));
-console.log('registrationCharges.type:', formData.registrationCharges.type);
-console.log('metadata:', transformedData.metadata);
-const response = await axios.post(API_ENDPOINT, transformedData, {
+       const response = await axios.post(API_ENDPOINT, transformedData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token ? `Bearer ${token}` : ''
@@ -708,7 +706,7 @@ const response = await axios.post(API_ENDPOINT, transformedData, {
       if (response.data.success) {
         toast.success('Commercial sell retail shop listing created successfully!');
         setTimeout(() => {
-          navigate('/updatedPropertyform');
+          navigate('/updatePropertyform');
         }, 1500);
       } else {
         toast.error(response.data.error || 'Failed to create listing');

@@ -276,10 +276,9 @@ const App = () => {
 <Route path="/updatepropertyform/:propertyId" element={<Pgmain />} />
 
                 {/* agriplot routes*/}
-                <Route path="/agriplot" element={<Agriplot />} />
+                <Route path="/agriplot/:id" element={<Agriplot />} />
 
-                {/* Agriplot route */}
-                <Route path="/agriplot" element={<Agriplot />} />
+                
                 {/* propdetailspage*/}
                 <Route path="/detailprop/:id" element={<Propdetail />} />
                 {/*Emp das*/}
