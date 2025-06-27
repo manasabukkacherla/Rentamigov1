@@ -45,7 +45,7 @@ interface Address {
 }
 
 interface BasicInformation {
-  propertyName: string;
+  title: string;
   propertyAddress: Address;
 }
 
@@ -162,6 +162,7 @@ interface LeaseAmount {
   durationUnit: string;
 }
 
+
 interface TenureDetails {
   minimumTenure: number;
   minimumUnit: string;
@@ -223,6 +224,10 @@ interface FormData {
   metadata?: {
     createdBy: string;
     createdAt: string;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
 
@@ -291,7 +296,7 @@ const LeaseIndependentHouse: React.FC = () => {
 
   const initialFormData: FormData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
       propertyAddress: {
         houseName: "",
         street: "",
@@ -455,6 +460,14 @@ const LeaseIndependentHouse: React.FC = () => {
         kitchen: []
       },
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date().toISOString(),
+      propertyType: "Residential",
+      propertyName: "Independent House",
+      intent: "Lease",
+      status: "Available"
     }
   };
 
@@ -494,8 +507,8 @@ const LeaseIndependentHouse: React.FC = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
           />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -845,7 +858,11 @@ const LeaseIndependentHouse: React.FC = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: "Residential",
+            propertyName: "Independent House",
+            intent: "Lease",
+            status: "Available"
           }
         };
 

@@ -38,7 +38,7 @@ interface Address {
 }
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: Address;
 }
 
@@ -177,6 +177,15 @@ interface RentDetails {
   rentType: string;
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
+}
+
 interface FormData {
   basicInformation: IBasicInformation;
   propertySize: number;
@@ -226,6 +235,7 @@ interface FormData {
     date: string;
   };
   media: IMedia;
+  metadata: IMetadata;
 }
 
 interface SharedSpaceProps {
@@ -244,7 +254,7 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
 
   const initialFormData: FormData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -408,6 +418,14 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
       },
       videoTour: undefined,
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Shared Space",
+      intent: "Rent",
+      status: "active"
     }
   };
 
@@ -437,11 +455,11 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.basicInformation.propertyName}
+            propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name) =>
               setFormData((prev) => ({
                 ...prev,
-                basicInformation: { ...prev.basicInformation, propertyName: name }
+                basicInformation: { ...prev.basicInformation, title: name }
               }))
             }
           />
@@ -763,7 +781,11 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Shared Space",
+          intent: "Rent",
+          status: "active"
         }
       };
 

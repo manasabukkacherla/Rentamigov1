@@ -39,7 +39,7 @@ interface Address {
 }
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -206,7 +206,7 @@ const Apartment = () => {
 
   const initialFormData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -340,7 +340,7 @@ const Apartment = () => {
   }
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -528,8 +528,8 @@ const Apartment = () => {
       content: (
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
           />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
