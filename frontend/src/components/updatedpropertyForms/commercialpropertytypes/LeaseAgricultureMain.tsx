@@ -24,28 +24,6 @@ import axios from "axios"
 import MapLocation from "../CommercialComponents/MapLocation"
 
 interface FormData {
-<<<<<<< HEAD
-  basicInformation:{
-  title: string;
-  Type: string[];
-  powerSupply: boolean;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
-};
-
-  landDetails: {
-    totalArea: number;
-=======
   basicInformation: {
     title: string;
     landType: string[];
@@ -67,7 +45,6 @@ interface FormData {
  
   Agriculturelanddetails: {
     totalArea?:Number;
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
@@ -75,34 +52,9 @@ interface FormData {
     waterSource: string;
     legalClearances: boolean;
   };
-<<<<<<< HEAD
-  propertyDetails: {
-    area: {
-      totalArea: number;
-      carpetArea: number;
-      builtUpArea: number;
-    };
-    floor: {
-      floorNumber: number;
-      totalFloors: number;
-    };
-    facingDirection: string;
-    furnishingStatus: string;
-    propertyAmenities: string[];
-    wholeSpaceAmenities: string[];
-    waterAvailability: string;
-    propertyAge:string;
-    propertyCondition: string;
-    electricitySupply: {
-      powerLoad: number;
-      backup: boolean;
-    };
-  };
-=======
 
   
   leaseTerms: {
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
   leaseAmount: {
     amount: number;
     duration: number;
@@ -123,8 +75,8 @@ interface FormData {
 };
 
   availability: {
-    date: Date;
-    type: string;
+    availableFrom: Date;
+    availableImmediately: boolean;
     availabilityStatus: string;
     leaseDuration: string;
     noticePeriod: string;
@@ -157,19 +109,11 @@ interface FormData {
 
 const LeaseAgricultureMain = () => {
   const [formData, setFormData] = useState<FormData>({
-<<<<<<< HEAD
-    basicInformation:{
-    title: '',
-    Type: [],
-    powerSupply: false,
-    address: {
-=======
     basicInformation: {
       title: '',
       landType: [] as string[],
       powerSupply: 'Available',
       address: {
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
       street: '',
       city: '',
       state: '',
@@ -182,19 +126,7 @@ const LeaseAgricultureMain = () => {
       },
       isCornerProperty: false,
     },
-<<<<<<< HEAD
-    landmark: '',
-    location: {
-      latitude: '',
-      longitude: ''
-    },
-    isCornerProperty: false,
-  },
-  
-    landDetails: {
-=======
     Agriculturelanddetails: {
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
       totalArea: 0,
       soilType: '',
       irrigation: false,
@@ -203,32 +135,7 @@ const LeaseAgricultureMain = () => {
       waterSource: '',
       legalClearances: false
     },
-<<<<<<< HEAD
-    propertyDetails: {
-      area: {
-        totalArea: 0,
-        carpetArea: 0,
-        builtUpArea: 0
-      },
-      floor: {
-        floorNumber: 0,
-        totalFloors: 0
-      },
-      facingDirection: '',
-      furnishingStatus: '',
-      propertyAmenities: [],
-      wholeSpaceAmenities: [],
-      waterAvailability: '',
-      propertyAge: '',  
-      propertyCondition: '',
-      electricitySupply: {
-        powerLoad: 0,
-        backup: false
-      }
-    },
-=======
     leaseTerms: {
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
     leaseAmount: {
       amount: 0,
       duration: 0,
@@ -250,8 +157,8 @@ const LeaseAgricultureMain = () => {
   },
     
     availability: {
-      date: new Date(),
-      type: '',
+      availableFrom: new Date(),
+      availableImmediately: false,
       availabilityStatus: '',
       leaseDuration: '',
       noticePeriod: '',
@@ -314,30 +221,15 @@ const LeaseAgricultureMain = () => {
                 propertyName={formData.basicInformation.title}
                 onPropertyNameChange={(name) => setFormData(prev => ({
                   ...prev,
-<<<<<<< HEAD
-                  basicInformation:{
-=======
                   basicInformation: {
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
                     ...prev.basicInformation,
                     title: name
                   }
                 }))}
               />
-<<<<<<< HEAD
-              <AgriculturalLandType
-                onLandTypeChange={(types: string[]) => setFormData(prev => ({
-                  ...prev,
-                  basicInformation:{
-                    ...prev.basicInformation,
-                    Type: types
-                  }
-                }))}
-=======
               
               <AgriculturalLandType onLandTypeChange={handleLandTypeChange}
                 
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
               />
             </div>
 
@@ -346,15 +238,9 @@ const LeaseAgricultureMain = () => {
                 address={formData.basicInformation.address}
                 onAddressChange={(address) => setFormData(prev => ({
                   ...prev,
-<<<<<<< HEAD
-                  basicInformation:{
-                    ...prev.basicInformation,
-                    address
-=======
                   basicInformation: {
                     ...prev.basicInformation,
                     address: address
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
                   }
                 }))}
               />
@@ -362,28 +248,15 @@ const LeaseAgricultureMain = () => {
                 latitude={formData.basicInformation.location.latitude}
                 longitude={formData.basicInformation.location.longitude}
                 landmark={formData.basicInformation.landmark}
-<<<<<<< HEAD
-                onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation:{...prev.basicInformation,location} }))}
-                onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation:{...prev.basicInformation,address} }))}
-                onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation:{...prev.basicInformation,landmark} }))}
-=======
                 onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
                 onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
                 onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
               />
               <CornerProperty
                 isCornerProperty={formData.basicInformation.isCornerProperty}
                 onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                   ...prev,
-<<<<<<< HEAD
-                  basicInformation:{
-                    ...prev.basicInformation,
-                    isCornerProperty: isCorner
-                  }
-=======
                   basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner }
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
                 }))}
               />
               
@@ -516,11 +389,7 @@ const LeaseAgricultureMain = () => {
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
-<<<<<<< HEAD
-        const metaData = {
-=======
         const metadata = {
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
           createdBy: author,
           createdAt: new Date(),
           propertyType: 'Commercial',
@@ -531,18 +400,6 @@ const LeaseAgricultureMain = () => {
 
         const transformedData = {
           ...formData,
-<<<<<<< HEAD
-          media: convertedMedia,
-          metaData:{
-            ...metaData,
-            createdBy: author,
-            createdAt: new Date(),
-            propertyType: 'Commercial',
-            propertyName: 'Agricultural Land',
-            intent: 'Lease',
-            status: 'Available',
-          }
-=======
       basicInformation:{
         ...formData.basicInformation,
         title: formData.basicInformation.title,
@@ -611,7 +468,6 @@ const LeaseAgricultureMain = () => {
       metadata: metadata
       
 
->>>>>>> cc290696f7a67e571f51e01c9cd0f313d6c9f70f
         };
 
         const response = await axios.post('/api/commercial/lease/agriculture', transformedData, {
