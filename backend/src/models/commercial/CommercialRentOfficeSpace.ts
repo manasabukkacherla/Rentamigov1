@@ -71,7 +71,7 @@ interface IMetadata {
 }
 
 interface IRentalTerms {
-    rent: {
+    rentDetails: {
         expectedRent: number;
         isNegotiable: boolean;
         rentType: string;
@@ -197,7 +197,7 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
         propertyCondition: { type: String }
     },
     rentalTerms: {
-        rent: {
+        rentDetails: {
             expectedRent: { type: Number, required: true },
             isNegotiable: { type: Boolean, default: false },
             rentType: { type: String, required: true },
@@ -228,13 +228,12 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
             }
         },
     },
-    
     brokerage: {
         required: { type: String, required: true },
         amount: { type: Number },
     },
     availability: {
-        type: { type: String, default:"Available" },
+        type: { type: String, required: true },
         date: { type: String },
     },
     contactInformation: {
@@ -259,11 +258,14 @@ const CommercialRentOfficeSpaceSchema = new Schema<ICommercialRentOfficeSpace>({
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
         createdAt: { type: Date, default: Date.now },
+        // propertyType: { type: String, default:'Commercial', required: true },
+        // propertyName:{type:String},
+        // intent: { type: String, default:'Rent', required: true },
         // status: { 
         //     type: String, 
         //     enum: ['available', 'rented', 'Under Maintenance'], 
         //     default: 'available' 
-        // },
+        // }
         propertyType: { type: String, default: 'Commercial' },
         intent: { type: String,default: 'Rent' },
         propertyName: { type: String,  default: 'Office Space' },

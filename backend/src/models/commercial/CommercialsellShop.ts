@@ -27,16 +27,15 @@ interface IBasicInformation {
 interface IPricingDetails {
   propertyPrice: number;
   pricetype: "fixed" | "negotiable";
-  pricecalculator: {
-    area: number;
-    totalprice: number;
-  };
+  area: number;
+  totalprice: number;
+  pricePerSqft: number;
 }
 
 interface IAvailability {
   
-  type: 'immediate' | 'specific';
-  date?: Date;
+  availableImmediately: boolean;
+  availableFrom?: Date;
   leaseDuration: string;
   noticePeriod: string;
   petsAllowed: boolean;
@@ -178,10 +177,9 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
   pricingDetails: {
     propertyPrice: { type: Number, required: true },
     pricetype: { type: String, enum: ['fixed', 'negotiable'], required: true },
-    pricecalculator: {
-      area: { type: Number, required: true },
-      totalprice: { type: Number, required: true },
-    },
+    area: { type: Number, required: true },
+    totalprice: { type: Number, required: true },
+    pricePerSqft: { type: Number, required: true },
   },
   registration: {
     chargestype: { type: String, enum: ['inclusive', 'exclusive'], required: true },
@@ -195,8 +193,8 @@ const CommercialShopSchema = new Schema<ICommercialShop>({
     amount: { type: Number, required: false }
   },
   availability: {
-    type: { type: String, enum: ['immediate', 'specific'], default: 'immediate' },
-    date: { type: Date, required: false },
+    availableFrom: { type: Date, required: false },
+    availableImmediately: { type: Boolean, required: true },
     leaseDuration: { type: String, required: true },
     noticePeriod: { type: String, required: true },
     petsAllowed: { type: Boolean, required: true },

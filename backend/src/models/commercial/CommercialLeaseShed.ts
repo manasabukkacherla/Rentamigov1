@@ -2,7 +2,7 @@ import { Schema, model, Document } from 'mongoose';
 
 interface IBasicInformation {
     title: string;
-    shedType: string[];
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -93,8 +93,8 @@ interface ILeaseTerms {
         amount?: number;
     };
     availability: {
-        date: Date;
-        type: string;
+        availableFrom: Date;
+        availableImmediately: boolean;
         leaseDuration: string;
         noticePeriod: string;
         petsAllowed: boolean;
@@ -147,99 +147,99 @@ export interface ICommercialLeaseShed extends Document {
 }
 
 const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
-    propertyId: { type: String, required: true, unique: true },
+    propertyId: { type: String, unique: true },
     basicInformation: {
-        title: { type: String, required: true },
-        shedType: [{ type: String, required: true }],
+        title: { type: String },
+        Type: [{ type: String }],
         address: {
-            street: { type: String, required: true },
-            city: { type: String, required: true },
-            state: { type: String, required: true },
-            zipCode: { type: String, required: true }
+            street: { type: String,  },
+            city: { type: String },
+            state: { type: String },
+            zipCode: { type: String }
         },
-        landmark: { type: String, required: true },
+        landmark: { type: String },
         location: {
-            latitude: { type: String, required: true },
-            longitude: { type: String, required: true }
+            latitude: { type: String },
+            longitude: { type: String }
         },
         isCornerProperty: { type: Boolean, default: false }
     },
     shedDetails: {
-        totalArea: { type: Number, required: true },
-        carpetArea: { type: Number, required: true },
-        height: { type: Number, required: true },
-        entranceWidth: { type: Number, required: true },
+        totalArea: { type: Number },
+        carpetArea: { type: Number },
+        height: { type: Number },
+        entranceWidth: { type: Number },
         additionaldetails: { type: String }
     },
     propertyDetails: {
         area: {
-            totalArea: { type: Number, required: true },
-            builtUpArea: { type: Number, required: true },
-            carpetArea: { type: Number, required: true }
+            totalArea: { type: Number },
+            builtUpArea: { type: Number },
+            carpetArea: { type: Number }
         },
         floor: {
-            floorNumber: { type: Number, required: true },
-            totalFloors: { type: Number, required: true }
+            floorNumber: { type: Number },
+            totalFloors: { type: Number }
         },
-        facingDirection: { type: String, required: true },
-        furnishingStatus: { type: String, required: true },
+        facingDirection: { type: String },
+        furnishingStatus: { type: String },
         propertyAmenities: [{ type: String }],
         wholeSpaceAmenities: [{ type: String }],
         electricitySupply: {
-            powerLoad: { type: Number, required: true },
+            powerLoad: { type: Number },
             backup: { type: Boolean, default: false }
         },
-        propertyAge: { type: Number, required: true },
-        propertyCondition: { type: String, required: true }
+        propertyAge: { type: Number },
+        propertyCondition: { type: String }
     },
     leaseTerms: {
         leaseDetails: {
             leaseAmount: {
-                amount: { type: Number, required: true },
+                amount: { type: Number },
                 type: { type: String, enum: ['Fixed', 'Negotiable'], default: 'Fixed' },
-                duration: { type: Number, required: true },
-                durationUnit: { type: String, required: true }
+                duration: { type: Number },
+                durationUnit: { type: String }
             }
         },
         tenureDetails: {
-            minimumTenure: { type: Number, required: true },
-            minimumUnit: { type: String, required: true },
-            maximumTenure: { type: Number, required: true },
-            maximumUnit: { type: String, required: true },
-            lockInPeriod: { type: Number, required: true },
-            lockInUnit: { type: String, required: true },
-            noticePeriod: { type: Number, required: true },
-            noticePeriodUnit: { type: String, required: true }
+            minimumTenure: { type: Number },
+            minimumUnit: { type: String },
+            maximumTenure: { type: Number },
+            maximumUnit: { type: String },
+            lockInPeriod: { type: Number },
+            lockInUnit: { type: String },
+            noticePeriod: { type: Number },
+            noticePeriodUnit: { type: String }
         },
         maintenanceAmount: {
-            amount: { type: Number, required: true },
-            frequency: { type: String, enum: ['Monthly', 'Quarterly', 'Yearly', 'Half-Yearly'], required: true }
+            amount: { type: Number },
+            frequency: { type: String, enum: ['Monthly', 'Quarterly', 'Yearly', 'Half-Yearly'] }
         },
         otherCharges: {
             electricityCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             waterCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             gasCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             },
             otherCharges: {
-                type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
+                type: { type: String, enum: ['inclusive', 'exclusive'] },
                 amount: { type: Number }
             }
         },
         brokerage: {
-            required: { type: String, enum: ['yes', 'no'], required: true },
+            required: { type: String, enum: ['yes', 'no'], },
             amount: { type: Number }
         },
         availability: {
-            date: { type: Date },
-            type: { type: String,default:"Available" },
+            availableFrom: { type: Date },
+            availableImmediately: { type: Boolean, default: false },
             leaseDuration: { type: String },
             noticePeriod: { type: String },
             petsAllowed: { type: Boolean, default: false },
@@ -250,9 +250,9 @@ const CommercialLeaseShedSchema = new Schema<ICommercialLeaseShed>({
         }
     },
     contactInformation: {
-        name: { type: String, required: true },
-        email: { type: String, required: true },
-        phone: { type: String, required: true },
+        name: { type: String },
+        email: { type: String },
+        phone: { type: String },
         alternatePhone: { type: String },
         bestTimeToContact: { type: String }
     },

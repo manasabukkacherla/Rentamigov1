@@ -10,34 +10,33 @@ interface IFloor {
   floorNumber: number;
   totalFloors: number;
 }
-interface basicInformation{
-    title: string;
-    commercialType: string[];
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
-    };
-    landmark: string;
-    location: {
-        latitude: string;
-        longitude: string;
-    };
-    isCornerProperty: boolean;
-}
 
 export interface ICommercialLeaseOthers extends Document {
   propertyId?: string;
-  basicInformation:basicInformation;
-  otherDetails: {
-    propertyTypeDescription: string;
-    specialFeatures: string;
-    usageRecommendation: string;
-    additionalRequirements: string;
+  basicInformation: {
+    title: string;
+    type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
   };
-  
+
   propertyDetails: {
+    otherPropertyDetails: {
+      propertyTypeDescription: string;
+      specialFeatures: string;
+      usageRecommendation: string;
+      additionalRequirements: string;
+    };
     area: IArea;
     floor: IFloor;
     facingDirection: string;
@@ -52,79 +51,76 @@ export interface ICommercialLeaseOthers extends Document {
       backup: boolean;
     };
   };
-  
-  
-  
- 
-  
-  leaseAmount: {
-    amount: number;
-    duration: number;
-    durationType: string;
-    isNegotiable: boolean;
-  };
-  
-  leaseTenure: {
-    minimumTenure: string;
-    minimumUnit: string;
-    maximumTenure: string;
-    maximumUnit: string;
-    lockInPeriod: string;
-    lockInUnit: string;
-    noticePeriod: string;
-    noticePeriodUnit: string;
-  };
-  
-  maintenanceAmount: {
-    amount?: number;
-    frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
-  };
-  
-  otherCharges: {
-    electricityCharges: {
-      type: "inclusive" | "exclusive";
-      amount?: number;
-    };
-    waterCharges: { 
-      type: "inclusive" | "exclusive";
-      amount?: number;
-    };
-    gasCharges: {
-      type: "inclusive" | "exclusive";
-      amount?: number;
-    };  
-    otherCharges: {
-      type: "inclusive" | "exclusive";
-      amount?: number;
-    };
-  };
-  
 
-  brokerage: {
-    required: string;
-    amount?: number;
+  leaseTerms: {
+    leaseAmount: {
+      amount: number;
+      duration: number;
+      durationType: string;
+      isNegotiable: boolean;
+    };
+
+    leaseTenure: {
+      minimumTenure: string;
+      minimumUnit: string;
+      maximumTenure: string;
+      maximumUnit: string;
+      lockInPeriod: string;
+      lockInUnit: string;
+      noticePeriod: string;
+      noticePeriodUnit: string;
+    };
+
+    maintenanceAmount: {
+      amount?: number;
+      frequency?: "monthly" | "quarterly" | "half-yearly" | "yearly";
+    };
+
+    otherCharges: {
+      electricityCharges: {
+        type: "inclusive" | "exclusive";
+        amount?: number;
+      };
+      waterCharges: { 
+        type: "inclusive" | "exclusive";
+        amount?: number;
+      };
+      gasCharges: {
+        type: "inclusive" | "exclusive";
+        amount?: number;
+      };
+      otherCharges: {
+        type: "inclusive" | "exclusive";
+        amount?: number;
+      };
+    };
+
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
   };
-  
+
   availability: {
-    date: Date;
-    type: string;
+    availableFrom: Date;
+    availableImmediately: boolean;
+    availabilityStatus: string;
     leaseDuration: string;
     noticePeriod: string;
     isPetsAllowed: boolean;
     operatingHours: {   
       restricted: boolean;
-      restrictions: string;
     };
   };
-  
-  contactDetails: {
+
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
   };
-  
+
   media: {
     photos: {
       exterior: string[];
@@ -137,7 +133,7 @@ export interface ICommercialLeaseOthers extends Document {
     videoTour?: string;
     documents: string[];
   };
-  
+
   metaData?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
@@ -152,29 +148,29 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CLO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
   basicInformation: {
     title: { type: String, default: "Unnamed Property" },
-    commercialType: { type: [String], default: ["Other"] },
+    type: { type: [String], default: ["Other"] },
     address: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      zipCode: { type: String, required: true }
-  },
-  landmark: { type: String },
-  location: {
-      latitude: { type: String},
+      street: { type: String, default: "Not Specified" },
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String },
       longitude: { type: String}
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  isCornerProperty: { type: Boolean, default: false }
-  },
-  
-  otherDetails: {
-    propertyTypeDescription: { type: String },
-    specialFeatures: { type: String },
-    usageRecommendation: { type: String },
-    additionalRequirements: { type: String }
-  },
-  
+
   propertyDetails: {
+    otherPropertyDetails: {
+      propertyTypeDescription: { type: String },
+      specialFeatures: { type: String },
+      usageRecommendation: { type: String },
+      additionalRequirements: { type: String }
+    },
+    
     area: {
       totalArea: { type: Number },
       carpetArea: { type: Number },
@@ -196,57 +192,60 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
       backup: { type: Boolean, default: false }
     }
   },
-  
-  leaseAmount: {
-    amount: { type: Number, default: 0 },
-    duration: { type: Number, default: 1 },
-    durationType: { type: String, default: 'years' },
-    isNegotiable: { type: Boolean, default: false }
-  },
-  
-  leaseTenure: {
-    minimumTenure: { type: String, default: '1' },
-    minimumUnit: { type: String, default: 'years' },
-    maximumTenure: { type: String, default: '1' },
-    maximumUnit: { type: String, default: 'years' },
-    lockInPeriod: { type: String, default: '1' },
-    lockInUnit: { type: String, default: 'years' },
-    noticePeriod: { type: String, default: '1' },
-    noticePeriodUnit: { type: String, default: 'years' }
-  },
-    
-  maintenanceAmount: {
-    amount: { type: Number },
-    frequency: { type: String, enum: ["monthly", "quarterly", "half-yearly", "yearly"] }
-  },
-  
-  otherCharges: {
-    electricityCharges: {
-      type: { type: String, enum: ["inclusive", "exclusive"] },
-      amount: { type: Number }
+
+  leaseTerms: {
+    leaseAmount: {
+      amount: { type: Number, default: 0 },
+      duration: { type: Number, default: 1 },
+      durationType: { type: String, default: 'years' },
+      isNegotiable: { type: Boolean, default: false }
     },
-    waterCharges: {
-      type: { type: String, enum: ["inclusive", "exclusive"] },
-      amount: { type: Number }
+
+    leaseTenure: {
+      minimumTenure: { type: String, default: '1' },
+      minimumUnit: { type: String, default: 'years' },
+      maximumTenure: { type: String, default: '1' },
+      maximumUnit: { type: String, default: 'years' },
+      lockInPeriod: { type: String, default: '1' },
+      lockInUnit: { type: String, default: 'years' },
+      noticePeriod: { type: String, default: '1' },
+      noticePeriodUnit: { type: String, default: 'years' }
     },
-    gasCharges: {
-      type: { type: String, enum: ["inclusive", "exclusive"] },
-      amount: { type: Number }
+
+    maintenanceAmount: {
+      amount: { type: Number },
+      frequency: { type: String, enum: ["monthly", "quarterly", "half-yearly", "yearly"] }
     },
+
     otherCharges: {
-      type: { type: String, enum: ["inclusive", "exclusive"] },
+      electricityCharges: {
+        type: { type: String, enum: ["inclusive", "exclusive"] },
+        amount: { type: Number }
+      },
+      waterCharges: {
+        type: { type: String, enum: ["inclusive", "exclusive"] },
+        amount: { type: Number }
+      },
+      gasCharges: {
+        type: { type: String, enum: ["inclusive", "exclusive"] },
+        amount: { type: Number }
+      },
+      otherCharges: {
+        type: { type: String, enum: ["inclusive", "exclusive"] },
+        amount: { type: Number }
+      }
+    },
+
+    brokerage: {
+      required: { type: String },
       amount: { type: Number }
     }
   },
-  
-  brokerage: {
-    required: { type: String },
-    amount: { type: Number }
-  },
-  
+
   availability: {
-    date: { type: Date },
-    type: { type: String,default:"Available" },
+    availableFrom: { type: Date },
+    availableImmediately: { type: Boolean, default: false },
+    availabilityStatus: { type: String },
     leaseDuration: { type: String },
     noticePeriod: { type: String },
     isPetsAllowed: { type: Boolean, default: false },
@@ -255,15 +254,15 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
       restrictions: { type: String }
     }
   },
-  
-  contactDetails: {
+
+  contactInformation: {
     name: { type: String, default: "Not Specified" },
     email: { type: String, default: "not.specified@example.com" },
     phone: { type: String, default: "0000000000" },
     alternatePhone: { type: String },
     bestTimeToContact: { type: String }
   },
-  
+
   media: {
     photos: {
       exterior: { type: [String], default: [] },
@@ -276,15 +275,15 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  
+
   metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
-    intent: { type: String,default: 'Lease' },
-    propertyName: { type: String,  default: 'Others' },
+    intent: { type: String, default: 'Lease' },
+    propertyName: { type: String, default: 'Others' },
     status: { type: String, default: 'Available' }
   }
 });
 
-export default mongoose.model<ICommercialLeaseOthers>('CommercialLeaseOthers', CommercialLeaseOthersSchema); 
+export default mongoose.model<ICommercialLeaseOthers>('CommercialLeaseOthers', CommercialLeaseOthersSchema);

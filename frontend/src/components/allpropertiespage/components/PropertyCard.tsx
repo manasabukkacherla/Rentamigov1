@@ -158,6 +158,16 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
           >
             For {property.intent || listing }
           </span>
+          <span
+            className={`px-2 py-1 rounded text-sm font-medium border ${getIntentColor(property.type)}`}
+          >
+            {property.type || type }
+          </span>
+          <span
+            className={`px-2 py-1 rounded text-sm font-medium border ${getIntentColor(property.propertyName)}`}
+          >
+            {property.propertyName || category}
+          </span>
         </div>
       </div>
       <div className="p-3 flex-1 flex flex-col">

@@ -1,31 +1,27 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-interface basicInformation {
-    title: string;
-    landType: string[];
-    waterSource?: string;
-    powerSupply: 'Available' | 'Not Available';
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
-    };
-    location: {
-        latitude: string;
-        longitude: string;
-    };
-    landmark: string;
-    
-    isCornerProperty: boolean;
-}
 export interface ICommercialRentAgriculture extends Document {
   propertyId: string;
-  basicInformation:basicInformation;
-  propertyDetails: {
-    area:{
-        totalArea: number;
-    }
+   basicInformation:{
+    title: string;
+    Type: string[];
+    powerSupply: 'Available' | 'Not Available';
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  };
+  location: {
+    latitude: string;
+    longitude: string;
+  };
+  landmark: string;
+  
+  isCornerProperty: boolean;
+}
+  Agriculturelanddetails: {
+    totalArea: number;
     soilType: string;
     irrigation: boolean;
     fencing: boolean;
@@ -62,7 +58,7 @@ export interface ICommercialRentAgriculture extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData : {
+  metadata : {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     propertyType: string;
@@ -74,13 +70,12 @@ export interface ICommercialRentAgriculture extends Document {
 
 const CommercialRentAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
-  basicInformation: {
-    title: { type: String, required: true },
-    landType: { type: [String], required: true },
-    waterSource: { type: String},
-    powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
-    address: {
-      street: { type: String, required: true },
+  basicInformation:{
+  title: { type: String, required: true },
+  Type: [{ type: String, required: true }],
+  powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
+  address: {
+    street: { type: String, required: true },
     city: { type: String, required: true },
     state: { type: String, required: true },
     zipCode: { type: String, required: true }
@@ -93,10 +88,8 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   
   isCornerProperty: { type: Boolean, default: false },
 },
-    propertyDetails: {
-    area:{
-        totalArea: { type: Number, required: true },
-    },
+    Agriculturelanddetails: {
+    totalArea: { type: Number, required: true },
     soilType: { type: String },
     irrigation: { type: Boolean, default: false },
     fencing: { type: Boolean, default: false },
@@ -114,7 +107,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     
     
   availability: {
-    type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
+    type: { type: String, enum: ['immediate', 'specific'], required: true },
     date: { type: Date }
   },
   contactDetails: {
@@ -132,8 +125,8 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData : {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  metadata : {
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Rent' },

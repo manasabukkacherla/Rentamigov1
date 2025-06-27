@@ -48,7 +48,7 @@ interface IMetadata {
 }
 
 interface IRentalTerms {
-    rent: {
+    rentDetails: {
       expectedRent: number;
       isNegotiable: boolean;
       rentType: string;
@@ -100,7 +100,7 @@ interface ICommercialrentShop extends Document {
   }
   availability: {
     type: string;
-    date?: Date;
+    date?: string;
   }
   contactInformation: IContactInformation;
   media: IMedia;
@@ -136,7 +136,7 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
     previousBusiness: { type: String }
   },
   rentalTerms: {
-    rent: {
+    rentDetails: {
         expectedRent: { type: Number, required: true },
         isNegotiable: { type: Boolean, default: false },
         rentType: { type: String, required: true },
@@ -172,8 +172,8 @@ const CommercialrentShopSchema = new Schema<ICommercialrentShop>({
     amount: { type: Number },
 },
   availability: {
-    type: { type: String, enum: ['immediate', 'specific'], default:'immediate' },
-    date: { type: Date },
+    type: { type: String, required: true },
+    date: { type: String },
   },
   contactInformation: {
     name: { type: String, required: true },

@@ -42,7 +42,7 @@ interface IFloor {
 }
 
 interface IRentalTerms {
-  rent: {
+  rentDetails: {
     expectedRent: number;
     isNegotiable: boolean;
     rentType: string;
@@ -165,13 +165,13 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     roadWidthUnit: { type: String, required: true },
     ceilingHeight: { type: Number, required: true },
     ceilingHeightUnit: { type: String, required: true },
-    noOfOpenSides: { type: Number, required: true }, 
+    noOfOpenSides: { type: Number, required: true }, // ✅ Changed to Number
   },
   propertyDetails: {
     area: {
-      totalArea: { type: Number, required: true }, 
-      builtUpArea: { type: Number, required: true }, 
-      carpetArea: { type: Number, required: true }, 
+      totalArea: { type: Number, required: true }, // ✅ Changed to Number
+      builtUpArea: { type: Number, required: true }, // ✅ Changed to Number
+      carpetArea: { type: Number, required: true }, // ✅ Changed to Number
     },
     floor: {
       floorNumber: { type: Number, required: true },
@@ -190,7 +190,7 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     propertyCondition: { type: String, required: true },
   },
   rentalTerms: {
-    rent: {
+    rentDetails: {
       expectedRent: { type: Number, required: true },
       isNegotiable: { type: Boolean, default: false },
       rentType: { type: String, required: true },
@@ -226,8 +226,8 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     amount: { type: Number },
   },
   availability: {
-    type: { type: String, default:"Available" },
-    date: { type: Date},
+    type: { type: String, required: true },
+    date: { type: Date, required: false },
   },
   contactInformation: {
     name: { type: String, required: true },
@@ -235,6 +235,18 @@ const CommercialRentCoveredSpaceSchema = new Schema<ICommercialRentCoveredSpace>
     phone: { type: String, required: true },
     alternatePhone: { type: String },
     bestTimeToContact: { type: String },
+  },
+  media: {
+    photos: {
+      exterior: { type: [String], default: [] },
+      interior: { type: [String], default: [] },
+      floorPlan: { type: [String], default: [] },
+      washrooms: { type: [String], default: [] },
+      lifts: { type: [String], default: [] },
+      emergencyExits: { type: [String], default: [] }
+    },
+    videoTour: { type: String, default: null },
+    documents: { type: [String], default: [] }
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'}, 

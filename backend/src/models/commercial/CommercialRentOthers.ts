@@ -29,7 +29,7 @@ interface IBasicInformation {
 }
 
 interface IRentalTerms {
-  rent: {
+  rentDetails: {
     expectedRent: number;
     isNegotiable: boolean;
     rentType: string;
@@ -178,7 +178,7 @@ const CommercialRentOthersSchema: Schema = new Schema({
     }
   },
   rentalTerms:  {
-    rent: {
+    rentDetails: {
       expectedRent: { type: Number, required: true },
       isNegotiable: { type: Boolean, default: false },
       rentType: { type: String, enum: ['inclusive', 'exclusive'], required: true }
@@ -220,7 +220,7 @@ const CommercialRentOthersSchema: Schema = new Schema({
     amount: { type: Number }
   },
   availability: {
-    type: { type: String, enum: ['immediate', 'specific'],default:'immediate' },
+    type: { type: String, enum: ['immediate', 'specific'], required: true },
     date: { type: Date }
   },
   contactInformation: {
