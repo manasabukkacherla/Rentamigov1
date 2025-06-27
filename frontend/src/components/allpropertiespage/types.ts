@@ -7,19 +7,7 @@ export type PropertyType =
   | 'Studio'
   | 'Penthouse'
   | 'Standalone Building'
-  | 'Agricultural'
-  | 'Office Space'
-  | 'Retail Store'
-  | 'Shop'
-  | 'Warehouse'
-  | 'Shed'
-  | 'Covered Space'
-  | 'Showroom'
-  | 'Plot';
-
-export type PropertyCategory = 'Residential' | 'Commercial';
-
-export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
+  | 'Agricultural';
 
 export type ListingType = 'Owner' | 'Agent' | 'PG' | 'RentAmigo';
 
@@ -29,13 +17,13 @@ export type FurnishingType =
   | 'Partially Furnished'
   | 'Unfurnished';
 
-export type BHKType =
-  | '1 RK'
-  | '1 BHK'
-  | '2 BHK'
-  | '3 BHK'
-  | '4 BHK'
-  | '4+ BHK';
+// export type BHKType =
+//   | '1 RK'
+//   | '1 BHK'
+//   | '2 BHK'
+//   | '3 BHK'
+//   | '4 BHK'
+//   | '4+ BHK';
 
 export type SharingType =
   | '1 Share'
@@ -46,143 +34,13 @@ export type SharingType =
 
 export type PropertyStatus = 'Available' | 'Rented' | 'Under Maintenance';
 
-// Commercial Property Types
-export interface CommercialPropertyType {
-  Agriculture: {
-    landDetails: {
-      totalArea: number;
-    };
-  };
-  CoveredSpace: {
-    area: {
-      totalArea: number;
-    };
-  };
-  OfficeSpace: {
-    area: {
-      totalArea: number;
-    };
-  };
-  Others: {
-    area: {
-      totalArea: number;
-    };
-  };
-  RetailStore: {
-    area: {
-      totalArea: number;
-    };
-  };
-  Shed: {
-    propertySize: number;
-  };
-  Warehouse: {
-    area: {
-      totalArea: number;
-    };
-  };
-  Plot: {
-    area: {
-      totalArea: number;
-    };
-  };
-  Shop: {
-    area: {
-      totalArea: number;
-    };
-  };
-  Showroom: {
-    area: {
-      totalArea: number;
-    };
-  };
-}
-
-// Base Property Interface
-export interface BaseProperty {
-  _id?: string;
-  propertyId: string;
-  title: string;
-  basicInformation?: {
-    title?: string;
-    address?: {
-      city?: string;
-      state?: string;
-    };
-  };
-  metadata?: {
-    propertyName?: string;
-    propertyType?: PropertyType;
-    intent?: PropertyIntent;
-    createdAt?: Date;
-  };
-  propertyDetails?: {
-    area?: {
-      totalArea?: number;
-    };
-    bathrooms?: number;
-    furnishingStatus?: FurnishingType;
-  };
-  media?: {
-    photos?: {
-      exterior?: string[];
-    };
-  };
-  rent?: {
-    expectedRent: number;
-  };
-  leaseAmount?: {
-    amount: number;
-  };
-  availability?: {
-    type: PropertyStatus;
-  };
-}
-
-// Unified Property Card Interface
-export interface Property {
-  id: string;
-  propertyId: string;
-  title: string;
-  location: string;
-  propertyName: string;
-  type: PropertyType;
-  listingType: ListingType;
-  price: number;
-  area: number;
-  image: string;
-  postedDate: string;
-  status: PropertyStatus;
-  intent: PropertyIntent;
-  bathrooms: number;
-  furnishing: FurnishingType;
-}
-
-// Property Response Interface
-export interface PropertyResponse {
-  success: boolean;
-  message: string;
-  data: {
-    commercialRent: {
-      agriculture: Property[];
-      coveredSpace: Property[];
-      officeSpace: Property[];
-      others: Property[];
-      retailStore: Property[];
-      shed: Property[];
-      warehouse: Property[];
-      plot: Property[];
-      shop: Property[];
-      showroom: Property[];
-    };
-  };
-}
+export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
 
 // Search Criteria used in filters/search
 export interface SearchCriteria {
   location: string | null;
   propertyType: PropertyType | null;
-  bhkType: BHKType | null;
+  // bhkType: BHKType | null;
   priceRange: {
     min: number | null;
     max: number | null;
@@ -197,7 +55,7 @@ export interface SearchCriteria {
   };
   furnishing: FurnishingType | null;
   strict: boolean;
-  bathrooms: number | null;
+  // bathrooms: number | null;
   listingTypes: ListingType[];
   sharing: SharingType | null;
 }
@@ -207,12 +65,21 @@ export interface Filters {
   listingTypes: ListingType[];
   propertyTypes: PropertyType[];
   furnishingTypes: FurnishingType[];
-  bhkTypes: BHKType[];
+  // bhkTypes: BHKType[];
   sharingTypes: SharingType[];
   priceRange: {
     min: number | null;
     max: number | null;
   };
+}
+
+// Filter Section Props
+type FilterSectionType = keyof Filters;
+
+export interface FilterSectionProps {
+  title: string;
+  items: string[];
+  type: FilterSectionType;
 }
 
 // Unified Property Card Interface
@@ -221,12 +88,11 @@ export interface Property {
   propertyId: string;
   title: string;
   type: PropertyType;
-  propertyName: string;
   listingType: ListingType;
   price: number;
   location: string;
   // bhkType: BHKType;
-  bathrooms: number;
+  // bathrooms: number;
   furnishing: FurnishingType;
   area: number;
   image: string;

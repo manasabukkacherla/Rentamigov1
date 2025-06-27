@@ -727,7 +727,8 @@ function Allproperties() {
     const saved = localStorage.getItem('recentLocations');
     return saved ? JSON.parse(saved) : [];
   });
-  
+  const [showFilters, setShowFilters] = useState(false);  // Manage filter panel visibility
+
   const popularLocations = [
     'Bangalore, Karnataka',
     'Mumbai, Maharashtra',
@@ -751,7 +752,7 @@ function Allproperties() {
       try {
         const response = await axios.get('/api/allproperties/all');
         const grouped = response.data?.data || {};
-        
+
         const flattenGrouped = (grouped: Record<string, any>) => {
           const all: any[] = [];
           for (const groupKey in grouped) {
@@ -766,7 +767,7 @@ function Allproperties() {
           return all;
         };
 
-        const allProperties = flattenGrouped(grouped); 
+        const allProperties = flattenGrouped(grouped);
         setFetchedProperties(allProperties);
         setLoading(false);
       } catch (error) {
@@ -778,7 +779,7 @@ function Allproperties() {
     fetchAllProperties();
   }, []);
 
-  const searchQuery = '';
+  const [searchQuery, setSearchQuery] = useState('');
   const activeFilters: Filters = {
     listingTypes: [],
     propertyTypes: [],
@@ -820,12 +821,18 @@ function Allproperties() {
     return results;
   }, [searchResults]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-  };
-
   const handlePropertyClick = (propertyId: string) => {
     navigate(`/detailprop/${propertyId}`);
+  };
+
+  const handleFilterChange = (filters: Filters) => {
+    setShowFilters(false);
+    // Apply the new filters
+    activeFilters.listingTypes = filters.listingTypes;
+    activeFilters.propertyTypes = filters.propertyTypes;
+    activeFilters.furnishingTypes = filters.furnishingTypes;
+    activeFilters.sharingTypes = filters.sharingTypes;
+    activeFilters.priceRange = filters.priceRange;
   };
 
   return (
@@ -849,8 +856,9 @@ function Allproperties() {
                 </button>
               </div>
             </div>
+
             <div className="flex-1">
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <form onSubmit={(e) => e.preventDefault()} className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                     <Search size={16} />
@@ -859,8 +867,17 @@ function Allproperties() {
                     type="text"
                     placeholder="Search properties..."
                     className="w-full px-3 py-2 pl-9 rounded text-black text-sm focus:outline-none focus:ring-1 focus:ring-black"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-1 bg-white/10 px-3 py-2 rounded text-sm hover:bg-white/20"
+                >
+                  <Filter size={16} />
+                  <span>Filters</span>
+                </button>
               </form>
             </div>
           </div>
@@ -884,6 +901,17 @@ function Allproperties() {
           </div>
         )}
       </main>
+
+      {showFilters && (
+        <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowFilters(false)}>
+          <div
+            className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FiltersPanel onFilterChange={handleFilterChange} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

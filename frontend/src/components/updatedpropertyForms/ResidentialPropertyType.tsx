@@ -325,18 +325,18 @@ const ResidentialPropertyType = ({
       } else if (listingType === "Lease") {
         switch (selectedType) {
           case "Apartment":
-            return <LeaseApartment propertyId={""} />
+            return <LeaseApartment />
           case "Independent House":
-            return <LeaseIndependentHouse propertyId={""} />
+            return <LeaseIndependentHouse />
           case "Builder Floor":
             return <LeaseBuilderFloor propertyId={""} />
         }
       } else if (listingType === "Sell") {
         switch (selectedType) {
           case "Apartment":
-            return <SellApartment propertyId={""} />
+            return <SellApartment />
           case "Independent House":
-            return <SellIndependentHouse propertyId={""} />
+            return <SellIndependentHouse />
           case "Builder Floor":
             return <SellBuilderFloor propertyId={""} />
           case "Plot":
