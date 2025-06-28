@@ -15,7 +15,8 @@ export const FiltersPanel = ({ onFilterChange }: FiltersPanelProps): JSX.Element
     priceRange: {
       min: null,
       max: null
-    }
+    },
+    category: []
   });
 
   const handleCheckboxChange = (type: keyof Filters, item: string) => {
@@ -114,7 +115,7 @@ export const FiltersPanel = ({ onFilterChange }: FiltersPanelProps): JSX.Element
               className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm cursor-pointer transition-all
                 ${(selectedFilters[currentType] as string[]).includes(item)
                   ? 'bg-black text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors'}`}
             >
               <input
                 type="checkbox"
@@ -153,7 +154,22 @@ export const FiltersPanel = ({ onFilterChange }: FiltersPanelProps): JSX.Element
         
         <FilterSection
           title="Property Type"
-          items={['Apartment', 'House', 'Villa', 'PG', 'Studio', 'Penthouse']}
+          items={[
+            'Appartment',
+            'Others',
+            'Agriculture',
+            'PG',
+            'Warehouse',
+            'Shed',
+            'Plot',
+            'Retail-Store',
+            'Office-Space',
+            'Showroom',
+            'Shop',
+            'Builder-Floor',
+            'Independent-House',
+            'Shared-Space'
+          ]}
           type="propertyTypes"
         />
         
