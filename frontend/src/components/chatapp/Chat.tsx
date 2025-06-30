@@ -130,33 +130,30 @@ const Chat: React.FC<ChatProps> = ({
   }, [socket, otherUserId]);
 
   // Function to send a message.
- const handleSendMessage = (text: string) => {
-  if (socket && text.trim()) {
-    const messageData = {
-      senderId: currentUserId,
-      receiverId: otherUserId,
-      roomId,
-      text,
-      createdAt: new Date().toISOString(),
-      read: false,
-    };
+ // ⬇️  REPLACE your existing handleSendMessage with this version
+const handleSendMessage = (text: string) => {
+  if (!socket || !text.trim()) return;
 
-    socket.emit("chatMessage", messageData);
+  const messageData = {
+    senderId: currentUserId,
+    receiverId: otherUserId,
+    roomId,
+    text,
+    createdAt: new Date().toISOString(),
+    read: false,           // server will decide when it's read
+  };
 
-    // Update local message list
-    setMessages((prev) => [...prev, { ...messageData, read: true }]);
+  socket.emit("chatMessage", messageData);  // <- just fire and forget
 
-    // 🔄 Notify parent (ChatPage) to possibly update the conversation status to "pending"
-    if (onConversationUpdate) {
-      onConversationUpdate({
-        roomId,
-        lastMessage: text,
-        status: "pending",
-        lastResolvedAt: null,
-      });
-    }
-  }
+  // 🔄 Let parent update conversation list (still useful)
+  onConversationUpdate?.({
+    roomId,
+    lastMessage: text,
+    status: "pending",
+    lastResolvedAt: null,
+  });
 };
+
 
 
   // Function to handle typing indicator

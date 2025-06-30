@@ -1,91 +1,90 @@
 import { Server, Socket } from "socket.io";
-import { Document } from "mongoose"; // Assuming you're using Mongoose for DB operations
+import { Document } from "mongoose";
 import Notification from "../models/Notification";
 import Message from "../models/Message";
 import Conversation from "../models/Conversation";
 import mongoose from "mongoose";
 
-// Define the interface for a Notification document.
-// Adjust this based on your actual Mongoose schema.
+/* ---------- types ---------- */
 export interface INotification extends Document {
-  // Optional field that can link to a specific resource or user.
   resourceId?: string;
-  // The message to be displayed in the notification (this is required).
   message: string;
-  // A flag to indicate if the notification has been read.
   read: boolean;
-  // The timestamp for when the notification was created.
   createdAt: Date;
 }
 
-// Define the shape of the response for a successful "markAsRead" event.
 interface MarkAsReadResponseSuccess {
   status: "success";
   notification: INotification | null;
 }
-
-// Define the shape of the response when an error occurs in "markAsRead".
 interface MarkAsReadResponseError {
   status: "error";
   error: string;
 }
-
-// Union type for the callback parameter of "markAsRead" event.
 type MarkAsReadCallback = (
-  response: MarkAsReadResponseSuccess | MarkAsReadResponseError
+  resp: MarkAsReadResponseSuccess | MarkAsReadResponseError
 ) => void;
 
-// Export a function to initialize our Socket.IO events.
+/* ---------- presence map ---------- */
+const onlineUsers = new Map<string, string>(); // userId → socket.id
 
-/**
- * Socket.IO Connection Event:
- * This is where every new client connection is handled.
- * We also define events like "getNotifications", "joinRoom", etc.
- */
-const onlineUsers = new Map<string, string>(); // userId -> socket.id
-
+/* ============================================================================
+   MAIN HANDLER
+============================================================================ */
 export default function socketHandler(io: Server) {
-  // Listen for new client connections.
   io.on("connection", (socket: Socket) => {
     console.log(`Client connected: ${socket.id}`);
 
+    /* ──────────────────────────────────────────────────────────────
+       1. USER REGISTRATION  (client must emit: socket.emit("register", userId))
+    ────────────────────────────────────────────────────────────── */
     socket.on("register", (userId: string) => {
       onlineUsers.set(userId, socket.id);
       console.log(`User ${userId} registered with socket ${socket.id}`);
+
+      /*  👇 broadcast presence to EVERYONE (including sender) */
+      io.emit("userStatus", { userId, isOnline: true });
     });
 
-    // Handle "joinRoom" event.
+    /* ──────────────────────────────────────────────────────────────
+       2. SINGLE-SHOT STATUS QUERY   (client: socket.emit("getUserStatus", id, cb))
+    ────────────────────────────────────────────────────────────── */
+    socket.on(
+      "getUserStatus",
+      (otherId: string, cb: (online: boolean) => void) => {
+        cb(onlineUsers.has(otherId));
+      }
+    );
+
+    /* ──────────────────────────────────────────────────────────────
+       3. ROOMS
+    ────────────────────────────────────────────────────────────── */
     socket.on("joinRoom", (roomId: string) => {
       socket.join(roomId);
       console.log(`Socket ${socket.id} joined room ${roomId}`);
     });
 
-    // Handle "leaveRoom" event.
-    socket.on("leaveRoom", (roomId: string): void => {
+    socket.on("leaveRoom", (roomId: string) => {
       socket.leave(roomId);
-      console.log(`Socket ${socket.id} left room: ${roomId}`);
+      console.log(`Socket ${socket.id} left room ${roomId}`);
     });
-    // Handle "getNotifications" event.
-    socket.on("getNotifications", async (): Promise<void> => {
+
+    /* ──────────────────────────────────────────────────────────────
+       4. NOTIFICATIONS
+    ────────────────────────────────────────────────────────────── */
+    socket.on("getNotifications", async () => {
       try {
-        // Fetch notifications from your DB, sorting them with the most recent first.
-        // Here, Notification is assumed to be your Mongoose model.
-        const notifications: INotification[] = await Notification.find().sort({
-          createdAt: -1,
-        });
-        // Send the notifications back to the requesting client.
+        const notifications = await Notification.find().sort({ createdAt: -1 });
         socket.emit("loadNotifications", notifications);
       } catch (err) {
         console.error(err);
       }
     });
 
-    // Notification listener
     socket.on(
       "sendNotification",
       async (data: { receiverId: string; type: string; message: string }) => {
         try {
-          // Store notification in database
           const notification = new Notification({
             receiverId: data.receiverId,
             type: data.type,
@@ -93,7 +92,6 @@ export default function socketHandler(io: Server) {
           });
           await notification.save();
 
-          // Emit notification to receiver if online
           const receiverSocketId = onlineUsers.get(data.receiverId);
           if (receiverSocketId) {
             io.to(receiverSocketId).emit("notification", {
@@ -110,34 +108,28 @@ export default function socketHandler(io: Server) {
         }
       }
     );
-    // Handle "markAsRead" event with an acknowledgement callback.
+
     socket.on(
       "markAsRead",
-      async (
-        notificationId: string,
-        callback: MarkAsReadCallback
-      ): Promise<void> => {
+      async (id: string, cb: MarkAsReadCallback) => {
         try {
-          // Update the notification in the database.
-          const updatedNotification: INotification | null =
-            await Notification.findByIdAndUpdate(
-              notificationId,
-              { read: true },
-              { new: true }
-            );
-          // Acknowledge success to the client.
-          callback({ status: "success", notification: updatedNotification });
-          // Optionally broadcast the updated notification to all connected clients.
-          io.emit("notificationUpdated", updatedNotification);
+          const updated = await Notification.findByIdAndUpdate(
+            id,
+            { read: true },
+            { new: true }
+          );
+          cb({ status: "success", notification: updated });
+          io.emit("notificationUpdated", updated);
         } catch (error: any) {
           console.error("Error marking notification as read:", error);
-          // Acknowledge failure to the client.
-          callback({ status: "error", error: error.message });
+          cb({ status: "error", error: error.message });
         }
       }
     );
 
-    // chat message listener
+    /* ──────────────────────────────────────────────────────────────
+       5. CHAT MESSAGES
+    ────────────────────────────────────────────────────────────── */
     socket.on(
       "chatMessage",
       async (data: {
@@ -147,7 +139,7 @@ export default function socketHandler(io: Server) {
         text: string;
       }) => {
         try {
-          // Store message in database
+          /* store message */
           const message = new Message({
             senderId: data.senderId,
             receiverId: data.receiverId,
@@ -156,103 +148,74 @@ export default function socketHandler(io: Server) {
           });
           await message.save();
 
-          // Update conversation's last message
-          console.log(
-            "Updating conversation in socket handler with roomId:",
-            data.roomId
-          );
-          console.log("Participants:", [data.senderId, data.receiverId]);
+          /* upsert conversation */
+          let conversation = await Conversation.findOne({ roomId: data.roomId });
+          const senderObj   = new mongoose.Types.ObjectId(data.senderId);
+          const receiverObj = new mongoose.Types.ObjectId(data.receiverId);
 
-          // Find the conversation or create a new one
-          let conversation = await Conversation.findOne({
-            roomId: data.roomId,
-          });
-
-          if (conversation) {
-            // Update existing conversation
-            conversation.lastMessage = data.text;
-
-            // Make sure both participants are in the array
-            const senderIdObj = new mongoose.Types.ObjectId(data.senderId);
-            const receiverIdObj = new mongoose.Types.ObjectId(data.receiverId);
-
-            if (!conversation.participants.some((p) => p.equals(senderIdObj))) {
-              conversation.participants.push(senderIdObj);
-            }
-            if (
-              !conversation.participants.some((p) => p.equals(receiverIdObj))
-            ) {
-              conversation.participants.push(receiverIdObj);
-            }
-
-            await conversation.save();
-          } else {
-            // Create new conversation
+          if (!conversation) {
             conversation = new Conversation({
               roomId: data.roomId,
-              participants: [
-                new mongoose.Types.ObjectId(data.senderId),
-                new mongoose.Types.ObjectId(data.receiverId),
-              ],
+              participants: [senderObj, receiverObj],
               lastMessage: data.text,
             });
-            await conversation.save();
+          } else {
+            conversation.lastMessage = data.text;
+            if (!conversation.participants.some(p => p.equals(senderObj)))
+              conversation.participants.push(senderObj);
+            if (!conversation.participants.some(p => p.equals(receiverObj)))
+              conversation.participants.push(receiverObj);
           }
+          await conversation.save();
 
-          console.log(
-            "Conversation after update in socket:",
-            JSON.stringify(conversation, null, 2)
-          );
-          console.log(
-            "Number of participants:",
-            conversation.participants.length
-          );
-
-          // Emit message to room
+          /* broadcast message */
           io.to(data.roomId).emit("newMessage", {
             ...data,
             _id: message._id,
             createdAt: message.createdAt,
           });
-          console.log(
-            `Message from ${data.senderId} in room ${data.roomId}: ${data.text}`
-          );
 
-          // Send notification to receiver if online and not the sender
+          /* send notification to receiver if online */
           const receiverSocketId = onlineUsers.get(data.receiverId);
           if (receiverSocketId && receiverSocketId !== socket.id) {
-            // Store notification in database
-            const notification = new Notification({
+            const notif = new Notification({
               receiverId: data.receiverId,
               type: "chat",
               message: `New message from ${data.senderId}`,
             });
-            await notification.save();
+            await notif.save();
 
-            // Emit notification
             io.to(receiverSocketId).emit("notification", {
               receiverId: data.receiverId,
               type: "chat",
               message: `New message from ${data.senderId}`,
-              id: notification._id,
+              id: notif._id,
             });
           }
-        } catch (error) {
-          console.error("Error storing message:", error);
+        } catch (err) {
+          console.error("Error storing message:", err);
           socket.emit("error", "Failed to store message");
         }
       }
     );
 
-    socket.on("disconnect", (reason: string): void => {
-      onlineUsers.forEach((id, userId) => {
-        if (id === socket.id) {
+    /* ──────────────────────────────────────────────────────────────
+       6. DISCONNECT
+    ────────────────────────────────────────────────────────────── */
+    socket.on("disconnect", (reason: string) => {
+      /* find which user owned this socket and remove */
+      for (const [userId, sId] of onlineUsers) {
+        if (sId === socket.id) {
           onlineUsers.delete(userId);
           console.log(
             `User ${userId} disconnected and removed from online users. (${reason})`
           );
+
+          /* 👇 broadcast presence OFFLINE */
+          io.emit("userStatus", { userId, isOnline: false });
+          break;
         }
-      });
+      }
     });
   });
 }
