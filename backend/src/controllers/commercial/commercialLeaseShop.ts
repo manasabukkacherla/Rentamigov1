@@ -5,7 +5,7 @@ import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMLEASH";
+    const prefix = "RA-COMLESH";
     
     const highestShop = await CommercialLeaseShop.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
@@ -65,7 +65,7 @@ export const createCommercialLeaseShop = async (req: Request, res: Response) => 
       media: formData.media,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: formData.metadata?.createdBy,
         createdAt: new Date()
         // updatedAt: new Date()
       }
@@ -110,7 +110,7 @@ export const getAllCommercialLeaseShop = async (req: Request, res: Response) => 
 
 export const getCommercialLeaseShopById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialLeaseShop.findOne({ propertyId });
     
     if (!property) {

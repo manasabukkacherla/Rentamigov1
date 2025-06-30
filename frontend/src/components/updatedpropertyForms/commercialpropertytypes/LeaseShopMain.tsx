@@ -24,7 +24,7 @@ interface FormData {
   // propertyId: string;
   basicInformation: {
     title: string;
-    shopType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -153,7 +153,7 @@ const LeaseShopMain = () => {
     // propertyId: '',
     basicInformation: {
       title: '',
-      shopType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -297,7 +297,7 @@ const LeaseShopMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
-          <ShopType shopType={formData.basicInformation.shopType} onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, shopType: type } }))} />
+          <ShopType Type={formData.basicInformation.Type} onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, Type: type } }))} />
 
           <div className="space-y-8">
             <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
@@ -628,13 +628,17 @@ const LeaseShopMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Lease',
+            status: 'Available'
           }
         };
 
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial/lease-shops', transformedData, {
+        const response = await axios.post('/api/commercial/lease/shops', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

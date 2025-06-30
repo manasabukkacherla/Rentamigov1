@@ -17,14 +17,14 @@ const PropertyName = ({ propertyName, onPropertyNameChange }: PropertyNameProps)
           <h3 className="text-2xl font-semibold text-black">Property Name</h3>
         </div>
 
-        <div className="bg-white p-6 rounded-lg space-y-4">
+        <div className="bg-white p-6 rounded-lg space-y-4 relative z-20">
           <div className="relative">
             <input
               type="text"
               value={propertyName}
               onChange={(e) => onPropertyNameChange(e.target.value)}
               placeholder="Enter property name"
-              className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
+              className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40 relative z-30"
             />
           </div>
         </div>

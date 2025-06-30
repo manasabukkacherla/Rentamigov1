@@ -35,86 +35,41 @@ interface FormData {
       zipCode: string;
     };
     landmark: string;
-    coordinates: {
+    location: {
       latitude: string;
       longitude: string;
     };
     isCornerProperty: boolean;
   };
-  propertyDetails: {
-    area: {
-      totalArea: number;
-      carpetArea: number;
-      builtUpArea: number;
-    };
-    floor: {
-      floorNumber: number;
-      totalFloors: number;
-    };
-    facingDirection?: string;
-    furnishingStatus?: string;
-    propertyAmenities?: string[];
-    wholeSpaceAmenities?: string;
-    waterAvailability?: string;
-  };
   plotDetails: {
     totalPlotArea: number;
     zoningType: string;
-    infrastructure: string[];
+    boundaryWall?: boolean;
+    waterSewer?: boolean;
+    electricity?: boolean;
     roadAccess: string;
     securityRoom: boolean;
     previousConstruction: string;
   };
-  leaseDetails: {
-    leaseAmount: number;
-    leaseduration: {
+
+  leaseTerms: {
+    leaseAmount: {
+      amount: number;
       duration: number;
-      type: string;
+      durationType: string;
       amountType: "fixed" | "negotiable";
     };
-    leasetenure: {
-      minimumTenure: {
-        duration: number;
-        type: string;
-      };
-      maximumTenure: {
-        duration: number;
-        type: string;
-      };
-      lockInPeriod: {
-        duration: number;
-        type: string;
-      };
-      noticePeriod: {
-        duration: number;
-        type: string;
-      };
+    leaseTenure: {
+      minimumTenure: string,
+      minimumUnit: string,
+      maximumTenure: string,
+      maximumUnit: string,
+      lockInPeriod: string,
+      lockInUnit: string,
+      noticePeriod: string,
+      noticePeriodUnit: string,
     };
-    maintenanceCharges: {
-      amount: number;
-      frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
-    };
-    otherCharges: {
-      electricityCharges: {
-        type: "inclusive" | "exclusive";
-        amount?: number;
-      };
-      waterCharges: {
-        type: "inclusive" | "exclusive";
-        amount?: number;
-      };
-      gasCharges: {
-        type: "inclusive" | "exclusive";
-        amount?: number;
-      };
-      otherCharges: "inclusive" | "exclusive";
-      amount?: number;
-    };
-  };
-  brokerage?: {
-    required: boolean;
-    amount?: number;
-  };
+  }
   availability: {
     availableFrom?: Date;
     availableImmediately?: boolean;
@@ -130,16 +85,12 @@ interface FormData {
     phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
-    preferredContactTime?: string;
+    
   };
   media: {
     photos: {
       exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      washroom: File[];
-      lift: File[];
-      emergencyExit: File[];
+      
     };
     videoTour?: File | null;
     documents: File[];
@@ -147,10 +98,13 @@ interface FormData {
   metadata?: {
     createdBy: string;
     createdAt: Date;
-    userName: string;
-    userId: string;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   };
 }
+
 
 const convertFileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -204,85 +158,43 @@ const LeasePlotMain = () => {
         zipCode: ""
       },
       landmark: "",
-      coordinates: {
+       location: {
         latitude: "",
         longitude: ""
       },
       isCornerProperty: false,
     },
-    propertyDetails: {
-      area: {
-        totalArea: 0,
-        carpetArea: 0,
-        builtUpArea: 0
-      },
-      floor: {
-        floorNumber: 0,
-        totalFloors: 0
-      },
-      facingDirection: "",
-      furnishingStatus: "",
-      propertyAmenities: [],
-      wholeSpaceAmenities: "",
-      waterAvailability: "",
-    },
     plotDetails: {
       totalPlotArea: 0,
       zoningType: "commercial",
-      infrastructure: [],
+      boundaryWall: false,
+      waterSewer: false,
+      electricity: false,
       roadAccess: "",
       securityRoom: false,
       previousConstruction: ""
+      
     },
-    leaseDetails: {
-      leaseAmount: 0,
-      leaseduration: {
+
+  leaseTerms: {
+      leaseAmount: {
+        amount: 0,
         duration: 0,
-        type: "month",
+        durationType: "month",
         amountType: "fixed"
       },
-      leasetenure: {
-        minimumTenure: {
-          duration: 0,
-          type: "month"
-        },
-        maximumTenure: {
-          duration: 0,
-          type: "month"
-        },
-        lockInPeriod: {
-          duration: 0,
-          type: "month"
-        },
-        noticePeriod: {
-          duration: 0,
-          type: "month"
-        }
+      leaseTenure: {
+        minimumTenure: "",
+        minimumUnit: "",
+        maximumTenure: "",
+        maximumUnit: "",
+        lockInPeriod: "",
+        lockInUnit: "",
+        noticePeriod: "",
+        noticePeriodUnit: "",
       },
-      maintenanceCharges: {
-        amount: 0,
-        frequency: "monthly"
-      },
-      otherCharges: {
-        electricityCharges: {
-          type: "inclusive",
-          amount: 0
-        },
-        waterCharges: {
-          type: "inclusive",
-          amount: 0
-        },
-        gasCharges: {
-          type: "inclusive",
-          amount: 0
-        },
-        otherCharges: "inclusive",
-        amount: 0
-      }
-    },
-    brokerage: {
-      required: false,
-      amount: 0
+      
+      
     },
     availability: {
       availableFrom: new Date(),
@@ -298,17 +210,12 @@ const LeasePlotMain = () => {
       email: "",
       phone: "",
       alternatePhone: "",
-      bestTimeToContact: "",
-      preferredContactTime: ""
+      bestTimeToContact: ""
     },
     media: {
       photos: {
         exterior: [],
-        interior: [],
-        floorPlan: [],
-        washroom: [],
-        lift: [],
-        emergencyExit: []
+        
       },
       videoTour: null,
       documents: []
@@ -317,6 +224,7 @@ const LeasePlotMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
+  
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -335,6 +243,7 @@ const LeasePlotMain = () => {
   };
 
   // Define form steps
+  
   const steps = [
     {
       title: "Basic Information",
@@ -346,16 +255,19 @@ const LeasePlotMain = () => {
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name) => handleChange('basicInformation.title', name)}
           />
-          <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
+          <PlotType onPlotTypeChange={(Type) => handleChange('basicInformation.plotType', Type)} />
           <CommercialPropertyAddress onAddressChange={(address) => handleChange('basicInformation.address', address)} address={formData.basicInformation.address}
             
           />
           <MapLocation
-            latitude={formData.basicInformation.coordinates.latitude}
-            longitude={formData.basicInformation.coordinates.longitude}
-            onLocationChange={(location) => handleChange('basicInformation.coordinates', location)}
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
             onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            landmark={formData.basicInformation.landmark}          />
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+            />
+
           <CornerProperty
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)} isCornerProperty={false}          />
         </div>
@@ -375,9 +287,9 @@ const LeasePlotMain = () => {
               builtUpArea: details.builtUpArea || 0
             };
 
-            // Update propertyDetails with area information
-            handleChange('propertyDetails', {
-              ...formData.propertyDetails,
+            // Update plotDetails with area information
+            handleChange('plotDetails', {
+              ...formData.plotDetails,
               area: updatedArea,
             });
 
@@ -385,12 +297,16 @@ const LeasePlotMain = () => {
             handleChange('plotDetails', {
               ...formData.plotDetails,
               totalPlotArea: details.totalPlotArea || details.totalArea || 0,
-              infrastructure: details.infrastructure || [],
+              boundaryWall: details.boundaryWall || false,
+              waterSewer: details.waterSewer || false,
+              electricity: details.electricity || false,
               roadAccess: details.roadAccess || "",
               securityRoom: details.securityRoom || false,
-              previousConstruction: details.previousConstruction || ""
+              previousConstruction: details.previousConstruction || "",
+              zoningType: details.zoningType || "commercial"
             });
-          }} />
+
+          }} /> 
 
           {/* Zoning Type - Required field */}
           <div className="bg-gray-100 rounded-lg p-6 shadow-sm border border-gray-200 mt-6">
@@ -430,38 +346,15 @@ const LeasePlotMain = () => {
         <div className="space-y-6">
           <div className="space-y-4 text-black">
             <LeaseAmount
-              onLeaseAmountChange={(amount) => handleChange('leaseDetails', {
-                ...formData.leaseDetails,
-                leaseAmount: amount.leaseAmount,
-                leaseduration: {
-                  ...formData.leaseDetails.leaseduration,
-                  duration: amount.leaseTenure || 0,
-                  type: amount.leaseTermType || 'month',
-                  amountType: 'fixed'
-                }
+              onLeaseAmountChange={(amount) => handleChange('leaseTerms', {
+                ...formData.leaseTerms,
+                leaseAmount: amount
               })}
             />
             <LeaseTenure
-              onLeaseTenureChange={(tenure) => handleChange('leaseDetails', {
-                ...formData.leaseDetails,
-                leasetenure: {
-                  minimumTenure: {
-                    duration: tenure.minimumTenure.duration || 0,
-                    type: tenure.minimumTenure.durationType || 'month'
-                  },
-                  maximumTenure: {
-                    duration: tenure.maximumTenure.duration || 0,
-                    type: tenure.maximumTenure.durationType || 'month'
-                  },
-                  lockInPeriod: {
-                    duration: tenure.lockInPeriod.duration || 0,
-                    type: tenure.lockInPeriod.durationType || 'month'
-                  },
-                  noticePeriod: {
-                    duration: tenure.noticePeriod.duration || 1,
-                    type: tenure.noticePeriod.durationType || 'month'
-                  }
-                }
+              onLeaseTenureChange={(tenure) => handleChange('leaseTerms', {
+                ...formData.leaseTerms,
+                leaseTenure: tenure
               })}
             />
           </div>
@@ -484,8 +377,8 @@ const LeasePlotMain = () => {
             name: "",
             phone: "",
             email: "",
-            alternatePhone: undefined,
-            bestTimeToContact: undefined
+            alternatePhone: "",
+            bestTimeToContact: ""
           }}          />
       ),
     },
@@ -557,11 +450,11 @@ const LeasePlotMain = () => {
   };
 
   const validateFormData = () => {
-    const errors = [];
+    const errors = [];  
 
     // Check basic information
     if (!formData.basicInformation.title) errors.push("Property name");
-    if (!formData.basicInformation.plotType || formData.basicInformation.plotType.length === 0) errors.push("Plot type");
+          if (!formData.basicInformation.plotType || formData.basicInformation.plotType.length === 0) errors.push("Plot type");
     if (!formData.basicInformation.landmark) errors.push("Landmark");
 
     // Check address
@@ -572,9 +465,14 @@ const LeasePlotMain = () => {
     if (!address.zipCode) errors.push("Zip code");
 
     // Check property details
-    if (formData.propertyDetails.area.totalArea <= 0) errors.push("Total area");
-    if (formData.propertyDetails.area.carpetArea <= 0) errors.push("Carpet area");
-    if (formData.propertyDetails.area.builtUpArea <= 0) errors.push("Built-up area");
+    if (formData.plotDetails.totalPlotArea <= 0) errors.push("Total area");
+    if (formData.plotDetails.zoningType) errors.push("Zoning type");
+    if (formData.plotDetails.boundaryWall) errors.push("Boundary wall");
+    if (formData.plotDetails.waterSewer) errors.push("Water sewer");
+    if (formData.plotDetails.electricity) errors.push("Electricity");
+    if (formData.plotDetails.roadAccess) errors.push("Road access");
+    if (formData.plotDetails.securityRoom) errors.push("Security room");
+    if (formData.plotDetails.previousConstruction) errors.push("Previous construction");
 
     // Check plot details
     if (!formData.plotDetails.zoningType) errors.push("Zoning type");
@@ -582,7 +480,7 @@ const LeasePlotMain = () => {
     if (!formData.plotDetails.previousConstruction) errors.push("Previous construction");
 
     // Check lease details
-    if (formData.leaseDetails.leaseAmount <= 0) errors.push("Lease amount");
+    if (formData.leaseTerms.leaseAmount.amount <= 0) errors.push("Lease amount");
 
     // Check contact information
     if (!formData.contactInformation.name) errors.push("Contact name");
@@ -610,130 +508,102 @@ const LeasePlotMain = () => {
     setIsSubmitting(true);
     console.log("Form submission started...");
 
-    // Run validation summary first
-    // if (!showValidationSummary()) {
-    //   return; // Stop if validation fails
+    // Basic validation
+    if (!formData.basicInformation.title) {
+      toast.error('Property name is required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.plotDetails.totalPlotArea || formData.plotDetails.totalPlotArea <= 0) {
+      toast.error('Total plot area is required and must be greater than 0');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // if (!formData.leaseTerms.leaseAmount || formData.leaseTerms.leaseAmount <= 0) {
+    //   toast.error('Lease amount is required and must be greater than 0');
+    //   setIsSubmitting(false);
+    //   return;
     // }
 
-    console.log("Form data being submitted:", formData);
+    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
         console.log("User not authenticated, redirecting to login");
         toast.error('You must be logged in to list a property.');
+        setIsSubmitting(false);
         return;
-      }// Validate required fields before submission
-      // if (
-      //   !formData.basicInformation.landmark ||
-      //   !formData.propertyDetails.area.carpetArea ||
-      //   !formData.propertyDetails.area.builtUpArea
-      // ) {
-      //   toast.error("Please fill in all required fields: Landmark, Carpet area, Built-up area");
-      //   return;
-      // }
+      }
 
       const author = JSON.parse(user).id;
       console.log("User authenticated, ID:", author);
 
       // Ensure coordinates are valid numbers for the backend
-      const safeCoordinates = {
-        latitude: typeof formData.basicInformation.coordinates.latitude === 'string'
-          ? parseFloat(formData.basicInformation.coordinates.latitude) || 0
-          : formData.basicInformation.coordinates.latitude || 0,
-        longitude: typeof formData.basicInformation.coordinates.longitude === 'string'
-          ? parseFloat(formData.basicInformation.coordinates.longitude) || 0
-          : formData.basicInformation.coordinates.longitude || 0
+      const safelocation = {
+        latitude: typeof formData.basicInformation.location.latitude === 'string'
+          ? parseFloat(formData.basicInformation.location.latitude) || 0
+          : formData.basicInformation.location.latitude || 0,
+        longitude: typeof formData.basicInformation.location.longitude === 'string'
+          ? parseFloat(formData.basicInformation.location.longitude) || 0
+          : formData.basicInformation.location.longitude || 0
       };
 
       // Generate a unique propertyId if not already set
-      const propertyId = formData.propertyId || `CLPLOT-${Date.now().toString().slice(-8)}`;
-      console.log("Generated or existing propertyId:", propertyId);
 
       // Update form data with safe coordinates and ensure required fields
       const updatedFormData = {
-        propertyId,
         basicInformation: {
           title: formData.basicInformation.title,
           plotType: formData.basicInformation.plotType,
           address: formData.basicInformation.address,
           landmark: formData.basicInformation.landmark,
-          coordinates: safeCoordinates,
+          location:safelocation,
           isCornerProperty: formData.basicInformation.isCornerProperty
-        },
-        propertyDetails: {
-          area: {
-            totalArea: formData.propertyDetails.area.totalArea || 0,
-            carpetArea: formData.propertyDetails.area.carpetArea || 0,
-            builtUpArea: formData.propertyDetails.area.builtUpArea || 0
-          },
-          floor: {
-            floorNumber: formData.propertyDetails.floor.floorNumber || 0,
-            totalFloors: formData.propertyDetails.floor.totalFloors || 0
-          },
-          facingDirection: formData.propertyDetails.facingDirection || "",
-          furnishingStatus: formData.propertyDetails.furnishingStatus || "",
-          propertyAmenities: formData.propertyDetails.propertyAmenities || [],
-          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || ""
         },
         plotDetails: {
           totalPlotArea: formData.plotDetails.totalPlotArea || 0,
           zoningType: formData.plotDetails.zoningType || "commercial",
-          infrastructure: formData.plotDetails.infrastructure || [],
+          boundaryWall: formData.plotDetails.boundaryWall || false,
+          waterSewer: formData.plotDetails.waterSewer || false,
+          electricity: formData.plotDetails.electricity || false,
           roadAccess: formData.plotDetails.roadAccess || "",
           securityRoom: formData.plotDetails.securityRoom || false,
           previousConstruction: formData.plotDetails.previousConstruction || ""
         },
-        leaseDetails: {
-          leaseAmount: formData.leaseDetails.leaseAmount || 0,
-          leaseduration: {
-            duration: formData.leaseDetails.leaseduration.duration || 0,
-            type: formData.leaseDetails.leaseduration.type || "month",
-            amountType: formData.leaseDetails.leaseduration.amountType || "fixed"
+        
+        leaseTerms: {
+          leaseAmount: {
+            amount: formData.leaseTerms.leaseAmount.amount || 0,
+            duration: formData.leaseTerms.leaseAmount.duration || 0,
+            durationType: formData.leaseTerms.leaseAmount.durationType || "month",
+            amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
           },
-          leasetenure: {
-            minimumTenure: {
-              duration: formData.leaseDetails.leasetenure.minimumTenure.duration || 0,
-              type: formData.leaseDetails.leasetenure.minimumTenure.type || "month"
-            },
-            maximumTenure: {
-              duration: formData.leaseDetails.leasetenure.maximumTenure.duration || 0,
-              type: formData.leaseDetails.leasetenure.maximumTenure.type || "month"
-            },
-            lockInPeriod: {
-              duration: formData.leaseDetails.leasetenure.lockInPeriod.duration || 0,
-              type: formData.leaseDetails.leasetenure.lockInPeriod.type || "month"
-            },
-            noticePeriod: {
-              duration: formData.leaseDetails.leasetenure.noticePeriod.duration || 0,
-              type: formData.leaseDetails.leasetenure.noticePeriod.type || "month"
-            }
+          leaseTenure: {
+            minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure ||"",
+            minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
+            maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
+            maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
+            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
+            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
+            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
+            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
           },
-          maintenanceCharges: {
-            amount: formData.leaseDetails.maintenanceCharges.amount || 0,
-            frequency: formData.leaseDetails.maintenanceCharges.frequency || "monthly"
-          },
-          otherCharges: {
-            electricityCharges: {
-              type: formData.leaseDetails.otherCharges.electricityCharges.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.electricityCharges.amount || 0
-            },
-            waterCharges: {
-              type: formData.leaseDetails.otherCharges.waterCharges.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.waterCharges.amount || 0
-            },
-            gasCharges: {
-              type: formData.leaseDetails.otherCharges.gasCharges.type || "inclusive",
-              amount: formData.leaseDetails.otherCharges.gasCharges.amount || 0
-            },
-            otherCharges: formData.leaseDetails.otherCharges.otherCharges || "inclusive",
-            amount: formData.leaseDetails.otherCharges.amount || 0
-          }
+          
         },
-        brokerage: formData.brokerage ? {
-          required: formData.brokerage.required || false,
-          amount: formData.brokerage.amount || 0
-        } : undefined,
+        
         availability: {
           availableFrom: formData.availability.availableFrom,
           availableImmediately: formData.availability.availableImmediately || false,
@@ -748,7 +618,6 @@ const LeasePlotMain = () => {
           email: formData.contactInformation.email || "",
           phone: formData.contactInformation.phone || "",
           alternatePhone: formData.contactInformation.alternatePhone || "",
-          preferredContactTime: formData.contactInformation.preferredContactTime || "",
           bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
         }
       };
@@ -760,30 +629,87 @@ const LeasePlotMain = () => {
       const convertedMedia = {
         photos: {
           exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washroom: await Promise.all((formData.media?.photos?.washroom ?? []).map(convertFileToBase64)),
-          lift: await Promise.all((formData.media?.photos?.lift ?? []).map(convertFileToBase64)),
-          emergencyExit: await Promise.all((formData.media?.photos?.emergencyExit ?? []).map(convertFileToBase64))
         },
         videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
         documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
       };
 
       const transformedData = {
-        ...updatedFormData,
+        propertyId: formData.propertyId || `CLPLOT-${Date.now().toString().slice(-8)}`,
+        basicInformation: {
+          title: formData.basicInformation.title || "",
+          plotType: formData.basicInformation.plotType || [],
+          address: {
+            street: formData.basicInformation.address.street || "",
+            city: formData.basicInformation.address.city || "",
+            state: formData.basicInformation.address.state || "",
+            zipCode: formData.basicInformation.address.zipCode || ""
+          },
+          landmark: formData.basicInformation.landmark || "",
+          location: {
+            latitude: formData.basicInformation.location.latitude || "",
+            longitude: formData.basicInformation.location.longitude || ""
+          },
+          isCornerProperty: formData.basicInformation.isCornerProperty || false
+        },
+        plotDetails: {
+          totalPlotArea: formData.plotDetails.totalPlotArea || 0,
+          zoningType: formData.plotDetails.zoningType || "commercial",
+          boundaryWall: formData.plotDetails.boundaryWall || false,
+          waterSewer: formData.plotDetails.waterSewer || false,
+          electricity: formData.plotDetails.electricity || false,
+          roadAccess: formData.plotDetails.roadAccess || "",
+          securityRoom: formData.plotDetails.securityRoom || false,
+          previousConstruction: formData.plotDetails.previousConstruction || ""
+        },
+        leaseTerms: {
+          leaseAmount: {
+            amount: formData.leaseTerms.leaseAmount.amount || 0,
+            duration: formData.leaseTerms.leaseAmount.duration || 0,
+            durationType: formData.leaseTerms.leaseAmount.durationType || "month",
+            amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
+          },
+          leaseTenure: {
+            minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure || "",
+            minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
+            maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
+            maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
+            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
+            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
+            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
+            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
+          }
+        },
+        availability: {
+          availableFrom: formData.availability.availableFrom,
+          availableImmediately: formData.availability.availableImmediately || false,
+          availabilityStatus: formData.availability.availabilityStatus || (formData.availability.availableImmediately ? 'immediate' : 'later'),
+          leaseDuration: formData.availability.leaseDuration || "",
+          noticePeriod: formData.availability.noticePeriod || "",
+          isPetsAllowed: formData.availability.isPetsAllowed || false,
+          operatingHours: formData.availability.operatingHours || false
+        },
+        contactInformation: {
+          name: formData.contactInformation.name || "",
+          email: formData.contactInformation.email || "",
+          phone: formData.contactInformation.phone || "",
+          alternatePhone: formData.contactInformation.alternatePhone || "",
+          bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
+        },
         media: convertedMedia,
         metadata: {
           createdBy: author,
           createdAt: new Date(),
-          userName: author,
-          userId: author 
+          propertyType: 'Commercial',
+          propertyName: 'Plot',
+          intent: 'Lease',
+          status: 'Available'
         }
       };
 
       console.log("Submitting data:", transformedData);
 
-      const response = await axios.post('http://localhost:8000/api/commercial/lease/plot', transformedData, {
+      const response = await axios.post('/api/commercial/lease/plots', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

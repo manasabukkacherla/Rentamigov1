@@ -6,7 +6,7 @@ const commercialSellShowroomRoutes = express.Router();
 // Protected route for creating showroom
 commercialSellShowroomRoutes.post('/',  createShowroom);
 commercialSellShowroomRoutes.get('/', getAllShowrooms);
-commercialSellShowroomRoutes.get('/:id', getShowroom);
+commercialSellShowroomRoutes.get('/:propertyId', getShowroom);
 commercialSellShowroomRoutes.put('/:id', updateShowroom);
 commercialSellShowroomRoutes.delete('/:id', deleteShowroom);
 

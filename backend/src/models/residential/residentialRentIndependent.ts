@@ -3,7 +3,7 @@ import mongoose, { Schema } from 'mongoose';
 interface IResidentialRentIndependentHouse extends Document {
   propertyId: string;
   basicInformation: {
-    propertyName: string;
+    title: string;
     propertyAddress: {
         houseName: string;
         street: string;
@@ -171,6 +171,12 @@ interface IResidentialRentIndependentHouse extends Document {
   metadata: {
     createdBy: Schema.Types.ObjectId | string;
     createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Independent House';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
+    updatedBy?: Schema.Types.ObjectId | string;
+    updatedAt?: Date;
   };
 }
 
@@ -181,7 +187,7 @@ const residentialRentIndependentHouseSchema = new mongoose.Schema<IResidentialRe
     unique: true,
   },
   basicInformation: {
-    propertyName: { type: String, required: true },
+    title: { type: String, required: true },
     propertyAddress: {
       houseName: { type: String, required: true },
       street: { type: String, required: true },
@@ -348,6 +354,12 @@ const residentialRentIndependentHouseSchema = new mongoose.Schema<IResidentialRe
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    intent: { type: String, default: 'Rent' },
+    propertyName: { type: String, default: 'Independent House' },
+    status: { type: String, default: 'Available' },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    updatedAt: { type: Date, default: Date.now },
   }
 }, {
   timestamps: true

@@ -6,7 +6,7 @@ import User  from '../../models/signup';
 // Helper function to generate Property ID
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMLEAAG";
+    const prefix = "RA-COMLEAG";
     const highestShop = await CommercialLeaseAgriculture.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
     }).sort({ propertyId: -1 });
@@ -50,26 +50,9 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
     const formData = req.body;
 
     // Prefer authenticated user if available
-    let userId: string | undefined = undefined;
-    let user: any = undefined;
-    if (req.user && (req.user as any)._id) {
-      userId = (req.user as any)._id;
-      user = req.user;
-    } else if (formData.metaData && formData.metaData.userId) {
-      userId = formData.metaData.userId;
-      // Optionally: fetch user from DB if needed
-    } else if (formData.metadata && formData.metadata.userId) {
-      userId = formData.metadata.userId;
-      // Optionally: fetch user from DB if needed
-    }
+   
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not authenticated or user ID is missing in request.'
-      });
-    }
-
+  
     // Generate property ID
     const propertyId = await generatePropertyId();
     if (!propertyId) {
@@ -78,13 +61,86 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
         message: 'Failed to generate property ID.'
       });
     }
+    
+    console.log(propertyId);
 
     // Add metadata with userId and user (like Sell controller)
     const agricultureData = {
+      propertyId,
       ...formData,
+      basicInformation:{
+        ...formData.basicInformation,
+        title: formData.basicInformation.title,
+        Type: formData.basicInformation.Type,
+        address: {
+          street: formData.basicInformation.address.street,
+          city: formData.basicInformation.address.city,
+          state: formData.basicInformation.address.state,
+          zipCode: formData.basicInformation.address.zipCode
+        },
+        landmark: formData.basicInformation.landmark,
+        location: {
+          latitude: formData.basicInformation.location.latitude,
+          longitude: formData.basicInformation.location.longitude
+        },
+        isCornerProperty: formData.basicInformation.isCornerProperty,
+        powerSupply: formData.basicInformation.powerSupply
+      },
+      Agriculturelanddetails:{
+        ...formData.Agriculturelanddetails,
+        totalArea: Number(formData.Agriculturelanddetails.totalArea),
+        soilType: formData.Agriculturelanddetails.soilType,
+        irrigation: formData.Agriculturelanddetails.irrigation,
+        fencing: formData.Agriculturelanddetails.fencing,
+        cropSuitability: formData.Agriculturelanddetails.cropSuitability,
+        waterSource: formData.Agriculturelanddetails.waterSource,
+        legalClearances: formData.Agriculturelanddetails.legalClearances
+      },
+      leaseTerms:{
+        ...formData.leaseTerms,
+        leaseAmount: {
+          amount: formData.leaseTerms.leaseAmount.amount,
+          duration: formData.leaseTerms.leaseAmount.duration,
+          durationType: formData.leaseTerms.leaseAmount.durationType,
+          isNegotiable: formData.leaseTerms.leaseAmount.isNegotiable
+        },
+        leaseTenure: {
+          minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure,
+          minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit,
+          maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure,
+          maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit,
+          lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod,
+          lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit,
+          noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod,
+          noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit
+        }
+      },
+      availability:{
+        ...formData.availability,
+        availableFrom: formData.availability.availableFrom,
+        availableImmediately: formData.availability.availableImmediately,
+        availabilityStatus: formData.availability.availabilityStatus,
+        leaseDuration: formData.availability.leaseDuration,
+        noticePeriod: formData.availability.noticePeriod,
+        isPetsAllowed: formData.availability.isPetsAllowed,
+        operatingHours: formData.availability.operatingHours
+      },
+      contactInformation:{
+        ...formData.contactInformation,
+        name: formData.contactInformation.name,
+        email: formData.contactInformation.email,
+        phone: formData.contactInformation.phone,
+        alternatePhone: formData.contactInformation.alternatePhone,
+        bestTimeToContact: formData.contactInformation.bestTimeToContact
+      },
+      media: {
+        photos: formData.media.photos,
+        videoTour: formData.media.videoTour,
+        documents: formData.media.documents,
+      },
       metadata: {
         ...formData.metadata,
-       // createdBy: req.user?._id || null,
+        createdBy: formData.metadata?.createdBy,
         createdAt: new Date()
       }
     };
@@ -130,7 +186,7 @@ export const getAllCommercialLeaseAgriculture = async (req: Request, res: Respon
 // Get Commercial Rent Agriculture by ID
 export const getCommercialLeaseAgricultureById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialLeaseAgriculture.findOne({ propertyId });
 
     if (!property) {

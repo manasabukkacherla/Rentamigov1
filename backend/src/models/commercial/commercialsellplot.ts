@@ -9,51 +9,28 @@ interface IArea {
 
 interface IBasicInformation {
     title: string;
-    plotType: string;
+    Type: string[];
     address: string;
     landmark: string;
     city: string;
     state: string;
     zipCode: string;
-    latitude: string;
-    longitude: string;
+    location: { latitude: string; longitude: string };
     isCornerProperty: boolean;
 }
 
 interface IPlotDetails {
     totalArea: number;
     zoningType: string;
-    plotFacing?: string;
-    roadWidth?: number;
-    landmarkProximity?: string[];
-    approvals?: string[];
-    floorAreaRatio?: number;
-    infrastructure?: any[]; 
-    security?: any[];       
-    boundaryWall?: boolean;
-    waterConnection?: boolean;
-    electricityConnection?: boolean;
-    previousConstruction: string;
+    boundaryWall: boolean;
+    waterSewer: boolean;
+    electricity: boolean;
     roadAccess: string;
-    zoninginformation: string;
+    securityRoom: boolean;
+    previousConstruction: string;
 }
 
-interface IPropertyDetails {
-    area?: IArea;
-    zoning?: string;
-    facingDirection?: string;
-    waterAvailability?: string;
-    ownershipType?: string;
-    propertyCondition?: string;
-    permissibleFAR?: number;
-    permissibleHeight?: number;
-    groundCoverage?: number;
-    setback?: {
-        front?: number;
-        rear?: number;
-        sides: number;
-    };
-}
+
 
 interface IPricingDetails {
     propertyPrice: number;
@@ -63,16 +40,7 @@ interface IPricingDetails {
     pricePerSqFt: number;
 }
 
-interface IRegistration {
-    type: "inclusive" | "exclusive";
-    registrationCharges: number;
-    stampDutyCharges: number;
-}
 
-interface IBrokerage {
-    required?: string;
-    amount?: number;
-}
 
 interface IAvailability {
     availableFrom?: Date;
@@ -107,16 +75,17 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 interface ICommercialPlot extends Document {
     propertyId: string;
     basicInformation: IBasicInformation;
     plotDetails: IPlotDetails;
-    propertyDetails: IPropertyDetails;
     pricingDetails: IPricingDetails;
-    registration: IRegistration;
-    brokerage?: IBrokerage;
     availability: IAvailability;
     contactInformation: IContactInformation;
     media: IMedia;
@@ -128,53 +97,26 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        plotType: { type: String, required: true },
+        Type: [{ type: String, required: true }],
         address: { type: String, required: true },
         landmark: { type: String, required: true },
+        location: { latitude: String, longitude: String },
         city: { type: String, required: true },
         state: { type: String, required: true },
         zipCode: { type: String, required: true },
-         latitude: { type: String, required: true },
-        longitude: { type: String, required: true },
     
         isCornerProperty: { type: Boolean, default: false }
     },
     plotDetails: {
         totalArea: { type: Number},
         zoningType: { type: String },
-        plotFacing: { type: String },
-        roadWidth: { type: Number },
-        landmarkProximity: [{ type: String }],
-        approvals: [{ type: String }],
-        floorAreaRatio: { type: Number },
-        infrastructure: [{ type: Schema.Types.Mixed }], 
-        security: [{ type: Schema.Types.Mixed }],       
         boundaryWall: { type: Boolean },
-        waterConnection: { type: Boolean },
-        electricityConnection: { type: Boolean },
+        waterSewer: { type: Boolean },
+        electricity: { type: Boolean },
         previousConstruction: [{type:String}],
         roadAccess: { type: String },
-        zoninginformation: { type: String }
-    },
-    propertyDetails: {
-        area: {
-            totalArea: { type: Number},
-            carpetArea: { type: Number},
-            builtUpArea: { type: Number}
-        },
-        zoning: { type: String },
-        facingDirection: { type: String },
-        waterAvailability: { type: String },
-        ownershipType: { type: String },
-        propertyCondition: { type: String },
-        permissibleFAR: { type: Number},
-        permissibleHeight: { type: Number},
-        groundCoverage: { type: Number},
-        setback: {
-            front: { type: Number },
-            rear: { type: Number },
-            sides: { type: Number }
-        }
+        securityRoom: { type: Boolean },
+       
     },
     pricingDetails: {
         propertyPrice: { type: Number, required: true },
@@ -182,15 +124,6 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
         area: { type: Number, required: true },
         totalPrice: { type: Number, required: true },
         pricePerSqFt: { type: Number, required: true }
-    },
-    registration: {
-        type: { type: String, enum: ['inclusive', 'exclusive'], required: true },
-        registrationCharges: { type: Number, required: true },
-        stampDutyCharges: { type: Number, required: true }
-    },
-    brokerage: {
-        required: { type: String, enum: ['yes', 'no'] },
-        amount: { type: Number }
     },
     availability: {
         availableFrom: { type: Date },
@@ -221,7 +154,11 @@ const CommercialPlotSchema = new Schema<ICommercialPlot>({
     },
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Sell' },
+        propertyName: { type: String,  default: 'Plot' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true
@@ -240,11 +177,8 @@ export {
     ICommercialPlot,
     IBasicInformation,
     IPlotDetails,
-    IPropertyDetails,
     IArea,
     IPricingDetails,
-    IRegistration,
-    IBrokerage,
     IAvailability,
     IContactInformation,
     IMedia,

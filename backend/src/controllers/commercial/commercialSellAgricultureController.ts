@@ -53,7 +53,7 @@ const generatePropertyId = async (): Promise<string> => {
     console.error('Error generating property ID:', error);
     // Fallback to timestamp-based ID if there's an error
     const timestamp = Date.now().toString().slice(-8);
-    return `SA-COMSAG${timestamp}`;
+    return `SA-COMSEAG${timestamp}`;
   }
 };
 
@@ -64,22 +64,22 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
     // Generate property ID
     const propertyId = await generatePropertyId();
 
-    // Robustly ensure userId is always set for metaData
+    // Robustly ensure userId is always set for metadata
     let userId: string | undefined = undefined;
     let user: any = undefined;
     if (req.user && (req.user as any)._id) {
       userId = (req.user as any)._id;
       user = req.user;
-    } else if (formData.metaData && formData.metaData.userId) {
-      userId = formData.metaData.userId;
+    } else if (formData.metadata && formData.metadata.userId) {
+      userId = formData.metadata.userId;
     } else if (formData.metadata && formData.metadata.userId) {
       userId = formData.metadata.userId;
     }
 
     if (!userId) {
       // Fallback: try createdBy (as seen in your sample data)
-      if (formData.metaData && formData.metaData.createdBy) {
-        userId = formData.metaData.createdBy;
+      if (formData.metadata && formData.metadata.createdBy) {
+        userId = formData.metadata.createdBy;
       } else if (formData.metadata && formData.metadata.createdBy) {
         userId = formData.metadata.createdBy;
       }
@@ -96,9 +96,9 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
     const agricultureData = {
       propertyId,
       ...formData,
-      metaData: {
-        ...formData.metaData,
-        createdBy: req.user?._id || null,
+      metadata: {
+        ...formData.metadata,
+        createdBy: formData.metadata.createdBy,
         createdAt: new Date()
       }
     };
@@ -123,7 +123,7 @@ export const createCommercialSellAgriculture = async (req: Request, res: Respons
 
 export const getAllCommercialSellAgriculture = async (req: Request, res: Response) => {
   try {
-    const properties = await CommercialSellAgriculture.find().sort({ 'metaData.createdAt': -1 });
+    const properties = await CommercialSellAgriculture.find().sort({ 'metadata.createdAt': -1 });
     
     res.status(200).json({
       message: 'Commercial sell agriculture listings retrieved successfully',
@@ -137,7 +137,7 @@ export const getAllCommercialSellAgriculture = async (req: Request, res: Respons
 
 export const getCommercialSellAgricultureById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialSellAgriculture.findOne({ propertyId });
     
     if (!property) {

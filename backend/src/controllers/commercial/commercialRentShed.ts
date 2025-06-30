@@ -4,7 +4,7 @@ import CommercialRentShed from '../../models/commercial/CommercialRentShed';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-COMRSD";
+        const prefix = "RA-COMRESD";
 
         const highestShowroom = await CommercialRentShed.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
@@ -42,7 +42,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMRSH${timestamp}`;
+        return `RA-COMRESD${timestamp}`;
     }
 };
 
@@ -56,6 +56,11 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             formData.metadata = {};
         }
 
+        // Robustly set metadata.createdBy and createdAt
+        formData.metadata = formData.metadata || {};
+        formData.metadata.createdBy = req.user?._id || formData.metadata.createdBy || null;
+        formData.metadata.createdAt = formData.metadata.createdAt || new Date();
+
         if (!formData.metadata.createdBy) {
             return res.status(400).json({
                 success: false,
@@ -68,11 +73,12 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
             propertyId,
             ...formData,
             metadata: {
-                ...formData.metadata,
-                createdBy: req.user?._id || null,
-                createdAt: new Date()
+                ...formData.metadata
             }
         };
+
+        // Debug: log the payload being saved
+        console.log('Saving CommercialRentShed:', JSON.stringify(showroomData, null, 2));
 
         const showroom = new CommercialRentShed(showroomData);
         await showroom.save();
@@ -120,13 +126,15 @@ export const getSheds = async (req: Request, res: Response) => {
 
 export const getShedById = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialRentShed.findById(req.params.id);
+        const propertyId = req.params.propertyId;
+        const shed = await CommercialRentShed.findOne({ propertyId });
         if (!shed) {
             return res.status(404).json({
                 success: false,
-                error: 'Shed not found'
+                error: 'Commercial RentShed listing not found'
             });
         }
+        
         res.status(200).json({
             success: true,
             data: shed

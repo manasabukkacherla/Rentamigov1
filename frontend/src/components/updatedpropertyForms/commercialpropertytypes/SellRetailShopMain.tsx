@@ -20,6 +20,7 @@ import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon,
 import axios from "axios"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
+import PriceDetails from "../CommercialComponents/PriceDetails"
 // interface MediaFile {
 //   url: string;
 //   file: File;
@@ -38,7 +39,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormDataState {
   basicInformation: {
     title: string;
-    retailStoreType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -51,7 +52,6 @@ interface FormDataState {
       longitude: string;
     };
     isCornerProperty: boolean;
-    shopType?: string[];
   };
   retailStoreDetails: {
     location: string;
@@ -80,29 +80,28 @@ interface FormDataState {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
     ownershipType: string;
     possessionStatus: string;
   };
   priceDetails: {
-    price: number;
-    pricePerSqft: number;
-    isNegotiable: boolean;
-    registrationCharges: {
-      registrationAmount: number;
-      stampDuty: number;
-      otherCharges: number;
-    };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
+    propertyPrice: number;
+    pricetype: string;
+  };
+    registration: {
+      chargestype: string;
+      registrationAmount?: number;
+      stampDutyAmount?: number;
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
       type: string;
       date?: string;
     };
-  };
   contactInformation: {
     name: string;
     email: string;
@@ -125,8 +124,11 @@ interface FormDataState {
   metadata?: {
     createdBy?: string;
     createdAt?: Date;
-    status?: string;
     isVerified?: boolean;
+    propertyType?: string;
+    propertyName?: string;
+    intent?: string;
+    status?: string;
   };
 }
 
@@ -135,7 +137,7 @@ const SellRetailShopMain = () => {
   const [formData, setFormData] = useState<FormDataState>({
     basicInformation: {
       title: '',
-      retailStoreType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -176,29 +178,30 @@ const SellRetailShopMain = () => {
         backup: false
       },
       waterAvailability: '',
-      propertyAge: 0,
+      propertyAge: '',
       propertyCondition: '',
       ownershipType: 'Freehold',
       possessionStatus: 'Ready to Move'
     },
     priceDetails: {
-      price: 0,
-      pricePerSqft: 0,
-      isNegotiable: false,
-      registrationCharges: {
-        registrationAmount: 0,
-        stampDuty: 0,
-        otherCharges: 0
-      },
-      brokerage: {
-        required: 'No',
-        amount: 0
-      },
-      availability: {
+      propertyPrice: 0,
+      pricetype: 'fixed',
+    },
+    registration: {
+      chargestype: 'inclusive',
+      registrationAmount: 0,
+      stampDutyAmount: 0,
+      
+    },
+    brokerage: {
+      required: 'No',
+      amount: 0
+    },
+    availability: {
         type: 'Ready to Move',
         date: ''
-      }
-    },
+      },
+    
     contactInformation: {
       name: '',
       email: '',
@@ -262,7 +265,7 @@ const SellRetailShopMain = () => {
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name: string) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, title: name } })}
           />
-          <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, retailStoreType: types } })} />
+          <RetailStoreType onRetailTypeChange={(types: string[]) => setFormData({ ...formData, basicInformation: { ...formData.basicInformation, Type: types } })} />
 
           <CommercialPropertyAddress 
             address={formData.basicInformation.address}
@@ -326,7 +329,7 @@ const SellRetailShopMain = () => {
                   backup: details.electricitySupply?.backup || false
                 },
                 waterAvailability: details.waterAvailability,
-                propertyAge: parseInt(details.propertyAge?.toString() || '0'),
+                propertyAge: details.propertyAge || '',
                 propertyCondition: details.propertyCondition || ''
               }
             })}
@@ -340,45 +343,41 @@ const SellRetailShopMain = () => {
       component: (
         <div className="space-y-6">
           <div className="space-y-4 text-black">
-            <Price onPriceChange={(price) => setFormData({
-              ...formData,
-              priceDetails: {
-                ...formData.priceDetails,
-                price: parseFloat(price.amount.toString())
-              }
-            })} />
+        <Price onPriceChange={(price) => setFormData(prev => ({
+           ...prev,
+          priceDetails: {
+            ...prev.priceDetails,
+            propertyPrice:price.propertyPrice,
+            pricetype: price.pricetype || 'fixed'
+  }
+}))} />
           </div>
-
+         
 
           <div className="space-y-4 text-black">
             <div className="text-black">
               <RegistrationCharges
-                onRegistrationChargesChange={(charges) => setFormData({
-                  ...formData,
-                  priceDetails: {
-                    ...formData.priceDetails,
-                    registrationCharges: {
-                      registrationAmount: parseFloat(charges.registrationAmount?.toString() || '0'),
-                      stampDuty: parseFloat(charges.stampDuty?.toString() || '0'),
-                      otherCharges: parseFloat(charges.otherCharges?.toString() || '0')
-                    }
+                onRegistrationChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    ...prev.registration,
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
                   }
-                })}
-              />
+                }))} />  
             </div>
             <div className="text-black">
               <Brokerage 
-              bro={formData.priceDetails.brokerage}
+              bro={formData.brokerage}
               onBrokerageChange={(brokerage) => setFormData({
                 ...formData,
-                priceDetails: {
-                  ...formData.priceDetails,
-                  brokerage: {
+                brokerage: {
                     required: brokerage.required || 'No',
                     amount: parseFloat(brokerage.amount?.toString() || '0')
                   }
-                }
-              })} />
+                })}
+              />
             </div>
           </div>
         </div>
@@ -391,12 +390,9 @@ const SellRetailShopMain = () => {
           <div className="space-y-6">
             <CommercialAvailability onAvailabilityChange={(availability) => setFormData({
               ...formData,
-              priceDetails: {
-                ...formData.priceDetails,
-                availability: {
-                  type: availability.type || 'Ready to Move',
-                  date: availability.date
-                }
+              availability: {
+                type: availability.type || 'Ready to Move',
+                date: availability.date
               }
             })} />
           </div>
@@ -512,15 +508,15 @@ const SellRetailShopMain = () => {
     switch (currentStep) {
       case 0: // Basic Information
         return !!formData.basicInformation.title &&
-          formData.basicInformation.retailStoreType.length > 0 &&
+          formData.basicInformation.Type.length > 0 &&
           !!formData.basicInformation.address.street;
       case 1: // Property Details
         return !!formData.retailStoreDetails.location &&
           formData.propertyDetails.area.totalArea > 0;
       case 2: // Pricing Details
-        return formData.priceDetails.price > 0;
+        return formData.priceDetails.propertyPrice > 0;
       case 3: // Availability
-        return !!formData.priceDetails.availability.type;
+        return !!formData.availability.type;
       case 4: // Contact Information
         return !!formData.contactInformation.name &&
           !!formData.contactInformation.email &&
@@ -531,22 +527,30 @@ const SellRetailShopMain = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
+    // Debug: log price before validation
+    console.log('DEBUG price before validation:', formData.priceDetails.propertyPrice);
     e.preventDefault();
     console.log('Form Data:', formData);
+
+    // Validate price and author before submission
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      toast.error('You need to be logged in to create a listing');
+      navigate('/login');
+      return;
+    }
+    const userData = JSON.parse(user);
+    const author = userData.id;
+    if (!author) {
+      toast.error('User information missing. Please log in again.');
+      navigate('/login');
+      return;
+    }
+    // Removed price > 0 validation as requested
     setIsSubmitting(true);
 
     try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        toast.error('You need to be logged in to create a listing');
-        navigate('/login');
-        return;
-      }
-
-      const userData = JSON.parse(user);
-      const author = userData.id;
       const token = sessionStorage.getItem('token');
-
       // Convert media files to base64
       const convertFileToBase64 = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -575,9 +579,10 @@ const SellRetailShopMain = () => {
       const transformedData = {
         basicInformation: {
           ...formData.basicInformation,
-          shopType: Array.isArray(formData.basicInformation.shopType)
-            ? formData.basicInformation.shopType
-            : (formData.basicInformation.shopType ? [formData.basicInformation.shopType] : []),
+          Type: Array.isArray(formData.basicInformation.Type)
+          ? formData.basicInformation.Type
+  : (formData.basicInformation.Type ? [formData.basicInformation.Type] : []),
+
           location: {
             latitude: formData.basicInformation.location.latitude,
             longitude: formData.basicInformation.location.longitude
@@ -641,27 +646,24 @@ const SellRetailShopMain = () => {
             backup: formData.propertyDetails.electricitySupply.backup
           },
           waterAvailability: formData.propertyDetails.waterAvailability,
-          propertyAge: parseInt(formData.propertyDetails.propertyAge.toString()),
-          propertyCondition: formData.propertyDetails.propertyCondition
         },
-        priceDetails: {
-          ...formData.priceDetails,
-          price: parseFloat(formData.priceDetails.price.toString()),
-          pricePerSqft: parseFloat(formData.priceDetails.pricePerSqft.toString()),
-          isNegotiable: formData.priceDetails.isNegotiable,
-          registrationCharges: {
-            registrationAmount: parseFloat(formData.priceDetails.registrationCharges.registrationAmount.toString()),
-            stampDuty: parseFloat(formData.priceDetails.registrationCharges.stampDuty.toString()),
-            otherCharges: parseFloat(formData.priceDetails.registrationCharges.otherCharges.toString())
+          priceDetails: {
+            propertyPrice: parseFloat(formData.priceDetails.propertyPrice.toString()),
+            pricetype: formData.priceDetails.pricetype=='fixed'?'fixed':'negotiable'
           },
+          registration: {
+            chargestype: formData.registration.chargestype=='inclusive'?'inclusive':'exclusive',
+            registrationAmount: formData.registration.registrationAmount ? parseFloat(formData.registration.registrationAmount.toString()) : 0,
+            stampDutyAmount: formData.registration.stampDutyAmount ? parseFloat(formData.registration.stampDutyAmount.toString()) : 0,
+          },
+        
           brokerage: {
-            required: formData.priceDetails.brokerage.required,
-            amount: formData.priceDetails.brokerage.amount ? parseFloat(formData.priceDetails.brokerage.amount.toString()) : undefined
+            required: formData.brokerage.required === "Yes" ? "Yes" : "No",
+            amount: formData.brokerage.amount ? parseFloat(formData.brokerage.amount.toString()) : undefined
           },
           availability: {
-            type: formData.priceDetails.availability.type,
-            date: formData.priceDetails.availability.date
-          }
+            type: formData.availability.type,
+            date: formData.availability.date
         },
         contactInformation: {
           ...formData.contactInformation,
@@ -673,11 +675,14 @@ const SellRetailShopMain = () => {
         },
         media: convertedMedia,
         metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          status: 'draft',
-          isVerified: false
-        }
+  createdAt: new Date(),
+  isVerified: false,
+  propertyType: 'Commercial',
+  propertyName: 'Retail Store',
+  intent: 'Sell',
+  status: 'Available',
+  createdBy: author // ensure createdBy is set from logged-in user
+},
       };
 
       // Use the same format as in the backend routes configuration
@@ -688,7 +693,8 @@ const SellRetailShopMain = () => {
         'Authorization': token ? `Bearer ${token}` : ''
       });
 
-      const response = await axios.post(API_ENDPOINT, transformedData, {
+      console.log('Sending transformedData:', JSON.stringify(transformedData, null, 2));
+       const response = await axios.post(API_ENDPOINT, transformedData, {
         headers: {
           'Content-Type': 'application/json',
           'Authorization': token ? `Bearer ${token}` : ''
@@ -700,7 +706,7 @@ const SellRetailShopMain = () => {
       if (response.data.success) {
         toast.success('Commercial sell retail shop listing created successfully!');
         setTimeout(() => {
-          navigate('/dashboard');
+          navigate('/updatePropertyform');
         }, 1500);
       } else {
         toast.error(response.data.error || 'Failed to create listing');

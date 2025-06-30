@@ -1,99 +1,111 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock, ArrowRight, Calendar, User, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-interface BlogPost {
-  id: number;
-  title: string;
-  excerpt: string;
-  image: string;
-  author: {
-    name: string;
-    avatar: string;
-  };
-  date: string;
-  readTime: string;
-  category: string;
-  featured?: boolean;
-  tags?: string[];
+interface Author {
+  _id: string;
+  username: string;
+  fullName: string;
+  email: string;
+  image?: string;
+  // Add other author fields as needed
 }
 
-const articles: BlogPost[] = [
-  {
-    id: 1,
-    title: "The Future of Smart Homes: Integration of AI in Modern Living",
-    excerpt: "Discover how artificial intelligence is revolutionizing home automation and enhancing living experiences.",
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800",
-    author: {
-      name: "Sarah Chen",
-      avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150"
-    },
-    date: "Mar 15, 2024",
-    readTime: "5 min read",
-    category: "Technology",
-    featured: true,
-    tags: ["Smart Home", "AI", "IoT"]
-  },
-  {
-    id: 2,
-    title: "Sustainable Architecture: Building for Tomorrow",
-    excerpt: "Exploring eco-friendly building practices and their impact on modern real estate development.",
-    image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=800",
-    author: {
-      name: "Michael Roberts",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150"
-    },
-    date: "Mar 14, 2024",
-    readTime: "4 min read",
-    category: "Architecture",
-    tags: ["Sustainability", "Green Building", "Eco-friendly"]
-  },
-  {
-    id: 3,
-    title: "Investment Guide: Navigating the Real Estate Market in 2024",
-    excerpt: "Expert insights on market trends and investment opportunities in the current real estate landscape.",
-    image: "https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800",
-    author: {
-      name: "Emily Thompson",
-      avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150"
-    },
-    date: "Mar 13, 2024",
-    readTime: "6 min read",
-    category: "Investment",
-    featured: true,
-    tags: ["Investment", "Market Trends", "Finance"]
-  },
-  {
-    id: 4,
-    title: "Interior Design Trends That Will Dominate 2024",
-    excerpt: "From minimalist aesthetics to bold color choices, discover the interior design trends that will shape homes this year.",
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800",
-    author: {
-      name: "Jessica Wang",
-      avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150"
-    },
-    date: "Mar 10, 2024",
-    readTime: "4 min read",
-    category: "Design",
-    tags: ["Interior Design", "Home Decor", "Trends"]
-  }
-];
+interface Blogs {
+    _id: string;
+    title: string;
+    excerpt: string;
+    content: string;
+    media: {
+        coverImage: string;
+        images?: string[];
+    };
+    tags: string[];
+    category: string;
+    readTime: number;
+    author: Author | string; // Handle both string ID and populated author object
+    likes: number;
+    views: number;
+    shares: number;
+    comments: string[];
+    reviews: string[];
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 export const LatestInsights: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  
-  const categories = Array.from(new Set(articles.map(article => article.category)));
+  const [myBlogs, setMyBlogs] = useState<Blogs[]>([]);
+  const [randomBlog, setRandomBlog] = useState<Blogs | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+
+  const handleRandomBlog = () => {
+    if (myBlogs.length > 0) {
+      const randomIndex = Math.floor(Math.random() * myBlogs.length);
+      setRandomBlog(myBlogs[randomIndex]);
+    }
+  };
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await axios.get('http://localhost:3000/api/blog/');
+        const data = response.data.data;
+        setMyBlogs(data);
+        handleRandomBlog();
+      } catch (error) {
+        console.error('Error fetching blogs:', error);
+        setError('Failed to load blogs. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBlogs();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 border border-gray-100">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 border border-gray-100">
+        <div className="text-center">
+          <p className="text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const categories = Array.from(new Set(myBlogs.map(article => article.category)));
   
   const filteredArticles = activeCategory 
-    ? articles.filter(article => article.category === activeCategory)
-    : articles;
+    ? myBlogs.filter(article => article.category === activeCategory)
+    : myBlogs;
     
-  const featuredArticle = articles.find(article => article.featured);
-  const regularArticles = filteredArticles.filter(article => article.id !== featuredArticle?.id);
-  
+  const featuredArticle = randomBlog;
+  console.log(featuredArticle);
   const articlesPerPage = 3;
-  const totalPages = Math.ceil(regularArticles.length / articlesPerPage);
-  const displayedArticles = regularArticles.slice(
+  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
+  const displayedArticles = filteredArticles.slice(
     currentPage * articlesPerPage, 
     (currentPage + 1) * articlesPerPage
   );
@@ -141,7 +153,7 @@ export const LatestInsights: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100">
             <div className="relative aspect-video md:aspect-auto overflow-hidden">
               <img
-                src={featuredArticle.image}
+                src={featuredArticle.media.coverImage}
                 alt={featuredArticle.title}
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               />
@@ -159,7 +171,7 @@ export const LatestInsights: React.FC = () => {
                   </span>
                   <div className="flex items-center text-gray-500 text-sm">
                     <Clock className="w-4 h-4 mr-1" />
-                    {featuredArticle.readTime}
+                    {featuredArticle.readTime} min read
                   </div>
                 </div>
 
@@ -184,16 +196,24 @@ export const LatestInsights: React.FC = () => {
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-3">
-                  <img 
-                    src={featuredArticle.author.avatar} 
-                    alt={featuredArticle.author.name}
-                    className="w-10 h-10 rounded-full object-cover"
-                  />
+                  {typeof featuredArticle.author !== 'string' && featuredArticle.author?.image ? (
+                    <img 
+                      src={featuredArticle.author.image} 
+                      alt={featuredArticle.author.fullName || 'Author'}
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="w-5 h-5 text-gray-500" />
+                    </div>
+                  )}
                   <div>
-                    <p className="font-medium text-gray-900">{featuredArticle.author.name}</p>
+                    <p className="font-medium text-gray-900">
+                      {typeof featuredArticle.author === 'string' ? 'Author' : (featuredArticle.author?.fullName || 'Unknown Author')}
+                    </p>
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="w-3 h-3 mr-1" />
-                      {featuredArticle.date}
+                      {new Date(featuredArticle.createdAt).toLocaleDateString()}
                     </div>
                   </div>
                 </div>
@@ -210,16 +230,16 @@ export const LatestInsights: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {displayedArticles.map((article) => (
           <article
-            key={article.id}
+            key={article._id}
             className="group bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col h-full"
           >
             <div className="relative aspect-video overflow-hidden">
               <img
-                src={article.image}
+                src={article.media.coverImage}
                 alt={article.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
-              {article.featured && (
+              {randomBlog && randomBlog._id === article._id && (
                 <div className="absolute top-4 left-4 px-3 py-1 bg-gray-900 text-white text-sm font-medium rounded-full">
                   Featured
                 </div>
@@ -233,7 +253,7 @@ export const LatestInsights: React.FC = () => {
                 </span>
                 <div className="flex items-center text-gray-500 text-sm">
                   <Clock className="w-4 h-4 mr-1" />
-                  {article.readTime}
+                  {article.readTime} min read
                 </div>
               </div>
 
@@ -246,14 +266,24 @@ export const LatestInsights: React.FC = () => {
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-auto">
                 <div className="flex items-center gap-2">
-                  <img 
-                    src={article.author.avatar} 
-                    alt={article.author.name}
-                    className="w-8 h-8 rounded-full object-cover"
-                  />
+                  {typeof article.author !== 'string' && article.author?.image ? (
+                    <img 
+                      src={article.author.image} 
+                      alt={typeof article.author === 'string' ? 'Author' : (article.author.fullName || 'Author')}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                      <User className="w-4 h-4 text-gray-500" />
+                    </div>
+                  )}
                   <div>
-                    <p className="font-medium text-gray-900 text-sm">{article.author.name}</p>
-                    <p className="text-xs text-gray-500">{article.date}</p>
+                    <p className="font-medium text-gray-900 text-sm">
+                      {typeof article.author === 'string' ? 'Author' : (article.author?.fullName || 'Unknown Author')}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(article.createdAt).toLocaleDateString()}
+                      </p>
                   </div>
                 </div>
                 <button className="flex items-center gap-1 text-gray-900 group-hover:text-gray-600 transition-colors">
@@ -313,7 +343,7 @@ export const LatestInsights: React.FC = () => {
       )}
       
       <div className="flex justify-center mt-10">
-        <button className="group flex items-center gap-2 text-gray-900 hover:text-gray-600 transition-colors bg-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg border border-gray-200">
+        <button onClick={() => navigate('/blogs')} className="group flex items-center gap-2 text-gray-900 hover:text-gray-600 transition-colors bg-white px-6 py-3 rounded-lg shadow-md hover:shadow-lg border border-gray-200">
           <span className="font-medium">View All Articles</span>
           <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
         </button>

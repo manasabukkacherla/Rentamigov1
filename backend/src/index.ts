@@ -50,7 +50,7 @@ import Notification from "./models/Notification";
 import { Document } from "mongoose";
 
 import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main 
-import commercialPlotRoutes from "./routes/commercial/commericalPlotRoutes";
+import commercialPlotRoutes from "./routes/commercial/commercialPlotRoutes";
 import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouseRoutes";
@@ -63,7 +63,7 @@ import commercialRentCoveredSpaceRoutes from "./routes/commercial/commercialRent
 import commercialSellCoveredSpaceRoutes from "./routes/commercial/commercialSellCoveredSpaceRoutes";
 import commercialSellOfficeSpaceRoutes from "./routes/commercial/CommercialSellOfficeSpace";
 import commercialSellRetailStore from "./routes/commercial/commercialSellRetailStore";
-import commercialRentShowroom from "./routes/commercial/commericalRentShowroom";
+import commercialRentShowroom from "./routes/commercial/commercialRentShowroom";
 import commercialRentSheds from "./routes/commercial/commercialRentSheds";
 import commercialRentPlot from "./routes/commercial/commercialRentPlot";
 import commercialLeasePlotRoutes from "./routes/commercial/commercialLeasePlotRoutes";
@@ -77,7 +77,7 @@ import conversationRoutes from "./routes/conversationRoutes";
 import messageRoutes from "./routes/messageRoutes";
 import socketHandler from "./sockets";
 import commercialLeaseWarehouseRoutes from "./routes/commercial/commercialLeaseWarehouseRoutes";
-import CommercialLeaseOfficeSpace from "./routes/commercial/CommericalLeaseOfficeSpace";
+import CommercialLeaseOfficeSpace from "./routes/commercial/CommercialLeaseOfficeSpace";
 import commercialLeaseShedRoutes from "./routes/commercial/commercialLeaseShedRoutes"
 
 
@@ -86,7 +86,7 @@ import residentialLeaseIndependentHouse from "./routes/residential/leaseIndepend
 import residentialSellApartmentRoutes from "./routes/residential/residentialSellApartmentRoutes";
 import residentialSalePlotRoutes from "./routes/residential/residentialSalePlotRoutes";
 import residentialRentBuilderFloorRoutes from "./routes/residential/rentBuilderFloor";
-import residentialLeaseApartmentRoutes from "./routes/residential/leaseAppartment";
+import residentialLeaseApartmentRoutes from "./routes/residential/leaseApartment";
 import residentialLeaseBuilderFloorRoutes from "./routes/residential/leaseBuilderFloor";
 import residentialSaleIndependentHouseRoutes from "./routes/residential/residentialSaleIndependentHouse";
 import residentialSaleBuilderFloorRoutes from "./routes/residential/residentialSaleBuilderFloor";
@@ -96,6 +96,8 @@ import commercialSellShedRoutes from "./routes/commercial/commercialSellShedRout
 import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShowroomRoutes";
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
+import residentialMediaRoutes from './routes/residentialMediaRoutes';
+import allPropertiesRoutes from "./routes/allPropertiesRoutes";
 
 dotenv.config();
 
@@ -115,7 +117,7 @@ const app: Application = express();
 const server = http.createServer(app);
 
 // Increase timeout
-server.timeout = 120000; // 2 minutes
+server.timeout = 300000; // 5 minutes
 
 // Initialize Socket.IO with correct CORS settings
 export const io: Server = new Server(server, {
@@ -135,12 +137,17 @@ connectToDatabase()
 // Serve static files from "build"
 app.use(express.static(path.join(__dirname, "build")));
 // cors
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'http://localhost:5173'], // Add your frontend URLs
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  credentials: false
+}));
 
 // Configure express with proper types
 app.use(
   express.json({
-    limit: "50mb",
+    limit: "100mb", // Increase limit
     verify: (
       req: express.Request,
       res: express.Response,
@@ -153,6 +160,7 @@ app.use(
         res.status(400).json({
           success: false,
           error: "Invalid JSON",
+          message: "The request contains invalid JSON data."
         });
         throw new Error("Invalid JSON");
       }
@@ -162,7 +170,7 @@ app.use(
 app.use(
   express.urlencoded({
     extended: true,
-    limit: "50mb",
+    limit: "100mb", // Increase limit
   })
 );
 
@@ -172,10 +180,11 @@ const timeout = (
   res: express.Response,
   next: express.NextFunction
 ) => {
-  res.setTimeout(120000, () => {
+  res.setTimeout(300000, () => { // 5 minutes
     res.status(408).json({
       success: false,
       error: "Request timeout",
+      message: "The request took too long to process. Please try again."
     });
   });
   next();
@@ -183,7 +192,13 @@ const timeout = (
 
 app.use(timeout);
 
-
+// Configure CORS
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Initialize all Socket.IO event handlers
 socketHandler(io);
@@ -240,7 +255,7 @@ app.use("/api/commercial/sell/covered-space", commercialSellCoveredSpaceRoutes);
 //openspace
 
 //lease routes
-app.use("/api/commercial/lease/plot", commercialLeasePlotRoutes);
+app.use("/api/commercial/lease/plots", commercialLeasePlotRoutes);
 app.use("/api/commercial/lease/agriculture", commercialLeaseAgricultureRoutes);
 app.use("/api/commercial/lease/shops", commercialLeaseShopRoutes);
 app.use("/api/commercial/lease/others", commercialLeaseOthersRoutes);
@@ -252,22 +267,28 @@ app.use("/api/commercial/lease/office-space",CommercialLeaseOfficeSpace);
 app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 //rent routes
+
 app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
-app.use("/api/commercial/rent/office-spaces", commercialRentOfficeSpaceRoutes);
+app.use("/api/commercial/rent/office-space", commercialRentOfficeSpaceRoutes);
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
 app.use("/api/commercial/rent/covered-space", commercialRentCoveredSpaceRoutes);
 app.use("/api/commercial/rent/shops", commercialRentShop);
-app.use("/api/commercial/rent/retail-stores", commercialRentRetailStore);
+app.use("/api/commercial/rent/retail-store", commercialRentRetailStore);
 app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
+
+app.use("/api/allproperties", allPropertiesRoutes);
 
 // PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
 
 // Property media routes for all property types
 app.use('/api/property-media', propertyMediaRoutes);
+
+// Residential Media Routes
+app.use('/api/residential/media', residentialMediaRoutes);
 
 // Redirect old pg-media routes to the new integrated endpoints
 app.use("/api/residential/pg-media", (req, res, next) => {
@@ -288,7 +309,7 @@ app.use("/api/residential/pg-media", (req, res, next) => {
 });
 
 //sell routes
-app.use("/api/residential/sale/apartments", residentialSellApartmentRoutes);
+app.use("/api/residential/sale/apartment", residentialSellApartmentRoutes);
 app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
 app.use("/api/residential/sale/independent-house", residentialSaleIndependentHouseRoutes);
 app.use("/api/residential/sale/builder-floor", residentialSaleBuilderFloorRoutes);
@@ -300,7 +321,7 @@ app.use('/api/residential/rent/independent-house', residentialRentIndependentHou
 
 //lease
 app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
-app.use('/api/residential/lease/appartment',residentialLeaseApartmentRoutes);
+app.use('/api/residential/lease/apartment',residentialLeaseApartmentRoutes);
 app.use('/api/residential/lease/builder-floor',residentialLeaseBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {

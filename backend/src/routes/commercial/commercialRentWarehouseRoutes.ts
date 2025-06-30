@@ -8,7 +8,7 @@ commercialRentWarehouseRoutes.route('/')
   .post(createRentWarehouse)
   .get(getAllRentWarehouses);
 
-commercialRentWarehouseRoutes.route('/:id')
+commercialRentWarehouseRoutes.route('/:propertyId')
   .get(getRentWarehouseById)
   .put(updateRentWarehouse)
   .delete(deleteRentWarehouse);

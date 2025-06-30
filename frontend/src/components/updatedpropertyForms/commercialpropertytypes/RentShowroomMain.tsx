@@ -24,7 +24,7 @@ import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
   basicInformation: {
     title: string;
-    showroomType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -135,6 +135,10 @@ interface FormData {
   metadata: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName: 'Showroom';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
@@ -142,7 +146,7 @@ const RentShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      showroomType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -252,7 +256,11 @@ const RentShowroomMain = () => {
     },
     metadata: {
       createdBy: '',
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Showroom',
+      intent: 'Rent',
+      status: 'Available'
     }
   });
 
@@ -386,7 +394,7 @@ const RentShowroomMain = () => {
               ...prev,
               basicInformation: {
                 ...prev.basicInformation,
-                showroomType: Array.isArray(type) ? type : [type]
+                Type: Array.isArray(type) ? type : [type]
               }
             }))}
           />
@@ -682,8 +690,13 @@ const RentShowroomMain = () => {
           ...formData,
           media: convertedMedia,
           metadata: {
+            ...formData.metadata,
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Showroom',
+            intent: 'Rent',
+            status: 'Available',
           }
         };
 

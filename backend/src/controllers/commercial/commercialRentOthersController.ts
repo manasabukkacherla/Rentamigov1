@@ -65,13 +65,23 @@ export const createCommercialRentOthers = async (req: Request, res: Response) =>
     // Generate property ID
     const propertyId = await generatePropertyId();
 
+    // Prefer authenticated user if available
+    const userId = formData.metaData.createdBy;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        message: 'User is not authenticated or user ID is missing in request.'
+      });
+    }
+
     // Create the data object with property ID and metadata
     const otherPropertyData = {
       propertyId,
       ...formData,
       metaData: {
         ...formData.metaData,
-        createdBy: req.user?._id || null,
+        createdBy: userId,
         createdAt: new Date()
       }
     };
@@ -115,9 +125,9 @@ export const getAllCommercialRentOthers = async (req: Request, res: Response) =>
 // Get a single commercial Rent others property by ID
 export const getCommercialRentOthersById = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const propertyId = req.params.propertyId;
     
-    const RentProperty = await CommercialRentOthers.findOne({ propertyId: id });
+    const RentProperty = await CommercialRentOthers.findOne({ propertyId });
     
     if (!RentProperty) {
       return res.status(404).json({

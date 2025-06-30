@@ -32,35 +32,37 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define proper interface for form data
 interface FormData {
-  propertyName: string;
-  officeType: string;
-  address: {
-    street: string;
-    city: string;
+  basicInformation: {
+    title: string;
+    Type: string[];
+    address: {
+      street: string;
+      city: string;
     state: string;
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
-    longitude: string
+      longitude: string;
   };
   isCornerProperty: boolean;
+}
   officeDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
-  price: {
-    expectedPrice: number;
-    isNegotiable: boolean;
+  pricingDetails: {
+    propertyPrice: number;
+    pricetype: "fixed" | "negotiable";
   };
   area: {
     totalArea: number;
     builtUpArea: number;
     carpetArea: number;
   };
-  registrationCharges: {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
+  registration: {
+    chargestype: 'inclusive' | 'exclusive',
+    registrationAmount?: number,
+    stampDutyAmount?: number
   };
   brokerage: {
     required: string;
@@ -110,8 +112,9 @@ const SellOfficeSpaceMain = () => {
 
   // Initialize form data with proper structure
   const [formData, setFormData] = useState<FormData>({
-    propertyName: "",
-    officeType: "",
+    basicInformation: {
+    title: "",
+    Type: [],
     address: {
       street: "",
       city: "",
@@ -119,21 +122,24 @@ const SellOfficeSpaceMain = () => {
       zipCode: ""
     },
     landmark: "",
-    coordinates: { latitude: "", longitude: "" },
+    location: { latitude: "", longitude: "" },
     isCornerProperty: false,
+    },
     officeDetails: {},
     propertyDetails: {},
-    price: {
-      expectedPrice: 0,
-      isNegotiable: false
+    pricingDetails: {
+      propertyPrice: 0,
+      pricetype: "fixed"
     },
     area: {
       totalArea: 0,
       builtUpArea: 0,
       carpetArea: 0
     },
-    registrationCharges: {
-      included: false
+    registration: {
+      chargestype: "inclusive",
+      registrationAmount: 0,
+      stampDutyAmount: 0
     },
     brokerage: {
       required: "No"
@@ -196,44 +202,46 @@ const SellOfficeSpaceMain = () => {
       component: (
         <div className="space-y-8">
           <PropertyName
-            propertyName={formData.propertyName}
-            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, propertyName: name }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
           />
           <OfficeSpaceType
             onOfficeTypeChange={(types) => {
               if (types && types.length > 0) {
-                setFormData((prev) => ({ ...prev, officeType: types[0] }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, Type: types } }))
               }
             }}
           />
 
           <CommercialPropertyAddress
-            address={formData.address}
-            onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+            address={formData.basicInformation.address}
+            onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
           />
           {/* <Landmark
-            onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
+            onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
             onLocationSelect={(location) => setFormData((prev) => ({
               ...prev,
-              coordinates: {
-                latitude: location.latitude,
-                longitude: location.longitude
+              basicInformation: {
+                ...prev.basicInformation,
+                coordinates: {
+                  latitude: location.latitude,
+                  longitude: location.longitude
               }
             }))}
           /> */}
           <MapLocation
-            latitude={formData.coordinates.latitude.toString()}
-            longitude={formData.coordinates.longitude.toString()}
-            landmark={formData.landmark}
-            onLocationChange={(location) => handleChange('coordinates', location)}
-            onAddressChange={(address) => handleChange('address', address)}
-            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            latitude={formData.basicInformation.location.latitude.toString()}
+            longitude={formData.basicInformation.location.longitude.toString()}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
           <CornerProperty
-            isCornerProperty={formData.isCornerProperty}
+            isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) =>
-              setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+              setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))
             }
           />
         </div>
@@ -276,9 +284,9 @@ const SellOfficeSpaceMain = () => {
             <Price onPriceChange={(price) =>
               setFormData((prev) => ({
                 ...prev,
-                price: {
-                  expectedPrice: parseFloat(price.propertyPrice.toString()),
-                  isNegotiable: price.pricetype === 'negotiable'
+                pricingDetails: {
+                  propertyPrice: price.propertyPrice,
+                  pricetype: price.pricetype
                 }
               }))
             } />
@@ -291,10 +299,10 @@ const SellOfficeSpaceMain = () => {
                 onRegistrationChargesChange={(charges) =>
                   setFormData((prev) => ({
                     ...prev,
-                    registrationCharges: {
-                      included: charges.included,
-                      amount: charges.amount,
-                      stampDuty: charges.stampDuty
+                    registration: {
+                      chargestype: charges.chargestype,
+                      registrationAmount: charges.registrationAmount,
+                      stampDutyAmount: charges.stampDutyAmount
                     }
                   }))
                 }
@@ -473,27 +481,38 @@ const SellOfficeSpaceMain = () => {
       // Create payload for API
       const transformedData = {
         basicInformation: {
-          title: formData.propertyName,
-          officeType: [formData.officeType],
-          address: formData.address,
-          landmark: formData.landmark,
+          title: formData.basicInformation.title,
+          Type: formData.basicInformation.Type,
+          address: formData.basicInformation.address,
+          landmark: formData.basicInformation.landmark,
           location: {
-            latitude: formData.coordinates.latitude,
-            longitude: formData.coordinates.longitude
+            latitude: formData.basicInformation.location.latitude,
+            longitude: formData.basicInformation.location.longitude
           },
-          isCornerProperty: formData.isCornerProperty
+          isCornerProperty: formData.basicInformation.isCornerProperty
         },
         officeDetails: formData.officeDetails,
         propertyDetails: formData.propertyDetails,
-        price: formData.price,
-        registrationCharges: formData.registrationCharges,
+        pricingDetails:{
+            propertyPrice: formData.pricingDetails.propertyPrice,
+            pricetype: formData.pricingDetails.pricetype
+        },
+        registration: {
+           chargestype: formData.registration.chargestype,
+           registrationAmount: formData.registration.registrationAmount,
+           stampDutyAmount: formData.registration.stampDutyAmount
+        },
         brokerage: formData.brokerage,
         availability: formData.availability,
         contactInformation: formData.contactDetails,
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: 'Commercial',
+          propertyName: 'Office Space',
+          intent: 'Sell',
+          status: 'Available',
         }
       };
 

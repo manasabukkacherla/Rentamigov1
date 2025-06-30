@@ -70,7 +70,7 @@ export const createCommercialLeaseRetail = async (req: Request, res: Response) =
       ...formData,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: formData.metadata?.createdBy,
         createdAt: new Date()
       }
     };
@@ -120,7 +120,7 @@ export const getAllCommercialLeaseRetail = async (req: Request, res: Response) =
 
 export const getCommercialLeaseRetailById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialLeaseRetail.findOne({ propertyId });
     
     if (!property) {

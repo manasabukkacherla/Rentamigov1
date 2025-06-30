@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMSELS";
+    const prefix = "RA-COMSERS";
     
     const highestShop = await CommercialSellRetailStore.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
@@ -22,7 +22,7 @@ const generatePropertyId = async (): Promise<string> => {
     let nextNumber = 1;
     
     if (highestShop) {
-      const match = highestShop.propertyId.match(/(\d+)$/);
+      const match = highestShop?.propertyId?.match(/(\d+)$/);
       if (match && match[1]) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
@@ -51,76 +51,54 @@ const generatePropertyId = async (): Promise<string> => {
   } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSELS${timestamp}`;
+    return `RA-COMSERS${timestamp}`;
   }
 };
 
 export const createCommercialSellRetailStore = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    console.log('==== COMMERCIAL SELL RETAIL STORE - CREATE REQUEST ====');
-    console.log('Headers:', req.headers);
-    console.log('User object in request:', req.user);
-    
     const formData = req.body;
-    console.log('Received form data keys:', Object.keys(formData));
-    
     const propertyId = await generatePropertyId();
-    console.log('Generated property ID:', propertyId);
 
-    // Prepare metadata with defaults
+    // Prepare metadata
     const metadata = {
-      // status: 'draft',
-      // createdAt: new Date(),
-      // isVerified: false,
-      ...formData.metadata
+      ...formData.metadata,
+      createdBy: formData.metadata.createdBy,
+      createdAt: new Date(),
     };
 
-    // Set the createdBy field from the authenticated user if available
-    // if (req.user && req.user._id) {
-    //   metadata.createdBy = req.user._id;
-    //   console.log('Using authenticated user ID:', req.user._id);
-    // } else if (formData.metadata && formData.metadata.createdBy) {
-    //   // Preserve the createdBy from the frontend if present
-    //   console.log('Using client-provided createdBy:', formData.metadata.createdBy);
-    // } else {
-    //   console.log('No user authentication or createdBy provided');
-    //   return res.status(401).json({
-    //     success: false,
-    //     error: 'Authentication required - user information missing'
-    //   });
-    // }
-
+    // Construct the data object according to the Mongoose schema
     const shopData = {
-      propertyId,
       ...formData,
-      metadata: {
-        ...formData.metadata,
-        createdBy: req.user?._id || null,
-        createdAt: new Date()
-      }
+      propertyId,
+      metadata,
     };
 
-    console.log('Prepared shop data metadata:', shopData.metadata);
-
-    // Create new shop listing
     const shop = new CommercialSellRetailStore(shopData);
     await shop.save();
-    console.log('Shop saved successfully with ID:', shop._id);
 
     res.status(201).json({
       success: true,
       message: 'Commercial sell retail store listing created successfully',
       data: {
         _id: shop._id,
-        propertyId: shop.propertyId
-      }
+        propertyId: shop.propertyId,
+      },
     });
   } catch (error: any) {
     console.error('Error creating commercial sell retail store:', error);
-    res.status(500).json({ 
+    // Mongoose validation errors are helpful to send back to the client
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: error.errors,
+      });
+    }
+    res.status(500).json({
       success: false,
       error: 'Failed to create commercial sell retail store',
-      details: error.message 
+      details: error.message,
     });
   }
 };
@@ -172,13 +150,8 @@ export const getAllCommercialSellRetailStores = async (req: Request, res: Respon
 
 export const getCommercialSellRetailStoreById = async (req: Request, res: Response) => {
   try {
-    const shop = await CommercialSellRetailStore.findOne({
-      $or: [
-        { propertyId: req.params.id },
-        { _id: mongoose.Types.ObjectId.isValid(req.params.id) ? req.params.id : null }
-      ],
-      'metadata.status': { $ne: 'deleted' }
-    });
+    const propertyId = req.params.propertyId;
+    const shop = await CommercialSellRetailStore.findOne({ propertyId });
 
     if (!shop) {
       return res.status(404).json({

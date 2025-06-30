@@ -50,25 +50,9 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     const formData = req.body;
 
     // Prefer authenticated user if available
-    let userId: string | undefined = undefined;
-    let user: any = undefined;
-    if (req.user && (req.user as any)._id) {
-      userId = (req.user as any)._id;
-      user = req.user;
-    } else if (formData.metaData && formData.metaData.userId) {
-      userId = formData.metaData.userId;
-      // Optionally: fetch user from DB if needed
-    } else if (formData.metadata && formData.metadata.userId) {
-      userId = formData.metadata.userId;
-      // Optionally: fetch user from DB if needed
-    }
+    const userId = formData.metadata?.createdBy;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: 'User is not authenticated or user ID is missing in request.'
-      });
-    }
+   
 
     // Ensure powerSupply is explicitly set from the request body
     // if (typeof formData.powerSupply !== 'boolean') {
@@ -88,9 +72,9 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     const agricultureData = {
       ...formData,
       propertyId, // Ensure propertyId is at the root level
-      metaData: {
-        ...formData.metaData,
-        createdBy: req.user._id,  // Assign the authenticated user's ID
+      metadata: {
+        ...formData.metadata,
+        createdBy: formData.metadata.createdBy,  // Use the extracted userId
         createdAt: new Date()
       }
     };
@@ -113,7 +97,7 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
 // Get all Commercial Rent Agriculture
 export const getAllCommercialRentAgriculture = async (req: Request, res: Response) => {
   try {
-    const properties = await CommercialRentAgriculture.find().sort({ 'metaData.createdAt': -1 });
+    const properties = await CommercialRentAgriculture.find().sort({ 'metadata.createdAt': -1 });
 
     res.status(200).json({
       success: true,
@@ -132,7 +116,7 @@ export const getAllCommercialRentAgriculture = async (req: Request, res: Respons
 // Get Commercial Rent Agriculture by ID
 export const getCommercialRentAgricultureById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialRentAgriculture.findOne({ propertyId });
 
     if (!property) {

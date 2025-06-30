@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Request, Response } from 'express';
-import CommercialLeaseCoveredSpace from '../../models/commercial/CommericalLeaseCoveredSpace';
+import CommercialLeaseCoveredSpace from '../../models/commercial/CommercialLeaseCoveredSpace';
 import mongoose from 'mongoose';
 
 interface AuthenticatedRequest extends Request {
@@ -13,7 +13,7 @@ interface AuthenticatedRequest extends Request {
 
 // Generate unique propertyId
 const generatePropertyId = async (): Promise<string> => {
-  const prefix = "RA-COMSH";
+  const prefix = "RA-COMLECS";
   const latest = await CommercialLeaseCoveredSpace.findOne({
     propertyId: { $regex: `^${prefix}\\d+$` }
   }).sort({ propertyId: -1 });
@@ -132,7 +132,7 @@ export const getAllCommercialLeaseCoveredSpaces = async (req: Request, res: Resp
 // GET BY ID
 export const getCommercialLeaseCoveredSpaceById = async (req: Request, res: Response) => {
   try {
-    const coveredSpace = await CommercialLeaseCoveredSpace.findById(req.params.id)
+    const coveredSpace = await CommercialLeaseCoveredSpace.findOne({ propertyId: req.params.propertyId })
       .populate('metadata.createdBy', 'name email');
 
     if (!coveredSpace) return res.status(404).json({ success: false, error: 'Not found' });

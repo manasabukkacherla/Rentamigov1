@@ -22,24 +22,61 @@ import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle,
 import MapLocation from '../CommercialComponents/MapLocation';
 
 interface FormData {
-  propertyName: string;
-  spaceType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    landType: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    landmark: string;
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
+ 
+  powerSupply: boolean;
+
+  landDetails: {
+    totalArea: number;
+    type: string;
+    irrigation: boolean;
+    fencing: boolean;
+    cropSuitability: string;
+    waterSource: string;
+    legalClearances: boolean;
   };
-  isCornerProperty: boolean;
-  spaceDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  leaseAmount: Record<string, any>;
-  leaseTenure: Record<string, any>;
+
+  propertyDetails: {
+    area: {
+      totalArea: number;
+      carpetArea: number;
+      builtUpArea: number;
+    };
+  };
+
+  leaseTerms: {
+  leaseAmount: {
+    amount: number;
+    duration: number;
+    durationType: string;
+    isNegotiable: boolean;
+  };
+
+  leaseTenure: {
+    minimumTenure: string;
+    minimumUnit: string;
+    maximumTenure: string;
+    maximumUnit: string;
+    lockInPeriod: string;
+    lockInUnit: string;
+    noticePeriod: string;
+    noticePeriodUnit: string;
+  };
   maintenanceAmount: {
     amount: number;
     frequency: string;
@@ -49,25 +86,32 @@ interface FormData {
     electricity: { amount: number; type: string };
     gas: { amount: number; type: string };
     others: { amount: number; type: string };
+    brokerage: { required: string; amount?: number };
   };
+};
   brokerage: {
-    amount?: number;
     required: string;
+    amount?: number;
   };
+
   availability: {
-    date: Date;
+    availableFrom: Date;
     availableImmediately: boolean;
+    availabilityStatus: string;
     leaseDuration: string;
     noticePeriod: string;
-    petsAllowed: boolean;
+    isPetsAllowed: boolean;
+    operatingHours: boolean;
   };
-  contactDetails: {
+
+  contactInformation: {
     name: string;
     email: string;
     phone: string;
     alternatePhone?: string;
     bestTimeToContact?: string;
   };
+
   media: {
     photos: {
       exterior: File[];
@@ -86,48 +130,84 @@ const LeaseCoveredSpaceMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    spaceType: [],
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    basicInformation: {
+      title: '',
+      landType: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      location: { latitude: '', longitude: '' },
+      landmark: '',
+      isCornerProperty: false,
     },
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
-    spaceDetails: {},
-    propertyDetails: {},
-    leaseAmount: {},
-    leaseTenure: {},
+    powerSupply: false,
+    landDetails: {
+      totalArea: 0,
+      type: '',
+      irrigation: false,
+      fencing: false,
+      cropSuitability: '',
+      waterSource: '',
+      legalClearances: false,
+    },
+    propertyDetails: {
+      area: {
+        totalArea: 0,
+        carpetArea: 0,
+        builtUpArea: 0,
+      }
+    },
+    leaseTerms: {
+    leaseAmount: {
+      amount: 0,
+      duration: 0,
+      durationType: '',
+      isNegotiable: false
+    },
+    leaseTenure: {
+      minimumTenure: '',
+      minimumUnit: '',
+      maximumTenure: '',
+      maximumUnit: '',
+      lockInPeriod: '',
+      lockInUnit: '',
+      noticePeriod: '',
+      noticePeriodUnit: '',
+    },
     maintenanceAmount: {
       amount: 0,
-      frequency: 'monthly'
+      frequency: 'Monthly'
     },
     otherCharges: {
       water: { amount: 0, type: 'inclusive' },
       electricity: { amount: 0, type: 'inclusive' },
       gas: { amount: 0, type: 'inclusive' },
-      others: { amount: 0, type: 'inclusive' }
+      others: { amount: 0, type: 'inclusive' },
+      brokerage: { required: 'no', amount: 0 }
     },
+  },
     brokerage: {
       required: 'no',
       amount: 0
     },
     availability: {
-      date: new Date(),
+      availableFrom: new Date(),
       availableImmediately: false,
+      availabilityStatus: '',
       leaseDuration: '',
       noticePeriod: '',
-      petsAllowed: false
+      isPetsAllowed: false,
+      operatingHours: false,
     },
-    contactDetails: {
+    contactInformation: {
       name: '',
       email: '',
       phone: '',
       alternatePhone: '',
-      bestTimeToContact: ''
+      bestTimeToContact: '',
     },
     media: {
       photos: {
@@ -136,7 +216,7 @@ const LeaseCoveredSpaceMain = () => {
         floorPlan: [],
         washrooms: [],
         lifts: [],
-        emergencyExits: []
+        emergencyExits: [],
       },
       videoTour: null,
       documents: []
@@ -161,23 +241,23 @@ const LeaseCoveredSpaceMain = () => {
       icon: <MapPin className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-          <div className="space-y-8"><PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+          <div className="space-y-8"><PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
             <CoveredOpenSpaceType onSpaceTypeChange={(type) => setFormData(prev => ({ ...prev, spaceType: type }))} />
           </div>
 
           <div className="space-y-8">
 
 
-            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
             <MapLocation
-              latitude={formData.coordinates.latitude}
-              longitude={formData.coordinates.longitude}
-              landmark={formData.landmark}
-              onLocationChange={(location) => setFormData(prev => ({ ...prev, coordinates: location }))}
-              onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
-              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
+              latitude={formData.basicInformation.location.latitude}
+              longitude={formData.basicInformation.location.longitude}
+              landmark={formData.basicInformation.landmark}
+              onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
+              onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
             />
-            <CornerProperty isCornerProperty={formData.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
+            <CornerProperty isCornerProperty={formData.basicInformation.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))} />
           </div>
         </div>
       )
@@ -196,11 +276,49 @@ const LeaseCoveredSpaceMain = () => {
       icon: <DollarSign className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-
-          <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({ ...prev, leaseAmount: amount }))} />
-          <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({ ...prev, leaseTenure: tenure }))} />
-          <MaintenanceAmount maintenanceAmount={formData.maintenanceAmount} onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ ...prev, maintenanceAmount: maintenance }))} />
-          <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
+          <LeaseAmount onLeaseAmountChange={(amount) => setFormData(prev => ({
+            ...prev,
+            leaseAmount: {
+              amount: amount.amount || 0,
+              duration: amount.duration || 0,
+              durationType: amount.durationType || 'months',
+              isNegotiable: amount.isNegotiable || false
+            }
+          }))} />
+          <LeaseTenure onLeaseTenureChange={(tenure) => setFormData(prev => ({
+            ...prev,
+            leaseTenure: {
+              minimumTenure: tenure.minimumTenure || '',
+              minimumUnit: tenure.minimumUnit || 'months',
+              maximumTenure: tenure.maximumTenure || '',
+              maximumUnit: tenure.maximumUnit || 'months',
+              lockInPeriod: tenure.lockInPeriod || '',
+              lockInUnit: tenure.lockInUnit || 'months',
+              noticePeriod: tenure.noticePeriod || '',
+              noticePeriodUnit: tenure.noticePeriodUnit || 'months'
+            }
+          }))} />
+          <MaintenanceAmount 
+            maintenanceAmount={formData.leaseTerms.maintenanceAmount || { amount: 0, type: 'inclusive' }} 
+            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
+              ...prev,
+              leaseTerms: {
+                ...prev.leaseTerms,
+                maintenanceAmount: {
+                  amount: maintenance.amount || 0,
+                  frequency: maintenance.frequency || 'Monthly'
+                }
+              }
+            }))} 
+          />
+          <OtherCharges 
+            otherCharges={formData.leaseTerms.otherCharges || {
+              water: { amount: 0, type: 'inclusive' },
+              electricity: { amount: 0, type: 'inclusive' },
+              gas: { amount: 0, type: 'inclusive' },
+              others: { amount: 0, type: 'inclusive' }
+            }} 
+            onOtherChargesChange={(charges) => {
             // Since the OtherCharges component sends the old state, wait for the component to update
             // by deferring the formData update with setTimeout
             setTimeout(() => {
@@ -224,16 +342,16 @@ const LeaseCoveredSpaceMain = () => {
       icon: <Calendar className="w-6 h-6" />,
       content: (
         <div className="space-y-8">
-
-
           <CommercialAvailability onAvailabilityChange={(availability) => setFormData(prev => ({
             ...prev,
             availability: {
-              date: availability.date || new Date(),
+              availableFrom: availability.date || new Date(),
               availableImmediately: availability.availableImmediately || false,
+              availabilityStatus: availability.availabilityStatus || '',
               leaseDuration: availability.preferredSaleDuration || '',
               noticePeriod: availability.noticePeriod || '',
-              petsAllowed: availability.petsAllowed || false
+              isPetsAllowed: availability.petsAllowed || false,
+              operatingHours: availability.operatingHours || false
             }
           }))} />
         </div>
@@ -246,7 +364,7 @@ const LeaseCoveredSpaceMain = () => {
         <div className="space-y-8">
 
 
-          <CommercialContactDetails contactInformation={formData.contactDetails} onContactChange={(contact) => setFormData(prev => ({ ...prev, contactDetails: contact }))} />
+            <CommercialContactDetails contactInformation={formData.contactInformation} onContactChange={(contact) => setFormData(prev => ({ ...prev, contactInformation: contact }))} />
         </div>
       )
     },
@@ -289,9 +407,9 @@ const LeaseCoveredSpaceMain = () => {
                     exterior: photosByCategory.exterior,
                     interior: photosByCategory.interior,
                     floorPlan: photosByCategory.floorPlan,
-                    washrooms: photosByCategory.washrooms,
-                    lifts: photosByCategory.lifts,
-                    emergencyExits: photosByCategory.emergencyExits
+                    washrooms: photosByCategory.washrooms || [],
+                    lifts: photosByCategory.lifts || [],
+                    emergencyExits: photosByCategory.emergencyExits || []
                   },
                   videoTour: media.videoTour || null,
                   documents: media.documents
@@ -387,14 +505,14 @@ const LeaseCoveredSpaceMain = () => {
     };
 
     // Format the lease type and frequency values
-    const leaseType = formatEnumValue(formData.leaseAmount?.type, 'leaseType');
-    const maintenanceFrequency = formatEnumValue(formData.maintenanceAmount?.frequency, 'frequency');
+    const leaseType = formatEnumValue(formData.leaseTerms.leaseAmount?.type, 'leaseType');
+    const maintenanceFrequency = formatEnumValue(formData.leaseTerms.maintenanceAmount?.frequency, 'frequency');
 
     // Enhanced debugging for property age and other charges
     console.log('Frontend Form Data:', formData);
     console.log('Property Age (raw):', formData.propertyDetails?.propertyAge);
     console.log('Property Age Type:', typeof formData.propertyDetails?.propertyAge);
-    console.log('Other Charges (Full Object):', formData.otherCharges);
+    console.log('Other Charges (Full Object):', formData.leaseTerms.otherCharges);
 
     // Helper function to handle charge types and amounts
     const formatCharge = (charge: any) => {
@@ -409,14 +527,14 @@ const LeaseCoveredSpaceMain = () => {
     };
 
     // Ensure we have the right structure for charges
-    console.log('Other Charges before mapping:', formData.otherCharges);
+    console.log('Other Charges before mapping:', formData.leaseTerms.otherCharges);
 
     // Map the charges from OtherCharges component to the backend format
     const mappedCharges = {
-      electricityCharges: formatCharge(formData.otherCharges.electricity),
-      waterCharges: formatCharge(formData.otherCharges.water),
-      gasCharges: formatCharge(formData.otherCharges.gas),
-      otherCharges: formatCharge(formData.otherCharges.others)
+      electricityCharges: formatCharge(formData.leaseTerms.otherCharges.electricity),
+      waterCharges: formatCharge(formData.leaseTerms.otherCharges.water),
+      gasCharges: formatCharge(formData.leaseTerms.otherCharges.gas),
+      otherCharges: formatCharge(formData.leaseTerms.otherCharges.others)
     };
 
     console.log('Mapped charges for backend:', mappedCharges);
@@ -424,30 +542,30 @@ const LeaseCoveredSpaceMain = () => {
     // Create the backend data object with proper mapping
     const backendData = {
       basicInformation: {
-        title: formData.propertyName || '',
-        shedType: formData.spaceType || [],
+        title: formData.basicInformation.title || '',
+        shedType: formData.basicInformation.type || [],
         address: {
-          street: formData.address.street || '',
-          city: formData.address.city || '',
-          state: formData.address.state || '',
-          zipCode: formData.address.zipCode || ''
+          street: formData.basicInformation.address.street || '',
+          city: formData.basicInformation.address.city || '',
+          state: formData.basicInformation.address.state || '',
+          zipCode: formData.basicInformation.address.zipCode || ''
         },
         landmark: formData.landmark || '',
         location: {
-          latitude: parseFloat(formData.coordinates.latitude) || 0,
-          longitude: parseFloat(formData.coordinates.longitude) || 0
+          latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
+          longitude: parseFloat(formData.basicInformation.location.longitude) || 0
         },
-        isCornerProperty: formData.isCornerProperty || false
+        isCornerProperty: formData.basicInformation.isCornerProperty || false
       },
       coveredSpaceDetails: {
-        totalArea: Number(formData.spaceDetails?.totalArea) || 0,
-        sqaurefeet: formData.spaceDetails?.squareFeet || String(formData.spaceDetails?.totalArea || '0'),
-        coveredarea: Number(formData.spaceDetails?.coveredArea) || 0,
-        roadwidth: Number(formData.spaceDetails?.roadWidth) || 0,
-        roadfeet: formData.spaceDetails?.roadWidthUnit || '',
-        ceilingheight: Number(formData.spaceDetails?.ceilingHeight) || 0,
-        ceilingfeet: formData.spaceDetails?.ceilingHeightUnit || '',
-        noofopenslides: Number(formData.spaceDetails?.openSides) || 0
+        totalArea: Number(formData.propertyDetails?.area?.totalArea) || 0,
+        sqaurefeet: formData.propertyDetails?.area?.squareFeet || String(formData.propertyDetails?.area?.totalArea || '0'),
+        coveredarea: Number(formData.propertyDetails?.area?.coveredArea) || 0,
+        roadwidth: Number(formData.propertyDetails?.area?.roadWidth) || 0,
+        roadfeet: formData.propertyDetails?.area?.roadWidthUnit || '',
+        ceilingheight: Number(formData.propertyDetails?.area?.ceilingHeight) || 0,
+        ceilingfeet: formData.propertyDetails?.area?.ceilingHeightUnit || '',
+        noofopenslides: Number(formData.propertyDetails?.area?.openSides) || 0
       },
       propertyDetails: {
         area: {
@@ -477,10 +595,10 @@ const LeaseCoveredSpaceMain = () => {
       leaseTerms: {
         leaseDetails: {
           leaseAmount: {
-            amount: Number(formData.leaseAmount?.amount) || 0,
+            amount: Number(formData.leaseTerms.leaseAmount?.amount) || 0,
             type: leaseType || 'Fixed',
-            duration: Number(formData.leaseAmount?.duration) || 1,
-            durationUnit: (formData.leaseAmount?.durationUnit || 'Month').toLowerCase()
+            duration: Number(formData.leaseTerms.leaseAmount?.duration) || 1,
+            durationUnit: (formData.leaseTerms.leaseAmount?.durationUnit || 'Month').toLowerCase()
           }
         },
         tenureDetails: {
@@ -494,7 +612,7 @@ const LeaseCoveredSpaceMain = () => {
           noticePeriodUnit: (formData.leaseTenure?.noticePeriodUnit || '').toLowerCase()
         },
         maintenanceAmount: {
-          amount: Number(formData.maintenanceAmount?.amount) || 0,
+          amount: Number(formData.leaseTerms.maintenanceAmount?.amount) || 0,
           frequency: maintenanceFrequency || 'Monthly'
         },
         otherCharges: mappedCharges,
@@ -503,27 +621,29 @@ const LeaseCoveredSpaceMain = () => {
           amount: Number(formData.brokerage?.amount) || 0
         },
         availability: {
-          date: formData.availability?.date || new Date(),
+          availableFrom: formData.availability?.availableFrom || new Date(),
           availableImmediately: Boolean(formData.availability?.availableImmediately),
           leaseDuration: formData.availability?.leaseDuration || '',
           noticePeriod: formData.availability?.noticePeriod || '',
-          petsAllowed: Boolean(formData.availability?.petsAllowed)
+          isPetsAllowed: Boolean(formData.availability?.isPetsAllowed),
+          operatingHours: Boolean(formData.availability?.operatingHours)
         }
       },
       contactInformation: {
-        name: formData.contactDetails?.name || '',
-        email: formData.contactDetails?.email || '',
-        phone: formData.contactDetails?.phone || '',
-        alternatePhone: formData.contactDetails?.alternatePhone || '',
-        bestTimeToContact: formData.contactDetails?.bestTimeToContact || ''
+        name: formData.contactInformation?.name || '',
+        email: formData.contactInformation?.email || '',
+        phone: formData.contactInformation?.phone || '',
+        alternatePhone: formData.contactInformation?.alternatePhone || '',
+        bestTimeToContact: formData.contactInformation?.bestTimeToContact || ''
       },
       media: uploadedMedia,
       metadata: {
-        status: 'active',
-        views: 0,
-        favorites: 0,
-        isVerified: false,
-        createdBy: localStorage.getItem('userId') || null
+        userId: localStorage.getItem('userId') || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: 'Covered Space',
+        intent: 'Lease',
+        status: 'Available',
       }
     };
 
@@ -594,23 +714,23 @@ const LeaseCoveredSpaceMain = () => {
     // Add validation logic based on the current step
     switch (currentStep) {
       case 0: // Basic Information
-        return !!formData.propertyName &&
-          formData.spaceType.length > 0 &&
-          !!formData.address.street &&
-          !!formData.address.city &&
-          !!formData.address.state &&
-          !!formData.address.zipCode;
+        return !!formData.basicInformation.title &&
+          formData.basicInformation.type.length > 0 &&
+          !!formData.basicInformation.address.street &&
+          !!formData.basicInformation.address.city &&
+          !!formData.basicInformation.address.state &&
+          !!formData.basicInformation.address.zipCode;
       case 1: // Property Details
-        return !!formData.spaceDetails.totalArea;
+        return !!formData.propertyDetails.area.totalArea;
       case 2: // Lease Terms
-        return !!formData.leaseAmount.amount &&
-          !!formData.leaseAmount.duration;
+        return !!formData.leaseTerms.leaseAmount.amount &&
+          !!formData.leaseTerms.leaseAmount.duration;
       case 3: // Availability
         return true; // Optional fields
       case 4: // Contact Information
-        return !!formData.contactDetails.name &&
-          !!formData.contactDetails.email &&
-          !!formData.contactDetails.phone;
+        return !!formData.contactInformation.name &&
+          !!formData.contactInformation.email &&
+          !!formData.contactInformation.phone;
       case 5: // Property Media
         return true; // We'll validate this in validateFinalStep when actually submitting
       default:

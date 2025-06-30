@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  warehouseType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -68,6 +68,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -129,7 +133,7 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   propertyId: { type: String, required: true, unique: true },
   basicInformation: {
     title: { type: String, required: true },
-    warehouseType: [{ type: String, required: true }],
+    Type: [{ type: String, required: true }],
     address: { 
       street: { type: String, required: true },
       city: { type: String, required: true },
@@ -175,7 +179,7 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
       backup: { type: Boolean, default: false }
     },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String }
   },
   pricingDetails: {
@@ -226,7 +230,11 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Sell' },
+    propertyName: { type: String,  default: 'Warehouse' },
+    status: { type: String, default: 'Available' }
   }
 }, {
   timestamps: true

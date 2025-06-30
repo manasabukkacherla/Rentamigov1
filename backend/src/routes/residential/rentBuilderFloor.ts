@@ -12,7 +12,7 @@ const residentialRentBuilderFloorRoutes = express.Router();
 
 residentialRentBuilderFloorRoutes.post('/', createRentBuilderFloor);
 residentialRentBuilderFloorRoutes.get('/', getAllRentBuilderFloors);
-residentialRentBuilderFloorRoutes.get('/:id', getRentBuilderFloorById);
+residentialRentBuilderFloorRoutes.get('/:propertyId', getRentBuilderFloorById);
 residentialRentBuilderFloorRoutes.put('/:id', updateRentBuilderFloor);
 residentialRentBuilderFloorRoutes.delete('/:id', deleteRentBuilderFloor);
 residentialRentBuilderFloorRoutes.get('/:userId', getUserBuilderFloors);

@@ -14,17 +14,20 @@ import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
 import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import OtherCharges from "../residentialrent/OtherCharges"
-import MediaUpload from "../MediaUpload"
+import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
+import { v4 as uuidv4 } from 'uuid'
+import { uploadResidentialMediaToS3 } from '../../../utils/residentialMediaUploader'
 
 interface LeaseBuilderFloorProps {
-  propertyId: string
-  onSubmit?: (formData: any) => void
+  propertyId?: string;
+  onSubmit?: (formData: FormData) => void;
 }
+
 interface Address {
   flatNo: number;
   showFlatNo: boolean;
@@ -41,7 +44,11 @@ interface Address {
 }
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
+  builderName: string;
+  floorNumber: number;
+  totalFloors: number;
+  propertyId?: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -54,81 +61,41 @@ interface IBasicInformation {
     location: {
       latitude: string;
       longitude: string;
+      locationLabel: string;
     };
   };
 }
-interface PropertyDetails {
+
+interface IPropertyDetails {
+  propertysize: number;
   bedrooms: number;
   washrooms: number;
+  bathrooms: number;
   balconies: number;
-  hasParking: boolean;
-  parkingDetails: {
-    twoWheeler: number;
-    fourWheeler: number;
-  };
-  extraRooms: {
-    servant: boolean;
-    puja: boolean;
-    store: boolean;
-    others: boolean;
-  };
-  utilityArea: string;
-  furnishingStatus: string;
-  totalFloors: number;
-  propertyOnFloor: number;
-  facing: string;
-  propertyAge: string;
-  superBuiltUpAreaSqft: number;
-  superBuiltUpAreaSqmt: number;
-  builtUpAreaSqft: number;
-  builtUpAreaSqmt: number;
-  carpetAreaSqft: number;
-  carpetAreaSqmt: number;
-  electricityAvailability: string;
-  waterAvailability: {
-    borewell: boolean;
-    governmentSupply: boolean;
-    tankerSupply: boolean;
-  };
+  parkingdetails: string;
+  ExtraRooms: string[];
+  utility: string;
+  Furnishingstatus: string;
+  totalfloors: number;
+  floorNumber: number;
+  propertyfacing: string;
+  propertyage: string;
+  superareasqft: number;
+  superareasqmt: number;
+  builtupareasqft: number;
+  builtupareasqmt: number;
+  carpetareasqft: number;
+  carpetareasqmt: number;
+  electricityavailability: string;
+  wateravailability: string[];
+  servantRoom: boolean;
+  studyRoom: boolean;
+  pooja: boolean;
 }
 
-interface FlatAmenities {
-  lights: number;
-  ceilingFan: number;
-  geysers: number;
-  chimney: boolean;
-  callingBell: boolean;
-  wardrobes: number;
-  lofts: number;
-  kitchenCabinets: number;
-  clothHanger: number;
-  pipedGasConnection: boolean;
-  gasStoveWithCylinder: boolean;
-  ironingStand: boolean;
-  bathtub: boolean;
-  shower: boolean;
-  sofa: boolean;
-  coffeeTable: boolean;
-  tvUnit: boolean;
-  diningTableWithChairs: number;
-  cotWithMattress: number;
-  sideTable: number;
-  studyTableWithChair: number;
-  television: boolean;
-  refrigerator: boolean;
-  washingMachine: boolean;
-  dishwasher: boolean;
-  waterPurifier: boolean;
-  microwaveOven: boolean;
-  inductionCooktop: boolean;
-  gasStove: boolean;
-  airConditioner: number;
-  desertCooler: number;
-  ironBox: boolean;
-  exhaustFan: number;
-}
-
-interface SocietyAmenities {
+interface IAvailableItems {
+  availableitems: string[];
+  securityandsafety: string[];
   powerutility: string[];
   parkingtranspotation: string[];
   recreationalsportsfacilities: string[];
@@ -141,107 +108,259 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
+interface IFloorAmenities {
+  lights: number;
+  geysers: number;
+  lofts: number;
+  clothHanger: number;
+  cotWithMattress: number;
+  airConditioner: number;
+  exhaustFan: number;
+  ceilingFan: number;
+  wardrobes: number;
+  kitchenCabinets: number;
+  diningTableWithChairs: number;
+  sideTable: number;
+  desertCooler: number;
+}
+
+interface ILeaseDetails {
+  monthlyRent: number;
+  securityDeposit: number;
+  maintenanceCharges: {
+    amount: number;
+    type: string;
+  };
+  leaseDuration: {
+    minimumDuration: number;
+    maximumDuration: number;
+    durationUnit: string;
+  };
+  rentNegotiable: boolean;
+  additionalCharges: {
+    waterCharges: {
+      type: string;
+      amount: number;
+    };
+    electricityCharges: {
+      type: string;
+      amount: number;
+    };
+    gasCharges: {
+      type: string;
+      amount: number;
+    };
+    otherCharges: {
+      type: string;
+      amount: number;
+    };
+  };
+  brokerage: {
+    type: string;
+    amount: number;
+  };
+}
+
+interface IAvailability {
+  type: "immediate" | "specific";
+  date?: string;
+}
+
 interface IMedia {
   photos: {
     exterior: (File | string)[];
     interior: (File | string)[];
     floorPlan: (File | string)[];
     washrooms: (File | string)[];
-    lifts: (File | string)[];
-    emergencyExits: (File | string)[];
     bedrooms: (File | string)[];
     halls: (File | string)[];
     storerooms: (File | string)[];
     kitchen: (File | string)[];
+    servantRoom: (File | string)[];
+    studyRoom: (File | string)[];
+    pooja: (File | string)[];
+    lifts: (File | string)[];
+    emergencyExits: (File | string)[];
   };
-  videoTour?: File | string;
+  mediaItems: {
+    id: string;
+    type: string;
+    url: string;
+    title: string;
+    tags: string[];
+    roomType: string;
+    category: string;
+  }[];
+  videoTour: File | string;
   documents: (File | string)[];
 }
 
-
-
-interface Restrictions {
-  foodPreference: string;
-  petsAllowed: string;
-  tenantType: string;
-}
-
-
-
-
-
-interface ILeaseTerms {
-  leaseDetails: {
-    leaseAmount:{
-    amount: number;
-    type: string;
-    duration: number;
-    durationUnit: string;
-    },
-  };
-  tenureDetails: {
-    minimumTenure: number;
-    minimumUnit: string;
-    maximumTenure: number;
-    maximumUnit: string;
-    lockInPeriod: number;
-    lockInUnit: string;
-    noticePeriod: number;
-    noticePeriodUnit: string;
-  };
-  maintenanceAmount: {
-    amount: number;
-    frequency: string;
-  };
-  otherCharges: {
-    water: {
-      amount: number;
-      type: string;
-    };
-    electricity: {
-      amount: number;
-      type: string;
-    };
-    gas: {
-      amount: number;
-      type: string;
-    };
-    others: {
-      amount: number;
-      type: string;
-    }
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
- 
-}
 interface IMetadata {
   createdBy: string;
-  createdAt: string;
+  createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Builder Floor';
+  intent: 'Lease';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
 }
 
-interface formData {
-  basicInformation: IBasicInformation;
-  propertySize: number;
-  propertyDetails: PropertyDetails;
-  restrictions: Restrictions;
-  flatAmenities: FlatAmenities;
-  societyAmenities: SocietyAmenities;
-  leaseTerms:ILeaseTerms;
-  availability: {
-    type: string;
-    date: string;
+interface ValidationError {
+  field: string;
+  message: string;
+  code: string;
+}
+
+interface ApiError {
+  status: number;
+  message: string;
+  errors?: ValidationError[];
+}
+
+interface FormData {
+  basicInformation: {
+    title: string;
+    builderName: string;
+    floorNumber: number;
+    totalFloors: number;
+    address: Address;
+    propertyId?: string;
   };
-  media: IMedia;
-
+  propertyDetails: {
+    propertysize: number;
+    bedrooms: number;
+    washrooms: number;
+    bathrooms: number;
+    balconies: number;
+    parkingdetails: string;
+    ExtraRooms: string[];
+    utility: string;
+    Furnishingstatus: string;
+    totalfloors: number;
+    floorNumber: number;
+    propertyfacing: string;
+    propertyage: string;
+    superareasqft: number;
+    superareasqmt: number;
+    builtupareasqft: number;
+    builtupareasqmt: number;
+    carpetareasqft: number;
+    carpetareasqmt: number;
+    electricityavailability: string;
+    wateravailability: string[];
+    servantRoom: boolean;
+    studyRoom: boolean;
+    pooja: boolean;
+  };
+  availableitems: {
+    availableitems: string[];
+    securityandsafety: string[];
+    powerutility: string[];
+    parkingtranspotation: string[];
+    recreationalsportsfacilities: string[];
+    childrenfamilyamenities: string[];
+    healthwellnessfacilities: string[];
+    shoppingconviencestores: string[];
+    ecofriendlysustainable: string[];
+    communityculturalspaces: string[];
+    smarthometechnology: string[];
+    otheritems: string[];
+  };
+  floorAmenities: {
+    lights: number;
+    geysers: number;
+    lofts: number;
+    clothHanger: number;
+    cotWithMattress: number;
+    airConditioner: number;
+    exhaustFan: number;
+    ceilingFan: number;
+    wardrobes: number;
+    kitchenCabinets: number;
+    diningTableWithChairs: number;
+    sideTable: number;
+    desertCooler: number;
+  };
+  leaseDetails: {
+    monthlyRent: number;
+    securityDeposit: number;
+    maintenanceCharges: {
+      amount: number;
+      type: string;
+    };
+    leaseDuration: {
+      minimumDuration: number;
+      maximumDuration: number;
+      durationUnit: string;
+    };
+    rentNegotiable: boolean;
+    additionalCharges: {
+      waterCharges: {
+        type: string;
+        amount: number;
+      };
+      electricityCharges: {
+        type: string;
+        amount: number;
+      };
+      gasCharges: {
+        type: string;
+        amount: number;
+      };
+      otherCharges: {
+        type: string;
+        amount: number;
+      };
+    };
+    brokerage: {
+      type: string;
+      amount: number;
+    };
+  };
+  availability: {
+    type: "immediate" | "specific";
+    date?: string;
+  };
+  media: {
+    photos: {
+      exterior: (File | string)[];
+      interior: (File | string)[];
+      floorPlan: (File | string)[];
+      washrooms: (File | string)[];
+      bedrooms: (File | string)[];
+      halls: (File | string)[];
+      storerooms: (File | string)[];
+      kitchen: (File | string)[];
+      servantRoom: (File | string)[];
+      studyRoom: (File | string)[];
+      pooja: (File | string)[];
+      lifts: (File | string)[];
+      emergencyExits: (File | string)[];
+    };
+    mediaItems: {
+      id: string;
+      type: string;
+      url: string;
+      title: string;
+      tags: string[];
+      roomType: string;
+      category: string;
+    }[];
+    videoTour: File | string;
+    documents: (File | string)[];
+  };
+  metadata: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Builder Floor';
+    intent: 'Lease';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
+  };
 }
-
 
 interface PropertyNameProps {
-  // propertyName: string
-  onPropertyNameChange: (name: string) => void
+  title: string;
+  onTitleChange: (name: string) => void;
 }
 
 interface MapSelectorProps {
@@ -256,32 +375,69 @@ interface PropertySizeProps {
   onPropertySizeChange: (size: number) => void;
 }
 
-
 interface PropertyFeaturesProps {
   onFeaturesChange?: (features: Record<string, any>) => void
 }
 
 interface FlatAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
+  amenities: {
+    lights: number;
+    geysers: number;
+    lofts: number;
+    clothHanger: number;
+    cotWithMattress: number;
+    airConditioner: number;
+    exhaustFan: number;
+    ceilingFan: number;
+    wardrobes: number;
+    kitchenCabinets: number;
+    diningTableWithChairs: number;
+    sideTable: number;
+    desertCooler: number;
+  };
+  onAmenitiesChange: (amenities: Partial<FormData['floorAmenities']>) => void;
 }
 
 interface SocietyAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
+  amenities: {
+    availableitems: string[];
+    securityandsafety: string[];
+    powerutility: string[];
+    parkingtranspotation: string[];
+    recreationalsportsfacilities: string[];
+    childrenfamilyamenities: string[];
+    healthwellnessfacilities: string[];
+    shoppingconviencestores: string[];
+    ecofriendlysustainable: string[];
+    communityculturalspaces: string[];
+    smarthometechnology: string[];
+  };
+  onChange: (amenities: FormData['availableitems']) => void;
 }
 
 interface RestrictionsProps {
-  restrictions: string[]
-  onChange: (restrictions: string[]) => void
+  res: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  };
+  onRestrictionsChange: (restrictions: {
+    foodPreference: string;
+    petsAllowed: string;
+    tenantType: string;
+  }) => void;
 }
 
 interface AvailabilityDateProps {
-  date: Date
-  onChange: (date: Date) => void
+  availability: {
+    availablefrom: string;
+    date: string;
+  };
+  onAvailabilityChange: (availability: {
+    availablefrom: string;
+    date: string;
+  }) => void;
 }
-
-
 
 interface MediaUploadProps {
   onMediaChange?: (media: {
@@ -296,16 +452,123 @@ interface MediaUploadProps {
   }) => void;
 }
 
+interface MediaItem {
+  id: string;
+  type: 'photo' | 'video' | 'document';
+  file: File;
+  category: string;
+  title?: string;
+  tags?: string[];
+  progress?: UploadProgress;
+  status: 'pending' | 'uploading' | 'completed' | 'error';
+}
 
-const LeaseBuilderFloor  = () => {
+interface UploadProgress {
+  loaded: number;
+  total: number;
+  percentage: number;
+}
+
+interface LeaseAmountProps {
+  onLeaseAmountChange: (leaseAmount: Record<string, any>) => void;
+}
+
+interface LeaseTenureProps {
+  onLeaseTenureChange: (tenure: {
+    minimumTenure: number;
+    minimumUnit: string;
+    maximumTenure: number;
+    maximumUnit: string;
+    lockInPeriod: number;
+    lockInUnit: string;
+    noticePeriod: number;
+    noticePeriodUnit: string;
+  }) => void;
+}
+
+interface MaintenanceAmountProps {
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  onMaintenanceAmountChange: (maintenance: {
+    amount: number;
+    frequency: string;
+  }) => void;
+}
+
+interface BrokerageProps {
+  bro: {
+    required: string;
+    amount?: number;
+  };
+  onBrokerageChange: (brokerage: {
+    required: string;
+    amount?: number;
+  }) => void;
+}
+
+interface OtherChargesProps {
+  otherCharges: {
+    water: {
+      type: string;
+      amount: number;
+    };
+    electricity: {
+      type: string;
+      amount: number;
+    };
+    gas: {
+      type: string;
+      amount: number;
+    };
+    others: {
+      type: string;
+      amount: number;
+    };
+  };
+  onOtherChargesChange: (charges: {
+    water: {
+      type: string;
+      amount: number;
+    };
+    electricity: {
+      type: string;
+      amount: number;
+    };
+    gas: {
+      type: string;
+      amount: number;
+    };
+    others: {
+      type: string;
+      amount: number;
+    };
+  }) => void;
+}
+
+// Add strict validation for lease duration units
+type DurationUnit = 'days' | 'months' | 'years';
+
+interface LeaseDuration {
+  minimumDuration: number;
+  maximumDuration: number;
+  durationUnit: DurationUnit;  // More strict typing
+}
+
+const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initialPropertyId, onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
   const formRef = useRef<HTMLDivElement>(null)
-  const initialData={
+  const initialData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
+      builderName: "",
+      floorNumber: 0,
+      totalFloors: 0,
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -321,82 +584,35 @@ const LeaseBuilderFloor  = () => {
         }
       }
     },
-    propertySize: 0,
     propertyDetails: {
+      propertysize: 0,
       bedrooms: 0,
       washrooms: 0,
+      bathrooms: 0,
       balconies: 0,
-      hasParking: false,
-      parkingDetails: {
-        twoWheeler: 0,
-        fourWheeler: 0
-      },
-      extraRooms: {
-        servant: false,
-        puja: false,
-        store: false,
-        others: false
-      },
-      utilityArea: "",
-      furnishingStatus: "",
-      totalFloors: 0,
-      propertyOnFloor: 0,
-      facing: "",
-      propertyAge: "",
-      superBuiltUpAreaSqft: 0,
-      superBuiltUpAreaSqmt: 0,
-      builtUpAreaSqft: 0,
-      builtUpAreaSqmt: 0,
-      carpetAreaSqft: 0,
-      carpetAreaSqmt: 0,
-      electricityAvailability: "",
-      waterAvailability: {
-        borewell: false,
-        governmentSupply: false,
-        tankerSupply: false
-      }
+      parkingdetails: "",
+      ExtraRooms: [],
+      utility: "",
+      Furnishingstatus: "",
+      totalfloors: 0,
+      floorNumber: 0,
+      propertyfacing: "",
+      propertyage: "",
+      superareasqft: 0,
+      superareasqmt: 0,
+      builtupareasqft: 0,
+      builtupareasqmt: 0,
+      carpetareasqft: 0,
+      carpetareasqmt: 0,
+      electricityavailability: "",
+      wateravailability: [],
+      servantRoom: false,
+      studyRoom: false,
+      pooja: false
     },
-    restrictions: {
-      foodPreference: "",
-      petsAllowed: "",
-      tenantType: ""
-    },
-    flatAmenities: {
-      lights: 0,
-      ceilingFan: 0,
-      geysers: 0,
-      chimney: false,
-      callingBell: false,
-      wardrobes: 0,
-      lofts: 0,
-      kitchenCabinets: 0,
-      clothHanger: 0,
-      pipedGasConnection: false,
-      gasStoveWithCylinder: false,
-      ironingStand: false,
-      bathtub: false,
-      shower: false,
-      sofa: false,
-      coffeeTable: false,
-      tvUnit: false,
-      diningTableWithChairs: 0,
-      cotWithMattress: 0,
-      sideTable: 0,
-      studyTableWithChair: 0,
-      television: false,
-      refrigerator: false,
-      washingMachine: false,
-      dishwasher: false,
-      waterPurifier: false,
-      microwaveOven: false,
-      inductionCooktop: false,
-      gasStove: false,
-      airConditioner: 0,
-      desertCooler: 0,
-      ironBox: false,
-      exhaustFan: 0
-    },
-    societyAmenities: {
+    availableitems: {
+      availableitems: [],
+      securityandsafety: [],
       powerutility: [],
       parkingtranspotation: [],
       recreationalsportsfacilities: [],
@@ -408,64 +624,96 @@ const LeaseBuilderFloor  = () => {
       smarthometechnology: [],
       otheritems: []
     },
-    leaseTerms:{
-      leaseDetails: {
-        leaseAmount:{
+    floorAmenities: {
+      lights: 0,
+      geysers: 0,
+      lofts: 0,
+      clothHanger: 0,
+      cotWithMattress: 0,
+      airConditioner: 0,
+      exhaustFan: 0,
+      ceilingFan: 0,
+      wardrobes: 0,
+      kitchenCabinets: 0,
+      diningTableWithChairs: 0,
+      sideTable: 0,
+      desertCooler: 0
+    },
+    leaseDetails: {
+      monthlyRent: 0,
+      securityDeposit: 0,
+      maintenanceCharges: {
         amount: 0,
-        type: 'fixed',
-    duration: 0,
-    durationUnit: 'years'
+        type: "monthly"
+      },
+      leaseDuration: {
+        minimumDuration: 0,
+        maximumDuration: 0,
+        durationUnit: "years"
+      },
+      rentNegotiable: false,
+      additionalCharges: {
+        waterCharges: {
+          type: "inclusive",
+          amount: 0
         },
-      },
-      tenureDetails: {
-        minimumTenure: 0,
-        minimumUnit: "years",
-        maximumTenure: 0,
-        maximumUnit: "years",
-        lockInPeriod: 0,
-        lockInUnit: "years",
-        noticePeriod: 0,
-        noticePeriodUnit: "months",
-      },
-      maintenanceAmount: {
-        amount: 0,
-        frequency: "monthly",
-      },
-      otherCharges: {
-        water: { amount: 0, type: "inclusive" },
-        electricity: { amount: 0, type: "inclusive" },
-        gas: { amount: 0, type: "inclusive" },
-        others: { amount: 0, type: "inclusive" },
+        electricityCharges: {
+          type: "inclusive",
+          amount: 0
+        },
+        gasCharges: {
+          type: "inclusive",
+          amount: 0
+        },
+        otherCharges: {
+          type: "inclusive",
+          amount: 0
+        }
       },
       brokerage: {
-        required: "no",
-        amount: 0,
-      },
+        type: "no",
+        amount: 0
+      }
     },
-      availability: {
-        date: new Date().toISOString(),
-        type: "immediate",
-      },
+    availability: {
+      type: "immediate" as const,
+      date: ""
+    },
     media: {
       photos: {
         exterior: [],
         interior: [],
         floorPlan: [],
         washrooms: [],
-        lifts: [],
-        emergencyExits: [],
         bedrooms: [],
         halls: [],
         storerooms: [],
-        kitchen: []
+        kitchen: [],
+        servantRoom: [],
+        studyRoom: [],
+        pooja: [],
+        lifts: [],
+        emergencyExits: []
       },
-      videoTour: undefined,
-      documents: [],
+      mediaItems: [],
+      videoTour: "",
+      documents: []
     },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Lease",
+      status: "Available"
+    }
   }
-  const [formData, setFormData] = useState<formData>({
+  const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
+      title: "",
+      builderName: "",
+      floorNumber: 0,
+      totalFloors: 0,
       address: {
         flatNo: 0,
         showFlatNo: false,
@@ -477,86 +725,39 @@ const LeaseBuilderFloor  = () => {
         zipCode: "",
         location: {
           latitude: "",
-          longitude: ""
+          longitude: "",
         }
       }
     },
-    propertySize: 0,
     propertyDetails: {
+      propertysize: 0,
       bedrooms: 0,
       washrooms: 0,
+      bathrooms: 0,
       balconies: 0,
-      hasParking: false,
-      parkingDetails: {
-        twoWheeler: 0,
-        fourWheeler: 0
-      },
-      extraRooms: {
-        servant: false,
-        puja: false,
-        store: false,
-        others: false
-      },
-      utilityArea: "",
-      furnishingStatus: "",
-      totalFloors: 0,
-      propertyOnFloor: 0,
-      facing: "",
-      propertyAge: "",
-      superBuiltUpAreaSqft: 0,
-      superBuiltUpAreaSqmt: 0,
-      builtUpAreaSqft: 0,
-      builtUpAreaSqmt: 0,
-      carpetAreaSqft: 0,
-      carpetAreaSqmt: 0,
-      electricityAvailability: "",
-      waterAvailability: {
-        borewell: false,
-        governmentSupply: false,
-        tankerSupply: false
-      }
+      parkingdetails: "",
+      ExtraRooms: [],
+      utility: "",
+      Furnishingstatus: "",
+      totalfloors: 0,
+      floorNumber: 0,
+      propertyfacing: "",
+      propertyage: "",
+      superareasqft: 0,
+      superareasqmt: 0,
+      builtupareasqft: 0,
+      builtupareasqmt: 0,
+      carpetareasqft: 0,
+      carpetareasqmt: 0,
+      electricityavailability: "",
+      wateravailability: [],
+      servantRoom: false,
+      studyRoom: false,
+      pooja: false
     },
-    restrictions: {
-      foodPreference: "",
-      petsAllowed: "",
-      tenantType: ""
-    },
-    flatAmenities: {
-      lights: 0,
-      ceilingFan: 0,
-      geysers: 0,
-      chimney: false,
-      callingBell: false,
-      wardrobes: 0,
-      lofts: 0,
-      kitchenCabinets: 0,
-      clothHanger: 0,
-      pipedGasConnection: false,
-      gasStoveWithCylinder: false,
-      ironingStand: false,
-      bathtub: false,
-      shower: false,
-      sofa: false,
-      coffeeTable: false,
-      tvUnit: false,
-      diningTableWithChairs: 0,
-      cotWithMattress: 0,
-      sideTable: 0,
-      studyTableWithChair: 0,
-      television: false,
-      refrigerator: false,
-      washingMachine: false,
-      dishwasher: false,
-      waterPurifier: false,
-      microwaveOven: false,
-      inductionCooktop: false,
-      gasStove: false,
-      airConditioner: 0,
-      desertCooler: 0,
-      ironBox: false,
-      exhaustFan: 0
-    },
-    societyAmenities: {
+    availableitems: {
+      availableitems: [],
+      securityandsafety: [],
       powerutility: [],
       parkingtranspotation: [],
       recreationalsportsfacilities: [],
@@ -568,79 +769,107 @@ const LeaseBuilderFloor  = () => {
       smarthometechnology: [],
       otheritems: []
     },
-    leaseTerms:{
-      leaseDetails: {
-        leaseAmount:{
-        amount: 0,
-        type: 'fixed',
-    duration: 0,
-    durationUnit: 'years'
-      },
+    floorAmenities: {
+      lights: 0,
+      geysers: 0,
+      lofts: 0,
+      clothHanger: 0,
+      cotWithMattress: 0,
+      airConditioner: 0,
+      exhaustFan: 0,
+      ceilingFan: 0,
+      wardrobes: 0,
+      kitchenCabinets: 0,
+      diningTableWithChairs: 0,
+      sideTable: 0,
+      desertCooler: 0
     },
-      tenureDetails: {
-        minimumTenure: 0,
-        minimumUnit: "years",
-        maximumTenure: 0,
-        maximumUnit: "years",
-        lockInPeriod: 0,
-        lockInUnit: "years",
-        noticePeriod: 0,
-        noticePeriodUnit: "months",
-      },
-      maintenanceAmount: {
+    leaseDetails: {
+      monthlyRent: 0,
+      securityDeposit: 0,
+      maintenanceCharges: {
         amount: 0,
-        frequency: "monthly",
+        type: "monthly"
       },
-      otherCharges: {
-        water: { amount: 0, type: "inclusive" },
-        electricity: { amount: 0, type: "inclusive" },
-        gas: { amount: 0, type: "inclusive" },
-        others: { amount: 0, type: "inclusive" },
+      leaseDuration: {
+        minimumDuration: 0,
+        maximumDuration: 0,
+        durationUnit: "years"
+      },
+      rentNegotiable: false,
+      additionalCharges: {
+        waterCharges: {
+          type: "inclusive",
+          amount: 0
+        },
+        electricityCharges: {
+          type: "inclusive",
+          amount: 0
+        },
+        gasCharges: {
+          type: "inclusive",
+          amount: 0
+        },
+        otherCharges: {
+          type: "inclusive",
+          amount: 0
+        }
       },
       brokerage: {
-        required: "no",
-        amount: 0,
-      },
+        type: "no",
+        amount: 0
+      }
     },
-      availability: {
-        date: new Date().toISOString(),
-        type: "immediate",
-      },
+    availability: {
+      type: "immediate" as const,
+      date: ""
+    },
     media: {
       photos: {
         exterior: [],
         interior: [],
         floorPlan: [],
         washrooms: [],
-        lifts: [],
-        emergencyExits: [],
         bedrooms: [],
         halls: [],
         storerooms: [],
-        kitchen: []
+        kitchen: [],
+        servantRoom: [],
+        studyRoom: [],
+        pooja: [],
+        lifts: [],
+        emergencyExits: []
       },
-      videoTour: undefined,
-      documents: [],
+      mediaItems: [],
+      videoTour: "",
+      documents: []
     },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Lease",
+      status: "Available"
+    }
   })
 
   const handleAddressChange = useCallback((newAddress: Address) => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        address: {
-          ...prev.basicInformation.address,
-          ...newAddress,
-          location: {
-            ...prev.basicInformation.address.location,
-            ...newAddress.location // <-- This line ensures updated lat/lng are applied
+      setFormData(prev => ({
+        ...prev,
+        basicInformation: {
+          ...prev.basicInformation,
+          address: {
+            ...prev.basicInformation.address,
+            ...newAddress,
+            location: {
+              ...prev.basicInformation.address.location,
+              ...newAddress.location // <-- This line ensures updated lat/lng are applied
+            }
           }
         }
-      }
-    }));
-  }, []);
-
+      }));
+    }, []);
 
   const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
     setFormData(prev => ({
@@ -655,136 +884,124 @@ const LeaseBuilderFloor  = () => {
           zipCode: address?.pinCode || prev.basicInformation.address.zipCode,
           location: {
             latitude: lat,
-            longitude: lng
-          },
+            longitude: lng,
+            locationLabel: address?.locationLabel || ""
+          }
         }
       }
-    }))
+    }));
   }, []);
 
-  const handleAvailabilityChange = useCallback((newAvailability: { type: "immediate" | "specific", date?: string }) => {
+  const handleLeaseAmountChange = useCallback((leaseAmount: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      leaseDetails: {
+        ...prev.leaseDetails,
+        monthlyRent: leaseAmount.amount,
+        rentNegotiable: leaseAmount.type === 'negotiable',
+        leaseDuration: {
+          minimumDuration: leaseAmount.duration,
+          maximumDuration: prev.leaseDetails.leaseDuration.maximumDuration,
+          durationUnit: leaseAmount.durationUnit
+        }
+      }
+    }));
+  }, []);
+
+  const handleLeaseTenureChange = useCallback((tenure: Record<string, any>) => {
+    setFormData(prev => ({
+      ...prev,
+      leaseDetails: {
+        ...prev.leaseDetails,
+        leaseDuration: {
+          minimumDuration: tenure.minimumTenure,
+          maximumDuration: tenure.maximumTenure,
+          durationUnit: tenure.minimumUnit
+        }
+      }
+    }));
+  }, []);
+
+  const handleMaintenanceAmountChange = useCallback((maintenance: {
+    amount: number;
+    frequency: string;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      leaseDetails: {
+        ...prev.leaseDetails,
+        maintenanceCharges: {
+          amount: maintenance.amount,
+          type: maintenance.frequency
+        }
+      }
+    }));
+  }, []);
+
+  const handleBrokerageChange = useCallback((brokerage: {
+    required: string;
+    amount?: number;
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      leaseDetails: {
+        ...prev.leaseDetails,
+        brokerage: {
+          type: brokerage.required,
+          amount: brokerage.amount || 0
+        }
+      }
+    }));
+  }, []);
+
+  const handleOtherChargesChange = useCallback((charges: {
+    water: {
+      type: string;
+      amount: number;
+    };
+    electricity: {
+      type: string;
+      amount: number;
+    };
+    gas: {
+      type: string;
+      amount: number;
+    };
+    others: {
+      type: string;
+      amount: number;
+    };
+  }) => {
+    setFormData(prev => ({
+      ...prev,
+      leaseDetails: {
+        ...prev.leaseDetails,
+        additionalCharges: {
+          waterCharges: charges.water,
+          electricityCharges: charges.electricity,
+          gasCharges: charges.gas,
+          otherCharges: charges.others
+        }
+      }
+    }));
+  }, []);
+
+  const handleAvailabilityChange = useCallback((availability: { type: "immediate" | "specific"; date?: string }) => {
     setFormData(prev => ({
       ...prev,
       availability: {
-        type: newAvailability.type,
-        date: newAvailability.date || ""
+        type: availability.type,
+        date: availability.date || ""
       }
-    }))
+    }));
   }, []);
 
-  // Function to update map location based on latitude and longitude
-  // const updateMapLocation = (lat: string, lng: string) => {
-  //   const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
-  //   if (iframe && lat && lng) {
-  //     iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
-  //   }
-  // };
-
-    
-// const LeaseBuilderFloor = ({ propertyId, onSubmit }: LeaseBuilderFloorProps) => {
-//   const [currentStep, setCurrentStep] = useState(0)
-//   const [loading, setLoading] = useState(false)
-//   const [error, setError] = useState<string | null>(null)
-//   const [success, setSuccess] = useState<string | null>(null)
-//   const formRef = useRef<HTMLDivElement>(null)
-
-//   const [formData, setFormData] = useState({
-
-  // Function to update map location based on latitude and longitude
   const updateMapLocation = (lat: string, lng: string) => {
     const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
     if (iframe && lat && lng) {
       iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
     }
   };
-
-  // // Function to get current location
-  // const getCurrentLocation = () => {
-  //   if (navigator.geolocation) {
-  //     navigator.geolocation.getCurrentPosition(
-  //       (position) => {
-  //         const lat = position.coords.latitude.toString();
-  //         const lng = position.coords.longitude.toString();
-          
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           coordinates: {
-  //             latitude: lat,
-  //             longitude: lng
-  //           }
-  //         }));
-          
-  //         updateMapLocation(lat, lng);
-          
-  //         reverseGeocode(lat, lng);
-  //       },
-  //       (error) => {
-  //         console.error("Error getting location: ", error);
-  //         toast.error("Unable to get your current location. Please check your browser permissions.");
-  //       }
-  //     );
-  //   } else {
-  //     toast.error("Geolocation is not supported by your browser.");
-  //   }
-  // };
-
-  // // Reverse geocode to get address from coordinates
-  // const reverseGeocode = (lat: string, lng: string) => {
-  //   const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY}`;
-    
-  //   fetch(geocodingUrl)
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       if (data.status === "OK" && data.results && data.results.length > 0) {
-  //         const address = data.results[0];
-          
-  //         const addressComponents = {
-  //           street: '',
-  //           city: '',
-  //           state: '',
-  //           zipCode: ''
-  //         };
-          
-  //         address.address_components.forEach((component: any) => {
-  //           const types = component.types;
-            
-  //           if (types.includes('route')) {
-  //             addressComponents.street = component.long_name;
-  //           } else if (types.includes('locality')) {
-  //             addressComponents.city = component.long_name;
-  //           } else if (types.includes('administrative_area_level_1')) {
-  //             addressComponents.state = component.long_name;
-  //           } else if (types.includes('postal_code')) {
-  //             addressComponents.zipCode = component.long_name;
-  //           }
-  //         });
-          
-  //         if (!addressComponents.street && address.formatted_address) {
-  //           const formattedParts = address.formatted_address.split(',');
-  //           if (formattedParts.length > 0) {
-  //             addressComponents.street = formattedParts[0];
-  //           }
-  //         }
-          
-  //         setFormData(prev => ({
-  //           ...prev,
-  //           propertyAddress: {
-  //             ...prev.propertyAddress,
-  //             ...addressComponents
-  //           }
-  //         }));
-          
-  //         toast.success("Location details updated successfully");
-  //       } else {
-  //         console.error("Geocoding failed:", data.status);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.error("Error during reverse geocoding:", error);
-  //     });
-  // };
-
-
 
   const formSections = [
     {
@@ -794,8 +1011,14 @@ const LeaseBuilderFloor  = () => {
         <div className="space-y-8">
            
            <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...prev.basicInformation,
+                title: name
+              }
+            }))}
           />
              
 
@@ -818,127 +1041,6 @@ const LeaseBuilderFloor  = () => {
                 }}
                 onAddressChange={handleAddressChange}
               />
-                {/* <div className="bg-white p-6 rounded-lg space-y-6">
-                  <div>
-                    <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Use the map below to set your property's location. Click on the map or search for an address.
-                    </p>
-                    <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
-                      <iframe
-                        id="map-iframe"
-                        src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${formData.coordinates.longitude || '78.9629'}!3d${formData.coordinates.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${formData.coordinates.latitude || '20.5937'},${formData.coordinates.longitude || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
-                        allowFullScreen
-                        loading="lazy"
-                        referrerPolicy="no-referrer-when-downgrade"
-                        className="rounded-xl"
-                        title="Property Location Map"
-                      ></iframe>
-                      
-                      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                        <button 
-                          onClick={() => getCurrentLocation()}
-                          className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                          aria-label="Get current location"
-                          type="button"
-                        >
-                          <Locate className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm font-medium">My Location</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => openLocationPicker()}
-                          className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                          aria-label="Select location"
-                          type="button"
-                        >
-                          <Navigation className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm font-medium">Select Location</span>
-                        </button>
-                      </div>
-                      
-                      <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
-                        Powered by Google Maps
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
-                          Latitude
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            id="latitude"
-                            value={formData.coordinates.latitude}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (!isNaN(Number(value)) || value === '-' || value === '') {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  coordinates: {
-                                    ...prev.coordinates,
-                                    latitude: value
-                                  }
-                                }));
-                                
-                                updateMapLocation(
-                                  value, 
-                                  formData.coordinates.longitude || '78.9629'
-                                );
-                              }
-                            }}
-                            placeholder="Enter latitude (e.g., 17.683301)"
-                            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                          />
-                          <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                        </div>
-                      </div>
-                      <div>
-                        <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
-                          Longitude
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            id="longitude"
-                            value={formData.coordinates.longitude}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              if (!isNaN(Number(value)) || value === '-' || value === '') {
-                                setFormData(prev => ({
-                                  ...prev,
-                                  coordinates: {
-                                    ...prev.coordinates,
-                                    longitude: value
-                                  }
-                                }));
-                                
-                                updateMapLocation(
-                                  formData.coordinates.latitude || '20.5937',
-                                  value
-                                );
-                              }
-                            }}
-                            placeholder="Enter longitude (e.g., 83.019301)"
-                            className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                          />
-                          <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      Enter coordinates manually or use the map above to set the location.
-                    </p>
-                  </div>
-                </div> */}
               </div>
             </div>
           </div>
@@ -958,11 +1060,14 @@ const LeaseBuilderFloor  = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <PropertySize
-                  propertySize={formData.propertySize}
+                  propertySize={formData.propertyDetails.propertysize}
                   onPropertySizeChange={(size: number) => {
                     setFormData(prev => ({
                       ...prev,
-                      propertySize: size
+                      propertyDetails: {
+                        ...prev.propertyDetails,
+                        propertysize: size
+                      }
                     }));
                   }}
                 />
@@ -994,15 +1099,24 @@ const LeaseBuilderFloor  = () => {
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <Restrictions
-              res={formData.restrictions}
-              onRestrictionsChange={(restrictions: {
-                foodPreference: string;
-                petsAllowed: string;
-                tenantType: string;
-              }) => setFormData(prev => ({
-                ...prev,
-                restrictions
-              }))}
+              res={{
+                foodPreference: "",
+                petsAllowed: "",
+                tenantType: ""
+              }}
+              onRestrictionsChange={(restrictions) => {
+                setFormData(prev => ({
+                  ...prev,
+                  propertyDetails: {
+                    ...prev.propertyDetails,
+                    ExtraRooms: [
+                      ...(restrictions.foodPreference ? ['foodPreference'] : []),
+                      ...(restrictions.petsAllowed ? ['petsAllowed'] : []),
+                      ...(restrictions.tenantType ? ['tenantType'] : [])
+                    ]
+                  }
+                }));
+              }}
             />
           </div>
 
@@ -1014,23 +1128,50 @@ const LeaseBuilderFloor  = () => {
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <FlatAmenities
-                    amenities={formData.flatAmenities}
+                    amenities={{
+                      ...formData.floorAmenities,
+                      chimney: false,
+                      callingBell: false,
+                      pipedGasConnection: false,
+                      gasStoveWithCylinder: false,
+                      ironingStand: false,
+                      bathtub: false,
+                      shower: false,
+                      sofa: false,
+                      coffeeTable: false,
+                      tvUnit: false,
+                      studyTableWithChair: 0,
+                      television: false,
+                      washingMachine: false,
+                      refrigerator: false,
+                      microwaveOven: false,
+                      dishwasher: false,
+                      waterPurifier: false,
+                      inductionCooktop: false,
+                      gasStove: false,
+                      ironBox: false
+                    }}
                     onAmenitiesChange={(amenities) =>
                       setFormData((prev) => ({
                         ...prev,
-                        flatAmenities: {
-                          ...prev.flatAmenities,
-                          ...amenities
+                        floorAmenities: {
+                          ...prev.floorAmenities,
+                          ...Object.fromEntries(
+                            Object.entries(amenities).map(([key, value]) => [key, Number(value)])
+                          )
                         }
                       }))
                     }
                   />
 
                   <SocietyAmenities
-                    amenities={formData.societyAmenities}
+                    amenities={formData.availableitems}
                     onChange={(updatedAmenities) => setFormData((prev) => ({
                       ...prev,
-                      societyAmenities: updatedAmenities
+                      availableitems: {
+                        ...prev.availableitems,
+                        ...updatedAmenities
+                      }
                     }))}
                   />
               </div>
@@ -1045,85 +1186,33 @@ const LeaseBuilderFloor  = () => {
       component: (
         <div className="space-y-8">
           <LeaseAmount
-            onLeaseAmountChange={(amount) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                leaseDetails: {
-                  ...prev.leaseTerms.leaseDetails,
-                  leaseAmount: {
-                    amount: amount.amount || 0,
-                    type: amount.type || 'fixed',
-                    duration: amount.duration || 0,
-                    durationUnit: amount.durationUnit || 'years'
-                  },
-
-                }
-              }
-            }))}
+            onLeaseAmountChange={handleLeaseAmountChange}
           />
           <LeaseTenure
-            onLeaseTenureChange={(tenure) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                leaseDetails: {
-                  ...prev.leaseTerms.leaseDetails,
-                  // leaseDuration: tenure.leaseDuration || '',
-                },
-                tenureDetails: {
-                  minimumTenure: Number(tenure.minimumTenure) || 0,
-                  minimumUnit: tenure.minimumUnit || 'years',
-                  maximumTenure: Number(tenure.maximumTenure) || 0,
-                  maximumUnit: tenure.maximumUnit || 'years',
-                  lockInPeriod: Number(tenure.lockInPeriod) || 0,
-                  lockInUnit: tenure.lockInUnit || 'years',
-                  noticePeriod: Number(tenure.noticePeriod) || 0,
-                  noticePeriodUnit: tenure.noticePeriodUnit || 'months'
-                }
-              }
-            }))}
+            onLeaseTenureChange={handleLeaseTenureChange}
           />
           <MaintenanceAmount
-            maintenanceAmount={formData.leaseTerms.maintenanceAmount}
-            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                maintenanceAmount: {
-                  amount: Number(maintenance.amount) || 0,
-                  frequency: maintenance.frequency || 'monthly'
-                }
-              }
-            }))}
+            maintenanceAmount={{
+              amount: formData.leaseDetails.maintenanceCharges.amount,
+              frequency: formData.leaseDetails.maintenanceCharges.type
+            }}
+            onMaintenanceAmountChange={handleMaintenanceAmountChange}
           />
           <OtherCharges
-            otherCharges={formData.leaseTerms.otherCharges}
-            onOtherChargesChange={(charges) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                otherCharges: {
-                  water: { type: charges.water.type, amount: charges.water.amount },
-                  electricity: { type: charges.electricity.type, amount: charges.electricity.amount },
-                  gas: { type: charges.gas.type, amount: charges.gas.amount },
-                  others: { type: charges.others.type, amount: charges.others.amount }
-                }
-              }
-            }))}
+            otherCharges={{
+              water: formData.leaseDetails.additionalCharges.waterCharges,
+              electricity: formData.leaseDetails.additionalCharges.electricityCharges,
+              gas: formData.leaseDetails.additionalCharges.gasCharges,
+              others: formData.leaseDetails.additionalCharges.otherCharges
+            }}
+            onOtherChargesChange={handleOtherChargesChange}
           />
           <Brokerage
-            bro={formData.leaseTerms.brokerage}
-            onBrokerageChange={(brokerage) => setFormData(prev => ({
-              ...prev,
-              leaseTerms: {
-                ...prev.leaseTerms,
-                brokerage: {
-                  required: brokerage.required as 'yes' | 'no',
-                  amount: Number(brokerage.amount) || 0
-                }
-              }
-            }))}
+            bro={{
+              required: formData.leaseDetails.brokerage.type,
+              amount: formData.leaseDetails.brokerage.amount
+            }}
+            onBrokerageChange={handleBrokerageChange}
           />
               </div>
       ),
@@ -1136,10 +1225,7 @@ const LeaseBuilderFloor  = () => {
           <div className="space-y-8">
             <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
             <AvailabilityDate
-                availability={{
-                  type: formData.availability.type === "immediate" ? "immediate" : "specific",
-                  date: formData.availability.date
-                }}
+                availability={formData.availability}
                 onAvailabilityChange={handleAvailabilityChange}
               />
             </div>
@@ -1152,42 +1238,36 @@ const LeaseBuilderFloor  = () => {
       icon: <Image className="w-6 h-6" />,
       component: (
          <div className="space-y-8">
-            <MediaUpload
-              initialMedia={formData.media}
-              onMediaChange={(media) => {
-                setFormData(prev => ({
+            <ResidentialPropertyMediaUpload
+                propertyType="builderfloor"
+                propertyId={propertyId}
+                value={formData.media}
+                onChange={(media) => setFormData(prev => ({
                   ...prev,
                   media: {
+                    ...media,
+                    mediaItems: prev.media.mediaItems,
                     photos: {
-                      exterior: media.photos.exterior,
-                      interior: media.photos.interior,
-                      floorPlan: media.photos.floorPlan,
-                      washrooms: media.photos.washrooms,
-                      lifts: media.photos.lifts,
-                      emergencyExits: media.photos.emergencyExits,
-                      bedrooms: media.photos.bedrooms,
-                      halls: media.photos.halls,
-                      storerooms: media.photos.storerooms,
-                      kitchen: media.photos.kitchen
+                      ...media.photos,
+                      servantRoom: prev.media.photos.servantRoom,
+                      studyRoom: prev.media.photos.studyRoom,
+                      pooja: prev.media.photos.pooja
                     },
-                    videoTour: media.videoTour,
-                    documents: media.documents
+                    videoTour: media.videoTour || ""
                   }
-                }));
-              }}
-            />
+                }))}
+              />
             </div>
       ),
     },
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
       setCurrentStep(currentStep + 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -1207,7 +1287,6 @@ const LeaseBuilderFloor  = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -1224,86 +1303,137 @@ const LeaseBuilderFloor  = () => {
     }
   };
 
-  const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    console.log(formData)
+    console.log(formData);
 
     try {
       const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
+      if (!user) {
+        navigate('/login');
+        return;
+      }
 
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
+      const author = JSON.parse(user).id;
+
+      // Convert media files to MediaItem format for S3 upload
+      const mediaItemsToUpload: MediaItem[] = [];
+
+      // Process photos
+      Object.entries(formData.media.photos).forEach(([category, files]) => {
+        files.forEach((file: File | string) => {
+          if (file instanceof File) {
+            mediaItemsToUpload.push({
+              id: uuidv4(),
+              type: 'photo',
+              file,
+              category,
+              status: 'pending'
+            });
+          }
+        });
+      });
+
+      // Process video tour
+      if (formData.media.videoTour instanceof File) {
+        mediaItemsToUpload.push({
+          id: uuidv4(),
+          type: 'video',
+          file: formData.media.videoTour,
+          category: 'videoTour',
+          status: 'pending'
+        });
+      }
+
+      // Process documents
+      formData.media.documents.forEach((file: File | string) => {
+        if (file instanceof File) {
+          mediaItemsToUpload.push({
+            id: uuidv4(),
+            type: 'document',
+            file,
+            category: 'documents',
+            status: 'pending'
           });
-        };
+        }
+      });
 
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
-            if (file instanceof File) {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
+      // Upload media to S3
+      let uploadedMediaUrls;
+      if (mediaItemsToUpload.length > 0) {
+        try {
+          uploadedMediaUrls = await uploadResidentialMediaToS3(
+            'builder-floor',
+            mediaItemsToUpload,
+            propertyId
+          );
+
+          // Update formData with uploaded URLs
+          if (uploadedMediaUrls) {
+            const updatedFormData = {
+              ...formData,
+              media: {
+                ...formData.media,
+                mediaItems: uploadedMediaUrls.map(item => ({
+                  id: item.id,
+                  type: item.type,
+                  url: item.url,
+                  title: item.title || '',
+                  tags: item.tags || [],
+                  roomType: item.category,
+                  category: item.category
+                }))
+              }
+            };
+
+            // Send the updated form data to the backend
+            const response = await axios.post('/api/residential/lease/builder-floor', {
+              ...updatedFormData,
+              metadata: {
+                createdBy: author,
+                createdAt: new Date(),
+                propertyType: "Residential",
+                propertyName: "Builder Floor",
+                intent: "Lease",
+                status: "Available"
+              }
+            });
+
+            if (response.data.success) {
+              // Set the propertyId from the response
+              setPropertyId(response.data.data.propertyId);
+              toast.success('Property listed successfully!');
+              navigate('/dashboard');
             }
           }
-          return results;
-        };
-
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
-        };
-
-        const transformedData = {
+        } catch (error) {
+          console.error('Error uploading media:', error);
+          toast.error('Failed to upload media files');
+        }
+      } else {
+        // If no media to upload, just send the form data
+        const response = await axios.post('/api/residential/lease/builder-floor', {
           ...formData,
-          media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
-          }
-        };
-
-        const response = await axios.post('/api/residential/lease/builder-floor', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
+            createdAt: new Date(),
+            propertyType: "Residential",
+            propertyName: "Builder Floor",
+            intent: "Lease",
+            status: "Available"
           }
         });
 
         if (response.data.success) {
-          toast.success('Builder Floor listing created successfully!');
-          setFormData({...initialData} as formData);
+          // Set the propertyId from the response
+          setPropertyId(response.data.data.propertyId);
+          toast.success('Property listed successfully!');
+          navigate('/dashboard');
         }
-      } else {
-        navigate('/login');
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create builder floor listing. Please try again.');
+      console.error('Error creating builder floor listing:', error);
+      toast.error('Failed to create builder floor listing');
     } finally {
       setIsSubmitting(false);
     }
@@ -1416,6 +1546,6 @@ const LeaseBuilderFloor  = () => {
       )}
     </div>
   );
-  };
+};
 
 export default LeaseBuilderFloor;

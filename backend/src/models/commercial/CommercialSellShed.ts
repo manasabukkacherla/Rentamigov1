@@ -9,7 +9,7 @@ interface IArea {
 
 interface IBasicInformation {
   title: string;
-  shedType: string[];
+  Type: string[];
   address: {
     street: string;
     city: string;
@@ -29,14 +29,16 @@ interface IPricingDetails {
   pricetype: "fixed" | "negotiable";
 }
 
-// interface IAvailability {
-//   type: 'immediate' | 'specific';
-//   date?: Date;
-//   preferredSaleDuration?: string;
-//   noticePeriod: string;
-//   isPetsAllowed: boolean;
-//   operatingHours: boolean;
-// }
+interface IRegistration {
+  chargestype: 'inclusive' | 'exclusive';
+  registrationAmount?: number;
+  stampDutyAmount?: number;
+}
+
+interface IBrokerage {
+  required: string;
+  amount?: number;
+}
 
 interface IContactInformation {
   name: string;
@@ -47,8 +49,12 @@ interface IContactInformation {
 }
 
 interface IMetadata {
-  createdBy: Types.ObjectId;
+  createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
 }
 
 interface IFloor {
@@ -56,71 +62,59 @@ interface IFloor {
   totalFloors: number;
 }
 
-export interface ICommercialSellShed extends Document {
+interface IAvailability {
+  type: 'immediate' | 'specific';
+  date?: Date;
+  preferredSaleDuration?: string;
+  noticePeriod?: string;
+  isPetsAllowed: boolean;
+  operatingHours: boolean;
+}
+
+interface IMedia {
+  photos: {
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    washrooms: string[];
+    lifts: string[];
+    emergencyExits: string[];
+  };
+  videoTour?: string;
+  documents: string[];
+}
+
+ interface ICommercialSellShed extends Document {
   propertyId?: string;
-  propertyName: string;
-  shopType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  basicInformation: IBasicInformation;
   shedDetails: {
     totalArea: number;
-    
+    builtUpArea: number;
     carpetArea: number;
     entranceWidth: number;
     ceilingHeight: number;
     additionalDetails: string;
-    
   };
   propertyDetails: {
     area: IArea;
     facingDetails: IFloor;
     facingDirection: string;
     furnishingStatus: string;
-    propertyAge: number;
+    propertyAge: string;
     propertyCondition: string;
-      propertyAmenities: string[];
-      wholeSpaceAmenities: string[];
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
     waterAvailability: string[];
     electricitySupply: {
       powerLoad: number;
       backup: boolean;
     };
   };
-  
-  registrationCharges: {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
-  availability: {
-    type: 'immediate' | 'specific';
-    date?: Date;
-    preferredSaleDuration?: string;
-    noticePeriod?: string;
-    isPetsAllowed: boolean;
-    operatingHours: boolean;
-  };
-  contactDetails: {
-    name: string;
-    email: string;
-    phone: string;
-    alternatePhone?: string;
-    bestTimeToContact?: string;
-  };
+  pricingDetails: IPricingDetails;
+  registration: IRegistration;
+  brokerage: IBrokerage;
+  availability: IAvailability;
+  contactDetails: IContactInformation;
   media: {
     photos: {
       exterior: string[];
@@ -133,35 +127,43 @@ export interface ICommercialSellShed extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData: {
-    createdBy: Schema.Types.ObjectId | null;
-    createdAt: Date;
-  }
+  metaData: IMetadata;
 }
 
 // Schema
 const CommercialSellShedSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSS-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  propertyName: { type: String, default: "Unnamed Property" },
-  shopType: { type: [String], default: [] },
-  address: {
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+  basicInformation: {
+    title: { type: String, default: "Unnamed Property" },
+    Type: { type: [String], default: [] },
+    address: {
+      street: { type: String, default: "Not Specified" },
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String, required: true },
+      longitude: { type: String, required: true }
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  coordinates: {
-    latitude: { type: String,required:true },
-    longitude: { type: String,required:true }
-  },
-  isCornerProperty: { type: Boolean, default: false },
   shedDetails: {
-      totalArea: { type: Number },
-      carpetArea: { type: Number },
-      entranceWidth: { type: Number },
-      ceilingHeight: { type: Number },
-      additionalDetails: { type: String }
+    totalArea: { type: Number, required: true },
+    builtUpArea: { type: Number},
+    carpetArea: { type: Number, required: true },
+    entranceWidth: { type: Number, required: true },
+    ceilingHeight: { 
+      type: Schema.Types.Mixed,
+      validate: {
+        validator: function (v: any) {
+          return typeof v === 'number' || (typeof v === 'object' && v.hasOwnProperty('value') && v.hasOwnProperty('unit'));
+        },
+        message: 'ceilingHeight must be either a number or an object with value and unit properties'
+      }
+    },
+    additionalDetails: { type: String }
   },
   propertyDetails: {
     area: {
@@ -175,7 +177,7 @@ const CommercialSellShedSchema: Schema = new Schema({
     },
     facingDirection: { type: String },
     furnishingStatus: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
@@ -186,13 +188,13 @@ const CommercialSellShedSchema: Schema = new Schema({
     }
   },
   pricingDetails: {
-    propertyPrice: { type: Number },
+    propertyPrice: { type: Number, required: true },
     pricetype: { type: String, enum: ['fixed', 'negotiable'], default: 'fixed' }
   },
-  registrationCharges: {
-    included: { type: Boolean, default: false },
-    amount: { type: Number },
-    stampDuty: { type: Number }
+  registration: {
+    chargestype: { type: String, enum: ['inclusive', 'exclusive'], default: 'inclusive' },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number }
   },
   brokerage: {
     required: { type: String },
@@ -229,8 +231,12 @@ const CommercialSellShedSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metaData: {
-    creadtedBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String, default: 'Sell' },
+    propertyName: { type: String, default: 'Shed' },
+    status: { type: String, default: 'Available' }
   }
 });
 
@@ -238,10 +244,9 @@ const CommercialSellShedSchema: Schema = new Schema({
 CommercialSellShedSchema.index({ propertyId: 1 }, { unique: true });
 CommercialSellShedSchema.index({ 'address.city': 1 });
 CommercialSellShedSchema.index({ 'address.state': 1 });
-CommercialSellShedSchema.index({ price: 1 });
 CommercialSellShedSchema.index({ 'propertyDetails.area.superBuiltUpAreaSqft': 1 });
 CommercialSellShedSchema.index({ 'metaData.createdAt': -1 });
 
 // Export model and interfaces
-export type { IBasicInformation, IArea, IPricingDetails,IContactInformation, IMetadata };
+export type { ICommercialSellShed, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };
 export default mongoose.model<ICommercialSellShed>('CommercialSellShed', CommercialSellShedSchema);

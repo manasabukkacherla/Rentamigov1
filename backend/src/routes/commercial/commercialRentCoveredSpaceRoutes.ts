@@ -4,7 +4,7 @@ import { createCommercialRentCoveredSpace, deleteCommercialRentCoveredSpace, get
 const router = express.Router();
 
 router.get('/', getAllCommercialRentCoveredSpaces);
-router.get('/:id', getCommercialRentCoveredSpaceById);
+router.get('/:propertyId', getCommercialRentCoveredSpaceById);
 router.post('/', createCommercialRentCoveredSpace);
 router.put('/:id', updateCommercialRentCoveredSpace);
 router.delete('/:id', deleteCommercialRentCoveredSpace);

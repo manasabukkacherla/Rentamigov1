@@ -3,7 +3,7 @@ import { NumberListInstance } from 'twilio/lib/rest/pricing/v2/number';
 
 interface IBasicInformation {
   propertyId: string;
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -108,7 +108,15 @@ interface societyAmenities {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Appartment';
+  intent: 'Rent';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
+  updatedBy?: Schema.Types.ObjectId | string;
+  updatedAt?: Date;
 }
+
+
 
 interface availability {
   type: string;
@@ -125,16 +133,16 @@ interface IPhotoDetail {
 
 interface IMedia {
   photos: {
-    exterior: IPhotoDetail[];
-    interior: IPhotoDetail[];
-    floorPlan: IPhotoDetail[];
-    washrooms: IPhotoDetail[];
-    lifts: IPhotoDetail[];
-    emergencyExits: IPhotoDetail[];
-    bedrooms: IPhotoDetail[];
-    halls: IPhotoDetail[];
-    storerooms: IPhotoDetail[];
-    kitchen: IPhotoDetail[];
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    washrooms: string[];
+    lifts: string[];
+    emergencyExits: string[];
+    bedrooms: string[];
+    halls: string[];
+    storerooms: string[];
+    kitchen: string[];
   };
   mediaItems?: Array<{
     id?: string;
@@ -177,7 +185,7 @@ interface IResidentialRentApartment extends Document {
 const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
   propertyId: { type: String, required: false, unique: false },
   basicInformation: {
-    propertyName: { type: String, required: false },
+    title: { type: String, required: false },
     address: {
       flatNo: { type: Number, required: false },
       showFlatNo: { type: Boolean, required: false },
@@ -288,76 +296,16 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
   },
   media: {
     photos: {
-      exterior: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      interior: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      floorPlan: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      washrooms: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      lifts: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      emergencyExits: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      bedrooms: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      halls: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      storerooms: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }],
-      kitchen: [{ 
-        id: String, 
-        url: String, 
-        title: String, 
-        category: String, 
-        tags: [String] 
-      }]
+      exterior: [{ type: String, required: false }],
+      interior: [{ type: String, required: false }],
+      floorPlan: [{ type: String, required: false }],
+      washrooms: [{ type: String, required: false }],
+      lifts: [{ type: String, required: false }],
+      emergencyExits: [{ type: String, required: false }],
+      bedrooms: [{ type: String, required: false }],
+      halls: [{ type: String, required: false }],
+      storerooms: [{ type: String, required: false }],
+      kitchen: [{ type: String, required: false }]
     },
     mediaItems: [{
       id: String,
@@ -372,8 +320,18 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
     documents: [{ type: String, required: false }]
   },
   metadata: {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    propertyName: { type: String, default:'Appartment' },
+    intent: { type: String, default: 'Rent' },
+    status: { 
+      type: String, 
+      enum: ['Available', 'Rented', 'Under Maintenance'], 
+      default: 'Available' 
+    },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    updatedAt: { type: Date }
   }
 }, {
   timestamps: false

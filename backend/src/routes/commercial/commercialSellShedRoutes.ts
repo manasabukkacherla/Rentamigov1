@@ -6,7 +6,7 @@ const commercialSellShedRoutes = express.Router();
 // Routes
 commercialSellShedRoutes.post('/', createCommercialShed);
 commercialSellShedRoutes.get('/', getAllCommercialSheds);
-commercialSellShedRoutes.get('/:id', getCommercialShedById);
+commercialSellShedRoutes.get('/:propertyId', getCommercialShedById);
 commercialSellShedRoutes.put('/:id', updateCommercialShed);
 commercialSellShedRoutes.delete('/:id', deleteCommercialShed);
 

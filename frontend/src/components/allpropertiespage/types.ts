@@ -7,7 +7,7 @@ export type PropertyType =
   | 'Studio'
   | 'Penthouse'
   | 'Standalone Building'
-  | 'Agricultural'; // ✅ Added
+  | 'Agricultural';
 
 export type ListingType = 'Owner' | 'Agent' | 'PG' | 'RentAmigo';
 
@@ -17,13 +17,13 @@ export type FurnishingType =
   | 'Partially Furnished'
   | 'Unfurnished';
 
-export type BHKType =
-  | '1 RK'
-  | '1 BHK'
-  | '2 BHK'
-  | '3 BHK'
-  | '4 BHK'
-  | '4+ BHK';
+// export type BHKType =
+//   | '1 RK'
+//   | '1 BHK'
+//   | '2 BHK'
+//   | '3 BHK'
+//   | '4 BHK'
+//   | '4+ BHK';
 
 export type SharingType =
   | '1 Share'
@@ -40,7 +40,7 @@ export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
 export interface SearchCriteria {
   location: string | null;
   propertyType: PropertyType | null;
-  bhkType: BHKType | null;
+  // bhkType: BHKType | null;
   priceRange: {
     min: number | null;
     max: number | null;
@@ -55,7 +55,7 @@ export interface SearchCriteria {
   };
   furnishing: FurnishingType | null;
   strict: boolean;
-  bathrooms: number | null;
+  // bathrooms: number | null;
   listingTypes: ListingType[];
   sharing: SharingType | null;
 }
@@ -65,7 +65,7 @@ export interface Filters {
   listingTypes: ListingType[];
   propertyTypes: PropertyType[];
   furnishingTypes: FurnishingType[];
-  bhkTypes: BHKType[];
+  // bhkTypes: BHKType[];
   sharingTypes: SharingType[];
   priceRange: {
     min: number | null;
@@ -73,16 +73,27 @@ export interface Filters {
   };
 }
 
+// Filter Section Props
+type FilterSectionType = keyof Filters;
+
+export interface FilterSectionProps {
+  title: string;
+  items: string[];
+  type: FilterSectionType;
+}
+
 // Unified Property Card Interface
 export interface Property {
   id: string;
+  propertyId: string;
   title: string;
   type: PropertyType;
+  propertyName:string;
   listingType: ListingType;
   price: number;
   location: string;
-  bhkType: BHKType;
-  bathrooms: number;
+  // bhkType: BHKType;
+  // bathrooms: number;
   furnishing: FurnishingType;
   area: number;
   image: string;

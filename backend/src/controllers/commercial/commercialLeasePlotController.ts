@@ -58,141 +58,97 @@ const transformPlotData = (formData: any) => {
     // Basic Information
     if (formData.basicInformation) {
         transformedData.basicInformation = {
-            title: formData.basicInformation.title || '',
-            plotType: Array.isArray(formData.basicInformation.plotType) 
-                ? formData.basicInformation.plotType 
-                : (formData.basicInformation.plotType ? [formData.basicInformation.plotType] : []),
+            title: formData.basicInformation.title ?? '',
+            plotType: Array.isArray(formData.basicInformation.plotType)
+                ? formData.basicInformation.plotType
+                : (formData.basicInformation.plotType != null ? [formData.basicInformation.plotType] : []),
             address: {
-                street: formData.basicInformation.address?.street || '',
-                city: formData.basicInformation.address?.city || '',
-                state: formData.basicInformation.address?.state || '',
-                zipCode: formData.basicInformation.address?.zipCode || ''
+                street: formData.basicInformation.address?.street ?? '',
+                city: formData.basicInformation.address?.city ?? '',
+                state: formData.basicInformation.address?.state ?? '',
+                zipCode: formData.basicInformation.address?.zipCode ?? '',
+                _id: formData.basicInformation.address?._id ?? ''
             },
-            landmark: formData.basicInformation.landmark || '',
-            coordinates: {
-                latitude: parseFloat(formData.basicInformation.coordinates?.latitude) || 0,
-                longitude: parseFloat(formData.basicInformation.coordinates?.longitude) || 0
+            landmark: formData.basicInformation.landmark ?? '',
+            location: {
+                latitude: formData.basicInformation.location?.latitude ?? '',
+                longitude: formData.basicInformation.location?.longitude ?? '',
+                _id: formData.basicInformation.location?._id ?? ''
             },
-            isCornerProperty: Boolean(formData.basicInformation.isCornerProperty)
+            isCornerProperty: formData.basicInformation.isCornerProperty ?? false
         };
     }
 
     // Property Details
-    if (formData.propertyDetails) {
-        transformedData.propertyDetails = {
-            area: {
-                totalArea: parseFloat(formData.propertyDetails.area?.totalArea) || 0,
-                carpetArea: parseFloat(formData.propertyDetails.area?.carpetArea) || 0,
-                builtUpArea: parseFloat(formData.propertyDetails.area?.builtUpArea) || 0
-            },
-            floor: {
-                floorNumber: parseInt(formData.propertyDetails.floor?.floorNumber) || 0,
-                totalFloors: parseInt(formData.propertyDetails.floor?.totalFloors) || 0
-            },
-            facingDirection: formData.propertyDetails.facingDirection || '',
-            furnishingStatus: formData.propertyDetails.furnishingStatus || '',
-            propertyAmenities: Array.isArray(formData.propertyDetails.propertyAmenities) 
-                ? formData.propertyDetails.propertyAmenities 
-                : [],
-            wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || ''
-        };
-    }
+    
 
     // Plot Details
     if (formData.plotDetails) {
         transformedData.plotDetails = {
-            totalPlotArea: parseFloat(formData.plotDetails.totalPlotArea) || 0,
-            zoningType: formData.plotDetails.zoningType || "commercial",
-            infrastructure: Array.isArray(formData.plotDetails.infrastructure) 
-                ? formData.plotDetails.infrastructure 
-                : [],
-            roadAccess: formData.plotDetails.roadAccess || "",
-            securityRoom: Boolean(formData.plotDetails.securityRoom),
-            previousConstruction: formData.plotDetails.previousConstruction || ""
+            totalPlotArea: formData.plotDetails.totalPlotArea ?? 0,
+            zoningType: formData.plotDetails.zoningType ?? 'commercial',
+            boundaryWall: formData.plotDetails.boundaryWall ?? false,
+            waterSewer: formData.plotDetails.waterSewer ?? false,
+            electricity: formData.plotDetails.electricity ?? false,
+            roadAccess: formData.plotDetails.roadAccess ?? '',
+            securityRoom: formData.plotDetails.securityRoom ?? false,
+            previousConstruction: formData.plotDetails.previousConstruction ?? ''
         };
     }
+
+    // Helper to treat '', null, or undefined as missing
+    const defaultIfEmpty = (value: any, def: any) => (value === undefined || value === null || value === '' ? def : value);
 
     // Lease Details
-    if (formData.leaseDetails) {
-        transformedData.leaseDetails = {
-            leaseAmount: parseFloat(formData.leaseDetails.leaseAmount) || 0,
-            leaseduration: {
-                duration: parseInt(formData.leaseDetails.leaseduration?.duration) || 0,
-                type: formData.leaseDetails.leaseduration?.type || 'month',
-                amountType: formData.leaseDetails.leaseduration?.amountType || 'fixed'
+    if (formData.leaseTerms) {
+        transformedData.leaseTerms = {
+            leaseAmount: {
+                amount: formData.leaseTerms.leaseAmount?.amount ?? 0,
+                duration: formData.leaseTerms.leaseAmount?.duration ?? 0,
+                durationType: formData.leaseTerms.leaseAmount?.durationType ?? "month",
+
+                amountType: formData.leaseTerms.leaseAmount?.amountType ?? "fixed",
             },
-            leasetenure: {
-                minimumTenure: {
-                    duration: parseInt(formData.leaseDetails.leasetenure?.minimumTenure?.duration) || 0,
-                    type: formData.leaseDetails.leasetenure?.minimumTenure?.type || 'month'
-                },
-                maximumTenure: {
-                    duration: parseInt(formData.leaseDetails.leasetenure?.maximumTenure?.duration) || 0,
-                    type: formData.leaseDetails.leasetenure?.maximumTenure?.type || 'month'
-                },
-                lockInPeriod: {
-                    duration: parseInt(formData.leaseDetails.leasetenure?.lockInPeriod?.duration) || 0,
-                    type: formData.leaseDetails.leasetenure?.lockInPeriod?.type || 'month'
-                },
-                noticePeriod: {
-                    duration: parseInt(formData.leaseDetails.leasetenure?.noticePeriod?.duration) || 0,
-                    type: formData.leaseDetails.leasetenure?.noticePeriod?.type || 'month'
-                }
-            },
-            maintenanceCharges: {
-                amount: parseFloat(formData.leaseDetails.maintenanceCharges?.amount) || 0,
-                frequency: formData.leaseDetails.maintenanceCharges?.frequency || 'monthly'
-            },
-            otherCharges: {
-                electricityCharges: {
-                    type: formData.leaseDetails.otherCharges?.electricityCharges?.type || 'inclusive',
-                    amount: parseFloat(formData.leaseDetails.otherCharges?.electricityCharges?.amount) || 0
-                },
-                waterCharges: {
-                    type: formData.leaseDetails.otherCharges?.waterCharges?.type || 'inclusive',
-                    amount: parseFloat(formData.leaseDetails.otherCharges?.waterCharges?.amount) || 0
-                },
-                gasCharges: {
-                    type: formData.leaseDetails.otherCharges?.gasCharges?.type || 'inclusive',
-                    amount: parseFloat(formData.leaseDetails.otherCharges?.gasCharges?.amount) || 0
-                },
-                otherCharges: formData.leaseDetails.otherCharges?.otherCharges || 'inclusive',
-                amount: parseFloat(formData.leaseDetails.otherCharges?.amount) || 0
+            leaseTenure: {
+                minimumTenure: formData.leaseTerms.leaseTenure?.minimumTenure ?? "",
+                minimumUnit: formData.leaseTerms.leaseTenure?.minimumUnit ?? "",
+                maximumTenure: formData.leaseTerms.leaseTenure?.maximumTenure ?? "",
+                maximumUnit: formData.leaseTerms.leaseTenure?.maximumUnit ?? "",
+                lockInPeriod: formData.leaseTerms.leaseTenure?.lockInPeriod ?? "",
+                lockInUnit: formData.leaseTerms.leaseTenure?.lockInUnit ?? "",
+                noticePeriod: formData.leaseTerms.leaseTenure?.noticePeriod ?? "",
+                noticePeriodUnit: formData.leaseTerms.leaseTenure?.noticePeriodUnit ?? ""
             }
-        };
+        }
     }
+        
+        
+    
 
     // Brokerage
-    if (formData.brokerage) {
-        transformedData.brokerage = {
-            required: Boolean(formData.brokerage.required),
-            amount: parseFloat(formData.brokerage.amount) || 0
-        };
-    }
+    
 
     // Availability
     if (formData.availability) {
         transformedData.availability = {
-            availableFrom: formData.availability.availableFrom || new Date(),
-            availableImmediately: Boolean(formData.availability.availableImmediately),
-            availabilityStatus: formData.availability.availabilityStatus || 'later',
-            leaseDuration: formData.availability.leaseDuration || '',
-            noticePeriod: formData.availability.noticePeriod || '',
-            isPetsAllowed: Boolean(formData.availability.isPetsAllowed),
-            operatingHours: formData.availability.operatingHours || false
-            
+            availableFrom: formData.availability.availableFrom ?? new Date(),
+            availableImmediately: formData.availability.availableImmediately ?? false,
+            availabilityStatus: formData.availability.availabilityStatus ?? 'later',
+            leaseDuration: formData.availability.leaseDuration ?? '',
+            noticePeriod: formData.availability.noticePeriod ?? '',
+            isPetsAllowed: formData.availability.isPetsAllowed ?? false,
+            operatingHours: formData.availability.operatingHours ?? false
         };
     }
 
     // Contact Information
     if (formData.contactInformation) {
         transformedData.contactInformation = {
-            name: formData.contactInformation.name || '',
-            email: formData.contactInformation.email || '',
-            phone: formData.contactInformation.phone || '',
-            alternatePhone: formData.contactInformation.alternatePhone || '',
-            preferredContactTime: formData.contactInformation.preferredContactTime || '',
-            bestTimeToContact: formData.contactInformation.bestTimeToContact || ''
+            name: formData.contactInformation.name ?? '',
+            email: formData.contactInformation.email ?? '',
+            phone: formData.contactInformation.phone ?? '',
+            alternatePhone: formData.contactInformation.alternatePhone ?? '',
+            bestTimeToContact: formData.contactInformation.bestTimeToContact ?? ''
         };
     }
 
@@ -200,28 +156,13 @@ const transformPlotData = (formData: any) => {
     if (formData.media) {
         transformedData.media = {
             photos: {
-                exterior: Array.isArray(formData.media.photos?.exterior) 
-                    ? formData.media.photos.exterior 
+                exterior: Array.isArray(formData.media.photos?.exterior)
+                    ? formData.media.photos.exterior
                     : [],
-                interior: Array.isArray(formData.media.photos?.interior) 
-                    ? formData.media.photos.interior 
-                    : [],
-                floorPlan: Array.isArray(formData.media.photos?.floorPlan) 
-                    ? formData.media.photos.floorPlan 
-                    : [],
-                washroom: Array.isArray(formData.media.photos?.washroom) 
-                    ? formData.media.photos.washroom 
-                    : [],
-                lift: Array.isArray(formData.media.photos?.lift) 
-                    ? formData.media.photos.lift 
-                    : [],
-                emergencyExit: Array.isArray(formData.media.photos?.emergencyExit) 
-                    ? formData.media.photos.emergencyExit 
-                    : []
             },
-            videoTour: formData.media.videoTour || '',
-            documents: Array.isArray(formData.media.documents) 
-                ? formData.media.documents 
+            videoTour: formData.media.videoTour ?? '',
+            documents: Array.isArray(formData.media.documents)
+                ? formData.media.documents
                 : []
         };
     }
@@ -229,9 +170,9 @@ const transformPlotData = (formData: any) => {
     // Metadata
     if (formData.metadata) {
         transformedData.metadata = {
-            userId: formData.metadata.userId,
-            createdAt: formData.metadata.createdAt || new Date(),
-            userName: formData.metadata.userName
+            createdBy: formData.metadata.createdBy ?? null,
+            createdAt: formData.metadata.createdAt ?? new Date(),
+            userName: formData.metadata.userName ?? ''
         };
     }
 
@@ -258,7 +199,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 
         // Generate property ID
         const propertyId = await generatePropertyId();
-
+        console.log("Property ID:", propertyId);
         // Create the complete plot data
         const plotData = {
             propertyId,
@@ -271,7 +212,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 
         // Return populated plot data with user information
         const populatedLeasePlot = await LeasePlot.findById(savedLeasePlot._id)
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v');
 
         res.status(201).json({
@@ -293,7 +234,7 @@ export const createLeasePlot = async (req: Request, res: Response) => {
 export const getAllLeasePlots = async (req: Request, res: Response) => {
     try {
         const leasePlots = await LeasePlot.find()
-            .populate('metadata.userId', 'name email')
+            .populate('metadata.createdBy', 'name email')
             .select('-__v')
             .sort({ 'metadata.createdAt': -1 });
 
@@ -315,11 +256,11 @@ export const getAllLeasePlots = async (req: Request, res: Response) => {
 // Get a specific commercial lease plot by ID
 export const getLeasePlotById = async (req: Request, res: Response) => {
     try {
-        const leasePlot = await LeasePlot.findById(req.params.id)
-            .populate('metadata.userId', 'name email')
-            .select('-__v');
-
-        if (!leasePlot) {
+        const propertyId = req.params.propertyId;
+        const leasePlot = await LeasePlot.findOne({ propertyId })
+           .populate('metadata.createdBy', 'name email')
+           .select('-__v');
+             if (!leasePlot) {
             return res.status(404).json({
                 success: false,
                 error: 'Lease plot not found'

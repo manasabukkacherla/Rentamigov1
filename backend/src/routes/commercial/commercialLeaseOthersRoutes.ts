@@ -11,7 +11,7 @@ const router = express.Router();
 
 router.post('/', createCommercialLeaseOthers);
 router.get('/', getAllCommercialLeaseOthers);
-router.get('/:id', getCommercialLeaseOthersById);
+router.get('/:propertyId', getCommercialLeaseOthersById);
 router.put('/:id', updateCommercialLeaseOthers);
 router.delete('/:id', deleteCommercialLeaseOthers);
 

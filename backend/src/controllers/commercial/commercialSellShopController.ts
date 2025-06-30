@@ -4,7 +4,7 @@ import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
   try {
-    const prefix = "RA-COMSH";
+    const prefix = "RA-COMSESH";
     
     const highestShop = await CommercialSellShop.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
@@ -42,7 +42,7 @@ const generatePropertyId = async (): Promise<string> => {
   } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSH${timestamp}`;
+    return `RA-COMSESH${timestamp}`;
   }
 };
 
@@ -58,7 +58,7 @@ export const createCommercialShop = async (req: Request, res: Response) => {
       ...formData,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: formData.metadata.createdBy,
         createdAt: new Date()
       }
     };
@@ -102,7 +102,7 @@ export const getAllCommercialSellShop = async (req: Request, res: Response) => {
 
 export const getCommercialSellShopById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialSellShop.findOne({ propertyId });
     
     if (!property) {
@@ -110,6 +110,7 @@ export const getCommercialSellShopById = async (req: Request, res: Response) => 
     }
     
     res.status(200).json({
+      success: true,
       message: 'Commercial sell shop property retrieved successfully',
       data: property
     });

@@ -1,7 +1,23 @@
+export interface PropertyMedia {
+  photos: {
+    exterior: string[];
+    interior: string[];
+    floorPlan: string[];
+    washrooms?: string[];
+    lifts?: string[];
+    emergencyExits?: string[];
+    aerial?: string[];
+    surroundings?: string[];
+  };
+  videoTour?: string;
+  documents: string[];
+}
+
 export interface PropertyImage {
   id: string;
   url: string;
-  category: string;
+  category: keyof PropertyMedia['photos'];
+  title?: string;
 }
 
 export interface PropertyDetails {

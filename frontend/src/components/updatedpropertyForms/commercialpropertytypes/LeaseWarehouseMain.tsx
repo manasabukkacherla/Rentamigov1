@@ -28,20 +28,22 @@ interface MediaType {
 }
 
 interface FormData {
-  propertyName: string;
-  warehouseType: string[];
-  address: {
-    street: string;
-    city: string;
+  basicInformation: {
+    title: string;
+    Type: string[];
+    address: {
+      street: string;
+      city: string;
     state: string;
     zipCode: string;
   };
   landmark: string;
-  coordinates: {
+  location: {
     latitude: string;
     longitude: string;
   };
   isCornerProperty: boolean;
+}
   warehouseDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
   leaseAmount: Record<string, any>;
@@ -91,17 +93,19 @@ const LeaseWarehouseMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
-    propertyName: '',
-    warehouseType: [] as string[],
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    basicInformation: {
+      title: '',
+      Type: [] as string[],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: { latitude: '', longitude: '' },
+      isCornerProperty: false,
     },
-    landmark: '',
-    coordinates: { latitude: '', longitude: '' },
-    isCornerProperty: false,
     warehouseDetails: {},
     propertyDetails: {},
     leaseAmount: {},
@@ -169,24 +173,24 @@ const LeaseWarehouseMain = () => {
         <div className="space-y-6">
           <div className="space-y-6">
             <div className="relative">
-              <PropertyName propertyName={formData.propertyName} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, propertyName: name }))} />
+              <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
               <Store className="absolute right-3 top-1/2 transform -translate-y-1/2 text-black" size={18} />
             </div>
-            <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev, warehouseType: type }))} />
+            <WarehouseType onWarehouseTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, Type: type } }))} />
           </div>
 
           <div className="space-y-6">
-            <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
+            <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
             <MapLocation
-              latitude={formData.coordinates.latitude}
-              longitude={formData.coordinates.longitude}
-              landmark={formData.landmark}
-              onLocationChange={(location) => setFormData(prev => ({ ...prev, coordinates: location }))}
-              onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
-              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
+              latitude={formData.basicInformation.location.latitude}
+              longitude={formData.basicInformation.location.longitude}
+              landmark={formData.basicInformation.landmark}
+              onLocationChange={(location) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, location } }))}
+              onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
+              onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }))}
             />
             <div className="flex items-center space-x-2 cursor-pointer">
-              <CornerProperty isCornerProperty={formData.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, isCornerProperty: isCorner }))} />
+              <CornerProperty isCornerProperty={formData.basicInformation.isCornerProperty} onCornerPropertyChange={(isCorner) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }))} />
             </div>
           </div>
         </div>
@@ -387,6 +391,16 @@ const LeaseWarehouseMain = () => {
     return uploadedMedia;
   };
 
+  // Add convertFileToBase64 function
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // Map frontend form data to backend model structure
   const mapFormDataToBackendModel = async () => {
     // Handle media upload first (this would involve actual file uploads in production)
@@ -444,20 +458,20 @@ const LeaseWarehouseMain = () => {
     // Create the backend data object with proper mapping
     const backendData = {
       basicInformation: {
-        title: formData.propertyName || '',
-        warehouseType: formData.warehouseType || [],
+        title: formData.basicInformation.title || '',
+        Type: formData.basicInformation.Type || [],
         address: {
-          street: formData.address.street || '',
-          city: formData.address.city || '',
-          state: formData.address.state || '',
-          zipCode: formData.address.zipCode || ''
+          street: formData.basicInformation.address.street || '',
+          city: formData.basicInformation.address.city || '',
+          state: formData.basicInformation.address.state || '',
+          zipCode: formData.basicInformation.address.zipCode || ''
         },
-        landmark: formData.landmark || '',
+        landmark: formData.basicInformation.landmark || '',
         location: {
-          latitude: parseFloat(formData.coordinates.latitude) || 0,
-          longitude: parseFloat(formData.coordinates.longitude) || 0
+          latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
+          longitude: parseFloat(formData.basicInformation.location.longitude) || 0
         },
-        isCornerProperty: formData.isCornerProperty || false
+        isCornerProperty: formData.basicInformation.isCornerProperty || false
       },
       coveredSpaceDetails: {
         totalArea: Number(formData.warehouseDetails?.totalArea) || 0,
@@ -540,11 +554,12 @@ const LeaseWarehouseMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        status: 'active',
-        views: 0,
-        favorites: 0,
-        isVerified: false,
-        createdBy: localStorage.getItem('userId') || null
+        createdBy: localStorage.getItem('userId') || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: formData.basicInformation.title,
+        intent: 'Rent',
+        status: 'Available'
       }
     };
 
@@ -560,12 +575,12 @@ const LeaseWarehouseMain = () => {
     // Add validation logic based on the current step
     switch (currentStep) {
       case 0: // Basic Information
-        return !!formData.propertyName &&
-          formData.warehouseType.length > 0 &&
-          !!formData.address.street &&
-          !!formData.address.city &&
-          !!formData.address.state &&
-          !!formData.address.zipCode;
+        return !!formData.basicInformation.title &&
+          formData.basicInformation.Type.length > 0 &&
+          !!formData.basicInformation.address.street &&
+          !!formData.basicInformation.address.city &&
+          !!formData.basicInformation.address.state &&
+          !!formData.basicInformation.address.zipCode;
       case 1: // Property Details
         return !!formData.warehouseDetails.totalArea;
       case 2: // Lease Terms
@@ -598,18 +613,6 @@ const LeaseWarehouseMain = () => {
       preventDefault(e);
     }
 
-    // If not on the last step, move to the next step instead of submitting
-    if (currentStep < steps.length - 1) {
-      handleNext(e as React.MouseEvent);
-      return;
-    }
-
-    // Validate the final step before submitting
-    // if (!validateFinalStep()) {
-    //   toast.error("Please add at least one image or document");
-    //   return;
-    // }
-
     try {
       setIsSubmitting(true);
       toast.loading("Submitting your property listing...");
@@ -619,7 +622,7 @@ const LeaseWarehouseMain = () => {
 
       // Make API call to create commercial lease warehouse
       const response = await axios.post(
-        `/api/commercial/lease/warehouse`,
+        `/api/commercial/lease/warehouses`,
         backendData,
         {
           headers: {
@@ -631,16 +634,12 @@ const LeaseWarehouseMain = () => {
 
       if (response.data.success) {
         toast.dismiss();
-        toast.success("Property listed successfully!");
-        navigate('/updatePropertyForm');
-      } else {
-        toast.dismiss();
-        toast.error(response.data.error || "Failed to create property listing");
-        console.error('Failed to create property listing:', response.data.error);
+        toast.success('Commercial warehouse listing created successfully!');
+        navigate('/dashboard');
       }
     } catch (error: any) {
       toast.dismiss();
-      toast.error(error.response?.data?.details || error.message || "An error occurred while submitting the form");
+      toast.error(error.response?.data?.message || 'Failed to create property listing');
       console.error('Error submitting form:', error);
     } finally {
       setIsSubmitting(false);

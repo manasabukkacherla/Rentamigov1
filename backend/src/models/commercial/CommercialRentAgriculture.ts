@@ -2,10 +2,10 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface ICommercialRentAgriculture extends Document {
   propertyId: string;
-  propertyName: string;
-  landType: string[];
-  waterSource?: string;
-  powerSupply: 'Available' | 'Not Available';
+   basicInformation:{
+    title: string;
+    Type: string[];
+    powerSupply: 'Available' | 'Not Available';
   address: {
     street: string;
     city: string;
@@ -19,6 +19,7 @@ export interface ICommercialRentAgriculture extends Document {
   landmark: string;
   
   isCornerProperty: boolean;
+}
   Agriculturelanddetails: {
     totalArea: number;
     soilType: string;
@@ -57,17 +58,21 @@ export interface ICommercialRentAgriculture extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData : {
+  metadata : {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
   }
 }
 
 const CommercialRentAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
-  propertyName: { type: String, required: true },
-  landType: { type: [String], required: true },
-  waterSource: { type: String},
+  basicInformation:{
+  title: { type: String, required: true },
+  Type: [{ type: String, required: true }],
   powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
   address: {
     street: { type: String, required: true },
@@ -82,6 +87,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   landmark: { type: String },
   
   isCornerProperty: { type: Boolean, default: false },
+},
     Agriculturelanddetails: {
     totalArea: { type: Number, required: true },
     soilType: { type: String },
@@ -95,7 +101,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   rent: {
     expectedRent: { type: Number, required: true },
     isNegotiable: { type: Boolean, default: false },
-    maintenanceType: { type: String, enum: ['inclusive', 'exclusive'], required: true }
+    maintenanceType: { type: String, enum: ['inclusive', 'exclusive']}
   },
   
     
@@ -119,9 +125,13 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData : {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    createdAt: { type: Date, default: Date.now }
+  metadata : {
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String,default: 'Rent' },
+    propertyName: { type: String,  default: 'Agriculture' },
+    status: { type: String, default: 'Available' }
   }
 });
 

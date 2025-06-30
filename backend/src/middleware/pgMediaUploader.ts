@@ -19,7 +19,6 @@ const upload = multer({
   storage,
   limits: {
     fileSize: 150 * 1024 * 1024, // 150MB limit for videos
-    files: 20, // Maximum number of files
   },
   fileFilter: (req, file, cb) => {
     // Accept images and videos
@@ -32,7 +31,7 @@ const upload = multer({
 });
 
 // Middleware for handling multiple media files
-export const pgMediaUpload = upload.array('mediaFiles', 20); // Allow up to 20 files at once
+export const pgMediaUpload = upload.array('mediaFiles'); // No limit on number of files
 
 // Function to upload a file to S3
 export const uploadToS3 = async (

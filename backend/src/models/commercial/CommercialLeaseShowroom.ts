@@ -13,13 +13,13 @@ interface IFloor {
 }
 
 interface IBasicInformation {
-    title: string;
-    showroomType: string;
-    address: {
-        street: string;
-        city: string;
-        state: string;
-        zipCode: string;
+    title?: string;
+    Type?: string[];
+    address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        zipCode?: string;
     };
     landmark: string;
     location: {
@@ -146,6 +146,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
 }
 
 interface ICommercialLeaseShowroom extends Document {
@@ -162,27 +166,27 @@ interface ICommercialLeaseShowroom extends Document {
 
 // Schema
 const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
-    propertyId: { type: String, required: true, unique: true },
+    propertyId: { type: String, unique: false },
     basicInformation: {
-        title: { type: String, required: true },
-        showroomType: [{ type: String, required: true }],
+        title: { type: String },
+        Type: [{ type: String }],
         address: {
-            street: { type: String, required: true },
-            city: { type: String, required: true },
-            state: { type: String, required: true },
-            zipCode: { type: String, required: true },
+            street: { type: String },
+            city: { type: String },
+            state: { type: String },
+            zipCode: { type: String },
         },
-        landmark: { type: String, required: true },
+        landmark: { type: String },
         location: {
-            latitude: { type: String, required: true },
-            longitude: { type: String, required: true },
+            latitude: { type: String },
+            longitude: { type: String },
         },
         isCornerProperty: { type: Boolean, default: false }
     },
     showroomDetails: {
-        totalSpace: { type: Number, required: true },
-        frontageWidth: { type: Number, required: true },
-        ceilingHeight: { type: Number, required: true },
+        totalSpace: { type: Number  },
+        frontageWidth: { type: Number },
+        ceilingHeight: { type: Number },
         glassFrontage: { type: Boolean, default: false },
         lightingType: { type: String },
         acInstalled: { type: Boolean, default: false },
@@ -194,87 +198,87 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
     },
     propertyDetails: {
         area: {
-            totalArea: { type: Number, required: true },
-            carpetArea: { type: Number, required: true },
-            builtUpArea: { type: Number, required: true }
+            totalArea: { type: Number },
+            carpetArea: { type: Number },
+            builtUpArea: { type: Number }
         },
         floor: {
-            floorNumber: { type: Number, required: true },
-            totalFloors: { type: Number, required: true }
+            floorNumber: { type: Number },
+            totalFloors: { type: Number }
         },
-        facingDirection: { type: String, required: false },
-        furnishingStatus: { type: String, required: false },
-        propertyAmenities: [{ type: String, required: false }],
-        wholeSpaceAmenities: [{ type: String, required: false }],
+        facingDirection: { type: String },
+        furnishingStatus: { type: String },
+        propertyAmenities: [{ type: String }],
+        wholeSpaceAmenities: [{ type: String }],
         electricitySupply: {
-            powerLoad: { type: Number, required: false, default: null },
+            powerLoad: { type: Number, default: null },
             backup: { type: Boolean, default: false }
         },
-        waterAvailability: { type: String, required: false, default: '' },
-        propertyAge: { type: String, required: false, default: '' },
-        propertyCondition: { type: String, required: false, default: 'new' }
+        waterAvailability: { type: String, default: '' },
+        propertyAge: { type: String, default: '' },
+        propertyCondition: { type: String, default: 'new' }
     },
     
     // leaseTerms: {
         leaseTerms: {
             leaseDetails: {
                 leaseAmount: { 
-                    amount: { type: Number, required: true },
-                    type: { type: String, required: true },
-                    duration: { type: Number, required: true },
-                    durationUnit: { type: String, required: true },
+                    amount: { type: Number },
+                    type: { type: String },
+                    duration: { type: Number },
+                    durationUnit: { type: String },
                 },
             },
             tenureDetails: {
-                minimumTenure: {type: Number, required: true },
-                minimumUnit: {type: String, required: true },
-                maximumTenure: {type: Number, required: true },
-                maximumUnit: {type: String, required: true },
-                lockInPeriod: {type: Number, required: true },
-                lockInUnit: {type: String, required: true },
-                noticePeriod: {type: Number, required: true },
-                noticePeriodUnit: {type: String, required: true },
+                minimumTenure: {type: Number },
+                minimumUnit: {type: String },
+                maximumTenure: {type: Number },
+                maximumUnit: {type: String },
+                lockInPeriod: {type: Number },
+                lockInUnit: {type: String },
+                noticePeriod: {type: Number },
+                noticePeriodUnit: {type: String },
             },
             maintenanceAmount: {
-                amount: { type: Number ,required: true},
-                frequency: { type: String ,required: true},
+                amount: { type: Number },
+                frequency: { type: String },
             },
             otherCharges: {
                 water: {
                     amount: { type: Number },
-                    type: { type: String, required: true},
+                    type: { type: String },
                 },
                 electricity: {
                     amount: { type: Number },
-                    type: { type: String, required: true},
+                    type: { type: String },
                 },
                 gas: {
                     amount: { type: Number },
-                    type: { type: String, required: true},
+                    type: { type: String },
                 },
                 others: {
                     amount: { type: Number },
-                    type: { type: String, required: true},
+                    type: { type: String },
                 }
             },
             brokerage: {
-                required: { type: String, required: false ,default:'no'},
+                required: { type: String, default:'no'},
                 amount: { type: Number }
             },
             availability: {
-                date: { type: Date, required: true },
-                availableImmediately: { type: Boolean, required: true },
-                preferredSaleDuration: { type: String, required: true },
-                noticePeriod: { type: String, required: true },
-                isPetsAllowed: { type: Boolean, required: true },
-                operatingHours: { type: Boolean, required: true },
+                date: { type: Date },
+                availableImmediately: { type: Boolean },
+                preferredSaleDuration: { type: String },
+                noticePeriod: { type: String },
+                isPetsAllowed: { type: Boolean },
+                operatingHours: { type: Boolean },
                
             }
           },
           contactInformation: {
-            name: { type: String, required: true },
-            email: { type: String, required: true },
-            phone: { type: String, required: true },
+            name: { type: String },
+            email: { type: String },
+            phone: { type: String },
             alternatePhone: { type: String },
             bestTimeToContact: { type: String }
           },
@@ -291,15 +295,19 @@ const CommercialLeaseShowroomSchema = new Schema<ICommercialLeaseShowroom>({
             documents: [{ type: String }] 
           },
           metadata: {
-            createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-            createdAt: { type: Date, default: Date.now }
+            createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+            createdAt: { type: Date, default: Date.now },
+            propertyType: { type: String, default: 'Commercial' },
+            intent: { type: String,default: 'Lease' },
+            propertyName: { type: String,  default: 'Showroom' },
+            status: { type: String, default: 'Available' }
           }
         }, {
-          timestamps: true
+          timestamps: false
         });
 
 // Indexes
-// CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: true }); // Removed duplicate index
+// CommercialLeaseShowroomSchema.index({ propertyId: 1 }, { unique: false }); // Removed duplicate index
 CommercialLeaseShowroomSchema.index({ 'basicInformation.city': 1 });
 CommercialLeaseShowroomSchema.index({ 'basicInformation.state': 1 });
 CommercialLeaseShowroomSchema.index({ 'propertyDetails.area.totalArea': 1 });

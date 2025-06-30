@@ -17,7 +17,7 @@ interface IFloor {
 // Basic Information interface
 interface IBasicInformation {
     title: string;
-    officeType: string[];
+    Type: string[];
     address: {
         street: string;
         city: string;
@@ -48,16 +48,16 @@ interface IOfficeDetails {
 }
 
 // Price interface
-interface IPrice {
-    expectedPrice: number;
-    isNegotiable: boolean;
+interface IPricingDetails {
+   propertyPrice: number;
+  pricetype: "fixed" | "negotiable";
 }
 
 // Registration Charges interface
-interface IRegistrationCharges {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
+interface IRegistration {
+    chargestype: 'inclusive' | 'exclusive',
+    registrationAmount?: number,
+    stampDutyAmount?: number
 }
 
 // Brokerage interface
@@ -99,6 +99,10 @@ interface IMedia {
 interface IMetadata {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
 }
 
 // Main interface for Commercial Sell Office Space
@@ -118,11 +122,11 @@ interface ICommercialSellOfficeSpace extends Document {
             backup: boolean;
         };
         waterAvailability: string[];
-        propertyAge: number;
+        propertyAge: string;
         propertyCondition: string;
     };
-    price: IPrice;
-    registrationCharges: IRegistrationCharges;
+    pricingDetails: IPricingDetails;
+    registration: IRegistration;
     brokerage: IBrokerage;
     availability: IAvailability;
     contactInformation: IContactInformation;
@@ -135,7 +139,7 @@ const CommercialSellOfficeSpaceSchema = new Schema<ICommercialSellOfficeSpace>({
     propertyId: { type: String, required: true, unique: true },
     basicInformation: {
         title: { type: String, required: true },
-        officeType: [{ type: String, required: true }],
+        Type: [{ type: String, required: true }],
         address: {
             street: { type: String, required: true },
             city: { type: String, required: true },
@@ -181,17 +185,17 @@ const CommercialSellOfficeSpaceSchema = new Schema<ICommercialSellOfficeSpace>({
             backup: { type: Boolean, required: true }
         },
         waterAvailability: [{ type: String, required: true }],
-        propertyAge: { type: Number, required: true },
+        propertyAge: { type:String, required: true },
         propertyCondition: { type: String, required: true }
     },
-    price: {
-        expectedPrice: { type: Number, required: true },
-        isNegotiable: { type: Boolean, default: false }
+    pricingDetails: {
+        propertyPrice: { type: Number, required: true },
+        pricetype: { type: String, enum: ['fixed', 'negotiable'], default: 'fixed' }
     },
-    registrationCharges: {
-        included: { type: Boolean, required: true },
-        amount: { type: Number },
-        stampDuty: { type: Number }
+    registration: {
+        chargestype: { type: String, enum: ['inclusive', 'exclusive'], default: 'inclusive' },
+        registrationAmount: { type: Number },
+        stampDutyAmount: { type: Number },
     },
     brokerage: {
         required: { type: String, required: true },
@@ -222,7 +226,11 @@ const CommercialSellOfficeSpaceSchema = new Schema<ICommercialSellOfficeSpace>({
     },
     metadata: {
         createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-        createdAt: { type: Date, default: Date.now }
+        createdAt: { type: Date, default: Date.now },
+        propertyType: { type: String, default: 'Commercial' },
+        intent: { type: String,default: 'Sell' },
+        propertyName: { type: String,  default: 'Office Space' },
+        status: { type: String, default: 'Available' }
     }
 }, {
     timestamps: true

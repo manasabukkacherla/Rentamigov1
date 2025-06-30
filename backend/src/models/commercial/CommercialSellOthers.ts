@@ -10,24 +10,40 @@ interface IFloor {
   floorNumber: number;
   totalFloors: number;
 }
+interface IPricingDetails {
+  propertyPrice: number;
+  pricetype: "fixed" | "negotiable";
+}
+interface IRegistration {
+  chargestype: 'inclusive' | 'exclusive',
+  registrationAmount?: number,
+  stampDutyAmount?: number
+}
+interface IBrokerage {
+  required: string;
+  amount?: number;
+}
 
 export interface ICommercialSellOthers extends Document {
   propertyId?: string;
-  propertyName: string;
-  commercialType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
-  
+  basicInformation:{
+    title: string;
+    type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
+  }
+
+
   propertyDetails: {
     area: IArea;
     floor: IFloor;
@@ -42,26 +58,16 @@ export interface ICommercialSellOthers extends Document {
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: string; // Accepts range values like "10-15"
     propertyCondition: string;
     electricitySupply: {
       powerLoad: number;
       backup: boolean;
     };
   };
-  price: {
-    expectedPrice: number;
-    isNegotiable: boolean;
-  };
-  registrationCharges: {
-    included: boolean;
-    amount?: number;
-    stampDuty?: number;
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
+  pricingDetails: IPricingDetails;
+  registration: IRegistration;
+  brokerage: IBrokerage;
   availability: {
     type: 'immediate' | 'specific';
     date?: Date;
@@ -93,25 +99,31 @@ export interface ICommercialSellOthers extends Document {
   metaData?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
   };
 }
 
 const CommercialSellOthersSchema: Schema = new Schema({
   propertyId: { type: String, default: () => `CSO-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}` },
-  propertyName: { type: String, default: "Unnamed Property" },
-  commercialType: { type: [String], default: ["Other"] },
-  address: {
-    street: { type: String, default: "Not Specified" },
-    city: { type: String, default: "Not Specified" },
-    state: { type: String, default: "Not Specified" },
-    zipCode: { type: String, default: "00000" }
+  basicInformation:{
+    title: { type: String, default: "Unnamed Property" },
+    type: { type: [String], default: ["Other"] },
+    address: {
+      street: { type: String, default: "Not Specified" },
+      city: { type: String, default: "Not Specified" },
+      state: { type: String, default: "Not Specified" },
+      zipCode: { type: String, default: "00000" }
+    },
+    landmark: { type: String },
+    location: {
+      latitude: { type: String, required: true },
+      longitude: { type: String, required: true }
+    },
+    isCornerProperty: { type: Boolean, default: false },
   },
-  landmark: { type: String },
-  coordinates: {
-    latitude: { type: String ,required:true},
-    longitude: { type: String ,required:true}
-  },
-  isCornerProperty: { type: Boolean, default: false },
   propertyDetails: {
     area: {
       totalArea: { type: Number },
@@ -133,21 +145,21 @@ const CommercialSellOthersSchema: Schema = new Schema({
     propertyAmenities: { type: [String], default: [] },
     wholeSpaceAmenities: { type: [String], default: [] },
     waterAvailability: { type: String },
-    propertyAge: { type: Number },
+    propertyAge: { type: String },
     propertyCondition: { type: String },
     electricitySupply: {
       powerLoad: { type: Number },
       backup: { type: Boolean, default: false }
     }
   },
-  price: {
-    expectedPrice: { type: Number, default: 0 },
-    isNegotiable: { type: Boolean, default: false }
+  pricingDetails: {
+    propertyPrice: { type: Number, required: true },
+    pricetype: { type: String, enum: ['fixed', 'negotiable'], default: 'fixed' }
   },
-  registrationCharges: {
-    included: { type: Boolean, default: false },
-    amount: { type: Number },
-    stampDuty: { type: Number }
+  registration: {
+    chargestype: { type: String, enum: ['inclusive', 'exclusive'], default: 'inclusive' },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number }
   },
   brokerage: {
     required: { type: String },
@@ -183,7 +195,11 @@ const CommercialSellOthersSchema: Schema = new Schema({
   },
   metaData: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Commercial' },
+    intent: { type: String, default: 'Sell' },
+    propertyName: { type: String, default: 'Others' },
+    status: { type: String, default: 'Available' }
   }
 });
 

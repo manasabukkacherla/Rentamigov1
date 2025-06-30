@@ -120,7 +120,7 @@ export const getAllCommercialLeaseShowroom = async (req: Request, res: Response)
 
 export const getCommercialLeaseShowroomById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialLeaseShowroom.findOne({ propertyId });
     
     if (!property) {

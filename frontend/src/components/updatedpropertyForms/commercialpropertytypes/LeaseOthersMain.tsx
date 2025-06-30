@@ -24,145 +24,199 @@ import axios from "axios";
 import MapLocation from "../CommercialComponents/MapLocation";
 
 interface FormData {
-  title: string;
-  commercialType: string[];
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
+  basicInformation: {
+    title: string;
+    type: string[];
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    coordinates: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
   };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
+  propertyDetails: {
+    otherPropertyDetails: Record<string, any>;
+    area: Record<string, any>;
+    floor: Record<string, any>;
+    facingDirection: string;
+    furnishingStatus: string;
+    propertyAmenities: string[];
+    wholeSpaceAmenities: string[];
+    waterAvailability: string;
+    propertyAge: string;
+    propertyCondition: string;
+    electricitySupply: {
+      powerLoad: number;
+      backup: boolean;
+    };
   };
-  coordinates: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
-  otherDetails: Record<string, any>;
-  propertyDetails: Record<string, any>;
-  leaseAmount: Record<string, any>;
-  leaseTenure: {
-    minimumTenure: string;
-    minimumUnit: string;
-    maximumTenure: string;
-    maximumUnit: string;
-    lockInPeriod: string;
-    lockInUnit: string;
-    noticePeriod: string;
-    noticePeriodUnit: string;
-  };
-  maintenanceAmount: {
+  leaseTerms: {
+leaseAmount: {
+  minimumTenure: string;
+  minimumUnit: string;
+  maximumTenure: string;
+  maximumUnit: string;
+  lockInPeriod: string;
+  lockInUnit: string;
+  noticePeriod: string;
+  noticePeriodUnit: string;
+};
+maintenanceAmount: {
+  amount: number;
+  frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
+};
+otherCharges: {
+  water: {
+    type: string;
     amount: number;
-    frequency: "monthly" | "quarterly" | "half-yearly" | "yearly";
   };
-  otherCharges: {
-    water: {
-      type: string;
-      amount: number;
-    };
-    electricity: {
-      type: string;
-      amount: number;
-    };
-    gas: {
-      type: string;
-      amount: number;
-    };
-    others: {
-      type: string;
-      amount: number;
-    };
+  electricity: {
+    type: string;
+    amount: number;
   };
-  brokerage: {
-    amount?: number;
-    required: string;
+  gas: {
+    type: string;
+    amount: number;
   };
-  availability: Record<string, any>;
-  contactInformation: {
-    name: string;
-    email: string;
-    phone: string;
-    alternatePhone?: string;
-    bestTimeToContact?: string;
+  others: {
+    type: string;
+    amount: number;
   };
-  media: {
-    photos: {
-      exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      washrooms: File[];
-      lifts: File[];
-      emergencyExits: File[];
-    };
-    videoTour: File | null;
-    documents: File[];
+};
+brokerage: {
+  amount ?: number;
+  required: string;
+};
   };
+availability: {
+  availableFrom: Date;
+  availableImmediately: boolean;
+  availabilityStatus: string;
+  leaseDuration: string;
+  noticePeriod: string;
+  isPetsAllowed: boolean;
+  operatingHours: {
+    restricted: boolean;
+  };
+};
+contactInformation: {
+  name: string;
+  email: string;
+  phone: string;
+  alternatePhone ?: string;
+  bestTimeToContact ?: string;
+};
+media: {
+  photos: {
+    exterior: File[];
+    interior: File[];
+    floorPlan: File[];
+    washrooms: File[];
+    lifts: File[];
+    emergencyExits: File[];
+  };
+  videoTour: File | null;
+  documents: File[];
+};
 }
 
 const LeaseOthersMain = () => {
   const [formData, setFormData] = useState<FormData>({
-    title: '',
-    commercialType: [],
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
-    },
-    landmark: '',
-    location: {
-      latitude: '',
-      longitude: ''
-    },
-    coordinates: {
-      latitude: '',
-      longitude: ''
-    },
-    isCornerProperty: false,
-    otherDetails: {},
-    propertyDetails: {},
-    leaseAmount: {},
-    leaseTenure: {
-      minimumTenure: '1',
-      minimumUnit: 'years',
-      maximumTenure: '3',
-      maximumUnit: 'years',
-      lockInPeriod: '1',
-      lockInUnit: 'years',
-      noticePeriod: '1',
-      noticePeriodUnit: 'months'
-    },
-    maintenanceAmount: {
-      amount: 0,
-      frequency: "monthly"
-    },
-    otherCharges: {
-      water: {
-        type: "inclusive",
-        amount: 0
+    basicInformation: {
+      title: '',
+      type: [],
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
       },
-      electricity: {
-        type: "inclusive",
-        amount: 0
+      landmark: '',
+      location: {
+        latitude: '',
+        longitude: ''
       },
-      gas: {
-        type: "inclusive",
-        amount: 0
+      coordinates: {
+        latitude: '',
+        longitude: ''
       },
-      others: {
-        type: "inclusive",
-        amount: 0
+      isCornerProperty: false,
+    },
+    propertyDetails: {
+      otherPropertyDetails: {},
+      area: {},
+      floor: {},
+      facingDirection: '',
+      furnishingStatus: '',
+      propertyAmenities: [],
+      wholeSpaceAmenities: [],
+      waterAvailability: '',
+      propertyAge: '',
+      propertyCondition: '',
+      electricitySupply: {
+        powerLoad: 0,
+        backup: false
       }
     },
-    brokerage: {
-      amount: 0,
-      required: "no"
+    leaseTerms: {
+      leaseAmount: {
+        minimumTenure: '1',
+        minimumUnit: 'years',
+        maximumTenure: '3',
+        maximumUnit: 'years',
+        lockInPeriod: '1',
+        lockInUnit: 'years',
+        noticePeriod: '1',
+        noticePeriodUnit: 'months'
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: "monthly"
+      },
+      otherCharges: {
+        water: {
+          type: "inclusive",
+          amount: 0
+        },
+        electricity: {
+          type: "inclusive",
+          amount: 0
+        },
+        gas: {
+          type: "inclusive",
+          amount: 0
+        },
+        others: {
+          type: "inclusive",
+          amount: 0
+        }
+      },
+      brokerage: {
+        amount: 0,
+        required: "no"
+      },
     },
-    availability: {},
+    availability: {
+      availableFrom: new Date(),
+      availableImmediately: false,
+      availabilityStatus: '',
+      leaseDuration: '',
+      noticePeriod: '',
+      isPetsAllowed: false,
+      operatingHours: {
+        restricted: false
+      }
+    },
     contactInformation: {
       name: '',
       email: '',
@@ -197,39 +251,42 @@ const LeaseOthersMain = () => {
 
           <div className="space-y-6">
             <PropertyName
-              propertyName={formData.title}
+              propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) => setFormData(prev => ({
                 ...prev,
-                title: name
+                basicInformation: {
+                  ...prev.basicInformation,
+                  title: name
+                }
               }))}
             />
             <OtherCommercialType
               onCommercialTypeChange={(types) => setFormData(prev => ({
                 ...prev,
-                commercialType: types
+                type: types
               }))}
             />
           </div>
 
           <div className="space-y-6">
             <CommercialPropertyAddress
-              address={formData.address}
+              address={formData.basicInformation.address}
               onAddressChange={(address) => setFormData(prev => ({
                 ...prev,
                 address
               }))}
             />
             <MapLocation
-              latitude={formData.location.latitude}
-              longitude={formData.location.longitude}
-              landmark={formData.landmark}
+              latitude={formData.basicInformation.location.latitude}
+              longitude={formData.basicInformation.location.longitude}
+              landmark={formData.basicInformation.landmark}
               onLocationChange={(location) => setFormData(prev => ({ ...prev, location }))}
               onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))}
               onLandmarkChange={(landmark) => setFormData(prev => ({ ...prev, landmark }))}
             />
 
             <CornerProperty
-              isCornerProperty={formData.isCornerProperty}
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) => setFormData(prev => ({
                 ...prev,
                 isCornerProperty: isCorner
@@ -247,13 +304,20 @@ const LeaseOthersMain = () => {
           <OtherPropertyDetails
             onDetailsChange={(details) => setFormData(prev => ({
               ...prev,
-              otherDetails: { ...prev.otherDetails, ...details }
+              propertyDetails: { ...prev.propertyDetails, ...details }
             }))}
           />
           <CommercialPropertyDetails
             onDetailsChange={(details) => setFormData(prev => ({
               ...prev,
-              propertyDetails: { ...prev.propertyDetails, ...details }
+              propertyDetails: {
+                ...prev.propertyDetails,
+                ...details,
+                electricitySupply: {
+                  ...prev.propertyDetails.electricitySupply,
+                  powerLoad: details.electricitySupply?.powerLoad ?? prev.propertyDetails.electricitySupply.powerLoad
+                }
+              }
             }))}
           />
         </div>
@@ -268,7 +332,7 @@ const LeaseOthersMain = () => {
             <LeaseAmount
               onLeaseAmountChange={(amount) => setFormData(prev => ({
                 ...prev,
-                leaseAmount: { ...prev.leaseAmount, ...amount }
+                leaseTerms: { ...prev.leaseTerms, ...amount }
               }))}
             />
             <LeaseTenure
@@ -287,44 +351,44 @@ const LeaseOthersMain = () => {
 
                 setFormData(prev => ({
                   ...prev,
-                  leaseTenure: formattedTenure
+                  leaseTerms: { ...prev.leaseTerms, ...formattedTenure }
                 }));
               }}
             />
           </div>
           <div className="space-y-4">
-          <MaintenanceAmount 
-            maintenanceAmount={formData.maintenanceAmount} 
-            onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({ 
-              ...prev, 
-              maintenanceAmount: {
-                amount: maintenance.amount,
-                frequency: maintenance.frequency as "monthly" | "quarterly" | "half-yearly" | "yearly"
-              }
-            }))} 
-          />
-            <div className="border-t border-gray-200 my-4"></div>
-            <OtherCharges otherCharges={formData.otherCharges} onOtherChargesChange={(charges) => {
-            // Since the OtherCharges component sends the old state, wait for the component to update
-            // by deferring the formData update with setTimeout
-            setTimeout(() => {
-              setFormData(prev => ({
+            <MaintenanceAmount
+              maintenanceAmount={formData.leaseTerms.maintenanceAmount}
+              onMaintenanceAmountChange={(maintenance) => setFormData(prev => ({
                 ...prev,
-                otherCharges: {
-                  water: charges.water || { amount: 0, type: 'inclusive' },
-                  electricity: charges.electricity || { amount: 0, type: 'inclusive' },
-                  gas: charges.gas || { amount: 0, type: 'inclusive' },
-                  others: charges.others || { amount: 0, type: 'inclusive' }
+                maintenanceAmount: {
+                  amount: maintenance.amount,
+                  frequency: maintenance.frequency as "monthly" | "quarterly" | "half-yearly" | "yearly"
                 }
-              }));
-            }, 0);
-          }} />
+              }))}
+            />
+            <div className="border-t border-gray-200 my-4"></div>
+            <OtherCharges otherCharges={formData.leaseTerms.otherCharges} onOtherChargesChange={(charges) => {
+              // Since the OtherCharges component sends the old state, wait for the component to update
+              // by deferring the formData update with setTimeout
+              setTimeout(() => {
+                setFormData(prev => ({
+                  ...prev,
+                  otherCharges: {
+                    water: charges.water || { amount: 0, type: 'inclusive' },
+                    electricity: charges.electricity || { amount: 0, type: 'inclusive' },
+                    gas: charges.gas || { amount: 0, type: 'inclusive' },
+                    others: charges.others || { amount: 0, type: 'inclusive' }
+                  }
+                }));
+              }, 0);
+            }} />
             <div className="border-t border-gray-200 my-4"></div>
             <Brokerage
-              bro={formData.brokerage}
+              bro={formData.leaseTerms.brokerage}
               onBrokerageChange={(brokerage) => setFormData(prev => ({
                 ...prev,
-                brokerage: { ...prev.brokerage, ...brokerage }
+                leaseTerms: { ...prev.leaseTerms, brokerage }
               }))}
             />
           </div>
@@ -339,7 +403,7 @@ const LeaseOthersMain = () => {
           <CommercialAvailability
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
-              availability: { ...prev.availability, ...availability }
+              leaseTerms: { ...prev.leaseTerms, ...availability }
             }))}
           />
         </div>
@@ -354,7 +418,7 @@ const LeaseOthersMain = () => {
             contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
-              contactInformation: { ...prev.contactInformation, ...contact }
+              leaseTerms: { ...prev.leaseTerms, ...contact }
             }))}
           />
         </div>
@@ -365,7 +429,7 @@ const LeaseOthersMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       component: (
         <div className="space-y-6">
-<CommercialMediaUpload
+          <CommercialMediaUpload
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
@@ -374,39 +438,40 @@ const LeaseOthersMain = () => {
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
             }}
-              onMediaChange={(media) => {
-                const photosByCategory: Record<string, File[]> = {
-                  exterior: [],
-                  interior: [],
-                  floorPlan: [],
-                  washrooms: [],
-                  lifts: [],
-                  emergencyExits: []
-                };
+            onMediaChange={(media) => {
+              const photosByCategory: Record<string, File[]> = {
+                exterior: [],
+                interior: [],
+                floorPlan: [],
+                washrooms: [],
+                lifts: [],
+                emergencyExits: []
+              };
 
-                media.photos.forEach(({ category, files }) => {
-                  if (category in photosByCategory) {
-                    photosByCategory[category] = files.map(f => f.file);
-                  }
-                });
+              media.photos.forEach(({ category, files }) => {
+                if (category in photosByCategory) {
+                  photosByCategory[category] = files.map(f => f.file);
+                }
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photosByCategory.exterior,
-                      interior: photosByCategory.interior,
-                      floorPlan: photosByCategory.floorPlan,
-                      washrooms: photosByCategory.washrooms,
-                      lifts: photosByCategory.lifts,
-                      emergencyExits: photosByCategory.emergencyExits
-                    },
-                    videoTour: media.videoTour || null,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  ...prev.media,
+                  photos: {
+                    exterior: photosByCategory.exterior,
+                    interior: photosByCategory.interior,
+                    floorPlan: photosByCategory.floorPlan,
+                    washrooms: photosByCategory.washrooms,
+                    lifts: photosByCategory.lifts,
+                    emergencyExits: photosByCategory.emergencyExits
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -425,92 +490,71 @@ const LeaseOthersMain = () => {
     e.preventDefault();
     console.log(formData);
     try {
-      // Validate form data before submission
-      if (!formData.title.trim()) {
-        toast.error('Property name is required');
-        return;
-      }
-
-      if ((!formData.location.latitude && !formData.coordinates.latitude) ||
-        (!formData.location.longitude && !formData.coordinates.longitude)) {
-        toast.error('Property location is required');
-        return;
-      }
-
-      // Ensure leaseTenure data is properly formatted
-      if (typeof formData.leaseTenure.minimumTenure === 'object' ||
-        typeof formData.leaseTenure.maximumTenure === 'object' ||
-        typeof formData.leaseTenure.lockInPeriod === 'object' ||
-        typeof formData.leaseTenure.noticePeriod === 'object') {
-
-        toast.error('Lease tenure data is not properly formatted. Please correct it before submitting.');
-        console.error('Lease tenure format error:', formData.leaseTenure);
-        return;
-      }
-
+      // Remove validation checks
       const user = sessionStorage.getItem('user');
       if (user) {
         const author = JSON.parse(user).id;
 
         // Prepare location data for API submission
         const locationData = {
-          latitude: formData.location.latitude.toString() || formData.coordinates.latitude,
-          longitude: formData.location.longitude.toString() || formData.coordinates.longitude
+          latitude: formData.basicInformation.location.latitude.toString() || formData.basicInformation.coordinates.latitude,
+          longitude: formData.basicInformation.location.longitude.toString() || formData.basicInformation.coordinates.longitude
         };
 
         // Normalize leaseTenure data to ensure all values are strings
         const normalizedLeaseTenure = {
-          minimumTenure: typeof formData.leaseTenure.minimumTenure === 'object'
-            ? ((formData.leaseTenure.minimumTenure as any)?.duration?.toString() || '1')
-            : formData.leaseTenure.minimumTenure,
-          minimumUnit: typeof formData.leaseTenure.minimumUnit === 'object'
-            ? ((formData.leaseTenure.minimumUnit as any)?.durationType || 'years')
-            : formData.leaseTenure.minimumUnit,
-          maximumTenure: typeof formData.leaseTenure.maximumTenure === 'object'
-            ? ((formData.leaseTenure.maximumTenure as any)?.duration?.toString() || '3')
-            : formData.leaseTenure.maximumTenure,
-          maximumUnit: typeof formData.leaseTenure.maximumUnit === 'object'
-            ? ((formData.leaseTenure.maximumUnit as any)?.durationType || 'years')
-            : formData.leaseTenure.maximumUnit,
-          lockInPeriod: typeof formData.leaseTenure.lockInPeriod === 'object'
-            ? ((formData.leaseTenure.lockInPeriod as any)?.duration?.toString() || '1')
-            : formData.leaseTenure.lockInPeriod,
-          lockInUnit: typeof formData.leaseTenure.lockInUnit === 'object'
-            ? ((formData.leaseTenure.lockInUnit as any)?.durationType || 'years')
-            : formData.leaseTenure.lockInUnit,
-          noticePeriod: typeof formData.leaseTenure.noticePeriod === 'object'
-            ? ((formData.leaseTenure.noticePeriod as any)?.duration?.toString() || '1')
-            : formData.leaseTenure.noticePeriod,
-          noticePeriodUnit: typeof formData.leaseTenure.noticePeriodUnit === 'object'
-            ? ((formData.leaseTenure.noticePeriodUnit as any)?.durationType || 'months')
-            : formData.leaseTenure.noticePeriodUnit
+          minimumTenure: typeof formData.leaseTerms.leaseAmount.minimumTenure === 'object'
+            ? ((formData.leaseTerms.leaseAmount.minimumTenure as any)?.durationType || 'years')
+            : formData.leaseTerms.leaseAmount.minimumUnit,
+          maximumTenure: typeof formData.leaseTerms.leaseAmount.maximumTenure === 'object'
+            ? ((formData.leaseTerms.leaseAmount.maximumTenure as any)?.duration?.toString() || '3')
+            : formData.leaseTerms.leaseAmount.maximumTenure,
+          maximumUnit: typeof formData.leaseTerms.leaseAmount.maximumUnit === 'object'
+            ? ((formData.leaseTerms.leaseAmount.maximumUnit as any)?.durationType || 'years')
+            : formData.leaseTerms.leaseAmount.maximumUnit,
+          lockInPeriod: typeof formData.leaseTerms.leaseAmount.lockInPeriod === 'object'
+            ? ((formData.leaseTerms.leaseAmount.lockInPeriod as any)?.duration?.toString() || '1')
+            : formData.leaseTerms.leaseAmount.lockInPeriod,
+          lockInUnit: typeof formData.leaseTerms.leaseAmount.lockInUnit === 'object'
+            ? ((formData.leaseTerms.leaseAmount.lockInUnit as any)?.durationType || 'years')
+            : formData.leaseTerms.leaseAmount.lockInUnit,
+          noticePeriod: typeof formData.leaseTerms.leaseAmount.noticePeriod === 'object'
+            ? ((formData.leaseTerms.leaseAmount.noticePeriod as any)?.duration?.toString() || '1')
+            : formData.leaseTerms.leaseAmount.noticePeriod,
+          noticePeriodUnit: typeof formData.leaseTerms.leaseAmount.noticePeriodUnit === 'object'
+            ? ((formData.leaseTerms.leaseAmount.noticePeriodUnit as any)?.durationType || 'months')
+            : formData.leaseTerms.leaseAmount.noticePeriodUnit
         };
 
         // Convert files to base64 strings
         const convertedMedia = {
           photos: {
-            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)), 
-            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+            exterior: await Promise.all((formData.media.photos?.exterior ?? []).map(convertFileToBase64)),
+            interior: await Promise.all((formData.media.photos?.interior ?? []).map(convertFileToBase64)),
+            floorPlan: await Promise.all((formData.media.photos?.floorPlan ?? []).map(convertFileToBase64)),
+            washrooms: await Promise.all((formData.media.photos?.washrooms ?? []).map(convertFileToBase64)),
+            lifts: await Promise.all((formData.media.photos?.lifts ?? []).map(convertFileToBase64)),
+            emergencyExits: await Promise.all((formData.media.photos?.emergencyExits ?? []).map(convertFileToBase64))
           },
-          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+          videoTour: formData.media.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+          documents: await Promise.all((formData.media.documents ?? []).map(convertFileToBase64))
         };
 
         // Remove redundant coordinates field from final submission
-        const { coordinates, ...formDataWithoutCoordinates } = formData;
+        const { basicInformation, ...formDataWithoutCoordinates } = formData;
 
         const transformedData = {
           ...formDataWithoutCoordinates,
           location: locationData,
-          leaseTenure: normalizedLeaseTenure,
+          leaseTerms: normalizedLeaseTenure,
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: 'Other Commercial Property',
+            intent: 'Lease',
+            status: 'Available',
           }
         };
 

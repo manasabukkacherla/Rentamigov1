@@ -383,7 +383,7 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
               /> */}
 
               <select
-                value={propertyDetails.propertyAge}
+                value={propertyDetails.propertyAge ? propertyDetails.propertyAge.toString() : ''}
                 onChange={(e) => handleChange('propertyAge', e.target.value)}
                 className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black"
               >
@@ -392,7 +392,6 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
                 <option value="5-10" className="text-black bg-white">5-10</option>
                 <option value="10-15" className="text-black bg-white">10-15</option>
                 <option value="15+" className="text-black bg-white">15+</option>
-                {/* Add other relevant options as needed */}
               </select>
             </div>
             <div className="relative">

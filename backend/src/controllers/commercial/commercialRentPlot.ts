@@ -69,7 +69,7 @@ export const createCommercialRentPlot = async (req: Request, res: Response) => {
             ...formData,
             metadata: {
                 ...formData.metadata,
-                createdBy: req.user?._id || null,
+                createdBy: formData.metadata.createdBy,
                 createdAt: new Date()
             }
         };
@@ -128,7 +128,8 @@ export const getAllRentPlots = async (req: Request, res: Response) => {
 // Get a specific commercial Rent plot by ID
 export const getRentPlotById = async (req: Request, res: Response) => {
     try {
-        const RentPlot = await CommercialRentPlot.findById(req.params.id)
+        const propertyId = req.params.propertyId;
+        const RentPlot = await CommercialRentPlot.findOne({propertyId})
             .populate('metadata.createdBy', 'name email')
             .select('-__v');
 

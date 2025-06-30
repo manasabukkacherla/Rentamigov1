@@ -53,6 +53,7 @@ import ConversationListPage from "./components/chatapp/pages/ConversationListPag
 import ChatPage from "./components/chatapp/pages/ChatPage";
 import FindEmployee from "./components/chatapp/FindEmployee";
 import Propdetail from "./components/detailproperty/App.tsx";
+import Pgmain from "./components/updatedpropertyForms/residentialrent/pg/Pgmain.tsx";
 const App = () => {
   const [isEmployee, setIsEmployee] = useState(false);
   const socket = useContext(SocketContext);
@@ -272,12 +273,12 @@ const App = () => {
                 />
                 {/* Dynamic PG Details page route */}
                 <Route path="/pgdash/listings/:propertyId" element={<PGDetails />} />
+<Route path="/updatepropertyform/:propertyId" element={<Pgmain />} />
 
                 {/* agriplot routes*/}
-                <Route path="/agriplot" element={<Agriplot />} />
+                <Route path="/agriplot/:id" element={<Agriplot />} />
 
-                {/* Agriplot route */}
-                <Route path="/agriplot" element={<Agriplot />} />
+                
                 {/* propdetailspage*/}
                 <Route path="/detailprop/:id" element={<Propdetail />} />
                 {/*Emp das*/}

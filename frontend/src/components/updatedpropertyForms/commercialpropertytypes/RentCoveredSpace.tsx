@@ -24,7 +24,7 @@ import MapLocation from '../CommercialComponents/MapLocation';
 interface IFormData {
   basicInformation: {
     title: string;
-    spaceType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -108,16 +108,15 @@ interface IFormData {
         type: string;
       };
     };
-    brokerage: {
-      required: string;
-      amount?: number;
-    };
-    availability: {
-      type: string;
-      date?: string;
-    };
   };
-
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+  availability: {
+    type: string;
+    date?: string;
+  };
   contactInformation: {
     name: string;
     email: string;
@@ -143,17 +142,17 @@ const RentCoveredSpace = () => {
   const [formData, setFormData] = useState<IFormData>({
     basicInformation: {
       title: '',
-      spaceType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
         state: '',
         zipCode: '',
       },
-      landmark: '',
+      landmark: '', // required, must be filled by user
       location: {
-        latitude: '',
-        longitude: '',
+        latitude: '', // required, must be filled by user
+        longitude: '', // required, must be filled by user
       },
       isCornerProperty: false,
     },
@@ -225,16 +224,16 @@ const RentCoveredSpace = () => {
           type: '',
         },
       },
-      brokerage: {
-        required: 'no',
-        amount: 0,
-      },
-      availability: {
-        type: 'immediate',
-        date: '',
-      },
     },
-
+    
+    brokerage: {
+      required: 'no',
+      amount: 0,
+    },
+    availability: {
+      type: 'immediate',
+      date: '',
+    },
     contactInformation: {
       name: '',
       email: '',
@@ -327,8 +326,8 @@ const RentCoveredSpace = () => {
           errors.title = 'Title must be at least 5 characters long';
         }
 
-        if (!formData.basicInformation.spaceType) {
-          errors.spaceType = 'Space type is required';
+        if (!formData.basicInformation.Type) {
+          errors.Type = 'Space type is required';
         }
 
         if (!formData.basicInformation.address.street.trim()) {
@@ -515,22 +514,22 @@ const RentCoveredSpace = () => {
         }
 
         // Validate brokerage selection first
-        if (!formData.rentalTerms.brokerage.required) {
+        if (!formData.brokerage.required) {
           errors.brokerage = 'Please select if brokerage is required';
         }
 
         // Only validate brokerage amount if brokerage is required (yes)
-        if (formData.rentalTerms.brokerage.required === 'yes') {
-          if (!formData.rentalTerms.brokerage.amount) {
+        if (formData.brokerage.required === 'yes') {
+          if (!formData.brokerage.amount) {
             errors.brokerage = 'Brokerage amount is required when brokerage is yes';
-          } else if (formData.rentalTerms.brokerage.amount <= 0) {
+          } else if (formData.brokerage.amount <= 0) {
             errors.brokerage = 'Brokerage amount must be greater than 0';
           }
         }
         break;
 
       case 3: // Availability
-        if (!formData.rentalTerms.availability.date) {
+        if (!formData.availability.date) {
           errors.date = 'Available from date is required';
         }
         break;
@@ -612,20 +611,19 @@ const RentCoveredSpace = () => {
 
 
 
-  const handleChange = (field: string, value: any) => {
+  const handleChange = (key: string, value: any) => {
     setFormData(prev => {
-      const fields = field.split('.');
-      const lastField = fields.pop() || '';
-
-      const newData = { ...prev };
-      let current: any = newData;
-
-      for (const field of fields) {
-        current = { ...current[field] };
+      const keys = key.split('.');
+      if (keys.length > 1) {
+        const newData = { ...prev };
+        let current: any = newData;
+        for (let i = 0; i < keys.length - 1; i++) {
+          current = current[keys[i]];
+        }
+        current[keys[keys.length - 1]] = value;
+        return newData;
       }
-
-      current[lastField] = value;
-      return newData;
+      return { ...prev, [key]: value };
     });
   };
 
@@ -653,7 +651,7 @@ const RentCoveredSpace = () => {
             }))} />
           <CoveredOpenSpaceType onSpaceTypeChange={(types) => setFormData(prev => ({
             ...prev,
-            basicInformation: { ...prev.basicInformation, spaceType: types }
+            basicInformation: { ...prev.basicInformation, Type: types }
           }))} />
           <CommercialPropertyAddress
             address={formData.basicInformation.address}
@@ -770,7 +768,7 @@ const RentCoveredSpace = () => {
               }))}
             />
             <Brokerage
-              bro={formData.rentalTerms.brokerage}
+              bro={formData.brokerage}
               onBrokerageChange={(brokerage) => {
                 setFormData(prev => ({
                   ...prev,
@@ -795,12 +793,12 @@ const RentCoveredSpace = () => {
         <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <AvailabilityDate
             availability={{
-              type: formData.rentalTerms.availability.type as "immediate" | "specific",
-              date: formData.rentalTerms.availability.date
+              type: formData.availability.type as "immediate" | "specific",
+              date: formData.availability.date
             }}
             onAvailabilityChange={(availability) => setFormData(prev => ({
               ...prev,
-              rentalTerms: { ...prev.rentalTerms, availability: availability }
+              availability: availability
             }))}
           />
         </div>
@@ -915,6 +913,7 @@ const RentCoveredSpace = () => {
     //   toast.error('Please fill in all required fields');
     //   return;
     // }
+    console.log(formData);
 
     try {
       const user = sessionStorage.getItem('user');
@@ -939,7 +938,7 @@ const RentCoveredSpace = () => {
         const transformedData = {
           basicInformation: {
             ...formData.basicInformation,
-            spaceType: formData.basicInformation.spaceType
+            Type: formData.basicInformation.Type
           },
           spaceDetails: {
             totalArea: formData.spaceDetails.totalArea,
@@ -975,15 +974,15 @@ const RentCoveredSpace = () => {
             propertyCondition: formData.propertyDetails.propertyCondition
           },
           rentalTerms: formData.rentalTerms,
+          brokerage: formData.brokerage,
           availability: {
-            date: formData.rentalTerms.availability.date,
-            type: formData.rentalTerms.availability.type
+            date: formData.availability.date,
+            type: formData.availability.type
           },
           contactInformation: formData.contactInformation,
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
           }
         };
 

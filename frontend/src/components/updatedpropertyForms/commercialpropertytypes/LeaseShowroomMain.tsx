@@ -26,7 +26,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 interface FormData {
   basicInformation: {
     title: string;
-    showroomType: string[];
+    Type: string[];
     address: {
       street: string;
       city: string;
@@ -151,6 +151,10 @@ interface FormData {
   metadata?: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Commercial';
+    propertyName: string;
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
@@ -158,7 +162,7 @@ const LeaseShowroomMain = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
-      showroomType: [],
+      Type: [],
       address: {
         street: '',
         city: '',
@@ -280,7 +284,14 @@ const LeaseShowroomMain = () => {
       videoTour: null,
       documents: []
     },
-    metadata: undefined
+    metadata:{
+      createdBy: '',
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: '',
+      intent: 'Rent',
+      status: 'Available'
+    }
   });
 
   const [currentStep, setCurrentStep] = useState(0)
@@ -304,7 +315,7 @@ const LeaseShowroomMain = () => {
             <ShowroomType
               onTypeChange={(type) => setFormData(prev => ({
                 ...prev,
-                basicInformation: { ...prev.basicInformation, showroomType: [type] }
+                basicInformation: { ...prev.basicInformation, Type: [type] }
               }))}
             />
           </div>
@@ -565,6 +576,7 @@ const LeaseShowroomMain = () => {
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setIsSubmitting(true);
+    console.log(formData);
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -588,7 +600,11 @@ const LeaseShowroomMain = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: 'Commercial',
+            propertyName: formData.basicInformation.title,
+            intent: 'Rent',
+            status: 'Available'
           }
         };
 

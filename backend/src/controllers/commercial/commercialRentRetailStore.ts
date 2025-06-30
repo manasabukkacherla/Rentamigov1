@@ -60,7 +60,7 @@ export const createCommercialRentRetailStore = async (req: Request, res: Respons
       metadata: {
         ...formData.metadata,
         // status: 'draft',
-        createdBy: req.user?._id || null,
+        createdBy: req.user?._id || formData?.metadata?.createdBy || null,
         createdAt: new Date(),
         // updatedAt: new Date(),
         // isVerified: false
@@ -105,7 +105,7 @@ export const getAllCommercialRentRetail = async (req: Request, res: Response) =>
 
 export const getCommercialRentRetailById = async (req: Request, res: Response) => {
   try {
-    const propertyId = req.params.id;
+    const propertyId = req.params.propertyId;
     const property = await CommercialRentRetailStore.findOne({ propertyId });
     
     if (!property) {

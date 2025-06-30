@@ -14,7 +14,7 @@ commercialLeaseWarehouseRoutes.route('/')
     .post(createLeaseWarehouse)
     .get(getAllLeaseWarehouses);
 
-commercialLeaseWarehouseRoutes.route('/:id')
+commercialLeaseWarehouseRoutes.route('/:propertyId')
     .get(getLeaseWarehouseById)
     .put(updateLeaseWarehouse)
     .delete(deleteLeaseWarehouse);

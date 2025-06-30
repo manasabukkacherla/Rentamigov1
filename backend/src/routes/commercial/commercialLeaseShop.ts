@@ -11,7 +11,7 @@ router.post('/',  createCommercialLeaseShop);
 router.get('/', getAllCommercialLeaseShop);
 
 // Get a single shed listing by ID
-router.get('/:id',getCommercialLeaseShopById);
+router.get('/:propertyId',getCommercialLeaseShopById);
 
 // Update a shed listing
 router.put('/:id', updateCommercialLeaseShop);

@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { CommercialLeaseShed } from '../../models/commercial/CommericalLeaseShed';
+import { CommercialLeaseShed } from '../../models/commercial/CommercialLeaseShed';
 import _ from 'lodash';
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RA-COMSH";
+        const prefix = "RA-COMLESD";
 
         const highestShed = await CommercialLeaseShed.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }
@@ -42,7 +42,7 @@ const generatePropertyId = async (): Promise<string> => {
     } catch (error) {
         console.error('Error generating property ID:', error);
         const timestamp = Date.now().toString().slice(-8);
-        return `RA-COMSH${timestamp}`;
+        return `RA-COMLESH${timestamp}`;
     }
 };
 
@@ -120,13 +120,15 @@ export const getSheds = async (req: Request, res: Response) => {
 
 export const getShedById = async (req: Request, res: Response) => {
     try {
-        const shed = await CommercialLeaseShed.findById(req.params.id);
+        const propertyId = req.params.propertyId;
+        const shed = await CommercialLeaseShed.findOne({ propertyId });
         if (!shed) {
             return res.status(404).json({
                 success: false,
                 error: 'Shed not found'
             });
         }
+        
         res.status(200).json({
             success: true,
             data: shed
