@@ -45,7 +45,7 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
-  builderName: string;
+  // builderName: string;
   floorNumber: number;
   totalFloors: number;
   propertyId?: string;

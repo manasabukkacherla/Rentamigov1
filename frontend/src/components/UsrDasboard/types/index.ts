@@ -3,9 +3,18 @@ import { ReactNode } from "react";
 export interface Property {
   id: string;
   name: string;
-  rent: number;
-  status: 'Available' | 'Rented' | 'Pending';
-  imageUrl: string;
+  rent?: number;
+  price?: number;
+  status?: 'Available' | 'Rented' | 'Pending' | string;
+  imageUrl?: string;
+  image?: string;
+  basicInformation?: any;
+  propertyName?: string;
+  title?: string;
+  monthlyRent?: number;
+  coverImage?: string;
+  images?: string[];
+  [key: string]: any;
 }
 
 export interface Lead {
