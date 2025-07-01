@@ -56,7 +56,7 @@ const normalizeProperty = (item: any) => ({
         id: item._id || item.propertyId || '',
         propertyId: item.propertyId || '',
         title: item.basicInformation?.title || item.title || item.pgDetails?.name || item.basicInformation?.propertyName,
-        location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}` || item.pgDetails?.address || '',
+        location: ${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''} || item.pgDetails?.address || '',
         propertyName: item.metadata?.propertyName || item.metaData?.propertyName || '',
         type: item.metadata?.propertyType || item.metaData?.propertyType || '',
         listingType: 'Owner',
