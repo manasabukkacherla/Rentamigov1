@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { X } from "lucide-react";
-import { Property } from "../types";
+import { Property } from "../types/index";
 import { PropertyCard } from "../components/PropertyCard";
 import { LoadingOverlay } from "../LoadingOverlay";
 import axios from "axios";
@@ -23,22 +23,7 @@ const initialProperties: Property[] = [
     propertyId: 'APT12345678',
     name: ""
   },
-  {
-    id: '2',
-    title: 'Luxury Villa with Ocean View',
-    imageUrl: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-    price: 1200000,
-    location: '456 Coastal Dr, Malibu, CA',
-    area: 3500,
-    furnishing: 'Semi-Furnished',
-    postedDate: '2023-06-10T14:15:00.000Z',
-    status: 'Available',
-    intent: 'Sale',
-    type: 'Villa',
-    listingType: 'Standard',
-    propertyId: 'VIL87654321',
-    name: ""
-  },
+
 ];
 
 export function Properties() {
@@ -70,22 +55,28 @@ export function Properties() {
             const userProperties = propertiesRes.data || [];
             if (userProperties.length > 0) {
               const finalProperties = userProperties.map((property: any) => ({
+                ...property, // Spread all existing properties first
                 id: property.id || `property-${Math.random().toString(36).substr(2, 9)}`,
-                title: property.propertyName || property.title || 'Untitled Property',
-                name: property.propertyName || property.name || '',
+                title: property.title || property.basicInformation?.title || property.pgDetails?.name || property.basicInformation?.propertyName || 'Untitled Property',
+                name: property.name || property.basicInformation?.propertyName || property.pgDetails?.name || '',
                 status: property.status || 'Available',
                 price: property.price || property.rent || 0,
                 rent: property.rent || property.price || 0,
-                type: property.type || 'Unknown',
-                intent: property.intent || 'Rent',
-                location: property.location || 'Location not specified',
-                area: property.area,
-                furnishing: property.furnishing,
-                imageUrl: property.imageUrl || property.image || 'https://via.placeholder.com/300',
+                type: property.type || property.metadata?.propertyType || property.metaData?.propertyType || 'Unknown',
+                intent: property.intent || property.metadata?.intent || property.metaData?.intent || 'Rent',
+                location: property.location || 
+                          (property.basicInformation?.address ? 
+                            `${property.basicInformation.address.city || ''}, ${property.basicInformation.address.state || ''}` : 
+                            'Location not specified'),
+                area: property.area || property.propertyDetails?.area?.totalArea || 0,
+                furnishing: property.furnishing || property.propertyDetails?.furnishingStatus || 'Unfurnished',
+                imageUrl: property.imageUrl || property.image || property.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/300',
                 propertyId: property.propertyId || property.id,
                 listingType: property.listingType || 'Standard',
-                postedDate: property.postedDate || property.createdAt || new Date().toISOString(),
-                basicInformation: property.basicInformation || {}
+                postedDate: property.postedDate || property.createdAt || 
+                           (property.metadata?.createdAt ? 
+                             new Date(property.metadata.createdAt).toISOString() : 
+                             new Date().toISOString())
               }));
               
               if (isMounted) {
@@ -122,8 +113,8 @@ export function Properties() {
         
         // Transform the properties to match our Property type
         const formattedProperties = allProperties.map((property: any) => ({
-          id: property._id || `property-${Math.random().toString(36).substr(2, 9)}`,
-          title: property.propertyName || property.title || 'Untitled Property',
+          id: property.id || `property-${Math.random().toString(36).substr(2, 9)}`,
+          title: property.title || property.title || 'Untitled Property',
           name: property.propertyName || property.name || '',
           status: property.status || 'Available',
           price: property.price || property.rent || 0,

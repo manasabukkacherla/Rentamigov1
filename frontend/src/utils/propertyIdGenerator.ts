@@ -13,7 +13,7 @@ interface PropertyTypeMap {
 const propertyTypeMap: PropertyTypeMap = {
   residential: {
     'apartment': 10,
-    'independent-house': 20,
+    'independenthouse': 20,
     'builder-floor': 30,
     'plot': 40,
     'shared-space': 50

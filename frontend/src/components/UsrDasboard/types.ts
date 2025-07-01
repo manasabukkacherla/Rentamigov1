@@ -64,6 +64,12 @@ export interface Property {
   basicInformation?: {
     propertyType?: string;
     furnishingStatus?: string;
+    title?: string;
+    propertyName?: string;
+  };
+  
+  pgDetails?: {
+    name?: string;
   };
   
   // Allow any other string key with any value
