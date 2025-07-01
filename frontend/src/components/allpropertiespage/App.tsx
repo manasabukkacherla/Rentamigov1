@@ -123,19 +123,19 @@
 
 //         //   // Residential Sale 
 //         //   fetch('/api/residential/sale/apartment'),
-//         //   fetch('/api/residential/sale/builder-floor'),
+//         //   fetch('/api/residential/sale/builderfloor'),
 //         //   fetch('/api/residential/sale/plots'),
 //         //   fetch('/api/residential/sale/independenthouse'),
 
 //         //   // Residential Rent 
 //         //   fetch('/api/residential/rent/apartment'),
-//         //   fetch('/api/residential/rent/builder-floor'),
+//         //   fetch('/api/residential/rent/builderfloor'),
 //         //   fetch('/api/residential/rent/independenthouse'),
 
 //         //   // Residential Lease 
 //         //   fetch('/api/residential/lease/independenthouse'),
 //         //   fetch('/api/residential/lease/apartment'),
-//         //   fetch('/api/residential/lease/builder-floor'),
+//         //   fetch('/api/residential/lease/builderfloor'),
 
 //         //   // Residential PG data
 //         //   fetch('/api/residential/pgmain')  // <-- Fetch Residential PG data
@@ -474,7 +474,7 @@
 //     others: "OT",
 //     apartment: "AP",
 //     "independenthouse": "IH",
-//     "builder-floor": "BF",
+//     "builderfloor": "BF",
 //     "shared-space": "SS",
 //   };
 

@@ -14,7 +14,7 @@ const propertyTypeMap: PropertyTypeMap = {
   residential: {
     'apartment': 10,
     'independenthouse': 20,
-    'builder-floor': 30,
+    'builderfloor': 30,
     'plot': 40,
     'shared-space': 50
   },

@@ -116,7 +116,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     others: "OT",
     apartment: "AP",
     "independenthouse": "IH",
-    "builder-floor": "BF",
+    "builderfloor": "BF",
     "shared-space": "SS",
   };
   if (!property.propertyId) {

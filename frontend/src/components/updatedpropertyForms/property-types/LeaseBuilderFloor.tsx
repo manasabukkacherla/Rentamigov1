@@ -1363,7 +1363,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       if (mediaItemsToUpload.length > 0) {
         try {
           uploadedMediaUrls = await uploadResidentialMediaToS3(
-            'builder-floor',
+            'builderfloor',
             mediaItemsToUpload,
             propertyId
           );
@@ -1387,7 +1387,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             };
 
             // Send the updated form data to the backend
-            const response = await axios.post('/api/residential/lease/builder-floor', {
+            const response = await axios.post('/api/residential/lease/builderfloor', {
               ...updatedFormData,
               metadata: {
                 createdBy: author,
@@ -1403,7 +1403,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               // Set the propertyId from the response
               setPropertyId(response.data.data.propertyId);
               toast.success('Property listed successfully!');
-              navigate('/dashboard');
+              // navigate('/dashboard');
             }
           }
         } catch (error) {
@@ -1412,7 +1412,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
         }
       } else {
         // If no media to upload, just send the form data
-        const response = await axios.post('/api/residential/lease/builder-floor', {
+        const response = await axios.post('/api/residential/lease/builderfloor', {
           ...formData,
           metadata: {
             createdBy: author,
