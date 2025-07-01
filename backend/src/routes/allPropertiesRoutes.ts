@@ -11,7 +11,7 @@ import CommercialRentPlot from '../models/commercial/commercialRentPlot';
 import CommercialRentShop from '../models/commercial/commercialrentshop';
 import { CommercialRentShowroom } from '../models/commercial/commercialRentShowroom';
 
-// Commercial Sell Models
+// Commercial Sell Models   
 import CommercialSellAgriculture from '../models/commercial/CommercialSellAgriculture';
 import CommercialSellCoveredSpace from '../models/commercial/CommercialSellCoveredSpace';
 import CommercialSellOfficeSpace from '../models/commercial/CommercialSellOfficeSpace';

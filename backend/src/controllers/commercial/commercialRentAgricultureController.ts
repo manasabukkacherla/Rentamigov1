@@ -12,7 +12,7 @@ const generatePropertyId = async (): Promise<string> => {
     }).sort({ propertyId: -1 });
 
     let nextNumber = 1;
-
+                                      
     if (highestShop) {
       const match = highestShop.propertyId.match(/(\d+)$/);
       if (match && match[1]) {
