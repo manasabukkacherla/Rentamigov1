@@ -45,7 +45,7 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
-  // builderName: string;
+
   floorNumber: number;
   totalFloors: number;
   propertyId?: string;
@@ -219,7 +219,6 @@ interface ApiError {
 interface FormData {
   basicInformation: {
     title: string;
-    builderName: string;
     floorNumber: number;
     totalFloors: number;
     address: Address;
@@ -566,7 +565,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   const initialData = {
     basicInformation: {
       title: "",
-      builderName: "",
       floorNumber: 0,
       totalFloors: 0,
       address: {
@@ -711,7 +709,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      builderName: "",
       floorNumber: 0,
       totalFloors: 0,
       address: {
