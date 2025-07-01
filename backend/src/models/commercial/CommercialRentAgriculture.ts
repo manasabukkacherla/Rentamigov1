@@ -135,4 +135,4 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   }
 });
 
-export default mongoose.model<ICommercialRentAgriculture>('CommercialRentAgriculture', CommercialRentAgricultureSchema); 
+export default mongoose.model<ICommercialRentAgriculture>('CommercialRentAgriculture', CommercialRentAgricultureSchema);
