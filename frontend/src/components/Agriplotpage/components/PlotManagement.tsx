@@ -433,7 +433,7 @@ const PlotManagement: React.FC = () => {
     agriculture: "AG",
     others: "OT",
     apartment: "AP",
-    "independent-house": "IH",
+    "independenthouse": "IH",
     "builder-floor": "BF",
     "shared-space": "SS",
   };

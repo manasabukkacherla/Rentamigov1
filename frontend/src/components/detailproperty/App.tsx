@@ -379,27 +379,27 @@ function Propdetail() {
 
   const listingCodes: Record<string, string> = {
     rent: "RE",
-    sell: "SE",
+    sale: "SE",
     lease: "LE",
-    "pg/co-living": "PG",
+    pgcoliving: "PG",
   };
 
   // Normalize Property Type Mapping
   const subCategoryCodes: Record<string, string> = {
     shops: "SH",
-    "retail-store": "RS",
+    retailstore: "RS",
     showrooms: "SR",
-    "office-space": "OS",
+    officyspace: "OS",
     warehouses: "WH",
     sheds: "SD",
-    "covered-space": "CS",
+    coveredspace: "CS",
     plots: "PL",
     agriculture: "AG",
     others: "OT",
     apartment: "AP",
-    "independent-house": "IH",
-    "builder-floor": "BF",
-    "shared-space": "SS",
+    independenthouse: "IH",
+    builderfloor: "BF",
+    sharedspace: "SS",
   };
   if (!propertyId) {
     console.log("No property ID");

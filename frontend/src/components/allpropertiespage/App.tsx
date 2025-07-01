@@ -125,15 +125,15 @@
 //         //   fetch('/api/residential/sale/apartment'),
 //         //   fetch('/api/residential/sale/builder-floor'),
 //         //   fetch('/api/residential/sale/plots'),
-//         //   fetch('/api/residential/sale/independent-house'),
+//         //   fetch('/api/residential/sale/independenthouse'),
 
 //         //   // Residential Rent 
 //         //   fetch('/api/residential/rent/apartment'),
 //         //   fetch('/api/residential/rent/builder-floor'),
-//         //   fetch('/api/residential/rent/independent-house'),
+//         //   fetch('/api/residential/rent/independenthouse'),
 
 //         //   // Residential Lease 
-//         //   fetch('/api/residential/lease/independent-house'),
+//         //   fetch('/api/residential/lease/independenthouse'),
 //         //   fetch('/api/residential/lease/apartment'),
 //         //   fetch('/api/residential/lease/builder-floor'),
 
@@ -473,7 +473,7 @@
 //     agriculture: "AG",
 //     others: "OT",
 //     apartment: "AP",
-//     "independent-house": "IH",
+//     "independenthouse": "IH",
 //     "builder-floor": "BF",
 //     "shared-space": "SS",
 //   };
