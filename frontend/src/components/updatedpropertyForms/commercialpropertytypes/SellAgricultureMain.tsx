@@ -258,16 +258,7 @@ const SellAgricultureMain = () => {
               address={formData.basicInformation.address}
               onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
             />
-            {/* <Landmark
-                onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
-                onLocationSelect={(location) => setFormData((prev) => ({
-                  ...prev,
-                  coordinates: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  }
-                }))}
-              /> */}
+           
             <MapLocation
               latitude={formData.basicInformation?.location.latitude}
               longitude={formData.basicInformation?.location.longitude}

@@ -352,7 +352,7 @@ const RentAgriculture = () => {
               address={formData.basicInformation.address}
               onAddressChange={handleAddressChange}
             />
-            {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
+       
             <MapLocation 
             latitude={formData.basicInformation.location.latitude}
             longitude={formData.basicInformation.location.longitude}

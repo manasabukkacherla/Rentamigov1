@@ -14,7 +14,7 @@ const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
   const [formData, setFormData] = React.useState({
     name: '',
     email: '',
-    phone: '',
+    phone: '',  
     message: ''
   });
 
