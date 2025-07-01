@@ -253,9 +253,9 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
             {renderPriceSection()}
             <button
               onClick={onEnquireClick}
-              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition"
+              className="w-full mt-4 bg-white text-black border border-black font-medium py-2 px-4 rounded-lg transition hover:bg-black hover:text-white"
             >
-              Enquire Now
+              Enquiry Form
             </button>
           </div>
         )}
@@ -267,7 +267,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
         {renderPriceSection()}
         <button
           onClick={onEnquireClick}
-          className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
+          className="w-full mt-6 bg-black hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
         >
           Enquire Now
         </button>
@@ -1279,11 +1279,9 @@ const PlotManagement: React.FC = () => {
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
                         <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
                           <div className="text-gray-600 font-semibold">Lease Amount</div>
-                          <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
 
-                          <div className="text-gray-600 font-semibold">Lease Duration</div>
-                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.durationType}</div>
-
+                        
                           <div className="text-gray-600 font-semibold">Minium Tenure</div>
                           <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
 
@@ -1349,17 +1347,18 @@ const PlotManagement: React.FC = () => {
                       </div>
                     )}
 {/* Enquiry Form Modal */}
-{showEnquiryForm && (
-        <EnquiryForm
-          onClose={() => setShowEnquiryForm(false)}
-        />
-      )}
+   
     </div>  {/* ← closes the outermost <div className="min-h-screen …"> */}
-
+    
 
 
                   </div>
                 </div>
+                {showEnquiryForm && (
+        <EnquiryForm
+          onClose={() => setShowEnquiryForm(false)}
+        />
+      )}
               </div>
   )
 };
