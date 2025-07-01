@@ -89,7 +89,8 @@ export const FiltersPanel = ({ onFilterChange }: FiltersPanelProps): JSX.Element
       priceRange: {
         min: null,
         max: null
-      }
+      },
+      category: []
     });
     onFilterChange({
       listingTypes: [],
@@ -99,7 +100,8 @@ export const FiltersPanel = ({ onFilterChange }: FiltersPanelProps): JSX.Element
       priceRange: {
         min: null,
         max: null
-      }
+      },
+      category: []
     });
   };
 

@@ -109,7 +109,7 @@ interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
   propertyType: 'Residential';
-  propertyName: 'Appartment';
+  propertyName: 'Apartment';
   intent: 'Rent';
   status: 'Available' | 'Rented' | 'Under Maintenance';
   updatedBy?: Schema.Types.ObjectId | string;
@@ -323,7 +323,7 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Residential' },
-    propertyName: { type: String, default:'Appartment' },
+    propertyName: { type: String, default:'Apartment' },
     intent: { type: String, default: 'Rent' },
     status: { 
       type: String, 
