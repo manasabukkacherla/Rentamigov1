@@ -33,7 +33,7 @@ const customStyles = `
 interface FormData {
   basicInformation: {
     title: string
-    propertyAddress: {
+    address: {
       houseName: string;
       street: string;
       city: string;
@@ -214,7 +214,7 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      propertyAddress: {
+      address: {
         houseName: "",
         street: "",
         city: "",
@@ -404,9 +404,9 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
               </div>
 
               <IndependentPropertyAddress
-                propertyAddress={formData.basicInformation.propertyAddress}
+                propertyAddress={formData.basicInformation.address}
                 onAddressChange={(address) =>
-                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyAddress: address } }))
+                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address: address } }))
                 }
               />
 
@@ -683,7 +683,7 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
-        navigate('/login');
+        navigate('/updatepropertyform');
         return;
       }
 
@@ -747,7 +747,7 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
         }
       };
 
-      const response = await axios.post('/api/residential/rent/independent-house', transformedData, {
+      const response = await axios.post('/api/residential/rent/independenthouse', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

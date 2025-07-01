@@ -759,7 +759,7 @@ const SellIndependentHouse = () => {
         };
 
 
-        const response = await axios.post('/api/residential/sale/independent-house', transformedData, {
+        const response = await axios.post('/api/residential/sale/independenthouse', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

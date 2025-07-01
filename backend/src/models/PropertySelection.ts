@@ -57,9 +57,9 @@ PropertySelectionSchema.pre("validate", async function (next) {
     "agricultural land": "AL",
     others: "OT",
     apartment: "AP",
-    "independent-house": "IH",
-    "builder-floor": "BF",
-    "shared-space": "SS",
+    "independenthouse": "IH",
+    "builderfloor": "BF",
+    "sharedspace": "SS",
   };
 
   // Get the corresponding codes (Handle missing values gracefully)

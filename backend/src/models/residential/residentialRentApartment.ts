@@ -3,7 +3,7 @@ import { NumberListInstance } from 'twilio/lib/rest/pricing/v2/number';
 
 interface IBasicInformation {
   propertyId: string;
-  title: string;
+  title?: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;

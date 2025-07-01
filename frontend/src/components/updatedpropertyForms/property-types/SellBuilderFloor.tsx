@@ -837,7 +837,7 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
         }
       };
 
-      const response = await axios.post('/api/residential/sale/builder-floor', transformedData, {
+      const response = await axios.post('/api/residential/sale/builderfloor', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

@@ -45,7 +45,6 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
-  builderName: string;
   floorNumber: number;
   totalFloors: number;
   propertyId?: string;
@@ -219,7 +218,6 @@ interface ApiError {
 interface FormData {
   basicInformation: {
     title: string;
-    builderName: string;
     floorNumber: number;
     totalFloors: number;
     address: Address;
@@ -566,7 +564,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   const initialData = {
     basicInformation: {
       title: "",
-      builderName: "",
       floorNumber: 0,
       totalFloors: 0,
       address: {
@@ -711,7 +708,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      builderName: "",
       floorNumber: 0,
       totalFloors: 0,
       address: {
@@ -1363,7 +1359,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       if (mediaItemsToUpload.length > 0) {
         try {
           uploadedMediaUrls = await uploadResidentialMediaToS3(
-            'builder-floor',
+            'builderfloor',
             mediaItemsToUpload,
             propertyId
           );
@@ -1387,7 +1383,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             };
 
             // Send the updated form data to the backend
-            const response = await axios.post('/api/residential/lease/builder-floor', {
+            const response = await axios.post('/api/residential/lease/builderfloor', {
               ...updatedFormData,
               metadata: {
                 createdBy: author,
@@ -1412,7 +1408,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
         }
       } else {
         // If no media to upload, just send the form data
-        const response = await axios.post('/api/residential/lease/builder-floor', {
+        const response = await axios.post('/api/residential/lease/builderfloor', {
           ...formData,
           metadata: {
             createdBy: author,
