@@ -71,10 +71,17 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     // Add metadata with userId and user (like Sell controller)
     const agricultureData = {
       ...formData,
-      propertyId, // Ensure propertyId is at the root level
+      propertyId, 
+      basicInformation: formData.basicInformation,
+      Agriculturelanddetails: formData.Agriculturelanddetails,
+      rent: formData.rent,
+      securityDeposit: formData.securityDeposit,
+      availability: formData.availability,
+      contactDetails: formData.contactDetails,
+      media: formData.media,
       metadata: {
         ...formData.metadata,
-        createdBy: formData.metadata.createdBy,  // Use the extracted userId
+        createdBy: formData.metadata.createdBy,  
         createdAt: new Date()
       }
     };

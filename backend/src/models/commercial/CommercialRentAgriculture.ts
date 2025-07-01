@@ -126,7 +126,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata : {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Rent' },
