@@ -246,7 +246,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
           className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 rounded-lg text-gray-800 font-medium"
         >
           <span>View Pricing Details</span>
-          <ChevronUp className={`w-5 h-5 transition-transform ${showMobilePricing ? 'transform rotate-180' : ''}`} />
+          <ChevronUp className={w-5 h-5 transition-transform ${showMobilePricing ? 'transform rotate-180' : ''}} />
         </button>
         {showMobilePricing && (
           <div className="mt-2 p-4 border border-gray-200 rounded-lg">
@@ -780,21 +780,21 @@ const PlotManagement: React.FC = () => {
     if (details.boundaryWall) features.push('Boundary Wall Present');
     if (details.waterSewer) features.push('Water & Sewer Available');
     if (details.electricity) features.push('Electricity Available');
-    if (details.roadAccess) features.push(`Road Access: ${details.roadAccess}`);
+    if (details.roadAccess) features.push(Road Access: ${details.roadAccess});
     if (details.securityRoom) features.push('Security Room Available');
-    if (details.previousConstruction && details.previousConstruction !== 'none') features.push(`Previous Construction: ${details.previousConstruction}`);
+    if (details.previousConstruction && details.previousConstruction !== 'none') features.push(Previous Construction: ${details.previousConstruction});
     // Add rent/sale-specific features
     if (listing === 'rent' && type == 'plot') {
-      if (typeof rent.expectedRent !== 'undefined') features.push(`Expected Rent: ₹${rent.expectedRent}`);
-      if (typeof securityDeposit !== 'undefined') features.push(`Security Deposit: ₹${securityDeposit}`);
+      if (typeof rent.expectedRent !== 'undefined') features.push(Expected Rent: ₹${rent.expectedRent});
+      if (typeof securityDeposit !== 'undefined') features.push(Security Deposit: ₹${securityDeposit});
       if (rent.isNegotiable) features.push('Rent is Negotiable');
-      if (rent.rentType) features.push(`Rent Type: ${rent.rentType}`);
+      if (rent.rentType) features.push(Rent Type: ${rent.rentType});
     }
     if (listing === 'sale' && type == 'plot') {
-      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+      if (typeof price !== 'undefined') features.push(Sale Price: ₹${price});
     }
     if (listing === 'lease' && type == 'agriculture') {
-      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+      if (typeof price !== 'undefined') features.push(Sale Price: ₹${price});
     }
     return (
       <div>
@@ -835,7 +835,7 @@ const PlotManagement: React.FC = () => {
     const fetchPropertyDetails = async () => {
 
       try {
-        const response = await axios.get(`/api/${category}/${listing}/${type}/${propertyId}`);
+        const response = await axios.get(/api/${category}/${listing}/${type}/${propertyId});
         console.log(response);
         setProperty(response.data.data);
         setRentplotproperty(response.data.data);
@@ -934,14 +934,14 @@ const PlotManagement: React.FC = () => {
                     {(() => {
                       if (type === 'agriculture') {
                         const address = property?.basicInformation?.address;
-                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                        return address ? ${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}.replace(/^, | ,| , | $/g, '') : '';
                       } else if (listing === 'rent') {
                         const address = rentplotproperty?.basicInformation?.address;
-                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                        return address ? ${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}.replace(/^, | ,| , | $/g, '') : '';
                       } else {
                         const address = saleplotproperty?.basicInformation;
 
-                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+                        return ${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}.replace(/^, | ,| , | $/g, '');
 
                       }
                     })()}
@@ -1000,7 +1000,7 @@ const PlotManagement: React.FC = () => {
                   >
                     <img
                       src={image}
-                      alt={`Plot view ${index + 1}`}
+                      alt={Plot view ${index + 1}}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -1059,7 +1059,7 @@ const PlotManagement: React.FC = () => {
                     >
                       <img
                         src={image}
-                        alt={`Plot view ${index + 1}`}
+                        alt={Plot view ${index + 1}}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1076,7 +1076,7 @@ const PlotManagement: React.FC = () => {
                     >
                       <img
                         src={image}
-                        alt={`Plot view ${index + 4}`}
+                        alt={Plot view ${index + 4}}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1105,7 +1105,7 @@ const PlotManagement: React.FC = () => {
               {/* Map Section */}
               <div className="md:w-1/2 h-[300px] rounded-lg overflow-hidden">
                 <iframe
-                  src={`https://maps.google.com/maps?q=${property?.basicInformation?.location?.latitude || ''},${property?.basicInformation?.location?.longitude || ''}&z=15&output=embed`}
+                  src={https://maps.google.com/maps?q=${property?.basicInformation?.location?.latitude || ''},${property?.basicInformation?.location?.longitude || ''}&z=15&output=embed}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -1210,10 +1210,10 @@ const PlotManagement: React.FC = () => {
                       className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
                     >
                       {showAllFeatures ? 'Show Less' : 'View All Features'}
-                      <ChevronDown className={`h-5 w-5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={h-5 w-5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}} />
                     </button> */}
                   </div>
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}`}>
+                  <div className={grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}}>
                     {property && (() => {
                       const features: string[] = [];
 
