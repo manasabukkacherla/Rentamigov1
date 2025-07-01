@@ -620,4 +620,3 @@ const SellAgricultureMain = () => {
 }
 
 export default SellAgricultureMain
-
