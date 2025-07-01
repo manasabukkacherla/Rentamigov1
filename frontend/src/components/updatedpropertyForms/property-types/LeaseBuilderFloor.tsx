@@ -45,6 +45,7 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
+
   floorNumber: number;
   totalFloors: number;
   propertyId?: string;
@@ -1399,7 +1400,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               // Set the propertyId from the response
               setPropertyId(response.data.data.propertyId);
               toast.success('Property listed successfully!');
-              navigate('/dashboard');
+              // navigate('/dashboard');
             }
           }
         } catch (error) {
