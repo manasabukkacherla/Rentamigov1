@@ -937,7 +937,16 @@ const PlotManagement: React.FC = () => {
                         return address ? ${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}.replace(/^, | ,| , | $/g, '') : '';
                       } else if (listing === 'rent') {
                         const address = rentplotproperty?.basicInformation?.address;
-                        return address ? ${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}.replace(/^, | ,| , | $/g, '') : '';
+
+                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                      } else if(listing==='sale'){
+                        const address = saleplotproperty?.basicInformation;
+                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+                      } else if(listing==='lease'){
+                        const address = leaseplotproperty?.basicInformation.address;
+                        return `${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+
+                        
                       } else {
                         const address = saleplotproperty?.basicInformation;
 
@@ -1097,7 +1106,8 @@ const PlotManagement: React.FC = () => {
                   <MapPin className="h-6 w-6 text-gray-400 mt-1" />
                   <div>
                     <h2 className="text-2xl font-bold text-black mb-2">Property Address</h2>
-                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : saleplotproperty?.basicInformation?.isCornerProperty}, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : saleplotproperty?.basicInformation?.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : saleplotproperty?.basicInformation?.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : saleplotproperty?.basicInformation?.zipCode}</p>
+                    <p className="text-gray-600">
+                    {type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing==='sale'?saleplotproperty?.basicInformation?.isCornerProperty:leaseplotproperty?.basicInformation.address.street }, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing==='sale'?saleplotproperty?.basicInformation?.city:leaseplotproperty?.basicInformation.address.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing==='sale'?saleplotproperty?.basicInformation?.state:leaseplotproperty?.basicInformation.address.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing==='sale'?saleplotproperty?.basicInformation?.zipCode:leaseplotproperty?.basicInformation.address.zipCode }</p>
                   </div>
                 </div>
               </div>
@@ -1303,47 +1313,14 @@ const PlotManagement: React.FC = () => {
                           <span className="text-black font-semibold">Lease Amount:</span>
                           <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amount}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Duration:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.duration} {leaseplotproperty?.leaseTerms?.leaseAmount?.durationType}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Amount Type:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amountType}</span>
-                        </div>
+                        
+                        
                         <div className="flex justify-between">
                           <span className="text-black font-semibold">Lease Minimum Tenure:</span>
                           <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumTenure}</span>
                         </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Minimum Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumUnit}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Maximum Tenure:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumTenure}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Maximum Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumUnit}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Lock In Period:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Lock In Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInUnit}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Notice Period:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriod}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-black font-semibold">Lease Notice Period Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriodUnit}</span>
-                        </div>
-
+                        
+                          
                       </div>
                     )}
 {/* Enquiry Form Modal */}
