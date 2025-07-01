@@ -13,8 +13,12 @@ import {
 } from "lucide-react";
 import { User as UserType } from "../types";
 import { toast } from "@/hooks/use-toast";
+import { Subscription } from "node_modules/react-hook-form/dist/utils/createSubject";
 
 export function Settings() {
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+const [subLoading, setSubLoading]   = useState<boolean>(true);
+const [subError,   setSubError]     = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [user, setUser] = useState<UserType>({
     id: "",
@@ -34,7 +38,11 @@ export function Settings() {
       smsNotifications: false,
     },
   });
-
+interface Subscription {
+  plan: "free" | "basic" | "premium" | "enterprise";
+  tokens: number;
+  planExpiry: string; // ISO date-string
+}
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -131,6 +139,25 @@ export function Settings() {
       },
     }));
   };
+    const fetchSubscription = async (id: string) => {
+  try {
+    const res  = await fetch(`http://localhost:3000/api/subscription/${id}`);
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || "Failed to load subscription");
+
+    setSubscription({
+      plan: data.plan,
+      tokens: data.tokens,
+      planExpiry: data.planExpiry,
+    });
+  } catch (err: any) {
+    console.error(err);
+    setSubError(err.message || "Could not load subscription");
+  } finally {
+    setSubLoading(false);
+  }
+};
   const handleProfileUpdate = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -235,6 +262,7 @@ export function Settings() {
         }),
       });
 
+
       const data = await response.json();
       console.log("✅ Password change response:", data);
 
@@ -290,7 +318,49 @@ export function Settings() {
               Profile Settings
             </h2>
           </div>
+        {subLoading ? (
+  <p className="text-center text-gray-600">Loading subscription…</p>
+) : subError ? (
+  <p className="text-center text-red-600">{subError}</p>
+) : subscription && (
+  <div className="bg-white rounded-xl p-4 sm:p-6 shadow-sm border border-black/10 mb-4 sm:mb-6">
+    <div className="flex items-center mb-4 sm:mb-6">
+      <Coins className="w-5 h-5 sm:w-6 sm:h-6 text-black mr-2" />
+      <h2 className="text-lg sm:text-xl font-semibold text-black">
+        Your Plan
+      </h2>
+    </div>
 
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm sm:text-base">
+      <div className="flex items-center gap-3">
+        <CheckCircle className="w-4 h-4 text-green-600" />
+        <span className="font-medium">Plan:</span>
+        <span className="capitalize">{subscription.plan}</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <Building className="w-4 h-4 text-black" />
+        <span className="font-medium">Tokens:</span>
+        <span>{subscription.tokens.toLocaleString()}</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <MapPin className="w-4 h-4 text-black" />
+        <span className="font-medium">Expires:</span>
+        <span>
+          {new Date(subscription.planExpiry).toLocaleDateString()}
+        </span>
+      </div>
+    </div>
+
+    {/* optional: list features */}
+    <ul className="mt-4 sm:mt-6 list-disc list-inside text-black/70 text-sm">
+      {planFeatures[subscription.plan].map(f => (
+        <li key={f}>{f}</li>
+      ))}
+    </ul>
+  </div>
+)}
           <div className="flex flex-col sm:flex-row gap-6 mb-6">
             {/* Profile Photo */}
             <div className="flex flex-col items-center space-y-3">
