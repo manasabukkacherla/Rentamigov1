@@ -144,7 +144,7 @@ interface IMetadata {
   createdBy: string;
   createdAt: Date;
   propertyType: 'Residential';
-  propertyName: 'Appartment';
+  propertyName: 'Apartment';
   intent: 'Rent';
   status: 'Available' | 'Rented' | 'Under Maintenance';
 }
@@ -467,7 +467,7 @@ const Apartment = () => {
       createdBy: '',
       createdAt: new Date(),
       propertyType: 'Residential',
-      propertyName: 'Appartment',
+      propertyName: 'Apartment',
       intent: 'Rent',
       status: 'Available'
     }

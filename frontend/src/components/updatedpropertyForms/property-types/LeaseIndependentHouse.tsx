@@ -866,7 +866,7 @@ const LeaseIndependentHouse: React.FC = () => {
           }
         };
 
-        const response = await axios.post('/api/residential/lease/independent-house', transformedData, {
+        const response = await axios.post('/api/residential/lease/independenthouse', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
