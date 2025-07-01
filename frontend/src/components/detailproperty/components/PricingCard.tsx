@@ -3,10 +3,13 @@ import { IndianRupee, X, ChevronUp } from 'lucide-react';
 import { EnquiryForm } from './EnquiryForm';
 import { Property } from '../App';
 
+
+
+
 export const PricingCard: React.FC<{property: Property}> = ({property}) => {
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [showMobilePricing, setShowMobilePricing] = useState(false);
-
+  
   const PricingContent = () => {
     if (property?.metadata?.intent === "sale" || property?.metadata?.intent === "Sale" || property?.metadata?.intent === "Sell" || property?.metadata?.intent === "sell") {
       return (
@@ -284,7 +287,7 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
       </div>
 
       {showEnquiry && (
-        <EnquiryForm onClose={() => setShowEnquiry(false)} />
+        <EnquiryForm onClose={() => setShowEnquiry(false)} property={property}/>
       )}
     </>
   );

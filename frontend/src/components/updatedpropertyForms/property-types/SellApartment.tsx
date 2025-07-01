@@ -282,19 +282,22 @@ interface FormData {
 const initialFormData = {
   basicInformation: {
     title: "",
-    showflat: false,
+    showFlatNo: false,
     apartmentType: "",
-    flatno: 0,
+    flatNo: 0,
     floor: 0,
     address: {
+      flatNo: 0,
+      showFlatNo: false,
+      floor: 0,
+      apartmentName: "",
       street: "",
       city: "",
       state: "",
       zipCode: "",
       location: {
         latitude: "",
-        longitude: "",
-        locationLabel: ""
+        longitude: ""
       }
     }
   },

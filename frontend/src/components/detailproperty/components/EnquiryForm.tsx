@@ -1,17 +1,108 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: string;
+  // selectedServices: string[];
+  // isVerified: boolean;
+}
 
 interface EnquiryFormProps {
   onClose: () => void;
 }
 
 export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    onClose();
-  };
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    phone: '',
+    message: '',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    status: "pending",
+    // selectedServices: [],
+    // isVerified: false
+  });
 
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate()
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   console.log(formData)
+  //   try {
+  //     const response = await fetch('/api/enquiry/submit', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({
+  //         name: formData.name,
+  //         email: formData.email,
+  //         phone: formData.phone,
+  //         message:formData.message,
+  //         createdAt: formData.createdAt,
+  //         updatedAt: formData.updatedAt,
+  //         status: formData.status,  
+  //         // selectedServices: formData.selectedServices,
+  //         // isVerified: formData.isVerified
+  //       })
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (data.success) {
+  //       // Show success message
+  //       alert('Enquiry submitted successfully!');
+  //       onClose();
+  //     } else {
+  //       throw new Error(data.message || 'Failed to submit enquiry');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting enquiry:', error);
+  //     alert('Failed to submit enquiry. Please try again.');
+  //   }
+  // };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    console.log(formData)
+
+    try {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        navigate('/login');
+        return;
+      }
+
+
+      const transformedData = {
+        ...formData,
+      };
+
+      const response = await axios.post('/api/enquiry/submit', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.data.success) {
+        toast.success('Enquiry submitted successfully!');
+          }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to submit enquiry. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md relative max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
@@ -33,6 +124,7 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
               type="text"
               id="name"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
               required
             />
           </div>
@@ -45,6 +137,7 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
               type="email"
               id="email"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
               required
             />
           </div>
@@ -57,18 +150,20 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
               type="tel"
               id="phone"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
               required
             />
           </div>
 
           <div>
-            <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Message
             </label>
             <textarea
               id="message"
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
             ></textarea>
           </div>
 
@@ -83,3 +178,5 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
     </div>
   );
 };
+
+export default EnquiryForm;

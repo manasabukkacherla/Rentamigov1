@@ -11,6 +11,8 @@ import { SimilarProperties } from "./components/SimilarProperties"
 import { LatestInsights } from "./components/LatestInsights"
 import { Reviews } from "./components/Reviews"
 import { Footer } from "./components/Footer"
+import { PropertyDetails } from "../detailproperty/types"
+import { PropertyImage } from "./types"
 import { propertyData } from "./data"
 import { ChevronLeft, ChevronRight, MapPin, Heart, Share2, ArrowLeft, Star } from "lucide-react"
 
@@ -18,7 +20,7 @@ function Propertydetail() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [showAllImages, setShowAllImages] = useState(false)
-  const allMedia = [propertyData.video, ...propertyData.images.map((img) => img.url)]
+  const allMedia = [propertyData.video, ...propertyData.images.map((img: PropertyImage) => img.url)];
 
   const goToNext = () => {
     setCurrentIndex((prev) => (prev + 1) % allMedia.length)
@@ -110,7 +112,7 @@ function Propertydetail() {
             </div>
 
             <div className="hidden md:grid grid-cols-2 gap-2">
-              {propertyData.images.slice(0, 8).map((image, index) => (
+              {propertyData.images.slice(0, 8).map((image: PropertyImage, index: number) => (
                 <div
                   key={image.id}
                   className="aspect-[4/3] cursor-pointer overflow-hidden rounded-lg"
@@ -141,7 +143,7 @@ function Propertydetail() {
             <LocationMap />
             <NearbyPlaces />
             <Reviews />
-            <SimilarProperties />
+            <SimilarProperties propertyType="Apartment" />
             <LatestInsights />
           </div>
           <div className="lg:w-[35%]">
