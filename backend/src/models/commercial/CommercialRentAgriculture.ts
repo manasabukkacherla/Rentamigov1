@@ -69,27 +69,27 @@ export interface ICommercialRentAgriculture extends Document {
 }
 
 const CommercialRentAgricultureSchema: Schema = new Schema({
-  propertyId: { type: String, required: true },
+  propertyId: { type: String, required: false },
   basicInformation:{
-  title: { type: String, required: true },
-  Type: [{ type: String, required: true }],
-  powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
+  title: { type: String, required: false },
+  Type: [{ type: String, required: false }],
+  powerSupply: { type: String, enum: ['Available', 'Not Available'], required: false },
   address: {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    zipCode: { type: String, required: true }
+    street: { type: String, required: false },
+    city: { type: String, required: false },
+    state: { type: String, required: false },
+    zipCode: { type: String, required: false }
   },
   location: {
-    latitude: { type: String ,required:true},
-    longitude: { type: String ,required:true}
+    latitude: { type: String ,required:false},
+    longitude: { type: String ,required:false}
   },
   landmark: { type: String },
   
   isCornerProperty: { type: Boolean, default: false },
 },
     Agriculturelanddetails: {
-    totalArea: { type: Number, required: true },
+    totalArea: { type: Number, required: false },
     soilType: { type: String },
     irrigation: { type: Boolean, default: false },
     fencing: { type: Boolean, default: false },
@@ -99,7 +99,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   },
   
   rent: {
-    expectedRent: { type: Number, required: true },
+    expectedRent: { type: Number, required: false },
     isNegotiable: { type: Boolean, default: false },
     maintenanceType: { type: String, enum: ['inclusive', 'exclusive']}
   },
@@ -107,13 +107,13 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     
     
   availability: {
-    type: { type: String, enum: ['immediate', 'specific'], required: true },
+    type: { type: String, enum: ['immediate', 'specific'], required: false },
     date: { type: Date }
   },
   contactDetails: {
-    name: { type: String, required: true },
-    email: { type: String, required: true },
-    phone: { type: String, required: true },
+    name: { type: String, required: false },
+    email: { type: String, required: false },
+    phone: { type: String, required: false },
     alternatePhone: { type: String },
     bestTimeToContact: { type: String }
   },
