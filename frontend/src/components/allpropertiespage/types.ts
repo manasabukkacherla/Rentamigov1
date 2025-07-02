@@ -65,12 +65,12 @@ export interface Filters {
   listingTypes: ListingType[];
   propertyTypes: PropertyType[];
   furnishingTypes: FurnishingType[];
-  // bhkTypes: BHKType[];
   sharingTypes: SharingType[];
   priceRange: {
     min: number | null;
     max: number | null;
   };
+  category: string[];
 }
 
 // Filter Section Props

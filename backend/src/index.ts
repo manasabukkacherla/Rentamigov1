@@ -227,7 +227,7 @@ app.use("/api/subscription", Subscriptionrouter);
 //Token plan routes
 app.use("/api/tokens", TokenRouter);
 
-app.use("/api/service", enquiryRoutes);
+app.use("/api", enquiryRoutes);
 app.use("/api/sign", signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes);

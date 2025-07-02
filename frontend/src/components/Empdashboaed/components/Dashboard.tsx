@@ -56,19 +56,23 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
       }
 
       try {
-        const response = await fetch(`/api/sign/employee/${userId}`);
+        const response = await fetch(`/api/employees/${userId}`);
         const data = await response.json();
 
         if (response.ok) {
-          setEmployee({
-            name: data.employee.name || "User",
-            role: data.employee.role || "Unknown Role",
-            avatar:
-              data.employee.avatar ||
-              "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-          });
+          const employeeData = await response.json();
+          if (employeeData.success && employeeData.data) {
+            setEmployee({
+              name: employeeData.data.name || "User",
+              role: employeeData.data.role || "Unknown Role",
+              avatar: employeeData.data.avatar ||
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+            });
+          } else {
+            console.error("Invalid response format:", employeeData);
+          }
         } else {
-          console.error("Error fetching user data:", data.error);
+          console.error("Error fetching user data:", response.statusText);
         }
       } catch (error) {
         console.error("❌ Error fetching user details:", error);

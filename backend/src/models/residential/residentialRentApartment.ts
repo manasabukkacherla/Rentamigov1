@@ -109,7 +109,7 @@ interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
   propertyType: 'Residential';
-  propertyName: 'Appartment';
+  propertyName: 'Apartment';
   intent: 'Rent';
   status: 'Available' | 'Rented' | 'Under Maintenance';
   updatedBy?: Schema.Types.ObjectId | string;

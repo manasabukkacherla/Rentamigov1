@@ -539,16 +539,16 @@ const Apartment = () => {
               </div>
 
               <PropertyAddress
-                // latitude={formData.basicInformation.address.location.latitude}
-                // longitude={formData.basicInformation.address.location.longitude}
-                address={{
-                  ...formData.basicInformation.address,
-                  location: {
-                    latitude: formData.basicInformation.address.location.latitude,
-                    longitude: formData.basicInformation.address.location.longitude
-                  }
-                }}
-                onAddressChange={handleAddressChange}
+                address={formData.basicInformation.address}
+                onAddressChange={(newAddress) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    basicInformation: {
+                      ...prev.basicInformation,
+                      address: newAddress
+                    }
+                  }))
+                }
               />
             </div>
           </div>

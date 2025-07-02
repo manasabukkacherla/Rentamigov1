@@ -35,11 +35,11 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
-  showflat: boolean;
-  apartmentType: string;
-  flatno: number;
-  floor: number;
   address: {
+    flatNo: number;
+    showFlatNo: boolean;
+    floor: number;
+    apartmentName: string;
     street: string;
     city: string;
     state: string;
@@ -47,7 +47,6 @@ interface IBasicInformation {
     location: {
       latitude: string;
       longitude: string;
-      locationLabel?: string;
     };
   };
 }
@@ -283,19 +282,22 @@ interface FormData {
 const initialFormData = {
   basicInformation: {
     title: "",
-    showflat: false,
+    showFlatNo: false,
     apartmentType: "",
-    flatno: 0,
+    flatNo: 0,
     floor: 0,
     address: {
+      flatNo: 0,
+      showFlatNo: false,
+      floor: 0,
+      apartmentName: "",
       street: "",
       city: "",
       state: "",
       zipCode: "",
       location: {
         latitude: "",
-        longitude: "",
-        locationLabel: ""
+        longitude: ""
       }
     }
   },
@@ -461,19 +463,18 @@ const SellApartment = () => {
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      showflat: false,
-      apartmentType: "",
-      flatno: 0,
-      floor: 0,
       address: {
+        flatNo: 0,
+        showFlatNo: false,
+        floor: 0,
+        apartmentName: "",
         street: "",
         city: "",
         state: "",
         zipCode: "",
         location: {
           latitude: "",
-          longitude: "",
-          locationLabel: ""
+          longitude: ""
         }
       }
     },
@@ -698,10 +699,24 @@ const SellApartment = () => {
               </div>
 
               <PropertyAddress
+                address={formData.basicInformation.address}
+                onAddressChange={(newAddress) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    basicInformation: {
+                      ...prev.basicInformation,
+                      address: newAddress
+                    }
+                  }))
+                }
+              />
+
+
+              {/* <PropertyAddress
                 address={{
-                  flatNo: formData.basicInformation.flatno,
-                  showFlatNo: formData.basicInformation.showflat,
-                  floor: formData.basicInformation.floor,
+                  flatNo: formData.basicInformation.address.flatNo,
+                  showFlatNo: formData.basicInformation.address.showFlatNo,
+                  floor: formData.basicInformation.address.floor,
                   apartmentName: formData.basicInformation.title,
                   street: formData.basicInformation.address.street,
                   city: formData.basicInformation.address.city,
@@ -713,7 +728,7 @@ const SellApartment = () => {
                   }
                 }}
                 onAddressChange={handleAddressChange}
-              />
+              /> */}
             </div>
           </div>
         </div>
