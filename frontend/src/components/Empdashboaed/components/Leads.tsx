@@ -1,25 +1,48 @@
-import React from 'react';
+import React,{useState} from 'react';
 import { Phone, Calendar, Clock, Search, Plus, Filter } from 'lucide-react';
-import type { Lead } from '../types';
+// import type { Lead } from '@/types';
+import { Property } from '../types';
 
-interface LeadsProps {
-  leads: Lead[];
+interface FormData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  propertyInterest: string;
+  status: string;
+  priority: string;
+  createdAt: string;
 }
 
-const LeadStatusBadge: React.FC<{ status: Lead['status'] }> = ({ status }) => {
+export interface LeadsProps {
+  leads: Array<FormData>;
+  // property?: Property;
+}
+
+const LeadStatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-  const statusClasses = {
-    'new': "bg-gray-900 text-white dark:bg-white dark:text-gray-900",
-    'contacted': "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white",
-    'viewing-scheduled': "bg-gray-300 text-gray-900 dark:bg-gray-600 dark:text-white",
-    'negotiating': "bg-gray-400 text-white dark:bg-gray-500 dark:text-white",
-    'converted': "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900",
-    'lost': "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'new':
+        return "bg-blue-100 text-blue-800";
+      case 'contacted':
+        return "bg-green-100 text-green-800";
+      case 'viewing-scheduled':
+        return "bg-yellow-100 text-yellow-800";
+      case 'negotiating':
+        return "bg-purple-100 text-purple-800";
+      case 'converted':
+        return "bg-purple-100 text-purple-800";
+      case 'lost':
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
-    <span className={`${baseClasses} ${statusClasses[status]}`}>
-      {status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+    <span className={`${baseClasses} ${getStatusColor(status)}`}>
+      {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 };

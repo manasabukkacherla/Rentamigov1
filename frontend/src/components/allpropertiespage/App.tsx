@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { MapPin, ChevronDown, X, Home, Search, Filter, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

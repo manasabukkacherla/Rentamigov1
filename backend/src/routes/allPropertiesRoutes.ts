@@ -50,6 +50,7 @@ import SalePlot from '../models/residential/salePlot';
 import ResidentialLeaseApartment from '../models/residential/residentialLeaseAppartment';
 import ResidentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
 import ResidentialLeaseIndependentHouse from '../models/residential/residentialLeaseIndependentHouse';
+import { type } from 'os';
 
 // Normalizer helper to pick only needed fields
 const normalizeProperty = (item: any) => ({
@@ -81,7 +82,7 @@ router.get('/all', async (req: any, res: any) => {
     // const filter='_id basicInformation.title metadata.propertyType metadata.propertyName propertyDetails.area.totalArea propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'
     const results = await Promise.allSettled([
       // Commercial Rent
-      CommercialRentAgriculture.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType rent.expectedRent Agriculturelanddetails.totalArea media.photos.exterior metaData.createdAt availability.type metaData.intent propertyDetails.furnishingStatus'),
+      // CommercialRentAgriculture.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType rent.expectedRent Agriculturelanddetails.totalArea media.photos.exterior metaData.createdAt availability.type metaData.intent propertyDetails.furnishingStatus'),
       CommercialRentCoveredSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialRentOfficeSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyName metadata.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialRentOthers.find().select('_id propertyId basicInformation.title basicInformation.address metaData.propertyName metaData.propertyType rentalTerms.rentDetails.expectedRent propertyDetails.area.totalArea media.photos.exterior metaData.createdAt metadata.status metaData.intent propertyDetails.furnishingStatus'),

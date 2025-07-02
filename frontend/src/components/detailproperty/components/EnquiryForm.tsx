@@ -12,6 +12,7 @@ interface FormData {
   createdAt: Date;
   updatedAt: Date;
   status: string;
+  propertyId: string;
   // selectedServices: string[];
   // isVerified: boolean;
 }
@@ -30,6 +31,7 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) =
     createdAt: new Date(),
     updatedAt: new Date(),
     status: "pending",
+    propertyId: '',
     // selectedServices: [],
     // isVerified: false
     });

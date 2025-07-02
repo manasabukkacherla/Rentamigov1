@@ -21,6 +21,7 @@ import ownerIntrstrouter from "./routes/ownerIntrst";
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
 
+
 import enquiryRoutes from "./routes/enquiryRoutes";
 import signupRouter from "./routes/signupform"; // Replace with the correct file path for User
 import loginRouter from "./routes/authRoutes";
@@ -51,7 +52,7 @@ import { Document } from "mongoose";
 
 import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main 
 import commercialPlotRoutes from "./routes/commercial/commercialPlotRoutes";
-import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
+// import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouseRoutes";
 import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
@@ -208,7 +209,7 @@ app.use("/api/Report", Reportrouter); // Report routers
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", Employeerouter); // Employee routes
-app.use("/api", serviceEnquiryRoutes); // Service interest routes
+app.use("/api/service", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
 
 app.use("/api/forms", subscriptionRouter);
@@ -268,7 +269,7 @@ app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 //rent routes
 
-app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
+// app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
 app.use("/api/commercial/rent/office-space", commercialRentOfficeSpaceRoutes);
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
