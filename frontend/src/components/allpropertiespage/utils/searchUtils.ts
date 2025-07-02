@@ -1,5 +1,5 @@
 import Fuse from 'fuse.js';
-import { Property, SearchCriteria } from '../types';
+import { Property, SearchCriteria, FurnishingType, PropertyType, ListingType } from '../types';
 
 // Location mappings
 const locationMappings: { [key: string]: string[] } = {
@@ -208,7 +208,7 @@ export const extractSearchCriteria = (query: string): SearchCriteria => {
   const criteria: SearchCriteria = {
     location: null,
     propertyType: null,
-    bhkType: null,
+    // bhkType: null,
     priceRange: {
       min: null,
       max: null,
@@ -223,7 +223,7 @@ export const extractSearchCriteria = (query: string): SearchCriteria => {
     },
     furnishing: null,
     strict: false,
-    bathrooms: null,
+    // bathrooms: null,
     listingTypes: [],
     sharing: null
   };
@@ -241,36 +241,37 @@ export const extractSearchCriteria = (query: string): SearchCriteria => {
       criteria.areaRange = {
         ...criteria.areaRange,
         ...result,
-        strict: true
+        strict: true,
+        type: result.type as 'more' | 'less' | 'between' | 'exact' | null
       };
       break;
     }
   }
 
   // Extract other criteria
-  for (const { pattern, handler } of bhkPatterns) {
-    const match = normalizedQuery.match(pattern);
-    if (match) {
-      criteria.bhkType = handler(match);
-      break;
-    }
-  }
+  // for (const { pattern, handler } of bhkPatterns) {
+  //   const match = normalizedQuery.match(pattern);
+  //   if (match) {
+  //     criteria.bhkType = handler(match);
+  //     break;
+  //   }
+  // }
 
-  for (const { pattern, handler } of sharingPatterns) {
-    const match = normalizedQuery.match(pattern);
-    if (match) {
-      criteria.sharing = handler(match);
-      break;
-    }
-  }
+  // for (const { pattern, handler } of sharingPatterns) {
+  //   const match = normalizedQuery.match(pattern);
+  //   if (match) {
+  //     criteria.sharing = handler(match);
+  //     break;
+  //   }
+  // }
 
-  for (const { pattern, handler } of bathroomPatterns) {
-    const match = normalizedQuery.match(pattern);
-    if (match) {
-      criteria.bathrooms = handler(match);
-      break;
-    }
-  }
+  // for (const { pattern, handler } of bathroomPatterns) {
+  //   const match = normalizedQuery.match(pattern);
+  //   if (match) {
+  //     criteria.bathrooms = handler(match);
+  //     break;
+  //   }
+  // }
 
   for (const { pattern, handler } of pricePatterns) {
     const match = normalizedQuery.match(pattern);
@@ -321,14 +322,25 @@ function updateCriteria(criteria: SearchCriteria, correction: { value: string; t
       criteria.location = correction.value;
       break;
     case 'propertyType':
-      criteria.propertyType = correction.value;
+      const propertyTypeValue = correction.value as PropertyType;
+      if (['Apartment', 'House', 'Villa', 'PG', 'Studio', 'Penthouse', 'Standalone Building', 'Agricultural'].includes(propertyTypeValue)) {
+        criteria.propertyType = propertyTypeValue;
+      } else {
+        criteria.propertyType = null;
+      }
       break;
     case 'furnishing':
-      criteria.furnishing = correction.value;
+      const furnishingValue = correction.value as FurnishingType;
+      if (['Fully Furnished', 'Semi Furnished', 'Unfurnished'].includes(furnishingValue)) {
+        criteria.furnishing = furnishingValue;
+      } else {
+        criteria.furnishing = 'Unfurnished';
+      }
       break;
     case 'listingType':
-      if (!criteria.listingTypes.includes(correction.value)) {
-        criteria.listingTypes.push(correction.value);
+      const listingTypeValue = correction.value as ListingType;
+      if (['Owner', 'Agent', 'RentAmigo'].includes(listingTypeValue)) {
+        criteria.listingTypes.push(listingTypeValue);
       }
       break;
   }
@@ -351,11 +363,11 @@ export const searchProperties = (
   // Track matched fields
   if (criteria.location) matchedFields.add('location');
   if (criteria.propertyType) matchedFields.add('propertyType');
-  if (criteria.bhkType) matchedFields.add('bhkType');
+  // if (criteria.bhkType) matchedFields.add('bhkType');
   if (criteria.furnishing) matchedFields.add('furnishing');
   if (criteria.priceRange.max || criteria.priceRange.min) matchedFields.add('price');
   if (criteria.areaRange.type) matchedFields.add('area');
-  if (criteria.bathrooms) matchedFields.add('bathrooms');
+  // if (criteria.bathrooms) matchedFields.add('bathrooms');
   if (criteria.listingTypes.length) matchedFields.add('listingType');
   if (criteria.sharing) matchedFields.add('sharing');
 
@@ -391,12 +403,12 @@ export const searchProperties = (
       if (criteria.sharing && property.sharing !== criteria.sharing) return false;
     } else {
       if (criteria.propertyType && property.type !== criteria.propertyType) return false;
-      if (criteria.bhkType && property.bhkType !== criteria.bhkType) return false;
+      // if (criteria.bhkType && property.bhkType !== criteria.bhkType) return false;
     }
 
     // Other criteria checks
     if (criteria.furnishing && property.furnishing !== criteria.furnishing) return false;
-    if (criteria.bathrooms && property.bathrooms !== criteria.bathrooms) return false;
+    // if (criteria.bathrooms && property.bathrooms !== criteria.bathrooms) return false;
     if (criteria.listingTypes.length && !criteria.listingTypes.includes(property.listingType)) return false;
 
     // Price range check
@@ -450,9 +462,10 @@ export const formatSearchSummary = (criteria: SearchCriteria): string => {
 
   if (criteria.sharing) {
     parts.push(`${criteria.sharing} PG`);
-  } else if (criteria.bhkType) {
-    parts.push(criteria.bhkType);
-  }
+  } 
+  // else if (criteria.bhkType) {
+  //   parts.push(criteria.bhkType);
+  // }
   
   if (criteria.propertyType && criteria.propertyType !== 'PG') {
     parts.push(criteria.propertyType.toLowerCase());
@@ -488,9 +501,9 @@ export const formatSearchSummary = (criteria: SearchCriteria): string => {
     parts.push(`(${criteria.furnishing.toLowerCase()})`);
   }
 
-  if (criteria.bathrooms) {
-    parts.push(`with ${criteria.bathrooms} bathroom${criteria.bathrooms > 1 ? 's' : ''}`);
-  }
+  // if (criteria.bathrooms) {
+  //   parts.push(`with ${criteria.bathrooms} bathroom${criteria.bathrooms > 1 ? 's' : ''}`);
+  // }
 
   return parts.join(' ') || 'All Properties';
 };

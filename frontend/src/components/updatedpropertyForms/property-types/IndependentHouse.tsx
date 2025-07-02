@@ -32,8 +32,8 @@ const customStyles = `
 
 interface FormData {
   basicInformation: {
-    propertyName: string
-    propertyAddress: {
+    title: string
+    address: {
       houseName: string;
       street: string;
       city: string;
@@ -187,6 +187,14 @@ interface FormData {
     };
     videoTour?: File | string;
     documents: (File | string)[];
+  },
+  metadata?: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Independent House';
+    intent: 'Rent';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   }
 }
 
@@ -205,8 +213,8 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
-      propertyName: "",
-      propertyAddress: {
+      title: "",
+      address: {
         houseName: "",
         street: "",
         city: "",
@@ -360,6 +368,14 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
       },
       videoTour: undefined,
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Independent House",
+      intent: "Rent",
+      status: "Available"
     }
   })
 
@@ -373,9 +389,9 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
 
 
             <PropertyName
-              propertyName={formData.basicInformation.propertyName}
+              propertyName={formData.basicInformation.title}
               onPropertyNameChange={(name) =>
-                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))
+                setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))
               }
             />
           </div>
@@ -388,9 +404,9 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
               </div>
 
               <IndependentPropertyAddress
-                propertyAddress={formData.basicInformation.propertyAddress}
+                propertyAddress={formData.basicInformation.address}
                 onAddressChange={(address) =>
-                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyAddress: address } }))
+                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address: address } }))
                 }
               />
 
@@ -667,7 +683,7 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
-        navigate('/login');
+        navigate('/updatepropertyform');
         return;
       }
 
@@ -723,11 +739,15 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
         media: convertedMedia,
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Independent House",
+          intent: "Rent",
+          status: "Available"
         }
       };
 
-      const response = await axios.post('/api/residential/rent/independent-house', transformedData, {
+      const response = await axios.post('/api/residential/rent/independenthouse', transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }

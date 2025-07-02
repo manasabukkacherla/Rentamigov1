@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Building2, Bath, Bed, MapPin, IndianRupee, ChevronLeft, ChevronRight, Heart, Share2, Star, ArrowRight, Check, Clock, Home, Castle, Building, Warehouse, Bookmark, BookmarkCheck } from 'lucide-react';
-import { Property } from '../App';
+import { Building2, Bath, Bed, MapPin,  IndianRupee, ChevronLeft, ChevronRight, Star, ArrowRight, Home, Castle, Building, Bookmark, BookmarkCheck } from 'lucide-react';
 import axios from 'axios';
 
 const properties = [
@@ -76,7 +75,7 @@ const properties = [
   }
 ];
 
-const propertyTypeIcons: Record<string, React.FC> = {
+const propertyTypeIcons: Record<string, React.FC<{ className?: string }>> = {
   'Apartment': Building2,
   'Villa': Home,
   'Condo': Building,
@@ -100,6 +99,13 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!propertyType) {
+      console.warn('Property type is undefined');
+      setProperties([]);
+      setLoading(false);
+      return;
+    }
+
     const fetchSimilarProperties = async () => {
       try {
         setLoading(true);
@@ -220,7 +226,7 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
       className="bg-white rounded-xl shadow-lg p-6 overflow-hidden"
       onMouseEnter={() => setAutoScrollPaused(true)}
       onMouseLeave={() => setAutoScrollPaused(false)}
-      onTouchStart={() => setAutoScrollPaused(true)}
+      onTouchStart={() => setAutoScrollPaused(true)}  
       onTouchEnd={() => setAutoScrollPaused(false)}
     >
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">

@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   propertyAddress: {
     houseName: string;
     street: string;
@@ -122,9 +122,18 @@ interface LeaseTerms {
   };
 }
 
-interface Availability {
+interface IMetadata {
+  createdBy: Schema.Types.ObjectId | string;
+  createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
+}
+
+interface availability {
   type: string;
-  date: string;
+  date?: string;
 }
 
 interface Media {
@@ -145,10 +154,6 @@ interface Media {
   documents: string[];
 }
 
-interface IMetadata {
-  createdBy: string;
-  createdAt: string;
-}
 
 interface IResidentialLeaseIndependentHouse extends Document {
   propertyId?: string;
@@ -163,7 +168,7 @@ interface IResidentialLeaseIndependentHouse extends Document {
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
   leaseTerms: LeaseTerms;
-  availability: Availability;
+  availability: availability;
   media: Media;
   metadata?: IMetadata;
 }
@@ -171,7 +176,7 @@ interface IResidentialLeaseIndependentHouse extends Document {
 const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndependentHouse>({
   propertyId: { type: String },
   basicInformation: {
-    propertyName: { type: String },
+    title: { type: String },
     propertyAddress: {
       houseName: { type: String },
       street: { type: String },
@@ -310,8 +315,16 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
     documents: [String]
   },
   metadata: {
-    createdBy: { type: String },
-    createdAt: { type: String }
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    propertyName: { type: String, default:'Independent House' },
+    intent: { type: String, default: 'Lease' },
+    status: { 
+      type: String, 
+      enum: ['Available', 'Leased', 'Under Maintenance'], 
+      default: 'Available' 
+    }
   }
 }, {
   timestamps: false

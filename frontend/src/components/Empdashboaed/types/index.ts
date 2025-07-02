@@ -2,7 +2,7 @@ export interface Property {
   id: string;
   name: string;
   location: string;
-  status: 'available' | 'occupied' | 'maintenance';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
   type: string;
 }
 

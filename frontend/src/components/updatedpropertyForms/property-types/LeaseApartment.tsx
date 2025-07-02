@@ -39,7 +39,7 @@ interface Address {
 }
 
 interface BasicInformation {
-  propertyName: string;
+  title: string;
   address: Address;
 }
 
@@ -150,6 +150,15 @@ interface Media {
   documents: (File | string)[];
 }
 
+interface Metadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Apartment';
+  intent: 'Lease';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
+}
+
 interface Restrictions {
   foodPreference: string;
   petsAllowed: string;
@@ -223,10 +232,7 @@ interface FormData {
   leaseTerms: LeaseTerms;
   availability: Availability;
   media: Media;
-  metadata?: {
-    createdBy: string;
-    createdAt: string;
-  };
+  metadata?: Metadata;
 }
 
 const LeaseApartment: React.FC = () => {
@@ -250,7 +256,7 @@ const LeaseApartment: React.FC = () => {
 
   const initialFormData: FormData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         flatNo: 0,
         showFlatNo: true,
@@ -417,6 +423,14 @@ const LeaseApartment: React.FC = () => {
         kitchen: []
       },
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Apartment",
+      intent: "Lease",
+      status: "Available"
     }
   };
 
@@ -460,10 +474,10 @@ const LeaseApartment: React.FC = () => {
         <div className="space-y-8">
           <div className="space-y-8">
             <PropertyName
-              propertyName={formData.basicInformation.propertyName}
-              onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
-            />
-          </div>
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
+          />
+              </div>
 
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -822,7 +836,11 @@ const LeaseApartment: React.FC = () => {
         media: processMediaForSubmission(formData.media),
         metadata: {
           createdBy: author,
-          createdAt: new Date()
+          createdAt: new Date().toISOString(),
+          propertyType: "Residential",
+          propertyName: "Apartment",
+          intent: "Lease",
+          status: "Available"
         }
       };
 

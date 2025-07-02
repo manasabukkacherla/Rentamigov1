@@ -179,6 +179,20 @@ const PlanForm: React.FC<PlanFormProps> = ({ onClose, editingPlan }) => {
                 placeholder="100"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Tokens per Lead
+              </label>
+              <input
+                type="number"
+                value={data.tokensPerLead}
+                onChange={(e) =>
+                  handleChange({ tokensPerLead: Number(e.target.value) })
+                }
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+                placeholder="100"
+              />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">

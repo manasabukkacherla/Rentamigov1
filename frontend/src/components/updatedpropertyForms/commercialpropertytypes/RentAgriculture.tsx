@@ -69,22 +69,25 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 
 interface FormData {
   propertyId?: string;
-  title: string;
-  landType: string[];
-  powerSupply: 'Available' | 'Not Available';
-  waterSource?: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location  : {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
+  basicInformation:{
+    title: string;
+    landType: string[];
+    powerSupply: 'Available' | 'Not Available';
+    waterSource?: string;
+    address: {
+      street: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location  : {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
+  },
+ 
   Agriculturelanddetails: {
     totalArea: number;
     soilType: string;
@@ -120,6 +123,14 @@ interface FormData {
     videoTour?: File | null;
     documents: File[];
   };
+  metadata: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: string;
+    propertyName: string;
+    intent: string;
+    status: string;
+  };
 }
 
 const convertFileToBase64 = (file: File): Promise<string> => {
@@ -136,6 +147,7 @@ const RentAgriculture = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyId: '',
+    basicInformation:{
     title: '',
     landType: [] as string[],
     powerSupply: 'Available',
@@ -152,6 +164,7 @@ const RentAgriculture = () => {
       longitude: ''
     },
     isCornerProperty: false,
+  },
     Agriculturelanddetails: {
       totalArea: 0,
       soilType: '',
@@ -186,6 +199,14 @@ const RentAgriculture = () => {
       },
       videoTour: null,
       documents: []
+    },
+    metadata: {
+      createdBy: '',
+      createdAt: new Date(),
+      propertyType: 'Commercial',
+      propertyName: 'Agriculture',
+      intent: 'Rent',
+      status: 'Available',
     }
   });
 
@@ -220,38 +241,38 @@ const RentAgriculture = () => {
 
   // Handler functions
   const handlePropertyNameChange = (name: string) => {
-    setFormData(prev => ({ ...prev, title: name }));
+    setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }));
   };
 
   const handleLandTypeChange = (types: string[]) => {
-    setFormData(prev => ({ ...prev, landType: types }));
+    setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landType: types } }));
   };
 
   const handleAddressChange = (address: { street: string; city: string; state: string; 
     zipCode: string; }) => {
-    setFormData(prev => ({ ...prev, address }));
+    setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }));
   };
 
   const handleLandmarkChange = (landmark: string) => {
-    setFormData(prev => ({ ...prev, landmark }));
+    setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landmark } }));
   };
 
   const handleLatitudeChange = (lat: string) => {
     setFormData(prev => ({
       ...prev,
-      location: { ...prev.location, latitude: lat }
+      basicInformation: { ...prev.basicInformation, location: { ...prev.basicInformation.location, latitude: lat } }
     }));
   };
 
   const handleLongitudeChange = (lng: string) => {
     setFormData(prev => ({
       ...prev,
-      location: { ...prev.location, longitude: lng }
+      basicInformation: { ...prev.basicInformation, location: { ...prev.basicInformation.location, longitude: lng } }
     }));
   };
 
   const handleCornerPropertyChange = (isCorner: boolean) => {
-    setFormData(prev => ({ ...prev, isCornerProperty: isCorner }));
+    setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, isCornerProperty: isCorner } }));
   };
 
   const handleLandDetailsChange = (details: Record<string, any>) => {
@@ -322,26 +343,26 @@ const RentAgriculture = () => {
       content: renderFormSection(
         <div className="space-y-6">
           <div className="space-y-6">
-            <PropertyName propertyName={formData.title} onPropertyNameChange={handlePropertyNameChange} />
+            <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={handlePropertyNameChange} />
             <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
           </div>     
 
           <div className="space-y-6">
             <CommercialPropertyAddress
-              address={formData.address}
+              address={formData.basicInformation.address}
               onAddressChange={handleAddressChange}
             />
-            {/* <Landmark onLandmarkChange={handleLandmarkChange} /> */}
+       
             <MapLocation 
-            latitude={formData.location.latitude}
-            longitude={formData.location.longitude}
-            landmark={formData.landmark}
-            onLocationChange={(location) => handleChange('location', location)}
-            onAddressChange={(address) => handleChange('address', address)}
-            onLandmarkChange={(landmark) => handleChange('landmark', landmark)}
+            latitude={formData.basicInformation.location.latitude}
+            longitude={formData.basicInformation.location.longitude}
+            landmark={formData.basicInformation.landmark}
+            onLocationChange={(location) => handleChange('basicInformation.location', location)}
+            onAddressChange={(address) => handleChange('basicInformation.address', address)}
+            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
             />
             <CornerProperty
-              isCornerProperty={formData.isCornerProperty}
+              isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={handleCornerPropertyChange}
             />
             <label>
@@ -475,21 +496,14 @@ const RentAgriculture = () => {
         };
         const transformedData = {
           propertyId: formData.propertyId,
-          title: formData.title,
-          landType: formData.landType,
-          powerSupply: formData.powerSupply,
-          waterSource: formData.waterSource,
-          address: formData.address,
-          landmark: formData.landmark,
-          location: formData.location,
-          isCornerProperty: formData.isCornerProperty,
+          basicInformation: formData.basicInformation,
           Agriculturelanddetails: formData.Agriculturelanddetails,
           rent: formData.rent,
           securityDeposit: formData.securityDeposit,
           availability: formData.availability,
           contactDetails: formData.contactDetails,
           media: convertedMedia,
-          metaData: {
+          metadata: {
             createdBy: author,
             createdAt: new Date(),
             propertyType: 'Commercial',

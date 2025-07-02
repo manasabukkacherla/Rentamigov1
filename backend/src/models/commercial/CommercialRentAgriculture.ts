@@ -2,15 +2,15 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface ICommercialRentAgriculture extends Document {
   propertyId: string;
-  title: string;
-  landType: string[];
-  waterSource?: string;
-  powerSupply: 'Available' | 'Not Available';
+   basicInformation:{
+    title: string;
+    Type: string[];
+    powerSupply: 'Available' | 'Not Available';
   address: {
     street: string;
     city: string;
     state: string;
-    zipCode: string;
+    zipCode: string;   
   };
   location: {
     latitude: string;
@@ -19,6 +19,7 @@ export interface ICommercialRentAgriculture extends Document {
   landmark: string;
   
   isCornerProperty: boolean;
+}
   Agriculturelanddetails: {
     totalArea: number;
     soilType: string;
@@ -57,7 +58,7 @@ export interface ICommercialRentAgriculture extends Document {
     videoTour?: string;
     documents: string[];
   };
-  metaData : {
+  metadata : {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     propertyType: string;
@@ -69,9 +70,9 @@ export interface ICommercialRentAgriculture extends Document {
 
 const CommercialRentAgricultureSchema: Schema = new Schema({
   propertyId: { type: String, required: true },
+  basicInformation:{
   title: { type: String, required: true },
-  landType: { type: [String], required: true },
-  waterSource: { type: String},
+  Type: [{ type: String, required: true }],
   powerSupply: { type: String, enum: ['Available', 'Not Available'], required: true },
   address: {
     street: { type: String, required: true },
@@ -86,6 +87,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   landmark: { type: String },
   
   isCornerProperty: { type: Boolean, default: false },
+},
     Agriculturelanddetails: {
     totalArea: { type: Number, required: true },
     soilType: { type: String },
@@ -123,8 +125,8 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData : {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  metadata : {
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Rent' },
@@ -133,4 +135,4 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   }
 });
 
-export default mongoose.model<ICommercialRentAgriculture>('CommercialRentAgriculture', CommercialRentAgricultureSchema); 
+export default mongoose.model<ICommercialRentAgriculture>('CommercialRentAgriculture', CommercialRentAgricultureSchema);

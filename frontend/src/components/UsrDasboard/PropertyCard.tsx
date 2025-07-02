@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Edit2,
@@ -12,16 +12,16 @@ import { Property } from "./types";
 
 interface PropertyCardProps {
   property: Property;
-  onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onStatusUpdate: (id: string) => void;
+  onEdit?: (id: string) => void; // Made optional
 }
 
 export function PropertyCard({
   property,
-  onEdit,
   onDelete,
   onStatusUpdate,
+  onEdit,
 }: PropertyCardProps) {
   const [coverImageUrl, setCoverImageUrl] = useState<string>(
     "https://via.placeholder.com/300"
@@ -66,6 +66,10 @@ export function PropertyCard({
         if (commercial?.monthlyRent) {
           setMonthlyRent(commercial.monthlyRent);
         }
+
+        // Fetch all properties
+        const allPropertiesResponse = await axios.get("/api/allproperties/all");
+        console.log("All properties:", allPropertiesResponse.data);
       } catch (error) {
         console.error("Error fetching property details:", error);
       }
@@ -94,19 +98,29 @@ export function PropertyCard({
 
   const StatusIcon = statusConfig[property.status]?.icon || Home;
 
+  // Base64 encoded 1x1 transparent pixel as final fallback
+  const transparentPixel = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+  const [imgSrc, setImgSrc] = useState(coverImageUrl || transparentPixel);
+  const [hasError, setHasError] = useState(false);
+
+  const handleImageError = () => {
+    if (!hasError) {
+      // Only try the fallback once to prevent infinite loops
+      setHasError(true);
+      setImgSrc(transparentPixel);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg sm:rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all border border-black/10">
       {/* ✅ Display Cover Image */}
-      <div className="aspect-[16/9] overflow-hidden">
+      <div className="aspect-[16/9] overflow-hidden bg-gray-100">
         <img
-          src={coverImageUrl}
+          src={imgSrc}
           alt={property.name}
           className="w-full h-full object-cover transform hover:scale-105 transition-transform duration-300"
           loading="lazy"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src =
-              "https://via.placeholder.com/300";
-          }}
+          onError={handleImageError}
         />
       </div>
 
@@ -134,14 +148,16 @@ export function PropertyCard({
         {/* Action Buttons */}
         <div className="flex justify-end items-center gap-1 pt-1.5 sm:pt-2">
           {/* Edit Button */}
-          <div className="group relative">
-            <button
-              onClick={() => onEdit(property.id)}
-              className="p-1.5 text-black hover:bg-black/5 rounded-lg transition-colors"
-              aria-label="Edit property"
-            >
-              <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
+          <div className="flex space-x-2">
+            {onEdit && (
+              <button
+                onClick={() => onEdit(property.id)}
+                className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                aria-label="Edit property"
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
             <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-black/80 rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-10">
               Edit property
             </div>

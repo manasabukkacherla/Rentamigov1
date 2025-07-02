@@ -102,6 +102,12 @@ interface ILeaseBuilderFloor extends Document {
   metadata: {
     createdBy: Schema.Types.ObjectId | string;
     createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
+    updatedBy: Schema.Types.ObjectId | string;
+    updatedAt: Date;
   };
 }
 
@@ -197,7 +203,13 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    intent: { type: String, default: 'Lease' },
+    propertyName: { type: String, default: 'Builder Floor' },
+    status: { type: String, default: 'Available' },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    updatedAt: { type: Date, default: Date.now },
   }
 });
 

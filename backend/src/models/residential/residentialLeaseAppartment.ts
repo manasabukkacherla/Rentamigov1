@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -211,7 +211,7 @@ interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
   propertyType: 'Residential';
-  propertyName: 'Appartment';
+  propertyName: 'Apartment';
   intent: 'Lease';
   status: 'Available' | 'Leased' | 'Under Maintenance';
 }
@@ -237,7 +237,7 @@ interface IResidentialLeaseApartment extends Document {
 const ResidentialLeaseApartmentSchema = new Schema<IResidentialLeaseApartment>({
   propertyId: { type: String, required: false, unique: false },
   basicInformation: {
-    propertyName: { type: String },
+    title: { type: String },
     address: {
       flatNo: { type: Number },
       showFlatNo: { type: Boolean },
@@ -410,7 +410,7 @@ const ResidentialLeaseApartmentSchema = new Schema<IResidentialLeaseApartment>({
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Residential' },
-    propertyName: { type: String, default:'Appartment' },
+    propertyName: { type: String, default:'Apartment' },
     intent: { type: String, default: 'Lease' },
     status: { 
       type: String, 

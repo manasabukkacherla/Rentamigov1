@@ -3,10 +3,10 @@ import { IndianRupee, X, ChevronUp } from 'lucide-react';
 import { EnquiryForm } from './EnquiryForm';
 import { Property } from '../App';
 
-export const PricingCard: React.FC<{property: Property}> = ({property}) => {
+export const PricingCard: React.FC<{property: Property; onEnquireClick?: () => void}> = ({property, onEnquireClick}) => {
   const [showEnquiry, setShowEnquiry] = useState(false);
   const [showMobilePricing, setShowMobilePricing] = useState(false);
-
+  
   const PricingContent = () => {
     if (property?.metadata?.intent === "sale" || property?.metadata?.intent === "Sale" || property?.metadata?.intent === "Sell" || property?.metadata?.intent === "sell") {
       return (
@@ -227,8 +227,8 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
         )}
 
         <button 
-          onClick={() => setShowEnquiry(true)}
-          className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+          onClick={onEnquireClick || (() => setShowEnquiry(true))}
+          className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
         >
           Enquire Now
         </button>
@@ -284,7 +284,7 @@ export const PricingCard: React.FC<{property: Property}> = ({property}) => {
       </div>
 
       {showEnquiry && (
-        <EnquiryForm onClose={() => setShowEnquiry(false)} />
+        <EnquiryForm onClose={() => setShowEnquiry(false)} property={property}/>
       )}
     </>
   );

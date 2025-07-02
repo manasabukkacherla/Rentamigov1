@@ -3,7 +3,7 @@ import { NumberListInstance } from 'twilio/lib/rest/pricing/v2/number';
 
 interface IBasicInformation {
   propertyId: string;
-  propertyName: string;
+  title: string;
   address: {
     flatNo: number;
     showFlatNo: boolean;
@@ -108,6 +108,12 @@ interface societyAmenities {
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
+  propertyType: string;
+  intent: string;
+  propertyName: string;
+  status: string;
+  updatedBy: Schema.Types.ObjectId | string;
+  updatedAt: Date;
 }
 
 interface availability {
@@ -160,7 +166,7 @@ interface IResidentialSaleApartment extends Document {
 const ResidentailSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
   propertyId: { type: String, unique: true },
   basicInformation: {
-    propertyName: { type: String },
+    title: { type: String },
     address: {
       flatNo: { type: Number },
       showFlatNo: { type: Boolean },
@@ -286,6 +292,13 @@ const ResidentailSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
+    propertyType: { type: String, default: 'Residential' },
+    intent: { type: String, default: 'Sale' },
+    propertyName: { type: String, default: 'Appartment' },
+    status: { type: String, default: 'Available' },
+    updatedBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    updatedAt: { type: Date, default: Date.now },
+
   }
 }, {
   timestamps: true

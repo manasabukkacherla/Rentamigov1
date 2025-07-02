@@ -97,7 +97,7 @@ import commercialSellShowroomRoutes from "./routes/commercial/commercialSellShow
 import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWarehouseRoutes";
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
-import allpropertiesData from "./routes/allpropertiesData";
+import allPropertiesRoutes from "./routes/allPropertiesRoutes";
 
 dotenv.config();
 
@@ -227,7 +227,7 @@ app.use("/api/subscription", Subscriptionrouter);
 //Token plan routes
 app.use("/api/tokens", TokenRouter);
 
-app.use("/api/service", enquiryRoutes);
+app.use("/api", enquiryRoutes);
 app.use("/api/sign", signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes);
@@ -279,7 +279,7 @@ app.use("/api/commercial/rent/showrooms", commercialRentShowroom);
 app.use("/api/commercial/rent/sheds", commercialRentSheds);
 app.use("/api/commercial/rent/plots", commercialRentPlot);
 
-app.use("/api/all",allpropertiesData);
+app.use("/api/allproperties", allPropertiesRoutes);
 
 // PG Main (residential) API route with integrated media functionality
 app.use('/api/residential/pgmain', residentialPgmainRoutes);
@@ -311,18 +311,18 @@ app.use("/api/residential/pg-media", (req, res, next) => {
 //sell routes
 app.use("/api/residential/sale/apartment", residentialSellApartmentRoutes);
 app.use("/api/residential/sale/plots", residentialSalePlotRoutes);
-app.use("/api/residential/sale/independent-house", residentialSaleIndependentHouseRoutes);
-app.use("/api/residential/sale/builder-floor", residentialSaleBuilderFloorRoutes);
+app.use("/api/residential/sale/independenthouse", residentialSaleIndependentHouseRoutes);
+app.use("/api/residential/sale/builderfloor", residentialSaleBuilderFloorRoutes);
 
 //rent
 app.use('/api/residential/rent/apartment', residentialRentApartmentRoutes);
-app.use('/api/residential/rent/builder-floor', residentialRentBuilderFloorRoutes);
-app.use('/api/residential/rent/independent-house', residentialRentIndependentHouseRoutes);
+app.use('/api/residential/rent/builderfloor', residentialRentBuilderFloorRoutes);
+app.use('/api/residential/rent/independenthouse', residentialRentIndependentHouseRoutes);
 
 //lease
-app.use('/api/residential/lease/independent-house',residentialLeaseIndependentHouse);
+app.use('/api/residential/lease/independenthouse',residentialLeaseIndependentHouse);
 app.use('/api/residential/lease/apartment',residentialLeaseApartmentRoutes);
-app.use('/api/residential/lease/builder-floor',residentialLeaseBuilderFloorRoutes);
+app.use('/api/residential/lease/builderfloor',residentialLeaseBuilderFloorRoutes);
 
 app.get("/testing", (req: Request, res: Response) => {
   io.emit("newNotification", "Test notification");

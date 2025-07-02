@@ -56,10 +56,7 @@ interface IRentalTerms {
     securityDeposit: {
         amount: number;
     }
-    maintenanceAmount?: {
-        amount?: number;
-        frequency?: string;
-    }
+    
 }
 
 interface ICommercialRentPlot extends Document {
@@ -124,10 +121,7 @@ const CommercialRentPlotSchema = new Schema<ICommercialRentPlot>({
         securityDeposit: {
             amount: { type: Number, required: true },
         },
-        maintenanceAmount: {
-            amount: { type: Number },
-            frequency: { type: String },
-        },
+       
     },
     availability: {
         type: { type: String, required: true },

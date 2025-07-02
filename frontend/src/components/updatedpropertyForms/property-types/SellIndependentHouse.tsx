@@ -29,7 +29,7 @@ interface Address {
 }
 
 interface IBasicInformation {
-  propertyName: string;
+  title: string;
   address: {
     houseName: string;    
     street: string;
@@ -160,6 +160,15 @@ interface Restrictions {
   tenantType: string;
 }
 
+interface IMetadata {
+  createdBy: string;
+  createdAt: Date;
+  propertyType: string;
+  propertyName: string;
+  intent: string;
+  status: string;
+}
+
 interface FormData {
   basicInformation: IBasicInformation;
   propertySize: number;
@@ -172,10 +181,11 @@ interface FormData {
     date: string;
   };
   media: IMedia;
+  metadata: IMetadata;
 }
 
 interface PropertyNameProps {
-  propertyName: string
+  title: string
   onPropertyNameChange: (name: string) => void
 }
 
@@ -251,7 +261,7 @@ const SellIndependentHouse = () => {
 
   const initialFormData: FormData = {
     basicInformation: {
-      propertyName: "",
+      title: "",
       address: {
         houseName: "",    
         street: "",
@@ -371,6 +381,14 @@ const SellIndependentHouse = () => {
       },
       videoTour: undefined,
       documents: []
+    },
+    metadata: {
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Independent House",
+      intent: "Sale",
+      status: "Active"
     }
   };
 
@@ -431,8 +449,8 @@ const SellIndependentHouse = () => {
       content: (
         <div className="space-y-6">
           <PropertyName
-            propertyName={formData.basicInformation.propertyName}
-            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyName: name } }))}
+            propertyName={formData.basicInformation.title}
+            onPropertyNameChange={(name: string) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))}
           />
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
@@ -731,12 +749,17 @@ const SellIndependentHouse = () => {
           media: convertedMedia,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: "Residential",
+            propertyName: "Independent House",
+            intent: "Sale",
+            status: "Active"
+
           }
         };
 
 
-        const response = await axios.post('/api/residential/sale/independent-house', transformedData, {
+        const response = await axios.post('/api/residential/sale/independenthouse', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }

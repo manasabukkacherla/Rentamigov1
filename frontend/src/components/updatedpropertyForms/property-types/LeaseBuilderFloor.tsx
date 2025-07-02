@@ -45,7 +45,7 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
-  builderName: string;
+
   floorNumber: number;
   totalFloors: number;
   propertyId?: string;
@@ -198,6 +198,10 @@ interface IMedia {
 interface IMetadata {
   createdBy: string;
   createdAt: Date;
+  propertyType: 'Residential';
+  propertyName: 'Builder Floor';
+  intent: 'Lease';
+  status: 'Available' | 'Rented' | 'Under Maintenance';
 }
 
 interface ValidationError {
@@ -215,7 +219,6 @@ interface ApiError {
 interface FormData {
   basicInformation: {
     title: string;
-    builderName: string;
     floorNumber: number;
     totalFloors: number;
     address: Address;
@@ -347,12 +350,16 @@ interface FormData {
   metadata: {
     createdBy: string;
     createdAt: Date;
+    propertyType: 'Residential';
+    propertyName: 'Builder Floor';
+    intent: 'Lease';
+    status: 'Available' | 'Rented' | 'Under Maintenance';
   };
 }
 
 interface PropertyNameProps {
-  propertyName: string;
-  onPropertyNameChange: (name: string) => void;
+  title: string;
+  onTitleChange: (name: string) => void;
 }
 
 interface MapSelectorProps {
@@ -558,7 +565,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   const initialData = {
     basicInformation: {
       title: "",
-      builderName: "",
       floorNumber: 0,
       totalFloors: 0,
       address: {
@@ -693,13 +699,16 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
     },
     metadata: {
       createdBy: "",
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Lease",
+      status: "Available"
     }
   }
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
-      builderName: "",
       floorNumber: 0,
       totalFloors: 0,
       address: {
@@ -834,7 +843,11 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
     },
     metadata: {
       createdBy: "",
-      createdAt: new Date()
+      createdAt: new Date(),
+      propertyType: "Residential",
+      propertyName: "Builder Floor",
+      intent: "Lease",
+      status: "Available"
     }
   })
 
@@ -1347,7 +1360,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       if (mediaItemsToUpload.length > 0) {
         try {
           uploadedMediaUrls = await uploadResidentialMediaToS3(
-            'builder-floor',
+            'builderfloor',
             mediaItemsToUpload,
             propertyId
           );
@@ -1371,11 +1384,15 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             };
 
             // Send the updated form data to the backend
-            const response = await axios.post('/api/residential/lease/builder-floor', {
+            const response = await axios.post('/api/residential/lease/builderfloor', {
               ...updatedFormData,
               metadata: {
                 createdBy: author,
-                createdAt: new Date()
+                createdAt: new Date(),
+                propertyType: "Residential",
+                propertyName: "Builder Floor",
+                intent: "Lease",
+                status: "Available"
               }
             });
 
@@ -1383,7 +1400,7 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               // Set the propertyId from the response
               setPropertyId(response.data.data.propertyId);
               toast.success('Property listed successfully!');
-              navigate('/dashboard');
+              // navigate('/dashboard');
             }
           }
         } catch (error) {
@@ -1392,11 +1409,15 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
         }
       } else {
         // If no media to upload, just send the form data
-        const response = await axios.post('/api/residential/lease/builder-floor', {
+        const response = await axios.post('/api/residential/lease/builderfloor', {
           ...formData,
           metadata: {
             createdBy: author,
-            createdAt: new Date()
+            createdAt: new Date(),
+            propertyType: "Residential",
+            propertyName: "Builder Floor",
+            intent: "Lease",
+            status: "Available"
           }
         });
 
