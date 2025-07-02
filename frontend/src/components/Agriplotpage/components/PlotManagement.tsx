@@ -147,7 +147,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
   const [showMobilePricing, setShowMobilePricing] = React.useState(false);
 
   const renderPriceSection = () => {
-    if (listing === 'sale' && type === 'PL') {
+    if (listing === 'sell' && type === 'PL') {
       return (
         <div className="space-y-4">
           <div className="bg-gray-50 p-4 rounded-lg">
@@ -157,10 +157,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
                 <span className="text-gray-600">Property Price</span>
                 <span className="font-medium">₹{property?.pricingDetails?.propertyPrice || 'N/A'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Price Type</span>
-                <span className="font-medium">{property?.pricingDetails?.priceType || 'N/A'}</span>
-              </div>
+             
               <div className="flex justify-between">
                 <span className="text-gray-600">Price per Sqft</span>
                 <span className="font-medium">₹{property?.pricingDetails?.pricePerSqFt || 'N/A'}</span>
@@ -169,10 +166,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
                 <span className="text-gray-600">Total Price</span>
                 <span className="font-medium">₹{property?.pricingDetails?.totalPrice || 'N/A'}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Area</span>
-                <span className="font-medium">{property?.plotDetails?.totalArea || 'N/A'} sqft</span>
-              </div>
+             
             </div>
           </div>
         </div>
@@ -512,7 +506,7 @@ interface leaseagriculture {
 }
 
 
-interface plotsale {
+interface plotsell {
   basicInformation: {
     title: string;
     Type: string[];
@@ -674,7 +668,7 @@ interface leaseplotproperty {
 
 const PlotManagement: React.FC = () => {
   const [showEnquiryForm, setShowEnquiryForm] = useState(false);
-  const [selectedProperty, setSelectedProperty] = useState<AgricultureProperty | propertyRentPlot | plotsale | leaseagriculture | leaseplotproperty | null>(null);
+  const [selectedProperty, setSelectedProperty] = useState<AgricultureProperty | propertyRentPlot | plotsell | leaseagriculture | leaseplotproperty | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showPriceCard, setShowPriceCard] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
@@ -717,7 +711,7 @@ const PlotManagement: React.FC = () => {
   const { id: propertyId } = useParams<{ id: string }>();
   const [property, setProperty] = useState<AgricultureProperty | null>(null);
   const [rentplotproperty, setRentplotproperty] = useState<propertyRentPlot | null>(null);
-  const [saleplotproperty, setSaleplotproperty] = useState<plotsale | null>(null);
+  const [sellplotproperty, setsellplotproperty] = useState<plotsell | null>(null);
   const [leaseagricultureproperty, setLeaseagricultureproperty] = useState<leaseagriculture | null>(null);
   const [leaseplotproperty, setLeaseplotproperty] = useState<leaseplotproperty | null>(null);
   const [loading, setLoading] = useState(true);
@@ -769,11 +763,11 @@ const PlotManagement: React.FC = () => {
     const details = property.plotDetails || property.propertyDetails || {};
     const listingType = property.metadata?.intent?.toLowerCase() || property.intent?.toLowerCase() || '';
     const isRent = listingType === 'rent';
-    const isSale = listingType === 'sell' || listingType === 'sale';
+    const issell = listingType === 'sell' || listingType === 'sell';
     // For rent plots
     const rent = property.rentalTerms?.rentDetails || property.rent || {};
     const securityDeposit = property.rentalTerms?.securityDeposit?.amount;
-    // For sale plots
+    // For sell plots
     const price = property.pricingDetails?.propertyPrice ?? property.price?.expectedPrice;
     // Features for commercial plot (no agriculture fields)
     const features: string[] = [];
@@ -783,18 +777,18 @@ const PlotManagement: React.FC = () => {
     if (details.roadAccess) features.push(`Road Access: ${details.roadAccess}`);
     if (details.securityRoom) features.push('Security Room Available');
     if (details.previousConstruction && details.previousConstruction !== 'none') features.push(`Previous Construction: ${details.previousConstruction}`);
-    // Add rent/sale-specific features
+    // Add rent/sell-specific features
     if (listing === 'rent' && type == 'plot') {
       if (typeof rent.expectedRent !== 'undefined') features.push(`Expected Rent: ₹${rent.expectedRent}`);
       if (typeof securityDeposit !== 'undefined') features.push(`Security Deposit: ₹${securityDeposit}`);
       if (rent.isNegotiable) features.push('Rent is Negotiable');
       if (rent.rentType) features.push(`Rent Type: ${rent.rentType}`);
     }
-    if (listing === 'sale' && type == 'plot') {
-      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+    if (listing === 'sell' && type == 'plot') {
+      if (typeof price !== 'undefined') features.push(`Sell Price: ₹${price}`);
     }
     if (listing === 'lease' && type == 'agriculture') {
-      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+      if (typeof price !== 'undefined') features.push(`Lease Price: ₹${price}`);
     }
     return (
       <div>
@@ -819,9 +813,9 @@ const PlotManagement: React.FC = () => {
             <div><strong>Security Deposit:</strong> ₹{securityDeposit}</div>
           </>
         )}
-        {isSale && (
+        {issell && (
           <>
-            <div><strong>Sale Price:</strong> ₹{price}</div>
+            <div><strong>sell Price:</strong> ₹{price}</div>
           </>
         )}
        
@@ -839,7 +833,7 @@ const PlotManagement: React.FC = () => {
         console.log(response);
         setProperty(response.data.data);
         setRentplotproperty(response.data.data);
-        setSaleplotproperty(response.data.data);
+        setsellplotproperty(response.data.data);
         setPropertyMedia(response.data.data.media);
         setLeaseagricultureproperty(response.data.data);
         setLeaseplotproperty(response.data.data);
@@ -866,7 +860,7 @@ const PlotManagement: React.FC = () => {
     const sources = [
       property?.media?.photos,
       rentplotproperty?.media?.photos,
-      saleplotproperty?.media?.photos
+      sellplotproperty?.media?.photos
     ];
     let allImages: string[] = [];
     for (const src of sources) {
@@ -889,7 +883,7 @@ const PlotManagement: React.FC = () => {
 
   const images = getAllImages();
 
-  // For displaying rent or sale price in the UI
+  // For displaying rent or sell price in the UI
   const expectedRent = property?.rent?.expectedRent;
   const propertyPrice = property?.pricingDetails?.propertyPrice;
 
@@ -926,7 +920,7 @@ const PlotManagement: React.FC = () => {
             <div className="text-center py-10 text-red-500">No property data found.</div>
           ) : (
             <>
-              <h1 className="text-2xl sm:text-3xl font-bold text-black">{type === 'agriculture' ? property?.basicInformation?.title || '' : listing === 'rent' ? rentplotproperty?.basicInformation?.title : saleplotproperty?.basicInformation?.title}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-black">{type === 'agriculture' ? property?.basicInformation?.title || '' : listing === 'rent' ? rentplotproperty?.basicInformation?.title : sellplotproperty?.basicInformation?.title}</h1>
               <div className="flex items-center gap-2 mt-2">
                 <div className="flex items-center text-gray-600">
                   <MapPin className="h-4 w-4 mr-1" />
@@ -938,12 +932,12 @@ const PlotManagement: React.FC = () => {
                       } else if (listing === 'rent') {
                         const address = rentplotproperty?.basicInformation?.address;
                         return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
-                      } else if(listing === 'sale'){
-                        const address = saleplotproperty?.basicInformation;
+                      } else if(listing === 'sell'){
+                        const address = sellplotproperty?.basicInformation;
 
-                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '') || '';
 
-                      }else if(listing === 'lease'){
+                      }else if(listing === 'lease') {
                         const address = leaseplotproperty?.basicInformation?.address;
 
                         return `${address?.street || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
@@ -1102,7 +1096,12 @@ const PlotManagement: React.FC = () => {
                   <MapPin className="h-6 w-6 text-gray-400 mt-1" />
                   <div>
                     <h2 className="text-2xl font-bold text-black mb-2">Property Address</h2>
-                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing === 'sale' ? saleplotproperty?.basicInformation?.state : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.street : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing === 'sale' ? saleplotproperty?.basicInformation?.city : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.city : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing === 'sale' ? saleplotproperty?.basicInformation?.state : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.state : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing === 'sale' ? saleplotproperty?.basicInformation?.zipCode : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.zipCode : ''}</p>
+                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : 
+                    listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing === 'sell' ? 
+                    sellplotproperty?.basicInformation?.state : listing === 'lease' ? 
+                    leaseplotproperty?.basicInformation?.address?.street : ''}, 
+                    {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing === 'sell' ? sellplotproperty?.basicInformation.city : listing === 'lease' ? 
+                    leaseplotproperty?.basicInformation?.address?.city : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing === 'sell' ? sellplotproperty?.basicInformation?.state : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.state : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing === 'sell' ? sellplotproperty?.basicInformation?.zipCode : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.zipCode : ''}</p>
                   </div>
                 </div>
               </div>
@@ -1135,7 +1134,7 @@ const PlotManagement: React.FC = () => {
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">Total Area</h3>
                     <p className="text-lg font-semibold text-black">
-                      {type === 'agriculture' ? property?.Agriculturelanddetails?.totalArea || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.totalArea || '' : listing === 'sale' ? saleplotproperty?.plotDetails.totalArea : leaseplotproperty?.plotDetails.totalPlotArea || ''}</p>
+                      {type === 'agriculture' ? property?.Agriculturelanddetails?.totalArea || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.totalArea || '' : listing === 'sell' ? sellplotproperty?.plotDetails.totalArea : leaseplotproperty?.plotDetails.totalPlotArea || ''}</p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="text-sm font-medium text-gray-500">Price</h3>
@@ -1149,10 +1148,10 @@ const PlotManagement: React.FC = () => {
                         if (listing === 'rent') {
                           return rentplotproperty?.rentalTerms?.rentDetails?.expectedRent || 'N/A';
                         }
-                        if (listing === 'sale') {
-                          return saleplotproperty?.pricingDetails?.propertyPrice
-                            ?? saleplotproperty?.pricingDetails?.totalPrice
-                            ?? saleplotproperty?.pricingDetails?.pricePerSqFt
+                        if (listing === 'sell') {
+                          return sellplotproperty?.pricingDetails?.propertyPrice
+                            ?? sellplotproperty?.pricingDetails?.totalPrice
+                            ?? sellplotproperty?.pricingDetails?.pricePerSqFt
                             ?? 'N/A';
                         }
                         if (listing === 'lease') {
@@ -1171,8 +1170,8 @@ const PlotManagement: React.FC = () => {
                       if (listing === 'rent') {
                         return rentplotproperty?.rentalTerms?.rentDetails?.rentType || 'N/A';
                       }
-                      if (listing === 'sale') {
-                        return saleplotproperty?.pricingDetails?.priceType || 'N/A';
+                      if (listing === 'sell') {
+                        return sellplotproperty?.pricingDetails?.priceType || 'N/A';
                       }
                       if (listing === 'lease') {
                         return leaseplotproperty?.leaseTerms?.leaseAmount?.amountType || 'N/A';
@@ -1189,8 +1188,8 @@ const PlotManagement: React.FC = () => {
                       if (listing === 'rent') {
                         return rentplotproperty?.propertyDetails?.zoningType || 'N/A';
                       }
-                      if (listing === 'sale') {
-                        return saleplotproperty?.plotDetails?.zoningType || 'N/A';
+                      if (listing === 'sell') {
+                        return sellplotproperty?.plotDetails?.zoningType || 'N/A';
                       }
                       if (listing === 'lease') {
                         return leaseplotproperty?.leaseTerms?.leaseAmount?.amountType || 'N/A';
@@ -1203,7 +1202,7 @@ const PlotManagement: React.FC = () => {
                 <div className="mb-8">
                   <h2 className="text-lg sm:text-xl font-semibold text-black mb-4">{type === 'agriculture' ? 'Water Source' : 'road access'}</h2>
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <p className="text-gray-800">{type === 'agriculture' ? property?.Agriculturelanddetails?.waterSource || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.roadAccess || '' : saleplotproperty?.plotDetails?.roadAccess || ''}</p>
+                    <p className="text-gray-800">{type === 'agriculture' ? property?.Agriculturelanddetails?.waterSource || '' : listing === 'rent' ? rentplotproperty?.propertyDetails?.roadAccess || '' : sellplotproperty?.plotDetails?.roadAccess || ''}</p>
                   </div>
                 </div>
 
@@ -1241,14 +1240,14 @@ const PlotManagement: React.FC = () => {
           {/* Pricing Card - Sticky on Desktop, Modal on Mobile */}
           <div className="lg:col-span-1">
             <PricingCard 
-              property={listing === 'sale' ? saleplotproperty : 
+              property={listing === 'sell' ? sellplotproperty : 
                         listing === 'rent' ? rentplotproperty : 
                         listing === 'lease' && type === 'AG' ? leaseagricultureproperty : 
                         leaseplotproperty}
               listing={listing}
               type={type}
               onEnquireClick={() => {
-                setSelectedProperty(listing === 'sale' ? saleplotproperty : 
+                setSelectedProperty(listing === 'sell' ? sellplotproperty : 
                                  listing === 'rent' ? rentplotproperty : 
                                  listing === 'lease' && type === 'AG' ? leaseagricultureproperty : 
                                  leaseplotproperty);
