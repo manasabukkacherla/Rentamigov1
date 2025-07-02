@@ -4,7 +4,7 @@ interface IResidentialRentIndependentHouse extends Document {
   propertyId: string;
   basicInformation: {
     title: string;
-    propertyAddress: {
+    address: {
         houseName: string;
         street: string;
         city: string;
@@ -187,13 +187,14 @@ const residentialRentIndependentHouseSchema = new mongoose.Schema<IResidentialRe
     unique: false,
   },
   basicInformation: {
-    title: { type: String, required: false },
-    propertyAddress: {
-      houseName: { type: String, required: false },
-      street: { type: String, required: false },
-      city: { type: String, required: false },
-      state: { type: String, required: false },
-      zipCode: { type: String, required: false },
+    title: { type: String, required: true },
+    address: {
+      houseName: { type: String, required: true },
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      zipCode: { type: String, required: true },
+
       location: {
         latitude: { type: Number, required: false },
         longitude: { type: Number, required: false },

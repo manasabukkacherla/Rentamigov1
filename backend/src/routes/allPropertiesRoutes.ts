@@ -56,12 +56,12 @@ const normalizeProperty = (item: any) => ({
         id: item._id || item.propertyId || '',
         propertyId: item.propertyId || '',
         title: item.basicInformation?.title || item.title || item.pgDetails?.name || item.basicInformation?.propertyName,
-        location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}` || item.pgDetails?.address || `${item.basicInformation?.propertyAddress?.city || ''}, ${item.basicInformation?.propertyAddress?.state || ''}`,
+        location: `${item.basicInformation?.address?.city || ''}, ${item.basicInformation?.address?.state || ''}` || item.pgDetails?.address || '',
         propertyName: item.metadata?.propertyName || item.metaData?.propertyName || '',
         type: item.metadata?.propertyType || item.metaData?.propertyType || '',
         listingType: 'Owner',
         price: item.rent?.expectedRent || item.rentalTerms?.rentDetails?.expectedRent || item.rentalDetails?.expectedRent || item.pricingDetails?.propertyPrice || item.priceDetails?.propertyPrice || item.price?.expectedPrice || item.leaseTerms?.leaseDetails?.leaseAmount?.amount || item.leaseAmount?.amount || item.leaseTerms?.leaseTerms?.leaseDetails?.leaseAmount?.amount || 0,
-        area: item.propertyDetails?.area?.totalArea || item.propertySize || item.propertyDetails?.builtUpAreaSqft || 0,
+        area: item.propertyDetails?.area?.totalArea || item.propertySize || item.propertyDetails?.builtUpAreaSqft || item.propertyDetails?.superBuiltUpAreaSqft || 0,
         image: item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
         postedDate: item.metadata?.createdAt instanceof Date ? item.metadata.createdAt.toISOString().slice(0, 10): '',
         status: (item.metadata?.status || item.metaData?.status || 'Available') ,
@@ -118,17 +118,17 @@ router.get('/all', async (req: any, res: any) => {
       
 
       // Residential Rent
-      ResidentialRentApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialRentApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialRentBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
-      ResidentialRentIndependent.find().select('_id propertyId basicInformation.title basicInformation.propertyAddress metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialRentIndependent.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       
-      ResidentialSaleApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
-      ResidentialSaleBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
-      SaleIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
-      SalePlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialSaleApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialSaleBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      SaleIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      SalePlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       
-      ResidentialLeaseApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
-      ResidentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialLeaseApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft leaseTerms.leaseDetails.leaseAmount.amount media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialLeaseIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus')
       ]);
 
