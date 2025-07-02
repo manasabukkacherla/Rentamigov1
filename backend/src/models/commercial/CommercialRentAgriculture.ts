@@ -10,7 +10,7 @@ export interface ICommercialRentAgriculture extends Document {
     street: string;
     city: string;
     state: string;
-    zipCode: string;
+    zipCode: string;   
   };
   location: {
     latitude: string;
@@ -126,7 +126,7 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
   metadata : {
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
     intent: { type: String,default: 'Rent' },
@@ -135,4 +135,4 @@ const CommercialRentAgricultureSchema: Schema = new Schema({
   }
 });
 
-export default mongoose.model<ICommercialRentAgriculture>('CommercialRentAgriculture', CommercialRentAgricultureSchema); 
+export default mongoose.model<ICommercialRentAgriculture>('CommercialRentAgriculture', CommercialRentAgricultureSchema);

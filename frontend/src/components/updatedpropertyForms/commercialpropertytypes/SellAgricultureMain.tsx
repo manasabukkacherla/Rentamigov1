@@ -127,7 +127,7 @@ interface FormData {
     videoTour: File | null;
     documents: File[];
   };
-  metaData?: {
+  metadata?: {
     createdBy: string;
     createdAt: Date;
     propertyType: string;
@@ -222,6 +222,14 @@ const SellAgricultureMain = () => {
       },
       videoTour: null,
       documents: []
+    },
+    metadata:{
+      createdBy: "",
+      createdAt: new Date(),
+      propertyType: "",
+      propertyName: "",
+      intent: "",
+      status: ""
     }
   })
 
@@ -236,39 +244,41 @@ const SellAgricultureMain = () => {
           <div className="space-y-6">
             <PropertyName
               propertyName={formData.basicInformation.title}
-              onPropertyNameChange={(name) => setFormData((prev) => ({ ...prev, title: name }))}
+              onPropertyNameChange={(name) => 
+                setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))
+              }
             />
             <AgriculturalLandType
-              onLandTypeChange={(types) => setFormData((prev) => ({ ...prev, landType: types }))}
+              onLandTypeChange={(types) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, landType: types } }))}
             />
           </div>
 
           <div className="space-y-6">
             <CommercialPropertyAddress
               address={formData.basicInformation.address}
-              onAddressChange={(address) => setFormData((prev) => ({ ...prev, address }))}
+              onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))}
             />
-            {/* <Landmark
-                onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
-                onLocationSelect={(location) => setFormData((prev) => ({
-                  ...prev,
-                  coordinates: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  }
-                }))}
-              /> */}
+           
             <MapLocation
-              latitude={formData.basicInformation?.location?.latitude}
-              longitude={formData.basicInformation?.location?.longitude}
+              latitude={formData.basicInformation?.location.latitude}
+              longitude={formData.basicInformation?.location.longitude}
               landmark={formData.basicInformation.landmark}
-              onLocationChange={(location) => setFormData(prev => ({
+              onLocationChange={(location:{latitude:string,longitude:string}) => setFormData(prev => ({
                 ...prev,
-                location: location
+                basicInformation:{
+                  ...prev.basicInformation,
+                  location:{
+                    latitude:location.latitude,
+                    longitude:location.longitude
+                  }
+                }
               }))}
               onAddressChange={(address) => setFormData(prev => ({
                 ...prev,
-                address
+                basicInformation:{
+                  ...prev.basicInformation,
+                  address:address
+                }
               }))}
               onLandmarkChange={(landmark) => setFormData(prev => ({
                 ...prev,
@@ -474,12 +484,7 @@ const SellAgricultureMain = () => {
 
         // Create the payload matching the backend model structure
         const transformedData = {
-          title: formData.basicInformation.title,
-          type: formData.basicInformation.type,
-          address: formData.basicInformation.address,
-          landmark: formData.basicInformation.landmark,
-          location: formData.basicInformation.location,
-          isCornerProperty: formData.basicInformation.isCornerProperty,
+          basicInformation: formData.basicInformation,
           Agriculturelanddetails: formData.Agriculturelanddetails,
           powerSupply: formData.Agriculturelanddetails.powersupply,
           propertyDetails: formData.propertyDetails,
@@ -491,7 +496,7 @@ const SellAgricultureMain = () => {
           operatingHoursRestrictions: formData.operatingHoursRestrictions,
           contactDetails: formData.contactDetails,
           media: convertedMedia,
-          metaData: {
+          metadata: {
             createdBy: author,
             createdAt: new Date(),
             propertyType: 'Commercial',
@@ -615,4 +620,3 @@ const SellAgricultureMain = () => {
 }
 
 export default SellAgricultureMain
-

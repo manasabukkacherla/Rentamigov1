@@ -8,11 +8,11 @@ const generatePropertyId = async (): Promise<string> => {
   try {
     const prefix = "RA-COMREAG";
     const highestShop = await CommercialRentAgriculture.findOne({
-      propertyId: { $regex: `^${prefix}\\d+$` }
+      propertyId: { $regex: ^${prefix}\\d+$ }
     }).sort({ propertyId: -1 });
 
     let nextNumber = 1;
-
+                                      
     if (highestShop) {
       const match = highestShop.propertyId.match(/(\d+)$/);
       if (match && match[1]) {
@@ -20,13 +20,13 @@ const generatePropertyId = async (): Promise<string> => {
       }
     }
 
-    const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
+    const propertyId = ${prefix}${nextNumber.toString().padStart(4, '0')};
     const existingWithExactId = await CommercialRentAgriculture.findOne({ propertyId });
 
     if (existingWithExactId) {
-      console.log(`Property ID ${propertyId} already exists, trying next number`);
+      console.log(Property ID ${propertyId} already exists, trying next number);
       const forcedNextNumber = nextNumber + 1;
-      const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
+      const forcedPropertyId = ${prefix}${forcedNextNumber.toString().padStart(4, '0')};
 
       const forcedExisting = await CommercialRentAgriculture.findOne({ propertyId: forcedPropertyId });
       if (forcedExisting) {
@@ -40,7 +40,7 @@ const generatePropertyId = async (): Promise<string> => {
   } catch (error) {
     console.error('Error generating property ID:', error);
     const timestamp = Date.now().toString().slice(-8);
-    return `RA-COMSESH${timestamp}`;
+    return RA-COMSESH${timestamp};
   }
 };
 
@@ -71,10 +71,17 @@ export const createCommercialRentAgriculture = async (req: Request, res: Respons
     // Add metadata with userId and user (like Sell controller)
     const agricultureData = {
       ...formData,
-      propertyId, // Ensure propertyId is at the root level
+      propertyId, 
+      basicInformation: formData.basicInformation,
+      Agriculturelanddetails: formData.Agriculturelanddetails,
+      rent: formData.rent,
+      securityDeposit: formData.securityDeposit,
+      availability: formData.availability,
+      contactDetails: formData.contactDetails,
+      media: formData.media,
       metadata: {
         ...formData.metadata,
-        createdBy: formData.metadata.createdBy,  // Use the extracted userId
+        createdBy: formData.metadata.createdBy,  
         createdAt: new Date()
       }
     };
@@ -154,7 +161,7 @@ export const updateCommercialRentAgriculture = async (req: Request, res: Respons
 
     const cleanedData = JSON.parse(
       JSON.stringify(incomingData, (key, value) => {
-        if (key === "_id" || key === "__v") return undefined;
+        if (key === "id" || key === "_v") return undefined;
         return value;
       })
     );

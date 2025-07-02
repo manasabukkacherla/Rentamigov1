@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Property } from '@/components/allpropertiespage/types';
 interface FormData {
   name: string;
   email: string;
@@ -15,11 +16,12 @@ interface FormData {
   // isVerified: boolean;
 }
 
-interface EnquiryFormProps {
+export interface EnquiryFormProps {
   onClose: () => void;
+  property?: Property;
 }
 
-export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
+export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
     email: '',
@@ -30,7 +32,7 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
     status: "pending",
     // selectedServices: [],
     // isVerified: false
-  });
+    });
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
@@ -115,41 +117,43 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
 
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Enquiry Form</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {property && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <h3 className="font-medium text-gray-900">Property: {property.title}</h3>
+              <p className="text-sm text-gray-600">
+                Price: ₹{property.price}
+              </p>
+            </div>
+          )}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
             <input
               type="text"
               id="name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
-              onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
               required
-            />
+              />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
             <input
               type="email"
               id="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
               onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
               required
             />
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone
-            </label>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
             <input
               type="tel"
               id="phone"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               onChange={(e) => setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }))}
               required
             />
@@ -162,7 +166,7 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose }) => {
             <textarea
               id="message"
               rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
             ></textarea>
           </div>

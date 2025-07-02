@@ -1,9 +1,280 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, Phone, Mail, X, User, MessageSquare, ChevronLeft, ChevronRight, Navigation, ChevronDown } from 'lucide-react';
+import { MapPin, ChevronLeft, ChevronRight, ChevronUp, X } from 'lucide-react';
 
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { PropertyMedia } from '@/components/detailproperty/types';
+
+interface EnquiryFormProps {
+  onClose: () => void;
+  property?: any;
+}
+
+const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
+  const [formData, setFormData] = React.useState({
+    name: '',
+    email: '',
+    phone: '',  
+    message: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      console.log('Enquiry submitted:', {
+        ...formData,
+        propertyId: property?.propertyId,
+        propertyTitle: property?.metadata?.propertyName || property?.basicInformation?.title
+      });
+      
+      alert('Thank you for your enquiry! We will get back to you soon.');
+      onClose();
+    } catch (error) {
+      console.error('Error submitting enquiry:', error);
+      alert('There was an error submitting your enquiry. Please try again.');
+    }
+  };
+
+  function setShowEnquiryForm(arg0: boolean): void {
+    throw new Error('Function not implemented.');
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md relative max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">Enquiry Form</h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {property && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <h3 className="font-medium text-gray-900">Property: {property.metadata?.propertyName || property.basicInformation?.title}</h3>
+              {property.pricingDetails?.propertyPrice && (
+                <p className="text-sm text-gray-600">
+                  Price: ₹{property.pricingDetails.propertyPrice}
+                </p>
+              )}
+            </div>
+          )}
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              required
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="message" className="block text-sm font-medium text-gray-700">Message</label>
+            <textarea
+              id="message"
+              name="message"
+              value={formData.message}
+              onChange={handleChange}
+              rows={4}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              defaultValue={''}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-gray-900 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+            Submit Enquiry
+          </button>
+        </form>
+      </div>
+      
+      
+    </div>
+  );
+};
+
+interface PricingCardProps {
+  property: any;
+  listing: string;
+  type: string;
+  onEnquireClick: () => void;
+}
+
+const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEnquireClick }) => {
+  const [showMobilePricing, setShowMobilePricing] = React.useState(false);
+
+  const renderPriceSection = () => {
+    if (listing === 'sale' && type === 'PL') {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Pricing Details</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Property Price</span>
+                <span className="font-medium">₹{property?.pricingDetails?.propertyPrice || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Price Type</span>
+                <span className="font-medium">{property?.pricingDetails?.priceType || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Price per Sqft</span>
+                <span className="font-medium">₹{property?.pricingDetails?.pricePerSqFt || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Total Price</span>
+                <span className="font-medium">₹{property?.pricingDetails?.totalPrice || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Area</span>
+                <span className="font-medium">{property?.plotDetails?.totalArea || 'N/A'} sqft</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (listing === 'rent' && type === 'PL') {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Rental Details</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Expected Rent</span>
+                <span className="font-medium">₹{property?.rentalTerms?.rentDetails?.expectedRent || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Rent Type</span>
+                <span className="font-medium">{property?.rentalTerms?.rentDetails?.rentType || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Security Deposit</span>
+                <span className="font-medium">₹{property?.rentalTerms?.securityDeposit?.amount || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Negotiable</span>
+                <span className="font-medium">{property?.rentalTerms?.rentDetails?.isNegotiable ? 'Yes' : 'No'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    } else if (listing === 'lease' && type === 'AG') {
+      return (
+        <div className="space-y-4">
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Lease Details</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-600">Lease Amount</span>
+                <span className="font-medium">₹{property?.leaseTerms?.leaseAmount?.amount || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Duration</span>
+                <span className="font-medium">
+                  {property?.leaseTerms?.leaseAmount?.duration} {property?.leaseTerms?.leaseAmount?.durationType || 'months'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Negotiable</span>
+                <span className="font-medium">{property?.leaseTerms?.leaseAmount?.isNegotiable ? 'Yes' : 'No'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Minimum Tenure</span>
+                <span className="font-medium">
+                  {property?.leaseTerms?.leaseTenure?.minimumTenure} {property?.leaseTerms?.leaseTenure?.minimumUnit}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <>
+      {/* Mobile View - Button to show pricing */}
+      <div className="lg:hidden mb-4">
+        <button
+          onClick={() => setShowMobilePricing(!showMobilePricing)}
+          className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 rounded-lg text-gray-800 font-medium"
+        >
+          <span>View Pricing Details</span>
+          <ChevronUp className={w-5 h-5 transition-transform ${showMobilePricing ? 'transform rotate-180' : ''}} />
+        </button>
+        {showMobilePricing && (
+          <div className="mt-2 p-4 border border-gray-200 rounded-lg">
+            {renderPriceSection()}
+            <button
+              onClick={onEnquireClick}
+              className="w-full mt-4 bg-white text-black border border-black font-medium py-2 px-4 rounded-lg transition hover:bg-black hover:text-white"
+            >
+              Enquiry Form
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop View */}
+      <div className="hidden lg:block bg-white rounded-xl border border-gray-200 p-6">
+        <h3 className="text-2xl font-bold text-black mb-6">Price Details</h3>
+        {renderPriceSection()}
+        <button
+          onClick={onEnquireClick}
+          className="w-full mt-6 bg-black hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
+        >
+          Enquire Now
+        </button>
+      </div>
+    </>
+  );
+};
 
 export interface AgricultureProperty {
   propertyId: string;
@@ -403,10 +674,12 @@ interface leaseplotproperty {
 
 const PlotManagement: React.FC = () => {
   const [showEnquiryForm, setShowEnquiryForm] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<AgricultureProperty | propertyRentPlot | plotsale | leaseagriculture | leaseplotproperty | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [showPriceCard, setShowPriceCard] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
-
+  const [propertyRentPlot, setPropertyRentPlot] = useState<any>(null);
+  
   const categoryCodes: Record<string, string> = {
     residential: "RES",
     commercial: "COM",
@@ -433,8 +706,10 @@ const PlotManagement: React.FC = () => {
     agriculture: "AG",
     others: "OT",
     apartment: "AP",
+
     "independenthouse": "IH",
     "builderfloor": "BF",
+
     "shared-space": "SS",
   };
 
@@ -505,21 +780,21 @@ const PlotManagement: React.FC = () => {
     if (details.boundaryWall) features.push('Boundary Wall Present');
     if (details.waterSewer) features.push('Water & Sewer Available');
     if (details.electricity) features.push('Electricity Available');
-    if (details.roadAccess) features.push(`Road Access: ${details.roadAccess}`);
+    if (details.roadAccess) features.push(Road Access: ${details.roadAccess});
     if (details.securityRoom) features.push('Security Room Available');
-    if (details.previousConstruction && details.previousConstruction !== 'none') features.push(`Previous Construction: ${details.previousConstruction}`);
+    if (details.previousConstruction && details.previousConstruction !== 'none') features.push(Previous Construction: ${details.previousConstruction});
     // Add rent/sale-specific features
     if (listing === 'rent' && type == 'plot') {
-      if (typeof rent.expectedRent !== 'undefined') features.push(`Expected Rent: ₹${rent.expectedRent}`);
-      if (typeof securityDeposit !== 'undefined') features.push(`Security Deposit: ₹${securityDeposit}`);
+      if (typeof rent.expectedRent !== 'undefined') features.push(Expected Rent: ₹${rent.expectedRent});
+      if (typeof securityDeposit !== 'undefined') features.push(Security Deposit: ₹${securityDeposit});
       if (rent.isNegotiable) features.push('Rent is Negotiable');
-      if (rent.rentType) features.push(`Rent Type: ${rent.rentType}`);
+      if (rent.rentType) features.push(Rent Type: ${rent.rentType});
     }
     if (listing === 'sale' && type == 'plot') {
-      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+      if (typeof price !== 'undefined') features.push(Sale Price: ₹${price});
     }
     if (listing === 'lease' && type == 'agriculture') {
-      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
+      if (typeof price !== 'undefined') features.push(Sale Price: ₹${price});
     }
     return (
       <div>
@@ -549,17 +824,7 @@ const PlotManagement: React.FC = () => {
             <div><strong>Sale Price:</strong> ₹{price}</div>
           </>
         )}
-        {/* { <div className="mt-4">
-          <h4 className="font-semibold mb-2">Features</h4>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {features.length > 0 ? features.map((feature, idx) => (
-              <div key={idx} className="flex items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <div className="h-2 w-2 bg-black rounded-full mr-3"></div>
-                <span className="text-gray-800">{feature}</span>
-              </div>
-            )) : <span className="text-gray-500">No notable features listed.</span>}
-          </div> 
-        </div>  */}
+       
       </div>
     );
   };
@@ -570,7 +835,7 @@ const PlotManagement: React.FC = () => {
     const fetchPropertyDetails = async () => {
 
       try {
-        const response = await axios.get(`/api/${category}/${listing}/${type}/${propertyId}`);
+        const response = await axios.get(/api/${category}/${listing}/${type}/${propertyId});
         console.log(response);
         setProperty(response.data.data);
         setRentplotproperty(response.data.data);
@@ -669,14 +934,23 @@ const PlotManagement: React.FC = () => {
                     {(() => {
                       if (type === 'agriculture') {
                         const address = property?.basicInformation?.address;
-                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                        return address ? ${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}.replace(/^, | ,| , | $/g, '') : '';
                       } else if (listing === 'rent') {
                         const address = rentplotproperty?.basicInformation?.address;
+
                         return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
+                      } else if(listing==='sale'){
+                        const address = saleplotproperty?.basicInformation;
+                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+                      } else if(listing==='lease'){
+                        const address = leaseplotproperty?.basicInformation.address;
+                        return `${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+
+                        
                       } else {
                         const address = saleplotproperty?.basicInformation;
 
-                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
+                        return ${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}.replace(/^, | ,| , | $/g, '');
 
                       }
                     })()}
@@ -735,7 +1009,7 @@ const PlotManagement: React.FC = () => {
                   >
                     <img
                       src={image}
-                      alt={`Plot view ${index + 1}`}
+                      alt={Plot view ${index + 1}}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -794,7 +1068,7 @@ const PlotManagement: React.FC = () => {
                     >
                       <img
                         src={image}
-                        alt={`Plot view ${index + 1}`}
+                        alt={Plot view ${index + 1}}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -811,7 +1085,7 @@ const PlotManagement: React.FC = () => {
                     >
                       <img
                         src={image}
-                        alt={`Plot view ${index + 4}`}
+                        alt={Plot view ${index + 4}}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -832,7 +1106,8 @@ const PlotManagement: React.FC = () => {
                   <MapPin className="h-6 w-6 text-gray-400 mt-1" />
                   <div>
                     <h2 className="text-2xl font-bold text-black mb-2">Property Address</h2>
-                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : saleplotproperty?.basicInformation?.isCornerProperty}, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : saleplotproperty?.basicInformation?.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : saleplotproperty?.basicInformation?.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : saleplotproperty?.basicInformation?.zipCode}</p>
+                    <p className="text-gray-600">
+                    {type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing==='sale'?saleplotproperty?.basicInformation?.isCornerProperty:leaseplotproperty?.basicInformation.address.street }, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing==='sale'?saleplotproperty?.basicInformation?.city:leaseplotproperty?.basicInformation.address.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing==='sale'?saleplotproperty?.basicInformation?.state:leaseplotproperty?.basicInformation.address.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing==='sale'?saleplotproperty?.basicInformation?.zipCode:leaseplotproperty?.basicInformation.address.zipCode }</p>
                   </div>
                 </div>
               </div>
@@ -840,7 +1115,7 @@ const PlotManagement: React.FC = () => {
               {/* Map Section */}
               <div className="md:w-1/2 h-[300px] rounded-lg overflow-hidden">
                 <iframe
-                  src={`https://maps.google.com/maps?q=${property?.basicInformation?.location?.latitude || ''},${property?.basicInformation?.location?.longitude || ''}&z=15&output=embed`}
+                  src={https://maps.google.com/maps?q=${property?.basicInformation?.location?.latitude || ''},${property?.basicInformation?.location?.longitude || ''}&z=15&output=embed}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -945,10 +1220,10 @@ const PlotManagement: React.FC = () => {
                       className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
                     >
                       {showAllFeatures ? 'Show Less' : 'View All Features'}
-                      <ChevronDown className={`h-5 w-5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={h-5 w-5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}} />
                     </button> */}
                   </div>
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}`}>
+                  <div className={grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}}>
                     {property && (() => {
                       const features: string[] = [];
 
@@ -970,258 +1245,99 @@ const PlotManagement: React.FC = () => {
 
           {/* Pricing Card - Sticky on Desktop, Modal on Mobile */}
           <div className="lg:col-span-1">
-            {/* Desktop View */}
-            <div className="hidden lg:block sticky top-4">
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold text-black mb-6">Price Details</h3>
-                  <div className="space-y-4">
-                    {listing == "sell" && type == "plots" &&
+            <PricingCard 
+              property={listing === 'sale' ? saleplotproperty : 
+                        listing === 'rent' ? rentplotproperty : 
+                        listing === 'lease' && type === 'AG' ? leaseagricultureproperty : 
+                        leaseplotproperty}
+              listing={listing}
+              type={type}
+              onEnquireClick={() => {
+                setSelectedProperty(listing === 'sale' ? saleplotproperty : 
+                                 listing === 'rent' ? rentplotproperty : 
+                                 listing === 'lease' && type === 'AG' ? leaseagricultureproperty : 
+                                 leaseplotproperty);
+                setShowEnquiryForm(true);
+              }}
+            />
+                    {listing == "rent" && type == "plots" && (
+                      <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                          <div className="text-gray-600 font-semibold">Excepted rent</div>
+                          <div className="text-black font-bold">₹{rentplotproperty?.rentalTerms?.rentDetails?.expectedRent}</div>
 
-                      <>
-                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                            <div className="text-gray-600 font-semibold">Property Price</div>
-                            <div className="text-black font-bold">₹{saleplotproperty?.pricingDetails?.propertyPrice}</div>
-
-                            <div className="text-gray-600 font-semibold">Price Type</div>
-                            <div className="text-black font-bold">{saleplotproperty?.pricingDetails?.priceType}</div>
-
-                            <div className="text-gray-600 font-semibold">Price per Sqft</div>
-                            <div className="text-black font-bold">₹{saleplotproperty?.pricingDetails?.pricePerSqFt}</div>
-
-                            <div className="text-gray-600 font-semibold">Total Price</div>
-                            <div className="text-black font-bold">₹{saleplotproperty?.pricingDetails?.totalPrice}</div>
-
-                            <div className="text-gray-600 font-semibold">Area</div>
-                            <div className="text-black font-bold">{saleplotproperty?.pricingDetails?.area} sqft</div>
-                          </div>
+                          <div className="text-gray-600 font-semibold">Rent Type</div>
+                          <div className="text-black font-bold">{rentplotproperty?.rentalTerms?.rentDetails?.rentType}</div>
                         </div>
+                      </div>
+                    )}
+                    {type == "agriculture" && listing != "lease" && (
+                      <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                          <div className="text-gray-600 font-semibold">Property Price</div>
+                          <div className="text-black font-bold">₹{property?.price?.expectedPrice || property?.rent?.expectedRent}</div>
 
-                      </>
-
-                    }
-                    {listing == "rent" && type == "plots" &&
-
-                      <>
-                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                            <div className="text-gray-600 font-semibold">Excepted rent</div>
-                            <div className="text-black font-bold">₹{rentplotproperty?.rentalTerms?.rentDetails?.expectedRent}</div>
-
-                            <div className="text-gray-600 font-semibold">Rent Type</div>
-                            <div className="text-black font-bold">{rentplotproperty?.rentalTerms?.rentDetails?.rentType}</div>
-                          </div>
+                          <div className="text-gray-600 font-semibold">Price Type</div>
+                          <div className="text-black font-bold">{property?.price?.isNegotiable ? "Not Negotiable" : "Negotiable"}</div>
                         </div>
-                      </>}
-                    {
-                      type == "agriculture" && listing != "lease" &&
-                      <>
-                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                            <div className="text-gray-600 font-semibold">Property Price</div>
-                            <div className="text-black font-bold">₹{property?.price?.expectedPrice || property?.rent?.expectedRent}</div>
+                      </div>
+                    )}
+                    {type == "agriculture" && listing == "lease" && (
+                      <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                          <div className="text-gray-600 font-semibold">Lease Amount</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
 
-                            <div className="text-gray-600 font-semibold">Price Type</div>
-                            <div className="text-black font-bold">{property?.price?.isNegotiable ? "Not Negotiable" : "Negotiable"}</div>
-                          </div>
+                        
+                          <div className="text-gray-600 font-semibold">Minium Tenure</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
+
+                          <div className="text-gray-600 font-semibold">Maximum Tenure</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.maximumTenure}</div>
+
+                          <div className="text-gray-600 font-semibold">Lock In Period</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</div>
+
+                          <div className="text-gray-600 font-semibold">Notice Period</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.noticePeriod}</div>
                         </div>
-                      </>
-                    }
-                    {
-                      type == "agriculture" && listing == "lease" &&
-                      <>
-                        <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                          <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                          <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                            <div className="text-gray-600 font-semibold">Lease Amount</div>
-                            <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
-
-                            <div className="text-gray-600 font-semibold">Lease Duration</div>
-                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.durationType}</div>
-
-                            <div className="text-gray-600 font-semibold">Minium Tenure</div>
-                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
-
-                            <div className="text-gray-600 font-semibold">Maximum Tenure</div>
-                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.maximumTenure}</div>
-
-                            <div className="text-gray-600 font-semibold">Lock In Period</div>
-                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</div>
-
-                            <div className="text-gray-600 font-semibold">Notice Period</div>
-                            <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.noticePeriod}</div>
-                          </div>
-                        </div>
-                      </>
-                    }
+                      </div>
+                    )}
 
                     {listing === 'lease' && type !== "agriculture" && (
-                      <>
-                        <div className="flex justify-between mb-2">
+                      <div className="space-y-2 w-full">
+                        <div className="flex justify-between">
                           <span className="text-black font-semibold">Lease Amount:</span>
                           <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amount}</span>
                         </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Duration:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.duration}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Duration Type:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.durationType}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Amount Type:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amountType}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
+                        
+                        
+                        <div className="flex justify-between">
                           <span className="text-black font-semibold">Lease Minimum Tenure:</span>
                           <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumTenure}</span>
                         </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Minimum Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumUnit}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Maximum Tenure:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumTenure}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Maximum Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumUnit}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Lock In Period:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Lock In Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInUnit}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Notice Period:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriod}</span>
-                        </div>
-                        <div className="flex justify-between mb-2">
-                          <span className="text-black font-semibold">Lease Notice Period Unit:</span>
-                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriodUnit}</span>
-                        </div>
-
-                      </>
+                        
+                          
+                      </div>
                     )}
+{/* Enquiry Form Modal */}
+   
+    </div>  {/* ← closes the outermost <div className="min-h-screen …"> */}
+    
 
 
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Enquiry Form Modal */}
-      {showEnquiryForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-4 sm:p-6 max-w-md w-full relative animate-slide-up">
-            <button
-              onClick={() => setShowEnquiryForm(false)}
-              className="absolute right-4 top-4 text-gray-400 hover:text-gray-600 transition-colors"
-              aria-label="Close modal"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-black">Enquire Now</h3>
-              <p className="text-gray-600 text-sm mt-1">
-                Fill in your details to get more information about this property.
-              </p>
-            </div>
-
-            <form className="space-y-4">
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="text"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    placeholder="Enter your name"
-                  />
-                </div>
-              </div>
-
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="email"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    placeholder="Enter your email"
-                  />
-                </div>
-              </div>
-
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Phone className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    type="tel"
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    placeholder="Enter your phone number"
-                  />
-                </div>
-              </div>
-
-              <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Message
-                </label>
-                <div className="relative">
-                  <div className="absolute top-3 left-3 pointer-events-none">
-                    <MessageSquare className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <textarea
-                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400"
-                    rows={4}
-                    placeholder="Enter your message"
-                  ></textarea>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-black hover:bg-gray-900 text-white font-medium py-3 px-4 rounded-lg transition-colors"
-              >
-                Submit Enquiry
-              </button>
-            </form>
-          </div>
-        </div>
+                {showEnquiryForm && (
+        <EnquiryForm
+          onClose={() => setShowEnquiryForm(false)}
+        />
       )}
-    </div>
-  );
+              </div>
+  )
 };
 
 export default PlotManagement;
-
-function setPropertyRentPlot(data: any) {
-  throw new Error('Function not implemented.');
-}
