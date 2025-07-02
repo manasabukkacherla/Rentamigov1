@@ -14,7 +14,7 @@ const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
   const [formData, setFormData] = React.useState({
     name: '',
     email: '',
-    phone: '',  
+    phone: '',
     message: ''
   });
 
@@ -246,16 +246,16 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
           className="w-full flex items-center justify-between px-4 py-3 bg-gray-100 rounded-lg text-gray-800 font-medium"
         >
           <span>View Pricing Details</span>
-          <ChevronUp className={w-5 h-5 transition-transform ${showMobilePricing ? 'transform rotate-180' : ''}} />
+          <ChevronUp className={`w-5 h-5 transition-transform ${showMobilePricing ? 'transform rotate-180' : ''}`} />
         </button>
         {showMobilePricing && (
           <div className="mt-2 p-4 border border-gray-200 rounded-lg">
             {renderPriceSection()}
             <button
               onClick={onEnquireClick}
-              className="w-full mt-4 bg-white text-black border border-black font-medium py-2 px-4 rounded-lg transition hover:bg-black hover:text-white"
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition"
             >
-              Enquiry Form
+              Enquire Now
             </button>
           </div>
         )}
@@ -267,7 +267,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
         {renderPriceSection()}
         <button
           onClick={onEnquireClick}
-          className="w-full mt-6 bg-black hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
+          className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
         >
           Enquire Now
         </button>
@@ -780,21 +780,21 @@ const PlotManagement: React.FC = () => {
     if (details.boundaryWall) features.push('Boundary Wall Present');
     if (details.waterSewer) features.push('Water & Sewer Available');
     if (details.electricity) features.push('Electricity Available');
-    if (details.roadAccess) features.push(Road Access: ${details.roadAccess});
+    if (details.roadAccess) features.push(`Road Access: ${details.roadAccess}`);
     if (details.securityRoom) features.push('Security Room Available');
-    if (details.previousConstruction && details.previousConstruction !== 'none') features.push(Previous Construction: ${details.previousConstruction});
+    if (details.previousConstruction && details.previousConstruction !== 'none') features.push(`Previous Construction: ${details.previousConstruction}`);
     // Add rent/sale-specific features
     if (listing === 'rent' && type == 'plot') {
-      if (typeof rent.expectedRent !== 'undefined') features.push(Expected Rent: ₹${rent.expectedRent});
-      if (typeof securityDeposit !== 'undefined') features.push(Security Deposit: ₹${securityDeposit});
+      if (typeof rent.expectedRent !== 'undefined') features.push(`Expected Rent: ₹${rent.expectedRent}`);
+      if (typeof securityDeposit !== 'undefined') features.push(`Security Deposit: ₹${securityDeposit}`);
       if (rent.isNegotiable) features.push('Rent is Negotiable');
-      if (rent.rentType) features.push(Rent Type: ${rent.rentType});
+      if (rent.rentType) features.push(`Rent Type: ${rent.rentType}`);
     }
     if (listing === 'sale' && type == 'plot') {
-      if (typeof price !== 'undefined') features.push(Sale Price: ₹${price});
+      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
     }
     if (listing === 'lease' && type == 'agriculture') {
-      if (typeof price !== 'undefined') features.push(Sale Price: ₹${price});
+      if (typeof price !== 'undefined') features.push(`Sale Price: ₹${price}`);
     }
     return (
       <div>
@@ -835,7 +835,7 @@ const PlotManagement: React.FC = () => {
     const fetchPropertyDetails = async () => {
 
       try {
-        const response = await axios.get(/api/${category}/${listing}/${type}/${propertyId});
+        const response = await axios.get(`/api/${category}/${listing}/${type}/${propertyId}`);
         console.log(response);
         setProperty(response.data.data);
         setRentplotproperty(response.data.data);
@@ -934,23 +934,14 @@ const PlotManagement: React.FC = () => {
                     {(() => {
                       if (type === 'agriculture') {
                         const address = property?.basicInformation?.address;
-                        return address ? ${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}.replace(/^, | ,| , | $/g, '') : '';
+                        return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
                       } else if (listing === 'rent') {
                         const address = rentplotproperty?.basicInformation?.address;
-
                         return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
-                      } else if(listing==='sale'){
-                        const address = saleplotproperty?.basicInformation;
-                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
-                      } else if(listing==='lease'){
-                        const address = leaseplotproperty?.basicInformation.address;
-                        return `${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
-
-                        
                       } else {
                         const address = saleplotproperty?.basicInformation;
 
-                        return ${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}.replace(/^, | ,| , | $/g, '');
+                        return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
 
                       }
                     })()}
@@ -1009,7 +1000,7 @@ const PlotManagement: React.FC = () => {
                   >
                     <img
                       src={image}
-                      alt={Plot view ${index + 1}}
+                      alt={`Plot view ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </div>
@@ -1068,7 +1059,7 @@ const PlotManagement: React.FC = () => {
                     >
                       <img
                         src={image}
-                        alt={Plot view ${index + 1}}
+                        alt={`Plot view ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1085,7 +1076,7 @@ const PlotManagement: React.FC = () => {
                     >
                       <img
                         src={image}
-                        alt={Plot view ${index + 4}}
+                        alt={`Plot view ${index + 4}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -1106,8 +1097,7 @@ const PlotManagement: React.FC = () => {
                   <MapPin className="h-6 w-6 text-gray-400 mt-1" />
                   <div>
                     <h2 className="text-2xl font-bold text-black mb-2">Property Address</h2>
-                    <p className="text-gray-600">
-                    {type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing==='sale'?saleplotproperty?.basicInformation?.isCornerProperty:leaseplotproperty?.basicInformation.address.street }, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing==='sale'?saleplotproperty?.basicInformation?.city:leaseplotproperty?.basicInformation.address.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing==='sale'?saleplotproperty?.basicInformation?.state:leaseplotproperty?.basicInformation.address.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing==='sale'?saleplotproperty?.basicInformation?.zipCode:leaseplotproperty?.basicInformation.address.zipCode }</p>
+                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : saleplotproperty?.basicInformation?.isCornerProperty}, {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : saleplotproperty?.basicInformation?.city}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : saleplotproperty?.basicInformation?.state}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : saleplotproperty?.basicInformation?.zipCode}</p>
                   </div>
                 </div>
               </div>
@@ -1115,7 +1105,7 @@ const PlotManagement: React.FC = () => {
               {/* Map Section */}
               <div className="md:w-1/2 h-[300px] rounded-lg overflow-hidden">
                 <iframe
-                  src={https://maps.google.com/maps?q=${property?.basicInformation?.location?.latitude || ''},${property?.basicInformation?.location?.longitude || ''}&z=15&output=embed}
+                  src={`https://maps.google.com/maps?q=${property?.basicInformation?.location?.latitude || ''},${property?.basicInformation?.location?.longitude || ''}&z=15&output=embed`}
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -1220,10 +1210,10 @@ const PlotManagement: React.FC = () => {
                       className="text-gray-600 hover:text-gray-900 flex items-center gap-1"
                     >
                       {showAllFeatures ? 'Show Less' : 'View All Features'}
-                      <ChevronDown className={h-5 w-5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}} />
+                      <ChevronDown className={`h-5 w-5 transition-transform ${showAllFeatures ? 'rotate-180' : ''}`} />
                     </button> */}
                   </div>
-                  <div className={grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}}>
+                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}`}>
                     {property && (() => {
                       const features: string[] = [];
 
@@ -1289,9 +1279,11 @@ const PlotManagement: React.FC = () => {
                         <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
                         <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
                           <div className="text-gray-600 font-semibold">Lease Amount</div>
-                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
+                          <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
 
-                        
+                          <div className="text-gray-600 font-semibold">Lease Duration</div>
+                          <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseAmount?.durationType}</div>
+
                           <div className="text-gray-600 font-semibold">Minium Tenure</div>
                           <div className="text-black font-bold">{leaseagricultureproperty?.leaseTerms?.leaseTenure?.minimumTenure}</div>
 
@@ -1313,29 +1305,61 @@ const PlotManagement: React.FC = () => {
                           <span className="text-black font-semibold">Lease Amount:</span>
                           <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amount}</span>
                         </div>
-                        
-                        
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Duration:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.duration} {leaseplotproperty?.leaseTerms?.leaseAmount?.durationType}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Amount Type:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseAmount?.amountType}</span>
+                        </div>
                         <div className="flex justify-between">
                           <span className="text-black font-semibold">Lease Minimum Tenure:</span>
                           <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumTenure}</span>
                         </div>
-                        
-                          
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Minimum Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.minimumUnit}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Maximum Tenure:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumTenure}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Maximum Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.maximumUnit}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Lock In Period:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInPeriod}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Lock In Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.lockInUnit}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Notice Period:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriod}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-black font-semibold">Lease Notice Period Unit:</span>
+                          <span className="text-gray-600">{leaseplotproperty?.leaseTerms?.leaseTenure?.noticePeriodUnit}</span>
+                        </div>
+
                       </div>
                     )}
 {/* Enquiry Form Modal */}
-   
-    </div>  {/* ← closes the outermost <div className="min-h-screen …"> */}
-    
-
-
-                  </div>
-                </div>
-                {showEnquiryForm && (
+{showEnquiryForm && (
         <EnquiryForm
           onClose={() => setShowEnquiryForm(false)}
         />
       )}
+    </div>  {/* ← closes the outermost <div className="min-h-screen …"> */}
+
+
+
+                  </div>
+                </div>
               </div>
   )
 };
