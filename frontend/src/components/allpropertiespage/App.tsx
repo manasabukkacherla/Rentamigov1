@@ -11,6 +11,7 @@ import { FiltersPanel } from './components/FiltersPanel';
 import { VoiceSearch } from './components/VoiceSearch';
 import { searchProperties, formatSearchSummary, formatNearbySuggestion, extractSearchCriteria } from './utils/searchUtils';
 import axios from 'axios';
+import ListingTypeSelector from '../updatedpropertyForms/ListingTypeSelector';
 
 function Allproperties() {
   const navigate = useNavigate();
@@ -126,9 +127,16 @@ function Allproperties() {
     const results = searchResults.exact;
     return results;
   }, [searchResults]);
-
-  const handlePropertyClick = (propertyId: string) => {
-    navigate(`/detailprop/${propertyId}`);
+  console.log(sortedResults)
+  
+  const handlePropertyClick = (propertyname:string,propertyId: string) => {
+    if(propertyname!='PL' && propertyname!='AG'){
+      navigate(`/detailprop/${propertyId}`);
+    }
+    else{
+      navigate(`/agriplot/${propertyId}`);
+    }
+    
   };
 
   return (
@@ -186,14 +194,22 @@ function Allproperties() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {sortedResults.map((property) => (
-              <div
+              (<div
                 key={property.id}
-                onClick={() => handlePropertyClick(property.propertyId)}
+                onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
                 className="cursor-pointer"
               >
+
                 <PropertyCard property={property} />
+                
+                
+                
               </div>
-            ))}
+              
+              
+            )))}
+            
+            
           </div>
         )}
       </main>
