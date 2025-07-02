@@ -3,78 +3,78 @@ import { Building2, Bath, Bed, MapPin, IndianRupee, ChevronLeft, ChevronRight, H
 import { Property } from '../App';
 import axios from 'axios';
 
-// const properties = [
-//   {
-//     id: 1,
-//     title: 'Modern Apartment with City View',
-//     location: 'Electronic City Phase 1, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800',
-//     price: '24.5',
-//     beds: 3,
-//     baths: 2,
-//     area: '1,500',
-//     type: 'Apartment',
-//     status: 'Ready to Move',
-//     featured: true,
-//     rating: 4.8
-//   },
-//   {
-//     id: 2,
-//     title: 'Luxury Villa with Garden',
-//     location: 'Whitefield, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-//     price: '18.2',
-//     beds: 3,
-//     baths: 2,
-//     area: '2,200',
-//     type: 'Villa',
-//     status: 'Under Construction',
-//     featured: false,
-//     rating: 4.5
-//   },
-//   {
-//     id: 3,
-//     title: 'Spacious Condominium',
-//     location: 'HSR Layout, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800',
-//     price: '22.4',
-//     beds: 4,
-//     baths: 3,
-//     area: '1,800',
-//     type: 'Condo',
-//     status: 'Ready to Move',
-//     featured: false,
-//     rating: 4.7
-//   },
-//   {
-//     id: 4,
-//     title: 'Premium Lake View Apartment',
-//     location: 'Koramangala, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
-//     price: '32.8',
-//     beds: 4,
-//     baths: 3,
-//     area: '2,100',
-//     type: 'Apartment',
-//     status: 'Ready to Move',
-//     featured: true,
-//     rating: 4.9
-//   },
-//   {
-//     id: 5,
-//     title: 'Garden View Penthouse',
-//     location: 'Indiranagar, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800',
-//     price: '45.2',
-//     beds: 5,
-//     baths: 4,
-//     area: '3,200',
-//     type: 'Penthouse',
-//     status: 'Under Construction',
-//     featured: false,
-//     rating: 4.6
-//   }
-// ];
+const properties = [
+  {
+    id: 1,
+    title: 'Modern Apartment with City View',
+    location: 'Electronic City Phase 1, Bangalore',
+    image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800',
+    price: '24.5',
+    beds: 3,
+    baths: 2,
+    area: '1,500',
+    type: 'Apartment',
+    status: 'Ready to Move',
+    featured: true,
+    rating: 4.8
+  },
+  {
+    id: 2,
+    title: 'Luxury Villa with Garden',
+    location: 'Whitefield, Bangalore',
+    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
+    price: '18.2',
+    beds: 3,
+    baths: 2,
+    area: '2,200',
+    type: 'Villa',
+    status: 'Under Construction',
+    featured: false,
+    rating: 4.5
+  },
+  {
+    id: 3,
+    title: 'Spacious Condominium',
+    location: 'HSR Layout, Bangalore',
+    image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800',
+    price: '22.4',
+    beds: 4,
+    baths: 3,
+    area: '1,800',
+    type: 'Condo',
+    status: 'Ready to Move',
+    featured: false,
+    rating: 4.7
+  },
+  {
+    id: 4,
+    title: 'Premium Lake View Apartment',
+    location: 'Koramangala, Bangalore',
+    image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
+    price: '32.8',
+    beds: 4,
+    baths: 3,
+    area: '2,100',
+    type: 'Apartment',
+    status: 'Ready to Move',
+    featured: true,
+    rating: 4.9
+  },
+  {
+    id: 5,
+    title: 'Garden View Penthouse',
+    location: 'Indiranagar, Bangalore',
+    image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800',
+    price: '45.2',
+    beds: 5,
+    baths: 4,
+    area: '3,200',
+    type: 'Penthouse',
+    status: 'Under Construction',
+    featured: false,
+    rating: 4.6
+  }
+];
 
 const propertyTypeIcons: Record<string, React.FC> = {
   'Apartment': Building2,
