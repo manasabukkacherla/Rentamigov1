@@ -20,7 +20,7 @@ router.get("/tech-enquiries", async (req: Request, res: Response) => {
         email: e.email,
         phone: e.phone,
         message: e.message,
-        // propertyId: e.propertyId,
+        // propertyInterest: e.propertyInterest,
         status: e.status,
         createdAt: e.createdAt,
         updatedAt: e.updatedAt
