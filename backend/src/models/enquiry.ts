@@ -5,8 +5,11 @@ export interface Enquiry extends Document {
   email: string;
   phone: string;
   message: string;
-  // propertyId: string;
-  status: 'new' | 'contacted' | 'converted' | 'lost' | 'pending';
+  propertyId: string;
+  propertyType: string;
+  propertyName: string;
+  createdBy: Schema.Types.ObjectId | null;
+  // status: 'new' | 'contacted' | 'converted' | 'lost' | 'pending';
   // isOtpVerified: boolean;
   // selectedServices: string[];
   createdAt: Date;
@@ -35,14 +38,14 @@ const EnquirySchema = new Schema({
     required: true,
     trim: true
   },
-  // propertyId: {
-  //   type: String,
-  //   ref: 'Property'
-  // },
-  status: {
+  propertyId: {
     type: String,
-    enum: ['new', 'contacted', 'converted', 'lost', 'pending'],
-    default: 'new'
+    ref: 'Property'
+  },
+  propertyType: {
+    type: String,
+    enum: ['rent','sell','lease','pg/co-living','Rent','Sale','Sell','Lease','PG/Co-Living'],
+    // default: 'new'
   },
   createdAt: {
     type: Date,
@@ -51,6 +54,13 @@ const EnquirySchema = new Schema({
   updatedAt: {
     type: Date,
     default: Date.now,
+  },
+  
+  createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
+  propertyName:{
+    type:String,
+    required:true,
+    trim:true
   },
   // isOtpVerified: {
   //   type: Boolean,
@@ -64,4 +74,4 @@ const EnquirySchema = new Schema({
   timestamps: true
 });
 
-export const EnquiryModel: Model<Enquiry> = mongoose.model<Enquiry>('enquiry', EnquirySchema);
+export const EnquiryModel: Model<Enquiry> = mongoose.model<Enquiry>('enquiries', EnquirySchema);

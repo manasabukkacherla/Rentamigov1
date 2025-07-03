@@ -82,18 +82,30 @@ export interface FilterSectionProps {
   type: FilterSectionType;
 }
 
+interface PropertyMetadata {
+  createdBy?: string;
+  createdAt?: string; // Store as ISO string
+  contact?: {
+    name?: string;
+    email?: string;
+    phone?: string;
+  };
+  postedBy?: {
+    type?: string;
+    name?: string;
+  };
+}
+
 // Unified Property Card Interface
 export interface Property {
   id: string;
   propertyId: string;
   title: string;
   type: PropertyType;
-  propertyName:string;
+  propertyName: string;
   listingType: ListingType;
   price: number;
   location: string;
-  // bhkType: BHKType;
-  // bathrooms: number;
   furnishing: FurnishingType;
   area: number;
   image: string;
@@ -101,4 +113,5 @@ export interface Property {
   sharing?: SharingType;
   status: PropertyStatus;
   intent: PropertyIntent;
+  metadata?: PropertyMetadata;
 }

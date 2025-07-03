@@ -52,7 +52,7 @@ import { Document } from "mongoose";
 
 import residentialPgmainRoutes from "./routes/residential/residentialPgmain"; // <-- PG main 
 import commercialPlotRoutes from "./routes/commercial/commercialPlotRoutes";
-// import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
+import commercialrentcultureRoutes from "./routes/commercial/commercialRentAgricultureRoutes";
 import commercialRentOthersRoutes from "./routes/commercial/commercialRentOthersRoutes";
 import commercialRentWarehouseRoutes from "./routes/commercial/commercialRentWarehouseRoutes";
 import commercialRentOfficeSpaceRoutes from "./routes/commercial/CommercialRentOfficeSpace";
@@ -228,11 +228,11 @@ app.use("/api/subscription", Subscriptionrouter);
 //Token plan routes
 app.use("/api/tokens", TokenRouter);
 
-app.use("/api", enquiryRoutes);
 app.use("/api/sign", signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes);
 //app.use("/api/leads", leadsRouter);
+app.use("/api/enquiry", enquiryRoutes);
 
 app.use("/api/user", userRouter);
 app.use("/api/blog", blogRouter);
@@ -269,7 +269,7 @@ app.use("/api/commercial/lease/sheds",commercialLeaseShedRoutes);
 
 //rent routes
 
-// app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
+app.use("/api/commercial/rent/agriculture", commercialrentcultureRoutes);
 app.use("/api/commercial/rent/others", commercialRentOthersRoutes);
 app.use("/api/commercial/rent/office-space", commercialRentOfficeSpaceRoutes);
 app.use("/api/commercial/rent/warehouses", commercialRentWarehouseRoutes);
