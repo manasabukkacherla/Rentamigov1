@@ -3,41 +3,40 @@ import { Enquiry, EnquiryModel } from "../models/enquiry";
 import transporter from "../utils/emailservice";
 import sendOtpService from "../services/sendOtpService";
 
-
 const router = express.Router();
 
 /**
  * POST: Send OTP
  */
-router.get("/tech-enquiries", async (req: Request, res: Response) => {
-  try {
-    const enquiries = await EnquiryModel.find({ email: "tech@rentamigo.in" });
-    res.status(200).json({
-      success: true,
-      enquiries: enquiries.map(e => ({
-        _id: e._id,
-        name: e.name,
-        email: e.email,
-        phone: e.phone,
-        message: e.message,
-        // propertyId: e.propertyId,
-        status: e.status,
-        createdAt: e.createdAt,
-        updatedAt: e.updatedAt
-      }))
-    });
-  } catch (error: any) {
-    console.error("Error fetching tech enquiries:", error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch enquiries"
-    });
-  }
-});
+// router.get("/tech-enquiries", async (req: Request, res: Response) => {
+//   try {
+//     const enquiries = await EnquiryModel.find({ email: "tech@rentamigo.in" });
+//     res.status(200).json({
+//       success: true,
+//       enquiries: enquiries.map(e => ({
+//         _id: e._id,
+//         name: e.name,
+//         email: e.email,
+//         phone: e.phone,
+//         message: e.message,
+//         // propertyInterest: e.propertyInterest,
+//         // status: e.status,
+//         createdAt: e.createdAt,
+//         updatedAt: e.updatedAt
+//       }))
+//     });
+//   } catch (error: any) {
+//     console.error("Error fetching tech enquiries:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch enquiries"
+//     });
+//   }
+// });
 
 router.post("/send-otp", async (req: Request, res: Response) => {
   const { name, email, contactNumber } = req.body;
-
+  
   if (!name || !email || !contactNumber) {
     return res.status(400).json({ success: false, message: "All fields are required." });
   }
@@ -66,10 +65,20 @@ router.post("/send-otp", async (req: Request, res: Response) => {
 /**
  * POST: Submit Form
  */
-router.post("/enquiry/submit", async (req: Request, res: Response) => {
-  const { name, email, phone, message } = req.body;
+router.post("/submit", async (req: Request, res: Response) => {
+  console.log('Received enquiry submission:', req.body); // Add this line for debugging
+  const { 
+    name, 
+    email,  
+    phone, 
+    message, 
+    createdBy,
+    propertyId,
+    propertyType,
+    propertyName
+  } = req.body;
 
-  if (!name || !email || !phone || !message) {
+  if (!name || !email || !phone || !message || !createdBy || !propertyId || !propertyType || !propertyName) {
     return res.status(400).json({
       success: false,
       message: "Name, email, contact number, verification status, and services are required.",
@@ -79,13 +88,15 @@ router.post("/enquiry/submit", async (req: Request, res: Response) => {
   try {
     // Save the enquiry to the database
     const newEnquiry = new EnquiryModel({
-      name:name,
-      email:email,
-      phone: phone,
-      message: message,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      status: "pending",
+      name,
+      email,
+      phone,
+      message,
+      createdBy,
+      propertyId,
+      propertyType,
+      propertyName,
+      // status: "pending",
       // isOtpVerified: isVerified,
       // selectedServices,
     });
@@ -113,6 +124,7 @@ router.post("/enquiry/submit", async (req: Request, res: Response) => {
       <p><strong>Contact Number:</strong> ${savedEnquiry.phone}</p>
       <p><strong>Message:</strong> ${savedEnquiry.message}</p>
       <p><strong>Submission Date:</strong> ${savedEnquiry.createdAt}</p>
+      
     `;
 
     // Send email to the user

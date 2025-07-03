@@ -1,107 +1,223 @@
-import React from 'react';
-import { Phone, Calendar, Clock, Search, Plus, Filter } from 'lucide-react';
-import type { Lead } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Plus, Filter } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
-interface LeadsProps {
-  leads: Lead[];
+interface FormData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  createdBy: string | null;
+  propertyId: string;
+  propertyType: string;
+  propertyName: string;
+  message: string;
+  createdAt: string;
 }
 
-const LeadStatusBadge: React.FC<{ status: Lead['status'] }> = ({ status }) => {
-  const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-  const statusClasses = {
-    'new': "bg-gray-900 text-white dark:bg-white dark:text-gray-900",
-    'contacted': "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white",
-    'viewing-scheduled': "bg-gray-300 text-gray-900 dark:bg-gray-600 dark:text-white",
-    'negotiating': "bg-gray-400 text-white dark:bg-gray-500 dark:text-white",
-    'converted': "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900",
-    'lost': "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+interface LeadsProps {}
+
+const Leads: React.FC<LeadsProps> = () => {
+  const [leads, setLeads] = useState<Array<FormData>>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isMessageVisible, setIsMessageVisible] = useState(false);
+  const [currentMessage, setCurrentMessage] = useState<string>('');
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    propertyType: '' as string,
+    createdBy: '' as string,
+    startDate: '' as string,
+    endDate: '' as string
+  });
+
+  const handleFilterChange = (field: keyof typeof filters, value: string) => {
+    setFilters(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  return (
-    <span className={`${baseClasses} ${statusClasses[status]}`}>
-      {status.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-    </span>
-  );
-};
+  const toggleMessage = (message: string) => {
+    setIsMessageVisible(!isMessageVisible);
+    setCurrentMessage(message);
+  };
 
-const Leads: React.FC<LeadsProps> = ({ leads }) => {
-  return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-light text-gray-900 dark:text-white tracking-tight">Leads Management</h2>
-        <button className="btn btn-primary flex items-center space-x-2">
-          <Plus className="w-4 h-4" />
-          <span>Add New Lead</span>
-        </button>
-      </div>
+  const fetchLeads = async () => {
+    try {
+      const response = await axios.get('/api/enquiry/enquiries');
+      setLeads(response.data.data);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching leads:', err);
+      setError('Failed to fetch leads. Please try again.');
+      toast.error('Failed to fetch leads. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <div className="mb-6 flex items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search leads..."
-            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-white"
-          />
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Leads</h2>
+        <div className="flex gap-4">
+          <button
+            onClick={() => setIsFilterVisible(!isFilterVisible)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm hover:bg-gray-50"
+          >
+            <Filter className="w-4 h-4" />
+            {isFilterVisible ? 'Hide Filters' : 'Show Filters'}
+          </button>
+          <button
+            onClick={() => navigate('/property/add')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            Add Lead
+          </button>
         </div>
-        <button className="btn btn-secondary flex items-center space-x-2">
-          <Filter className="w-4 h-4" />
-          <span>Filter</span>
-        </button>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+      {isFilterVisible && (
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Property Type</label>
+              <select
+                className="w-full p-2 border rounded-lg"
+                onChange={(e) => handleFilterChange('propertyType', e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option value="Flat">Flat</option>
+                <option value="House">House</option>
+                <option value="Plot">Plot</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Created By</label>
+              <select
+                className="w-full p-2 border rounded-lg"
+                onChange={(e) => handleFilterChange('createdBy', e.target.value)}
+              >
+                <option value="">All Users</option>
+                <option value="John Doe">John Doe</option>
+                <option value="Jane Smith">Jane Smith</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Date Range</label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  className="flex-1 p-2 border rounded-lg"
+                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                />
+                <input
+                  type="date"
+                  className="flex-1 p-2 border rounded-lg"
+                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white rounded-lg shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-gray-700">
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 dark:text-gray-400">Name</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 dark:text-gray-400">Property</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 dark:text-gray-400">Status</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 dark:text-gray-400">Priority</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 dark:text-gray-400">Contact</th>
-                <th className="text-left py-4 px-6 text-sm font-medium text-gray-500 dark:text-gray-400">Actions</th>
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Phone
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Property
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Type
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created By
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Message
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {leads.map((lead) => (
-                <tr key={lead.id} className="group hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                  <td className="py-4 px-6">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{lead.name}</div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">{lead.email}</div>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {leads
+                .filter(lead => {
+                  const matchesPropertyType = !filters.propertyType || lead.propertyType === filters.propertyType;
+                  const matchesCreatedBy = !filters.createdBy || lead.createdBy === filters.createdBy;
+                  const matchesDateRange = !filters.startDate || new Date(lead.createdAt) >= new Date(filters.startDate);
+                  return matchesPropertyType && matchesCreatedBy && matchesDateRange;
+                })
+                .map((lead) => (
+                <tr key={lead.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900">
+                          {lead.name}
+                        </div>
+                      </div>
                     </div>
                   </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-900 dark:text-white">{lead.propertyInterest}</div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{lead.email}</div>
                   </td>
-                  <td className="py-4 px-6">
-                    <LeadStatusBadge status={lead.status} />
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{lead.phone}</div>
                   </td>
-                  <td className="py-4 px-6">
-                    <span className={`text-sm font-medium ${
-                      lead.priority === 'high' 
-                        ? 'text-gray-900 dark:text-white' 
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}>
-                      {lead.priority.charAt(0).toUpperCase() + lead.priority.slice(1)}
-                    </span>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{lead.propertyName}</div>
                   </td>
-                  <td className="py-4 px-6">
-                    <div className="text-sm text-gray-900 dark:text-white">{lead.phone}</div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{lead.propertyType}</div>
                   </td>
-                  <td className="py-4 px-6">
-                    <div className="flex space-x-2">
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <Phone className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <Calendar className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                      </button>
-                      <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                        <Clock className="w-4 h-4 text-gray-600 dark:text-gray-300" />
-                      </button>
-                    </div>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{lead.createdBy}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => toggleMessage(lead.message)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      {isMessageVisible && currentMessage === lead.message ? 'Hide Message' : 'View Message'}
+                    </button>
+                    {isMessageVisible && currentMessage === lead.message && (
+                      <div className="mt-2 p-3 bg-gray-50 rounded">
+                        {currentMessage}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{new Date(lead.createdAt).toLocaleDateString()}</div>
                   </td>
                 </tr>
               ))}
