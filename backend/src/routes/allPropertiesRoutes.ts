@@ -68,7 +68,7 @@ const normalizeProperty = (item: any) => ({
         item.propertyDetails?.builtUpAreaSqft || item.propertyDetails?.superBuiltUpAreaSqft || 
         item.Agriculturelanddetails?.totalArea || item.propertySize || item.propertyDetails?.builtUpAreaSqft || 
         item.propertyDetails?.superBuiltUpAreaSqft || item.plotDetails?.totalPlotArea || item.plotDetails?.totalArea ||  0,
-        image: item.media?.photos?.exterior?.[0] || item.media?.photos?.plot?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
+        image: item.media?.photos?.exterior?.[0] || item.media?.photos?.plot?.[0] || item.media?.photos?.exterior?.[0] || 'https://via.placeholder.com/400x300?text=No+Image',
         postedDate: item.metadata?.createdAt instanceof Date ? item.metadata.createdAt.toISOString().slice(0, 10): '',
         status: (item.metadata?.status || item.metaData?.status || 'Available') ,
         intent: item.metadata?.intent || item.metaData?.intent || '',
