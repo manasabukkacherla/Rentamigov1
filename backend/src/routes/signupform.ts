@@ -258,6 +258,16 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
     res.status(500).json({ error: "An error occurred during registration." });
   }
 });
+signupRouter.get("/users", async (req: Request, res: Response) => {
+  try {
+    const users = await User.find().select("-password"); // Exclude password field
+    res.status(200).json({ users });
+    console.log(users);
+  } catch (error) {
+    console.error("❌ Error fetching users:", error);
+    res.status(500).json({ error: "Server error, please try again." });
+  }
+})
 
 /**
  * 📌 GET /user/:id - Fetch User Details by ID
@@ -313,6 +323,7 @@ signupRouter.get("/employee/:id", async (req: Request, res: Response) => {
 });
 
 // update user details
+
 signupRouter.put("/user/update/:id", async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
