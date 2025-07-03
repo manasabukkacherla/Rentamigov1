@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Property } from '@/components/allpropertiespage/types';
+
 interface FormData {
   name: string;
   email: string;
@@ -11,14 +12,25 @@ interface FormData {
   message: string;
   createdAt: Date;
   updatedAt: Date;
-  status: string;
+  createdBy: string ;
+  propertyId: string;
+  propertyType: string;
+  propertyName: string;
+  
+  price:string,
   // selectedServices: string[];
   // isVerified: boolean;
 }
 
 export interface EnquiryFormProps {
   onClose: () => void;
-  property?: Property;
+  property?: {
+    price:string,
+    propertyId:string,
+    propertyType:string,
+    propertyName:string,
+    createdBy:string
+  }
 }
 
 export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
@@ -29,53 +41,23 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) =
     message: '',
     createdAt: new Date(),
     updatedAt: new Date(),
-    status: "pending",
+    price:'0',
+    createdBy: property?.createdBy || "",
+    propertyId: property?.propertyId || "",
+    propertyType:property?.propertyType || "",
+    propertyName: property?.propertyName || 'Unnamed property',
+    // price:property?.price || '0',
     // selectedServices: [],
     // isVerified: false
-    });
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   console.log(formData)
-  //   try {
-  //     const response = await fetch('/api/enquiry/submit', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({
-  //         name: formData.name,
-  //         email: formData.email,
-  //         phone: formData.phone,
-  //         message:formData.message,
-  //         createdAt: formData.createdAt,
-  //         updatedAt: formData.updatedAt,
-  //         status: formData.status,  
-  //         // selectedServices: formData.selectedServices,
-  //         // isVerified: formData.isVerified
-  //       })
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (data.success) {
-  //       // Show success message
-  //       alert('Enquiry submitted successfully!');
-  //       onClose();
-  //     } else {
-  //       throw new Error(data.message || 'Failed to submit enquiry');
-  //     }
-  //   } catch (error) {
-  //     console.error('Error submitting enquiry:', error);
-  //     alert('Failed to submit enquiry. Please try again.');
-  //   }
-  // };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     console.log(formData)
+    console.log(property)
 
     try {
       const user = sessionStorage.getItem('user');
@@ -83,9 +65,17 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) =
         return;
       }
 
-
       const transformedData = {
-        ...formData,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        createdBy: formData.createdBy,
+        propertyId: formData.propertyId,
+        propertyType: formData.propertyType,
+        propertyName: formData.propertyName,
+        createdAt: formData.createdAt,
+        updatedAt: formData.updatedAt
       };
 
       const response = await axios.post('/api/enquiry/submit', transformedData, {
@@ -119,7 +109,7 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) =
         <form onSubmit={handleSubmit} className="space-y-4">
           {property && (
             <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <h3 className="font-medium text-gray-900">Property: {property.title}</h3>
+              <h3 className="font-medium text-gray-900">Property: {property.propertyName}</h3>
               <p className="text-sm text-gray-600">
                 Price: ₹{property.price}
               </p>

@@ -22,8 +22,8 @@ import { ChatNotification } from "@/components/chatbott/types/chat";
 interface SidebarProps {
   darkMode: boolean;
   toggleDarkMode: () => void;
-  activeSection: string;
-  onSectionChange: (section: string) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -31,8 +31,8 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({
   darkMode,
   toggleDarkMode,
-  activeSection,
-  onSectionChange,
+  activeTab,
+  onTabChange,
   isOpen,
   onClose,
 }) => {
@@ -100,7 +100,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "users", icon: Users, label: "Users" },
     { id: "notifications", icon: Bell, label: "Notifications" },
     { id: "settings", icon: Settings, label: "Settings" },
-    { id: "messages", icon: MessageCircle, label: "My Messages" },
+    { id: "messages", icon: MessageCircle, label: "My Messages" },
   ];
 
   const handleLogout = () => {
@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 flex items-center z-30">
         <div className="flex-1 flex items-center justify-between px-4 max-w-[100vw]">
           <button
-            onClick={() => onSectionChange("menu")}
+            onClick={() => onTabChange("menu")}
             className="p-2 -ml-2 text-black hover:bg-gray-100 rounded-lg transition-colors"
           >
             <svg
@@ -180,60 +180,58 @@ const Sidebar: React.FC<SidebarProps> = ({
         lg:top-0 pt-0 lg:pt-0
       `}
       >
-       <div className="flex flex-col h-full justify-between">
-  {/* Header */}
-  <div>
-    <div className="p-2">
-      <h1 className="text-xl font-bold text-black">PropManager</h1>
-    </div>
+        <div className="flex flex-col h-full justify-between">
+          {/* Header */}
+          <div>
+            <div className="p-2">
+              <h1 className="text-xl font-bold text-black">PropManager</h1>
+            </div>
 
-    {/* Menu */}
-    <div className="flex flex-col gap-y-4 px-2 mt-2">
-      {menuItems.map((item) => {
-        const Icon = item.icon;
-        return (
-          <button
-            key={item.id}
-            onClick={() => onSectionChange(item.id)}
-            className={`w-full flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ${
-              activeSection === item.id ? "bg-gray-100 text-black" : ""
-            }`}
-          >
-            <Icon className="w-5 h-5 mr-3" />
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
-    </div>
+            {/* Menu */}
+            <div className="flex flex-col gap-y-4 px-2 mt-2">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onTabChange(item.id)}
+                    className={`w-full flex items-center px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors ${
+                      isActive ? "bg-gray-100 text-black" : ""
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 mr-3" />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-    {/* Chat Support */}
-    <div className="px-3 py-2">
-      <button
-        onClick={toggleChatbot}
-        className={`w-full flex items-center text-gray-600 hover:bg-gray-100 py-2 px-2 rounded-lg transition-colors ${
-          showChatbot ? "bg-gray-100 text-black" : ""
-        }`}
-      >
-        <MessageCircle className="w-5 h-5 mr-3" />
-        <span>Chat Support</span>
-      </button>
-    </div>
-  </div>
+            {/* Chat Support */}
+            <div className="px-3 py-2">
+              <button
+                onClick={toggleChatbot}
+                className={`w-full flex items-center text-gray-600 hover:bg-gray-100 py-2 px-2 rounded-lg transition-colors ${
+                  showChatbot ? "bg-gray-100 text-black" : ""
+                }`}
+              >
+                <MessageCircle className="w-5 h-5 mr-3" />
+                <span>Chat Support</span>
+              </button>
+            </div>
+          </div>
 
-  {/* Logout */}
-  <div className="px-3 py-2 border-t border-gray-200 mb-4">
-    <button
-      onClick={handleLogout}
-      className="flex items-center justify-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 rounded-lg transition-colors"
-    >
-      <LogOut className="w-4 h-4 mr-2" />
-      Logout
-    </button>
-  </div>
-</div>
-
-
-        
+          {/* Logout */}
+          <div className="px-3 py-2 border-t border-gray-200 mb-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center w-full px-4 py-2 text-sm text-black hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Chat Support View */}

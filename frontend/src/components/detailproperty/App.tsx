@@ -355,7 +355,71 @@ function Propdetail() {
   const { id: propertyId } = useParams<{ id: string }>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const allMedia = [propertyData.video, ...propertyData.images.map((img: { url: any; }) => img.url)];
-  const [property, setProperty] = useState<Property>({} as Property);
+  const [property, setProperty] = useState<Property>({
+  propertyId: '',
+  basicInformation: {
+    title: '',
+    Type: [],
+    address: {
+      city: '',
+      state: '',
+      country: '',
+      pincode: ''
+    },
+    location: {
+      latitude: '',
+      longitude: ''
+    },
+    landmark: '',
+    isCornerProperty: false
+  },
+  metadata: {
+    createdBy: null,
+    createdAt: new Date(),
+    propertyType: '',
+    intent: '',
+    propertyName: '',
+    status: ''
+  },
+  images: [],
+  video: '',
+  contactInformation: {
+    name: '',
+    email: '',
+    phone: '',
+    alternatePhone: '',
+    bestTimeToContact: ''
+  },
+  media: {
+    photos: {
+      exterior: [],
+      interior: [],
+      floorPlan: [],
+      washrooms: [],
+      lifts: [],
+      emergencyExits: [],
+      aerial: [],
+      surroundings: []
+    },
+    videoTour: '',
+    documents: []
+  },
+  brokerage: {
+    required: '',
+    amount: 0
+  },
+  availability: {
+    type: '',
+    date: '',
+    immediate: false,
+    availableFrom: '',
+    availableImmediately: false,
+    preferredSaleDuration: '',
+    noticePeriod: '',
+    isPetsAllowed: false,
+    operatingHours: false
+  }
+});
   const [loading, setLoading] = useState(true);
   const [propertyMedia, setPropertyMedia] = useState<PropertyMedia>({} as PropertyMedia);
   const Media = [

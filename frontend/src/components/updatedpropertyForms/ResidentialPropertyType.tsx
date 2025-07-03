@@ -523,4 +523,3 @@ const ResidentialPropertyType = ({
 }
 
 export default ResidentialPropertyType
-
