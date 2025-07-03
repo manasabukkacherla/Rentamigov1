@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 // Notification Type
 export interface Notification {
   id: string;
@@ -39,6 +41,9 @@ export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
 
 // Plan Interface
 export interface Plan {
+  maxProperties: number;
+  tokensPerLead: ReactNode;
+  _id(arg0: string, _id: any, name: string, _id1: any): void;
   id: string;
   name: string;
   description: string;
@@ -52,6 +57,8 @@ export interface Plan {
 
 // Token Package Interface
 export interface TokenPackage {
+  _id: string;
+  bonusTokens: number;
   id: string;
   name: string;
   description: string;
