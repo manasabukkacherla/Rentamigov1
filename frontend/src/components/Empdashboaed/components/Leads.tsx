@@ -44,7 +44,7 @@ const Leads: React.FC<LeadsProps> = () => {
     setIsMessageVisible(!isMessageVisible);
     setCurrentMessage(message);
   };
-
+const navigate = useNavigate();
   const fetchLeads = async () => {
     try {
       const response = await axios.get('/api/enquiry/enquiries');

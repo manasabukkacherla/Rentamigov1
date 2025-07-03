@@ -1,17 +1,7 @@
-
-import React, { useState, useEffect, useCallback } from 'react';
-import { MapPin, Home, Square, Calendar, Edit2, Trash2, Check } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { MapPin, Square, Calendar, Edit2, Trash2, Check } from 'lucide-react';
 import { Property } from '../types/index';
 import { format } from 'date-fns';
-
-// Format a single image URL into a PropertyImage object
-function formatImage(url: string): PropertyImage {
-  return {
-    id: `main-${Date.now()}`,
-    url,
-    title: 'Property main image',
-  };
-}
 
 export interface PropertyImage {
   id: string;
@@ -25,6 +15,7 @@ export interface PropertyCardProps {
   onDelete?: (id: string) => Promise<void>;
   onEdit?: (id: string) => void;
   onStatusUpdate?: (id: string) => void;
+  onClick?: (propertyId: string) => void;
   showActions?: boolean;
   className?: string;
 }
@@ -35,12 +26,10 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onDelete,
   onEdit,
   onStatusUpdate,
+  onClick,
   showActions = true,
   className = ''
 }) => {
-  const [propertyMedia, setPropertyMedia] = useState<PropertyImage | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
@@ -89,147 +78,62 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   }, []);
 
-  // Handle image loading and errors
-  useEffect(() => {
-    const loadImage = async () => {
-      const imageUrl = property.image || property.imageUrl;
-      
-      if (!imageUrl) {
-        setError('No image available');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const formattedImage = formatImage(imageUrl);
-        setPropertyMedia(formattedImage);
-        setError(null);
-      } catch (err) {
-        console.error('Error loading image:', err);
-        setError('Failed to load image');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadImage();
-  }, [property.image, property.imageUrl]);
-
-  const handleDelete = useCallback(async () => {
-    if (!onDelete || !property.id) return;
+  const handleDelete = useCallback(async (id: string) => {
+    if (!onDelete) return;
 
     try {
       setIsDeleting(true);
-      await onDelete(property.id);
+      await onDelete(id);
     } catch (error) {
       console.error('Error deleting property:', error);
     } finally {
       setIsDeleting(false);
       setShowConfirmDelete(false);
     }
-  }, [onDelete, property.id]);
+  }, [onDelete]);
 
-  const handleEdit = useCallback(() => {
-    if (onEdit && property.id) {
-      onEdit(property.id);
+  const handleEdit = useCallback((id: string) => {
+    if (onEdit) {
+      onEdit(id);
     }
-  }, [onEdit, property.id]);
+  }, [onEdit]);
 
-  const handleStatusUpdate = useCallback(() => {
-    if (onStatusUpdate && property.id) {
-      onStatusUpdate(property.id);
+  const handleStatusUpdate = useCallback((id: string) => {
+    if (onStatusUpdate) {
+      onStatusUpdate(id);
     }
-  }, [onStatusUpdate, property.id]);
+  }, [onStatusUpdate]);
 
-  if (isLoading) {
-    return (
-      <div className={`bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm ${className}`}>
-        <div className="animate-pulse h-48 bg-gray-200"></div>
-        <div className="p-4">
-          <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-1"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className={`bg-white rounded-lg border border-red-200 p-4 text-red-500 ${className}`}>
-        {error}
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className={`bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm ${className}`}>
-        <div className="animate-pulse h-48 bg-gray-200"></div>
-        <div className="p-4">
-          <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-full mb-1"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-        </div>
-      </div>
-    );
-  }
-  // Property type mappings
-  const categoryCodes: Record<string, string> = {
-    residential: "RES",
-    commercial: "COM",
-    other: "OT",
-  };
-
-  const listingCodes: Record<string, string> = {
-    rent: "RE",
-    sell: "SE",
-    lease: "LE",
-    "pg/co-living": "PG",
-  };
-
-  const subCategoryCodes: Record<string, string> = {
-    shops: "SH",
-    "retail-store": "RS",
-    showrooms: "SR",
-    "office-space": "OS",
-    warehouses: "WH",
-    sheds: "SD",
-    "covered-space": "CS",
-    plots: "PL",
-    agriculture: "AG",
-    others: "OT",
-    apartment: "AP",
-    "independenthouse": "IH",
-    "builderfloor": "BF",
-    "shared-space": "SS",
-  };
-
-  // Parse property ID to get type information
-  let category = '';
-  let listing = '';
-  let propertyType = '';
-
-  if (property.propertyId) {
-    const categoryCode = property.propertyId.slice(3, 6);
-    const listingCode = property.propertyId.slice(6, 8);
-    const typeCode = property.propertyId.slice(8, 10);
-
-    category = Object.entries(categoryCodes).find(([_, code]) => code === categoryCode)?.[0] || '';
-    listing = Object.entries(listingCodes).find(([_, code]) => code === listingCode)?.[0] || '';
-    propertyType = Object.entries(subCategoryCodes).find(([_, code]) => code === typeCode)?.[0] || '';
-  }
+  const propertyType = property.type || 'Property';
 
   const postedDate = property.postedDate ? new Date(property.postedDate) : new Date();
   const formattedDate = format(postedDate, 'MMM d, yyyy');
 
+  const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    if (onClick && property.id) {
+      onClick(property.id);
+    }
+  };
+
+  const getListingType = () => {
+    return property.intent || 'Rent';
+  };
+
   return (
     <div
-      className={`bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full ${className}`}
+      className={`bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col h-full cursor-pointer ${className}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={handleCardClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick(e);
+        }
+      }}
     >
       {/* Image Section */}
       <div className="relative h-48 bg-gray-100">
@@ -264,7 +168,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleEdit();
+                if (property.id) handleEdit(property.id);
               }}
               className="p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
               aria-label="Edit property"
@@ -277,7 +181,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleDelete();
+                    if (property.id) handleDelete(property.id);
                   }}
                   disabled={isDeleting}
                   className="p-2 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600 transition-colors disabled:opacity-50"
@@ -321,7 +225,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
           <div className="flex-shrink-0 ml-2">
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${getIntentColor(property.intent || '')}`}>
-              {property.intent || listing || 'Rent'}
+              {getListingType()}
             </span>
           </div>
         </div>
@@ -375,7 +279,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                handleStatusUpdate();
+                if (property.id) handleStatusUpdate(property.id);
               }}
               className="mt-2 w-full py-1.5 text-sm font-medium rounded-md bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
             >

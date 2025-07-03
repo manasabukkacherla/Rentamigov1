@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Property } from "../types/index";
 import { PropertyCard } from "../components/PropertyCard";
 import { LoadingOverlay } from "../LoadingOverlay";
@@ -27,7 +28,9 @@ const initialProperties: Property[] = [
 ];
 
 export function Properties() {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
+
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"Available" | "Rented" | "Pending" | "All">("All");
@@ -202,6 +205,18 @@ export function Properties() {
     }
   }, [selectedPropertyId]);
 
+  // Handle property click
+  const handlePropertyClick = useCallback((propertyId: string) => {
+    const property = properties.find(p => p.id === propertyId);
+    if (!property || !property.propertyId) return;
+    
+    if (property.name === 'PL' || property.name === 'AG') {
+      navigate(`/agriplot/${property.propertyId}`);
+    } else {
+      navigate(`/detailprop/${property.propertyId}`);
+    }
+  }, [navigate, properties]);
+
   // Filter properties based on search and filters
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
@@ -299,6 +314,7 @@ export function Properties() {
               onDelete={handleDelete}
               onEdit={handleEdit}
               onStatusUpdate={handleStatusUpdate}
+              onClick={handlePropertyClick}
             />
           ))}
         </div>
@@ -323,10 +339,13 @@ export function Properties() {
             </div>
             <div className="space-y-3">
               {['Available', 'Rented', 'Pending'].map((status) => (
-                <button
+                <button 
                   key={status}
-                  onClick={() => handleStatusChange(status)}
-                  className="w-full text-left p-2 hover:bg-gray-50 rounded"
+                  className="btn btn-secondary btn-sm hover:scale-105 transition-transform"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleStatusChange(status);
+                  }}
                 >
                   {status}
                 </button>
