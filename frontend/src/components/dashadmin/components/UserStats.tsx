@@ -51,7 +51,30 @@ interface User{
 const UserStats = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchBy, setSearchBy] = useState<'id' | 'phone'>('id');
-  const [users, setUsers] = useState<User[]>([{_id:"",username:"",fullName:"",email:"",phone:"",address:"",city:"",state:"",role:"",acceptTerms:false,emailVerified:false,createdAt:"",updatedAt:"",__v:0,bio:"",image:"",instagram:"",linkedin:"",twitter:"",website:""}]);
+  const [users, setUsers] = useState<User[]>([
+    {
+      _id:"",
+      username:"",
+      fullName:"",
+      email:"",
+      phone:"",
+      address:"",
+      city:"",
+      state:"",
+      role:"",
+      acceptTerms:false,
+      emailVerified:false,
+      createdAt:"",
+      updatedAt:"",
+      __v:0,
+      bio:"",
+      image:"",
+      instagram:"",
+      linkedin:"",
+      twitter:"",
+      website:""
+    }
+  ]);
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -373,7 +396,7 @@ const UserStats = () => {
                 {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Last Active</th> */}
                 {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th> */}
                 {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th> */}
-                <th className="px-6 py-4 text-right text-sm font-semibold ml-500 text-gray-900">Type</th>
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Role</th>
 
               </tr>
             </thead>
