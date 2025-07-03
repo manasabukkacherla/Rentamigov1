@@ -8,7 +8,7 @@ export const PricingCard: React.FC<{property: Property; onEnquireClick?: () => v
   const [showMobilePricing, setShowMobilePricing] = useState(false);
   
   const PricingContent = () => {
-    if (property?.metadata?.intent === "sale" || property?.metadata?.intent === "Sale" || property?.metadata?.intent === "Sell" || property?.metadata?.intent === "sell") {
+    if (property?.metadata?.intent === "sale" || property?.metadata?.intent === "Sale") {
       return (
         <div className="space-y-4">
           <div className="bg-gray-50 p-3 rounded-lg">
@@ -23,7 +23,7 @@ export const PricingCard: React.FC<{property: Property; onEnquireClick?: () => v
             <div className="text-sm font-medium text-gray-500 mb-1">Price Type</div>
             <div className="flex justify-between items-center text-gray-900">
               <span className="font-medium">Type</span>
-              <span className="text-lg">{property?.pricingDetails?.pricetype || property?.priceDetails?.pricetype || "Not specified"}</span>
+              <span className="text-lg">{property?.metadata?.intent || "Not specified"}</span>
             </div>
           </div>
 
@@ -126,19 +126,19 @@ export const PricingCard: React.FC<{property: Property; onEnquireClick?: () => v
                 <div className="space-y-2 text-gray-900">
                   <div className="flex justify-between items-center">
                     <span>Water</span>
-                    <span>{property?.leaseTerms?.otherCharges?.water?.type === "exclusive" ? property?.leaseTerms?.otherCharges?.water?.amount : "Inclusive"}</span>
+                    <span>{property?.rentalTerms?.otherCharges?.water?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.water?.amount : "Inclusive"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Electricity</span>
-                    <span>{property?.leaseTerms?.otherCharges?.electricity?.type === "exclusive" ? property?.leaseTerms?.otherCharges?.electricity?.amount : "Inclusive"}</span>
+                    <span>{property?.rentalTerms?.otherCharges?.electricity?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.electricity?.amount : "Inclusive"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Gas</span>
-                    <span>{property?.leaseTerms?.otherCharges?.gas?.type === "exclusive" ? property?.leaseTerms?.otherCharges?.gas?.amount : "Inclusive"}</span>
+                    <span>{property?.rentalTerms?.otherCharges?.gas?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.gas?.amount : "Inclusive"}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Others</span>
-                    <span>{property?.leaseTerms?.otherCharges?.others?.type === "exclusive" ? property?.leaseTerms?.otherCharges?.others?.amount : "Inclusive"}</span>
+                    <span>{property?.rentalTerms?.otherCharges?.others?.type === "exclusive" ? property?.rentalTerms?.otherCharges?.others?.amount : "Inclusive"}</span>
                   </div>
                 </div>
               </div>
@@ -284,7 +284,16 @@ export const PricingCard: React.FC<{property: Property; onEnquireClick?: () => v
       </div>
 
       {showEnquiry && (
-        <EnquiryForm onClose={() => setShowEnquiry(false)} property={property}/>
+        <EnquiryForm 
+          onClose={() => setShowEnquiry(false)} 
+          property={{
+            price: (property?.pricingDetails?.propertyPrice || property?.priceDetails?.propertyPrice || "Not specified")?.toString() ?? "Not specified",
+            propertyId:property.propertyId,
+            propertyType:property.metadata.intent,
+            createdBy: property.metadata.createdBy?.toString() ?? "Not specified",
+            propertyName:property.basicInformation.title
+          }}
+        />
       )}
     </>
   );

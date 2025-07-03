@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
 import Leads from "./components/Leads";
@@ -8,11 +8,14 @@ import Notifications from "./components/Notifications";
 import Settings from "./components/Settings";
 import { Menu } from "lucide-react";
 import ConversationListPage from "../chatapp/pages/ConversationListPage";
+import axios from "axios";
 
 function Empapp() {
   const [darkMode, setDarkMode] = useState(false);
-  const [activeSection, setActiveSection] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [techEnquiries, setTechEnquiries] = useState<FormData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Enhanced mock data with comparative revenue streams
   const dashboardStats = {
@@ -95,6 +98,35 @@ function Empapp() {
     setSidebarOpen(!sidebarOpen);
   };
 
+  useEffect(() => {
+    const fetchTechEnquiries = async () => {
+      try {
+        const response = await axios.get('/api/enquiry/tech-enquiries');
+        const techEnquiries = response.data?.enquiries || [];
+
+        // Convert the data to match FormData interface
+        const formattedEnquiries = techEnquiries.map((enquiry: any) => ({
+          id: enquiry._id,
+          name: enquiry.name,
+          email: enquiry.email,
+          phone: enquiry.phone,
+          propertyInterest: '', // You might want to add this from your backend
+          status: enquiry.status,
+          priority: 'medium', // You might want to add this from your backend
+          createdAt: enquiry.createdAt
+        }));
+
+        setTechEnquiries(formattedEnquiries);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching tech enquiries:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchTechEnquiries();
+  }, []);
+
   return (
     <div
       className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${
@@ -112,9 +144,9 @@ function Empapp() {
       <Sidebar
         darkMode={darkMode}
         toggleDarkMode={toggleDarkMode}
-        activeSection={activeSection}
-        onSectionChange={(section) => {
-          setActiveSection(section);
+        activeTab={activeTab}
+        onTabChange={(tab: string) => {
+          setActiveTab(tab);
           setSidebarOpen(false);
         }}
         isOpen={sidebarOpen}
@@ -127,15 +159,15 @@ function Empapp() {
         }`}
       >
         <div className="pt-16 lg:pt-0">
-          {activeSection === "dashboard" && (
+          {activeTab === "dashboard" && (
             <Dashboard stats={dashboardStats} />
           )}
-          {activeSection === "leads" && <Leads leads={dashboardStats.leads} />}
-          {activeSection === "properties" && <Properties />}
-          {activeSection === "users" && <Users />}
-          {activeSection === "notifications" && <Notifications />}
-          {activeSection === "settings" && <Settings />}
-          {activeSection === "messages" && <ConversationListPage />}
+          {activeTab === "leads" && <Leads leads={techEnquiries} onClose={() => setActiveTab('dashboard')} />}
+          {activeTab === "properties" && <Properties />}
+          {activeTab === "users" && <Users />}
+          {activeTab === "notifications" && <Notifications />}
+          {activeTab === "settings" && <Settings />}
+          {activeTab === "messages" && <ConversationListPage />}
         </div>
       </div>
     </div>
