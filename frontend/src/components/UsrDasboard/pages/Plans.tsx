@@ -285,7 +285,7 @@ function Plans() {
                           {plan.tokensPerLead} tokens per lead
                         </span>
                       </div>
-                      {plan.features.map((feature, index) => (
+                      {plan?.features?.map((feature, index) => (
                         <div key={index} className="flex items-center">
                           <CheckCircle2 className="w-5 h-5 text-green-500 mr-3" />
                           <span className="text-gray-600">{feature}</span>
@@ -298,9 +298,9 @@ function Plans() {
                       onClick={() =>
                         handlePayment(
                           "subscription",
-                          plan._id,
+                          plan.id,
                           plan.name,
-                          plan._id
+                          plan.id
                         )
                       }
                     >
@@ -317,10 +317,10 @@ function Plans() {
         {activeTab === "tokens" && !loading && (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {tokenPackages.map((token) => {
-              const isCurrentPackage = token._id === currentTokenPackageId;
+              const isCurrentPackage = token.id === currentTokenPackageId;
               return (
                 <div
-                  key={token._id}
+                  key={token.id}
                   className={`bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-200 hover:scale-105 relative ${
                     isCurrentPackage ? "ring-2 ring-gray-800" : ""
                   }`}
@@ -356,7 +356,7 @@ function Plans() {
                       )}
                     </div>
                     <div className="space-y-4">
-                      {token.features.map((feature, index) => (
+                      {token?.features?.map((feature, index) => (
                         <div key={index} className="flex items-center">
                           <CheckCircle2 className="w-5 h-5 text-green-500 mr-3" />
                           <span className="text-gray-600">{feature}</span>
@@ -367,7 +367,7 @@ function Plans() {
                   <div className="p-6 bg-gray-50">
                     <button
                       onClick={() =>
-                        handlePayment("token", token._id, token.name, token._id)
+                        handlePayment("token", token.id, token.name, token.id)
                       }
                     >
                       Purchase Tokens
