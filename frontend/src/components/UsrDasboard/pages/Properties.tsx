@@ -4,6 +4,7 @@ import { Property } from "../types/index";
 import { PropertyCard } from "../components/PropertyCard";
 import { LoadingOverlay } from "../LoadingOverlay";
 import axios from "axios";
+import Allproperties from "@/components/allpropertiespage/App";
 
 // Type guard to check if the error is an AxiosError
 interface AxiosError {
@@ -32,6 +33,7 @@ export function Properties() {
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("All");
   const [intentFilter, setIntentFilter] = useState<string>("All");
+  const [newProperty, setNewProperty] = useState<Property []>([]);
   
   // Memoized filtered properties
   const filteredProperties = useMemo(() => {
@@ -83,6 +85,7 @@ export function Properties() {
           const all: any[] = [];
           for (const groupKey in grouped) {
             const category = grouped[groupKey];
+
             for (const subType in category) {
               const items = category[subType];
               if (Array.isArray(items)) {
@@ -111,13 +114,15 @@ export function Properties() {
           imageUrl: property.image || property.imageUrl || 'https://via.placeholder.com/300',
           propertyId: property.propertyId || property.id,
           listingType: property.listingType || 'Standard',
-          postedDate: property.postedDate || new Date().toISOString()
+          postedDate: property.postedDate || new Date().toISOString(),
+        createdBy: property.userId || property.createdBy
         }));
         
         if (isMounted) {
           setProperties(finalProperties);
           setIsLoading(false);
         }
+  
       } catch (error: unknown) {
         console.error("Error fetching user properties:", error);
         if (isMounted) {
@@ -146,6 +151,20 @@ export function Properties() {
     };
   }, []);
 
+    useEffect(() => {
+      const user = sessionStorage.getItem("userId");
+      const token = sessionStorage.getItem("token");
+      console.log(properties);
+      properties.filter((property: any) => {
+        if(property.createdBy === user){
+          setNewProperty(prev => [...prev, property]);
+        }
+      })
+    }, [properties]);
+
+  
+  console.log(newProperty);
+  
   // Handle property deletion
   const handleDelete = useCallback(async (id: string) => {
     if (window.confirm("Are you sure you want to delete this property?")) {
@@ -174,6 +193,16 @@ export function Properties() {
   if (isLoading) {
     return <LoadingOverlay />;
   }
+
+  const handlePropertyClick = (propertyname:string,propertyId: string) => {
+    if(propertyname!='PL' && propertyname!='AG'){
+      navigate(`/detailprop/${propertyId}`);
+    }
+    else{
+      navigate(`/agriplot/${propertyId}`);
+    }
+    
+  };
 
   return (
     <div className="p-6">
@@ -230,16 +259,16 @@ export function Properties() {
       </div>
 
       {/* Properties Grid */}
-      {filteredProperties.length > 0 ? (
+      {newProperty.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
+          {newProperty.map((property) => (
             <PropertyCard
               key={property.id}
               property={property}
               onDelete={handleDelete}
               onEdit={() => handleEdit(property.id)}
               onStatusUpdate={() => handleStatusUpdate(property.id)}
-              onClick={() => navigate(`/property/${property.id}`)}
+              onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
             />
           ))}
         </div>
