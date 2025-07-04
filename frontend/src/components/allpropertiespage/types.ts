@@ -114,4 +114,5 @@ export interface Property {
   status: PropertyStatus;
   intent: PropertyIntent;
   metadata?: PropertyMetadata;
+  createdBy: string;
 }

@@ -1,3 +1,14 @@
+import { ReactNode } from "react";
+
+// Notification Type
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type?: 'success' | 'error' | 'info' | 'warning';
+  timestamp?: Date;
+}
+
 // Property-related Union Types
 export type PropertyType =
   | 'Apartment'
@@ -27,6 +38,38 @@ export type SharingType =
 export type PropertyStatus = 'Available' | 'Rented' | 'Under Maintenance';
 
 export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
+
+// Plan Interface
+export interface Plan {
+  maxProperties: number;
+  tokensPerLead: ReactNode;
+  _id(arg0: string, _id: any, name: string, _id1: any): void;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  duration: number; // in days
+  isPopular?: boolean;
+  features?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Token Package Interface
+export interface TokenPackage {
+  _id: string;
+  bonusTokens: number;
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  tokens: number;
+  isPopular?: boolean;
+  features?: string[];
+  validityDays?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
 // Unified Property Card Interface
 export interface Property {

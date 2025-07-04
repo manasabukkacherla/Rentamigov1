@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Dashboard } from "./pages/Dashboard";
 import { Properties } from "./pages/Properties";
-import { Leads } from "./pages/Leads";
+import Leads from "./pages/Leads";
 import { Settings } from "./pages/Settings";
 import { Notifications } from "./pages/Notifications";
 import { ToastContainer } from "./ToastContainer";
@@ -40,7 +40,9 @@ function UsrDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar onNewNotification={function (notification: Notification): void {
+        throw new Error("Function not implemented.");
+      } } />
 
       {/* Main Content */}
       <main className="lg:ml-64 min-h-screen pt-14 lg:pt-16">
