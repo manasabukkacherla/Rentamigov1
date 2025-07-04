@@ -154,7 +154,7 @@ export function Properties() {
     useEffect(() => {
       const user = sessionStorage.getItem("userId");
       const token = sessionStorage.getItem("token");
-      console.log(properties);
+      // console.log(properties);
       properties.filter((property: any) => {
         if(property.createdBy === user){
           setNewProperty(prev => [...prev, property]);
@@ -163,7 +163,7 @@ export function Properties() {
     }, [properties]);
 
   
-  console.log(newProperty);
+  // console.log(newProperty);
   
   // Handle property deletion
   const handleDelete = useCallback(async (id: string) => {

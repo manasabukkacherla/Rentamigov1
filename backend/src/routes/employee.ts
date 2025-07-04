@@ -171,10 +171,10 @@ Employeerouter.get("/active-change", async (req, res) => {
  */
 Employeerouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    console.log("reacged here");
+    // console.log("reacged here");
     const { id } = req.params;
     // const newId = id.userId;
-    console.log("this is id", id);
+    // console.log("this is id", id);
     // Validate ID format
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       return res
