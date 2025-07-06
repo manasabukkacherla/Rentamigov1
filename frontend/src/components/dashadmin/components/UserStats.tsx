@@ -91,65 +91,68 @@ const UserStats = () => {
     };
     fetchUsers();
   }, []);
-  
+  let admin=0;
+  let employee=0;
+  let owner=0;
+  let tenant=0;
+  let agent=0;
+  let usertype=0;
+  users.map((user)=>{
+    if(user.role==='admin') admin++;
+    else if(user.role==='employee') employee++;
+    else if(user.role==='owner') owner++;
+    else if(user.role==='tenant') tenant++;
+    else if(user.role==='agent') agent++;
+    else usertype++;
+    
+  })
   const stats = [
     {
-      title: 'Total Users',
-      value: '15,847',
-      change: '+12.5%',
-      period: 'vs last month',
-      icon: Users
+      title: 'Admin',
+      value: admin,
     },
     {
-      title: 'Active Users',
-      value: '12,543',
-      change: '+8.2%',
-      period: 'vs last month',
-      icon: Activity
+      title: 'Employee',
+      value: employee,
     },
     {
-      title: 'New Users (Today)',
-      value: '247',
-      change: '+15.3%',
-      period: 'vs yesterday',
-      icon: UserCircle
+      title: 'Owner',
+      value: owner,
     },
     {
-      title: 'Avg. Session Time',
-      value: '24m 30s',
-      change: '+5.7%',
-      period: 'vs last month',
-      icon: Clock
-    }
+      title: 'Tenant',
+      value: tenant,
+    },
+    {
+      title: 'Agent',
+      value: agent,
+    },
+    {
+      title: 'User',
+      value: usertype,
+    },
   ];
-
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const usersType=['admin','employee','owner','tenant','agent','user'];
 
   const userGrowthData = {
-    labels: months,
+    labels: usersType,
     datasets: [
       {
-        label: 'Total Users',
-        data: [8500, 9200, 10100, 11000, 11800, 12500, 13200, 13800, 14500, 15000, 15500, 15847],
+        label: 'User Type',
+        data: [admin, employee, owner, tenant, agent,usertype],
         borderColor: 'rgb(0, 0, 0)',
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         tension: 0.4
       },
-      {
-        label: 'Active Users',
-        data: [6800, 7400, 8100, 8800, 9400, 10000, 10600, 11000, 11600, 12000, 12300, 12543],
-        borderColor: 'rgb(128, 128, 128)',
-        backgroundColor: 'rgba(128, 128, 128, 0.1)',
-        tension: 0.4
-      }
+      
     ]
   };
-
+  
   const userTypeData = {
-    labels: ['Premium Users', 'Standard Users', 'Free Users'],
+    labels: ['admin', 'employee', 'owner', 'tenant', 'agent', 'user'],
     datasets: [
       {
-        data: [4235, 6512, 5100],
+        data: [admin, employee, owner, tenant, agent,usertype],
         backgroundColor: [
           'rgba(0, 0, 0, 0.8)',
           'rgba(0, 0, 0, 0.5)',
@@ -226,22 +229,12 @@ const UserStats = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, index) => {
-          const Icon = stat.icon;
           return (
             <div key={index} className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
-                <Icon className="w-5 h-5 text-gray-400" />
               </div>
               <p className="text-xl md:text-2xl font-semibold text-gray-900">{stat.value}</p>
-              <div className="flex items-center mt-2">
-                <span className={`text-sm ${
-                  stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stat.change}
-                </span>
-                <span className="text-sm text-gray-500 ml-2">{stat.period}</span>
-              </div>
             </div>
           );
         })}
