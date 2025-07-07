@@ -104,6 +104,42 @@ interface societyAmenities {
   smarthometechnology: string[]
   otheritems: string[];
 }
+interface RentalTerms {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  };
+  securityDeposit: {
+    amount: number;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount: number;
+      type: string;
+    };
+    electricity: {
+      amount: number;
+      type: string;
+    };
+    gas: {
+      amount: number;
+      type: string;
+    };
+    others: {
+      amount: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+}
 
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
@@ -177,6 +213,7 @@ interface IResidentialRentApartment extends Document {
   }
   flatAmenities: flatamenities;
   societyAmenities: societyAmenities;
+  rentalTerms: RentalTerms;
   availability: availability;
   media: IMedia;
   metadata: IMetadata;
@@ -236,6 +273,7 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
       tankerSupply: { type: Boolean, required: false },
     },
   },
+
   restrictions: {
 
     foodPreference: { type: String, required:false },
@@ -289,6 +327,42 @@ const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
     communityculturalspaces: { type: [String], required: false },
     smarthometechnology: { type: [String], required: false },
     otheritems: { type: [String], required: false },
+  },
+   rentalTerms: {
+    rentDetails: {
+      expectedRent: {type: Number, required: false},
+      isNegotiable: {type: Boolean, required: false},
+      rentType: {type: String, required: false},
+    },
+    securityDeposit: {
+      amount: {type: Number, required: false},
+    },
+    maintenanceAmount: {
+      amount: {type: Number, required: false},
+      frequency: {type: String, required: false},
+    },
+    otherCharges: {
+      water: {
+        amount: {type: Number, required: false},
+        type: {type: String, required: false},
+      },
+      electricity: {
+        amount: {type: Number, required: false},
+        type: {type: String, required: false},
+      },
+      gas: {
+        amount: {type: Number, required: false},
+        type: {type: String, required: false},
+      },
+      others: {
+        amount: {type: Number, required: false},
+        type: {type: String, required: false},
+      },
+    },
+    brokerage: {
+      required: {type: String, required: false},
+      amount: {type: Number, required: false},
+    },
   },
   availability: {
     type: { type: String, required: false },
