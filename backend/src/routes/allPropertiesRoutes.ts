@@ -62,7 +62,10 @@ const normalizeProperty = (item: any) => ({
   propertyName: item.metadata?.propertyName || item.metaData?.propertyName || '',
   type: item.metadata?.propertyType || item.metaData?.propertyType || '',
   listingType: 'Owner',
-  price: item.rent?.expectedRent || item.rentalTerms?.rentDetails?.expectedRent || item.rentalDetails?.expectedRent || item.pricingDetails?.propertyPrice || item.priceDetails?.propertyPrice || item.price?.expectedPrice || item.leaseTerms?.leaseDetails?.leaseAmount?.amount || item.leaseAmount?.amount || item.leaseTerms?.leaseTerms?.leaseDetails?.leaseAmount?.amount || item.leaseTerms?.leaseAmount?.amount || 0,
+  price: item.rent?.expectedRent || item.rentalTerms?.rentDetails?.expectedRent || 
+  item.rentalDetails?.expectedRent || item.pricingDetails?.propertyPrice || item.priceDetails?.propertyPrice || 
+  item.price?.expectedPrice || item.leaseTerms?.leaseDetails?.leaseAmount?.amount || item.leaseAmount?.amount
+   || item.leaseTerms?.leaseTerms?.leaseDetails?.leaseAmount?.amount || item.leaseTerms?.leaseAmount?.amount || 0,
   area: item.propertyDetails?.area?.totalArea || item.propertyDetails?.area?.totalArea || item.propertySize || item.propertyDetails?.totalArea ||
     item.propertyDetails?.builtUpAreaSqft || item.propertyDetails?.superBuiltUpAreaSqft ||
     item.Agriculturelanddetails?.totalArea || item.propertySize || item.propertyDetails?.builtUpAreaSqft ||
@@ -127,9 +130,9 @@ router.get('/all', async (req: any, res: any) => {
       ResidentialRentBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialRentIndependent.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
 
-      ResidentialSaleApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      ResidentialSaleApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft priceDetails.propertyPrice media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialSaleBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
-      SaleIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      SaleIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft priceDetails.propertyPrice media.photos.exterior propertyDetails.furnishingStatus'),
       SalePlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
 
       ResidentialLeaseApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft leaseTerms.leaseDetails.leaseAmount.amount media.photos.exterior propertyDetails.furnishingStatus'),
