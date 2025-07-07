@@ -113,6 +113,19 @@ interface IMetadata {
   updatedBy: Schema.Types.ObjectId | string;
   updatedAt: Date;
 }
+interface priceDetails {
+  propertyPrice: number;
+  pricetype: string;
+}
+interface registration {
+  chargestype: string;
+  registrationAmount: number;
+  stampDutyAmount: number;
+}
+interface brokerage {
+  required: string;
+  amount: number;
+}
 
 interface availability {
   type: string;
@@ -151,6 +164,9 @@ interface IResidentialSaleIndependentHouse extends Document {
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: propertyDetails;
+  priceDetails: priceDetails;
+  registration: registration;
+  brokerage: brokerage;
   restrictions?: {
     foodPreference?: string;
     petsAllowed?: string;
@@ -266,6 +282,19 @@ const ResidentailsaleIndependentHouseSchema = new Schema<IResidentialSaleIndepen
     communityculturalspaces: { type: [String], required: false },
     smarthometechnology: { type: [String], required: false },
     otheritems: { type: [String], required: false },
+  },
+  priceDetails: {
+    propertyPrice: { type: Number, required: false },
+    pricetype: { type: String, required: false },
+  },
+  registration: {
+    chargestype: { type: String, required: false },
+    registrationAmount: { type: Number, required: false },
+    stampDutyAmount: { type: Number, required: false },
+  },
+  brokerage: {
+    required: { type: String, required: false },
+    amount: { type: Number, required: false },
   },
   availability: {
     type: { type: String, required: false },
