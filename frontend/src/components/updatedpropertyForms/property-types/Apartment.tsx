@@ -17,11 +17,12 @@ import axios from "axios"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
 import ResidentialPropertyMediaUpload from '../ResidentialPropertyMediaUpload'
-
-// interface ApartmentProps {
-//   propertyId: string
-//   onSubmit?: () => void
-// }
+import Brokerage from "../residentialrent/Brokerage"
+import Rent from "../residentialrent/Rent"
+import SecurityDeposit from "../residentialrent/SecurityDeposit"
+import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
+import OtherCharges from "../residentialrent/OtherCharges"
+import RentDetails from "@/components/fullpages/Rent_monthly"
 
 interface Address {
   flatNo: number;
@@ -127,6 +128,43 @@ interface FlatAmenities {
   exhaustFan: number;
 }
 
+interface RentalTerms {
+  rentDetails: {
+    expectedRent: number;
+    isNegotiable: boolean;
+    rentType: string;
+  };
+  securityDeposit: {
+    amount: number;
+  };
+  maintenanceAmount: {
+    amount: number;
+    frequency: string;
+  };
+  otherCharges: {
+    water: {
+      amount: number;
+      type: string;
+    };
+    electricity: {
+      amount: number;
+      type: string;
+    };
+    gas: {
+      amount: number;
+      type: string;
+    };
+    others: {
+      amount: number;
+      type: string;
+    };
+  };
+  brokerage: {
+    required: string;
+    amount?: number;
+  };
+}
+
 interface SocietyAmenities {
   powerutility: string[];
   parkingtranspotation: string[];
@@ -188,6 +226,42 @@ interface FormData {
   restrictions: Restrictions;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
+  rentalTerms: {
+    rentDetails: {
+      expectedRent: number,
+      isNegotiable: boolean,
+      rentType: string
+    },
+    securityDeposit: {
+      amount: number
+    },
+    maintenanceAmount: {
+      amount: number,
+      frequency: string
+    },
+    otherCharges: {
+      water: {
+        amount: number,
+        type: string
+      },
+      electricity: {
+        amount: number,
+        type: string
+      },
+      gas: {
+        amount: number,
+        type: string
+      },
+      others: {
+        amount: number,
+        type: string
+      }
+    },
+    brokerage: {
+      required: string,
+      amount?: number
+    },
+  };
   availability: {
     type: "immediate" | "specific";
     date: string;
@@ -309,6 +383,43 @@ const Apartment = () => {
       smarthometechnology: [],
       otheritems: []
     },
+    rentalTerms:{
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: "inclusive",
+      },
+      securityDeposit: {
+        amount: 0,
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: "monthly",
+      },
+      otherCharges: {
+        water: {
+          amount: 0,
+          type: "inclusive",
+        },
+        electricity: {
+          amount: 0,
+          type: "inclusive",
+        },
+        gas: {
+          amount: 0,
+          type: "inclusive",
+        },
+        others: {
+          amount: 0,
+          type: "inclusive",
+        },
+      },
+      brokerage: {
+        required: "no",
+        amount: 0,
+      },
+    },
+    
     availability: {
       type: "immediate",
       date: "",
@@ -442,6 +553,43 @@ const Apartment = () => {
       communityculturalspaces: [],
       smarthometechnology: [],
       otheritems: []
+    },
+    rentalTerms: {
+      rentDetails: {
+        expectedRent: 0,
+        isNegotiable: false,
+        rentType: "inclusive"
+      },
+      securityDeposit: {
+        amount: 0
+
+      },
+      maintenanceAmount: {
+        amount: 0,
+        frequency: "monthly"
+      },
+      otherCharges:{
+        water:{
+          amount:0,
+          type:"inclusive"
+        },
+        electricity:{
+          amount:0,
+          type:"inclusive"
+        },
+        gas:{
+          amount:0,
+          type:"inclusive"
+        },
+        others:{
+          amount:0,
+          type:"inclusive"
+        }
+      },
+      brokerage: {
+        required: "no",
+        amount: 0
+      }
     },
     availability: {
       type: "immediate",
@@ -652,6 +800,85 @@ const Apartment = () => {
       ),
     },
     {
+      title: "Rental Terms",
+      icon: <IndianRupee className="w-6 h-6" />,
+      content: (
+        <div className="space-y-8">
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <Rent
+                rentDetails={formData.rentalTerms.rentDetails}
+                onRentChange={(rent) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    rentDetails: {
+                      expectedRent: rent.expectedRent,
+                      isNegotiable: rent.isNegotiable,
+                      rentType: rent.rentType,
+                    },
+                  },
+                }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <SecurityDeposit
+                deposit={formData.rentalTerms.securityDeposit}
+                onSecurityDepositChange={(deposit) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: {
+                    ...prev.rentalTerms,
+                    securityDeposit: deposit
+                  }
+                }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <MaintenanceAmount
+                maintenanceAmount={formData.rentalTerms.maintenanceAmount}
+                onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+              <OtherCharges
+                otherCharges={formData.rentalTerms.otherCharges}
+                onOtherChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: { ...prev.rentalTerms, otherCharges: charges }
+                }))}
+              />
+
+            </div>
+          </div>
+
+          <div className="space-y-8">
+
+            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <Brokerage
+                bro={formData.rentalTerms.brokerage}
+                onBrokerageChange={(brokerage) => setFormData(prev => ({
+                  ...prev,
+                  rentalTerms: { ...prev.rentalTerms, brokerage: brokerage }
+                }))}
+              />
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
       content: (
@@ -808,7 +1035,7 @@ const Apartment = () => {
           // Set the propertyId from the response
           setPropertyId(response.data.propertyId);
           toast.success('Property listing created successfully!');
-          setFormData({...initialFormData} as FormData);
+          setFormData({...initialFormData as FormData});
         }
       } else {
         navigate('/login');

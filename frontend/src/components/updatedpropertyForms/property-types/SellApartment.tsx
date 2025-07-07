@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2, DollarSign } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
 import MapSelector from "../MapSelector"
@@ -10,12 +10,17 @@ import PropertyFeatures from "../PropertyFeatures"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import ResidentialPropertyMediaUpload from '../ResidentialPropertyMediaUpload'
+import Price from "../sell/Price"
+import RegistrationCharges from "../sell/RegistrationCharges"
+import Brokerage from "../residentialrent/Brokerage"
 import AvailabilityDate from "../AvailabilityDate"
 import Restrictions from "../Restrictions"
 import FinalSteps from "../FinalSteps"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
+import PriceDetails from "../CommercialComponents/PriceDetails"
+import PricePerSqft from "../sell/PricePerSqft"
 
 interface Address {
   flatNo: number;
@@ -175,36 +180,20 @@ interface availableitems {
 }
 
 interface pricedetails {
-  propertyprice: number;
-  pricetype: 'negotiable' | 'fixed';
-  pricepersqft: number;
-  stampcharges: {
-    chargestype: 'inclusive' | 'exclusive';
-    registrationcharges: number;
-    stampdutycharges: number;
-    othercharges: {
-      watercharges: {
-        type: 'inclusive' | 'exclusive';
-        amount: number;
-      };
-      electricitycharges: {
-        type: 'inclusive' | 'exclusive';
-        amount: number;
-      };
-      gascharges: {
-        type: 'inclusive' | 'exclusive';
-        amount: number;
-      };
-      othercharges: {
-        type: 'inclusive' | 'exclusive';
-        amount: number;
-      };
-    };
-    brokerage: {
-      type: 'yes' | 'no';
-      amount: number;
-    };
-  };
+  propertyPrice: number;
+  pricetype: string;
+     
+}
+
+interface registration {
+  chargestype: string;
+  registrationAmount?: number;
+  stampDutyAmount?: number;
+}
+
+interface brokerage {
+  required: string;
+  amount?: number;
 }
 
 interface IMetadata {
@@ -217,7 +206,7 @@ interface IMetadata {
 }
 
 interface availability {
-  type: "immediate" | "specific";
+  type: string;
   date: string;
 }
 
@@ -269,6 +258,8 @@ interface FormData {
   flatAmenities: flatamenities;
   societyAmenities: societyAmenities;
   priceDetails: pricedetails;
+  registration: registration;
+  brokerage: brokerage;
   media: IMedia;
   metadata: IMetadata;
   availability: availability;
@@ -385,36 +376,20 @@ const initialFormData = {
     otheritems: []
   },
   priceDetails: {
-    propertyprice: 0,
-    pricetype: 'negotiable' as 'negotiable' | 'fixed',
-    pricepersqft: 0,
-    stampcharges: {
-      chargestype: 'inclusive' as 'inclusive' | 'exclusive',
-      registrationcharges: 0,
-      stampdutycharges: 0,
-      othercharges: {
-        watercharges: {
-          type: 'inclusive' as 'inclusive' | 'exclusive',
-          amount: 0
-        },
-        electricitycharges: {
-          type: 'inclusive' as 'inclusive' | 'exclusive',
-          amount: 0
-        },
-        gascharges: {
-          type: 'inclusive' as 'inclusive' | 'exclusive',
-          amount: 0
-        },
-        othercharges: {
-          type: 'inclusive' as 'inclusive' | 'exclusive',
-          amount: 0
-        }
-      },
-      brokerage: {
-        type: 'no' as 'yes' | 'no',
-        amount: 0
-      }
-    }
+   propertyPrice: 0,
+   pricetype: "",
+
+  
+       
+  },
+  registration: {
+    chargestype: "",
+    registrationAmount: 0,
+    stampDutyAmount: 0
+  },
+  brokerage: {
+    required: "",
+    amount: 0
   },
   media: {
     photos: {
@@ -562,37 +537,20 @@ const SellApartment = () => {
       otheritems: []
     },
     priceDetails: {
-      propertyprice: 0,
+      propertyPrice: 0,
       pricetype: 'negotiable' as 'negotiable' | 'fixed',
-      pricepersqft: 0,
-      stampcharges: {
-        chargestype: 'inclusive' as 'inclusive' | 'exclusive',
-        registrationcharges: 0,
-        stampdutycharges: 0,
-        othercharges: {
-          watercharges: {
-            type: 'inclusive' as 'inclusive' | 'exclusive',
-            amount: 0
-          },
-          electricitycharges: {
-            type: 'inclusive' as 'inclusive' | 'exclusive',
-            amount: 0
-          },
-          gascharges: {
-            type: 'inclusive' as 'inclusive' | 'exclusive',
-            amount: 0
-          },
-          othercharges: {
-            type: 'inclusive' as 'inclusive' | 'exclusive',
-            amount: 0
-          }
+    },
+    registration: {
+        chargestype: "",
+        registrationAmount: 0,
+        stampDutyAmount: 0
+        
         },
         brokerage: {
-          type: 'no' as 'yes' | 'no',
+          required: "",
           amount: 0
-        }
-      }
-    },
+        },
+      
     media: {
       photos: {
         exterior: [],
@@ -753,7 +711,7 @@ const SellApartment = () => {
                       ...prev,
                       propertyDetails: {
                         ...prev.propertyDetails,
-                        propertysize: size
+                        propertysize: size,
                       }
                     }));
                   }}
@@ -809,6 +767,48 @@ const SellApartment = () => {
                   }))}
                 />
               </div>
+            </div>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "Pricing Details",
+      icon: <DollarSign className="w-5 h-5" />,
+      content: (
+        <div className="space-y-6">
+          <Price onPriceChange={(price) => setFormData(prev => ({
+            ...prev,
+            priceDetails: {
+              ...prev.priceDetails,
+              propertyPrice: price.propertyPrice,
+              pricetype: price.pricetype || 'fixed',
+            }
+          }))} />
+          <div className="space-y-4 text-black">
+            <div className="text-black">
+              <RegistrationCharges
+                onRegistrationChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    ...prev.registration,
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
+                  }
+                }))} />  
+            </div>
+            <div className="text-black">
+              <Brokerage 
+              bro={formData.brokerage}
+              onBrokerageChange={(brokerage) => setFormData({
+                ...formData,
+                brokerage: {
+                    required: brokerage.required || 'No',
+                    amount: parseFloat(brokerage.amount?.toString() || '0')
+                  }
+                })}
+              />
             </div>
           </div>
         </div>
@@ -954,6 +954,19 @@ const SellApartment = () => {
 
       const transformedData = {
         ...formData,
+        priceDetails: {
+          ...formData.priceDetails,
+          
+        },
+        registration: {
+          ...formData.registration,
+          registrationAmount: formData.registration.registrationAmount || 0,
+          stampDutyAmount: formData.registration.stampDutyAmount || 0
+        },
+        brokerage: {
+          ...formData.brokerage,
+          amount: formData.brokerage.amount || 0
+        },
         media: convertedMedia,
         metadata: {
           createdBy: author,
@@ -974,7 +987,7 @@ const SellApartment = () => {
       if (response.data.success) {
         setPropertyId(response.data.propertyId);
         toast.success('Property listing created successfully!');
-        setFormData({ ...initialFormData, availability: { ...initialFormData.availability, type: initialFormData.availability.type as "immediate" | "specific" } });
+        setFormData({ ...initialFormData});
       }
     } catch (error) {
       console.error('Error submitting form:', error);
