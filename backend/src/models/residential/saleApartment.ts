@@ -104,7 +104,19 @@ interface societyAmenities {
   smarthometechnology: string[]
   otheritems: string[];
 }
-
+interface priceDetails {
+  propertyPrice: number;
+  pricetype: string;
+}
+interface registration {
+  chargestype: string;
+  registrationAmount?: number;
+  stampDutyAmount?: number;
+}
+interface brokerage {
+  required: string;
+  amount?: number;
+}
 interface IMetadata {
   createdBy: Schema.Types.ObjectId | string;
   createdAt: Date;
@@ -151,6 +163,9 @@ interface IResidentialSaleApartment extends Document {
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: propertyDetails;
+  priceDetails: priceDetails;
+  registration: registration;
+  brokerage: brokerage;
   restrictions: {
     foodPreference: string;
     petsAllowed: string;
@@ -268,6 +283,19 @@ const ResidentailSaleApartmentSchema = new Schema<IResidentialSaleApartment>({
     communityculturalspaces: { type: [String] },
     smarthometechnology: { type: [String] },
     otheritems: { type: [String] },
+  },
+  priceDetails: {
+    propertyPrice: { type: Number },
+    pricetype: { type: String },
+  },
+  registration: {
+    chargestype: { type: String },
+    registrationAmount: { type: Number },
+    stampDutyAmount: { type: Number },
+  },
+  brokerage: {
+    required: { type: String },
+    amount: { type: Number },
   },
   availability: {
     type: { type: String },

@@ -91,8 +91,13 @@ export const Properties: React.FC = () => {
     ? properties 
     : properties.filter(p => p.status === filter);
 
-  const handlePropertyClick = (propertyId: string) => {
-    navigate(`/detailprop/${propertyId}`);
+  const handlePropertyClick = (propertyname:string,propertyId: string) => {
+    if(propertyname=='PL' || propertyname=='AG'){
+      navigate(`/agriplot/${propertyId}`);
+    }
+    else{
+      navigate(`/detailprop/${propertyId}`);
+    }
   };
 
   if (loading) {
@@ -145,7 +150,7 @@ export const Properties: React.FC = () => {
                 <td>
                   <button 
                     className="btn btn-secondary btn-sm hover:scale-105 transition-transform"
-                    onClick={() => handlePropertyClick(property.propertyId)}
+                    onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
                   >
                     View Details
                   </button>
