@@ -34,6 +34,73 @@ const router = express.Router();
 //   }
 // });
 
+router.post("/enquiry", async (req: Request, res: Response) => {
+  try {
+    const { name, email, phone, propertyType, propertyName, message } = req.body;
+    
+    const newEnquiry = new EnquiryModel({
+      name,
+      email,
+      phone,
+      propertyType,
+      propertyName,
+      message,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    const savedEnquiry = await newEnquiry.save();
+    res.status(201).json({ success: true, data: savedEnquiry });
+  } catch (error: any) {
+    console.error("Error creating enquiry:", error);
+    if (error.name === 'ValidationError') {
+      res.status(400).json({ success: false, message: error.message });
+    } else {
+      res.status(500).json({ success: false, message: "Failed to create enquiry" });
+    }
+  }
+});
+
+router.get("/enquiry/:id", async (req: Request, res: Response) => {
+  try {
+    const enquiry = await EnquiryModel.findById(req.params.id);
+    if (!enquiry) {
+      return res.status(404).json({ success: false, message: "Enquiry not found" });
+    }
+    res.status(200).json({ success: true, data: enquiry });
+  } catch (error: any) {
+    console.error("Error fetching enquiry:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch enquiry" });
+  }
+});
+
+router.put("/enquiry/:id", async (req: Request, res: Response) => {
+  try {
+    const enquiry = await EnquiryModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        propertyType: req.body.propertyType,
+        propertyName: req.body.propertyName,
+        message: req.body.message,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!enquiry) {
+      return res.status(404).json({ success: false, message: "Enquiry not found" });
+    }
+
+    res.status(200).json({ success: true, data: enquiry });
+  } catch (error: any) {
+    console.error("Error updating enquiry:", error);
+    res.status(500).json({ success: false, message: "Failed to update enquiry" });
+  }
+});
+
 router.post("/send-otp", async (req: Request, res: Response) => {
   const { name, email, contactNumber } = req.body;
   

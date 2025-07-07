@@ -10,36 +10,40 @@ import {
   ArrowRight,
   User,
   Briefcase,
+  Edit2,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import type { DashboardStats, Lead } from "../types";
 
 interface DashboardProps {
   stats: DashboardStats;
 }
 
-const LeadStatusBadge: React.FC<{ status: Lead["status"] }> = ({ status }) => {
-  const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
-  const statusClasses = {
-    new: "bg-black text-white dark:bg-white dark:text-black",
-    contacted: "bg-gray-200 text-black dark:bg-gray-700 dark:text-white",
-    "viewing-scheduled":
-      "bg-gray-300 text-black dark:bg-gray-600 dark:text-white",
-    negotiating: "bg-gray-400 text-white dark:bg-gray-500 dark:text-white",
-    converted: "bg-black text-white dark:bg-white dark:text-black",
-    lost: "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
+  const navigate = useNavigate();
+
+  const LeadStatusBadge: React.FC<{ status: Lead["status"] }> = ({ status }) => {
+    const baseClasses = "px-2 py-1 rounded-full text-xs font-medium";
+    const statusClasses = {
+      new: "bg-black text-white dark:bg-white dark:text-black",
+      contacted: "bg-gray-200 text-black dark:bg-gray-700 dark:text-white",
+      "viewing-scheduled":
+        "bg-gray-300 text-black dark:bg-gray-600 dark:text-white",
+      negotiating: "bg-gray-400 text-white dark:bg-gray-500 dark:text-white",
+      converted: "bg-black text-white dark:bg-white dark:text-black",
+      lost: "bg-gray-200 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+    };
+
+    return (
+      <span className={`${baseClasses} ${statusClasses[status]}`}>
+        {status
+          .split("-")
+          .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ")}
+      </span>
+    );
   };
 
-  return (
-    <span className={`${baseClasses} ${statusClasses[status]}`}>
-      {status
-        .split("-")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ")}
-    </span>
-  );
-};
-
-const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
   const [employee, setEmployee] = useState({
     name: "Loading...",
     role: "Loading...",
@@ -49,30 +53,69 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userId = sessionStorage.getItem("userId");
-      if (!userId) {
-        console.error("User ID not found in session. Please log in again.");
+      const user = sessionStorage.getItem("user");
+      if (!user) {
+        console.error("User data not found in session. Please log in again.");
         return;
       }
 
       try {
-        const response = await fetch(`/api/employees/${userId}`);
-        const data = await response.json();
+        const userData = JSON.parse(user);
+        if (!userData || !userData.id) {
+          console.error("Invalid user data in session");
+          return;
+        }
 
-        if (response.ok) {
-          const employeeData = await response.json();
-          if (employeeData.success && employeeData.data) {
+        // Determine which API endpoint to use based on user role
+        const apiUrl = userData.role === 'employee' 
+          ? `/api/employee/${userData.id}`
+          : `/api/user/${userData.id}`;
+
+        try {
+          const response = await fetch(apiUrl, {
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (!response.ok) {
+            // Try to get the error message from the response
+            const errorText = await response.text();
+            console.error("API Error:", errorText);
+            return;
+          }
+
+          const data = await response.json();
+          
+          if (data.success) {
+            // The backend returns user data in the 'user' property
+            const userData = data.user || data.data;
             setEmployee({
-              name: employeeData.data.name || "User",
-              role: employeeData.data.role || "Unknown Role",
-              avatar: employeeData.data.avatar ||
+              name: userData.name || userData.name || "User",
+              role: userData.role || userData.role || "Unknown Role",
+              avatar: userData.avatar || userData.avatar ||
                 "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
             });
           } else {
-            console.error("Invalid response format:", employeeData);
+            console.error("API Error:", data);
+            // If the response is unsuccessful, use stored user data
+            setEmployee({
+              name: userData.name || "User",
+              role: userData.role || "Unknown Role",
+              avatar:
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+            });
           }
-        } else {
-          console.error("Error fetching user data:", response.statusText);
+        } catch (error) {
+          console.error("❌ Error fetching user details:", error);
+          // If any error occurs, use stored user data as fallback
+          setEmployee({
+            name: userData.name || "User",
+            role: userData.role || "Unknown Role",
+            avatar:
+              "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+          });
         }
       } catch (error) {
         console.error("❌ Error fetching user details:", error);
@@ -416,6 +459,12 @@ const Dashboard: React.FC<DashboardProps> = ({ stats }) => {
                         </button>
                         <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                           <Clock className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                        </button>
+                        <button 
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                          onClick={() => navigate(`/enquiryput/${lead.id}`)}
+                        >
+                          <Edit2 className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                         </button>
                       </div>
                     </td>
