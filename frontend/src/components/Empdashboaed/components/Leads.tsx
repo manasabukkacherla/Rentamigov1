@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Filter, Plus, Edit2, Trash } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Filter, Plus, Edit2, Trash, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -17,6 +17,15 @@ export interface Lead {
   createdAt: string;
 }
 
+interface EnquiryForm {
+  name: string;
+  email: string;
+  phone: string;
+  propertyType: string;
+  propertyName: string;
+  message: string;
+}
+
 const Leads: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,10 +38,42 @@ const Leads: React.FC = () => {
     startDate: '',
     endDate: ''
   });
+  const [showEnquiryModal, setShowEnquiryModal] = useState(false);
+  const [enquiryForm, setEnquiryForm] = useState<EnquiryForm>({
+    name: '',
+    email: '',
+    phone: '',
+    propertyType: '',
+    propertyName: '',
+    message: ''
+  });
 
   const navigate = useNavigate();
 
-  // 1) Fetch all leads
+  const handleFilterChange = useCallback((k: keyof typeof filters, v: string) => {
+    setFilters(f => ({ ...f, [k]: v }));
+  }, []);
+
+  const toggleMessage = useCallback((id: string) =>
+    setShowMsgFor(prev => (prev === id ? null : id)),
+  []
+  );
+
+  const handleDelete = useCallback((id: string) => {
+    if (!window.confirm('Delete this lead?')) return;
+    axios
+      .delete(`/api/enquiry/enquirydel/${id}`)
+      .then(() => {
+        toast.success('Deleted');
+        setLeads(l => l.filter(x => x.id !== id));
+      })
+      .catch(() => toast.error('Delete failed'));
+  }, []);
+
+  const handleEdit = useCallback((id: string) => {
+    navigate(`/leads/edit/${id}`);
+  }, [navigate]);
+
   useEffect(() => {
     axios
       .get('/api/enquiry/enquiries')
@@ -59,36 +100,54 @@ const Leads: React.FC = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const handleFilterChange = (k: keyof typeof filters, v: string) => {
-    setFilters(f => ({ ...f, [k]: v }));
-  };
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const toggleMessage = (id: string) =>
-    setShowMsgFor(prev => (prev === id ? null : id));
+  const handleSubmitEnquiry = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const response = await axios.post('/api/enquiry/enquiry', enquiryForm);
+      if (response.data.success) {
+        toast.success('Enquiry created successfully');
+        setShowEnquiryModal(false);
+        setEnquiryForm({
+          name: '',
+          email: '',
+          phone: '',
+          propertyType: '',
+          propertyName: '',
+          message: ''
+        });
+        // Refresh leads list
+        const res = await axios.get('/api/enquiry/enquiries');
+        const data: Lead[] = res.data.data.map((e: any) => ({
+          id: e._id,
+          name: e.name,
+          email: e.email,
+          phone: e.phone,
+          createdBy: e.createdBy,
+          propertyId: e.propertyId,
+          propertyType: e.propertyType,
+          propertyName: e.propertyName,
+          message: e.message,
+          createdAt: e.createdAt
+        }));
+        setLeads(data);
+      } else {
+        toast.error(response.data.message || 'Failed to create enquiry');
+      }
+    } catch (error: any) {
+      console.error('Error creating enquiry:', error);
+      toast.error(error.response?.data?.message || 'Failed to create enquiry');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [enquiryForm]);
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Delete this lead?')) return;
-    axios
-      .delete(`/api/enquiry/enquirydel/${id}`)
-      .then(() => {
-        toast.success('Deleted');
-        setLeads(l => l.filter(x => x.id !== id));
-      })
-      .catch(() => toast.error('Delete failed'));
-  };
+  const handleInputChange = useCallback((field: keyof EnquiryForm, value: string) => {
+    setEnquiryForm(prev => ({ ...prev, [field]: value }));
+  }, []);
 
-  // const handleEdit = (id: string) =>
-  //   navigate(`/leads/edit/${id}`);
-
-  const handleEdit = (id: string) => {
-    -    navigate(`/enquiryput/${id}`);
-    +    navigate(`/leads/edit/${id}`);
-       };
-
-  if (loading) return <div>Loading…</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
-
-  // 2) Apply filters
   const filtered = leads.filter(l => {
     const dt = new Date(l.createdAt);
     return (
@@ -98,6 +157,9 @@ const Leads: React.FC = () => {
       (!filters.endDate || dt <= new Date(filters.endDate))
     );
   });
+
+  if (loading) return <div>Loading…</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
 
   return (
     <div className="p-6 bg-white rounded-lg shadow overflow-auto">
@@ -111,7 +173,7 @@ const Leads: React.FC = () => {
             <Filter /> Filters
           </button>
           <button
-            onClick={() => navigate('/leads/add')}
+            onClick={() => setShowEnquiryModal(true)}
             className="px-3 py-1 bg-blue-600 text-white rounded flex items-center gap-1"
           >
             <Plus /> Add
@@ -213,6 +275,135 @@ const Leads: React.FC = () => {
           ))}
         </tbody>
       </table>
+
+      {/* Enquiry Modal */}
+      {showEnquiryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md transform transition-all duration-300 ease-in-out">
+            <div className="border-b border-gray-200 p-5">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-gray-900">Add New Enquiry</h3>
+                <button
+                  onClick={() => setShowEnquiryModal(false)}
+                  className="text-gray-400 hover:text-gray-500 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="mt-1 text-sm text-gray-500">Fill in the details to create a new enquiry</p>
+            </div>
+            <form onSubmit={handleSubmitEnquiry} className="p-6 space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                  <input
+                    type="text"
+                    value={enquiryForm.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    placeholder="Enter full name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                  <input
+                    type="email"
+                    value={enquiryForm.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    placeholder="Enter email address"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                  <input
+                    type="tel"
+                    value={enquiryForm.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    placeholder="Enter phone number"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Property Type</label>
+                  <select
+                    value={enquiryForm.propertyType}
+                    onChange={(e) => handleInputChange('propertyType', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    required
+                  >
+                    <option value="">Select Property Type</option>
+                    <option value="rent">For Rent</option>
+                    <option value="sell">For Sale</option>
+                    <option value="lease">For Lease</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Property Name</label>
+                  <input
+                    type="text"
+                    value={enquiryForm.propertyName}
+                    onChange={(e) => handleInputChange('propertyName', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    placeholder="Enter property name"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Message</label>
+                  <textarea
+                    value={enquiryForm.message}
+                    onChange={(e) => handleInputChange('message', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    rows={4}
+                    placeholder="Enter your message..."
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => setShowEnquiryModal(false)}
+                  className="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-lg bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-5 h-5 inline-block mr-2" />
+                      Create Enquiry
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
