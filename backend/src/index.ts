@@ -22,7 +22,6 @@ import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
 
 
-import enquiryRoutes from "./routes/enquiryRoutes";
 import signupRouter from "./routes/signupform"; // Replace with the correct file path for User
 import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
@@ -99,6 +98,7 @@ import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWar
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
 import allPropertiesRoutes from "./routes/allPropertiesRoutes";
+import enquiryRoutes from "./routes/enquiryRoutes";
 
 dotenv.config();
 
@@ -211,6 +211,7 @@ app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", Employeerouter); // Employee routes
 app.use("/api/service", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
+app.use("/api/enquiry", enquiryRoutes); // Tech Enquiry routes
 
 app.use("/api/forms", subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter);

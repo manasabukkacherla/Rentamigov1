@@ -45,6 +45,7 @@ import "react-toastify/dist/ReactToastify.css";
 import ErrorBoundary from "./components/blogs/ErrorBoundary";
 import { Toaster } from "react-hot-toast";
 import Notifications from "./components/Empdashboaed/components/Notifications";
+import EnquiryEdit from "./components/Empdashboaed/components/EnquiryEdit";
 import { useContext } from "react";
 import { SocketContext } from "./socketContext";
 import SellShowroomMain from "./components/updatedpropertyForms/commercialpropertytypes/SellShowroomMain";
@@ -88,7 +89,9 @@ const App = () => {
                   }
                 />
                 {/* Redirect "/" to "/Homepage" */}
-                <Route path="/" element={<Navigate to="/Homepage" replace />} />
+                <Route path="/" element={<Navigate to="/home" />} />
+                <Route path="/home" element={<Homepage />} />
+                <Route path="/leads/edit/:id" element={<EnquiryEdit />} />
                 {/* Public Routes */}
                 <Route path="/Homepage" element={<Homepage />} />
                 <Route path="/Aboutus" element={<AboutUs />} />

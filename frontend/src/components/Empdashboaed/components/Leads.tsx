@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter } from 'lucide-react';
+import { Filter, Plus, Edit2, Trash } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 
-interface FormData {
+export interface Lead {
   id: string;
   name: string;
   email: string;
@@ -17,214 +17,202 @@ interface FormData {
   createdAt: string;
 }
 
-interface LeadsProps {}
-
-const Leads: React.FC<LeadsProps> = () => {
-  const [leads, setLeads] = useState<Array<FormData>>([]);
+const Leads: React.FC = () => {
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isMessageVisible, setIsMessageVisible] = useState(false);
-  const [currentMessage, setCurrentMessage] = useState<string>('');
-  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showMsgFor, setShowMsgFor] = useState<string | null>(null);
   const [filters, setFilters] = useState({
-    propertyType: '' as string,
-    createdBy: '' as string,
-    startDate: '' as string,
-    endDate: '' as string
+    propertyType: '',
+    createdBy: '',
+    startDate: '',
+    endDate: ''
   });
 
-  const handleFilterChange = (field: keyof typeof filters, value: string) => {
-    setFilters(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
+  const navigate = useNavigate();
 
-  const toggleMessage = (message: string) => {
-    setIsMessageVisible(!isMessageVisible);
-    setCurrentMessage(message);
-  };
-const navigate = useNavigate();
-  const fetchLeads = async () => {
-    try {
-      const response = await axios.get('/api/enquiry/enquiries');
-      setLeads(response.data.data);
-      setError(null);
-    } catch (err: any) {
-      console.error('Error fetching leads:', err);
-      setError('Failed to fetch leads. Please try again.');
-      toast.error('Failed to fetch leads. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // 1) Fetch all leads
   useEffect(() => {
-    fetchLeads();
+    axios
+      .get('/api/enquiry/enquiries')
+      .then(res => {
+        const data: Lead[] = res.data.data.map((e: any) => ({
+          id: e._id,
+          name: e.name,
+          email: e.email,
+          phone: e.phone,
+          createdBy: e.createdBy,
+          propertyId: e.propertyId,
+          propertyType: e.propertyType,
+          propertyName: e.propertyName,
+          message: e.message,
+          createdAt: e.createdAt
+        }));
+        setLeads(data);
+      })
+      .catch(err => {
+        console.error(err);
+        setError('Failed to load leads.');
+        toast.error('Failed to load leads.');
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const handleFilterChange = (k: keyof typeof filters, v: string) => {
+    setFilters(f => ({ ...f, [k]: v }));
+  };
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
+  const toggleMessage = (id: string) =>
+    setShowMsgFor(prev => (prev === id ? null : id));
+
+  const handleDelete = (id: string) => {
+    if (!window.confirm('Delete this lead?')) return;
+    axios
+      .delete(`/api/enquiry/enquirydel/${id}`)
+      .then(() => {
+        toast.success('Deleted');
+        setLeads(l => l.filter(x => x.id !== id));
+      })
+      .catch(() => toast.error('Delete failed'));
+  };
+
+  // const handleEdit = (id: string) =>
+  //   navigate(`/leads/edit/${id}`);
+
+  const handleEdit = (id: string) => {
+    -    navigate(`/enquiryput/${id}`);
+    +    navigate(`/leads/edit/${id}`);
+       };
+
+  if (loading) return <div>Loading…</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
+  // 2) Apply filters
+  const filtered = leads.filter(l => {
+    const dt = new Date(l.createdAt);
+    return (
+      (!filters.propertyType || l.propertyType === filters.propertyType) &&
+      (!filters.createdBy || l.createdBy === filters.createdBy) &&
+      (!filters.startDate || dt >= new Date(filters.startDate)) &&
+      (!filters.endDate || dt <= new Date(filters.endDate))
+    );
+  });
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Leads</h2>
-        <div className="flex gap-4">
+    <div className="p-6 bg-white rounded-lg shadow overflow-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl">Leads</h2>
+        <div className="flex gap-2">
           <button
-            onClick={() => setIsFilterVisible(!isFilterVisible)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm hover:bg-gray-50"
+            onClick={() => setShowFilters(v => !v)}
+            className="px-3 py-1 border rounded flex items-center gap-1"
           >
-            <Filter className="w-4 h-4" />
-            {isFilterVisible ? 'Hide Filters' : 'Show Filters'}
+            <Filter /> Filters
           </button>
           <button
-            onClick={() => navigate('/property/add')}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            onClick={() => navigate('/leads/add')}
+            className="px-3 py-1 bg-blue-600 text-white rounded flex items-center gap-1"
           >
-            <Plus className="w-4 h-4" />
-            Add Lead
+            <Plus /> Add
           </button>
         </div>
       </div>
 
-      {isFilterVisible && (
-        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Property Type</label>
-              <select
-                className="w-full p-2 border rounded-lg"
-                onChange={(e) => handleFilterChange('propertyType', e.target.value)}
-              >
-                <option value="">All Types</option>
-                <option value="Flat">Flat</option>
-                <option value="House">House</option>
-                <option value="Plot">Plot</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Created By</label>
-              <select
-                className="w-full p-2 border rounded-lg"
-                onChange={(e) => handleFilterChange('createdBy', e.target.value)}
-              >
-                <option value="">All Users</option>
-                <option value="John Doe">John Doe</option>
-                <option value="Jane Smith">Jane Smith</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Date Range</label>
-              <div className="flex gap-2">
-                <input
-                  type="date"
-                  className="flex-1 p-2 border rounded-lg"
-                  onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                />
-                <input
-                  type="date"
-                  className="flex-1 p-2 border rounded-lg"
-                  onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                />
-              </div>
+      {showFilters && (
+        <div className="mb-4 p-4 bg-gray-50 rounded grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label>Type</label>
+            <select
+              className="w-full border p-2 rounded"
+              value={filters.propertyType}
+              onChange={e => handleFilterChange('propertyType', e.target.value)}
+            >
+              <option value="">All</option>
+              <option value="rent">rent</option>
+              <option value="sell">sell</option>
+              <option value="lease">lease</option>
+            </select>
+          </div>
+          <div>
+            <label>By</label>
+            <input
+              type="text"
+              className="w-full border p-2 rounded"
+              placeholder="Created By"
+              value={filters.createdBy}
+              onChange={e => handleFilterChange('createdBy', e.target.value)}
+            />
+          </div>
+          <div>
+            <label>Date</label>
+            <div className="flex gap-2">
+              <input
+                type="date"
+                className="flex-1 border p-2 rounded"
+                value={filters.startDate}
+                onChange={e => handleFilterChange('startDate', e.target.value)}
+              />
+              <input
+                type="date"
+                className="flex-1 border p-2 rounded"
+                value={filters.endDate}
+                onChange={e => handleFilterChange('endDate', e.target.value)}
+              />
             </div>
           </div>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Property
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created By
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Message
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {leads
-                .filter(lead => {
-                  const matchesPropertyType = !filters.propertyType || lead.propertyType === filters.propertyType;
-                  const matchesCreatedBy = !filters.createdBy || lead.createdBy === filters.createdBy;
-                  const matchesDateRange = !filters.startDate || new Date(lead.createdAt) >= new Date(filters.startDate);
-                  return matchesPropertyType && matchesCreatedBy && matchesDateRange;
-                })
-                .map((lead) => (
-                <tr key={lead.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {lead.name}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{lead.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{lead.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{lead.propertyName}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{lead.propertyType}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{lead.createdBy}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => toggleMessage(lead.message)}
-                      className="text-blue-500 hover:text-blue-700"
-                    >
-                      {isMessageVisible && currentMessage === lead.message ? 'Hide Message' : 'View Message'}
-                    </button>
-                    {isMessageVisible && currentMessage === lead.message && (
-                      <div className="mt-2 p-3 bg-gray-50 rounded">
-                        {currentMessage}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{new Date(lead.createdAt).toLocaleDateString()}</div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <table className="w-full table-auto">
+        <thead className="bg-gray-100">
+          <tr>
+            {['Name','Email','Phone','Property','Type','By','Message','Date','Actions'].map(col => (
+              <th key={col} className="px-3 py-2 text-sm font-medium">{col}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.length === 0 ? (
+            <tr>
+              <td colSpan={9} className="p-4 text-center text-gray-500">
+                No leads found
+              </td>
+            </tr>
+          ) : filtered.map(l => (
+            <tr key={l.id} className="hover:bg-gray-50">
+              <td className="px-3 py-2">{l.name}</td>
+              <td className="px-3 py-2">{l.email}</td>
+              <td className="px-3 py-2">{l.phone}</td>
+              <td className="px-3 py-2">{l.propertyName}</td>
+              <td className="px-3 py-2">{l.propertyType}</td>
+              <td className="px-3 py-2">{l.createdBy}</td>
+              <td className="px-3 py-2">
+                <button
+                  onClick={() => toggleMessage(l.id)}
+                  className="text-blue-600 underline"
+                >
+                  {showMsgFor === l.id ? 'Hide' : 'View'}
+                </button>
+                {showMsgFor === l.id && (
+                  <div className="mt-1 p-2 bg-gray-50 rounded">{l.message}</div>
+                )}
+              </td>
+              <td className="px-3 py-2">
+                {new Date(l.createdAt).toLocaleDateString()}
+              </td>
+              <td className="px-3 py-2 flex gap-2">
+                <button onClick={() => handleEdit(l.id)}>
+                  <Edit2 className="text-blue-600" />
+                </button>
+                <button onClick={() => handleDelete(l.id)}>
+                  <Trash className="text-red-600" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
