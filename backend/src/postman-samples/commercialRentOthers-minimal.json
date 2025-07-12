@@ -1,0 +1,34 @@
+{
+  "propertyName": "Basic Commercial Space",
+  "commercialType": "Office Space",
+  "address": {
+    "street": "789 Business Street",
+    "city": "Bangalore",
+    "state": "Karnataka",
+    "zipCode": "560001"
+  },
+  "propertyDetails": {
+    "area": {
+      "totalArea": 1200
+    },
+    "otherDetails": {
+      "propertyTypeDescription": "Simple office space"
+    }
+  },
+  "rent": {
+    "expectedRent": 50000,
+    "isNegotiable": false,
+    "rentType": "inclusive"
+  },
+  "availability": {
+    "type": "immediate"
+  },
+  "contactDetails": {
+    "name": "Amit Singh",
+    "email": "amit.singh@example.com",
+    "phone": "7654321098"
+  },
+  "metaData": {
+    "createdBy": "64f73de7b6e7d3fca91a7c69"
+  }
+} 
