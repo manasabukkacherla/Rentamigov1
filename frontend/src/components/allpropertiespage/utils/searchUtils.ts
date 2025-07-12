@@ -398,12 +398,17 @@ export const searchProperties = (
     }
 
     // Property type and sharing type check
-    if (criteria.propertyType === 'PG') {
-      if (property.type !== 'PG') return false;
-      if (criteria.sharing && property.sharing !== criteria.sharing) return false;
-    } else {
-      if (criteria.propertyType && property.type !== criteria.propertyType) return false;
-      // if (criteria.bhkType && property.bhkType !== criteria.bhkType) return false;
+    if (criteria.propertyTypes && criteria.propertyTypes.length > 0) {
+      // Check if property type is in the selected types array
+      if (!criteria.propertyTypes.includes(property.type as PropertyType)) return false;
+    } else if (criteria.propertyType) {
+      // Fallback to single property type for backward compatibility
+      if (property.type !== criteria.propertyType) return false;
+    }
+
+    // Handle PG sharing type check
+    if (property.type === 'PG' && criteria.sharing && property.sharing !== criteria.sharing) {
+      return false;
     }
 
     // Other criteria checks
@@ -437,9 +442,16 @@ export const searchProperties = (
           if (property.area !== criteria.areaRange.exact) return false;
         }
 
-        if (criteria.propertyType === 'PG') {
-          if (property.type !== 'PG') return false;
-          if (criteria.sharing && property.sharing !== criteria.sharing) return false;
+        // Check property type for nearby properties
+        if (criteria.propertyTypes && criteria.propertyTypes.length > 0) {
+          if (!criteria.propertyTypes.includes(property.type as PropertyType)) return false;
+        } else if (criteria.propertyType) {
+          if (property.type !== criteria.propertyType) return false;
+        }
+        
+        // Handle PG sharing type check for nearby properties
+        if (property.type === 'PG' && criteria.sharing && property.sharing !== criteria.sharing) {
+          return false;
         }
 
         return nearbyMatch;
