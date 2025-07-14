@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { UserCircle, Users, Activity, Clock, Calendar, MapPin, Search, Ban, CheckCircle, Mail, Phone, MoreVertical, Globe, Calendar as CalendarIcon } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -12,6 +12,7 @@ import {
   ArcElement
 } from 'chart.js';
 import { Line, Pie } from 'react-chartjs-2';
+import axios from 'axios';
 
 ChartJS.register(
   CategoryScale,
@@ -24,15 +25,27 @@ ChartJS.register(
   ArcElement
 );
 
-interface User {
-  id: string;
-  name: string;
+interface User{
+  _id: string;
+  username: string;
+  fullName: string;
   email: string;
   phone: string;
-  joinDate: string;
-  location: string;
-  status: 'active' | 'blocked';
-  lastActive: string;
+  address: string;
+  city: string;
+  state: string;
+  role: string;
+  acceptTerms: boolean;
+  emailVerified: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  bio: string;
+  image: string;
+  instagram: string;
+  linkedin: string;
+  twitter: string;
+  website: string;
 }
 
 const UserStats = () => {
@@ -40,115 +53,106 @@ const UserStats = () => {
   const [searchBy, setSearchBy] = useState<'id' | 'phone'>('id');
   const [users, setUsers] = useState<User[]>([
     {
-      id: 'USR001',
-      name: 'Sarah Johnson',
-      email: 'sarah.j@example.com',
-      phone: '+1 (555) 123-4567',
-      joinDate: '2024-02-15',
-      location: 'New York, USA',
-      status: 'active',
-      lastActive: '2 minutes ago'
-    },
-    {
-      id: 'USR002',
-      name: 'Michael Chen',
-      email: 'michael.c@example.com',
-      phone: '+1 (555) 234-5678',
-      joinDate: '2024-02-14',
-      location: 'San Francisco, USA',
-      status: 'active',
-      lastActive: '15 minutes ago'
-    },
-    {
-      id: 'USR003',
-      name: 'Emma Wilson',
-      email: 'emma.w@example.com',
-      phone: '+1 (555) 345-6789',
-      joinDate: '2024-02-13',
-      location: 'London, UK',
-      status: 'blocked',
-      lastActive: '45 minutes ago'
-    },
-    {
-      id: 'USR004',
-      name: 'James Brown',
-      email: 'james.b@example.com',
-      phone: '+1 (555) 456-7890',
-      joinDate: '2024-02-12',
-      location: 'Toronto, Canada',
-      status: 'active',
-      lastActive: '1 hour ago'
-    },
-    {
-      id: 'USR005',
-      name: 'Sofia Garcia',
-      email: 'sofia.g@example.com',
-      phone: '+1 (555) 567-8901',
-      joinDate: '2024-02-11',
-      location: 'Madrid, Spain',
-      status: 'active',
-      lastActive: '2 hours ago'
+      _id:"",
+      username:"",
+      fullName:"",
+      email:"",
+      phone:"",
+      address:"",
+      city:"",
+      state:"",
+      role:"",
+      acceptTerms:false,
+      emailVerified:false,
+      createdAt:"",
+      updatedAt:"",
+      __v:0,
+      bio:"",
+      image:"",
+      instagram:"",
+      linkedin:"",
+      twitter:"",
+      website:""
     }
   ]);
-
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/sign/users');
+        console.log('API Response:', response); 
+        setUsers( Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response.data.users)
+        ? response.data.users
+        : []);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchUsers();
+  }, []);
+  let admin=0;
+  let employee=0;
+  let owner=0;
+  let tenant=0;
+  let agent=0;
+  let usertype=0;
+  users.map((user)=>{
+    if(user.role==='admin') admin++;
+    else if(user.role==='employee') employee++;
+    else if(user.role==='owner') owner++;
+    else if(user.role==='tenant') tenant++;
+    else if(user.role==='agent') agent++;
+    else usertype++;
+    
+  })
   const stats = [
     {
-      title: 'Total Users',
-      value: '15,847',
-      change: '+12.5%',
-      period: 'vs last month',
-      icon: Users
+      title: 'Admin',
+      value: admin,
     },
     {
-      title: 'Active Users',
-      value: '12,543',
-      change: '+8.2%',
-      period: 'vs last month',
-      icon: Activity
+      title: 'Employee',
+      value: employee,
     },
     {
-      title: 'New Users (Today)',
-      value: '247',
-      change: '+15.3%',
-      period: 'vs yesterday',
-      icon: UserCircle
+      title: 'Owner',
+      value: owner,
     },
     {
-      title: 'Avg. Session Time',
-      value: '24m 30s',
-      change: '+5.7%',
-      period: 'vs last month',
-      icon: Clock
-    }
+      title: 'Tenant',
+      value: tenant,
+    },
+    {
+      title: 'Agent',
+      value: agent,
+    },
+    {
+      title: 'User',
+      value: usertype,
+    },
   ];
-
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const usersType=['admin','employee','owner','tenant','agent','user'];
 
   const userGrowthData = {
-    labels: months,
+    labels: usersType,
     datasets: [
       {
-        label: 'Total Users',
-        data: [8500, 9200, 10100, 11000, 11800, 12500, 13200, 13800, 14500, 15000, 15500, 15847],
+        label: 'User Type',
+        data: [admin, employee, owner, tenant, agent,usertype],
         borderColor: 'rgb(0, 0, 0)',
         backgroundColor: 'rgba(0, 0, 0, 0.1)',
         tension: 0.4
       },
-      {
-        label: 'Active Users',
-        data: [6800, 7400, 8100, 8800, 9400, 10000, 10600, 11000, 11600, 12000, 12300, 12543],
-        borderColor: 'rgb(128, 128, 128)',
-        backgroundColor: 'rgba(128, 128, 128, 0.1)',
-        tension: 0.4
-      }
+      
     ]
   };
-
+  
   const userTypeData = {
-    labels: ['Premium Users', 'Standard Users', 'Free Users'],
+    labels: ['admin', 'employee', 'owner', 'tenant', 'agent', 'user'],
     datasets: [
       {
-        data: [4235, 6512, 5100],
+        data: [admin, employee, owner, tenant, agent,usertype],
         backgroundColor: [
           'rgba(0, 0, 0, 0.8)',
           'rgba(0, 0, 0, 0.5)',
@@ -194,25 +198,30 @@ const UserStats = () => {
     setSearchTerm(value);
   };
 
-  const handleToggleUserStatus = (userId: string) => {
-    setUsers(users.map(user => {
-      if (user.id === userId) {
-        return {
-          ...user,
-          status: user.status === 'active' ? 'blocked' : 'active'
-        };
-      }
-      return user;
-    }));
-  };
+  function handleToggleUserStatus(_id: string): void {
+    throw new Error('Function not implemented.');
+  }
 
-  const filteredUsers = users.filter(user => {
-    if (!searchTerm) return true;
-    if (searchBy === 'id') {
-      return user.id.toLowerCase().includes(searchTerm.toLowerCase());
-    }
-    return user.phone.includes(searchTerm);
-  });
+  // const handleToggleUserStatus = (userId: string) => {
+  //   setUsers(users.map(user => {
+  //     if (user.id === userId) {
+  //       return {
+  //         ...user,
+  //         status: user.status === 'active' ? 'blocked' : 'active'
+  //       };
+  //     }
+  //     return user;
+  //   }));
+  // };
+
+  // const filteredUsers = users.filter(user => {
+  //   if (!searchTerm) return true;
+  //   if (searchBy === 'id') {
+  //     return user.id.toLowerCase().includes(searchTerm.toLowerCase());
+  //   }
+  //   return user.phone.includes(searchTerm);
+  // });
+   console.log(users);
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -220,22 +229,12 @@ const UserStats = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {stats.map((stat, index) => {
-          const Icon = stat.icon;
           return (
             <div key={index} className="bg-white p-4 md:p-6 rounded-xl shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-medium text-gray-500">{stat.title}</h3>
-                <Icon className="w-5 h-5 text-gray-400" />
               </div>
               <p className="text-xl md:text-2xl font-semibold text-gray-900">{stat.value}</p>
-              <div className="flex items-center mt-2">
-                <span className={`text-sm ${
-                  stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {stat.change}
-                </span>
-                <span className="text-sm text-gray-500 ml-2">{stat.period}</span>
-              </div>
             </div>
           );
         })}
@@ -300,9 +299,9 @@ const UserStats = () => {
 
         <div className="md:hidden">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
-            {filteredUsers.map((user) => (
+            {users.map((user) => (
               <div 
-                key={user.id} 
+                key={user._id} 
                 className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300"
               >
                 <div className="relative">
@@ -310,32 +309,32 @@ const UserStats = () => {
                   <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-24 h-24 bg-white rounded-full shadow-md p-1 border-4 border-white">
                     <div className="w-full h-full bg-gray-100 rounded-full flex items-center justify-center">
                       <span className="text-xl font-semibold text-gray-900">
-                        {user.name.split(' ').map(n => n[0]).join('')}
+                        {user.fullName.split(' ').map(n => n[0]).join('')}
                       </span>
                     </div>
                   </div>
                   <div className="absolute top-4 right-4">
-                    <button
-                      onClick={() => handleToggleUserStatus(user.id)}
+                    {/* <button
+                      onClick={() => handleToggleUserStatus(user._id)}
                       className={`p-2 rounded-full bg-white/90 backdrop-blur-sm transition-colors ${
                         user.status === 'active'
                           ? 'hover:bg-gray-100'
                           : 'hover:bg-gray-100'
                       }`}
-                    >
-                      {user.status === 'active' ? (
+                    > */}
+                      {/* {user.status === 'active' ? (
                         <Ban className="w-5 h-5 text-black" />
                       ) : (
                         <CheckCircle className="w-5 h-5 text-black" />
                       )}
-                    </button>
+                    </button> */}
                   </div>
                 </div>
 
                 <div className="pt-16 p-6">
                   <div className="text-center mb-6">
-                    <h4 className="text-lg font-semibold text-gray-900">{user.name}</h4>
-                    <p className="text-sm text-gray-500 mt-1">{user.id}</p>
+                    <h4 className="text-lg font-semibold text-gray-900">{user.fullName}</h4>
+                    <p className="text-sm text-gray-500 mt-1">{user._id}</p>
                   </div>
 
                   <div className="space-y-4">
@@ -349,26 +348,26 @@ const UserStats = () => {
                     </div>
                     <div className="flex items-center text-gray-600 text-sm">
                       <Globe className="w-4 h-4 mr-3 text-gray-400" />
-                      {user.location}
+                      {user.address}
                     </div>
-                    <div className="flex items-center text-gray-600 text-sm">
+                    {/* <div className="flex items-center text-gray-600 text-sm">
                       <Clock className="w-4 h-4 mr-3 text-gray-400" />
                       {user.lastActive}
-                    </div>
-                    <div className="flex items-center text-gray-600 text-sm">
+                    </div> */}
+                    {/* <div className="flex items-center text-gray-600 text-sm">
                       <CalendarIcon className="w-4 h-4 mr-3 text-gray-400" />
                       Joined {user.joinDate}
-                    </div>
+                    </div> */}
                   </div>
 
                   <div className="mt-6 pt-6 border-t flex items-center justify-between">
-                    <span className={`px-4 py-1.5 rounded-full text-xs font-medium ${
+                    {/* <span className={`px-4 py-1.5 rounded-full text-xs font-medium ${
                       user.status === 'active'
                         ? 'bg-gray-900 text-white'
                         : 'bg-gray-100 text-gray-900'
                     }`}>
                       {user.status}
-                    </span>
+                    </span> */}
                     <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
@@ -386,25 +385,27 @@ const UserStats = () => {
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">User ID</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">User</th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Phone</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Location</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Last Active</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Address</th>
+                {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Last Active</th> */}
+                {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th> */}
+                {/* <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th> */}
+                <th className="px-6 py-4 text-right text-sm font-semibold text-gray-900">Role</th>
+
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b">
-                  <td className="px-6 py-4 text-gray-500">{user.id}</td>
+              {users.map((user) => (
+                <tr key={user._id} className="border-b">
+                  <td className="px-6 py-4 text-gray-500">{user._id}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                         <span className="text-sm font-medium text-gray-600">
-                          {user.name.split(' ').map(n => n[0]).join('')}
+                          {user.fullName.split(' ').map((n: string) => n[0]).join('')}
                         </span>
                       </div>
                       <div className="ml-3">
-                        <p className="font-medium text-gray-900">{user.name}</p>
+                        <p className="font-medium text-gray-900">{user.fullName}</p>
                         <p className="text-sm text-gray-500">{user.email}</p>
                       </div>
                     </div>
@@ -412,22 +413,22 @@ const UserStats = () => {
                   <td className="px-6 py-4 text-gray-500">{user.phone}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center text-gray-500">
-                      <MapPin className="w-4 h-4 mr-1" />
-                      {user.location}
+                      {/* MapPin< className="w-4 h-4 mr-1" /> */}
+                      {user.address}
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-gray-500">{user.lastActive}</td>
+                  {/* <td className="px-6 py-4 text-gray-500">{user.lastActive}</td> */}
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-sm ${
+                    {/* <span className={`px-3 py-1 rounded-full text-sm ${
                       user.status === 'active'
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {user.status}
-                    </span>
+                    </span> */}
                   </td>
                   <td className="px-6 py-4">
-                    <button
+                    {/* <button
                       onClick={() => handleToggleUserStatus(user.id)}
                       className={`p-2 rounded-lg ${
                         user.status === 'active'
@@ -440,7 +441,16 @@ const UserStats = () => {
                       ) : (
                         <CheckCircle className="w-5 h-5" />
                       )}
-                    </button>
+                    </button> */}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      user.role === 'manager'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {user.role}
+                    </span>
                   </td>
                 </tr>
               ))}

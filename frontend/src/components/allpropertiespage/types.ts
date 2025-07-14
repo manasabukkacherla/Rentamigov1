@@ -40,6 +40,7 @@ export type PropertyIntent = 'Rent' | 'Sale' | 'Lease';
 export interface SearchCriteria {
   location: string | null;
   propertyType: PropertyType | null;
+  propertyTypes?: PropertyType[]; // For multiple property type filtering
   // bhkType: BHKType | null;
   priceRange: {
     min: number | null;
@@ -114,4 +115,5 @@ export interface Property {
   status: PropertyStatus;
   intent: PropertyIntent;
   metadata?: PropertyMetadata;
+  createdBy: string;
 }

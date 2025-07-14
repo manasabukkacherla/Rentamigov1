@@ -16,13 +16,13 @@ import googleAuthRouter from "./routes/googleAuth";
 import emailRouter from "./routes/email";
 import employeeRouter from "./routes/employee";
 import serviceEnquiryRoutes from "./routes/services-intrst-user";
+
 import ownerIntrstrouter from "./routes/ownerIntrst";
 
 import subscriptionRouter from "./routes/subscriberform";
 import ownerInterestRouter from "./routes/ownerInterest";
 
 
-import enquiryRoutes from "./routes/enquiryRoutes";
 import signupRouter from "./routes/signupform"; // Replace with the correct file path for User
 import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
@@ -99,6 +99,7 @@ import commercialSellWarehouseRoutes from "./routes/commercial/commercialSellWar
 import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
 import allPropertiesRoutes from "./routes/allPropertiesRoutes";
+import enquiryRoutes from "./routes/enquiryRoutes";
 
 dotenv.config();
 
@@ -209,9 +210,9 @@ app.use("/api/Report", Reportrouter); // Report routers
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
 app.use("/api/email", emailRouter); // Email routes
 app.use("/api/employees", Employeerouter); // Employee routes
+app.use("/api/enquiry", enquiryRoutes); // Enquiry routes
 app.use("/api/service", serviceEnquiryRoutes); // Service interest routes
 app.use("/api", ownerIntrstrouter); // Owner interest routes
-
 app.use("/api/forms", subscriptionRouter);
 app.use("/api/owner-interest", ownerInterestRouter);
 // chat app routes
@@ -232,8 +233,6 @@ app.use("/api/sign", signupRouter);
 app.use("/api/loginuser", loginRouter);
 app.use("/api", forgotPasswordRoutes);
 //app.use("/api/leads", leadsRouter);
-app.use("/api/enquiry", enquiryRoutes);
-
 app.use("/api/user", userRouter);
 app.use("/api/blog", blogRouter);
 app.use("/api/reviews", reviewRouter);

@@ -99,7 +99,8 @@ function Allproperties() {
       criteria.listingTypes = activeFilters.listingTypes;
     }
     if (activeFilters.propertyTypes.length) {
-      criteria.propertyType = activeFilters.propertyTypes[0]; // Using first selected property type
+      // Support multiple property types
+      criteria.propertyTypes = [...activeFilters.propertyTypes];
     }
     if (activeFilters.furnishingTypes.length) {
       criteria.furnishing = activeFilters.furnishingTypes[0]; // Using first selected furnishing type
@@ -125,14 +126,11 @@ function Allproperties() {
   }, [searchResults]);
   console.log(sortedResults)
   
-  const handlePropertyClick = (propertyname:string,propertyId: string) => {
-    if(propertyname!='PL' && propertyname!='AG'){
-      navigate(`/detailprop/${propertyId}`);
-    }
-    else{
-      navigate(`/agriplot/${propertyId}`);
-    }
-    
+  const handlePropertyClick = (propertyname: string, propertyId: string) => {
+    const url = propertyname !== 'PL' && propertyname !== 'AG' 
+      ? `/detailprop/${propertyId}`
+      : `/agriplot/${propertyId}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -210,16 +208,20 @@ function Allproperties() {
         )}
       </main>
 
-      {showFilters && (
-        <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowFilters(false)}>
-          <div
-            className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white overflow-hidden flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <FiltersPanel onFilterChange={handleFilterChange} />
-          </div>
+      <div 
+        className={`fixed inset-0 bg-black/50 z-50 transition-opacity duration-300 ${showFilters ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setShowFilters(false)}
+      >
+        <div
+          className={`absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white overflow-y-auto flex flex-col transform transition-transform duration-300 ${showFilters ? 'translate-x-0' : 'translate-x-full'}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <FiltersPanel 
+            onFilterChange={handleFilterChange} 
+            onClose={() => setShowFilters(false)}
+          />
         </div>
-      )}
+      </div>
     </div>
   );
 }

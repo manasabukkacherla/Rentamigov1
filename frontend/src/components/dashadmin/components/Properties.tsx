@@ -92,8 +92,13 @@ export default function Properties() {
     fetchProperties();
   }, []);
 
-  const handlePropertyClick = (propertyId: string) => {
-    navigate(`/detailprop/${propertyId}`);
+  const handlePropertyClick = (propertyname:string,propertyId: string) => {
+    if(propertyname=='PL' || propertyname=='AG'){
+      navigate(`/agriplot/${propertyId}`);
+    }
+    else{
+      navigate(`/detailprop/${propertyId}`);
+    }
   };
 
   const handleContactClick = (property: Property) => {
@@ -184,7 +189,7 @@ export default function Properties() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button 
                     className="text-indigo-600 hover:text-indigo-900"
-                    onClick={() => handlePropertyClick(property.propertyId)}
+                    onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
                   >
                     View Details
                   </button>

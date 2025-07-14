@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2, DollarSign } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../IndependentPropertyAddress"
 import PropertySize from "../PropertySize"
@@ -14,6 +14,9 @@ import Restrictions from "../Restrictions"
 import axios from "axios"
 import { toast } from "react-toastify"
 import { useNavigate } from "react-router-dom"
+import RegistrationCharges from "../sell/RegistrationCharges"
+import Price from "../sell/Price"
+import Brokerage from "../residentialrent/Brokerage"
 
 interface Address {
   houseNo: string;
@@ -159,6 +162,19 @@ interface Restrictions {
   petsAllowed: string;
   tenantType: string;
 }
+interface priceDetails {
+  propertyPrice: number;
+  pricetype: string;
+}
+interface registration {
+  chargestype: string;
+  registrationAmount?: number;
+  stampDutyAmount?: number;
+}
+interface brokerage {
+  required: string;
+  amount?: number;
+}
 
 interface IMetadata {
   createdBy: string;
@@ -174,6 +190,9 @@ interface FormData {
   propertySize: number;
   propertyDetails: PropertyDetails;
   restrictions: Restrictions;
+  priceDetails: priceDetails;
+  registration: registration;
+  brokerage: brokerage;
   flatAmenities: FlatAmenities;
   societyAmenities: SocietyAmenities;
   availability: {
@@ -361,6 +380,19 @@ const SellIndependentHouse = () => {
       communityculturalspaces: [],
       smarthometechnology: [],
       otheritems: []
+    },
+    priceDetails:{
+      propertyPrice:0,
+      pricetype:""
+    },
+    registration:{
+      chargestype:"",
+      registrationAmount:0,
+      stampDutyAmount:0
+    },
+    brokerage:{
+      required:"",
+      amount:0
     },
     availability: {
       type: "immediate",
@@ -575,6 +607,49 @@ const SellIndependentHouse = () => {
         </div>
       ),
     },
+    {
+      title: "Pricing Details",
+      icon: <DollarSign className="w-5 h-5" />,
+      content: (
+        <div className="space-y-6">
+            <Price onPriceChange={(price) => setFormData(prev => ({
+              ...prev,
+              priceDetails: {
+                ...prev.priceDetails,
+                propertyPrice: price.propertyPrice,
+                pricetype: price.pricetype || 'fixed',
+              }
+            }))} />
+            <div className="space-y-4 text-black">
+              <div className="text-black">
+                <RegistrationCharges
+                  onRegistrationChargesChange={(charges) => setFormData(prev => ({
+                    ...prev,
+                    registration: {
+                      ...prev.registration,
+                      chargestype: charges.chargestype,
+                      registrationAmount: charges.registrationAmount,
+                      stampDutyAmount: charges.stampDutyAmount,
+                    }
+                  }))} />  
+              </div>
+              <div className="text-black">
+                <Brokerage 
+                bro={formData.brokerage}
+                onBrokerageChange={(brokerage) => setFormData({
+                  ...formData,
+                  brokerage: {
+                      required: brokerage.required || 'No',
+                      amount: parseFloat(brokerage.amount?.toString() || '0')
+                    }
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+        ),
+      },
+    
     {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
