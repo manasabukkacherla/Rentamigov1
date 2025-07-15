@@ -193,7 +193,10 @@ export const updateCommercialRentAgriculture = async (req: Request, res: Respons
 // Delete Commercial Rent Agriculture
 export const deleteCommercialRentAgriculture = async (req: Request, res: Response) => {
   try {
-    const data = await CommercialRentAgriculture.findByIdAndDelete(req.params.id);
+    const { id } = req.params;
+    
+    // Delete by propertyId instead of _id
+    const data = await CommercialRentAgriculture.findOneAndDelete({ propertyId: id });
 
     if (!data) {
         return res.status(404).json({

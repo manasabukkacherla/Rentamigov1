@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Property, PropertyStatus } from '../../../components/allpropertiespage/types';
 import axios from 'axios';
-import { Check, AlertCircle, Wrench } from 'lucide-react';
+import { Check, AlertCircle, Wrench, Trash, Edit2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const statusIcons = {
   Available: <Check className="w-4 h-4" />,
@@ -21,7 +22,86 @@ export const Properties: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'Available' | 'Rented' | 'Under Maintenance'>('all');
   const navigate = useNavigate();
+  const handleDelete = useCallback((id: string) => {
+    if (!window.confirm('Delete this property?')) return;
+    
+    // Parse property ID to get category, listing, and type
+    const propertyId = id;
+    const categoryCode = propertyId.slice(3, 6);
+    const listingCode = propertyId.slice(6, 8);
+    const typeCode = propertyId.slice(8, 10);
 
+    // Map codes to route parameters
+    const category = categoryCode === 'COM' ? 'commercial' : 'residential';
+    const listing = listingCode === 'RE' ? 'rent' : 
+                    listingCode === 'SA' ? 'sale' : 
+                    'lease';
+
+    // Get the type based on the type code
+    let type: string;
+    switch(typeCode) {
+      case 'AP': type = 'apartment'; break;
+      case 'BF': type = 'builderfloor'; break;
+      case 'IH': type = 'independenthouse'; break;
+      case 'AG': type = 'agriculture'; break;
+      case 'CS': type = 'coveredspace'; break;
+      case 'OS': type = 'officespace'; break;
+      case 'RS': type = 'retailstore'; break;
+      case 'SH': type = 'shop'; break;
+      case 'PL': type = 'plot'; break;
+      case 'WH': type = 'warehouse'; break;
+      case 'SD': type = 'shed'; break;
+      case 'SR': type = 'showroom'; break;
+      case 'OT': type = 'others'; break;
+      default: type = 'apartment'; break;
+    }
+
+    axios
+      .delete(`/api/${category}/${listing}/${type}/${propertyId}`)
+      .then(() => {
+        toast.success('Property deleted successfully');
+        setProperties(l => l.filter(x => x.propertyId !== propertyId));
+      })
+      .catch((error) => {
+        console.error('Delete error:', error);
+        toast.error(error.response?.data?.message || 'Failed to delete property');
+      });
+  }, []);
+
+  const handleEdit = useCallback((id: string) => {
+    // Parse property ID to get category, listing, and type
+    const propertyId = id;
+    const categoryCode = propertyId.slice(3, 6);
+    const listingCode = propertyId.slice(6, 8);
+    const typeCode = propertyId.slice(8, 10);
+
+    // Map codes to route parameters
+    const category = categoryCode === 'COM' ? 'commercial' : 'residential';
+    const listing = listingCode === 'RE' ? 'rent' : 
+                    listingCode === 'SA' ? 'sale' : 
+                    'lease';
+
+    // Get the type based on the type code
+    let type: string;
+    switch(typeCode) {
+      case 'AP': type = 'apartment'; break;
+      case 'BF': type = 'builderfloor'; break;
+      case 'IH': type = 'independenthouse'; break;
+      case 'AG': type = 'agriculture'; break;
+      case 'CS': type = 'coveredspace'; break;
+      case 'OS': type = 'officespace'; break;
+      case 'RS': type = 'retailstore'; break;
+      case 'SH': type = 'shop'; break;
+      case 'PL': type = 'plot'; break;
+      case 'WH': type = 'warehouse'; break;
+      case 'SD': type = 'shed'; break;
+      case 'SR': type = 'showroom'; break;
+      case 'OT': type = 'others'; break;
+      default: type = 'apartment'; break;
+    }
+
+    navigate(`/properties/edit/${category}/${listing}/${type}/${propertyId}`);
+  }, [navigate]);
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -155,6 +235,14 @@ export const Properties: React.FC = () => {
                     View Details
                   </button>
                 </td>
+                <td className="px-3 py-2 flex gap-2">
+                <button onClick={() => handleEdit(property.propertyId)}>
+                  <Edit2 className="text-blue-600" />
+                </button>
+                <button onClick={() => handleDelete(property.propertyId)}>
+                  <Trash className="text-red-600" />
+                </button>
+              </td>
               </tr>
             ))}
           </tbody>

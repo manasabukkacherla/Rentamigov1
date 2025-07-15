@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Property, PropertyStatus } from '../../../components/allpropertiespage/types';
 import axios from 'axios';
-import { Check, AlertCircle, Wrench, Mail, Phone, User } from 'lucide-react';
+import { Check, AlertCircle, Wrench, Mail, Phone, User, Edit2, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 type StatusType = 'Available' | 'Rented' | 'Under Maintenance';
 
@@ -101,6 +102,85 @@ export default function Properties() {
     }
   };
 
+  const handleEdit = (propertyId: string) => {
+    // Parse property ID to get category, listing, and type
+    const categoryCode = propertyId.slice(3, 6);
+    const listingCode = propertyId.slice(6, 8);
+    const typeCode = propertyId.slice(8, 10);
+
+    // Map codes to route parameters
+    const category = categoryCode === 'COM' ? 'commercial' : 'residential';
+    const listing = listingCode === 'RE' ? 'rent' : 
+                    listingCode === 'SA' ? 'sale' : 
+                    'lease';
+
+    // Get the type based on the type code
+    let type: string;
+    switch(typeCode) {
+      case 'AP': type = 'apartment'; break;
+      case 'BF': type = 'builderfloor'; break;
+      case 'IH': type = 'independenthouse'; break;
+      case 'AG': type = 'agriculture'; break;
+      case 'CS': type = 'coveredspace'; break;
+      case 'OS': type = 'officespace'; break;
+      case 'RS': type = 'retailstore'; break;
+      case 'SH': type = 'shop'; break;
+      case 'PL': type = 'plot'; break;
+      case 'WH': type = 'warehouse'; break;
+      case 'SD': type = 'shed'; break;
+      case 'SR': type = 'showroom'; break;
+      case 'OT': type = 'others'; break;
+      default: type = 'apartment'; break;
+    }
+
+    navigate(`/properties/edit/${category}/${listing}/${type}/${propertyId}`);
+  };
+
+  const handleDelete = (propertyId: string) => {
+    if (!window.confirm('Delete this property?')) return;
+    
+    // Parse property ID to get category, listing, and type
+    const categoryCode = propertyId.slice(3, 6);
+    const listingCode = propertyId.slice(6, 8);
+    const typeCode = propertyId.slice(8, 10);
+
+    // Map codes to route parameters
+    const category = categoryCode === 'COM' ? 'commercial' : 'residential';
+    const listing = listingCode === 'RE' ? 'rent' : 
+                    listingCode === 'SA' ? 'sale' : 
+                    'lease';
+
+    // Get the type based on the type code
+    let type: string;
+    switch(typeCode) {
+      case 'AP': type = 'apartment'; break;
+      case 'BF': type = 'builderfloor'; break;
+      case 'IH': type = 'independenthouse'; break;
+      case 'AG': type = 'agriculture'; break;
+      case 'CS': type = 'coveredspace'; break;
+      case 'OS': type = 'officespace'; break;
+      case 'RS': type = 'retailstore'; break;
+      case 'SH': type = 'shop'; break;
+      case 'PL': type = 'plot'; break;
+      case 'WH': type = 'warehouse'; break;
+      case 'SD': type = 'shed'; break;
+      case 'SR': type = 'showroom'; break;
+      case 'OT': type = 'others'; break;
+      default: type = 'apartment'; break;
+    }
+
+    axios
+      .delete(`/api/${category}/${listing}/${type}/${propertyId}`)
+      .then(() => {
+        toast.success('Property deleted successfully');
+        setProperties(l => l.filter(x => x.propertyId !== propertyId));
+      })
+      .catch((error) => {
+        console.error('Delete error:', error);
+        toast.error(error.response?.data?.message || 'Failed to delete property');
+      });
+  };
+
   const handleContactClick = (property: Property) => {
     setSelectedProperty(property);
     setIsContactModalOpen(true);
@@ -186,12 +266,20 @@ export default function Properties() {
                     Contact
                   </button>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="space-x-2">
                   <button 
-                    className="text-indigo-600 hover:text-indigo-900"
-                    onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
+                    className="text-blue-600 hover:text-blue-900"
+                    onClick={() => handleEdit(property.propertyId)}
                   >
-                    View Details
+                    <Edit2 className="w-4 h-4 inline-block mr-1" />
+                    Edit
+                  </button>
+                  <button 
+                    className="text-red-600 hover:text-red-900"
+                    onClick={() => handleDelete(property.propertyId)}
+                  >
+                    <Trash2 className="w-4 h-4 inline-block mr-1" />
+                    Delete
                   </button>
                 </td>
               </tr>
