@@ -44,6 +44,7 @@ function Allproperties() {
     const fetchAllProperties = async () => {
       try {
         const response = await axios.get('/api/allproperties/all');
+        // console.log("response", response);
         const grouped = response.data?.data || {};
 
         const flattenGrouped = (grouped: Record<string, any>) => {
