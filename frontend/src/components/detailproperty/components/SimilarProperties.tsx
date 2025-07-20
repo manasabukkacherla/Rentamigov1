@@ -99,6 +99,7 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
     })));
 
     // Ensure all properties have an imageUrl with proper URL
+    
     const updatedProperties = properties.map(property => {
       // Get image from the nested media structure first, then fall back to other sources
       let imgUrl = property.media?.photos?.exterior?.[0] || 
@@ -108,20 +109,20 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
                   property.imageUrl || 
                   property.image ||
                   'https://via.placeholder.com/400x300?text=No+Image';
-      
+     
       // If the URL is relative, make it absolute
       if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('data:image') && !imgUrl.startsWith('https://via.placeholder.com')) {
         imgUrl = imgUrl.startsWith('/') 
           ? `${window.location.origin}${imgUrl}`
           : `${window.location.origin}/${imgUrl}`;
       }
-
+      console.log('Image URL:', imgUrl);
       return {
         ...property,
         imageUrl: imgUrl
       };
     });
-    
+    console.log(updatedProperties)
     setProperties(updatedProperties);
   }, [properties]);
 
@@ -159,8 +160,7 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
             formattedArea: property.area ? `${property.area.toLocaleString()} sq.ft` : 'N/A',
             postedDate: property.createdAt ? new Date(property.createdAt).toLocaleDateString() : 'N/A',
             type: property.propertyType || 'Property',
-            images: property.images || [],
-            image: property.images?.[0]?.url
+            imageUrl: property.images?.[0]?.url
           }));
 
         setProperties(processedProperties);
@@ -235,7 +235,7 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
       </div>
     );
   }
-
+  console.log('Properties:', properties);
   return (
     <div className="relative">
       <div className="container mx-auto px-4 py-8">
@@ -268,7 +268,7 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
       >
         {properties.map((property) => {
           const isSaved = savedProperties.includes(property.id);
-          
+        
           return (
             <div
               key={property.id}
