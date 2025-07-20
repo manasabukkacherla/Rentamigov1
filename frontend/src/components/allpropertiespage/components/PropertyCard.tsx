@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Home, Square, Calendar } from 'lucide-react';
+import { MapPin, Home, Square, Calendar, Pencil, Trash2 } from 'lucide-react';
 import { Property } from '../types';
+import axios from 'axios';
 
 // Format a single image URL into a PropertyImage object
 function formatImage(url: string): PropertyImage {
@@ -20,12 +21,23 @@ export interface PropertyImage {
 export interface PropertyCardProps {
   property: Property;
   matchedFields?: Set<string>;
+  onEdit?: (propertyId: string) => void;
+  onDelete?: (propertyId: string) => void;
 }
 
 export const PropertyCard: React.FC<PropertyCardProps> = ({
   property,
   matchedFields = new Set(),
+  onEdit,
+  onDelete,
 }) => {
+  // Get current user ID from session storage
+  const currentUserId = sessionStorage.getItem('userId');
+  const isOwner = currentUserId === property.createdBy;
+
+  console.log("isOwner", isOwner);
+  console.log("currentUserId", currentUserId);
+  console.log("property.createdBy", property.createdBy);
   const [propertyMedia, setPropertyMedia] = useState<PropertyImage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -130,8 +142,29 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const listing = Object.entries(listingCodes).find(([_, code]) => code === listingCode)?.[0] || '';
   const type = Object.entries(subCategoryCodes).find(([_, code]) => code === typeCode)?.[0] || '';
 
+  const handleEdit = async () => {
+    console.log("Editing property:", property.propertyId);
+    try {
+      const response = await axios.put(`/api/${category}/${listing}/${type}/${property.propertyId}`);
+        console.log(response);
+        if (response.data.success) {
+          console.log("Property edited successfully");
+        } else {
+          console.log("response.data.message");
+        }
+    } catch (error) {
+      console.error("Error editing property:", error);
+    }
+    // Add your edit logic here
+  };
+
+  const handleDelete = () => {
+    console.log("Deleting property:", property.propertyId);
+    // Add your delete logic here
+  };
+
   return (
-    <div className="bg-white rounded border transition-all hover:shadow-lg border-gray-200 h-full flex flex-col">
+    <div className="bg-white rounded border transition-all hover:shadow-lg border-gray-200 h-full flex flex-col relative">
       <div className="relative h-60">
         {/* Render the base64 formatted image */}
         <img
@@ -171,9 +204,41 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         </div>
       </div>
       <div className="p-3 flex-1 flex flex-col">
-        <h3 className="text-lg font-semibold mb-2 line-clamp-2">
-          {highlightIfMatched('title', property.title)}
-        </h3>
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold line-clamp-2 flex-1">
+            {highlightIfMatched('title', property.title)}
+          </h3>
+          <div className="flex space-x-2 ml-2">
+            {isOwner && (
+              <>
+                {/* {onEdit && ( */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit();
+                    }}
+                    className="p-1.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-600 shadow-sm"
+                    title="Edit Property"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                {/* )} */}
+                {/* {onDelete && ( */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete();
+                    }}
+                    className="p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 shadow-sm"
+                    title="Delete Property"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                {/* )} */}
+              </>
+            )}
+          </div>
+        </div>
         <div className="flex items-center text-gray-600 mb-2">
           <MapPin size={16} className="mr-1 flex-shrink-0" />
           <span className="text-base truncate">

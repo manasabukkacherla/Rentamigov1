@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
-// Property type icons mapping
+
 
 interface MediaPhotos {
   exterior?: string[];
