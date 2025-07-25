@@ -251,7 +251,7 @@ const Footer: React.FC = () => {
             <ul className="list-unstyled">
               <li>
                 <a
-                  href="#"
+                  href="/Contactus"
                   style={styles.link}
                   onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
                   onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
@@ -261,7 +261,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/Aboutus"
                   style={styles.link}
                   onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
                   onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
@@ -271,7 +271,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/owner-page"
                   style={styles.link}
                   onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
                   onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}

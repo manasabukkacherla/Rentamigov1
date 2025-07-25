@@ -514,119 +514,89 @@ const Homepage: React.FC = () => {
         {/* Decorative Elements */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-gray-100 rounded-full opacity-50"></div>
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-gray-100 rounded-full opacity-50"></div>
+<div className="container mx-auto px-4 relative z-10">
+  <motion.div
+    initial="hidden"
+    whileInView="visible"
+    viewport={{ once: true }}
+    variants={fadeInUp}
+    className="text-center mb-16"
+  >
+    <h2 className="text-4xl font-bold mb-4">Why Choose Rentamigo?</h2>
+    <p className="text-gray-600 max-w-2xl mx-auto">
+      Your one-stop platform for affordable rentals, property sales, and reliable support — made for everyone.
+    </p>
+  </motion.div>
 
-        <div className="container mx-auto px-4 relative z-10">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeInUp}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold mb-4">Why Choose Rentamigo?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              We provide the best rental experience with our comprehensive
-              services and dedicated support.
-            </p>
-          </motion.div>
+  <div className="grid md:grid-cols-3 gap-8">
+    {/* Card 1 */}
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.1 }}
+      viewport={{ once: true }}
+      className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-black hover:transform hover:-translate-y-2 transition-all duration-300"
+    >
+      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold mb-4 text-center">
+        Explore Rentals & Sales in One Place
+      </h3>
+      <p className="text-gray-600 text-center">
+        Discover flats, homes, plots, PGs, commercial spaces, and more — all under one roof.
+      </p>
+    </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-              viewport={{ once: true }}
-              className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-black hover:transform hover:-translate-y-2 transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-8 h-8 text-black"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-center">
-                Smart Search
-              </h3>
-              <p className="text-gray-600 text-center">
-                Find your ideal property with our powerful search tools and
-                filters.
-              </p>
-            </motion.div>
+    {/* Card 2 */}
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      viewport={{ once: true }}
+      className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-black hover:transform hover:-translate-y-2 transition-all duration-300"
+    >
+      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold mb-4 text-center">
+        Verified Listings & Transparent Deals
+      </h3>
+      <p className="text-gray-600 text-center">
+        Every listing is verified, and all transactions are safe, secure, and fully documented.
+      </p>
+    </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-black hover:transform hover:-translate-y-2 transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-8 h-8 text-black"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-center">
-                Secure Transactions
-              </h3>
-              <p className="text-gray-600 text-center">
-                Our platform ensures safe and transparent rental transactions.
-              </p>
-            </motion.div>
+    {/* Card 3 */}
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3 }}
+      viewport={{ once: true }}
+      className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-black hover:transform hover:-translate-y-2 transition-all duration-300"
+    >
+      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+            d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold mb-4 text-center">
+        Help at Every Step, Anytime
+      </h3>
+      <p className="text-gray-600 text-center">
+        From shortlisting to shifting — our team is ready 24/7 to support your rental or purchase journey.
+      </p>
+    </motion.div>
+  </div>
+</div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-              viewport={{ once: true }}
-              className="bg-white p-8 rounded-xl shadow-lg border-t-4 border-black hover:transform hover:-translate-y-2 transition-all duration-300"
-            >
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg
-                  className="w-8 h-8 text-black"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"
-                  ></path>
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold mb-4 text-center">
-                24/7 Support
-              </h3>
-              <p className="text-gray-600 text-center">
-                Our dedicated team is always available to assist you with any
-                issues.
-              </p>
-            </motion.div>
-          </div>
-        </div>
       </section>
 
       {/* Testimonials Section */}
