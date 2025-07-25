@@ -476,11 +476,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
   });
 
   // Add effect to handle admin role selection
-  useEffect(() => {
-    if (formData.role === "admin" || formData.role === "owner") {
-      onSwitchToLogin();
-    }
-  }, [formData.role, onSwitchToLogin]);
+
 
   const roles = [
     { value: "owner", label: "Owner" },
@@ -488,7 +484,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: "tenant", label: "Tenant" },
     { value: "pg", label: "PG" },
     { value: "employee", label: "Employee" },
-    { value: "admin", label: "Admin" },
+    
   ];
 
   const handleSendOTP = async () => {
@@ -678,7 +674,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
           </div>
         </div>
 
-        {formData.role !== "admin" && formData.role !== "owner" && (
+        {formData.role !== "admin" && (
           <>
             <div className="col-span-2 sm:col-span-1">
               <div className="relative">

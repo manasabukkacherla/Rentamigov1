@@ -182,12 +182,14 @@ const Headerr: React.FC = () => {
                 className="h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 object-contain"
               />
               <span
-                className={`text-base xs:text-lg sm:text-xl font-bold ml-1 ${
-                  scrolled ? "text-black" : "text-white"
-                }`}
-              >
-                Rentamigo
-              </span>
+  className={`text-base xs:text-lg sm:text-xl font-bold ml-1 ${
+    scrolled ? "text-black" : "text-white"
+  }`}
+  style={{ fontFamily: 'Neuropol X' }}
+>
+  Rentamigo
+</span>
+
             </div>
 
             {/* Desktop Navigation - Single line, width-responsive, scroll if needed */}
