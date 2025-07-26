@@ -229,6 +229,7 @@ export default function Properties() {
         <table className="table w-full table-zebra">
           <thead>
             <tr>
+              <th className="text-left font-bold text-gray-900">Property ID</th>
               <th className="text-left font-bold text-gray-900">Title</th>
               <th className="text-left font-bold text-gray-900">Type</th>
               <th className="text-left font-bold text-gray-900">Location</th>
@@ -243,6 +244,11 @@ export default function Properties() {
           <tbody>
             {filteredProperties.map((property) => (
               <tr key={property.propertyId} className="hover">
+                <td className="font-mono text-sm">
+                  <span className="bg-gray-100 px-2 py-1 rounded">
+                    {property.propertyId}
+                  </span>
+                </td>
                 <td className="font-medium">{property.title}</td>
                 <td className="font-medium">{property.type}</td>
                 <td>{property.location}</td>
@@ -253,35 +259,35 @@ export default function Properties() {
                   </span>
                 </td>
                 <td>{property.price || '0'}</td>
-                <td>{property.metadata?.postedBy?.name || 'Unknown'}</td>
+                <td>{property.metadata?.createdBy || 'Unknown'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {property.postedDate ? new Date(property.postedDate).toLocaleDateString() : 
                    new Date().toLocaleDateString()}
                 </td>
                 
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button 
+                  {/* <button 
                     className="text-green-600 hover:text-green-900"
                     onClick={() => handleContactClick(property)}
                   >
                     <Mail className="w-4 h-4 inline-block mr-1" />
                     Contact
-                  </button>
-                </td>
-                <td className="space-x-2">
+                  </button> */}
+                {/* </td>
+                <td className="space-x-2"> */}
                   <button 
-                    className="text-blue-600 hover:text-blue-900"
+                    className="pl-4 text-blue-600 hover:text-blue-900"
                     onClick={() => handleEdit(property.propertyId)}
                   >
-                    <Edit2 className="w-4 h-4 inline-block mr-1" />
-                    Edit
+                    <Edit2 className="w-5 h-5 inline-block mr-1" />
+                    {/* Edit */}
                   </button>
                   <button 
                     className="text-red-600 hover:text-red-900"
                     onClick={() => handleDelete(property.propertyId)}
                   >
-                    <Trash2 className="w-4 h-4 inline-block mr-1" />
-                    Delete
+                    <Trash2 className="w-5 h-5 inline-block mr-1" />
+                    {/* Delete */}
                   </button>
                 </td>
               </tr>
