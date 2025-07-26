@@ -116,4 +116,29 @@ export interface Property {
   intent: PropertyIntent;
   metadata?: PropertyMetadata;
   createdBy: string;
+  
+  // Additional properties for property details
+  basicInformation?: {
+    title: string;
+    location: {
+      address?: string;
+      formattedAddress?: string;
+      latitude?: number;
+      longitude?: number;
+      [key: string]: any;
+    };
+    [key: string]: any;
+  };
+  
+  rentalTerms?: {
+    price: number;
+    [key: string]: any;
+  };
+  
+  availability?: {
+    status: string;
+    [key: string]: any;
+  };
+  
+  [key: string]: any; // Allow additional properties
 }

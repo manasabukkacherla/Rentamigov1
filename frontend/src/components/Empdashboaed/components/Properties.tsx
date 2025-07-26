@@ -142,25 +142,94 @@ export const Properties: React.FC = () => {
       const categorySlug = category === 'COM' ? 'commercial' : 'residential';
       const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
       
-      // Send update request to the correct endpoint with data wrapped in a data object
-      // Format: /api/commercial/rent/plots/:_id
+      // Create a properly typed update object with all required fields
+      const updateData: any = {
+        basicInformation: {
+          ...property.basicInformation,
+          title: updatedData.title,
+          location: {
+            ...property.basicInformation?.location,
+            address: updatedData.location,
+            formattedAddress: updatedData.location,
+            // Default to 0 if lat/lng doesn't exist
+            latitude: property.basicInformation?.location?.latitude || 0,
+            longitude: property.basicInformation?.location?.longitude || 0
+          }
+        },
+        rentalTerms: {
+          ...property.rentalTerms,
+          price: parseFloat(updatedData.price) || 0
+        },
+        availability: {
+          ...property.availability,
+          status: updatedData.status || 'Available'
+        }
+      };
+
+      // Clean the data to remove any undefined values
+      const cleanData = JSON.parse(JSON.stringify(updateData, (_, value) => 
+        value === undefined ? undefined : value
+      ));
+      
+      // Log the request details for debugging
+      console.log('Sending update request to:', `/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${property.id}`);
+      console.log('Update payload:', JSON.stringify({ data: cleanData }, null, 2));
+      
+      // Send update request to the correct endpoint with properly formatted data
       const response = await axios.put(
-        `/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${(property as any)._id}`,
-        { data: updatedData }, // Wrap the data in a data object
+        `/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${property.id}`,
+        { data: cleanData },
         {
           headers: {
             'Content-Type': 'application/json'
-          }
+          },
+          validateStatus: (status) => status < 500 // Don't throw for 500 errors
         }
       );
-      console.log('Update response:', response.data);
       
-      toast.success('Property updated successfully');
-      setEditModalOpen(false);
-      fetchProperties();
-    } catch (error) {
+      console.log('Update response status:', response.status);
+      console.log('Update response data:', response.data);
+      
+      if (response.status >= 200 && response.status < 300) {
+        // Force a complete refresh of the properties list
+        await fetchProperties();
+        
+        // Verify the update was applied
+        const updatedProperty = properties.find(p => p.propertyId === propertyId);
+        console.log('Property after update:', updatedProperty);
+        
+        toast.success('Property updated successfully');
+        setEditModalOpen(false);
+      } else {
+        console.error('Update failed with status:', response.status);
+        console.error('Error details:', response.data);
+        throw new Error(response.data.message || `Server responded with status ${response.status}`);
+      }
+    } catch (error: any) {
       console.error('Update error:', error);
-      toast.error(`Failed to update property: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      let errorMessage = 'Failed to update property';
+      
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+        console.error('Error response headers:', error.response.headers);
+        
+        errorMessage = error.response.data?.message || 
+                      error.response.data?.error || 
+                      `Server error: ${error.response.status}`;
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.error('No response received:', error.request);
+        errorMessage = 'No response received from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', error.message);
+        errorMessage = error.message || 'Unknown error occurred';
+      }
+      
+      toast.error(errorMessage);
     }
   };
 
