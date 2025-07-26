@@ -28,16 +28,15 @@ export default function Properties() {
   const [filterType, setFilterType] = useState<'all' | 'owner' | 'agent' | 'rentamigo'>('all');
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await axios.get('/api/allproperties/all');
-        const data = response.data;
-        
-        // Extract properties from all sections
-        const allProperties = [
-          ...(data?.data?.commercialRent?.apartment || []),
-          ...(data?.data?.commercialRent?.coveredSpace || []),
+  const fetchProperties = async () => {
+    try {
+      const response = await axios.get('/api/allproperties/all');
+      const data = response.data;
+      
+      // Extract properties from all sections
+      const allProperties = [
+        ...(data?.data?.commercialRent?.apartment || []),
+        ...(data?.data?.commercialRent?.coveredSpace || []),
           ...(data?.data?.commercialRent?.officeSpace || []),
           ...(data?.data?.commercialRent?.others || []),
           ...(data?.data?.commercialRent?.retailStore || []),
@@ -90,6 +89,7 @@ export default function Properties() {
       }
     };
 
+  useEffect(() => {
     fetchProperties();
   }, []);
 
@@ -170,10 +170,12 @@ export default function Properties() {
     }
 
     axios
-      .delete(`/api/${category}/${listing}/${type}/${propertyId}`)
+      .delete(`/api/properties/${category}/${listing}/${type}/${propertyId}`)
       .then(() => {
         toast.success('Property deleted successfully');
         setProperties(l => l.filter(x => x.propertyId !== propertyId));
+        // Refresh the properties list after deletion
+        fetchProperties();
       })
       .catch((error) => {
         console.error('Delete error:', error);

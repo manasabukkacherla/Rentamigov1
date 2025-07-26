@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Property, PropertyStatus } from '../../../components/allpropertiespage/types';
 import axios from 'axios';
-import { Check, AlertCircle, Wrench, Trash, Edit2 } from 'lucide-react';
+import { Check, AlertCircle, Wrench, Trash, Edit2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
@@ -21,87 +21,104 @@ export const Properties: React.FC = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'Available' | 'Rented' | 'Under Maintenance'>('all');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const navigate = useNavigate();
-  const handleDelete = useCallback((id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     if (!window.confirm('Delete this property?')) return;
     
-    // Parse property ID to get category, listing, and type
-    const propertyId = id;
-    const categoryCode = propertyId.slice(3, 6);
-    const listingCode = propertyId.slice(6, 8);
-    const typeCode = propertyId.slice(8, 10);
+    try {
+      const property = properties.find(p => p.propertyId === id);
+      if (!property) return;
 
-    // Map codes to route parameters
-    const category = categoryCode === 'COM' ? 'commercial' : 'residential';
-    const listing = listingCode === 'RE' ? 'rent' : 
-                    listingCode === 'SA' ? 'sale' : 
-                    'lease';
+      const categoryCode = property.propertyId.slice(3, 6);
+      const listingCode = property.propertyId.slice(6, 8);
+      const typeCode = property.propertyId.slice(8, 10);
 
-    // Get the type based on the type code
-    let type: string;
-    switch(typeCode) {
-      case 'AP': type = 'apartment'; break;
-      case 'BF': type = 'builderfloor'; break;
-      case 'IH': type = 'independenthouse'; break;
-      case 'AG': type = 'agriculture'; break;
-      case 'CS': type = 'coveredspace'; break;
-      case 'OS': type = 'officespace'; break;
-      case 'RS': type = 'retailstore'; break;
-      case 'SH': type = 'shop'; break;
-      case 'PL': type = 'plot'; break;
-      case 'WH': type = 'warehouse'; break;
-      case 'SD': type = 'shed'; break;
-      case 'SR': type = 'showroom'; break;
-      case 'OT': type = 'others'; break;
-      default: type = 'apartment'; break;
+      const category = categoryCode === 'COM' ? 'commercial' : 'residential';
+      const listing = listingCode === 'RE' ? 'rent' : 
+                      listingCode === 'SA' ? 'sale' : 
+                      'lease';
+
+      let type: string;
+      switch(typeCode) {
+        case 'AP': type = 'apartment'; break;
+        case 'BF': type = 'builderfloor'; break;
+        case 'IH': type = 'independenthouse'; break;
+        case 'AG': type = 'agriculture'; break;
+        case 'CS': type = 'coveredspace'; break;
+        case 'OS': type = 'officespace'; break;
+        case 'RS': type = 'retailstore'; break;
+        case 'SH': type = 'shop'; break;
+        case 'PL': type = 'plot'; break;
+        case 'WH': type = 'warehouse'; break;
+        case 'SD': type = 'shed'; break;
+        case 'SR': type = 'showroom'; break;
+        case 'OT': type = 'others'; break;
+        default: type = 'apartment'; break;
+      }
+
+      await axios.delete(`/api/${category}/${listing}/${type}/${id}`);
+      toast.success('Property deleted successfully');
+      // Refresh properties list
+      fetchProperties();
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error(error.response?.data?.message || 'Failed to delete property');
     }
-
-    axios
-      .delete(`/api/${category}/${listing}/${type}/${propertyId}`)
-      .then(() => {
-        toast.success('Property deleted successfully');
-        setProperties(l => l.filter(x => x.propertyId !== propertyId));
-      })
-      .catch((error) => {
-        console.error('Delete error:', error);
-        toast.error(error.response?.data?.message || 'Failed to delete property');
-      });
-  }, []);
+  }, [properties]);
 
   const handleEdit = useCallback((id: string) => {
-    // Parse property ID to get category, listing, and type
-    const propertyId = id;
-    const categoryCode = propertyId.slice(3, 6);
-    const listingCode = propertyId.slice(6, 8);
-    const typeCode = propertyId.slice(8, 10);
-
-    // Map codes to route parameters
-    const category = categoryCode === 'COM' ? 'commercial' : 'residential';
-    const listing = listingCode === 'RE' ? 'rent' : 
-                    listingCode === 'SA' ? 'sale' : 
-                    'lease';
-
-    // Get the type based on the type code
-    let type: string;
-    switch(typeCode) {
-      case 'AP': type = 'apartment'; break;
-      case 'BF': type = 'builderfloor'; break;
-      case 'IH': type = 'independenthouse'; break;
-      case 'AG': type = 'agriculture'; break;
-      case 'CS': type = 'coveredspace'; break;
-      case 'OS': type = 'officespace'; break;
-      case 'RS': type = 'retailstore'; break;
-      case 'SH': type = 'shop'; break;
-      case 'PL': type = 'plot'; break;
-      case 'WH': type = 'warehouse'; break;
-      case 'SD': type = 'shed'; break;
-      case 'SR': type = 'showroom'; break;
-      case 'OT': type = 'others'; break;
-      default: type = 'apartment'; break;
+    const property = properties.find(p => p.propertyId === id);
+    if (property) {
+      setSelectedProperty(property);
+      setEditModalOpen(true);
     }
+  }, [properties]);
 
-    navigate(`/properties/edit/${category}/${listing}/${type}/${propertyId}`);
-  }, [navigate]);
+  const handleUpdateProperty = async (propertyId: string, updatedData: Partial<Property>) => {
+    try {
+      const property = properties.find(p => p.propertyId === propertyId);
+      if (!property) return;
+
+      const categoryCode = property.propertyId.slice(3, 6);
+      const listingCode = property.propertyId.slice(6, 8);
+      const typeCode = property.propertyId.slice(8, 10);
+
+      const category = categoryCode === 'COM' ? 'commercial' : 'residential';
+      const listing = listingCode === 'RE' ? 'rent' : 
+                      listingCode === 'SA' ? 'sale' : 
+                      'lease';
+
+      let type: string;
+      switch(typeCode) {
+        case 'AP': type = 'apartment'; break;
+        case 'BF': type = 'builderfloor'; break;
+        case 'IH': type = 'independenthouse'; break;
+        case 'AG': type = 'agriculture'; break;
+        case 'CS': type = 'coveredspace'; break;
+        case 'OS': type = 'officespace'; break;
+        case 'RS': type = 'retailstore'; break;
+        case 'SH': type = 'shop'; break;
+        case 'PL': type = 'plot'; break;
+        case 'WH': type = 'warehouse'; break;
+        case 'SD': type = 'shed'; break;
+        case 'SR': type = 'showroom'; break;
+        case 'OT': type = 'others'; break;
+        default: type = 'apartment'; break;
+      }
+
+      await axios.put(`/api/${category}/${listing}/${type}/${propertyId}`, updatedData);
+      toast.success('Property updated successfully');
+      setEditModalOpen(false);
+      setSelectedProperty(null);
+      // Refresh properties list
+      fetchProperties();
+    } catch (error) {
+      console.error('Update error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update property');
+    }
+  };
   useEffect(() => {
     const fetchProperties = async () => {
       try {
@@ -236,18 +253,93 @@ export const Properties: React.FC = () => {
                   </button>
                 </td>
                 <td className="px-3 py-2 flex gap-2">
-                <button onClick={() => handleEdit(property.propertyId)}>
-                  <Edit2 className="text-blue-600" />
-                </button>
-                <button onClick={() => handleDelete(property.propertyId)}>
-                  <Trash className="text-red-600" />
-                </button>
-              </td>
+                  <button onClick={() => handleEdit(property.propertyId)}>
+                    <Edit2 className="text-blue-600" />
+                  </button>
+                  <button onClick={() => handleDelete(property.propertyId)}>
+                    <Trash className="text-red-600" />
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+
+      {/* Edit Property Modal */}
+      {editModalOpen && selectedProperty && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg w-96 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Edit Property</h2>
+              <button onClick={() => { setEditModalOpen(false); setSelectedProperty(null); }}>
+                <X className="text-gray-500 hover:text-gray-700" />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target as HTMLFormElement);
+              const updatedData = Object.fromEntries(formData.entries());
+              handleUpdateProperty(selectedProperty.propertyId, updatedData);
+            }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    defaultValue={selectedProperty.title}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    defaultValue={selectedProperty.location}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Price</label>
+                  <input
+                    type="number"
+                    name="price"
+                    defaultValue={selectedProperty.price}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Status</label>
+                  <select
+                    name="status"
+                    defaultValue={selectedProperty.status}
+                    className="w-full px-3 py-2 border rounded"
+                  >
+                    <option value="Available">Available</option>
+                    <option value="Rented">Rented</option>
+                    <option value="Under Maintenance">Under Maintenance</option>
+                  </select>
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => { setEditModalOpen(false); setSelectedProperty(null); }}
+                    className="btn btn-outline"
+                  >
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
