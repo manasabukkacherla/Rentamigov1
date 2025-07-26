@@ -30,39 +30,46 @@ export const Properties: React.FC = () => {
     
     try {
       const property = properties.find(p => p.propertyId === id);
-      if (!property) return;
-
-      const categoryCode = property.propertyId.slice(3, 6);
-      const listingCode = property.propertyId.slice(6, 8);
-      const typeCode = property.propertyId.slice(8, 10);
-
-      const category = categoryCode === 'COM' ? 'commercial' : 'residential';
-      const listing = listingCode === 'RE' ? 'rent' : 
-                      listingCode === 'SA' ? 'sale' : 
-                      'lease';
-
-      let type: string;
-      switch(typeCode) {
-        case 'AP': type = 'apartment'; break;
-        case 'BF': type = 'builderfloor'; break;
-        case 'IH': type = 'independenthouse'; break;
-        case 'AG': type = 'agriculture'; break;
-        case 'CS': type = 'coveredspace'; break;
-        case 'OS': type = 'officespace'; break;
-        case 'RS': type = 'retailstore'; break;
-        case 'SH': type = 'shop'; break;
-        case 'PL': type = 'plot'; break;
-        case 'WH': type = 'warehouse'; break;
-        case 'SD': type = 'shed'; break;
-        case 'SR': type = 'showroom'; break;
-        case 'OT': type = 'others'; break;
-        default: type = 'apartment'; break;
+      if (!property) {
+        toast.error('Property not found');
+        return;
       }
 
-      // Log the URL for debugging
-      console.log('Deleting from:', `/api/${category}/${listing}/${type}/${id}`);
-
-      const response = await axios.delete(`/api/${category}/${listing}/${type}/${id}`);
+      // Log the deletion attempt
+      console.log('Deleting property with ID:', id);
+      
+      // Extract the property type and listing type from the propertyId
+      // Format: RA-COMREPL0001
+      const [_, typeCode] = id.split('-');
+      const category = typeCode.substring(0, 3); // 'COM' or 'RES'
+      const listingType = typeCode.substring(3, 5); // 'RE', 'SA', or 'LE'
+      const propertyType = typeCode.substring(5, 7); // 'PL', 'AG', 'CS', etc.
+      
+      // Map property type codes to their corresponding API endpoints
+      const typeMap: Record<string, string> = {
+        'PL': 'plots',
+        'AG': 'agriculture',
+        'CS': 'covered-space',
+        'OS': 'office-space',
+        'RS': 'retail-store',
+        'SH': 'shops',
+        'SR': 'showrooms',
+        'SD': 'sheds',
+        'WH': 'warehouses',
+        'OT': 'others',
+        'AP': 'apartments',
+        'IH': 'independent-houses',
+        'BF': 'builder-floors',
+        'SS': 'shared-spaces'
+      };
+      
+      const propertyTypeSlug = typeMap[propertyType] || 'others';
+      const categorySlug = category === 'COM' ? 'commercial' : 'residential';
+      const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
+      
+      // Send delete request to the correct endpoint using the MongoDB _id
+      // Format: /api/commercial/rent/plots/:_id
+      const response = await axios.delete(`/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${property.id}`);
       console.log('Delete response:', response.data);
       
       toast.success('Property deleted successfully');
@@ -88,59 +95,72 @@ export const Properties: React.FC = () => {
     setEditModalOpen(true);
   }, [properties]);
 
-  const handleUpdateProperty = async (propertyId: string, updatedData: Partial<Property>) => {
+  const handleUpdateProperty = async (propertyId: string, updatedData: any) => {
+    // Find the property to get its MongoDB _id
+    const property = properties.find(p => p.propertyId === propertyId);
+    if (!property) {
+      toast.error('Property not found');
+      return;
+    }
+
     try {
-      const property = properties.find(p => p.propertyId === propertyId);
-      if (!property) {
-        toast.error('Property not found');
-        return;
-      }
 
-      const categoryCode = property.propertyId.slice(3, 6);
-      const listingCode = property.propertyId.slice(6, 8);
-      const typeCode = property.propertyId.slice(8, 10);
-
-      const category = categoryCode === 'COM' ? 'commercial' : 'residential';
-      const listing = listingCode === 'RE' ? 'rent' : 
-                      listingCode === 'SA' ? 'sale' : 
-                      'lease';
-
-      let type: string;
-      switch(typeCode) {
-        case 'AP': type = 'apartment'; break;
-        case 'BF': type = 'builderfloor'; break;
-        case 'IH': type = 'independenthouse'; break;
-        case 'AG': type = 'agriculture'; break;
-        case 'CS': type = 'coveredspace'; break;
-        case 'OS': type = 'officespace'; break;
-        case 'RS': type = 'retailstore'; break;
-        case 'SH': type = 'shop'; break;
-        case 'PL': type = 'plot'; break;
-        case 'WH': type = 'warehouse'; break;
-        case 'SD': type = 'shed'; break;
-        case 'SR': type = 'showroom'; break;
-        case 'OT': type = 'others'; break;
-        default: type = 'apartment'; break;
-      }
-
-      // Log the URL for debugging
-      console.log('Updating at:', `/api/${category}/${listing}/${type}/${propertyId}`);
+      // Log the update request for debugging
+      console.log('Updating property with ID:', propertyId);
       console.log('Update data:', updatedData);
 
-      const response = await axios.put(`/api/${category}/${listing}/${type}/${propertyId}`, updatedData);
+      // Extract the property type and listing type from the propertyId
+      // Format: RA-COMREPL0001
+      const [_, typeCode] = propertyId.split('-');
+      
+      // Log the update attempt for debugging
+      console.log('Updating property with ID:', propertyId);
+      console.log('Update data:', updatedData);
+      const category = typeCode.substring(0, 3); // 'COM' or 'RES'
+      const listingType = typeCode.substring(3, 5); // 'RE', 'SA', or 'LE'
+      const propertyType = typeCode.substring(5, 7); // 'PL', 'AG', 'CS', etc.
+      
+      // Map property type codes to their corresponding API endpoints
+      const typeMap: Record<string, string> = {
+        'PL': 'plots',
+        'AG': 'agriculture',
+        'CS': 'covered-space',
+        'OS': 'office-space',
+        'RS': 'retail-store',
+        'SH': 'shops',
+        'SR': 'showrooms',
+        'SD': 'sheds',
+        'WH': 'warehouses',
+        'OT': 'others',
+        'AP': 'apartments',
+        'IH': 'independent-houses',
+        'BF': 'builder-floors',
+        'SS': 'shared-spaces'
+      };
+      
+      const propertyTypeSlug = typeMap[propertyType] || 'others';
+      const categorySlug = category === 'COM' ? 'commercial' : 'residential';
+      const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
+      
+      // Send update request to the correct endpoint with data wrapped in a data object
+      // Format: /api/commercial/rent/plots/:_id
+      const response = await axios.put(
+        `/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${(property as any)._id}`,
+        { data: updatedData }, // Wrap the data in a data object
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
       console.log('Update response:', response.data);
       
       toast.success('Property updated successfully');
       setEditModalOpen(false);
-      setSelectedProperty(null);
-      // Refresh properties list
       fetchProperties();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Update error:', error);
-      const errorMessage = error.response?.data?.message || 
-                        error.response?.status === 404 ? 'Property not found' :
-                        'Failed to update property';
-      toast.error(errorMessage);
+      toast.error(`Failed to update property: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
