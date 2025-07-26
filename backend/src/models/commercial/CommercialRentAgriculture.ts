@@ -69,7 +69,7 @@ export interface ICommercialRentAgriculture extends Document {
 }
 
 const CommercialRentAgricultureSchema: Schema = new Schema({
-  propertyId: { type: String, required: false },
+  propertyId: { type: String, required: true, unique: true },
   basicInformation:{
   title: { type: String, required: false },
   Type: [{ type: String, required: false }],

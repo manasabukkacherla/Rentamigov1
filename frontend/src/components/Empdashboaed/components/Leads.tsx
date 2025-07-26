@@ -21,6 +21,7 @@ interface EnquiryForm {
   name: string;
   email: string;
   phone: string;
+  propertyId: string;
   propertyType: string;
   propertyName: string;
   message: string;
@@ -43,6 +44,7 @@ const Leads: React.FC = () => {
     name: '',
     email: '',
     phone: '',
+    propertyId: '',
     propertyType: '',
     propertyName: '',
     message: ''
@@ -114,6 +116,7 @@ const Leads: React.FC = () => {
           name: '',
           email: '',
           phone: '',
+          propertyId: '',
           propertyType: '',
           propertyName: '',
           message: ''
@@ -229,7 +232,7 @@ const Leads: React.FC = () => {
       <table className="w-full table-auto">
         <thead className="bg-gray-100">
           <tr>
-            {['Name','Email','Phone','Property','Type','By','Message','Date','Actions'].map(col => (
+            {['Name','Email','Phone','PropertyId','Property Name','Type','By','Message','Date','Actions'].map(col => (
               <th key={col} className="px-3 py-2 text-sm font-medium">{col}</th>
             ))}
           </tr>
@@ -246,6 +249,7 @@ const Leads: React.FC = () => {
               <td className="px-3 py-2">{l.name}</td>
               <td className="px-3 py-2">{l.email}</td>
               <td className="px-3 py-2">{l.phone}</td>
+              <td className="px-3 py-2">{l.propertyId}</td>
               <td className="px-3 py-2">{l.propertyName}</td>
               <td className="px-3 py-2">{l.propertyType}</td>
               <td className="px-3 py-2">{l.createdBy}</td>
@@ -329,7 +333,17 @@ const Leads: React.FC = () => {
                     required
                   />
                 </div>
-
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Property ID</label>
+                  <input
+                    type="text"
+                    value={enquiryForm.propertyId}
+                    onChange={(e) => handleInputChange('propertyId', e.target.value)}
+                    className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none focus:ring-opacity-50 transition-colors"
+                    placeholder="Enter property ID"
+                    required
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Property Type</label>
                   <select

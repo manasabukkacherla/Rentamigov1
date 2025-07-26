@@ -1,4 +1,6 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
+import { Model, Document } from 'mongoose';
+
 // Commercial Rent Models
 import CommercialRentAgriculture from '../models/commercial/CommercialRentAgriculture';
 import CommercialRentCoveredSpace from '../models/commercial/CommercialRentCoveredSpace';
@@ -260,6 +262,231 @@ router.get('/all', async (req: any, res: any) => {
     });
   } catch (err) {
     console.error('Unhandled error in all properties route:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: 'Server error', error: err });
+    }
+  }
+});
+
+router.put('/:category/:listing/:type/:propertyId', async (req: any, res: any) => {
+  try {
+    const { category, listing, type, propertyId } = req.params;
+    
+    // Get the model based on category, listing, and type
+    let model;
+    
+    if (category === 'commercial') {
+      switch (listing) {
+        case 'rent':
+          switch (type) {
+            case 'agriculture': model = CommercialRentAgriculture; break;
+            case 'covered-space': model = CommercialRentCoveredSpace; break;
+            case 'office-space': model = CommercialRentOfficeSpace; break;
+            case 'others': model = CommercialRentOthers; break;
+            case 'retail-store': model = CommercialRentRetailStore; break;
+            case 'shed': model = CommercialRentShed; break;
+            case 'warehouse': model = CommercialRentWarehouse; break;
+            case 'plot': model = CommercialRentPlot; break;
+            case 'shops': model = CommercialRentShop; break;
+            case 'showrooms': model = CommercialRentShowroom; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'sale':
+          switch (type) {
+            case 'agriculture': model = CommercialSellAgriculture; break;
+            case 'covered-space': model = CommercialSellCoveredSpace; break;
+            case 'office-space': model = CommercialSellOfficeSpace; break;
+            case 'others': model = CommercialSellOthers; break;
+            case 'retail-store': model = CommercialSellRetailStore; break;
+            case 'shed': model = CommercialSellShed; break;
+            case 'warehouse': model = CommercialSellWarehouse; break;
+            case 'plot': model = CommercialPlot; break;
+            case 'shops': model = CommercialSellShop; break;
+            case 'showrooms': model = CommercialSellShowroom; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'lease':
+          switch (type) {
+            case 'agriculture': model = CommercialLeaseAgriculture; break;
+            case 'others': model = CommercialLeaseOthers; break;
+            case 'retail-store': model = CommercialLeaseRetailStore; break;
+            case 'shops': model = CommercialLeaseShop; break;
+            case 'plot': model = CommercialLeasePlot; break;
+            case 'showrooms': model = CommercialLeaseShowroom; break;
+            case 'covered-space': model = CommercialLeaseCoveredSpace; break;
+            case 'office-space': model = CommercialLeaseOfficeSpace; break;
+            case 'warehouse': model = CommercialLeaseWarehouse; break;
+            case 'shed': model = CommercialLeaseShed; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        default:
+          return res.status(400).json({ success: false, message: 'Invalid listing type' });
+      }
+    } else if (category === 'residential') {
+      switch (listing) {
+        case 'rent':
+          switch (type) {
+            case 'apartment': model = ResidentialRentApartment; break;
+            case 'builderfloor': model = ResidentialRentBuilderFloor; break;
+            case 'independenthouse': model = ResidentialRentIndependent; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'sale':
+          switch (type) {
+            case 'apartment': model = ResidentialSaleApartment; break;
+            case 'builderfloor': model = ResidentialSaleBuilderFloor; break;
+            case 'independenthouse': model = SaleIndependentHouse; break;
+            case 'plot': model = SalePlot; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'lease':
+          switch (type) {
+            case 'apartment': model = ResidentialLeaseApartment; break;
+            case 'builderfloor': model = ResidentialLeaseBuilderFloor; break;
+            case 'independenthouse': model = ResidentialLeaseIndependentHouse; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        default:
+          return res.status(400).json({ success: false, message: 'Invalid listing type' });
+      }
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid category' });
+    }
+
+    // Update the property by propertyId
+    const updatedProperty = await (model as Model<Document>).findOneAndUpdate(
+      { propertyId },
+      req.body,
+      { new: true }
+    ) as Document;
+
+    if (!updatedProperty) {
+      return res.status(404).json({ success: false, message: 'Property not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Property updated successfully',
+      data: normalizeProperty(updatedProperty)
+    });
+  } catch (err) {
+    console.error('Error updating property:', err);
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: 'Server error', error: err });
+    }
+  }
+});
+
+router.delete('/:category/:listing/:type/:propertyId', async (req: any, res: any) => {
+  try {
+    const { category, listing, type, propertyId } = req.params;
+    
+    // Get the model based on category, listing, and type
+    let model;
+    
+    if (category === 'commercial') {
+      switch (listing) {
+        case 'rent':
+          switch (type) {
+            case 'agriculture': model = CommercialRentAgriculture; break;
+            case 'covered-space': model = CommercialRentCoveredSpace; break;
+            case 'office-space': model = CommercialRentOfficeSpace; break;
+            case 'others': model = CommercialRentOthers; break;
+            case 'retail-store': model = CommercialRentRetailStore; break;
+            case 'shed': model = CommercialRentShed; break;
+            case 'warehouse': model = CommercialRentWarehouse; break;
+            case 'plot': model = CommercialRentPlot; break;
+            case 'shops': model = CommercialRentShop; break;
+            case 'showrooms': model = CommercialRentShowroom; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'sale':
+          switch (type) {
+            case 'agriculture': model = CommercialSellAgriculture; break;
+            case 'covered-space': model = CommercialSellCoveredSpace; break;
+            case 'office-space': model = CommercialSellOfficeSpace; break;
+            case 'others': model = CommercialSellOthers; break;
+            case 'retail-store': model = CommercialSellRetailStore; break;
+            case 'shed': model = CommercialSellShed; break;
+            case 'warehouse': model = CommercialSellWarehouse; break;
+            case 'plot': model = CommercialPlot; break;
+            case 'shops': model = CommercialSellShop; break;
+            case 'showrooms': model = CommercialSellShowroom; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'lease':
+          switch (type) {
+            case 'agriculture': model = CommercialLeaseAgriculture; break;
+            case 'others': model = CommercialLeaseOthers; break;
+            case 'retail-store': model = CommercialLeaseRetailStore; break;
+            case 'shops': model = CommercialLeaseShop; break;
+            case 'plot': model = CommercialLeasePlot; break;
+            case 'showrooms': model = CommercialLeaseShowroom; break;
+            case 'covered-space': model = CommercialLeaseCoveredSpace; break;
+            case 'office-space': model = CommercialLeaseOfficeSpace; break;
+            case 'warehouse': model = CommercialLeaseWarehouse; break;
+            case 'shed': model = CommercialLeaseShed; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        default:
+          return res.status(400).json({ success: false, message: 'Invalid listing type' });
+      }
+    } else if (category === 'residential') {
+      switch (listing) {
+        case 'rent':
+          switch (type) {
+            case 'apartment': model = ResidentialRentApartment; break;
+            case 'builderfloor': model = ResidentialRentBuilderFloor; break;
+            case 'independenthouse': model = ResidentialRentIndependent; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'sale':
+          switch (type) {
+            case 'apartment': model = ResidentialSaleApartment; break;
+            case 'builderfloor': model = ResidentialSaleBuilderFloor; break;
+            case 'independenthouse': model = SaleIndependentHouse; break;
+            case 'plot': model = SalePlot; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        case 'lease':
+          switch (type) {
+            case 'apartment': model = ResidentialLeaseApartment; break;
+            case 'builderfloor': model = ResidentialLeaseBuilderFloor; break;
+            case 'independenthouse': model = ResidentialLeaseIndependentHouse; break;
+            default: return res.status(400).json({ success: false, message: 'Invalid type' });
+          }
+          break;
+        default:
+          return res.status(400).json({ success: false, message: 'Invalid listing type' });
+      }
+    } else {
+      return res.status(400).json({ success: false, message: 'Invalid category' });
+    }
+
+    // Delete the property by propertyId
+    const deletedProperty = await (model as Model<Document>).findOneAndDelete({ propertyId }) as Document;
+
+    if (!deletedProperty) {
+      return res.status(404).json({ success: false, message: 'Property not found' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Property deleted successfully'
+    });
+  } catch (err) {
+    console.error('Error deleting property:', err);
     if (!res.headersSent) {
       res.status(500).json({ success: false, message: 'Server error', error: err });
     }
