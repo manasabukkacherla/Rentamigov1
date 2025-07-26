@@ -91,6 +91,12 @@ function Allproperties() {
     setActiveFilters(filters);
   };
 
+  const handleDeleteProperty = (deletedPropertyId: string) => {
+    setFetchedProperties(prevProperties => 
+      prevProperties.filter(property => property.propertyId !== deletedPropertyId)
+    );
+  };
+
   const searchResults = useMemo(() => {
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const criteria = extractSearchCriteria(normalizedQuery);
@@ -199,7 +205,10 @@ function Allproperties() {
                 className="cursor-pointer"
               >
 
-                <PropertyCard property={property} />
+                <PropertyCard 
+                  property={property} 
+                  onDelete={handleDeleteProperty}
+                />
 
 
 

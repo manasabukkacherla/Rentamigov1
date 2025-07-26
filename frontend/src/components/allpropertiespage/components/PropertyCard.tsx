@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Home, Square, Calendar, Pencil, Trash2 } from 'lucide-react';
+import { MapPin, Home, Square, Calendar, Pencil, Trash2, AlertTriangle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Property } from '../types';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 // Format a single image URL into a PropertyImage object
 function formatImage(url: string): PropertyImage {
@@ -41,6 +44,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   const [propertyMedia, setPropertyMedia] = useState<PropertyImage | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Function to highlight matched fields
   const highlightIfMatched = (field: string, content: string) => {
@@ -158,9 +162,25 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
     // Add your edit logic here
   };
 
-  const handleDelete = () => {
-    console.log("Deleting property:", property.propertyId);
-    // Add your delete logic here
+  const handleDelete = async () => {
+    try {
+      const response = await axios.delete(`/api/${category}/${listing}/${type}/${property.propertyId}`);
+      console.log(response);
+      if (response.data.success) {
+        toast.success("Property deleted successfully");
+        // Call onDelete to update the parent component's state
+        if (onDelete) {
+          onDelete(property.propertyId);
+        }
+      } else {
+        toast.error(response.data.message || 'Failed to delete property');
+      }
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      toast.error('An error occurred while deleting the property');
+    } finally {
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -223,18 +243,53 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
                     <Pencil className="w-4 h-4" />
                   </button>
                 {/* )} */}
-                {/* {onDelete && ( */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete();
-                    }}
-                    className="p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 shadow-sm"
-                    title="Delete Property"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                {/* )} */}
+                <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="p-1.5 rounded-md bg-red-50 hover:bg-red-100 text-red-600 shadow-sm"
+                      title="Delete Property"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <div className="flex items-center gap-2">
+                        <AlertTriangle className="h-5 w-5 text-yellow-500" />
+                        <DialogTitle>Delete Property</DialogTitle>
+                      </div>
+                      <DialogDescription className="pt-2">
+                        Are you sure you want to delete this property? This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="sm:justify-between gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDeleteDialogOpen(false)
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete()
+                        }}
+                        className="bg-red-600 hover:bg-red-700"
+                      >
+                        Delete
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </>
             )}
           </div>
