@@ -24,6 +24,7 @@ export const Properties: React.FC = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const navigate = useNavigate();
+
   const handleDelete = useCallback(async (id: string) => {
     if (!window.confirm('Delete this property?')) return;
     
@@ -58,28 +59,42 @@ export const Properties: React.FC = () => {
         default: type = 'apartment'; break;
       }
 
-      await axios.delete(`/api/${category}/${listing}/${type}/${id}`);
+      // Log the URL for debugging
+      console.log('Deleting from:', `/api/${category}/${listing}/${type}/${id}`);
+
+      const response = await axios.delete(`/api/${category}/${listing}/${type}/${id}`);
+      console.log('Delete response:', response.data);
+      
       toast.success('Property deleted successfully');
       // Refresh properties list
       fetchProperties();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Delete error:', error);
-      toast.error(error.response?.data?.message || 'Failed to delete property');
+      const errorMessage = error.response?.data?.message || 
+                        error.response?.status === 404 ? 'Property not found' :
+                        'Failed to delete property';
+      toast.error(errorMessage);
     }
   }, [properties]);
 
   const handleEdit = useCallback((id: string) => {
     const property = properties.find(p => p.propertyId === id);
-    if (property) {
-      setSelectedProperty(property);
-      setEditModalOpen(true);
+    if (!property) {
+      toast.error('Property not found');
+      return;
     }
+
+    setSelectedProperty(property);
+    setEditModalOpen(true);
   }, [properties]);
 
   const handleUpdateProperty = async (propertyId: string, updatedData: Partial<Property>) => {
     try {
       const property = properties.find(p => p.propertyId === propertyId);
-      if (!property) return;
+      if (!property) {
+        toast.error('Property not found');
+        return;
+      }
 
       const categoryCode = property.propertyId.slice(3, 6);
       const listingCode = property.propertyId.slice(6, 8);
@@ -108,79 +123,89 @@ export const Properties: React.FC = () => {
         default: type = 'apartment'; break;
       }
 
-      await axios.put(`/api/${category}/${listing}/${type}/${propertyId}`, updatedData);
+      // Log the URL for debugging
+      console.log('Updating at:', `/api/${category}/${listing}/${type}/${propertyId}`);
+      console.log('Update data:', updatedData);
+
+      const response = await axios.put(`/api/${category}/${listing}/${type}/${propertyId}`, updatedData);
+      console.log('Update response:', response.data);
+      
       toast.success('Property updated successfully');
       setEditModalOpen(false);
       setSelectedProperty(null);
       // Refresh properties list
       fetchProperties();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update error:', error);
-      toast.error(error.response?.data?.message || 'Failed to update property');
+      const errorMessage = error.response?.data?.message || 
+                        error.response?.status === 404 ? 'Property not found' :
+                        'Failed to update property';
+      toast.error(errorMessage);
     }
   };
-  useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const response = await axios.get('/api/allproperties/all');
-        const data = response.data;
+
+  const fetchProperties = async () => {
+    try {
+      const response = await axios.get('/api/allproperties/all');
+      const data = response.data;
+      
+      // Extract properties from all sections
+      const allProperties = [
+        ...(data?.data?.commercialRent?.apartment || []),
+        ...(data?.data?.commercialRent?.coveredSpace || []),
+        ...(data?.data?.commercialRent?.officeSpace || []),
+        ...(data?.data?.commercialRent?.others || []),
+        ...(data?.data?.commercialRent?.retailStore || []),
+        ...(data?.data?.commercialRent?.shed || []),
+        ...(data?.data?.commercialRent?.warehouse || []),
+        ...(data?.data?.commercialRent?.plot || []),
+        ...(data?.data?.commercialRent?.shop || []),
+        ...(data?.data?.commercialRent?.showroom || []),
         
-        // Extract properties from all sections
-        const allProperties = [
-          ...(data?.data?.commercialRent?.apartment || []),
-          ...(data?.data?.commercialRent?.coveredSpace || []),
-          ...(data?.data?.commercialRent?.officeSpace || []),
-          ...(data?.data?.commercialRent?.others || []),
-          ...(data?.data?.commercialRent?.retailStore || []),
-          ...(data?.data?.commercialRent?.shed || []),
-          ...(data?.data?.commercialRent?.warehouse || []),
-          ...(data?.data?.commercialRent?.plot || []),
-          ...(data?.data?.commercialRent?.shop || []),
-          ...(data?.data?.commercialRent?.showroom || []),
-          
-          ...(data?.data?.commercialSale?.apartment || []),
-          ...(data?.data?.commercialSale?.coveredSpace || []),
-          ...(data?.data?.commercialSale?.officeSpace || []),
-          ...(data?.data?.commercialSale?.others || []),
-          ...(data?.data?.commercialSale?.retailStore || []),
-          ...(data?.data?.commercialSale?.shed || []),
-          ...(data?.data?.commercialSale?.warehouse || []),
-          ...(data?.data?.commercialSale?.plot || []),
-          ...(data?.data?.commercialSale?.shop || []),
-          ...(data?.data?.commercialSale?.showroom || []),
-          
-          ...(data?.data?.commercialLease?.apartment || []),
-          ...(data?.data?.commercialLease?.coveredSpace || []),
-          ...(data?.data?.commercialLease?.officeSpace || []),
-          ...(data?.data?.commercialLease?.others || []),
-          ...(data?.data?.commercialLease?.retailStore || []),
-          ...(data?.data?.commercialLease?.shed || []),
-          ...(data?.data?.commercialLease?.warehouse || []),
-          ...(data?.data?.commercialLease?.plot || []),
-          ...(data?.data?.commercialLease?.shop || []),
-          ...(data?.data?.commercialLease?.showroom || []),
-          
-          ...(data?.data?.residentialRent?.apartment || []),
-          ...(data?.data?.residentialRent?.house || []),
-          ...(data?.data?.residentialRent?.villa || []),
-          
-          ...(data?.data?.residentialSale?.apartment || []),
-          ...(data?.data?.residentialSale?.house || []),
-          ...(data?.data?.residentialSale?.villa || []),
-          
-          ...(data?.data?.residentialLease?.apartment || []),
-          ...(data?.data?.residentialLease?.house || []),
-          ...(data?.data?.residentialLease?.villa || [])
-        ];
+        ...(data?.data?.commercialSale?.apartment || []),
+        ...(data?.data?.commercialSale?.coveredSpace || []),
+        ...(data?.data?.commercialSale?.officeSpace || []),
+        ...(data?.data?.commercialSale?.others || []),
+        ...(data?.data?.commercialSale?.retailStore || []),
+        ...(data?.data?.commercialSale?.shed || []),
+        ...(data?.data?.commercialSale?.warehouse || []),
+        ...(data?.data?.commercialSale?.plot || []),
+        ...(data?.data?.commercialSale?.shop || []),
+        ...(data?.data?.commercialSale?.showroom || []),
+        
+        ...(data?.data?.commercialLease?.apartment || []),
+        ...(data?.data?.commercialLease?.coveredSpace || []),
+        ...(data?.data?.commercialLease?.officeSpace || []),
+        ...(data?.data?.commercialLease?.others || []),
+        ...(data?.data?.commercialLease?.retailStore || []),
+        ...(data?.data?.commercialLease?.shed || []),
+        ...(data?.data?.commercialLease?.warehouse || []),
+        ...(data?.data?.commercialLease?.plot || []),
+        ...(data?.data?.commercialLease?.shop || []),
+        ...(data?.data?.commercialLease?.showroom || []),
+        
+        ...(data?.data?.residentialRent?.apartment || []),
+        ...(data?.data?.residentialRent?.house || []),
+        ...(data?.data?.residentialRent?.villa || []),
+        
+        ...(data?.data?.residentialSale?.apartment || []),
+        ...(data?.data?.residentialSale?.house || []),
+        ...(data?.data?.residentialSale?.villa || []),
+        
+        ...(data?.data?.residentialLease?.apartment || []),
+        ...(data?.data?.residentialLease?.house || []),
+        ...(data?.data?.residentialLease?.villa || [])
+      ];
 
-        setProperties(allProperties);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-        setLoading(false);
-      }
-    };
+      setProperties(allProperties);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchProperties();
   }, []);
 
@@ -244,21 +269,27 @@ export const Properties: React.FC = () => {
                   </span>
                 </td>
                 <td>{property.price || 'N/A'}</td>
-                <td>
-                  <button 
-                    className="btn btn-secondary btn-sm hover:scale-105 transition-transform"
-                    onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
-                  >
-                    View Details
-                  </button>
-                </td>
-                <td className="px-3 py-2 flex gap-2">
-                  <button onClick={() => handleEdit(property.propertyId)}>
-                    <Edit2 className="text-blue-600" />
-                  </button>
-                  <button onClick={() => handleDelete(property.propertyId)}>
-                    <Trash className="text-red-600" />
-                  </button>
+                <td className="px-3 py-2">
+                  <div className="flex gap-2">
+                    <button 
+                      className="btn btn-secondary btn-sm hover:scale-105 transition-transform"
+                      onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
+                    >
+                      View Details
+                    </button>
+                    <button 
+                      className="btn btn-outline btn-sm hover:scale-105 transition-transform"
+                      onClick={() => handleEdit(property.propertyId)}
+                    >
+                      <Edit2 className="text-blue-600" />
+                    </button>
+                    <button 
+                      className="btn btn-error btn-sm hover:scale-105 transition-transform"
+                      onClick={() => handleDelete(property.propertyId)}
+                    >
+                      <Trash className="text-red-600" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
