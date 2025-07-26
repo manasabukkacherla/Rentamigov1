@@ -248,6 +248,7 @@ export const Properties: React.FC = () => {
         <table className="table w-full table-zebra">
           <thead>
             <tr>
+              <th className="text-left font-bold text-gray-900">Property ID</th>
               <th className="text-left font-bold text-gray-900">Title</th>
               <th className="text-left font-bold text-gray-900">Type</th>
               <th className="text-left font-bold text-gray-900">Location</th>
@@ -259,6 +260,11 @@ export const Properties: React.FC = () => {
           <tbody>
             {filteredProperties.map((property) => (
               <tr key={property.propertyId} className="hover">
+                <td className="font-mono text-sm">
+                  <span className="bg-gray-100 px-2 py-1 rounded">
+                    {property.propertyId}
+                  </span>
+                </td>
                 <td className="font-medium">{property.title}</td>
                 <td className="font-medium">{property.type}</td>
                 <td>{property.location}</td>
