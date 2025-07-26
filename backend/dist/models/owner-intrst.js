@@ -1,21 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
-const OwnerIntrstPropertySchema = new mongoose_1.Schema({
+// Define the OwnerInterestForm schema
+const OwnerInterestFormSchema = new mongoose_1.Schema({
     name: {
         type: String,
         required: [true, "Name is required"],
     },
     email: {
         type: String,
-        unique: true,
         required: [true, "Email is required"],
-        match: [/^\S+@\S+\.\S+$/, "Please enter a valid email address"],
+        match: [/^\S+@\S+\.\S+$/, "Invalid email format"],
     },
     mobileNo: {
         type: String,
         required: [true, "Mobile number is required"],
-        match: [/^\+?[\d\s-]{10,}$/, "Please enter a valid mobile number"],
+        match: [/^\+?\d{10,}$/, "Invalid phone number format"],
     },
     propertyName: {
         type: String,
@@ -29,8 +29,10 @@ const OwnerIntrstPropertySchema = new mongoose_1.Schema({
         type: String,
         required: [true, "City is required"],
     },
+}, {
+    timestamps: true, // Automatically adds createdAt and updatedAt fields
 });
 // Check if the model exists, if not create a new one
-const OwnerIntrstPropertyModel = mongoose_1.models.OwnerIntrstPropertyModel ||
-    (0, mongoose_1.model)("OwnerIntrstPropertyModel", OwnerIntrstPropertySchema);
-exports.default = OwnerIntrstPropertyModel;
+const OwnerInterestForm = mongoose_1.models.OwnerInterestForm ||
+    (0, mongoose_1.model)("OwnerInterestForm", OwnerInterestFormSchema);
+exports.default = OwnerInterestForm;

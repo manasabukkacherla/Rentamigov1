@@ -27,7 +27,10 @@ function ContactUs() {
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
                   <Phone className="w-5 h-5" />
-                  <span>+91 (800) 123-4567</span>
+                  <span>
+
+
+ 080-41554935</span>
                 </div>
                 <div className="flex items-center space-x-3">
                   <Mail className="w-5 h-5" />
@@ -35,7 +38,8 @@ function ContactUs() {
                 </div>
                 <div className="flex items-center space-x-3">
                   <MapPin className="w-5 h-5" />
-                  <span>123 Business District, Bangalore, Karnataka 560001</span>
+                  <span>170, Bentley's GuHa, 27th Main Rd, 3rd Cross Rd, Jay Bheema Nagar, 1st Stage, BTM 1st Stage, Bengaluru,
+Karnataka, 560068</span>
                 </div>
               </div>
             </div>

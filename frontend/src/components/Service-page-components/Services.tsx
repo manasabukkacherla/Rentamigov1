@@ -549,33 +549,39 @@ Please follow up with the customer regarding their service request.
         </div>
 
         {/* Services Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {currentServices.map((service, index) => (
-            <Card
-              key={service.id}
-              id={`card-${index + 1}`} // Add unique id to each card
-              className="transition-all hover:shadow-lg"
-            >
-              <CardHeader>
-                <CardTitle className="text-xl">{service.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  {service.shortDescription}
-                </p>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setSelectedService(service);
-                    setShowForm(false);
-                  }}
-                >
-                  Know More
-                </Button>
-              </CardFooter>
-            </Card>
+       <Card key={service.id} id={`card-${index + 1}`} className="transition-all hover:shadow-lg">
+  <CardHeader>
+    <CardTitle className="text-xl">{service.title}</CardTitle>
+  </CardHeader>
+
+  <CardContent>
+    <p className="text-sm text-muted-foreground mb-2">
+      {service.shortDescription}
+    </p>
+
+    {/* Show first 2–3 description points */}
+    <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+      {service.description.slice(0, 3).map((point, idx) => (
+        <li key={idx}>{point}</li>
+      ))}
+    </ul>
+  </CardContent>
+
+  <CardFooter>
+    <Button
+      variant="outline"
+      onClick={() => {
+        setSelectedService(service);
+        setShowForm(false);
+      }}
+    >
+      Know More
+    </Button>
+  </CardFooter>
+</Card>
+
           ))}
         </div>
 

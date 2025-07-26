@@ -1,209 +1,226 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Building2, Bath, Bed, MapPin,  IndianRupee, ChevronLeft, ChevronRight, Star, ArrowRight, Home, Castle, Building, Bookmark, BookmarkCheck } from 'lucide-react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  MapPin, Bed, Bath, Square, Bookmark, BookmarkCheck, 
+  ChevronLeft, ChevronRight, Calendar, ArrowRight, IndianRupee
+} from 'lucide-react';
 import axios from 'axios';
 
-// const properties = [
-//   {
-//     id: 1,
-//     title: 'Modern Apartment with City View',
-//     location: 'Electronic City Phase 1, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800',
-//     price: '24.5',
-//     beds: 3,
-//     baths: 2,
-//     area: '1,500',
-//     type: 'Apartment',
-//     status: 'Ready to Move',
-//     featured: true,
-//     rating: 4.8
-//   },
-//   {
-//     id: 2,
-//     title: 'Luxury Villa with Garden',
-//     location: 'Whitefield, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800',
-//     price: '18.2',
-//     beds: 3,
-//     baths: 2,
-//     area: '2,200',
-//     type: 'Villa',
-//     status: 'Under Construction',
-//     featured: false,
-//     rating: 4.5
-//   },
-//   {
-//     id: 3,
-//     title: 'Spacious Condominium',
-//     location: 'HSR Layout, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800',
-//     price: '22.4',
-//     beds: 4,
-//     baths: 3,
-//     area: '1,800',
-//     type: 'Condo',
-//     status: 'Ready to Move',
-//     featured: false,
-//     rating: 4.7
-//   },
-//   {
-//     id: 4,
-//     title: 'Premium Lake View Apartment',
-//     location: 'Koramangala, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800',
-//     price: '32.8',
-//     beds: 4,
-//     baths: 3,
-//     area: '2,100',
-//     type: 'Apartment',
-//     status: 'Ready to Move',
-//     featured: true,
-//     rating: 4.9
-//   },
-//   {
-//     id: 5,
-//     title: 'Garden View Penthouse',
-//     location: 'Indiranagar, Bangalore',
-//     image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800',
-//     price: '45.2',
-//     beds: 5,
-//     baths: 4,
-//     area: '3,200',
-//     type: 'Penthouse',
-//     status: 'Under Construction',
-//     featured: false,
-//     rating: 4.6
-//   }
-// ];
 
-const propertyTypeIcons: Record<string, React.FC<{ className?: string }>> = {
-  'Apartment': Building2,
-  'Villa': Home,
-  'Condo': Building,
-  'Penthouse': Castle,
-};
 
-let similarprops = [
-  'All',
-  'Shop',
-  'Retail Store',
-  'Showroom',
-  'Office Space',
-  'Warehouse',
-  'Covered Space',
-  'Other'
-];
+interface MediaPhotos {
+  exterior?: string[];
+  interior?: string[];
+  plot?: string[];
+  [key: string]: any;
+}
+
+interface PropertyMedia {
+  photos?: MediaPhotos;
+  [key: string]: any;
+}
+
+interface Property {
+  id: string;
+  propertyId?: string;
+  title: string;
+  type: string;
+  status?: string;
+  intent?: string;
+  listingType?: string;
+  price?: number;
+  formattedPrice?: string;
+  area?: number;
+  formattedArea?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  location?: string;
+  images?: { url: string }[];
+  media?: PropertyMedia;
+  url: string;
+  image?: string;
+  imageUrl?: string;
+  postedDate?: string;
+  createdAt?: string;
+  propertyType?: string;
+  furnishing?: string;
+}
 
 export const SimilarProperties: React.FC<{ propertyType: string }> = ({ propertyType }) => {
-
-  const [properties, setProperties] = useState<any[]>([]);
+  const navigate = useNavigate();
+  const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savedProperties, setSavedProperties] = useState<string[]>([]);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    if (!propertyType) {
-      console.warn('Property type is undefined');
-      setProperties([]);
-      setLoading(false);
-      return;
+  const handlePropertyClick = (propertyTypeCode: string, propertyId: string) => {
+    const url = propertyTypeCode !== 'PL' && propertyTypeCode !== 'AG' 
+      ? `/detailprop/${propertyId}`
+      : `/agriplot/${propertyId}`;
+    navigate(url);
+  };
+
+  // Format price in Indian numbering system
+  const formatPrice = (price?: number) => {
+    if (!price) return 'Price on request';
+    if (price >= 10000000) {
+      return `₹${(price / 10000000).toFixed(2)} Cr`;
+    } else if (price >= 100000) {
+      return `₹${(price / 100000).toFixed(2)} L`;
+    } else {
+      return `₹${price.toLocaleString()}`;
     }
+  };
 
-    const fetchSimilarProperties = async () => {
+  // Get status color class
+
+  // Toggle save property
+  const toggleSaveProperty = (e: React.MouseEvent, propertyId: string) => {
+    e.stopPropagation();
+    setSavedProperties(prev => 
+      prev.includes(propertyId)
+        ? prev.filter(id => id !== propertyId)
+        : [...prev, propertyId]
+    );
+  };
+
+  // Process property images when properties change
+  useEffect(() => {
+    if (!properties.length) return;
+
+    // Debug: Log the first property's image data
+    console.log('Processing properties with images:', properties.map(p => ({
+      id: p.id,
+      media: p.media,
+      imageUrl: p.imageUrl,
+      images: p.images,
+      image: p.image
+    })));
+
+    // Ensure all properties have an imageUrl with proper URL
+    
+    const updatedProperties = properties.map(property => {
+      // Get image from the nested media structure first, then fall back to other sources
+      let imgUrl = property.media?.photos?.exterior?.[0] || 
+                  property.media?.photos?.plot?.[0] ||
+                  property.media?.photos?.interior?.[0] ||
+                  property.images?.[0]?.url || 
+                  property.imageUrl || 
+                  property.image ||
+                  'https://via.placeholder.com/400x300?text=No+Image';
+     
+      // If the URL is relative, make it absolute
+      if (imgUrl && !imgUrl.startsWith('http') && !imgUrl.startsWith('data:image') && !imgUrl.startsWith('https://via.placeholder.com')) {
+        imgUrl = imgUrl.startsWith('/') 
+          ? `${window.location.origin}${imgUrl}`
+          : `${window.location.origin}/${imgUrl}`;
+      }
+      console.log('Image URL:', imgUrl);
+      return {
+        ...property,
+        imageUrl: imgUrl
+      };
+    });
+    console.log(updatedProperties)
+    setProperties(updatedProperties);
+  }, [properties]);
+
+  // Fetch recent properties
+  useEffect(() => {
+    const fetchRecentProperties = async () => {
       try {
         setLoading(true);
+        const response = await axios.get('/api/allproperties/all');
         
-        // Get intent from propertyType (rent/lease/sell)
-        const intent = propertyType.toLowerCase().includes('rent') ? 'rent' :
-                      propertyType.toLowerCase().includes('lease') ? 'lease' : 'sell';
+        // Flatten the grouped properties
+        const flattenGrouped = (grouped: Record<string, any>): Property[] => {
+          const all: Property[] = [];
+          for (const groupKey in grouped) {
+            const category = grouped[groupKey];
+            for (const subType in category) {
+              const items = category[subType];
+              if (Array.isArray(items)) {
+                all.push(...items);
+              }
+            }
+          }
+          return all;
+        };
+
+        const allProperties = flattenGrouped(response.data?.data || {});
         
-        // Define all property categories for the given intent
-        const propertyCategories = [
-          'shops', 'showrooms', 'warehouses', 'plots', 'agriculture', 
-          'office-space', 'retail-store', 'sheds', 'covered-space',
-          'others'
-        ];
+        // Process properties
+        const processedProperties = allProperties
+          .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime())
+          .slice(0, 10)
+          .map((property: any) => ({
+            ...property,
+            formattedPrice: formatPrice(property.price),
+            formattedArea: property.area ? `${property.area.toLocaleString()} sq.ft` : 'N/A',
+            postedDate: property.createdAt ? new Date(property.createdAt).toLocaleDateString() : 'N/A',
+            type: property.propertyType || 'Property',
+            imageUrl: property.images?.[0]?.url
+          }));
 
-        // Create promises for all property types
-        const fetchPromises = propertyCategories.map(category => 
-          axios.get(`/api/commercial/${intent}/${category}`)
-        );
-
-        // Fetch all properties in parallel
-        const responses = await Promise.allSettled(fetchPromises);
-        
-        // Combine all successful responses
-        const allProperties = responses
-          .filter(response => response.status === 'fulfilled')
-          .map(response => response.value.data)
-          .flat();
-
-        setProperties(allProperties || []);
-        console.log('Fetched properties:', allProperties);
+        setProperties(processedProperties);
       } catch (error) {
-        console.error('Error fetching similar properties:', error);
+        console.error('Error fetching properties:', error);
         setProperties([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchSimilarProperties();
+
+    fetchRecentProperties();
   }, [propertyType]);
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [autoScrollPaused, setAutoScrollPaused] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [savedProperties, setSavedProperties] = useState<number[]>([]);
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
-
-  const filteredProperties = activeFilter && activeFilter !== 'All'
-    ? properties.filter(property => property.type === activeFilter)
-    : properties;
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+  // Handle scroll to show current item
+  const scrollToIndex = (index: number) => {
+    if (!scrollContainerRef.current) return;
     
-    if (!autoScrollPaused && scrollContainerRef.current) {
-      interval = setInterval(() => {
-        const nextIndex = (currentIndex + 1) % filteredProperties.length;
-        setCurrentIndex(nextIndex);
-        
-        const cardWidth = scrollContainerRef.current?.offsetWidth || 0;
-        scrollContainerRef.current?.scrollTo({
-          left: nextIndex * cardWidth,
-          behavior: 'smooth'
-        });
-      }, 5000);
-    }
-
-    return () => clearInterval(interval);
-  }, [autoScrollPaused, currentIndex, filteredProperties.length]);
-
-  console.log(filteredProperties)
-
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollContainerRef.current) {
-      const nextIndex = direction === 'left' 
-        ? (currentIndex - 1 + filteredProperties.length) % filteredProperties.length
-        : (currentIndex + 1) % filteredProperties.length;
-      
-      setCurrentIndex(nextIndex);
-      const cardWidth = scrollContainerRef.current.offsetWidth;
-      scrollContainerRef.current.scrollTo({
-        left: nextIndex * cardWidth,
-        behavior: 'smooth'
-      });
-    }
+    const container = scrollContainerRef.current;
+    const items = container.children;
+    if (index < 0 || index >= items.length) return;
+    
+    const item = items[index] as HTMLElement;
+    container.scrollTo({
+      left: item.offsetLeft - container.offsetLeft - 16,
+      behavior: 'smooth'
+    });
+    
+    setCurrentIndex(index);
   };
 
-  const toggleSave = (id: number) => {
-    setSavedProperties(prev => 
-      prev.includes(id) 
-        ? prev.filter(propId => propId !== id)
-        : [...prev, id]
-    );
-  };
+  // Handle scroll events
+  const handleScroll = useCallback(() => {
+    if (!scrollContainerRef.current) return;
+    
+    const container = scrollContainerRef.current;
+    const containerWidth = container.offsetWidth;
+    const scrollLeft = container.scrollLeft;
+    const scrollWidth = container.scrollWidth;
+    
+    // Update current index based on scroll position
+    const newIndex = Math.round(scrollLeft / (scrollWidth / properties.length));
+    if (newIndex !== currentIndex) {
+      setCurrentIndex(newIndex);
+    }
+    
+    // Update scroll buttons disabled state
+    const isAtStart = scrollLeft <= 10;
+    const isAtEnd = scrollLeft + containerWidth >= scrollWidth - 10;
+    
+    if (isAtStart && currentIndex !== 0) {
+      setCurrentIndex(0);
+    } else if (isAtEnd && currentIndex !== properties.length - 1) {
+      setCurrentIndex(properties.length - 1);
+    }
+  }, [currentIndex, properties.length]);
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6">
+      <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
         </div>
@@ -211,110 +228,125 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
     );
   }
 
-  if (!properties?.length) {
+  if (!properties.length) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="text-center">
-          <p className="text-gray-600">No similar properties found</p>
-        </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center text-gray-500">No similar properties found</div>
       </div>
     );
   }
-
+  console.log('Properties:', properties);
   return (
-    <div 
-      className="bg-white rounded-xl shadow-lg p-6 overflow-hidden"
-      onMouseEnter={() => setAutoScrollPaused(true)}
-      onMouseLeave={() => setAutoScrollPaused(false)}
-      onTouchStart={() => setAutoScrollPaused(true)}  
-      onTouchEnd={() => setAutoScrollPaused(false)}
-    >
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Similar Properties</h2>
-          <p className="text-gray-600">Explore more properties in this area</p>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 mt-4 md:mt-0">
-          {similarprops.map((filter, index) => (
-            <button
-              key={filter || `filter-${index}`}
-              onClick={() => setActiveFilter(filter === 'All' ? null : filter)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                (filter === 'All' && activeFilter === null) || filter === activeFilter
-                  ? 'bg-gray-900 text-white shadow-md' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {filter}
-            </button>
-          ))}
+    <div className="relative">
+      <div className="container mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold text-gray-900">Similar Properties</h2>
+        <div className="flex items-center space-x-2">
+          <button 
+            onClick={() => scrollToIndex(currentIndex - 1)}
+            disabled={currentIndex === 0}
+            className="p-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Previous property"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button 
+            onClick={() => scrollToIndex(currentIndex + 1)}
+            disabled={currentIndex >= properties.length - 1}
+            className="p-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Next property"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      <div className="relative">
-        <button
-          onClick={() => scroll('left')}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 -ml-4 hover:bg-gray-50 transition-colors"
-          aria-label="Previous property"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-900" />
-        </button>
-
-        <div 
-          ref={scrollContainerRef}
-          className="flex overflow-x-auto snap-x snap-mandatory gap-6 scroll-smooth pb-4 px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
-        >
-          {filteredProperties.map((property) => {
-            const TypeIcon = propertyTypeIcons[property.type] || Building2;
-            const isSaved = savedProperties.includes(property.id);
-            
-            return (
-              <div
-                key={property.id}
-                className="flex-none w-full snap-center sm:w-[calc(100%/2-12px)] lg:w-[calc(100%/3-16px)] group"
-              >
-                <div className="h-full bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 flex flex-col">
-                  <div className="relative">
-                    <div className="aspect-[4/3] overflow-hidden">
-                      <img
-                        src={property.image}
-                        alt={property.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
-                      />
-                    </div>
+      <div 
+        ref={scrollContainerRef}
+        className="flex overflow-x-auto snap-x snap-mandatory gap-6 scroll-smooth pb-4 px-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+        onScroll={handleScroll}
+      >
+        {properties.map((property) => {
+          const isSaved = savedProperties.includes(property.id);
+        
+          return (
+            <div
+              key={property.id}
+              className="flex-none w-full snap-center sm:w-[calc(100%/2-12px)] lg:w-[calc(100%/3-16px)]"
+              onClick={() => handlePropertyClick(property.propertyId?.slice(8,10) || '', property.propertyId || property.id || '')}
+            >
+              <div className="h-full bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
+                {/* Image Section */}
+                <div className="relative h-48 bg-gray-100 group">
+                  <div className="relative w-full h-full overflow-hidden">
+                    <img
+                      src={property.imageUrl}
+                      alt={property.title || 'Property image'}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        console.error('Error loading image:', property.imageUrl);
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://via.placeholder.com/400x300?text=No+Image';
+                      }}
+                      onLoad={() => console.log('Image loaded successfully:', property.imageUrl)}
+                    />
                     
-                    <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm text-gray-900 text-sm font-medium shadow-md rounded-lg">
-                      <TypeIcon className="w-4 h-4" />
-                      <span>{property.type}</span>
-                    </div>
-                    
-                    {property.featured && (
-                      <div className="absolute top-0 left-0">
-                        <div className="bg-gray-900 text-white py-1 px-8 rotate-[-45deg] translate-x-[-30%] translate-y-[40%] text-sm font-medium shadow-md">
-                          Featured
-                        </div>
+                    {/* Image Count Badge - Show if there are multiple images */}
+                    {((property.images && property.images.length > 1) || (property.media?.photos?.exterior && property.media.photos.exterior.length > 1)) && (
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded-full">
+                        +{Math.max(
+                          property.images?.length || 0,
+                          property.media?.photos?.exterior?.length || 0
+                        ) - 1} more
                       </div>
                     )}
+                  </div>
+
+                  {/* Status and Type Badges */}
+                  <div className="absolute top-2 left-2 flex flex-wrap gap-1">
+                    {property.listingType && (
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        property.listingType === 'RentAmigo' 
+                          ? 'bg-black text-white' 
+                          : 'bg-white text-gray-800 border border-gray-200'
+                      }`}>
+                        {property.listingType}
+                      </span>
+                    )}
                     
-                    <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center bg-gradient-to-t from-black/70 via-black/40 to-transparent">
-                      <button 
-                        onClick={() => toggleSave(property.id)}
-                        className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors"
-                        aria-label={isSaved ? "Unsave property" : "Save property"}
-                      >
-                        {isSaved ? (
-                          <BookmarkCheck className="w-5 h-5 text-gray-900" />
-                        ) : (
-                          <Bookmark className="w-5 h-5 text-gray-900" />
-                        )}
-                      </button>
-                      
-                      <div className="flex items-center gap-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg shadow-md">
-                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                        <span className="text-sm font-medium text-gray-900">{property.rating}</span>
-                      </div>
+                    {(property.status || property.intent) && (
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        property.status === 'Available' 
+                          ? 'bg-green-100 text-green-800' 
+                          : property.status === 'Rented' || property.status === 'Sold' 
+                            ? 'bg-blue-100 text-blue-800' 
+                            : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {property.status || 'Available'}
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Save Button */}
+                  <button
+                    onClick={(e) => toggleSaveProperty(e, property.id)}
+                    className="absolute top-2 right-2 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-gray-100 transition-colors"
+                    aria-label={isSaved ? "Unsave property" : "Save property"}
+                  >
+                    {isSaved ? (
+                      <BookmarkCheck className="w-5 h-5 text-gray-900" />
+                    ) : (
+                      <Bookmark className="w-5 h-5 text-gray-900" />
+                    )}
+                  </button>
+                  
+                  {/* Posted Date */}
+                  <div className="absolute bottom-2 left-2">
+                    <div className="flex items-center gap-1 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg shadow-md">
+                      <Calendar className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm font-medium text-gray-900">{property.postedDate}</span>
                     </div>
+                  </div>
                   </div>
 
                   <div className="p-5 flex flex-col flex-grow">
@@ -327,36 +359,53 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
                       <span className="line-clamp-1">{property.location}</span>
                     </div>
                     
-                    <div className="flex items-center gap-1 text-2xl font-bold text-gray-900 mb-4">
+                    <div className="flex items-center gap-1 text-2xl font-bold text-gray-900 mb-2">
                       <IndianRupee className="w-6 h-6" />
-                      <span>{property.price} Cr</span>
+                      <span>{property.formattedPrice || 'Price on Request'}</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 mb-4">
-                      <div className="bg-gray-50 p-2 rounded-lg text-center">
-                        <div className="flex items-center justify-center gap-1 text-gray-700">
-                          <Bed className="w-4 h-4" />
-                          <span className="font-medium">{property.beds}</span>
+                      {property.bedrooms && (
+                        <div className="bg-gray-50 p-2 rounded-lg text-center">
+                          <div className="flex items-center justify-center gap-1 text-gray-700">
+                            <Bed className="w-4 h-4" />
+                            <span className="font-medium">{property.bedrooms}</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">Beds</p>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Beds</p>
-                      </div>
+                      )}
+                      
+                      {property.bathrooms && (
+                        <div className="bg-gray-50 p-2 rounded-lg text-center">
+                          <div className="flex items-center justify-center gap-1 text-gray-700">
+                            <Bath className="w-4 h-4" />
+                            <span className="font-medium">{property.bathrooms}</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">Baths</p>
+                        </div>
+                      )}
                       
                       <div className="bg-gray-50 p-2 rounded-lg text-center">
                         <div className="flex items-center justify-center gap-1 text-gray-700">
-                          <Bath className="w-4 h-4" />
-                          <span className="font-medium">{property.baths}</span>
+                          <Square className="w-4 h-4" />
+                          <span className="font-medium">{property.formattedArea}</span>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Baths</p>
-                      </div>
-                      
-                      <div className="bg-gray-50 p-2 rounded-lg text-center">
-                        <div className="flex items-center justify-center gap-1 text-gray-700">
-                          <Building2 className="w-4 h-4" />
-                          <span className="font-medium">{property.area}</span>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">Sq.ft.</p>
+                        <p className="text-xs text-gray-500 mt-1">Area</p>
                       </div>
                     </div>
+                    
+                    {property.furnishing && (
+                      <div className="mb-2">
+                        <span className="text-sm text-gray-600">Furnishing: </span>
+                        <span className="text-sm font-medium">{property.furnishing}</span>
+                      </div>
+                    )}
+                    
+                    {property.listingType && (
+                      <div className="text-sm text-gray-600">
+                        Listed by: <span className="font-medium">{property.listingType}</span>
+                      </div>
+                    )}
 
                     <button className="mt-auto w-full py-3 text-center text-white font-medium bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 shadow-sm">
                       <span>View Details</span>
@@ -368,18 +417,10 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
             );
           })}
         </div>
-
-        <button
-          onClick={() => scroll('right')}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white shadow-lg rounded-full p-3 -mr-4 hover:bg-gray-50 transition-colors"
-          aria-label="Next property"
-        >
-          <ChevronRight className="w-5 h-5 text-gray-900" />
-        </button>
       </div>
       
       <div className="flex gap-1 mt-6 justify-center">
-        {filteredProperties.map((_, index) => (
+        {properties.map((_: Property, index: number) => (
           <button
             key={index}
             onClick={() => {
@@ -409,5 +450,6 @@ export const SimilarProperties: React.FC<{ propertyType: string }> = ({ property
         </button>
       </div>
     </div>
+
   );
 };
