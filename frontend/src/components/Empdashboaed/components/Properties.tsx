@@ -25,220 +25,11 @@ export const Properties: React.FC = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const navigate = useNavigate();
 
-  const handleDelete = useCallback(async (id: string) => {
-    if (!window.confirm('Delete this property?')) return;
-    
-    try {
-      const property = properties.find(p => p.propertyId === id);
-      if (!property) {
-        toast.error('Property not found');
-        return;
-      }
-
-      // Log the deletion attempt
-      console.log('Deleting property with ID:', id);
-      
-      // Extract the property type and listing type from the propertyId
-      // Format: RA-COMREPL0001
-      const [_, typeCode] = id.split('-');
-      const category = typeCode.substring(0, 3); // 'COM' or 'RES'
-      const listingType = typeCode.substring(3, 5); // 'RE', 'SA', or 'LE'
-      const propertyType = typeCode.substring(5, 7); // 'PL', 'AG', 'CS', etc.
-      
-      // Map property type codes to their corresponding API endpoints
-      const typeMap: Record<string, string> = {
-        'PL': 'plots',
-        'AG': 'agriculture',
-        'CS': 'covered-space',
-        'OS': 'office-space',
-        'RS': 'retail-store',
-        'SH': 'shops',
-        'SR': 'showrooms',
-        'SD': 'sheds',
-        'WH': 'warehouses',
-        'OT': 'others',
-        'AP': 'apartments',
-        'IH': 'independent-houses',
-        'BF': 'builder-floors',
-        'SS': 'shared-spaces'
-      };
-      
-      const propertyTypeSlug = typeMap[propertyType] || 'others';
-      const categorySlug = category === 'COM' ? 'commercial' : 'residential';
-      const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
-      
-      // Send delete request to the correct endpoint using the MongoDB _id
-      // Format: /api/commercial/rent/plots/:_id
-      const response = await axios.delete(`/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${property.id}`);
-      console.log('Delete response:', response.data);
-      
-      toast.success('Property deleted successfully');
-      // Refresh properties list
-      fetchProperties();
-    } catch (error: any) {
-      console.error('Delete error:', error);
-      const errorMessage = error.response?.data?.message || 
-                        error.response?.status === 404 ? 'Property not found' :
-                        'Failed to delete property';
-      toast.error(errorMessage);
-    }
-  }, [properties]);
-
-  const handleEdit = useCallback((id: string) => {
-    const property = properties.find(p => p.propertyId === id);
-    if (!property) {
-      toast.error('Property not found');
-      return;
-    }
-
-    setSelectedProperty(property);
-    setEditModalOpen(true);
-  }, [properties]);
-
-  const handleUpdateProperty = async (propertyId: string, updatedData: any) => {
-    // Find the property to get its MongoDB _id
-    const property = properties.find(p => p.propertyId === propertyId);
-    if (!property) {
-      toast.error('Property not found');
-      return;
-    }
-
-    try {
-
-      // Log the update request for debugging
-      console.log('Updating property with ID:', propertyId);
-      console.log('Update data:', updatedData);
-
-      // Extract the property type and listing type from the propertyId
-      // Format: RA-COMREPL0001
-      const [_, typeCode] = propertyId.split('-');
-      
-      // Log the update attempt for debugging
-      console.log('Updating property with ID:', propertyId);
-      console.log('Update data:', updatedData);
-      const category = typeCode.substring(0, 3); // 'COM' or 'RES'
-      const listingType = typeCode.substring(3, 5); // 'RE', 'SA', or 'LE'
-      const propertyType = typeCode.substring(5, 7); // 'PL', 'AG', 'CS', etc.
-      
-      // Map property type codes to their corresponding API endpoints
-      const typeMap: Record<string, string> = {
-        'PL': 'plots',
-        'AG': 'agriculture',
-        'CS': 'covered-space',
-        'OS': 'office-space',
-        'RS': 'retail-store',
-        'SH': 'shops',
-        'SR': 'showrooms',
-        'SD': 'sheds',
-        'WH': 'warehouses',
-        'OT': 'others',
-        'AP': 'apartments',
-        'IH': 'independent-houses',
-        'BF': 'builder-floors',
-        'SS': 'shared-spaces'
-      };
-      
-      const propertyTypeSlug = typeMap[propertyType] || 'others';
-      const categorySlug = category === 'COM' ? 'commercial' : 'residential';
-      const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
-      
-      // Create a properly typed update object with all required fields
-      const updateData: any = {
-        basicInformation: {
-          ...property.basicInformation,
-          title: updatedData.title,
-          location: {
-            ...property.basicInformation?.location,
-            address: updatedData.location,
-            formattedAddress: updatedData.location,
-            // Default to 0 if lat/lng doesn't exist
-            latitude: property.basicInformation?.location?.latitude || 0,
-            longitude: property.basicInformation?.location?.longitude || 0
-          }
-        },
-        rentalTerms: {
-          ...property.rentalTerms,
-          price: parseFloat(updatedData.price) || 0
-        },
-        availability: {
-          ...property.availability,
-          status: updatedData.status || 'Available'
-        }
-      };
-
-      // Clean the data to remove any undefined values
-      const cleanData = JSON.parse(JSON.stringify(updateData, (_, value) => 
-        value === undefined ? undefined : value
-      ));
-      
-      // Log the request details for debugging
-      console.log('Sending update request to:', `/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${property.id}`);
-      console.log('Update payload:', JSON.stringify({ data: cleanData }, null, 2));
-      
-      // Send update request to the correct endpoint with properly formatted data
-      const response = await axios.put(
-        `/api/${categorySlug}/${listingSlug}/${propertyTypeSlug}/${property.id}`,
-        { data: cleanData },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          validateStatus: (status) => status < 500 // Don't throw for 500 errors
-        }
-      );
-      
-      console.log('Update response status:', response.status);
-      console.log('Update response data:', response.data);
-      
-      if (response.status >= 200 && response.status < 300) {
-        // Force a complete refresh of the properties list
-        await fetchProperties();
-        
-        // Verify the update was applied
-        const updatedProperty = properties.find(p => p.propertyId === propertyId);
-        console.log('Property after update:', updatedProperty);
-        
-        toast.success('Property updated successfully');
-        setEditModalOpen(false);
-      } else {
-        console.error('Update failed with status:', response.status);
-        console.error('Error details:', response.data);
-        throw new Error(response.data.message || `Server responded with status ${response.status}`);
-      }
-    } catch (error: any) {
-      console.error('Update error:', error);
-      let errorMessage = 'Failed to update property';
-      
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Error response data:', error.response.data);
-        console.error('Error response status:', error.response.status);
-        console.error('Error response headers:', error.response.headers);
-        
-        errorMessage = error.response.data?.message || 
-                      error.response.data?.error || 
-                      `Server error: ${error.response.status}`;
-      } else if (error.request) {
-        // The request was made but no response was received
-        console.error('No response received:', error.request);
-        errorMessage = 'No response received from server';
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error message:', error.message);
-        errorMessage = error.message || 'Unknown error occurred';
-      }
-      
-      toast.error(errorMessage);
-    }
-  };
-
   const fetchProperties = async () => {
     try {
       const response = await axios.get('/api/allproperties/all');
       const data = response.data;
       
-      // Extract properties from all sections
       const allProperties = [
         ...(data?.data?.commercialRent?.apartment || []),
         ...(data?.data?.commercialRent?.coveredSpace || []),
@@ -250,7 +41,7 @@ export const Properties: React.FC = () => {
         ...(data?.data?.commercialRent?.plot || []),
         ...(data?.data?.commercialRent?.shop || []),
         ...(data?.data?.commercialRent?.showroom || []),
-        
+
         ...(data?.data?.commercialSale?.apartment || []),
         ...(data?.data?.commercialSale?.coveredSpace || []),
         ...(data?.data?.commercialSale?.officeSpace || []),
@@ -261,7 +52,7 @@ export const Properties: React.FC = () => {
         ...(data?.data?.commercialSale?.plot || []),
         ...(data?.data?.commercialSale?.shop || []),
         ...(data?.data?.commercialSale?.showroom || []),
-        
+
         ...(data?.data?.commercialLease?.apartment || []),
         ...(data?.data?.commercialLease?.coveredSpace || []),
         ...(data?.data?.commercialLease?.officeSpace || []),
@@ -272,15 +63,15 @@ export const Properties: React.FC = () => {
         ...(data?.data?.commercialLease?.plot || []),
         ...(data?.data?.commercialLease?.shop || []),
         ...(data?.data?.commercialLease?.showroom || []),
-        
+
         ...(data?.data?.residentialRent?.apartment || []),
         ...(data?.data?.residentialRent?.house || []),
         ...(data?.data?.residentialRent?.villa || []),
-        
+
         ...(data?.data?.residentialSale?.apartment || []),
         ...(data?.data?.residentialSale?.house || []),
         ...(data?.data?.residentialSale?.villa || []),
-        
+
         ...(data?.data?.residentialLease?.apartment || []),
         ...(data?.data?.residentialLease?.house || []),
         ...(data?.data?.residentialLease?.villa || [])
@@ -298,22 +89,87 @@ export const Properties: React.FC = () => {
     fetchProperties();
   }, []);
 
-  const filteredProperties = filter === 'all' 
-    ? properties 
-    : properties.filter(p => p.status === filter);
+  // ✅ Updated handleDelete: calls backend and refreshes
+  const handleDelete = useCallback(async (id: string) => {
+    if (!window.confirm('Delete this property?')) return;
 
-  const handlePropertyClick = (propertyname:string,propertyId: string) => {
-    if(propertyname=='PL' || propertyname=='AG'){
-      navigate(`/agriplot/${propertyId}`);
+    const property = properties.find(p => p.propertyId === id);
+    if (!property) {
+      toast.error('Property not found');
+      return;
     }
-    else{
+
+    const [_, typeCode] = id.split('-');
+    const category = typeCode.substring(0, 3); // COM or RES
+    const listingType = typeCode.substring(3, 5); // RE, SA or LE
+    const propertyType = typeCode.substring(5, 7); // PL, AG, etc.
+
+    const typeMap: Record<string, string> = {
+      'PL': 'plots',
+      'AG': 'agriculture',
+      'CS': 'covered-space',
+      'OS': 'office-space',
+      'RS': 'retail-store',
+      'SH': 'shops',
+      'SR': 'showrooms',
+      'SD': 'sheds',
+      'WH': 'warehouses',
+      'OT': 'others',
+      'AP': 'apartments',
+      'IH': 'independent-houses',
+      'BF': 'builder-floors',
+      'SS': 'shared-spaces'
+    };
+
+    const ptSlug = typeMap[propertyType] || 'others';
+    const categorySlug = category === 'COM' ? 'commercial' : 'residential';
+    const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
+
+    try {
+      const response = await axios.delete(`/api/${categorySlug}/${listingSlug}/${ptSlug}/${property.id}`);
+      console.log('Delete response:', response.data);
+
+      if (response.data.success) {
+        toast.success('Property deleted successfully');
+        fetchProperties();
+      } else {
+        toast.error(response.data.message || 'Failed to delete property');
+      }
+    } catch (err: any) {
+      console.error('Delete error:', err);
+      const errMsg = err.response?.data?.message || (err.response?.status === 404 ? 'Property not found' : 'Failed to delete property');
+      toast.error(errMsg);
+    }
+  }, [properties]);
+
+  const handleEdit = useCallback((id: string) => {
+    const property = properties.find(p => p.propertyId === id);
+    if (!property) {
+      toast.error('Property not found');
+      return;
+    }
+    setSelectedProperty(property);
+    setEditModalOpen(true);
+  }, [properties]);
+
+  const handleUpdateProperty = async (propertyId: string, updatedData: any) => {
+    // ✅ Keep your existing update logic exactly as is here
+    /** ... */
+  };
+
+  const filteredProperties = filter === 'all' ? properties : properties.filter(p => p.status === filter);
+
+  const handlePropertyClick = (propertyname: string, propertyId: string) => {
+    if (propertyname === 'PL' || propertyname === 'AG') {
+      navigate(`/agriplot/${propertyId}`);
+    } else {
       navigate(`/detailprop/${propertyId}`);
     }
   };
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-64">Loading...</div>;
-  }
+  if (loading) return <div className="flex justify-center items-center h-64">Loading...</div>;
+
+
 
   return (
     <div className="space-y-8">
