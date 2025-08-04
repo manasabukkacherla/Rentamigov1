@@ -332,3 +332,83 @@ export default function Properties() {
     </div>
   );
 }
+
+
+
+
+
+
+
+// <td>{property.metadata?.createdBy || 'Unknown'}</td>
+//                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+//                   {property.postedDate ? new Date(property.postedDate).toLocaleDateString() : 
+//                    new Date().toLocaleDateString()}
+//                 </td>
+                
+//                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+//                   {/* <button 
+//                     className="text-green-600 hover:text-green-900"
+//                     onClick={() => handleContactClick(property)}
+//                   >
+//                     <Mail className="w-4 h-4 inline-block mr-1" />
+//                     Contact
+//                   </button> */}
+//                 {/* </td>
+//                 <td className="space-x-2"> */}
+//                   <button 
+//                     className="pl-4 text-blue-600 hover:text-blue-900"
+//                     onClick={() => handleEdit(property.propertyId)}
+//                   >
+//                     <Edit2 className="w-5 h-5 inline-block mr-1" />
+//                     {/* Edit */}
+//                   </button>
+//                   <button 
+//                     className="text-red-600 hover:text-red-900"
+//                     onClick={() => handleDelete(property.propertyId)}
+//                   >
+//                     <Trash2 className="w-5 h-5 inline-block mr-1" />
+//                     {/* Delete */}
+//                   </button>
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+
+//       {/* Contact Modal */}
+//       {isContactModalOpen && selectedProperty && (
+//         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+//           <div className="bg-white rounded-lg p-6 max-w-md w-full">
+//             <div className="flex justify-between items-center mb-4">
+//               <h3 className="text-xl font-semibold">Contact Details</h3>
+//               <button 
+//                 className="text-gray-500 hover:text-gray-700"
+//                 onClick={handleCloseContactModal}
+//               >
+//                 <span className="sr-only">Close</span>
+//                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+//                 </svg>
+//               </button>
+//             </div>
+//             <div className="space-y-4">
+//               <div className="flex items-center">
+//                 <User className="w-5 h-5 mr-2 text-gray-500" />
+//                 <span className="font-medium">{selectedProperty.metadata?.contact?.name || 'N/A'}</span>
+//               </div>
+//               <div className="flex items-center">
+//                 <Mail className="w-5 h-5 mr-2 text-gray-500" />
+//                 <span className="font-medium">{selectedProperty.metadata?.contact?.email || 'N/A'}</span>
+//               </div>
+//               <div className="flex items-center">
+//                 <Phone className="w-5 h-5 mr-2 text-gray-500" />
+//                 <span className="font-medium">{selectedProperty.metadata?.contact?.phone || 'N/A'}</span>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
