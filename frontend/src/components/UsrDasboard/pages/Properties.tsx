@@ -209,7 +209,7 @@ export function Properties() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">My Properties</h1>
         <button
-          onClick={() => navigate("/add-property")}
+          onClick={() => navigate("/updatePropertyform")}
           className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
         >
           Add New Property

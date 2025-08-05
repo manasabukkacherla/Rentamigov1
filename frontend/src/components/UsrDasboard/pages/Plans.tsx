@@ -1,381 +1,257 @@
 import React, { useState, useEffect } from "react";
-import { DollarSign, Users, Coins, CheckCircle2, Crown } from "lucide-react";
-import { Plan, TokenPackage } from "../types";
+import { Coins } from "lucide-react";
+import { toast } from "react-toastify";
 
 function Plans() {
-  const [activeTab, setActiveTab] = useState<"subscriptions" | "tokens">(
-    "subscriptions"
-  );
-  const [subscriptionPlans, setSubscriptionPlans] = useState<Plan[]>([]);
-  const [tokenPackages, setTokenPackages] = useState<TokenPackage[]>([]);
+  const [pricePerToken, setPricePerToken] = useState<number | null>(null);
+  const [tokenCount, setTokenCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const [currentPlanId, setCurrentPlanId] = useState<string>("plan2"); // Example: Replace with actual current plan ID
-  const [currentTokenPackageId, setCurrentTokenPackageId] =
-    useState<string>("token1"); // Example: Replace with actual token package ID
+  const [userPayments, setUserPayments] = useState<any[]>([]);
+  const [totalTokens, setTotalTokens] = useState<number>(0);
 
-  // Fetch Subscription Plans
-  const fetchSubscriptionPlans = async () => {
-    setLoading(true);
+  const fetchTokenPrice = async () => {
     try {
-      const response = await fetch("/api/subscription");
-      if (!response.ok) throw new Error("Failed to fetch subscription plans");
+      const response = await fetch(`/api/tokens?nocache=${Date.now()}`, {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       const data = await response.json();
-      setSubscriptionPlans(data);
-    } catch (error) {
-      console.error("Error fetching subscription plans:", error);
-    } finally {
-      setLoading(false);
+      if (Array.isArray(data) && data.length > 0 && data[0].pricePerToken) {
+        setPricePerToken(data[0].pricePerToken);
+      } else {
+        alert("Token pricing is not available. Please try again later.");
+      }
+    } catch (err) {
+      console.error("Failed to fetch token price", err);
+      alert("Could not fetch token price. Please try again later.");
     }
   };
-  // Subscription Button Click Handler
-  const handlePurchase = async (
-    type: string,
-    id: string,
-    planName: string,
-    planId: string
-  ) => {
-    handlePayment(type, id, planName, planId); // Call payment function
-  };
 
-  // Token Button Click Handler
-  const handleTokenPurchase = async (tokenName: string, tokenId: string) => {
-    handlePayment("token", tokenId, tokenName, tokenId); // Pass token info
-  };
+  const fetchUserPayments = async () => {
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) return;
 
-  // Fetch Token Packages
-  const fetchTokenPackages = async () => {
-    setLoading(true);
     try {
-      const response = await fetch("/api/tokens");
-      if (!response.ok) throw new Error("Failed to fetch token packages");
+      const response = await fetch(`/api/payment/user/${userId}?nocache=${Date.now()}`, {
+        method: "GET",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       const data = await response.json();
-      setTokenPackages(data);
-    } catch (error) {
-      console.error("Error fetching token packages:", error);
-    } finally {
-      setLoading(false);
+
+      if (Array.isArray(data)) {
+        setUserPayments(data);
+        const total = data.reduce((sum, p) => sum + (p.tokensPurchased || 0), 0);
+        setTotalTokens(total);
+      }
+    } catch (err) {
+      console.error("Failed to fetch user payments:", err);
     }
   };
 
   useEffect(() => {
-    fetchSubscriptionPlans();
-    fetchTokenPackages();
+    fetchTokenPrice();
+    fetchUserPayments();
 
-    // Check if Razorpay is loaded after the component mounts
-    if (window.Razorpay) {
-      // Razorpay is already loaded
-    } else {
-      // Wait for the Razorpay script to load
+    if (!window.Razorpay) {
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => {
-        // Razorpay is now loaded and ready to use
-        console.log("Razorpay script loaded");
-      };
+      script.onload = () => console.log("Razorpay loaded");
       document.body.appendChild(script);
     }
-  }, []); // Empty dependency array means this runs only once when the component mounts
+  }, []);
 
-  // Handle Purchase Button Click
-  const handlePayment = async (
-    type: string,
-    id: string,
-    planName: string,
-    planId: string
-  ) => {
-    console.log("Processing payment for:", { type, id, planName, planId });
+  const handleTokenPurchase = async () => {
+    if (!pricePerToken || tokenCount <= 0) {
+      alert("Please enter a valid number of tokens.");
+      return;
+    }
 
-    if (!id || !planName || !planId) {
-      alert("Invalid selection. Please try again.");
+    const amount = pricePerToken * tokenCount;
+    const amountInPaise = amount * 100;
+
+    const userId = sessionStorage.getItem("userId");
+    const userName = sessionStorage.getItem("username");
+
+    if (!userId || !userName) {
+      alert("Please log in to make a purchase.");
       return;
     }
 
     setLoading(true);
 
     try {
-      let selectedItem;
-      if (type === "subscription") {
-        const response = await fetch(`/api/subscription/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch subscription plan");
-        selectedItem = await response.json();
-      } else if (type === "token") {
-        const response = await fetch(`/api/tokens/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch token package");
-        selectedItem = await response.json();
-      }
-
-      if (!selectedItem) {
-        alert("Selected plan or token package not found.");
-        return;
-      }
-
-      // Calculate the amount in INR and convert it to paise (1 INR = 100 paise)
-      const amountInPaise = selectedItem.price * 100;
-      console.log("Amount calculated for payment (in paise):", amountInPaise);
-
-      const userName = sessionStorage.getItem("username");
-      const userId = sessionStorage.getItem("userId");
-
-      if (!userName || !userId) {
-        alert("User is not logged in. Please log in to continue.");
-        return;
-      }
-
-      // Create an order with Razorpay
-      const orderResponse = await fetch("/api/payment/create-order", {
+      const orderRes = await fetch("/api/payment/create-order", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount: amountInPaise }),
       });
 
-      const orderData = await orderResponse.json();
-      console.log("Razorpay order data:", orderData);
+      const orderData = await orderRes.json();
 
-      // Set up Razorpay options
       const options = {
-        key: orderData.key_id, // Razorpay key
-        amount: orderData.price, // Amount in paise
+        key: orderData.key_id,
+        amount: orderData.amount,
         currency: orderData.currency,
-        name:
-          type === "subscription"
-            ? "Subscription Plan Purchase"
-            : "Token Package Purchase",
-        description: `Purchase of ${planName}`,
+        name: "Token Purchase",
+        description: `Buying ${tokenCount} tokens`,
         order_id: orderData.id,
         handler: async function (response: any) {
-          alert(
-            `Payment successful. Payment ID: ${response.razorpay_payment_id}`
-          );
+          alert(`Payment successful. Payment ID: ${response.razorpay_payment_id}`);
 
-          // Prepare the payment details to save in your database
           const paymentDetails = {
             userId,
             userName,
-            amount: amountInPaise / 100, // Convert paise back to INR for storing (in INR)
+            amount,
             transactionId: response.razorpay_payment_id,
-            planName,
-            planId,
-            plantype: type, // This will either be 'subscription' or 'token'
-            expirationDate: new Date(),
+            planName: "Token Purchase",
+            planId: orderData.id,
+            plantype: "token",
+            tokensPurchased: tokenCount,
           };
 
-          // Save payment details to your backend
-          const saveResponse = await fetch("/api/payment/save-payment", {
+          // 1. Save payment
+          const saveRes = await fetch("/api/payment/save-payment", {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(paymentDetails),
           });
 
-          if (saveResponse.ok) {
-            alert("Payment details saved successfully.");
-          } else {
-            alert("Error saving payment details.");
+          if (!saveRes.ok) {
+            alert("Payment saved failed, but transaction succeeded.");
+            setLoading(false);
+            return;
           }
+
+          // 2. Add tokens to user
+          try {
+            const tokenAddRes = await fetch("/api/usertoken/add", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                userId,
+                tokensToAdd: tokenCount,
+              }),
+            });
+
+            const tokenAddData = await tokenAddRes.json();
+
+            if (tokenAddRes.ok) {
+              toast.success("Tokens added successfully!");
+            } else {
+              toast.error(tokenAddData.message || "Token addition failed");
+            }
+          } catch (tokenError) {
+            console.error("Error calling /usertoken/add:", tokenError);
+            toast.error("Error adding tokens to your account.");
+          }
+
+          // 3. Update UI
+          setTokenCount(0);
+          fetchUserPayments();
         },
         prefill: {
           name: userName,
           email: "user@example.com",
-          contact: "1234567890",
+          contact: "9999999999",
         },
         theme: {
-          color: "#F37254",
+          color: "#4f46e5",
         },
       };
 
-      // Open Razorpay's payment window
       const razorpay = new window.Razorpay(options);
       razorpay.open();
-    } catch (error) {
-      console.error("Error occurred while fetching order:", error);
-      alert("Error occurred while fetching order");
+    } catch (err) {
+      console.error("Payment error:", err);
+      alert("Payment failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const totalPrice = pricePerToken ? (tokenCount * pricePerToken).toFixed(2) : "0.00";
+
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Choose Your Plan
-          </h1>
-          <p className="text-lg text-gray-600">
-            Select the perfect plan for your business needs
-          </p>
+      <div className="max-w-xl mx-auto bg-white rounded-xl shadow-lg p-8">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">Buy Tokens</h2>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-1">Price Per Token</label>
+          <div className="text-lg font-medium text-gray-800">
+            {pricePerToken !== null ? `₹${pricePerToken}` : "Loading..."}
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex justify-center space-x-4 mb-12">
-          <button
-            onClick={() => setActiveTab("subscriptions")}
-            className={`px-6 py-3 text-lg font-medium rounded-full transition-all duration-200 ${
-              activeTab === "subscriptions"
-                ? "bg-gray-800 text-white shadow-lg"
-                : "bg-white text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            Subscription Plans
-          </button>
-          <button
-            onClick={() => setActiveTab("tokens")}
-            className={`px-6 py-3 text-lg font-medium rounded-full transition-all duration-200 ${
-              activeTab === "tokens"
-                ? "bg-gray-800 text-white shadow-lg"
-                : "bg-white text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            Token Packages
-          </button>
+        <div className="mb-4">
+          <label htmlFor="tokenCount" className="block text-gray-700 mb-1">
+            Enter Number of Tokens
+          </label>
+          <input
+            id="tokenCount"
+            type="number"
+            min={1}
+            value={tokenCount}
+            onChange={(e) => setTokenCount(Number(e.target.value))}
+            className="w-full border border-gray-300 rounded-md p-2"
+            placeholder="e.g. 100"
+            disabled={pricePerToken === null}
+          />
         </div>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800"></div>
+        <div className="mb-6 text-gray-700">
+          <div className="flex items-center">
+            <Coins className="w-5 h-5 mr-2 text-yellow-500" />
+            <span>
+              Total Amount: <strong>₹{totalPrice}</strong>
+            </span>
           </div>
-        )}
+        </div>
 
-        {/* Subscription Plans */}
-        {activeTab === "subscriptions" && !loading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {subscriptionPlans.map((plan) => {
-              const isCurrentPlan = plan.id === currentPlanId;
-              return (
-                <div
-                  key={plan.id}
-                  className={`bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-200 hover:scale-105 relative ${
-                    isCurrentPlan ? "ring-2 ring-gray-800" : ""
-                  }`}
-                >
-                  {isCurrentPlan && (
-                    <div className="absolute top-4 right-4 bg-gray-800 text-white px-3 py-1 rounded-full flex items-center space-x-1">
-                      <Crown className="w-4 h-4" />
-                      <span className="text-sm font-medium">Current Plan</span>
-                    </div>
-                  )}
-                  <div className="p-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      {plan.name}
-                    </h3>
-                    <p className="text-gray-600 mb-6">{plan.description}</p>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-gray-900">
-                        ${plan.price}
-                      </span>
-                      <span className="text-gray-600">/month</span>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center">
-                        <Users className="w-5 h-5 text-gray-400 mr-3" />
-                        <span className="text-gray-600">
-                          {plan.maxProperties === -1
-                            ? "Unlimited"
-                            : plan.maxProperties}{" "}
-                          Properties
-                        </span>
-                      </div>
-                      <div className="flex items-center">
-                        <Coins className="w-5 h-5 text-gray-400 mr-3" />
-                        <span className="text-gray-600">
-                          {plan.tokensPerLead} tokens per lead
-                        </span>
-                      </div>
-                      {plan?.features?.map((feature, index) => (
-                        <div key={index} className="flex items-center">
-                          <CheckCircle2 className="w-5 h-5 text-green-500 mr-3" />
-                          <span className="text-gray-600">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="p-6 bg-gray-50">
-                    <button
-                      onClick={() =>
-                        handlePayment(
-                          "subscription",
-                          plan.id,
-                          plan.name,
-                          plan.id
-                        )
-                      }
-                    >
-                      Subscribe Now
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <button
+          onClick={handleTokenPurchase}
+          disabled={loading || !pricePerToken}
+          className="w-full py-3 bg-gray-900 text-white rounded-md hover:bg-gray-800 transition disabled:opacity-50"
+        >
+          {loading ? "Processing..." : "Purchase Tokens"}
+        </button>
 
-        {/* Token Packages */}
-        {activeTab === "tokens" && !loading && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {tokenPackages.map((token) => {
-              const isCurrentPackage = token.id === currentTokenPackageId;
-              return (
-                <div
-                  key={token.id}
-                  className={`bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-200 hover:scale-105 relative ${
-                    isCurrentPackage ? "ring-2 ring-gray-800" : ""
-                  }`}
+        {/* Token Balance */}
+        <div className="mt-8">
+          <h3 className="text-lg font-semibold text-gray-800 mb-2">Your Token Balance</h3>
+          <div className="text-xl text-green-700 font-bold">{totalTokens} tokens</div>
+        </div>
+
+        {/* Purchase History */}
+        {userPayments.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">Purchase History</h3>
+            <ul className="space-y-2">
+              {userPayments.map((payment) => (
+                <li
+                  key={payment._id}
+                  className="border border-gray-200 rounded-lg p-3 text-sm"
                 >
-                  {isCurrentPackage && (
-                    <div className="absolute top-4 right-4 bg-gray-800 text-white px-3 py-1 rounded-full flex items-center space-x-1">
-                      <Crown className="w-4 h-4" />
-                      <span className="text-sm font-medium">
-                        Current Package
-                      </span>
-                    </div>
-                  )}
-                  <div className="p-8">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                      {token.name}
-                    </h3>
-                    <div className="mb-6">
-                      <span className="text-4xl font-bold text-gray-900">
-                        ${token.price}
-                      </span>
-                    </div>
-                    <div className="mb-6">
-                      <div className="flex items-center mb-2">
-                        <Coins className="w-5 h-5 text-yellow-500 mr-3" />
-                        <span className="text-lg font-medium">
-                          {token.tokens} tokens
-                        </span>
-                      </div>
-                      {token.bonusTokens > 0 && (
-                        <div className="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
-                          +{token.bonusTokens} Bonus Tokens!
-                        </div>
-                      )}
-                    </div>
-                    <div className="space-y-4">
-                      {token?.features?.map((feature, index) => (
-                        <div key={index} className="flex items-center">
-                          <CheckCircle2 className="w-5 h-5 text-green-500 mr-3" />
-                          <span className="text-gray-600">{feature}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div>
+                    <strong>Tokens:</strong> {payment.tokensPurchased || 0}
                   </div>
-                  <div className="p-6 bg-gray-50">
-                    <button
-                      onClick={() =>
-                        handlePayment("token", token.id, token.name, token.id)
-                      }
-                    >
-                      Purchase Tokens
-                    </button>
+                  <div>
+                    <strong>Amount:</strong> ₹{payment.amount}
                   </div>
-                </div>
-              );
-            })}
+                  <div>
+                    <strong>Date:</strong>{" "}
+                    {new Date(payment.createdAt).toLocaleDateString()}
+                  </div>
+                  <div>
+                    <strong>Txn ID:</strong> {payment.transactionId}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </div>
