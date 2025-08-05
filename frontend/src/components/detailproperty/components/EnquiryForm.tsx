@@ -54,46 +54,43 @@ export const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) =
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    console.log(formData)
-    console.log(property)
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        return;
+  try {
+    const transformedData = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      message: formData.message,
+      createdBy: formData.createdBy,  // may be empty if anonymous
+      propertyId: formData.propertyId,
+      propertyType: formData.propertyType,
+      propertyName: formData.propertyName,
+      createdAt: formData.createdAt,
+      updatedAt: formData.updatedAt,
+    };
+
+    const response = await axios.post('/api/enquiry/submit', transformedData, {
+      headers: {
+        'Content-Type': 'application/json'
       }
+    });
 
-      const transformedData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        message: formData.message,
-        createdBy: formData.createdBy,
-        propertyId: formData.propertyId,
-        propertyType: formData.propertyType,
-        propertyName: formData.propertyName,
-        createdAt: formData.createdAt,
-        updatedAt: formData.updatedAt
-      };
-
-      const response = await axios.post('/api/enquiry/submit', transformedData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.data.success) {
-        toast.success('Enquiry submitted successfully!');
-          }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to submit enquiry. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+    if (response.data.success) {
+      toast.success('Enquiry submitted successfully!');
+      onClose(); // Close the modal after success
     }
-  };
+  } catch (error) {
+    console.error('Error submitting form:', error);
+    toast.error('Failed to submit enquiry. Please try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg p-6 w-full max-w-md relative max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">

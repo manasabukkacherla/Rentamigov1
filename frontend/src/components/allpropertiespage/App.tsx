@@ -40,38 +40,55 @@ function Allproperties() {
     'Indore, Madhya Pradesh',
   ];
 
-  useEffect(() => {
-    const fetchAllProperties = async () => {
-      try {
-        const response = await axios.get('/api/allproperties/all');
-        // console.log("response", response);
-        const grouped = response.data?.data || {};
+useEffect(() => {
+  const fetchAllProperties = async () => {
+    try {
+      const [propertyRes, tokenRes] = await Promise.all([
+        axios.get('/api/allproperties/all'),
+        axios.get('/api/lead-token'),
+      ]);
 
-        const flattenGrouped = (grouped: Record<string, any>) => {
-          const all: any[] = [];
-          for (const groupKey in grouped) {
-            const category = grouped[groupKey];
-            for (const subType in category) {
-              const items = category[subType];
-              if (Array.isArray(items)) {
-                all.push(...items);
-              }
+      const grouped = propertyRes.data?.data || {};
+      const tokens = tokenRes.data || [];
+
+      const flattenGrouped = (grouped: Record<string, any>) => {
+        const all: any[] = [];
+        for (const groupKey in grouped) {
+          const category = grouped[groupKey];
+          for (const subType in category) {
+            const items = category[subType];
+            if (Array.isArray(items)) {
+              all.push(...items);
             }
           }
-          return all;
-        };
+        }
+        return all;
+      };
 
-        const allProperties = flattenGrouped(grouped);
-        setFetchedProperties(allProperties);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-        setLoading(false);
-      }
-    };
+      const allProperties = flattenGrouped(grouped);
 
-    fetchAllProperties();
-  }, []);
+      // Filter properties based on token lead criteria
+      const filtered = allProperties.filter((property) => {
+        const matchingToken = tokens.find(
+          (token: any) =>
+            token.propertyId === property.propertyId &&
+            token.verified === true &&
+            token.status?.toLowerCase() === 'active'
+        );
+        return !!matchingToken;
+      });
+
+      setFetchedProperties(filtered);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching properties or tokens:', error);
+      setLoading(false);
+    }
+  };
+
+  fetchAllProperties();
+}, []);
+
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilters, setActiveFilters] = useState<Filters>({

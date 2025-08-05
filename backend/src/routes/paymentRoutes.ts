@@ -12,15 +12,32 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET, // Correct key_secret from .env
 });
 router.post("/save-payment", async (req, res) => {
-  const { userId, userName, amount, transactionId, planName, planId, expirationDate, plantype} = req.body;
+  const {
+    userId,
+    userName,
+    amount,
+    transactionId,
+    planName,
+    planId,
+    plantype,
+    tokensPurchased,
+  } = req.body;
 
   try {
-    // Validate the incoming data
-    if (!userId || !userName || !amount || !transactionId || !planName || !planId || !expirationDate || !plantype) {
+    // Validate required fields
+    if (
+      !userId ||
+      !userName ||
+      !amount ||
+      !transactionId ||
+      !planName ||
+      !planId ||
+      !plantype
+    ) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Create a new Payment object and save it
+    // Create a new Payment instance
     const newPayment = new Payment({
       userId,
       userName,
@@ -28,17 +45,47 @@ router.post("/save-payment", async (req, res) => {
       transactionId,
       planName,
       planId,
-      expirationDate,
       plantype,
+      tokensPurchased, // optional field
     });
 
+    // Save to database
     await newPayment.save();
 
-    // Return success response
-    res.status(201).json({ message: "Payment details saved successfully", payment: newPayment });
+    res.status(201).json({
+      message: "Payment details saved successfully",
+      payment: newPayment,
+    });
   } catch (error) {
     console.error("Error saving payment details:", error);
     res.status(500).json({ message: "Error saving payment details" });
+  }
+});
+
+
+//get all payment details
+
+router.get('/all', async (req, res) => {
+  try {
+    const payments = await Payment.find().sort({ createdAt: -1 }); // newest first
+    res.status(200).json(payments);
+  } catch (error) {
+    console.error("Error fetching all payment details:", error);
+    res.status(500).json({ message: "Error fetching payment records" });
+  }
+});
+
+//getby user 
+// Route: GET /api/payment/user/:userId
+router.get('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const payments = await Payment.find({ userId }).sort({ createdAt: -1 });
+    res.status(200).json(payments);
+  } catch (error) {
+    console.error("Error fetching payments for user:", error);
+    res.status(500).json({ message: "Failed to fetch user payments" });
   }
 });
 

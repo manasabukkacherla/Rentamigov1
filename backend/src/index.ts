@@ -28,6 +28,7 @@ import loginRouter from "./routes/authRoutes";
 import forgotPasswordRoutes from "./routes/forgotPasswordRoutes";
 //import leadsRouter from "./routes/leads";
 import Reportrouter from "./routes/Reportleads";
+import leadTokenRoutes from './routes/leadTokenRoutes';
 import Propertyrouter from "./routes/PropertySelection";
 import BasicDetails from "./models/Basicdetails";
 import BasicDetailsrouter from "./routes/Basicdetails";
@@ -100,6 +101,7 @@ import propertyMediaRoutes from "./routes/propertyMediaRoutes";
 import residentialMediaRoutes from './routes/residentialMediaRoutes';
 import allPropertiesRoutes from "./routes/allPropertiesRoutes";
 import enquiryRoutes from "./routes/enquiryRoutes";
+import Usertokenrouter from "./routes/usertokens";
 
 dotenv.config();
 
@@ -205,6 +207,10 @@ app.use(cors({
 // Initialize all Socket.IO event handlers
 socketHandler(io);
 // Routes
+//leadtoken route 
+app.use('/api/lead-token', leadTokenRoutes);
+app.use('/api/usertoken', Usertokenrouter)
+
 app.use("/api/verify", verifyRouter);
 app.use("/api/Report", Reportrouter); // Report routers
 app.use("/api/auth/google", googleAuthRouter); // Google Auth routes
