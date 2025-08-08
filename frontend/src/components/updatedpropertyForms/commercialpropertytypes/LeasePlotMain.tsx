@@ -22,7 +22,7 @@ import CommercialAvailability from "../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import MapLocation from "../CommercialComponents/MapLocation"
-
+import { useParams } from 'react-router-dom';
 interface FormData {
   propertyId?: string;
   basicInformation: {
@@ -147,6 +147,8 @@ const globalStyles = `
 
 const LeasePlotMain = () => {
   const navigate = useNavigate();
+  const { propertyId } = useParams();
+
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
@@ -221,6 +223,54 @@ const LeasePlotMain = () => {
       documents: []
     }
   });
+useEffect(() => {
+  const fetchLeasePlotById = async () => {
+    try {
+      const response = await axios.get(`/api/commercial/lease/plots/${propertyId}`);
+      const data = response.data;
+
+      if (data && data.success) {
+        const plot = data.data;
+
+        setFormData(prev => ({
+          ...prev,
+          propertyId: plot.propertyId,
+          basicInformation: {
+            ...plot.basicInformation,
+          },
+          plotDetails: {
+            ...plot.plotDetails,
+          },
+          leaseTerms: {
+            ...plot.leaseTerms,
+          },
+          availability: {
+            ...plot.availability,
+          },
+          contactInformation: {
+            ...plot.contactInformation,
+          },
+          media: {
+            photos: {
+              exterior: [], // Optionally preload image URLs here
+            },
+            documents: [],
+            videoTour: null,
+          },
+        }));
+      } else {
+        toast.error("Unable to load property data.");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      toast.error("Error fetching property.");
+    }
+  };
+
+  if (propertyId) {
+    fetchLeasePlotById();
+  }
+}, [propertyId]);
 
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
@@ -709,11 +759,20 @@ const LeasePlotMain = () => {
 
       console.log("Submitting data:", transformedData);
 
-      const response = await axios.post('/api/commercial/lease/plots', transformedData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+    const isEditMode = !!formData.propertyId;
+
+const endpoint = isEditMode
+  ? `/api/commercial/lease/plots/${formData.propertyId}`
+  : '/api/commercial/lease/plots';
+
+const method = isEditMode ? axios.put : axios.post;
+
+const response = await method(endpoint, transformedData, {
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
 
       console.log("Response from server:", response.data);
 

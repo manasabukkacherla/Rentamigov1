@@ -142,15 +142,10 @@ export const Properties: React.FC = () => {
     }
   }, [properties]);
 
-  const handleEdit = useCallback((id: string) => {
-    const property = properties.find(p => p.propertyId === id);
-    if (!property) {
-      toast.error('Property not found');
-      return;
-    }
-    setSelectedProperty(property);
-    setEditModalOpen(true);
-  }, [properties]);
+const handleEdit = (propertyId: string) => {
+  navigate(`/updatepropertyform/${propertyId}`);
+};
+
 
   const handleUpdateProperty = async (propertyId: string, updatedData: any) => {
     // ✅ Keep your existing update logic exactly as is here

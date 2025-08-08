@@ -38,6 +38,8 @@ import Pgapp from "./components/pgdashboard/pgdashboard";
 import Allproperties from "./components/allpropertiespage/App";
 import PGDetails from "./components/pgdashboard/pages/PGDetails";
 import Agriplot from "./components/Agriplotpage/App.tsx";
+import UpdatePropertyRouter from "./components/UpdatePropertyRouter";
+
 // import PropertyDetailPage from "./components/PropertyDetailPage"
 // import {AuthProvider} from "./context/AuthContext";
 import { ToastContainer } from "react-toastify";
@@ -276,12 +278,13 @@ const App = () => {
                 />
                 {/* Dynamic PG Details page route */}
                 <Route path="/pgdash/listings/:propertyId" element={<PGDetails />} />
-<Route path="/updatepropertyform/:propertyId" element={<Pgmain />} />
+                <Route path="/updatepropertyform/:propertyId" element={<UpdatePropertyRouter />} />
+
 
                 {/* agriplot routes*/}
                 <Route path="/agriplot/:id" element={<Agriplot />} />
 
-                
+
                 {/* propdetailspage*/}
                 <Route path="/detailprop/:id" element={<Propdetail />} />
                 {/*Emp das*/}

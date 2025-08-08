@@ -3,7 +3,7 @@ import ResidentialSaleIndependentHouse from '../../models/residential/saleIndepe
 
 const generatePropertyId = async (): Promise<string> => {
     try {
-        const prefix = "RS-RESSEIH";
+        const prefix = "RA-RESSEIH";
 
         const highestShowroom = await ResidentialSaleIndependentHouse.findOne({
             propertyId: { $regex: `^${prefix}\\d+$` }

@@ -179,10 +179,9 @@ export function Properties() {
   }, []);
 
   // Handle property edit
-  const handleEdit = (id: string) => {
-    // Navigate to edit page or open edit modal
-    console.log("Edit property:", id);
-  };
+ const handleEdit = (propertyId: string) => {
+  navigate(`/updatepropertyform/${propertyId}`);
+};
 
   // Handle status update
   const handleStatusUpdate = (id: string) => {
@@ -266,7 +265,7 @@ export function Properties() {
               key={property.id}
               property={property}
               onDelete={handleDelete}
-              onEdit={() => handleEdit(property.id)}
+              onEdit={() =>handleEdit(property.propertyId)}
               onStatusUpdate={() => handleStatusUpdate(property.id)}
               onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
             />
