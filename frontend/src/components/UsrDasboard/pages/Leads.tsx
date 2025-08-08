@@ -1,395 +1,312 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { LeadsTable } from "../LeadsTable";
-import { Lead } from "../types";
-import { CheckCircle, X } from "lucide-react";
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { Plus, Filter, Coins } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
-type ReportType = 'agent' | 'fraud' | 'other';
-
-interface ReportedLead {
-  leadId: string;
-  type: ReportType;
-  description: string;
-  timestamp: string;
+interface FormData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  createdBy: string | null;
+  propertyId: string;
+  propertyType: string;
+  propertyName: string;
+  message: string;
+  createdAt: string;
 }
 
-export function Leads() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showReportModal, setShowReportModal] = useState(false);
-  const [reportType, setReportType] = useState<ReportType>('agent');
-  const [reportDescription, setReportDescription] = useState('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [reportedLeads, setReportedLeads] = useState<string[]>([]);
+const Leads: React.FC = () => {
+  const [leads, setLeads] = useState<FormData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isFilterVisible, setIsFilterVisible] = useState(false);
+  const [filters, setFilters] = useState({
+    propertyType: '',
+    createdBy: '',
+    startDate: '',
+    endDate: ''
+  });
+  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [leadTokenMap, setLeadTokenMap] = useState<Record<string, number>>({});
+  const [userTokens, setUserTokens] = useState<number>(0);
+  const [viewedLeads, setViewedLeads] = useState<string[]>([]);
 
+  const navigate = useNavigate();
 
-  // 🔹 Fetch leads from the backend
-  useEffect(() => {
-    console.log("Fetching leadss...");
-    const fetchLeads = async () => {
-      try {
-        const userId = sessionStorage.getItem("userId"); // Get userId from session storage
-        if (!userId) {
-          console.error("❌ No user ID found in session storage.");
-          return;
-        }
-
-        const response = await axios.get(`http://localhost:8000/api/leads/glead`, {
-          params: { userId }, // Send userId as a query parameter
-        });
-
-        console.log("Fetched Leads:", response.data); // Debug API Response
-
-        const formattedLeads = response.data.map((lead: any) => ({
-          id: lead._id,
-          name: lead.name,
-          email: lead.email,
-          phone: lead.phone,
-          propertyName: lead.propertyName,
-          flatNo: lead.flatNo,
-          status: lead.status,
-          createdAt: lead.createdAt
-            ? new Date(lead.createdAt).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "N/A",
-        }));
-
-        setLeads(formattedLeads);
-      } catch (error) {
-        console.error("❌ Error fetching leads:", error);
-      }
-    };
-
-    fetchLeads();
-  }, []);
-
-  // 🔹 Handle Export as CSV
-  const handleExport = () => {
-    const csvContent = [
-      ["Name", "Property", "Flat No", "Email", "Phone", "Status"],
-      ...leads.map((lead) => [
-        lead.name,
-        lead.propertyName,
-        lead.flatNo,
-        lead.email,
-        lead.phone,
-        lead.status,
-      ]),
-    ]
-      .map((row) => row.join(","))
-      .join("\n");
-
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `leads-${new Date().toISOString().split("T")[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  // 🔹 Handle Viewing Lead Details
-  const handleViewDetails = (lead: Lead) => {
-    setSelectedLead(lead);
-    setShowDetailsModal(true);
-  };
-
-  // 🔹 Handle Status Change & Update Backend
-  const handleStatusChange = async (leadId: string, newStatus: Lead["status"]) => {
+  const fetchLeads = async () => {
     try {
-      const response = await axios.put(`http://localhost:8000/api/leads/update-status/${leadId}`, {
-        status: newStatus,
-      });
+      setLoading(true);
+      const response = await axios.get('/api/enquiry/enquiries');
 
-      if (response.status === 200) {
-        setLeads((prevLeads) =>
-          prevLeads.map((lead) =>
-            lead.id === leadId ? { ...lead, status: newStatus } : lead
-          )
-        );
-        console.log("✅ Status updated successfully!");
-      }
-    } catch (error) {
-      console.error("❌ Error updating status:", error);
+      const leadsWithId: FormData[] = response.data.data.map((lead: any) => ({
+        id: lead._id,
+        name: lead.name,
+        email: lead.email,
+        phone: lead.phone,
+        createdBy: lead.createdBy,
+        propertyId: lead.propertyId,
+        propertyType: lead.propertyType,
+        propertyName: lead.propertyName,
+        message: lead.message,
+        createdAt: lead.createdAt,
+      }));
+
+      setLeads(leadsWithId);
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching leads:', err);
+      setError('Failed to fetch leads. Please try again.');
+      toast.error('Failed to fetch leads. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 🔹 Send Email
-  const handleSendMessage = (lead: Lead) => {
-    window.location.href = `mailto:${lead.email}?subject=Regarding your interest in ${lead.propertyName}`;
+  const fetchLeadTokens = async () => {
+    try {
+      const res = await axios.get('/api/lead-token');
+      const tokenMap: Record<string, number> = {};
+      res.data.forEach((item: any) => {
+        tokenMap[item.propertyId] = item.tokenPerLead;
+      });
+      setLeadTokenMap(tokenMap);
+    } catch (err) {
+      console.error('Error fetching lead tokens:', err);
+    }
   };
-  const handleSubmitReport = async () => {
-    if (selectedLead && reportDescription.trim()) {
+
+  const fetchUserTokens = async () => {
+    const userId = sessionStorage.getItem("userId");
+    if (!userId) return;
+    try {
+      const response = await axios.get(`/api/usertoken/${userId}`);
+      setUserTokens(response.data.tokens);
+      setViewedLeads(response.data.viewedLeads || []);
+      localStorage.setItem("viewedLeads", JSON.stringify(response.data.viewedLeads || []));
+    } catch (err) {
+      console.error("Error fetching user tokens:", err);
+    }
+  };
+
+  const handleViewLead = async (lead: FormData) => {
+    const tokensRequired = leadTokenMap[lead.propertyId] || 0;
+
+    if (viewedLeads.includes(lead.id)) {
+      setSelectedLeadId(prev => (prev === lead.id ? null : lead.id));
+      return;
+    }
+
+    if (userTokens >= tokensRequired) {
       try {
         const userId = sessionStorage.getItem("userId");
-        if (!userId) {
-          console.error("❌ No user ID found in session storage.");
-          return;
-        }
+        const res = await axios.post("/api/usertoken/deduct", {
+          userId,
+          amount: tokensRequired,
+          leadId: lead.id,
+        });
 
-        const newReport = {
-          leadId: selectedLead.id,
-          name: selectedLead.name,
-          number: selectedLead.phone,
-          userId: userId,
-          type: reportType,
-          description: reportDescription,
-        };
-
-        // Send data to backend
-        const response = await axios.post("http://localhost:8000/api/Report/reports", newReport);
-
-        if (response.status === 201) {
-          setReportedLeads([...reportedLeads, selectedLead.id]); // Store only the lead ID
-          setShowReportModal(false);
-          setShowSuccessModal(true);
-          setReportType("agent");
-          setReportDescription("");
-
-          setLeads(leads.map(lead =>
-            lead.id === selectedLead.id ? { ...lead, status: "Not Interested" } : lead
-          ));
-
-          setTimeout(() => {
-            setShowSuccessModal(false);
-            setShowDetailsModal(false);
-          }, 3000);
-        }
+        toast.success(`Deducted ${tokensRequired} token(s).`);
+        const updatedViewed = [...viewedLeads, lead.id];
+        setViewedLeads(updatedViewed);
+        localStorage.setItem("viewedLeads", JSON.stringify(updatedViewed));
+        setUserTokens(res.data.remaining);
+        setSelectedLeadId(lead.id);
       } catch (error) {
-        console.error("❌ Error submitting report:", error);
+        console.error("Token deduction error:", error);
+        toast.error("Failed to deduct tokens.");
       }
+    } else {
+      toast.warn("Insufficient tokens to view this lead.");
     }
   };
-  const handleReportLead = () => {
-    setShowReportModal(true);
-  };
-  const isLeadReported = (leadId: string) => {
-    return reportedLeads.includes(leadId); // ✅ Check if leadId exists in the reportedLeads array
-  };
-  
 
-  const filteredLeads = leads.filter(lead => 
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.flatNo.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchLeads();
+    fetchLeadTokens();
+    fetchUserTokens();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div className="text-red-500">{error}</div>;
+
+  function handleFilterChange(event: ChangeEvent<HTMLSelectElement>): void {
+    throw new Error('Function not implemented.');
+  }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold text-black mb-4">Leads</h1>
-      <LeadsTable
-        leads={filteredLeads}
-        onExport={handleExport}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        onViewDetails={handleViewDetails}
-        onStatusChange={handleStatusChange}
-        reportedLeads={reportedLeads}      />
-
-      {/* Lead Details Modal */}
-      {showDetailsModal && selectedLead && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-lg">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-semibold text-black">{selectedLead.name}</h2>
-              <button
-                onClick={() => setShowDetailsModal(false)}
-                className="p-2 hover:bg-black/5 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-black/60">Property</p>
-                  <p className="font-medium">{selectedLead.propertyName}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-black/60">Flat No</p>
-                  <p className="font-medium">{selectedLead.flatNo}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-black/60">Email</p>
-                  <a href={`mailto:${selectedLead.email}`} className="text-blue-600 hover:underline">
-                    {selectedLead.email}
-                  </a>
-                </div>
-                <div>
-                  <p className="text-sm text-black/60">Phone</p>
-                  <a href={`tel:${selectedLead.phone}`} className="text-blue-600 hover:underline">
-                    {selectedLead.phone}
-                  </a>
-                </div>
-                <div>
-                  <p className="text-sm text-black/60">Date</p>
-                  <p className="font-medium">{selectedLead.createdAt}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-black/60">Status</p>
-                  <select
-                    value={selectedLead.status}
-                    onChange={(e) => handleStatusChange(selectedLead.id, e.target.value as Lead['status'])}
-                    className="mt-1 block w-full px-3 py-2 text-sm border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-                    disabled={isLeadReported(selectedLead.id)}
-                  >
-                    <option value="New">New</option>
-                    <option value="Contacted">Contacted</option>
-                    <option value="Visited">Visited</option>
-                    <option value="Interested">Interested</option>
-                    <option value="Not Interested">Not Interested</option>
-                    <option value="RNR">RNR (Ringing No Response)</option>
-                    <option value="Call Back">Call Back</option>
-                    <option value="No Requirement">No Requirement</option>
-                    <option value="Different Requirement">Different Requirement</option>
-                    <option value="Converted">Converted</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-black/10">
-                <button
-                  onClick={() => handleSendMessage(selectedLead)}
-                  className="flex-1 px-4 py-2 bg-black text-white text-sm rounded-lg hover:bg-black/80 transition-colors"
-                  disabled={isLeadReported(selectedLead.id)}
-                >
-                  Send Message
-                </button>
-                <button
-                  onClick={handleReportLead}
-                  className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors"
-                  disabled={isLeadReported(selectedLead.id)}
-                >
-                  Report Lead
-                </button>
-              </div>
-            </div>
-          </div>
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold">
+          Leads (Tokens: <span className="text-green-600">{userTokens}</span>)
+        </h2>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsFilterVisible(!isFilterVisible)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border rounded-lg shadow-sm hover:bg-gray-50"
+          >
+            <Filter className="w-4 h-4" />
+            {isFilterVisible ? 'Hide Filters' : 'Filters'}
+          </button>
+          <button
+            onClick={() => navigate('/property/add')}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            <Plus className="w-4 h-4" />
+            Add Lead
+          </button>
         </div>
-      )}
+      </div>
 
-      {/* Report Modal */}
-      {showReportModal && selectedLead && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 w-full max-w-lg">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h2 className="text-xl font-semibold text-black">Report Lead</h2>
-                <p className="text-sm text-black/60 mt-1">Report inappropriate or suspicious lead behavior</p>
-              </div>
-              <button
-                onClick={() => setShowReportModal(false)}
-                className="p-2 hover:bg-black/5 rounded-lg transition-colors"
+      {isFilterVisible && (
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Property Type</label>
+              <select
+                name="propertyType"
+                value={filters.propertyType}
+                onChange={handleFilterChange}
+                className="w-full p-2 border rounded-lg"
               >
-                <X className="w-5 h-5" />
-              </button>
+                <option value="">All Types</option>
+                <option value="Flat">Flat</option>
+                <option value="House">House</option>
+                <option value="Plot">Plot</option>
+              </select>
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-black/70 mb-2">Report Type</label>
-                <div className="space-y-2">
-                  <label className="flex items-center p-3 border border-black/10 rounded-lg cursor-pointer hover:bg-black/5">
-                    <input
-                      type="radio"
-                      name="reportType"
-                      value="agent"
-                      checked={reportType === 'agent'}
-                      onChange={(e) => setReportType(e.target.value as ReportType)}
-                      className="mr-3"
-                    />
-                    <div>
-                      <p className="font-medium text-black">Report as Agent</p>
-                      <p className="text-xs text-black/60">Reporting User as agent </p>
-                    </div>
-                  </label>
-                  <label className="flex items-center p-3 border border-black/10 rounded-lg cursor-pointer hover:bg-black/5">
-                    <input
-                      type="radio"
-                      name="reportType"
-                      value="fraud"
-                      checked={reportType === 'fraud'}
-                      onChange={(e) => setReportType(e.target.value as ReportType)}
-                      className="mr-3"
-                    />
-                    <div>
-                      <p className="font-medium text-black">Report Fraud</p>
-                      <p className="text-xs text-black/60">Report suspicious or fraudulent activity</p>
-                    </div>
-                  </label>
-                  <label className="flex items-center p-3 border border-black/10 rounded-lg cursor-pointer hover:bg-black/5">
-                    <input
-                      type="radio"
-                      name="reportType"
-                      value="other"
-                      checked={reportType === 'other'}
-                      onChange={(e) => setReportType(e.target.value as ReportType)}
-                      className="mr-3"
-                    />
-                    <div>
-                      <p className="font-medium text-black">Other</p>
-                      <p className="text-xs text-black/60">Report for other reasons</p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-black/70 mb-2">Description</label>
-                <textarea
-                  value={reportDescription}
-                  onChange={(e) => setReportDescription(e.target.value)}
-                  placeholder="Please provide details about the issue..."
-                  className="w-full px-3 py-2 text-sm border border-black/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-black min-h-[100px]"
-                  required
+            <div>
+              <label className="block text-sm font-medium mb-1">Created By</label>
+              <input
+                type="text"
+                name="createdBy"
+                value={filters.createdBy}
+                onChange={handleFilterChange}
+                className="w-full p-2 border rounded-lg"
+                placeholder="Created by name..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Date Range</label>
+              <div className="flex gap-2">
+                <input
+                  type="date"
+                  name="startDate"
+                  value={filters.startDate}
+                  onChange={handleFilterChange}
+                  className="w-full p-2 border rounded-lg"
+                />
+                <input
+                  type="date"
+                  name="endDate"
+                  value={filters.endDate}
+                  onChange={handleFilterChange}
+                  className="w-full p-2 border rounded-lg"
                 />
               </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={handleSubmitReport}
-                  className="flex-1 px-4 py-2 bg-red-500 text-white text-sm rounded-lg hover:bg-red-600 transition-colors"
-                  disabled={!reportDescription.trim()}
-                >
-                  Submit Report
-                </button>
-                <button
-                  onClick={() => setShowReportModal(false)}
-                  className="flex-1 px-4 py-2 bg-black/5 text-black text-sm rounded-lg hover:bg-black/10 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 text-center max-w-sm w-full animate-fade-up">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-green-500" />
-            </div>
-            <h3 className="text-xl font-semibold text-black mb-2">Report Submitted</h3>
-            <p className="text-black/60 mb-4">
-              Thank you for your report. Our admin team will review it and take appropriate action.
-            </p>
-          </div>
-        </div>
-      )}
+      <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500">Tokens</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Property</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Type</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Created By</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Message</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Date</th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {leads
+              .filter((lead) => {
+                const matchesPropertyType = !filters.propertyType || lead.propertyType === filters.propertyType;
+                const matchesCreatedBy = !filters.createdBy || lead.createdBy?.toLowerCase().includes(filters.createdBy.toLowerCase());
+                const matchesDateRange =
+                  (!filters.startDate || new Date(lead.createdAt) >= new Date(filters.startDate)) &&
+                  (!filters.endDate || new Date(lead.createdAt) <= new Date(filters.endDate));
+                return matchesPropertyType && matchesCreatedBy && matchesDateRange;
+              })
+              .map((lead) => {
+                const isViewed = viewedLeads.includes(lead.id);
+                return (
+                  <React.Fragment key={lead.id}>
+                    <tr className="hover:bg-gray-50">
+                      {/* Token column always visible */}
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <button
+                          onClick={() => handleViewLead(lead)}
+                          className="flex items-center gap-1 bg-yellow-100 text-yellow-700 px-2 py-1 rounded-md text-xs font-medium hover:bg-yellow-200"
+                          title={`Click to use ${leadTokenMap[lead.propertyId] || 0} tokens to view`}
+                        >
+                          <Coins className="w-4 h-4" />
+                          {leadTokenMap[lead.propertyId] || 0}
+                        </button>
+                      </td>
+
+                      {/* All other columns blurred conditionally */}
+                      {[
+                        lead.name,
+                        lead.email,
+                        lead.phone,
+                        lead.propertyName,
+                        lead.propertyType,
+                        lead.createdBy,
+                      ].map((value, i) => (
+                        <td key={i} className={`px-6 py-4 whitespace-nowrap ${!isViewed ? 'blur-sm' : ''}`}>
+                          {value}
+                        </td>
+                      ))}
+
+                      <td className={`px-6 py-4 whitespace-nowrap ${!isViewed ? 'blur-sm' : ''}`}>
+                        {isViewed || selectedLeadId === lead.id ? (
+                          <span className="text-blue-600 cursor-pointer" onClick={() => setSelectedLeadId(null)}>
+                            Hide
+                          </span>
+                        ) : (
+                          <span className="text-blue-600 cursor-pointer" onClick={() => handleViewLead(lead)}>
+                            View ({leadTokenMap[lead.propertyId] || 0} tokens)
+                          </span>
+                        )}
+                      </td>
+
+                      <td className={`px-6 py-4 whitespace-nowrap ${!isViewed ? 'blur-sm' : ''}`}>
+                        {new Date(lead.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+
+                    {selectedLeadId === lead.id && (
+                      <tr>
+                        <td colSpan={9} className="px-6 py-4 bg-gray-50">
+                          <p className="font-medium">Message:</p>
+                          <p className="mt-1">{lead.message || 'No message available'}</p>
+                          <div className="mt-2 flex space-x-2">
+                            <button
+                              onClick={() => handleCall(lead.phone)}
+                              className="px-3 py-1 bg-green-100 text-green-700 rounded-md hover:bg-green-200"
+                            >
+                              Call
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
+};
+
+export default Leads;
