@@ -522,7 +522,7 @@ const Homepage: React.FC = () => {
     variants={fadeInUp}
     className="text-center mb-16"
   >
-    <h2 className="text-4xl font-bold mb-4">Why Choose Rentamigo?</h2>
+    <h2 className="text-4xl font-bold mb-4">Why Choose Propamigo?</h2>
     <p className="text-gray-600 max-w-2xl mx-auto">
       Your one-stop platform for affordable rentals, property sales, and reliable support — made for everyone.
     </p>
@@ -612,7 +612,7 @@ const Homepage: React.FC = () => {
             <h2 className="text-4xl font-bold mb-4">What Our Customers Say</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Hear from our satisfied customers about their experience with
-              Rentamigo.
+              Propamigo.
             </p>
           </motion.div>
 
@@ -624,7 +624,7 @@ const Homepage: React.FC = () => {
               viewport={{ once: true }}
             >
               <Testimonial
-                quote="Rentamigo made finding my dream apartment so easy! The search tools are intuitive and the customer service is exceptional."
+                quote="Propamigo made finding my dream apartment so easy! The search tools are intuitive and the customer service is exceptional."
                 author="Sarah Johnson"
                 role="Tenant"
                 image="https://randomuser.me/api/portraits/women/12.jpg"
@@ -638,7 +638,7 @@ const Homepage: React.FC = () => {
               viewport={{ once: true }}
             >
               <Testimonial
-                quote="As a property owner, I've had great success listing my properties on Rentamigo. The platform is user-friendly and attracts quality tenants."
+                quote="As a property owner, I've had great success listing my properties on Propamigo. The platform is user-friendly and attracts quality tenants."
                 author="Michael Chen"
                 role="Property Owner"
                 image="https://randomuser.me/api/portraits/men/32.jpg"
@@ -740,7 +740,7 @@ const Homepage: React.FC = () => {
             </h2>
             <p className="text-xl mb-10 text-gray-300">
               Join thousands of satisfied customers who found their perfect
-              property with Rentamigo.
+              property with Propamigo.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

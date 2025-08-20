@@ -180,7 +180,7 @@ router.post("/submit", async (req: Request, res: Response) => {
         <li><strong>Message:</strong> ${savedEnquiry.message}</li>
       </ul>
       <p>We will get back to you shortly.</p>
-      <p>Best Regards,<br>RentAmigo Team</p>
+      <p>Best Regards,<br>PropAmigo Team</p>
     `;
 
     // Email content for the company

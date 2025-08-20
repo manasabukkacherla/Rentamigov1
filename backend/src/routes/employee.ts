@@ -64,10 +64,10 @@ Employeerouter.post("/", async (req: Request, res: Response) => {
       const mailOptions = {
         from: process.env.EMAIL_USER, // Sender email
         to: email, // ✅ Send to any email address
-        subject: "Welcome to Rentamigo!",
+        subject: "Welcome to Propamigo!",
         html: `
           <h2>Welcome, ${name}!</h2>
-          <p>Your account has been successfully created on <strong>Rentamigo</strong>.</p>
+          <p>Your account has been successfully created on <strong>Propamigo</strong>.</p>
           <ul>
             <li><strong>Role:</strong> ${role}</li>
             <li><strong>Status:</strong> ${status}</li>
@@ -75,7 +75,7 @@ Employeerouter.post("/", async (req: Request, res: Response) => {
           <p>You can now log in using the email <strong>${email}</strong>.</p>
           <br />
           <p>Best Regards,</p>
-          <p><strong>Rentamigo Team</strong></p>
+          <p><strong>Propamigo Team</strong></p>
         `,
       };
 

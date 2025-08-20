@@ -95,7 +95,7 @@ router.post("/owner", async (req, res) => {
         <li><strong>Mobile Number:</strong> ${mobileNo}</li>
       </ul>
       <p>We will get back to you shortly.</p>
-      <p>Best regards,<br>RentAmigo Team</p>
+      <p>Best regards,<br>PropAmigo Team</p>
     `;
         await emailservice_1.default.sendMail({
             from: process.env.EMAIL_USER, // Your email

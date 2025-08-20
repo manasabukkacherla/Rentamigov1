@@ -429,7 +429,7 @@ export default function ServicesPage() {
 
       if (response.status === 201) {
         const emailContent = `
-        Welcome to RentAmigo!
+        Welcome to PropAmigo!
         
         Dear ${name},
         
@@ -439,7 +439,7 @@ export default function ServicesPage() {
         Our team will contact you shortly on your provided phone number: ${phoneNumber}
         
         Best regards,
-        RentAmigo Team
+        PropAmigo Team
       `;
 
         await axios.post(
@@ -447,7 +447,7 @@ export default function ServicesPage() {
           {
             content: emailContent,
             toEmailAddress: email,
-            subject: "Welcome to RentAmigo - Service Enquiry Confirmation",
+            subject: "Welcome to PropAmigo - Service Enquiry Confirmation",
           }
         );
 

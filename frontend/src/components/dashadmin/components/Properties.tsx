@@ -224,7 +224,7 @@ export default function Properties() {
             <option value="all">All Types</option>
             <option value="owner">Owner</option>
             <option value="agent">Agent</option>
-            <option value="rentamigo">Rentamigo</option>
+            <option value="rentamigo">Propamigo</option>
           </select>
         </div>
       </div>

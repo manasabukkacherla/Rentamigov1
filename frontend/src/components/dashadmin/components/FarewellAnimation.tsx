@@ -29,7 +29,7 @@ const FarewellAnimation = () => {
           transition={{ delay: 0.4 }}
           className="text-xl text-gray-200"
         >
-          Thank you for using Rentamigo  See you Soon!
+          Thank you for using Propamigo  See you Soon!
         </motion.p>
       </motion.div>
     </motion.div>

@@ -176,19 +176,14 @@ const Headerr: React.FC = () => {
               className="flex items-center cursor-pointer flex-shrink-0"
               onClick={() => navigate("/Homepage")}
             >
-              <img
-                src="./images/rentamigologou.png"
-                alt="Rentamigo Logo"
-                className="h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 object-contain"
-              />
-              <span
-  className={`text-base xs:text-lg sm:text-xl font-bold ml-1 ${
-    scrolled ? "text-black" : "text-white"
-  }`}
-  style={{ fontFamily: 'Neuropol X' }}
->
-  Rentamigo
-</span>
+             <img
+  src="./images/rentamigologou.png"
+  alt="Propamigo Logo"
+  className="h-16 w-32 xs:h-18 xs:w-18 sm:h-20 sm:w-20 object-contain"
+/>
+
+
+              
 
             </div>
 
