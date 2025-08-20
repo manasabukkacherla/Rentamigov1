@@ -5,86 +5,169 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const employee_1 = __importDefault(require("../models/employee"));
-const employeeRouter = express_1.default.Router();
-// CREATE - Post a new employee
-employeeRouter.post("/", async (req, res) => {
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const emailservice_1 = __importDefault(require("../utils/emailservice"));
+const Employeerouter = express_1.default.Router();
+// ✅ Utility function to validate email format (name@rentamigo.in)
+const isValidEmail = (email) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@rentamigo\.in$/;
+    return emailRegex.test(email);
+};
+/**
+ * 🔹 POST: Create a new Employee
+ */
+Employeerouter.post("/", async (req, res) => {
     try {
-        const employee = new employee_1.default(req.body);
-        const savedEmployee = await employee.save();
-        res.status(201).json(savedEmployee);
-    }
-    catch (error) {
-        res.status(400).json({ success: false, message: error.message });
-    }
-});
-employeeRouter.post("/verify", async (req, res) => {
-    try {
-        const { email } = req.body;
-        if (!email) {
-            return res.status(400).json({
-                success: false,
-                message: "Email is required",
-            });
+        const { name, email, role, phone, password, status } = req.body;
+        // ✅ Step 1: Validate required fields
+        if (!name || !email || !role || !phone || !password) {
+            return res
+                .status(400)
+                .json({ success: false, message: "All fields are required" });
         }
-        const employee = await employee_1.default.findOne({ email });
-        console.log(`Employee verification attempt for email: ${email}`);
-        if (!employee) {
-            console.log(`Verification failed: No employee found with email ${email}`);
-            return res.status(404).json({
-                success: false,
-                message: "Employee not found with this email",
-            });
+        // ✅ Step 2: Validate email format (Allow any domain)
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Invalid email format" });
         }
-        console.log(`Employee verified successfully: ${employee._id}`);
-        return res.status(200).json({
+        // ✅ Step 3: Check if email or phone already exists
+        const existingEmployee = await employee_1.default.findOne({
+            $or: [{ email }, { phone }],
+        });
+        if (existingEmployee) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Email or phone already in use" });
+        }
+        // ✅ Step 4: Hash the password before saving
+        const hashedPassword = await bcrypt_1.default.hash(password, 10);
+        // ✅ Step 5: Create new employee record
+        const newEmployee = new employee_1.default({
+            name,
+            email: email.toLowerCase(),
+            role: role.toLowerCase(),
+            phone,
+            password: hashedPassword,
+            status: status || "active", // Default to active
+        });
+        const savedEmployee = await newEmployee.save();
+        console.log("✅ New Employee Created:", savedEmployee);
+        // ✅ Step 6: Send Welcome Email (Do NOT fail API if email fails)
+        try {
+            const mailOptions = {
+                from: process.env.EMAIL_USER, // Sender email
+                to: email, // ✅ Send to any email address
+                subject: "Welcome to PropAmigo!",
+                html: `
+          <h2>Welcome, ${name}!</h2>
+          <p>Your account has been successfully created on <strong>Rentamigo</strong>.</p>
+          <ul>
+            <li><strong>Role:</strong> ${role}</li>
+            <li><strong>Status:</strong> ${status}</li>
+          </ul>
+          <p>You can now log in using the email <strong>${email}</strong>.</p>
+          <br />
+          <p>Best Regards,</p>
+          <p><strong>Rentamigo Team</strong></p>
+        `,
+            };
+            console.log("➡️ Sending Welcome Email to:", email);
+            const result = await emailservice_1.default.sendMail(mailOptions);
+            console.log("✅ Employee Email Sent:", result);
+        }
+        catch (error) {
+            console.error("❌ Error Sending Employee Email:", error);
+            // Continue even if email sending fails
+        }
+        // ✅ Step 7: Return Success Response
+        return res.status(201).json({
             success: true,
-            message: "Employee verified successfully",
-            data: {
-                isVerified: true,
-                employeeId: employee._id,
-            },
+            message: "Employee created successfully",
+            data: savedEmployee,
         });
     }
     catch (error) {
-        console.error("Employee verification error:", error);
-        res.status(500).json({
+        console.error("❌ Error creating employee:", error);
+        return res.status(500).json({
             success: false,
-            message: error.message,
+            message: error.message || "Internal server error",
         });
     }
 });
-// READ - Get all employees
-employeeRouter.get("/", async (_req, res) => {
+/**
+ * 🔹 GET: Fetch all employees
+ */
+Employeerouter.get("/", async (req, res) => {
     try {
-        const employees = await employee_1.default.find();
+        const employees = await employee_1.default.find().select("-password"); // Exclude password from response
         res.status(200).json({ success: true, data: employees });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("❌ Error fetching employees:", error);
+        res
+            .status(500)
+            .json({ success: false, message: "Error fetching employees" });
     }
 });
-// READ - Get employee by ID
-employeeRouter.get("/:id", async (req, res) => {
+Employeerouter.get("/active-count", async (req, res) => {
     try {
-        const employee = await employee_1.default.findById(req.params.id);
-        if (!employee) {
-            return res
-                .status(404)
-                .json({ success: false, message: "Employee not found" });
-        }
-        res.status(200).json({ success: true, data: employee });
+        const employees = await employee_1.default.find({}, { status: 1 });
+        const activeCount = employees.filter((emp) => emp.status?.trim().toLowerCase() === "active").length;
+        return res.status(200).json({ success: true, count: activeCount });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("❌ Error fetching active employee count:", error);
+        return res
+            .status(500)
+            .json({ success: false, message: "Failed to fetch count" });
     }
 });
-// UPDATE - Update employee by ID
-employeeRouter.put("/:id", async (req, res) => {
+// Route: GET /api/employees/active-change
+Employeerouter.get("/active-change", async (req, res) => {
     try {
-        const employee = await employee_1.default.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true,
+        const now = new Date();
+        const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const current = await employee_1.default.countDocuments({
+            status: { $regex: /^active$/i },
+            createdAt: { $gte: startOfThisMonth },
         });
+        const previous = await employee_1.default.countDocuments({
+            status: { $regex: /^active$/i },
+            createdAt: { $gte: startOfLastMonth, $lt: startOfThisMonth },
+        });
+        const change = previous === 0 ? 100 : ((current - previous) / previous) * 100;
+        res.status(200).json({
+            success: true,
+            current,
+            previous,
+            change: Number(change.toFixed(2)),
+        });
+    }
+    catch (error) {
+        res
+            .status(500)
+            .json({ success: false, message: "Failed to calculate employee change" });
+    }
+});
+/**
+ * 🔹 GET: Fetch an Employee by ID
+ */
+Employeerouter.get("/:id", async (req, res) => {
+    try {
+        console.log("reacged here");
+        const { id } = req.params;
+        // const newId = id.userId;
+        console.log("this is id", id);
+        // Validate ID format
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Invalid employee ID format" });
+        }
+        const employee = await employee_1.default.findById(id).select("-password"); // Exclude password
         if (!employee) {
             return res
                 .status(404)
@@ -93,14 +176,69 @@ employeeRouter.put("/:id", async (req, res) => {
         res.status(200).json({ success: true, data: employee });
     }
     catch (error) {
-        res.status(400).json({ success: false, message: error.message });
+        console.error("❌ Error fetching employee:", error);
+        res
+            .status(500)
+            .json({ success: false, message: "Error fetching employee" });
     }
 });
-// DELETE - Delete employee by ID
-employeeRouter.delete("/:id", async (req, res) => {
+/**
+ * 🔹 PUT: Update an Employee (Name, Phone, Role, Status)
+ */
+Employeerouter.put("/:id", async (req, res) => {
     try {
-        const employee = await employee_1.default.findByIdAndDelete(req.params.id);
-        if (!employee) {
+        const { id } = req.params;
+        const { name, phone, role, status } = req.body;
+        // Validate ID format
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Invalid employee ID format" });
+        }
+        const updateData = {};
+        if (name)
+            updateData.name = name;
+        if (phone)
+            updateData.phone = phone;
+        if (role)
+            updateData.role = role.toLowerCase();
+        if (status)
+            updateData.status = status;
+        const updatedEmployee = await employee_1.default.findByIdAndUpdate(id, updateData, {
+            new: true,
+        }).select("-password");
+        if (!updatedEmployee) {
+            return res
+                .status(404)
+                .json({ success: false, message: "Employee not found" });
+        }
+        res.status(200).json({
+            success: true,
+            message: "Employee updated successfully",
+            data: updatedEmployee,
+        });
+    }
+    catch (error) {
+        console.error("❌ Error updating employee:", error);
+        res
+            .status(500)
+            .json({ success: false, message: "Error updating employee" });
+    }
+});
+/**
+ * 🔹 DELETE: Remove an Employee
+ */
+Employeerouter.delete("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        // Validate ID format
+        if (!id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res
+                .status(400)
+                .json({ success: false, message: "Invalid employee ID format" });
+        }
+        const deletedEmployee = await employee_1.default.findByIdAndDelete(id);
+        if (!deletedEmployee) {
             return res
                 .status(404)
                 .json({ success: false, message: "Employee not found" });
@@ -110,7 +248,10 @@ employeeRouter.delete("/:id", async (req, res) => {
             .json({ success: true, message: "Employee deleted successfully" });
     }
     catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error("❌ Error deleting employee:", error);
+        res
+            .status(500)
+            .json({ success: false, message: "Error deleting employee" });
     }
 });
-exports.default = employeeRouter;
+exports.default = Employeerouter;
