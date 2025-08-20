@@ -66,7 +66,7 @@ function Admindash({ defaultSection = "dashboard" }: AdmindashProps) {
     sessionStorage.clear()
 
     // Show goodbye message
-    toast.success("Thank you for using RentAmigo. See you soon!", {
+    toast.success("Thank you for using PropAmigo. See you soon!", {
       position: "top-center",
       autoClose: 2000,
       hideProgressBar: false,

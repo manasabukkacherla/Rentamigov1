@@ -207,8 +207,8 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Welcome to RentAmigo",
-      html: `<h1>Welcome to RentAmigo</h1>
+      subject: "Welcome to PropAmigo",
+      html: `<h1>Welcome to PropAmigo</h1>
              <p>Dear ${fullName},</p>
              <p>Thank you for signing up! We're excited to have you onboard.</p>`,
     });

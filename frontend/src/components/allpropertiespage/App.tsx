@@ -150,7 +150,7 @@ function Allproperties() {
 
             </Link>
           <span className="text-xl font-bold" style={{ fontFamily: 'Neuropol X' }}>
-  RentAmigo
+  PropAmigo
 </span>
 
             <div className="flex items-center justify-center w-full md:w-auto">

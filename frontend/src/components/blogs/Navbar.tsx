@@ -39,7 +39,7 @@ const Navbar = () => {
   className="text-2xl font-bold text-black"
   style={{ fontFamily: 'Neuropol X' }}
 >
-  Rentamigo
+  Propamigo
 </span>
 
                     </div>

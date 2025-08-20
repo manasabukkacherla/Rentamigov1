@@ -65,7 +65,7 @@ const HomeFooter: React.FC = () => {
           <div>
             <div className="flex items-center mb-4">
               <Home className="h-6 w-6 mr-2" />
-              <h3 className="text-xl font-bold">Rentamigo</h3>
+              <h3 className="text-xl font-bold">Propamigo</h3>
             </div>
             <p className="text-gray-400 mb-4">
               Your trusted source for rental insights, tips, and stories to help you find the perfect place to call home.
@@ -137,7 +137,7 @@ const HomeFooter: React.FC = () => {
         </div>
         
         <div className="border-t border-gray-800 mt-12 pt-6 text-center text-gray-500 text-sm">
-          <p>&copy; {new Date().getFullYear()} Rentamigo. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Propamigo. All rights reserved.</p>
         </div>
       </div>
     </footer>

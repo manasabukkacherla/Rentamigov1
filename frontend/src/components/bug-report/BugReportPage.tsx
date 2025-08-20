@@ -13,11 +13,11 @@ const BugReportPage = () => {
     window.scrollTo(0, 0)
 
     // Set page title
-    document.title = "Report a Bug - Rentamigo"
+    document.title = "Report a Bug - Propamigo"
 
     return () => {
       // Reset title when component unmounts
-      document.title = "Rentamigo"
+      document.title = "Propamigo"
     }
   }, [])
 
