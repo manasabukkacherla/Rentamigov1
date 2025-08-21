@@ -68,7 +68,7 @@ export default function ServiceEnquiryForm() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://api.rentamigo.in/api/service/submit-form", {
+      const response = await fetch("https://api.Rentamigo.in/api/service/submit-form", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

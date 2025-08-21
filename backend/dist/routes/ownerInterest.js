@@ -95,7 +95,7 @@ router.post("/owner", async (req, res) => {
         <li><strong>Mobile Number:</strong> ${mobileNo}</li>
       </ul>
       <p>We will get back to you shortly.</p>
-      <p>Best regards,<br>RentAmigo Team</p>
+      <p>Best regards,<br>Rentamigo Team</p>
     `;
         await emailservice_1.default.sendMail({
             from: process.env.EMAIL_USER, // Your email
@@ -117,7 +117,7 @@ router.post("/owner", async (req, res) => {
     `;
         await emailservice_1.default.sendMail({
             from: process.env.EMAIL_USER,
-            to: "contact@rentamigo.in", // Company email
+            to: "contact@Rentamigo.in", // Company email
             subject: "New Property Registration Submission",
             html: companyEmail,
         });

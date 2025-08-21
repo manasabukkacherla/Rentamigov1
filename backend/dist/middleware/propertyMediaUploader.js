@@ -8,7 +8,7 @@ const multer_1 = __importDefault(require("multer"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const uuid_1 = require("uuid");
 // Define the S3 bucket URL
-const s3BucketUrl = `https://${process.env.AWS_S3_BUCKET_NAME || 'rentamigo-bucket'}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com`;
+const s3BucketUrl = `https://${process.env.AWS_S3_BUCKET_NAME || 'Rentamigo-bucket'}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com`;
 // Helper function to determine file type
 const getFileType = (mimetype) => {
     if (mimetype.startsWith('image/')) {
@@ -67,7 +67,7 @@ const uploadToS3 = async (file, path, category = 'general', mediaType = 'photo')
     }
     const fileKey = `${path}/${uniqueFileName}`;
     const params = {
-        Bucket: process.env.AWS_S3_BUCKET_NAME || 'rentamigo-bucket',
+        Bucket: process.env.AWS_S3_BUCKET_NAME || 'Rentamigo-bucket',
         Key: fileKey,
         Body: file.buffer,
         ContentType: file.mimetype,

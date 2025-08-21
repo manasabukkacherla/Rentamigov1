@@ -8,9 +8,9 @@ const employee_1 = __importDefault(require("../models/employee"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const emailservice_1 = __importDefault(require("../utils/emailservice"));
 const Employeerouter = express_1.default.Router();
-// ✅ Utility function to validate email format (name@rentamigo.in)
+// ✅ Utility function to validate email format (name@Rentamigo.in)
 const isValidEmail = (email) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@rentamigo\.in$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@Rentamigo\.in$/;
     return emailRegex.test(email);
 };
 /**

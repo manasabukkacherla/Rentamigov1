@@ -10,7 +10,7 @@ const router = express.Router();
  */
 // router.get("/tech-enquiries", async (req: Request, res: Response) => {
 //   try {
-//     const enquiries = await EnquiryModel.find({ email: "tech@rentamigo.in" });
+//     const enquiries = await EnquiryModel.find({ email: "tech@Rentamigo.in" });
 //     res.status(200).json({
 //       success: true,
 //       enquiries: enquiries.map(e => ({
@@ -180,7 +180,7 @@ router.post("/submit", async (req: Request, res: Response) => {
         <li><strong>Message:</strong> ${savedEnquiry.message}</li>
       </ul>
       <p>We will get back to you shortly.</p>
-      <p>Best Regards,<br>RentAmigo Team</p>
+      <p>Best Regards,<br>Rentamigo Team</p>
     `;
 
     // Email content for the company
@@ -205,7 +205,7 @@ router.post("/submit", async (req: Request, res: Response) => {
     // Send email to the company
     await transporter.sendMail({
       from: process.env.EMAIL_USER, // Your email
-      to: "contact@rentamigo.in", // Company's email
+      to: "contact@Rentamigo.in", // Company's email
       subject: "New Service Enquiry",
       html: companyEmailContent,
     });

@@ -61,7 +61,7 @@ export default function AddEmployeeForm({
       if (validateForm()) {
         // First request: Add employee
         const employeeResponse = await axios.post(
-          "https://api.rentamigo.in//api/employees",
+          "https://api.Rentamigo.in//api/employees",
           {
             firstname: formData.firstname,
             lastname: formData.lastname,
@@ -73,11 +73,11 @@ export default function AddEmployeeForm({
 
         // Send welcome email regardless of employee response success
         const emailResponse = await axios.post(
-          "https://api.rentamigo.in//api/email/send-email",
+          "https://api.Rentamigo.in//api/email/send-email",
           {
-            content: "rentamigo.in",
+            content: "Rentamigo.in",
             toEmailAddress: formData.email,
-            subject: `Welcome to RentAmigo - ${formData.firstname} ${formData.lastname}`,
+            subject: `Welcome to Rentamigo - ${formData.firstname} ${formData.lastname}`,
           }
         );
 

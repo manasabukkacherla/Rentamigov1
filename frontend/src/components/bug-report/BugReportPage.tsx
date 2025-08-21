@@ -40,8 +40,8 @@ const BugReportPage = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">Need immediate assistance?</h3>
             <p className="text-gray-600">
               For urgent issues, please contact our support team directly at{" "}
-              <a href="mailto:support@rentamigo.com" className="text-black font-medium hover:underline">
-                support@rentamigo.com
+              <a href="mailto:support@Rentamigo.com" className="text-black font-medium hover:underline">
+                support@Rentamigo.com
               </a>
             </p>
           </div>

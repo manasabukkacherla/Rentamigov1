@@ -14,7 +14,7 @@ const sampleReports: BugReport[] = [
       status: "in-progress",
       createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(), // 4 days ago
       updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-      assignedTo: "dev.team@rentamigo.com",
+      assignedTo: "dev.team@Rentamigo.com",
       comments: [
         {
           author: "Tech Support",

@@ -25,7 +25,7 @@ export function LoginForm() {
 
       // Step 1: Get user data from Google
       const response = await axios.post(
-        "https://api.rentamigo.in//api/auth/google",
+        "https://api.Rentamigo.in//api/auth/google",
         {
           credential: credentialResponse.credential,
         }
@@ -36,7 +36,7 @@ export function LoginForm() {
 
       // Step 2: Verify if the user is an employee
       const verificationResponse = await axios.post(
-        "https://api.rentamigo.in//api/employees/verify",
+        "https://api.Rentamigo.in//api/employees/verify",
         {
           email: userData.user.email,
         }
@@ -94,7 +94,7 @@ export function LoginForm() {
             alt="Rentamigo"
             className="w-12 h-12 sm:w-16 sm:h-16"
           />
-          <p className="text-sm text-center text-muted-foreground">rentamigo</p>
+          <p className="text-sm text-center text-muted-foreground">Rentamigo</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">

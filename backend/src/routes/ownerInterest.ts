@@ -103,7 +103,7 @@ router.post("/owner", async (req: Request, res: Response) => {
         <li><strong>Mobile Number:</strong> ${mobileNo}</li>
       </ul>
       <p>We will get back to you shortly.</p>
-      <p>Best regards,<br>RentAmigo Team</p>
+      <p>Best regards,<br>Rentamigo Team</p>
     `;
 
     await transporter.sendMail({
@@ -128,7 +128,7 @@ router.post("/owner", async (req: Request, res: Response) => {
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: "contact@rentamigo.in", // Company email
+      to: "contact@Rentamigo.in", // Company email
       subject: "New Property Registration Submission",
       html: companyEmail,
     });

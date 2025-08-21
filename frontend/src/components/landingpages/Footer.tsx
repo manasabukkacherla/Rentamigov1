@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import rentamigologo from '/images/rentamigologo.png';
+import Rentamigologo from '/images/Rentamigologo.png';
 
 const Footer: React.FC = () => {
   const [name, setName] = useState("");
@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://api.rentamigo.in/api/forms/subscribe", {
+      const response = await fetch("https://api.Rentamigo.in/api/forms/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email }),
@@ -169,7 +169,7 @@ const Footer: React.FC = () => {
           {/* Section 1: Company Logo and Address */}
           <div className="col-md-4 mb-4 mb-md-0">
             <img
-              src={rentamigologo}
+              src={Rentamigologo}
               alt="Company Logo"
               className="mb-3"
               style={{ width: "100px" }}
@@ -221,7 +221,7 @@ const Footer: React.FC = () => {
                 <i className="fab fa-twitter"></i>
               </a>
               <a
-                href="https://www.instagram.com/rentamigo/?igsh=MWlvcDdhZjZzejAwbQ%3D%3D#"
+                href="https://www.instagram.com/Rentamigo/?igsh=MWlvcDdhZjZzejAwbQ%3D%3D#"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -232,7 +232,7 @@ const Footer: React.FC = () => {
                 <i className="fab fa-instagram"></i>
               </a>
               <a
-                href="https://www.linkedin.com/in/rentamigo-property-management-services-83a106349/"
+                href="https://www.linkedin.com/in/Rentamigo-property-management-services-83a106349/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"

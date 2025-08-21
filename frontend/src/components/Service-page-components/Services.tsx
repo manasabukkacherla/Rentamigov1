@@ -325,7 +325,7 @@ export default function ServicesPage() {
     try {
       const formattedPhoneNumber = `+91${phoneNumber}`; // Adding +91 prefix
       const response = await axios.post(
-        "https://api.rentamigo.in//api/verify/start",
+        "https://api.Rentamigo.in//api/verify/start",
         {
           to: formattedPhoneNumber,
           channel: "sms",
@@ -365,7 +365,7 @@ export default function ServicesPage() {
     try {
       const formattedPhoneNumber = `+91${phoneNumber}`; // Adding +91 prefix
       const response = await axios.post(
-        "https://api.rentamigo.in//api/verify/check",
+        "https://api.Rentamigo.in//api/verify/check",
         {
           to: formattedPhoneNumber,
           code: otp,
@@ -418,7 +418,7 @@ export default function ServicesPage() {
 
     try {
       const response = await axios.post(
-        "https://api.rentamigo.in//api/service-enquiry",
+        "https://api.Rentamigo.in//api/service-enquiry",
         {
           name,
           email,
@@ -429,7 +429,7 @@ export default function ServicesPage() {
 
       if (response.status === 201) {
         const emailContent = `
-        Welcome to RentAmigo!
+        Welcome to Rentamigo!
         
         Dear ${name},
         
@@ -439,15 +439,15 @@ export default function ServicesPage() {
         Our team will contact you shortly on your provided phone number: ${phoneNumber}
         
         Best regards,
-        RentAmigo Team
+        Rentamigo Team
       `;
 
         await axios.post(
-          "https://api.rentamigo.in//api/email/send-email",
+          "https://api.Rentamigo.in//api/email/send-email",
           {
             content: emailContent,
             toEmailAddress: email,
-            subject: "Welcome to RentAmigo - Service Enquiry Confirmation",
+            subject: "Welcome to Rentamigo - Service Enquiry Confirmation",
           }
         );
 
@@ -468,10 +468,10 @@ Please follow up with the customer regarding their service request.
 `;
 
         await axios.post(
-          "https://api.rentamigo.in//api/email/send-email",
+          "https://api.Rentamigo.in//api/email/send-email",
           {
             content: companyEmailContent,
-            toEmailAddress: "vikranth@rentamigo.in",
+            toEmailAddress: "vikranth@Rentamigo.in",
             subject: "New Service Enquiry Received",
           }
         );

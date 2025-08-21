@@ -3,7 +3,7 @@ const User = require("./src/models/signup").default;
 
 async function checkUser() {
   try {
-    await mongoose.connect("mongodb://localhost:27017/rentamigo");
+    await mongoose.connect("mongodb://localhost:27017/Rentamigo");
     console.log("Connected to MongoDB");
 
     const userId = "67dabebe3d2a907ad68f8c4c";

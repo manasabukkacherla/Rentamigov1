@@ -5,9 +5,9 @@ import transporter from "../utils/emailservice";
 
 const Employeerouter = express.Router();
 
-// ✅ Utility function to validate email format (name@rentamigo.in)
+// ✅ Utility function to validate email format (name@Rentamigo.in)
 const isValidEmail = (email: string) => {
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@rentamigo\.in$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@Rentamigo\.in$/;
   return emailRegex.test(email);
 };
 

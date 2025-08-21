@@ -189,7 +189,7 @@ export const FiltersPanel = ({ onFilterChange, onClose }: FiltersPanelProps): JS
       <div className="space-y-4">
         <FilterSection
           title="Listing Type"
-          items={['Owner', 'Agent', 'PG', 'RentAmigo']}
+          items={['Owner', 'Agent', 'PG', 'Rentamigo']}
           type="listingTypes"
         />
         

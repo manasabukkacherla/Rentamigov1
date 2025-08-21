@@ -6,7 +6,7 @@ export function LogoutAnimation() {
       <div className="text-center space-y-4">
         <div className="text-6xl animate-wave">👋</div>
         <h2 className="text-2xl font-bold text-black animate-fade-up">See you again!</h2>
-        <p className="text-black/60 animate-fade-up animation-delay-200">Thanks for using RentAmigo</p>
+        <p className="text-black/60 animate-fade-up animation-delay-200">Thanks for using Rentamigo</p>
       </div>
     </div>
   );

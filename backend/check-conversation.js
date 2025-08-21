@@ -3,7 +3,7 @@ const Conversation = require("./src/models/Conversation.ts");
 
 async function checkConversation() {
   try {
-    await mongoose.connect("mongodb://localhost:27017/rentamigo");
+    await mongoose.connect("mongodb://localhost:27017/Rentamigo");
     console.log("Connected to MongoDB");
 
     const conv = await Conversation.findById("680f28b8a45456aa4909a19a");

@@ -108,4 +108,4 @@
 #             echo "Installing production dependencies..."
 #             npm install --production
 #             echo "Restarting server..."
-#             pm2 restart rentamigov1 || pm2 start dist/index.js --name rentamigov1
+#             pm2 restart Rentamigov1 || pm2 start dist/index.js --name Rentamigov1

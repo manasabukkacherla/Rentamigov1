@@ -200,8 +200,8 @@ const spellingCorrections: { [key: string]: { value: string; type: string } } = 
   'agent': { value: 'Agent', type: 'listingType' },
   'broker': { value: 'Agent', type: 'listingType' },
   'property dealer': { value: 'Agent', type: 'listingType' },
-  'rentamigo': { value: 'RentAmigo', type: 'listingType' },
-  'rent amigo': { value: 'RentAmigo', type: 'listingType' }
+  'Rentamigo': { value: 'Rentamigo', type: 'listingType' },
+  'rent amigo': { value: 'Rentamigo', type: 'listingType' }
 };
 
 export const extractSearchCriteria = (query: string): SearchCriteria => {
@@ -339,7 +339,7 @@ function updateCriteria(criteria: SearchCriteria, correction: { value: string; t
       break;
     case 'listingType':
       const listingTypeValue = correction.value as ListingType;
-      if (['Owner', 'Agent', 'RentAmigo'].includes(listingTypeValue)) {
+      if (['Owner', 'Agent', 'Rentamigo'].includes(listingTypeValue)) {
         criteria.listingTypes.push(listingTypeValue);
       }
       break;

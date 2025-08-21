@@ -34,7 +34,7 @@ export default function SignUpForm() {
               alt="Rentamigo Logo"
               className="h-10"
             />
-            <span className="ml-2 text-xl font-bold">rentamigo</span>
+            <span className="ml-2 text-xl font-bold">Rentamigo</span>
           </div>
           <Link
             to="/signin"

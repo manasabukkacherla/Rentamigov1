@@ -32,7 +32,7 @@
 //   //   {
 //   //     id: 1,
 //   //     name: "Samit Bhattacharya",
-//   //     email: "Samit@rentamigo.in",
+//   //     email: "Samit@Rentamigo.in",
 //   //     mobile: "9999999999",
 //   //     access: "Employee",
 //   //     selected: false,
@@ -40,7 +40,7 @@
 //   //   {
 //   //     id: 2,
 //   //     name: "Pradeep Kavali",
-//   //     email: "Pradeep@rentamigo.in",
+//   //     email: "Pradeep@Rentamigo.in",
 //   //     mobile: "9999999999",
 //   //     access: "Employee",
 //   //     selected: false,
@@ -52,7 +52,7 @@
 
 //   const fetchEmployees = async () => {
 //     try {
-//       const response = await axios.get("https://api.rentamigo.in//api/employees");
+//       const response = await axios.get("https://api.Rentamigo.in//api/employees");
 //       const employeeData = response.data.data;
 
 //       // Transform the API data to match our User interface
@@ -96,7 +96,7 @@
 //   };
 //   const handleUpdateEmployee = async (id: string, data: EmployeeUpdatePayload) => {
 //     try {
-//       await axios.put(`https://api.rentamigo.in//api/employees/${id}`, data);
+//       await axios.put(`https://api.Rentamigo.in//api/employees/${id}`, data);
 //       await fetchEmployees();
 //     } catch (error) {
 //       console.error("Error updating employee:", error);
@@ -300,7 +300,7 @@ export default function AccessManagementTable() {
 
   const fetchEmployees = async () => {
     try {
-      const response = await axios.get("https://api.rentamigo.in//api/employees");
+      const response = await axios.get("https://api.Rentamigo.in//api/employees");
       const employeeData = response.data.data;
 
       const transformedUsers: User[] = employeeData.map((emp: Employee) => ({
@@ -344,7 +344,7 @@ export default function AccessManagementTable() {
     data: EmployeeUpdatePayload
   ) => {
     try {
-      await axios.put(`https://api.rentamigo.in//api/employees/${id}`, data);
+      await axios.put(`https://api.Rentamigo.in//api/employees/${id}`, data);
       await fetchEmployees();
       setSelectedUserForUpdate(null);
     } catch (error) {

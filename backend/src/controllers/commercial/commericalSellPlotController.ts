@@ -167,7 +167,7 @@ const transformPlotData = (formData: any) => {
     } else {
         transformedData.contactInformation = {
             name: 'Not provided',
-            email: 'info@rentamigo.com',
+            email: 'info@Rentamigo.com',
             phone: '0000000000'
         };
     }

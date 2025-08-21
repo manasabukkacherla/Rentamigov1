@@ -8,7 +8,7 @@
 // // Connect to MongoDB
 // const connectDB = async () => {
 //   try {
-//     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/rentamigo';
+//     const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/Rentamigo';
 //     await mongoose.connect(mongoURI);
 //     console.log('MongoDB Connected...');
 //   } catch (err) {

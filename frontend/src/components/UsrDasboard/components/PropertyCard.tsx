@@ -146,7 +146,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         {/* Status and Type Badges */}
         <div className="absolute top-2 left-2 flex flex-wrap gap-1">
           {property.listingType && (
-            <span className={`px-2 py-1 rounded text-xs font-medium ${property.listingType === 'RentAmigo' ? 'bg-black text-white' : 'bg-white text-gray-800 border border-gray-200'
+            <span className={`px-2 py-1 rounded text-xs font-medium ${property.listingType === 'Rentamigo' ? 'bg-black text-white' : 'bg-white text-gray-800 border border-gray-200'
               }`}>
               {property.listingType}
             </span>

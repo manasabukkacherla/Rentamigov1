@@ -207,8 +207,8 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Welcome to RentAmigo",
-      html: `<h1>Welcome to RentAmigo</h1>
+      subject: "Welcome to Rentamigo",
+      html: `<h1>Welcome to Rentamigo</h1>
              <p>Dear ${fullName},</p>
              <p>Thank you for signing up! We're excited to have you onboard.</p>`,
     });
@@ -219,7 +219,7 @@ signupRouter.post("/register", async (req: Request, res: Response) => {
      */
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: "venkat.s@rentamigo.in",
+      to: "venkat.s@Rentamigo.in",
       subject: "New User Registration",
       html: `
         <h1>New User Registration</h1>

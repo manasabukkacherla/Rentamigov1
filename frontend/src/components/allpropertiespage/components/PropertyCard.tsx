@@ -195,7 +195,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <span
             className={`px-2 py-1 rounded text-sm font-medium ${
-              property.listingType === 'RentAmigo' ? 'bg-black text-white' : 'bg-white text-black'
+              property.listingType === 'Rentamigo' ? 'bg-black text-white' : 'bg-white text-black'
             }`}
           >
             {property.listingType}

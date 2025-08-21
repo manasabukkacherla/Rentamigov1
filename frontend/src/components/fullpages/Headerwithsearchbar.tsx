@@ -30,7 +30,7 @@ const HeaderWithSearchBar: React.FC = () => {
           onKeyDown={(e) => e.key === "Enter" && navigate("/Homepage")}
         >
           <img
-            src="/images/rentamigologou.png"
+            src="/images/Rentamigologou.png"
             alt="Logo"
             style={styles.logoImg}
           />

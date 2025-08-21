@@ -177,7 +177,7 @@ const Headerr: React.FC = () => {
               onClick={() => navigate("/Homepage")}
             >
               <img
-                src="./images/rentamigologou.png"
+                src="./images/Rentamigologou.png"
                 alt="Rentamigo Logo"
                 className="h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 object-contain"
               />

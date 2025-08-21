@@ -20,7 +20,7 @@ export type PropertyType =
   | 'Standalone Building'
   | 'Agricultural';
 
-export type ListingType = 'Owner' | 'Agent' | 'PG' | 'RentAmigo' | 'Premium' | 'Standard';
+export type ListingType = 'Owner' | 'Agent' | 'PG' | 'Rentamigo' | 'Premium' | 'Standard';
 
 export type FurnishingType =
   | 'Fully Furnished'
