@@ -108,7 +108,7 @@ const App: React.FC<AppProps> = ({ propertyId }) => {
         setError(null);
 
         const response = await axios.get(
-          `https://api.rentamigo.in/api/properties/${propertyId}/flat-amenities`
+          `api/properties/${propertyId}/flat-amenities`
         );
 
         console.log("API Response:", response.data);

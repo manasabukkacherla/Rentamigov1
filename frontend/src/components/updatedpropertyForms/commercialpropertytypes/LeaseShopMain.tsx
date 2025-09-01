@@ -18,10 +18,10 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MapLocation from '../CommercialComponents/MapLocation';
+
 interface FormData {
-  // propertyId: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -75,7 +75,6 @@ interface FormData {
       type: string;
       duration: number;
       durationUnit: string;
-
     };
     tenureDetails: {
       minimumTenure: number;
@@ -114,9 +113,7 @@ interface FormData {
       amount?: number;
     };
     availability: {
-      // immediate: boolean;
       date: Date;
-      // specificDate: Date;
       availableImmediately: boolean;
       preferredSaleDuration: string;
       noticePeriod: string;
@@ -149,23 +146,17 @@ interface FormData {
 }
 
 const LeaseShopMain = () => {
+  const { propertyId } = useParams();
+  const [currentStep, setCurrentStep] = useState(0);
+
   const [formData, setFormData] = useState<FormData>({
-    // propertyId: '',
     basicInformation: {
       title: '',
       Type: [],
-      address: {
-        street: '',
-        city: '',
-        state: '',
-        zipCode: ''
-      },
+      address: { street: '', city: '', state: '', zipCode: '' },
       landmark: '',
-      location: {
-        latitude: '',
-        longitude: ''
-      },
-      isCornerProperty: false
+      location: { latitude: '', longitude: '' },
+      isCornerProperty: false,
     },
     shopDetails: {
       frontageWidth: 0,
@@ -174,38 +165,22 @@ const LeaseShopMain = () => {
       attachedStorageRoom: false,
       averageFootTraffic: '',
       customerParking: false,
-      previousBusiness: ''
+      previousBusiness: '',
     },
     propertyDetails: {
-      area: {
-        totalArea: 0,
-        builtUpArea: 0,
-        carpetArea: 0
-      },
-      floor: {
-        floorNumber: 0,
-        totalFloors: 0
-      },
+      area: { totalArea: 0, builtUpArea: 0, carpetArea: 0 },
+      floor: { floorNumber: 0, totalFloors: 0 },
       facingDirection: '',
       furnishingStatus: '',
       propertyAmenities: [],
       wholeSpaceAmenities: [],
-      electricitySupply: {
-        powerLoad: 0,
-        backup: false
-      },
+      electricitySupply: { powerLoad: 0, backup: false },
       waterAvailability: '',
       propertyAge: '',
-      propertyCondition: ''
+      propertyCondition: '',
     },
     leaseTerms: {
-      leaseDetails: {
-        amount: 0,
-        type: 'fixed',
-        duration: 0,
-        durationUnit: 'years'
-
-      },
+      leaseDetails: { amount: 0, type: 'fixed', duration: 0, durationUnit: 'years' },
       tenureDetails: {
         minimumTenure: 0,
         minimumUnit: 'years',
@@ -214,54 +189,31 @@ const LeaseShopMain = () => {
         lockInPeriod: 0,
         lockInUnit: 'years',
         noticePeriod: 0,
-        noticePeriodUnit: 'months'
+        noticePeriodUnit: 'months',
       },
-      maintenanceAmount: {
-        amount: 0,
-        frequency: 'monthly'
-      },
+      maintenanceAmount: { amount: 0, frequency: 'monthly' },
       otherCharges: {
-        water: {
-          amount: 0,
-          type: 'inclusive',
-        },
-        electricity: {
-          amount: 0,
-          type: 'inclusive',
-        },
-        gas: {
-          amount: 0,
-          type: 'inclusive',
-        },
-        others: {
-          amount: 0,
-          type: 'inclusive',
-        },
+        water: { amount: 0, type: 'inclusive' },
+        electricity: { amount: 0, type: 'inclusive' },
+        gas: { amount: 0, type: 'inclusive' },
+        others: { amount: 0, type: 'inclusive' },
       },
-      brokerage: {
-        required: 'no',
-        amount: 0
-      },
+      brokerage: { required: 'no', amount: 0 },
       availability: {
-        // immediate: false,
         date: new Date(),
-        // specificDate: new Date(),
         availableImmediately: false,
         preferredSaleDuration: '',
         noticePeriod: '',
         petsAllowed: false,
-        operatingHours: {
-          restricted: false,
-          restrictions: ''
-        }
-      }
+        operatingHours: { restricted: false, restrictions: '' },
+      },
     },
     contactInformation: {
       name: '',
       email: '',
       phone: '',
       alternatePhone: '',
-      bestTimeToContact: ''
+      bestTimeToContact: '',
     },
     media: {
       photos: {
@@ -270,16 +222,37 @@ const LeaseShopMain = () => {
         floorPlan: [],
         washrooms: [],
         lifts: [],
-        emergencyExits: []
+        emergencyExits: [],
       },
       videoTour: null,
-      documents: []
-    }
+      documents: [],
+    },
   });
 
-  const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+
+  // Fetch the property details if editing
+  useEffect(() => {
+    const fetchPropertyDetails = async () => {
+      if (propertyId) {
+        try {
+          const response = await axios.get(`/api/commercial/lease/shops/${propertyId}`);
+          const data = response.data;
+          if (data.success) {
+            setFormData(data.data);  // Set the form data from the fetched data
+          } else {
+            toast.error('Unable to fetch property details.');
+          }
+        } catch (error) {
+          toast.error('Error fetching property details.');
+          console.error(error);
+        }
+      }
+    };
+
+    fetchPropertyDetails();
+  }, [propertyId]);
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -298,7 +271,6 @@ const LeaseShopMain = () => {
         <div className="space-y-8">
           <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={(name) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, title: name } }))} />
           <ShopType Type={formData.basicInformation.Type} onShopTypeChange={(type) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, Type: type } }))} />
-
           <div className="space-y-8">
             <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
             <MapLocation
@@ -332,7 +304,7 @@ const LeaseShopMain = () => {
                 customerParking: details.customerParking || false,
                 previousBusiness: details.previousBusiness || ''
               }
-            }))}
+            }))} 
           />
           <CommercialPropertyDetails
             onDetailsChange={(details) => setFormData(prev => ({
@@ -359,7 +331,7 @@ const LeaseShopMain = () => {
                 propertyAge: details.propertyAge || '',
                 propertyCondition: details.propertyCondition || ''
               }
-            }))}
+            }))} 
           />
         </div>
       ),
@@ -382,10 +354,9 @@ const LeaseShopMain = () => {
                     duration: amount.duration || 0,
                     durationUnit: amount.durationUnit || 'years'
                   },
-
                 }
               }
-            }))}
+            }))} 
           />
           <LeaseTenure
             onLeaseTenureChange={(tenure) => setFormData(prev => ({
@@ -394,7 +365,6 @@ const LeaseShopMain = () => {
                 ...prev.leaseTerms,
                 leaseDetails: {
                   ...prev.leaseTerms.leaseDetails,
-                  // leaseDuration: tenure.leaseDuration || '',
                 },
                 tenureDetails: {
                   minimumTenure: Number(tenure.minimumTenure) || 0,
@@ -407,7 +377,7 @@ const LeaseShopMain = () => {
                   noticePeriodUnit: tenure.noticePeriodUnit || 'months'
                 }
               }
-            }))}
+            }))} 
           />
           <MaintenanceAmount
             maintenanceAmount={formData.leaseTerms.maintenanceAmount}
@@ -420,7 +390,7 @@ const LeaseShopMain = () => {
                   frequency: maintenance.frequency || 'monthly'
                 }
               }
-            }))}
+            }))} 
           />
           <OtherCharges
             otherCharges={formData.leaseTerms.otherCharges}
@@ -435,7 +405,7 @@ const LeaseShopMain = () => {
                   others: { type: charges.others.type, amount: charges.others.amount }
                 }
               }
-            }))}
+            }))} 
           />
           <Brokerage
             bro={formData.leaseTerms.brokerage}
@@ -448,7 +418,7 @@ const LeaseShopMain = () => {
                   amount: Number(brokerage.amount) || 0
                 }
               }
-            }))}
+            }))} 
           />
         </div>
       ),
@@ -464,9 +434,7 @@ const LeaseShopMain = () => {
               leaseTerms: {
                 ...prev.leaseTerms,
                 availability: {
-                  // immediate: availability.immediate || false,
                   date: availability.date || new Date(),
-                  // specificDate: availability.immediate ? new Date() : (availability.specificDate ? availability.specificDate : new Date()),
                   availableImmediately: availability.availableImmediately || false,
                   preferredSaleDuration: availability.preferredSaleDuration || '',
                   noticePeriod: availability.noticePeriod || '',
@@ -477,7 +445,7 @@ const LeaseShopMain = () => {
                   }
                 }
               }
-            }))}
+            }))} 
           />
         </div>
       ),
@@ -487,7 +455,6 @@ const LeaseShopMain = () => {
       icon: <User className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-
           <CommercialContactDetails
             contactInformation={formData.contactInformation}
             onContactChange={(contact) => setFormData(prev => ({
@@ -499,7 +466,7 @@ const LeaseShopMain = () => {
                 alternatePhone: contact.alternatePhone,
                 bestTimeToContact: contact.bestTimeToContact
               }
-            }))}
+            }))} 
           />
         </div>
       ),
@@ -621,7 +588,6 @@ const LeaseShopMain = () => {
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
-        console.log(formData)
 
         const transformedData = {
           ...formData,
@@ -636,14 +602,11 @@ const LeaseShopMain = () => {
           }
         };
 
-
-        console.log(transformedData);
         const response = await axios.post('/api/commercial/lease/shops', transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
-        console.log(response.data)
 
         if (response.data.success) {
           toast.success('Commercial shop listing created successfully!');
@@ -652,14 +615,10 @@ const LeaseShopMain = () => {
         navigate('/login');
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
       toast.error('Failed to create commercial shop listing. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-    // console.log(formData);
-    // navigate('/');
-
   };
 
   return (

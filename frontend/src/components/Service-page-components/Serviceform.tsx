@@ -53,55 +53,56 @@ export default function ServiceEnquiryForm() {
     );
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (selectedServices.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select at least one service.",
-      });
-      return;
-    }
+  if (selectedServices.length === 0) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Please select at least one service.",
+    });
+    return;
+  }
 
-    setIsSubmitting(true);
+  setIsSubmitting(true);
 
-    try {
-      const response = await fetch("https://api.rentamigo.in/api/service/submit-form", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...formData,
-          isVerified: true,
-          selectedServices,
-        }),
-      });
+  try {
+    const response = await fetch("/api/service/service-enquiry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        mobileNo: formData.contactNumber,
+        selectedServices,
+      }),
+    });
 
-      if (!response.ok) throw new Error("Failed to submit form");
+    if (!response.ok) throw new Error("Failed to submit form");
 
-      toast({
-        title: "Success!",
-        description: "Your details have been successfully submitted.",
-        action: <ToastAction altText="Close">Close</ToastAction>,
-      });
+    toast({
+      title: "Success!",
+      description: "Your details have been successfully submitted.",
+      action: <ToastAction altText="Close">Close</ToastAction>,
+    });
 
-      setFormData({ name: "", email: "", contactNumber: "" });
-      setSelectedServices([]);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to submit form. Please try again.",
-        action: <ToastAction altText="Try again">Try again</ToastAction>,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    setFormData({ name: "", email: "", contactNumber: "" });
+    setSelectedServices([]);
+  } catch (error) {
+    console.error("Error submitting form:", error);
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to submit form. Please try again.",
+      action: <ToastAction altText="Try again">Try again</ToastAction>,
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="flex flex-col items-center justify-center p-4 space-y-4 mt-16">

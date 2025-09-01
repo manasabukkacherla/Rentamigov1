@@ -11,7 +11,7 @@ import ListingTypeSelector from '../updatedpropertyForms/ListingTypeSelector';
 
 function Allproperties() {
   const navigate = useNavigate();
-  const [location, setLocation] = useState('Bangalore, Karnataka');
+  const [location, setLocation] = useState(''); // 🔁 updated
   const [fetchedProperties, setFetchedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [showLocationModal, setShowLocationModal] = useState(false);
@@ -20,9 +20,10 @@ function Allproperties() {
     const saved = localStorage.getItem('recentLocations');
     return saved ? JSON.parse(saved) : [];
   });
-  const [showFilters, setShowFilters] = useState(false);  // Manage filter panel visibility
+  const [showFilters, setShowFilters] = useState(false);
 
-  const popularLocations = [
+  const locationOptions = [
+    '',
     'Bangalore, Karnataka',
     'Mumbai, Maharashtra',
     'Delhi, NCR',
@@ -40,54 +41,65 @@ function Allproperties() {
     'Indore, Madhya Pradesh',
   ];
 
-useEffect(() => {
-  const fetchAllProperties = async () => {
-    try {
-      const [propertyRes, tokenRes] = await Promise.all([
-        axios.get('/api/allproperties/all'),
-        axios.get('/api/lead-token'),
-      ]);
+  useEffect(() => {
+    const fetchAllProperties = async () => {
+      try {
+        const storedLocation = sessionStorage.getItem("selectedLocation") || "";
+        setLocation(storedLocation); // Keep it visible in the dropdown
 
-      const grouped = propertyRes.data?.data || {};
-      const tokens = tokenRes.data || [];
+        const [propertyRes, tokenRes] = await Promise.all([
+          axios.get('/api/allproperties/all'),
+          axios.get('/api/lead-token'),
+        ]);
 
-      const flattenGrouped = (grouped: Record<string, any>) => {
-        const all: any[] = [];
-        for (const groupKey in grouped) {
-          const category = grouped[groupKey];
-          for (const subType in category) {
-            const items = category[subType];
-            if (Array.isArray(items)) {
-              all.push(...items);
+        const grouped = propertyRes.data?.data || {};
+        const tokens = tokenRes.data || [];
+
+        const flattenGrouped = (grouped: Record<string, any>) => {
+          const all: any[] = [];
+          for (const groupKey in grouped) {
+            const category = grouped[groupKey];
+            for (const subType in category) {
+              const items = category[subType];
+              if (Array.isArray(items)) {
+                all.push(...items);
+              }
             }
           }
-        }
-        return all;
-      };
+          return all;
+        };
 
-      const allProperties = flattenGrouped(grouped);
+        let allProperties = flattenGrouped(grouped);
 
-      // Filter properties based on token lead criteria
-      const filtered = allProperties.filter((property) => {
-        const matchingToken = tokens.find(
-          (token: any) =>
-            token.propertyId === property.propertyId &&
-            token.verified === true &&
-            token.status?.toLowerCase() === 'active'
-        );
-        return !!matchingToken;
-      });
+        // Filter by verified and active token
+        allProperties = allProperties.filter((property) => {
+          const token = tokens.find(
+            (t: any) =>
+              t.propertyId === property.propertyId &&
+              t.verified === true &&
+              t.status?.toLowerCase() === "active"
+          );
+          return !!token;
+        });
 
-      setFetchedProperties(filtered);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching properties or tokens:', error);
-      setLoading(false);
-    }
-  };
+        // Filter by location (optional)
+        const locationLower = storedLocation.toLowerCase();
+        const filteredByLocation = locationLower
+          ? allProperties.filter((p) =>
+            p.location?.toLowerCase().includes(locationLower)
+          )
+          : allProperties;
 
-  fetchAllProperties();
-}, []);
+        setFetchedProperties(filteredByLocation);
+      } catch (error) {
+        console.error("Error fetching properties:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllProperties();
+  }, [location]); // ✅ Dependency added!
 
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -109,7 +121,7 @@ useEffect(() => {
   };
 
   const handleDeleteProperty = (deletedPropertyId: string) => {
-    setFetchedProperties(prevProperties => 
+    setFetchedProperties(prevProperties =>
       prevProperties.filter(property => property.propertyId !== deletedPropertyId)
     );
   };
@@ -123,14 +135,13 @@ useEffect(() => {
       criteria.listingTypes = activeFilters.listingTypes;
     }
     if (activeFilters.propertyTypes.length) {
-      // Support multiple property types
       criteria.propertyTypes = [...activeFilters.propertyTypes];
     }
     if (activeFilters.furnishingTypes.length) {
-      criteria.furnishing = activeFilters.furnishingTypes[0]; // Using first selected furnishing type
+      criteria.furnishing = activeFilters.furnishingTypes[0];
     }
     if (activeFilters.sharingTypes.length) {
-      criteria.sharing = activeFilters.sharingTypes[0]; // Using first selected sharing type
+      criteria.sharing = activeFilters.sharingTypes[0];
     }
     if (activeFilters.priceRange.min !== null || activeFilters.priceRange.max !== null) {
       criteria.priceRange = {
@@ -145,10 +156,8 @@ useEffect(() => {
   }, [searchQuery, activeFilters, fetchedProperties]);
 
   const sortedResults = useMemo(() => {
-    const results = searchResults.exact;
-    return results;
+    return searchResults.exact;
   }, [searchResults]);
-  console.log(sortedResults)
 
   const handlePropertyClick = (propertyname: string, propertyId: string) => {
     const url = propertyname !== 'PL' && propertyname !== 'AG'
@@ -157,6 +166,14 @@ useEffect(() => {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  // 🔁 Handle dropdown location change
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const loc = e.target.value;
+    sessionStorage.setItem("selectedLocation", loc);
+    setLocation(loc); // ✅ Update state to re-trigger useEffect
+  };
+
+
   return (
     <div className="min-h-screen bg-white">
       <header className="bg-black text-white py-3 sticky top-0 z-10">
@@ -164,23 +181,27 @@ useEffect(() => {
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
             <Link to="/" className="flex items-center gap-2 mb-2 md:mb-0 cursor-pointer">
               <Home size={30} />
-
             </Link>
-          <span className="text-xl font-bold" style={{ fontFamily: 'Neuropol X' }}>
-  PropAmigo
-</span>
 
+            <span className="text-xl font-bold" style={{ fontFamily: 'Neuropol X' }}>
+              PropAmigo
+            </span>
+
+            {/* 🔁 Location Dropdown */}
             <div className="flex items-center justify-center w-full md:w-auto">
-              <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-lg flex items-center gap-2 max-w-xs">
-                <MapPin className="h-5 w-5 text-gray-300" />
-                <span className="text-gray-100 truncate">{location}</span>
-                <button
-                  className="ml-2 p-1 hover:bg-white/10 rounded-full transition"
-                  onClick={() => setShowLocationModal(true)}
-                >
-                  <ChevronDown className="h-4 w-4 text-gray-300" />
-                </button>
-              </div>
+              <select
+                value={location}
+                onChange={handleLocationChange}
+                className="bg-white text-black px-3 py-2 rounded-md text-sm"
+              >
+                <option value="">All Locations</option>
+                {locationOptions.slice(1).map((loc) => (
+                  <option key={loc} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
+
             </div>
 
             <div className="flex-1">
@@ -216,25 +237,17 @@ useEffect(() => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {sortedResults.map((property) => (
-              (<div
+              <div
                 key={property.id}
                 onClick={() => handlePropertyClick(property.propertyId.slice(8, 10), property.propertyId)}
                 className="cursor-pointer"
               >
-
-                <PropertyCard 
-                  property={property} 
+                <PropertyCard
+                  property={property}
                   onDelete={handleDeleteProperty}
                 />
-
-
-
               </div>
-
-
-              )))}
-
-
+            ))}
           </div>
         )}
       </main>

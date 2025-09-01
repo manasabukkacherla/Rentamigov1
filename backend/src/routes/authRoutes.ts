@@ -58,6 +58,60 @@ loginRouter.post("/google", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Server error. Please try again later." });
   }
 });
+// routes/login.ts or loginRouter file
+loginRouter.post("/emp-google", async (req: Request, res: Response) => {
+  try {
+    const { credential } = req.body;
+    console.log("📨 Received Google credential:", credential);
+
+    const googleUser = await verifyGoogleToken(credential);
+    console.log("📩 Verified Google user:", googleUser);
+
+    if (!googleUser || !googleUser.email) {
+      return res.status(401).json({
+        success: false,
+        error: "Invalid Google token or email",
+      });
+    }
+
+    const employee = await Employee.findOne({ email: googleUser.email });
+    console.log("🔍 Found employee:", employee);
+
+    if (!employee) {
+      return res.status(400).json({
+        success: false,
+        error: "Employee not registered. Please sign up first.",
+      });
+    }
+
+    const token = jwt.sign(
+      { id: employee._id, isEmployee: true },
+      process.env.JWT_SECRET!,
+      { expiresIn: "2h" }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Google login successful",
+      token,
+      user: {
+        id: employee._id,
+        email: employee.email,
+        username: employee.username || "",
+        name: employee.name,
+        phone: employee.phone,
+        role: employee.role,
+      },
+    });
+  } catch (err) {
+    console.error("Google Employee Login Error:", err);
+    return res.status(500).json({
+      success: false,
+      error: "Server error. Please try again later.",
+    });
+  }
+});
+
 
 loginRouter.post("/login", async (req: Request, res: Response) => {
   try {

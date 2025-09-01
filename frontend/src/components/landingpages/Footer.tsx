@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("https://api.rentamigo.in/api/forms/subscribe", {
+      const response = await fetch("api/forms/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email }),

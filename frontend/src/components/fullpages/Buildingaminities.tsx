@@ -115,7 +115,7 @@ const BuildingAmenities: React.FC<BuildingAmenitiesProps> = ({ propertyId }) => 
     const fetchAmenities = async () => {
       try {
         const response = await axios.get(
-          `https://api.rentamigo.in/api/properties/${propertyId}/society-amenities`
+          `api/properties/${propertyId}/society-amenities`
         );
 
         const selectedAmenities = response.data[0]?.selectedAmenities || [];

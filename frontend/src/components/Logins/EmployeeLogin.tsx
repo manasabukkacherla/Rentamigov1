@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Mail, Lock, LogIn } from "lucide-react";
-import { GoogleLogin } from "@react-oauth/google";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import axios from "axios";
 import TermsAndConditions from "./TermsAndConditions";
 import ForgotPassword from "./ForgotPassword";
@@ -37,7 +37,7 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
       navigate("/homepage");
     } else if (role === "admin") {
       navigate("/admindash");
-    } else if (role === "employee" || "manager") {
+    } else if (role === "employee" || role=="manager") {
       navigate("/empdash");
     } else {
       navigate("/homepage"); // Default route if role is unknown
@@ -45,50 +45,36 @@ function EmployeeLogin({ onSwitchToSignup, onLoginSuccess }: LoginProps) {
   };
 
   // 🔹 Handle Google Authentication Success
-  const handleGoogleSuccess = async (credentialResponse: any) => {
-    try {
-      console.log("Google Credential Response:", credentialResponse);
+const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+  try {
+    console.log("✅ Google credential response:", credentialResponse);
 
-      const response = await axios.post("/api/loginuser/google", {
-        credential: credentialResponse.credential,
-      });
+    const res = await axios.post("/api/loginuser/emp-google", {
+      credential: credentialResponse.credential,
+    });
 
-      const userData = response.data;
-      console.log("✅ Google Login Successful:", userData);
+    const data = res.data;
+    console.log("✅ Response from backend:", data);
 
-      if (userData.error) {
-        alert("You are not registered. Please sign up first.");
-        onSwitchToSignup();
-        return;
-      }
-
-      // ✅ Store full user details in sessionStorage
-      sessionStorage.setItem("user", JSON.stringify(userData.user));
-
-      // ✅ Store userId separately for easy API access
-      sessionStorage.setItem("userId", userData.user.id);
-      sessionStorage.setItem("role", userData.user.role);
-      sessionStorage.setItem("email", userData.user.email);
-      sessionStorage.setItem(
-        "fullName",
-        userData.user.fullName || userData.user.name || ""
-      );
-      sessionStorage.setItem("username", userData.user.username);
-      sessionStorage.setItem("token", userData.token);
-
-      console.log(
-        "✅ Session Storage Updated:",
-        sessionStorage.getItem("user")
-      );
-      console.log("User Data Response:", userData.user);
-
-      redirectUser(userData.user.role);
-      onLoginSuccess(userData.user.email);
-    } catch (error) {
-      console.error("❌ Google Login Error:", error);
-      alert("Google login failed. Please try again.");
+    if (data.success && data.user) {
+      // Store token, user data in localStorage or context
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      
+      // Redirect to EmpDash
+      navigate("/empdash");
+    } else {
+      alert(data.error || "Google login failed. Please try again.");
     }
-  };
+  } catch (err: any) {
+    console.error("🚫 Google login error:", err);
+    alert(err.response?.data?.error || "Google login failed. Please try again.");
+  }
+};
+
+
+
+
 
   // 🔹 Handle Google Authentication Error
   const handleGoogleError = () => {

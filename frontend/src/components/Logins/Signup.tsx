@@ -483,7 +483,7 @@ function Signup({ onSwitchToLogin }: SignupProps) {
     { value: "agent", label: "Agent" },
     { value: "tenant", label: "Tenant" },
     { value: "pg", label: "PG" },
-    { value: "employee", label: "Employee" },
+    // { value: "employee", label: "Employee" },
     
   ];
 
@@ -678,21 +678,19 @@ function Signup({ onSwitchToLogin }: SignupProps) {
           <>
             <div className="col-span-2 sm:col-span-1">
               <div className="relative">
-                <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                <input
-                  type="text"
-                  required
-                  className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
-                  placeholder="Username"
-                  value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
-                  pattern="^[a-zA-Z0-9]{8,20}$"
-                  title="Username should be 8-20 alphanumeric characters."
-                  disabled={loading}
-                />
-              </div>
+  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+  <input
+    type="text"
+    required
+    className="w-full pl-12 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all duration-200 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed"
+    placeholder="Username"
+    value={formData.username}
+    onChange={(e) =>
+      setFormData({ ...formData, username: e.target.value })
+    }
+  />
+</div>
+
             </div>
 
             <div className="col-span-2 sm:col-span-1">

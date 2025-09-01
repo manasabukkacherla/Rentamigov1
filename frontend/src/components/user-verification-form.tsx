@@ -33,7 +33,7 @@ export default function UserVerificationForm() {
 
     try {
       setIsLoading(true);
-      const response = await fetch("https://api.rentamigo.in/api/owner-interest/owner", {
+      const response = await fetch("api/owner-interest/owner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, isVerified: true }),

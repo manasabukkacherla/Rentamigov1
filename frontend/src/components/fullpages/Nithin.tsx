@@ -37,7 +37,7 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
   useEffect(() => {
     const fetchPropertyDetails = async () => {
       try {
-        const response = await fetch(`https://api.rentamigo.in/api/property/${propertyId}`);
+        const response = await fetch(`api/property/${propertyId}`);
         if (!response.ok) throw new Error("Property not found");
         
         const data = await response.json();
@@ -66,7 +66,7 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
   const handleSendOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://api.rentamigo.in/api/property/send-otp", {
+      const response = await fetch("api/property/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
   const handleVerifyOtp = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://api.rentamigo.in/api/property/verify-otp", {
+      const response = await fetch("api/property/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -150,7 +150,7 @@ export default function PropertyRegistrationForm({ propertyId }: PropertyRegistr
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("https://api.rentamigo.in/api/property/submit-form", {
+      const response = await fetch("api/property/submit-form", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formData, isVerified: true }),

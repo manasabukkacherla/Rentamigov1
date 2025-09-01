@@ -100,7 +100,7 @@ const UpdatePropertyRouter = () => {
 
     // ✅ Residential Rent
     case 'RES-RE-AP': return <Apartment />;
-    case 'RES-RE-BF': return <BuilderFloor />;
+    case 'RES-RE-BF': return <BuilderFloor propertyId={''} />;
     case 'RES-RE-IH': return <IndependentHouse />;
     case 'RES-RE-SS': return <SharedSpace />;
 
@@ -111,7 +111,7 @@ const UpdatePropertyRouter = () => {
 
     // ✅ Residential Sale
     case 'RES-SA-AP': return <SellApartment />;
-    case 'RES-SA-BF': return <SellBuilderFloor />;
+    case 'RES-SA-BF': return <SellBuilderFloor propertyId={''} />;
     case 'RES-SA-IH': return <SellIndependentHouse />;
     case 'RES-SA-PL': return <SellPlot />;
 

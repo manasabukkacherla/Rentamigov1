@@ -38,7 +38,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
     const fetchPropertyDetails = async () => {
       try {
         const response = await fetch(
-          `https://api.rentamigo.in/api/properties/${propertyId}/locations`
+          `api/properties/${propertyId}/locations`
         );
         if (!response.ok) throw new Error("Failed to fetch property details");
         const data = await response.json();
@@ -72,7 +72,7 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ propertyId }) => {
     const fetchMedia = async () => {
       try {
         const response = await fetch(
-          `https://api.rentamigo.in/api/photos/${propertyId}/photos`
+          `api/photos/${propertyId}/photos`
         );
         if (!response.ok) throw new Error("Failed to fetch property media");
         const data = await response.json();
