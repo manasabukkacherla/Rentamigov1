@@ -10,7 +10,8 @@ const s3 = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
   },
-  forcePathStyle: true,
+  forcePathStyle: false, // Use virtual hosted-style URLs
+
 });
 
 // Configure multer for memory storage
@@ -57,8 +58,15 @@ export const uploadToS3 = async (
     // Return the public URL of the uploaded file
     return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
   } catch (error) {
-    console.error(`Error uploading ${mediaType} to S3:`, error);
-    throw new Error(`Failed to upload ${mediaType} to S3`);
+    console.error(`Error uploading ${mediaType} to S3:`, {
+      error: error,
+      bucketName: process.env.AWS_S3_BUCKET_NAME,
+      region: process.env.AWS_REGION,
+      fileKey,
+      hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+      hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+    });
+    throw new Error(`Failed to upload photo to S3`);
   }
 };
 

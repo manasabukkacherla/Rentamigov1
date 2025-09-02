@@ -129,6 +129,33 @@ const pricePatterns = [
       max: parseFloat(match[1].replace(',', '')) * (match[0].toLowerCase().includes('k') || match[0].toLowerCase().includes('thousand') ? 1000 : 1),
       strict: true
     })
+  },
+  {
+    // Enhanced pattern for just numbers with 'k' suffix
+    pattern: /(?:^|\s)(\d+)\s*k(?:\s|$)/i,
+    handler: (match: RegExpMatchArray) => ({
+      min: parseFloat(match[1]) * 1000,
+      max: parseFloat(match[1]) * 1000,
+      strict: true
+    })
+  },
+  {
+    // Pattern for direct numbers without currency (assume it's rent if > 1000)
+    pattern: /(?:^|\s)(\d{4,})(?:\s|$)/,
+    handler: (match: RegExpMatchArray) => ({
+      min: parseFloat(match[1]),
+      max: parseFloat(match[1]),
+      strict: true
+    })
+  },
+  {
+    // Pattern for currency symbol followed by number
+    pattern: /(?:rs\.?|₹)\s*(\d+(?:[,.]\d+)?)(?:\s*k|\s*thousand)?/i,
+    handler: (match: RegExpMatchArray) => ({
+      min: parseFloat(match[1].replace(',', '')) * (match[0].toLowerCase().includes('k') || match[0].toLowerCase().includes('thousand') ? 1000 : 1),
+      max: parseFloat(match[1].replace(',', '')) * (match[0].toLowerCase().includes('k') || match[0].toLowerCase().includes('thousand') ? 1000 : 1),
+      strict: true
+    })
   }
 ];
 
@@ -281,7 +308,7 @@ export const extractSearchCriteria = (query: string): SearchCriteria => {
         ...criteria.priceRange,
         ...result
       };
-      break;
+      break; // Only use the first matching price pattern
     }
   }
 
