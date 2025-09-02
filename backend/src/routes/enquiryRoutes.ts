@@ -1,16 +1,109 @@
 import express, { Request, Response } from "express";
-import EnquiryForm from "../models/EnqiuryForm"; // Ensure this path matches your model file
-import sendOtpService from "../services/sendOtpService"; // Assuming Twilio OTP service is defined here
-import transporter from "../utils/emailservice"; // Import email transporter
+import { Enquiry, EnquiryModel } from "../models/enquiry";
+import transporter from "../utils/emailservice";
+import sendOtpService from "../services/sendOtpService";
 
 const router = express.Router();
 
 /**
  * POST: Send OTP
  */
+// router.get("/tech-enquiries", async (req: Request, res: Response) => {
+//   try {
+//     const enquiries = await EnquiryModel.find({ email: "tech@rentamigo.in" });
+//     res.status(200).json({
+//       success: true,
+//       enquiries: enquiries.map(e => ({
+//         _id: e._id,
+//         name: e.name,
+//         email: e.email,
+//         phone: e.phone,
+//         message: e.message,
+//         // propertyInterest: e.propertyInterest,
+//         // status: e.status,
+//         createdAt: e.createdAt,
+//         updatedAt: e.updatedAt
+//       }))
+//     });
+//   } catch (error: any) {
+//     console.error("Error fetching tech enquiries:", error);
+//     res.status(500).json({
+//       success: false,
+//       message: "Failed to fetch enquiries"
+//     });
+//   }
+// });
+
+router.post("/enquiry", async (req: Request, res: Response) => {
+  try {
+    const { name, email, phone, propertyType, propertyName, message } = req.body;
+    
+    const newEnquiry = new EnquiryModel({
+      name,
+      email,
+      phone,
+      propertyType,
+      propertyName,
+      message,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+
+    const savedEnquiry = await newEnquiry.save();
+    res.status(201).json({ success: true, data: savedEnquiry });
+  } catch (error: any) {
+    console.error("Error creating enquiry:", error);
+    if (error.name === 'ValidationError') {
+      res.status(400).json({ success: false, message: error.message });
+    } else {
+      res.status(500).json({ success: false, message: "Failed to create enquiry" });
+    }
+  }
+});
+
+router.get("/enquiry/:id", async (req: Request, res: Response) => {
+  try {
+    const enquiry = await EnquiryModel.findById(req.params.id);
+    if (!enquiry) {
+      return res.status(404).json({ success: false, message: "Enquiry not found" });
+    }
+    res.status(200).json({ success: true, data: enquiry });
+  } catch (error: any) {
+    console.error("Error fetching enquiry:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch enquiry" });
+  }
+});
+
+router.put("/enquiry/:id", async (req: Request, res: Response) => {
+  try {
+    const enquiry = await EnquiryModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        propertyType: req.body.propertyType,
+        propertyName: req.body.propertyName,
+        message: req.body.message,
+        updatedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!enquiry) {
+      return res.status(404).json({ success: false, message: "Enquiry not found" });
+    }
+
+    res.status(200).json({ success: true, data: enquiry });
+  } catch (error: any) {
+    console.error("Error updating enquiry:", error);
+    res.status(500).json({ success: false, message: "Failed to update enquiry" });
+  }
+});
+
 router.post("/send-otp", async (req: Request, res: Response) => {
   const { name, email, contactNumber } = req.body;
-
+  
   if (!name || !email || !contactNumber) {
     return res.status(400).json({ success: false, message: "All fields are required." });
   }
@@ -39,10 +132,20 @@ router.post("/send-otp", async (req: Request, res: Response) => {
 /**
  * POST: Submit Form
  */
-router.post("/submit-form", async (req: Request, res: Response) => {
-  const { name, email, contactNumber, selectedServices, isVerified } = req.body;
+router.post("/submit", async (req: Request, res: Response) => {
+  console.log('Received enquiry submission:', req.body); // Add this line for debugging
+  const { 
+    name, 
+    email,  
+    phone, 
+    message, 
+    createdBy,
+    propertyId,
+    propertyType,
+    propertyName
+  } = req.body;
 
-  if (!name || !email || !contactNumber || isVerified === undefined || !selectedServices) {
+  if (!name || !email || !phone || !message || !createdBy || !propertyId || !propertyType || !propertyName) {
     return res.status(400).json({
       success: false,
       message: "Name, email, contact number, verification status, and services are required.",
@@ -51,12 +154,18 @@ router.post("/submit-form", async (req: Request, res: Response) => {
 
   try {
     // Save the enquiry to the database
-    const newEnquiry = new EnquiryForm({
+    const newEnquiry = new EnquiryModel({
       name,
       email,
-      mobileNo: contactNumber,
-      isOtpVerified: isVerified,
-      selectedServices,
+      phone,
+      message,
+      createdBy,
+      propertyId,
+      propertyType,
+      propertyName,
+      // status: "pending",
+      // isOtpVerified: isVerified,
+      // selectedServices,
     });
 
     const savedEnquiry = await newEnquiry.save();
@@ -67,14 +176,11 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       <p>Dear ${savedEnquiry.name},</p>
       <p>We have received your enquiry with the following details:</p>
       <ul>
-        <li><strong>Contact Number:</strong> ${savedEnquiry.mobileNo}</li>
-        <li><strong>Selected Services:</strong></li>
-        <ul>
-          ${savedEnquiry.selectedServices.map((service: string) => `<li>${service}</li>`).join("")}
-        </ul>
+        <li><strong>Contact Number:</strong> ${savedEnquiry.phone}</li>
+        <li><strong>Message:</strong> ${savedEnquiry.message}</li>
       </ul>
       <p>We will get back to you shortly.</p>
-      <p>Best Regards,<br>RentAmigo Team</p>
+      <p>Best Regards,<br>PropAmigo Team</p>
     `;
 
     // Email content for the company
@@ -82,13 +188,10 @@ router.post("/submit-form", async (req: Request, res: Response) => {
       <h1>New Service Enquiry</h1>
       <p><strong>Name:</strong> ${savedEnquiry.name}</p>
       <p><strong>Email:</strong> ${savedEnquiry.email}</p>
-      <p><strong>Contact Number:</strong> ${savedEnquiry.mobileNo}</p>
-      <p><strong>Verified:</strong> ${savedEnquiry.isOtpVerified ? "Yes" : "No"}</p>
-      <p><strong>Selected Services:</strong></p>
-      <ul>
-        ${savedEnquiry.selectedServices.map((service: string) => `<li>${service}</li>`).join("")}
-      </ul>
+      <p><strong>Contact Number:</strong> ${savedEnquiry.phone}</p>
+      <p><strong>Message:</strong> ${savedEnquiry.message}</p>
       <p><strong>Submission Date:</strong> ${savedEnquiry.createdAt}</p>
+      
     `;
 
     // Send email to the user
@@ -126,7 +229,7 @@ router.post("/submit-form", async (req: Request, res: Response) => {
  */
 router.get("/enquiries", async (_req: Request, res: Response) => {
   try {
-    const enquiries = await EnquiryForm.find();
+    const enquiries = await EnquiryModel.find();
     res.status(200).json({ success: true, data: enquiries });
   } catch (error) {
     console.error("Error fetching enquiries:", error);
@@ -141,7 +244,7 @@ router.get("/enquiryget/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const enquiry = await EnquiryForm.findById(id);
+    const enquiry = await EnquiryModel.findById(id);
 
     if (!enquiry) {
       return res.status(404).json({ success: false, message: "Enquiry not found." });
@@ -159,12 +262,12 @@ router.get("/enquiryget/:id", async (req: Request, res: Response) => {
  */
 router.put("/enquiryput/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, email, contactNumber, selectedServices } = req.body;
+  const { name, email, phone, message } = req.body;
 
   try {
-    const updatedEnquiry = await EnquiryForm.findByIdAndUpdate(
+    const updatedEnquiry = await EnquiryModel.findByIdAndUpdate(
       id,
-      { name, email, mobileNo: contactNumber, selectedServices },
+      { name, email, phone, message },
       { new: true } // Return the updated document
     );
 
@@ -186,7 +289,7 @@ router.delete("/enquirydel/:id", async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {
-    const deletedEnquiry = await EnquiryForm.findByIdAndDelete(id);
+    const deletedEnquiry = await EnquiryModel.findByIdAndDelete(id);
 
     if (!deletedEnquiry) {
       return res.status(404).json({ success: false, message: "Enquiry not found for deletion." });

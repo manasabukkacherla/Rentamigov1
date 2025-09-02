@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, ObjectCannedACL } from "@aws-sdk/client-s3";
 
 // Configure S3 Client
 const s3 = new S3Client({
@@ -7,6 +7,7 @@ const s3 = new S3Client({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
   },
+  forcePathStyle: false, // Use virtual hosted-style URLs
 });
 
 /**
@@ -28,6 +29,7 @@ export const uploadToS3 = async (
     Key: fileKey,
     Body: fileBuffer,
     ContentType: fileType,
+    ACL: ObjectCannedACL.public_read, // Make the file publicly accessible
   };
 
   try {
@@ -35,9 +37,34 @@ export const uploadToS3 = async (
     const response = await s3.send(command);
 
     console.log("File uploaded successfully:", fileKey);
-    return `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+    
+    // Generate the S3 URL
+    const s3Url = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+    
+    // Debug logging
+    console.log('S3 Upload Details (main uploader):', {
+      bucketName,
+      region: process.env.AWS_REGION,
+      fileKey,
+      generatedUrl: s3Url,
+      envVarsSet: {
+        bucketName: !!bucketName,
+        region: !!process.env.AWS_REGION,
+        accessKey: !!process.env.AWS_ACCESS_KEY_ID,
+        secretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+      }
+    });
+    
+    return s3Url;
   } catch (error) {
-    console.error("Error uploading file to S3:", error);
-    throw new Error("Failed to upload file to S3.");
+    console.error("Error uploading file to S3:", {
+      error: error,
+      bucketName,
+      region: process.env.AWS_REGION,
+      fileKey,
+      hasAccessKey: !!process.env.AWS_ACCESS_KEY_ID,
+      hasSecretKey: !!process.env.AWS_SECRET_ACCESS_KEY
+    });
+    throw new Error("Failed to upload photo to S3");
   }
 };

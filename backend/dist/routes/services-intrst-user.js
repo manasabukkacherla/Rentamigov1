@@ -13,8 +13,7 @@ router.post("/service-enquiry", async (req, res) => {
         const { name, email, mobileNo, selectedServices } = req.body;
         // Validate required fields
         if (!name ||
-            !email ||
-            !mobileNo ||
+            !email || +!mobileNo ||
             !selectedServices ||
             selectedServices.length === 0) {
             return res.status(400).json({ error: "Missing required fields" });
