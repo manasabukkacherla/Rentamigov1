@@ -1,0 +1,109 @@
+{
+  "propertyName": "Highway Business Center",
+  "commercialType": "Industrial Complex",
+  "address": {
+    "street": "456 Industrial Highway",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "zipCode": "411045"
+  },
+  "landmark": "Near Tech Park Junction",
+  "coordinates": {
+    "latitude": "18.5204",
+    "longitude": "73.8567"
+  },
+  "isCornerProperty": false,
+  "propertyDetails": {
+    "area": {
+      "totalArea": 5000,
+      "carpetArea": 4200,
+      "builtUpArea": 4500
+    },
+    "floor": {
+      "floorNumber": 0,
+      "totalFloors": 2
+    },
+    "otherDetails": {
+      "propertyTypeDescription": "Large industrial space with storage and office areas",
+      "specialFeatures": ["Loading Dock", "High Ceiling", "Reinforced Flooring", "Heavy Power Supply"],
+      "usageRecommendation": "Suitable for manufacturing, R&D, or distribution center",
+      "additionalRequirements": "No hazardous materials allowed"
+    },
+    "facingDirection": "North",
+    "furnishingStatus": "Unfurnished",
+    "propertyAmenities": ["24/7 Security", "Fire Safety Systems", "CCTV Surveillance", "Ample Parking"],
+    "wholeSpaceAmenities": ["Employee Cafeteria", "Meeting Rooms"],
+    "waterAvailability": "24/7 Industrial Supply",
+    "propertyAge": 8,
+    "propertyCondition": "Good",
+    "electricitySupply": {
+      "powerLoad": 50,
+      "backup": true
+    }
+  },
+  "rent": {
+    "expectedRent": 150000,
+    "isNegotiable": true,
+    "rentType": "exclusive"
+  },
+  "securityDeposit": {
+    "amount": 450000
+  },
+  "maintenanceAmount": {
+    "amount": 12000,
+    "frequency": "monthly"
+  },
+  "otherCharges": {
+    "water": {
+      "type": "exclusive",
+      "amount": 4000
+    },
+    "electricity": {
+      "type": "exclusive",
+      "amount": 0
+    },
+    "gas": {
+      "type": "exclusive",
+      "amount": 0
+    },
+    "others": {
+      "type": "exclusive",
+      "amount": 5000
+    }
+  },
+  "brokerage": {
+    "required": "Yes",
+    "amount": 150000
+  },
+  "availability": {
+    "type": "specific",
+    "date": "2023-12-01T00:00:00.000Z"
+  },
+  "contactDetails": {
+    "name": "Priya Sharma",
+    "email": "priya.sharma@example.com",
+    "phone": "8765432109",
+    "alternatePhone": "8765432108",
+    "bestTimeToContact": "9 AM to 5 PM"
+  },
+  "media": {
+    "photos": {
+      "exterior": ["https://example.com/industrial/exterior1.jpg", "https://example.com/industrial/exterior2.jpg"],
+      "interior": ["https://example.com/industrial/interior1.jpg", "https://example.com/industrial/interior2.jpg", "https://example.com/industrial/interior3.jpg"],
+      "floorPlan": ["https://example.com/industrial/floorplan.jpg"],
+      "washrooms": ["https://example.com/industrial/washroom1.jpg"],
+      "lifts": ["https://example.com/industrial/lift1.jpg", "https://example.com/industrial/lift2.jpg"],
+      "emergencyExits": ["https://example.com/industrial/emergency1.jpg", "https://example.com/industrial/emergency2.jpg"],
+      "others": ["https://example.com/industrial/loading-dock.jpg", "https://example.com/industrial/parking.jpg"]
+    },
+    "videoTour": "https://example.com/industrial/property-tour.mp4",
+    "documents": [
+      "https://example.com/industrial/property-details.pdf", 
+      "https://example.com/industrial/floor-plan.pdf",
+      "https://example.com/industrial/safety-certificate.pdf"
+    ]
+  },
+  "metaData": {
+    "createdBy": "64f73de7b6e7d3fca91a7c68"
+  }
+} 

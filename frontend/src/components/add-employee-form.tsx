@@ -77,7 +77,7 @@ export default function AddEmployeeForm({
           {
             content: "rentamigo.in",
             toEmailAddress: formData.email,
-            subject: `Welcome to RentAmigo - ${formData.firstname} ${formData.lastname}`,
+            subject: `Welcome to PropAmigo - ${formData.firstname} ${formData.lastname}`,
           }
         );
 

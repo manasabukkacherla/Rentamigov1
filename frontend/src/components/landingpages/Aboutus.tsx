@@ -19,11 +19,11 @@ function AboutUs() {
             <div>
               <p className="text-lg mb-6">
                 <span className="font-semibold">Amigo</span> is a Spanish word
-                which means "Friend". Rentamigo is a group of friends who help
+                which means "Friend". Propamigo is a group of friends who help
                 you with your property rental requirements.
               </p>
               <p className="text-lg mb-6">
-                Rentamigo aims to bridge the gap that exists between a lessor
+                Propamigo aims to bridge the gap that exists between a lessor
                 and lessee of a residential property. Its founders Samit
                 Bhattacharya and Vikranth Naik while working for several years
                 in the industry realized that there is a common need that
@@ -42,10 +42,10 @@ function AboutUs() {
                 <div>
                   <h3 className="text-xl font-bold mb-3">COMFORT GUARANTEED</h3>
                   <p>
-                    All the Rentamigo homes shall be equipped with the preset
+                    All the Propamigo homes shall be equipped with the preset
                     standard amenities that are promised on its platform. We
                     ensure that there is absolutely no deviation to these so
-                    that any user who takes up a Rentamigo home can move-in
+                    that any user who takes up a Propamigo home can move-in
                     without even giving a second thought about all the basic
                     amenities that are required to start residing.
                   </p>
@@ -66,7 +66,7 @@ function AboutUs() {
                   <h3 className="text-xl font-bold mb-3">PEACE OF MIND</h3>
                   <p>
                     We screen all the tenants prior to move-in to any of the
-                    Rentamigo properties to ensure that there aren't any
+                    Propamigo properties to ensure that there aren't any
                     problems post move-in. Also, we do have the home completely
                     ready for the tenant prior to the scheduled move-in date so
                     as to ensure there is no scope of delay.

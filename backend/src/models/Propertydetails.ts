@@ -1,83 +1,154 @@
-import { Schema, model, models, Document, Types } from "mongoose";
+import mongoose, { Schema, model, models, Document, CallbackError } from "mongoose";
+import PropertySelection from "./PropertySelection"; // Ensure correct import
 
-// Define the interface for the Property document
-interface IProperty extends Document {
-  userId: Types.ObjectId; // Reference to the user who added the property
-  username: string; // Username of the user
-  fullName: string; // Full name of the user
-  role: "owner" | "agent" | "tenant" | "pg" | "employee"; // Role of the user
-  propertyName: string; // Name of the property
-  propertyType: string; // Type of property
-  propertyConfiguration: string; // E.g., 1 BHK, 2 BHK, etc.
-  furnishingStatus: "Unfurnished" | "Semi Furnished" | "Fully Furnished" | "Partially Furnished"; // Furnishing status
-  facing: string; // Facing direction (e.g., North, East, etc.)
-  amenities: string[]; // List of selected amenities
-  createdAt?: Date; // Timestamp for document creation
-  updatedAt?: Date; // Timestamp for document updates
+interface IPropertyDetails extends Document {
+  propertyId: string;
+  propertyFeatures: {
+    noOfBedrooms: number;
+    noOfWashrooms: number;
+    noOfBalconies: number;
+  };
+  parkingDetails: {
+    hasParking: boolean;
+    twoWheelerParking?: number;
+    fourWheelerParking?: number;
+  };
+  extraRooms: {
+    servantRoom: boolean;
+    pujaRoom: boolean;
+    storeRoom: boolean;
+    others: boolean;
+  };
+  utilityArea: boolean;
+  propertyConfiguration: {
+    furnishingStatus: string;
+    flooringType: "Marble" | "Ceramic" | "Vitrified" | "Wooden" | "Mosaic" | "Others";
+  };
+  propertyFacing: "North" | "South" | "East" | "West" | "North-East" | "North-West" | "South-East" | "South-West";
+  propertyAge: number;
+  areaDetails: {
+    superBuiltUpArea: number;
+    builtUpArea: number;
+    carpetArea: number;
+  };
+  electricityAvailability: "24 hours" | "Partial power cuts" | "No power";
+  waterAvailability: "Bore well" | "Government Supply" | "Tanker supply";
+  propertyRestrictions: {
+    foodPreference: "Veg Only" | "Veg & Non-Veg";
+    pets: "Allowed" | "Not Allowed";
+    tenantType: "Bachelors" | "Family" | "Company Lease";
+  };
 }
 
-// Define the Mongoose schema for Property
-const PropertySchema = new Schema<IProperty>(
+const PropertyDetailsSchema = new Schema<IPropertyDetails>(
   {
-    userId: {
-      type: Schema.Types.ObjectId, // Correct type definition
-      ref: "User", // References the User model
-      required: true,
-    },
-    username: {
+    propertyId: {
       type: String,
       required: true,
-      trim: true,
+      unique: true,
     },
-    fullName: {
-      type: String,
-      required: true,
-      trim: true,
+    propertyFeatures: {
+      noOfBedrooms: { type: Number, required: true },
+      noOfWashrooms: { type: Number, required: true },
+      noOfBalconies: { type: Number, required: true },
     },
-    role: {
-      type: String,
-      enum: ["owner", "agent", "tenant", "pg", "employee"],
-      required: true,
+    parkingDetails: {
+      hasParking: { type: Boolean, required: true },
+      twoWheelerParking: { type: Number, default: 0 },
+      fourWheelerParking: { type: Number, default: 0 },
     },
-    propertyName: {
-      type: String,
-      required: [true, "Property name is required"],
-      trim: true,
+    extraRooms: {
+      servantRoom: { type: Boolean, default: false },
+      pujaRoom: { type: Boolean, default: false },
+      storeRoom: { type: Boolean, default: false },
+      others: { type: Boolean, default: false },
     },
-    propertyType: {
-      type: String,
-      enum: ["Apartment", "Standalone Building", "Villa", "Row House"],
-      required: [true, "Property type is required"],
-    },
+    utilityArea: { type: Boolean, required: true },
     propertyConfiguration: {
-      type: String,
-      required: [true, "Property configuration is required"],
-      enum: ["Studio Room (1 RK)", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "4+ BHK"],
+      furnishingStatus: { type: String, required: true },
+      flooringType: {
+        type: String,
+        enum: ["Marble", "Ceramic", "Vitrified", "Wooden", "Mosaic", "Others"],
+        required: true,
+      },
     },
-    furnishingStatus: {
+    propertyFacing: {
       type: String,
-      required: [true, "Furnishing status is required"],
-      enum: ["Unfurnished", "Semi Furnished", "Fully Furnished", "Partially Furnished"],
+      enum: [
+        "North",
+        "South",
+        "East",
+        "West",
+        "North-East",
+        "North-West",
+        "South-East",
+        "South-West",
+      ],
+      required: true,
     },
-    facing: {
+    propertyAge: { type: Number, required: true },
+    areaDetails: {
+      superBuiltUpArea: { type: Number, required: true },
+      builtUpArea: { type: Number, required: true },
+      carpetArea: { type: Number, required: true },
+    },
+    electricityAvailability: {
       type: String,
-      required: [true, "Facing direction is required"],
-      enum: ["North", "East", "South", "West", "North-East", "South-East", "North-West", "South-West"],
+      enum: ["24 hours", "Partial power cuts", "No power"],
+      required: true,
     },
-    amenities: {
-      type: [String],
-      validate: {
-        validator: (value: string[]) => Array.isArray(value),
-        message: "Amenities must be an array of strings",
+    waterAvailability: {
+      type: String,
+      enum: ["Bore well", "Government Supply", "Tanker supply"],
+      required: true,
+    },
+    propertyRestrictions: {
+      foodPreference: {
+        type: String,
+        enum: ["Veg Only", "Veg & Non-Veg"],
+        required: true,
+      },
+      pets: {
+        type: String,
+        enum: ["Allowed", "Not Allowed"],
+        required: true,
+      },
+      tenantType: {
+        type: String,
+        enum: ["Bachelors", "Family", "Company Lease"],
+        required: true,
       },
     },
   },
-  {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
-// Create and export the Property model
-const Property = models.Property || model<IProperty>("Property", PropertySchema);
+// ✅ **Pre-Save Hook to Fetch the Latest Property ID from PropertySelection**
+PropertyDetailsSchema.pre("validate", async function (next: (err?: CallbackError) => void) {
+  const propertyDetails = this as IPropertyDetails;
 
-export default Property;
+  if (!propertyDetails.propertyId) {
+    try {
+      const lastPropertySelection = await PropertySelection.findOne()
+        .sort({ createdAt: -1 })
+        .select("propertyId");
+
+      if (lastPropertySelection && lastPropertySelection.propertyId) {
+        propertyDetails.propertyId = lastPropertySelection.propertyId;
+      } else {
+        return next(new Error("No property ID found in PropertySelection") as CallbackError);
+      }
+    } catch (error) {
+      return next(error as CallbackError);
+    }
+  }
+
+  next();
+});
+
+// ✅ **Check if the model already exists to prevent re-compilation**
+const PropertyDetails =
+  models.PropertyDetails || model<IPropertyDetails>("PropertyDetails", PropertyDetailsSchema);
+
+export default PropertyDetails;
+    

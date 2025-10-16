@@ -78,7 +78,7 @@ const Footer: React.FC = () => {
       fontSize: "14px",
       gap: "15px", // Adjust spacing between numbers
       marginRight: "138px",
-      flexWrap: "wrap", // Enable wrapping for smaller screens
+      flexWrap: "wrap" as "wrap", // Enable wrapping for smaller screens
     },
     phoneLink: {
       color: "white",
@@ -251,7 +251,7 @@ const Footer: React.FC = () => {
             <ul className="list-unstyled">
               <li>
                 <a
-                  href="#"
+                  href="/Contactus"
                   style={styles.link}
                   onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
                   onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
@@ -261,7 +261,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/Aboutus"
                   style={styles.link}
                   onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
                   onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
@@ -271,7 +271,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/owner-page"
                   style={styles.link}
                   onMouseOver={(e) => Object.assign(e.currentTarget.style, styles.linkHover)}
                   onMouseOut={(e) => Object.assign(e.currentTarget.style, styles.link)}
