@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import PropertyName from '../PropertyName';
@@ -28,22 +28,23 @@ interface MediaType {
 }
 
 interface FormData {
+  propertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
     address: {
       street: string;
       city: string;
-    state: string;
-    zipCode: string;
-  };
-  landmark: string;
-  location: {
-    latitude: string;
-    longitude: string;
-  };
-  isCornerProperty: boolean;
-}
+      state: string;
+      zipCode: string;
+    };
+    landmark: string;
+    location: {
+      latitude: string;
+      longitude: string;
+    };
+    isCornerProperty: boolean;
+  }
   warehouseDetails: Record<string, any>;
   propertyDetails: Record<string, any>;
   leaseAmount: Record<string, any>;
@@ -152,9 +153,75 @@ const LeaseWarehouseMain = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
-
+  const { propertyId } = useParams();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   // Add form reference
   const formRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    const fetchLeaseWarehouse = async () => {
+      try {
+        await axios.get(`/api/commercial/lease/warehouses/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const leaseWarehouse = res.data.data;
+            console.log(leaseWarehouse);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: leaseWarehouse.propertyId,
+              basicInformation: {
+                ...leaseWarehouse.basicInformation,
+              },
+              warehouseDetails: {
+                ...leaseWarehouse.warehouseDetails,
+              },
+              propertyDetails: {
+                ...leaseWarehouse.propertyDetails,
+              },
+              leaseAmount: {
+                ...leaseWarehouse.leaseAmount,
+              },
+              leaseTenure: {
+                ...leaseWarehouse.leaseTenure,
+              },
+              maintenanceAmount: {
+                ...leaseWarehouse.maintenanceAmount,
+              },
+              otherCharges: {
+                ...leaseWarehouse.otherCharges,
+              },
+              brokerage: {
+                ...leaseWarehouse.brokerage,
+              },
+              availability: {
+                ...leaseWarehouse.availability,
+              },
+              contactDetails: {
+                ...leaseWarehouse.contactDetails,
+              },
+              media: {
+                ...leaseWarehouse.media,
+              }
+            }))
+          } else {
+            toast.error("Unable to load property data")
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if (propertyId) {
+      fetchLeaseWarehouse();
+    }
+  }, [navigate, propertyId]);
 
   // Form prevention utility function
   const preventDefault = (e: React.MouseEvent | React.FormEvent) => {
@@ -261,7 +328,7 @@ const LeaseWarehouseMain = () => {
       icon: <User className="w-6 h-6" />,
       component: (
         <div className="space-y-6">
-          <CommercialContactDetails 
+          <CommercialContactDetails
             contactInformation={formData.contactDetails || {}}
             onContactChange={(contact) => setFormData(prev => ({
               ...prev,
@@ -291,39 +358,39 @@ const LeaseWarehouseMain = () => {
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
             }}
-              onMediaChange={(media) => {
-                const photosByCategory: Record<string, File[]> = {
-                  exterior: [],
-                  interior: [],
-                  floorPlan: [],
-                  washrooms: [],
-                  lifts: [],
-                  emergencyExits: []
-                };
+            onMediaChange={(media) => {
+              const photosByCategory: Record<string, File[]> = {
+                exterior: [],
+                interior: [],
+                floorPlan: [],
+                washrooms: [],
+                lifts: [],
+                emergencyExits: []
+              };
 
-                media.photos.forEach(({ category, files }) => {
-                  if (category in photosByCategory) {
-                    photosByCategory[category] = files.map(f => f.file);
-                  }
-                });
+              media.photos.forEach(({ category, files }) => {
+                if (category in photosByCategory) {
+                  photosByCategory[category] = files.map(f => f.file);
+                }
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photosByCategory.exterior,
-                      interior: photosByCategory.interior,
-                      floorPlan: photosByCategory.floorPlan,
-                      washrooms: photosByCategory.washrooms,
-                      lifts: photosByCategory.lifts,
-                      emergencyExits: photosByCategory.emergencyExits
-                    },
-                    videoTour: media.videoTour || null,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photosByCategory.exterior,
+                    interior: photosByCategory.interior,
+                    floorPlan: photosByCategory.floorPlan,
+                    washrooms: photosByCategory.washrooms,
+                    lifts: photosByCategory.lifts,
+                    emergencyExits: photosByCategory.emergencyExits
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -612,30 +679,89 @@ const LeaseWarehouseMain = () => {
     if (e) {
       preventDefault(e);
     }
+    setIsSubmitting(true);
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.propertyDetails.area) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactDetails.name || !formData.contactDetails.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
-      setIsSubmitting(true);
-      toast.loading("Submitting your property listing...");
 
-      // Map form data to backend model structure
-      const backendData = await mapFormDataToBackendModel();
+      const user = sessionStorage.getItem('user');
+      if (user) {
+        const author = JSON.parse(user).id;
+        toast.loading("Submitting your property listing...");
+        // Map form data to backend model structure
+        const backendData = await mapFormDataToBackendModel();
 
-      // Make API call to create commercial lease warehouse
-      const response = await axios.post(
-        `/api/commercial/lease/warehouses`,
-        backendData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            location: safelocation,
           }
-        }
-      );
+        };
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
 
-      if (response.data.success) {
-        toast.dismiss();
-        toast.success('Commercial warehouse listing created successfully!');
-        navigate('/dashboard');
+
+        // Make API call to create commercial lease warehouse
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/lease/warehouses/${formData.propertyId}`
+          : `/api/commercial/lease/warehouses`
+        const method = isEditMode ? axios.put : axios.post;
+
+        const response = await method(
+          endpoint,
+          backendData,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        );
+
+        if (response.data.success) {
+          toast.dismiss();
+          toast.success('Commercial warehouse listing created successfully!');
+          navigate('/dashboard');
+        } else {
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
+        }
+      } else {
+        console.log("User not authenticated, redirecting to login");
+        toast.error('User not logged in');
+        navigate('/login');
       }
     } catch (error: any) {
       toast.dismiss();

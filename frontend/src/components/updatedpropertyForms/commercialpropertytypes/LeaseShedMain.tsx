@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PropertyName from '../PropertyName';
 import ShedType from '../CommercialComponents/ShedType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -28,6 +28,7 @@ interface MediaType {
 
 // Define interfaces based on the backend model (CommercialLeaseShed.ts)
 interface FormDataType {
+  propertyId: string,
   propertyName: string;
   Type: string[];
   address: {
@@ -88,29 +89,29 @@ interface FormDataType {
     maintenanceAmount: {
       amount: number;
       frequency: string;
-  };
-  otherCharges: {
-    water: { type: string; amount: number };
-    electricity: { type: string; amount: number };
-    gas: { type: string; amount: number };
-    others: { type: string; amount: number };
-  };
-  brokerage: {
-    required: string;
-    amount?: number;
-  };
-  availability: {
-    availableImmediately?: boolean;
-    availableFrom?: Date;
-    leaseDuration?: string;
-    noticePeriod?: string;
-    petsAllowed?: boolean;
-    operatingHours?: {
-      restricted?: boolean;
-      restrictions?: string;
+    };
+    otherCharges: {
+      water: { type: string; amount: number };
+      electricity: { type: string; amount: number };
+      gas: { type: string; amount: number };
+      others: { type: string; amount: number };
+    };
+    brokerage: {
+      required: string;
+      amount?: number;
+    };
+    availability: {
+      availableImmediately?: boolean;
+      availableFrom?: Date;
+      leaseDuration?: string;
+      noticePeriod?: string;
+      petsAllowed?: boolean;
+      operatingHours?: {
+        restricted?: boolean;
+        restrictions?: string;
+      };
     };
   };
-};
   contactInformation: {
     name: string;
     email: string;
@@ -173,7 +174,9 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 const LeaseShedMain = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+  const { propertyId } = useParams();
   const [formData, setFormData] = useState<FormDataType>({
+    propertyId: '',
     propertyName: '',
     Type: [],
     address: {
@@ -209,20 +212,20 @@ const LeaseShedMain = () => {
         frequency: 'monthly'
       },
       otherCharges: {
-      water: { type: 'inclusive', amount: 0 },
-      electricity: { type: 'inclusive', amount: 0 },
-      gas: { type: 'inclusive', amount: 0 },
-      others: { type: 'inclusive', amount: 0 }
+        water: { type: 'inclusive', amount: 0 },
+        electricity: { type: 'inclusive', amount: 0 },
+        gas: { type: 'inclusive', amount: 0 },
+        others: { type: 'inclusive', amount: 0 }
       },
-    brokerage: { required: 'no', amount: 0 },
-    availability: {
-      availableImmediately: false,
-      availableFrom: new Date(),
-      leaseDuration: '1 year',
-      noticePeriod: '1 month',
-      petsAllowed: false,
+      brokerage: { required: 'no', amount: 0 },
+      availability: {
+        availableImmediately: false,
+        availableFrom: new Date(),
+        leaseDuration: '1 year',
+        noticePeriod: '1 month',
+        petsAllowed: false,
+      },
     },
-  },
     contactInformation: {
       name: '',
       email: '',
@@ -263,7 +266,46 @@ const LeaseShedMain = () => {
     } else {
       setIsLoggedIn(true);
     }
-  }, [navigate]);
+
+    const fetchLeaseShedById = async () => {
+      try {
+        await axios.get(`/api/commercial/lease/sheds/${propertyId}`).then((res) => {
+          if (res.data && res.data.data) {
+            const leaseShed = res.data.data;
+            setFormData(prev => ({
+              ...prev,
+              propertyId: leaseShed.propertyId,
+              propertyName: leaseShed.propertyName,
+              Type: leaseShed.Type,
+              address: {
+                ...leaseShed.address,
+              },
+              landmark: leaseShed.landmark,
+              coordinates: {
+                ...leaseShed.coordinates,
+              },
+              isCornerProperty: leaseShed.isCornerProperty,
+              shedDetails: { ...leaseShed.shedDetails },
+              propertyDetails: { ...leaseShed.propertyDetails },
+              leaseTerms: { ...leaseShed.leaseTerms },
+              contactInformation: { ...leaseShed.contactInformation },
+              media: { ...leaseShed.media },
+              metadata: { ...leaseShed.metadata },
+            }))
+          } else {
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+
+    if (propertyId) {
+      fetchLeaseShedById();
+    }
+  }, [navigate, propertyId]);
 
   const renderFormSection = (content: React.ReactNode) => (
     <div className="space-y-4">
@@ -376,39 +418,39 @@ const LeaseShedMain = () => {
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
             }}
-              onMediaChange={(media) => {
-                const photosByCategory: Record<string, File[]> = {
-                  exterior: [],
-                  interior: [],
-                  floorPlan: [],
-                  washrooms: [],
-                  lifts: [],
-                  emergencyExits: []
-                };
+            onMediaChange={(media) => {
+              const photosByCategory: Record<string, File[]> = {
+                exterior: [],
+                interior: [],
+                floorPlan: [],
+                washrooms: [],
+                lifts: [],
+                emergencyExits: []
+              };
 
-                media.photos.forEach(({ category, files }) => {
-                  if (category in photosByCategory) {
-                    photosByCategory[category] = files.map(f => f.file);
-                  }
-                });
+              media.photos.forEach(({ category, files }) => {
+                if (category in photosByCategory) {
+                  photosByCategory[category] = files.map(f => f.file);
+                }
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photosByCategory.exterior,
-                      interior: photosByCategory.interior,
-                      floorPlan: photosByCategory.floorPlan,
-                      washrooms: photosByCategory.washrooms,
-                      lifts: photosByCategory.lifts,
-                      emergencyExits: photosByCategory.emergencyExits
-                    },
-                    videoTour: media.videoTour || null,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photosByCategory.exterior,
+                    interior: photosByCategory.interior,
+                    floorPlan: photosByCategory.floorPlan,
+                    washrooms: photosByCategory.washrooms,
+                    lifts: photosByCategory.lifts,
+                    emergencyExits: photosByCategory.emergencyExits
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -539,7 +581,6 @@ const LeaseShedMain = () => {
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     // Prevent the default form submission behavior
     e.preventDefault();
-
     console.log('Form Data for submission:', formData);
     console.log('LeaseTenure values for submission:', formData.leaseTerms.leaseTenure);
 
@@ -548,6 +589,8 @@ const LeaseShedMain = () => {
     try {
       const user = sessionStorage.getItem('user');
       if (!user) {
+        console.log("User not authenticated, redirecting to login");
+        toast.error('User not logged in');
         navigate('/login');
         return;
       }
@@ -611,7 +654,7 @@ const LeaseShedMain = () => {
 
         // Process documents
         const documents = await Promise.all(
-          formData.media.documents.map(doc => 
+          formData.media.documents.map(doc =>
             typeof doc === 'string' ? doc : convertFileToBase64(doc)
           )
         );
@@ -669,7 +712,7 @@ const LeaseShedMain = () => {
       const payload = {
         basicInformation: {
           title: formData.propertyName,
-          type: formData.type,
+          type: formData.Type,
           address: {
             street: formData.address.street || '',
             city: formData.address.city || '',
@@ -748,7 +791,7 @@ const LeaseShedMain = () => {
             }
           },
           brokerage: {
-                required: formData.leaseTerms.brokerage.required?.toLowerCase() || 'no',
+            required: formData.leaseTerms.brokerage.required?.toLowerCase() || 'no',
             amount: formData.leaseTerms.brokerage.amount
           },
           availability: {
@@ -786,13 +829,23 @@ const LeaseShedMain = () => {
 
       // Using the correct API endpoint pattern based on other similar components
       // Looking at similar files, we'll use the plural form
-      const response = await axios.post('/api/commercial/lease/sheds', payload);
+      const isEditMode = !!formData.propertyId;
+      const endpoint = isEditMode
+        ? `/api/commercial/lease/sheds/${formData.propertyId}`
+        : '/api/commercial/lease/sheds'
+      const method = isEditMode ? axios.put : axios.post;
+      const response = await method(endpoint, payload, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       if (response.status === 201) {
         toast.success('Property listed successfully!');
-        navigate('/dashboard');
+        navigate('/updatepropertyform');
       } else {
-        toast.error('Failed to list property. Please try again.');
+        console.error("Server returned success:false", response.data);
+        toast.error(response.data.message || 'Failed to create listing. Please try again.');
       }
     } catch (error) {
       console.error('Error submitting property:', error);

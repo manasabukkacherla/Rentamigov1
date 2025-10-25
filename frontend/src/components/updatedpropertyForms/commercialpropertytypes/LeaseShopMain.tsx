@@ -18,10 +18,10 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { MapPin, Building2, DollarSign, Calendar, User, Image, Store, ImageIcon, UserCircle, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import MapLocation from '../CommercialComponents/MapLocation';
 interface FormData {
-  // propertyId: string;
+  propertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -279,7 +279,59 @@ const LeaseShopMain = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+  const { propertyId } = useParams();
   const formRef = useRef<HTMLDivElement>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    const fetchLeaseShop = async () => {
+      try {
+        await axios.get(`/api/commercial/lease/shops/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const leaseShop = res.data.data;
+            console.log(leaseShop);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: leaseShop.propertyId,
+              basicInformation: {
+                ...leaseShop.basicInformation,
+              },
+              shopDetails: {
+                ...leaseShop.shopDetails,
+              },
+              propertyDetails: {
+                ...leaseShop.propertyDetails,
+              },
+              leaseTerms: {
+                ...leaseShop.leaseTerms,
+              },
+              contactInformation: {
+                ...leaseShop.contactInformation,
+              },
+              media: {
+                ...leaseShop.media,
+              }
+            }))
+          } else {
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if (propertyId) {
+      fetchLeaseShop();
+    }
+  }, [navigate, propertyId]);
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -511,14 +563,14 @@ const LeaseShopMain = () => {
         <div className="space-y-8">
           <div className="space-y-6">
             <CommercialMediaUpload
-            Media={{
-              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
-                category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
-              })),
-              videoTour: formData.media.videoTour || null,
-              documents: formData.media.documents
-            }}
+              Media={{
+                photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+                  category,
+                  files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+                })),
+                videoTour: formData.media.videoTour || null,
+                documents: formData.media.documents
+              }}
               onMediaChange={(media) => {
                 const photosByCategory: Record<string, File[]> = {
                   exterior: [],
@@ -604,6 +656,30 @@ const LeaseShopMain = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.propertyDetails.area) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -621,7 +697,24 @@ const LeaseShopMain = () => {
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
-        console.log(formData)
+
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            location: safelocation,
+          }
+        };
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
 
         const transformedData = {
           ...formData,
@@ -636,9 +729,12 @@ const LeaseShopMain = () => {
           }
         };
 
-
-        console.log(transformedData);
-        const response = await axios.post('/api/commercial/lease/shops', transformedData, {
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/lease/shops/${formData.propertyId}`
+          : '/api/commercial/lease/shops'
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -647,8 +743,14 @@ const LeaseShopMain = () => {
 
         if (response.data.success) {
           toast.success('Commercial shop listing created successfully!');
+          navigate('/updatepropertyform');
+        } else {
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
+        console.log("User not authenticated, redirecting to login");
+        toast.error('User not logged in');
         navigate('/login');
       }
     } catch (error) {

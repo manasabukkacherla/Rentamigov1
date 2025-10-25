@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
 import AgriculturalLandType from '../CommercialComponents/AgriculturalLandType';
@@ -69,7 +69,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 
 interface FormData {
   propertyId?: string;
-  basicInformation:{
+  basicInformation: {
     title: string;
     landType: string[];
     powerSupply: 'Available' | 'Not Available';
@@ -81,13 +81,13 @@ interface FormData {
       zipCode: string;
     };
     landmark: string;
-    location  : {
+    location: {
       latitude: string;
       longitude: string;
     };
     isCornerProperty: boolean;
   },
- 
+
   Agriculturelanddetails: {
     totalArea: number;
     soilType: string;
@@ -147,24 +147,24 @@ const RentAgriculture = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     propertyId: '',
-    basicInformation:{
-    title: '',
-    landType: [] as string[],
-    powerSupply: 'Available',
-    waterSource: '',
-    address: {
-      street: '',
-      city: '',
-      state: '',
-      zipCode: ''
+    basicInformation: {
+      title: '',
+      landType: [] as string[],
+      powerSupply: 'Available',
+      waterSource: '',
+      address: {
+        street: '',
+        city: '',
+        state: '',
+        zipCode: ''
+      },
+      landmark: '',
+      location: {
+        latitude: '',
+        longitude: ''
+      },
+      isCornerProperty: false,
     },
-    landmark: '',
-    location: {
-      latitude: '',
-      longitude: ''
-    },
-    isCornerProperty: false,
-  },
     Agriculturelanddetails: {
       totalArea: 0,
       soilType: '',
@@ -214,6 +214,7 @@ const RentAgriculture = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const { propertyId } = useParams();
 
   // Check login status on component mount
   useEffect(() => {
@@ -223,7 +224,53 @@ const RentAgriculture = () => {
     } else {
       setIsLoggedIn(true);
     }
-  }, [navigate]);
+
+    const fetchRentAgriculture = async () => {
+      try {
+        await axios.get(`/api/commercial/rent/agriculture/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const rentAgri = res.data.data;
+            console.log(rentAgri);
+            setFormData(prev => ({
+              ...prev,
+              basicInformation: {
+                ...rentAgri.basicInformation,
+              },
+              Agriculturelanddetails: {
+                ...rentAgri.agriculturelanddetails,
+              },
+              rent: {
+                ...rentAgri.rent,
+              },
+              securityDeposit: {
+                ...rentAgri.securityDeposit,
+              },
+              availability: {
+                ...rentAgri.availability,
+              },
+              contactDetails: {
+                ...rentAgri.contactDetails,
+              },
+              media: {
+                ...rentAgri.media,
+              },
+              metadata: {
+                ...rentAgri.metadata,
+              }
+            }))
+          } else {
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if (propertyId) {
+      fetchRentAgriculture();
+    }
+  }, [navigate, propertyId]);
 
   const validateCurrentStep = () => {
     const errors: Record<string, string> = {};
@@ -248,8 +295,10 @@ const RentAgriculture = () => {
     setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, landType: types } }));
   };
 
-  const handleAddressChange = (address: { street: string; city: string; state: string; 
-    zipCode: string; }) => {
+  const handleAddressChange = (address: {
+    street: string; city: string; state: string;
+    zipCode: string;
+  }) => {
     setFormData(prev => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }));
   };
 
@@ -345,21 +394,21 @@ const RentAgriculture = () => {
           <div className="space-y-6">
             <PropertyName propertyName={formData.basicInformation.title} onPropertyNameChange={handlePropertyNameChange} />
             <AgriculturalLandType onLandTypeChange={handleLandTypeChange} />
-          </div>     
+          </div>
 
           <div className="space-y-6">
             <CommercialPropertyAddress
               address={formData.basicInformation.address}
               onAddressChange={handleAddressChange}
             />
-       
-            <MapLocation 
-            latitude={formData.basicInformation.location.latitude}
-            longitude={formData.basicInformation.location.longitude}
-            landmark={formData.basicInformation.landmark}
-            onLocationChange={(location) => handleChange('basicInformation.location', location)}
-            onAddressChange={(address) => handleChange('basicInformation.address', address)}
-            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
+
+            <MapLocation
+              latitude={formData.basicInformation.location.latitude}
+              longitude={formData.basicInformation.location.longitude}
+              landmark={formData.basicInformation.landmark}
+              onLocationChange={(location) => handleChange('basicInformation.location', location)}
+              onAddressChange={(address) => handleChange('basicInformation.address', address)}
+              onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
             />
             <CornerProperty
               isCornerProperty={formData.basicInformation.isCornerProperty}
@@ -372,9 +421,9 @@ const RentAgriculture = () => {
                     checked={formData.powerSupply === 'Available'}
                 onChange={e => setFormData(prev => ({ ...prev, powerSupply: e.target.checked ? 'Available' : 'Not Available' }))}
               /> */}
-                </label>
-              </div>
-            </div>
+            </label>
+          </div>
+        </div>
       )
     },
     {
@@ -401,18 +450,18 @@ const RentAgriculture = () => {
       icon: <Calendar className="w-5 h-5" />,
       content: renderFormSection(
         <div className="flex items-center gap-3 mb-6">
-        <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-          <AvailabilityDate
-            availability={{
-              type: formData.availability.type as "immediate" | "specific",
-              date: formData.availability.date
-            }}
-            onAvailabilityChange={(availability) => setFormData(prev => ({
-              ...prev,
-              availability: availability
-            }))}
-          />
-        </div>
+          <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
+            <AvailabilityDate
+              availability={{
+                type: formData.availability.type as "immediate" | "specific",
+                date: formData.availability.date
+              }}
+              onAvailabilityChange={(availability) => setFormData(prev => ({
+                ...prev,
+                availability: availability
+              }))}
+            />
+          </div>
         </div>
       )
     },
@@ -482,9 +531,33 @@ const RentAgriculture = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.Agriculturelanddetails.totalArea) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactDetails.name || !formData.contactDetails.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const user = sessionStorage.getItem('user');
-  
+
       if (user) {
         const author = JSON.parse(user).id;
         const convertedMedia = {
@@ -512,15 +585,45 @@ const RentAgriculture = () => {
             status: 'Available',
           }
         };
-        const response = await axios.post('/api/commercial/rent/agriculture', transformedData, {
+
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            location: safelocation,
+          }
+        };
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
+
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/rent/agriculture/${formData.propertyId}`
+          : '/api/commercial/rent/agriculture'
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
         if (response.data.success) {
           toast.success('Commercial rent agriculture listing created successfully!');
+          navigate('/updatepropertyform');
+        } else {
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
+        console.log("User not authenticated, redirecting to login");
+        toast.error('User not logged in');
         navigate('/login');
       }
     } catch (error) {
@@ -591,7 +694,7 @@ const RentAgriculture = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-8">
+        <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Agriculture</h1>
         </div>
         <div className="mb-8">

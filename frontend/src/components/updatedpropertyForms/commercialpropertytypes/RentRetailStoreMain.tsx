@@ -20,6 +20,7 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle, ImageIcon, Calendar, DollarSign } from "lucide-react"
 import axios from 'axios';
 import MapLocation from '../CommercialComponents/MapLocation';
+import { useParams } from 'react-router-dom';
 
 const globalStyles = `
   input::placeholder,
@@ -52,6 +53,7 @@ const globalStyles = `
 `;
 
 interface FormData {
+  propertyId?:string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -196,6 +198,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 const RentRetailStoreMain = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+  const { propertyId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -325,7 +328,64 @@ const RentRetailStoreMain = () => {
     } else {
       setIsLoggedIn(true);
     }
-  }, [navigate]);
+    const fetchRentRetailStoreById = async() =>{try{
+      const response = await axios.get(`/api/commercial/rent/retail-store/${propertyId}`);
+      const data = response.data;
+      if(data && data.success){
+        const retail = data.data;
+        console.log(retail);
+        setFormData(prev => ({
+          ...prev,
+          propertyId: retail.propertyId,
+          basicInformation:{
+            ...retail.basicInformation,
+          },
+          retailStoreDetails:{
+            ...retail.retailStoreDetails,
+          },
+          propertyDetails:{
+            ...retail.propertyDetails,
+          },
+          rentalTerms:{
+            ...retail.rentalTerms,
+          },
+          brokerage:{
+            ...retail.brokerage,
+          },
+          availability:{
+            ...retail.availability,
+          },
+          contactInformation:{
+            ...retail.contactInformation,
+          },
+          media:{
+            photos: {
+              exterior: [],
+              interior: [],
+              floorPlan: [],
+              washrooms: [],
+              lifts: [],
+              emergencyExits: []
+            },
+            videoTour: null,
+            documents: []
+          },
+          metadata:{
+            ...retail.metadata,
+          },
+        }))
+      }else{
+        toast.error("Unable to lead property data");
+      }
+    }catch(error){
+      console.error("Fetch error:", error);
+      toast.error("Error fetching property.");
+    }};
+
+    if(propertyId){
+      fetchRentRetailStoreById();
+    }
+  }, [navigate,propertyId]);
 
   const validateCurrentStep = () => {
     const errors: Record<string, string> = {};
@@ -413,7 +473,9 @@ const RentRetailStoreMain = () => {
         // <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
           <div className="space-y-6">
             <RetailStoreDetails
-              onDetailsChange={(details) => {
+              storeDetails={formData.retailStoreDetails}
+              onDetailsChange={(details) => 
+                {
                 setFormData({
                   ...formData,
                   retailStoreDetails: {
@@ -674,13 +736,47 @@ const RentRetailStoreMain = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Add API submission logic here
-    console.log('Form Data:', formData);
-    try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
+    console.log("form submission started...");
 
+    if(!formData.basicInformation.title){
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if(!formData.basicInformation.address.street || !formData.basicInformation.address.city){
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if(!formData.retailStoreDetails.location) {
+      toast.error('Retail Store Location needed');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if(!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if(!formData.propertyDetails.area.totalArea){
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Add API submission logic here
+    try {
+      const author = sessionStorage.getItem('user');
+      if (!author) {
+        console.log("User not authenticated, redirecting to login");
+        toast.error("You must be logged in to update a property.");
+        setIsSubmitting(false);
+        return;
+      };
 
         // Convert media files to base64
         const convertFileToBase64 = (file: File): Promise<string> => {
@@ -705,27 +801,103 @@ const RentRetailStoreMain = () => {
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+        const safelocation = {
+        latitude: typeof formData.basicInformation.location.latitude === 'string'
+          ? parseFloat(formData.basicInformation.location.latitude) || 0
+          : formData.basicInformation.location.latitude || 0,
+        longitude: typeof formData.basicInformation.location.longitude === 'string'
+          ? parseFloat(formData.basicInformation.location.longitude) || 0
+          : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+        basicInformation: {
+          title: formData.basicInformation.title,
+          Type: formData.basicInformation.Type,
+          address: formData.basicInformation.address,
+          landmark: formData.basicInformation.landmark,
+          location:safelocation,
+          isCornerProperty: formData.basicInformation.isCornerProperty
+        },
+        RetailStoreDetail: formData.retailStoreDetails,
+        propertyDetails:{
+          area: formData.propertyDetails.area,
+          floor: formData.propertyDetails.floor,
+          facingDirection: formData.propertyDetails.facingDirection,
+          furnishingStats: formData.propertyDetails.furnishingStatus,
+          propertyAmenities: formData.propertyDetails.propertyAmenities,
+          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
+          electricitySupply: formData.propertyDetails.electricitySupply,
+          waterAvailability: formData.propertyDetails.waterAvailability,
+          propertyAge: formData.propertyDetails.propertyAge,
+          propertyCondition: formData.propertyDetails.propertyCondition,
+        },
+        rentalTerms:{
+          RentDetails: formData.rentalTerms.rentDetails,
+          SecurityDeposit: formData.rentalTerms.securityDeposit,
+          MaintenanceAmount: formData.rentalTerms.maintenanceAmount,
+          OtherCharges: formData.rentalTerms.otherCharges,
+        },
+        brokerage: formData.brokerage,
+        availability: formData.availability,
+        contactInformation: {
+          name: formData.contactInformation.name || "",
+          email: formData.contactInformation.email || "",
+          phone: formData.contactInformation.phone || "",
+          alternatePhone: formData.contactInformation.alternatePhone || "",
+          bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
+        }
+      };
+       console.log("Full structure of updatedFormData:", JSON.stringify(updatedFormData, null, 2));
+
         const transformedData = {
-          ...formData,
+          propertyId:formData.propertyId ,
+          basicInformation:{
+            ...formData.basicInformation,
+          },
+          retailStoreDetails:{
+            ...formData.retailStoreDetails,
+          },
+          propertyDetails:{
+            ...formData.propertyDetails,
+          },
+          rentalTerms:{
+            ...formData.rentalTerms,
+          },
+          brokerage:{
+            ...formData.brokerage,
+          },
+          availability:{
+            ...formData.availability,
+          },
+          contactInformation:{
+            ...formData.contactInformation,
+          },
           media: convertedMedia,
           metadata: {
             ...formData.metadata,
-            createdBy: JSON.parse(user).id,
+            createdBy: JSON.parse(author).id,
           }
         };
+        console.log("tf data",transformedData, "property id:", formData.propertyId);
+        const isEditMode = !!formData.propertyId;
 
-        const response = await axios.post('/api/commercial/rent/retail-store', transformedData, {
+        const endpoint = isEditMode
+        ? `/api/commercial/rent/retail-store/${formData.propertyId}`
+        : `/api/commercial/rent/retail-store`;
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
         });
-
         if (response.data.success) {
           toast.success('Commercial rent retail store listing created successfully!');
+          navigate('/updatepropertyform');
+        }else{
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
-      } else {
-        navigate('/login');
-      }
     } catch (error) {
       console.error('Error submitting form:', error);
       toast.error('Failed to create commercial rent retail store listing. Please try again.');

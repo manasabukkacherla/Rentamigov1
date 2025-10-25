@@ -2,18 +2,19 @@ import { useState } from 'react';
 import { ArrowRight, Building2, Store, Users, DoorOpen } from 'lucide-react';
 
 interface RetailStoreDetailsProps {
+  storeDetails:{
+    location: string,
+    anchorStores: boolean,
+    footfallData: string,
+    signageAllowed: boolean,
+    sharedWashrooms: boolean,
+    fireExit: boolean
+  }
   onDetailsChange?: (details: Record<string, any>) => void;
 }
 
-const RetailStoreDetails = ({ onDetailsChange }: RetailStoreDetailsProps) => {
-  const [details, setDetails] = useState({
-    location: '',
-    anchorStores: false,
-    footfallData: '',
-    signageAllowed: false,
-    sharedWashrooms: false,
-    fireExit: false
-  });
+const RetailStoreDetails = ({ storeDetails,onDetailsChange }: RetailStoreDetailsProps) => {
+  const [details, setDetails] = useState(storeDetails);
 
   const handleChange = (field: string, value: any) => {
     const updatedDetails = { ...details, [field]: value };

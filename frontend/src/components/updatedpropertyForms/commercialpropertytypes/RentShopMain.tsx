@@ -19,7 +19,7 @@ import { Store, MapPin, ChevronRight, ChevronLeft, Building2, Image, UserCircle,
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
 import Landmark from "../CommercialComponents/Landmark"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import PropertyName from "../PropertyName"
 import ShopType from "../CommercialComponents/ShopType"
 import CornerProperty from "../CommercialComponents/CornerProperty"
@@ -108,6 +108,7 @@ interface IMedia {
 }
 
 interface FormData {
+  propertyId?: string;
   basicInformation: IBasicInformation;
   shopDetails: IShopDetails;
   rentalTerms: IRentalTerms;
@@ -184,6 +185,7 @@ interface CommercialMediaUploadProps {
 
 const RentShopMain = () => {
   const navigate = useNavigate();
+  const {propertyId} = useParams();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -270,6 +272,48 @@ const RentShopMain = () => {
       documents: []
     }
   })
+
+  useEffect(()=>{
+    const fetchRenShopById = async()=>{
+      try {
+        await axios.get(`/api/commercial/rent/shops/${propertyId}`).then((res)=>{
+          if(res.data && res.data.success){
+            const shop = res.data.data;
+            setFormData(prev =>({
+              ...prev,
+              propertyId: shop.propertyId,
+              basicInformation:{
+                ...shop.basicInformation,
+              },
+              shopDetails:{
+                ...shop.shopDetails,
+              },
+              rentalTerms:{
+                ...shop.rentalTerms,
+              },
+              brokerage:{
+                ...shop.brokerage,
+              },
+              availability:{
+                ...shop.availability,
+              },
+              contactInformation:{
+                ...shop.contactInformation,
+              },
+            }));
+          }else{
+            toast.error("Unable to lead property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:",error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if(propertyId){
+      fetchRenShopById();
+    }
+  },[propertyId]);
 
   const [currentStep, setCurrentStep] = useState(0)
 
@@ -592,9 +636,13 @@ const RentShopMain = () => {
           }
         };
 
-        console.log("transformedData", transformedData)
-        
-        const response = await axios.post('/api/commercial/rent/shops', transformedData, {
+        console.log("transformedData", transformedData);
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+        ? `/api/commercial/rent/shops/${formData.propertyId}`
+        : `/api/commercial/rent/shops`;
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -602,6 +650,10 @@ const RentShopMain = () => {
 
         if (response.data.success) {
           toast.success('Commercial rent shop listing created successfully!');
+          navigate('/updatepropertyform');
+        }else{
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
         navigate('/login');

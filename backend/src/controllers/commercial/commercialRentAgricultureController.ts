@@ -143,8 +143,8 @@ export const getCommercialRentAgricultureById = async (req: Request, res: Respon
 // Update Commercial Rent Agriculture
 export const updateCommercialRentAgriculture = async (req: Request, res: Response) => {
   try {
-    const documentId = req.params.id; 
-    const incomingData = req.body?.data;
+    const propertyId = req.params.id; 
+    const incomingData = req.body;
     if (!incomingData) {
       return res.status(400).json({
         success: false,
@@ -160,7 +160,7 @@ export const updateCommercialRentAgriculture = async (req: Request, res: Respons
     );
 
    
-    const existingDoc = await CommercialRentAgriculture.findById(documentId);
+    const existingDoc = await CommercialRentAgriculture.findOne({propertyId});
     if (!existingDoc) {
       return res.status(404).json({
         success: false,
@@ -170,8 +170,8 @@ export const updateCommercialRentAgriculture = async (req: Request, res: Respons
 
     const mergedData = _.merge(existingDoc.toObject(), cleanedData);
 
-    const updatedDoc = await CommercialRentAgriculture.findByIdAndUpdate(
-      documentId,
+    const updatedDoc = await CommercialRentAgriculture.findOneAndUpdate(
+      {propertyId},
       { $set: mergedData },
       { new: true, runValidators: true }
     );

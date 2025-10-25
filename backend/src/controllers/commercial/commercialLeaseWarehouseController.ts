@@ -145,8 +145,8 @@ export const getLeaseWarehouseById = async (req: Request, res: Response) => {
 // Update a commercial lease warehouse
 export const updateLeaseWarehouse = async (req: Request, res: Response) => {
     try {
-        const documentId = req.params.id; 
-        const incomingData = req.body?.data;
+        const propertyId = req.params.id; 
+        const incomingData = req.body;
         if (!incomingData) {
           return res.status(400).json({
             success: false,
@@ -162,7 +162,7 @@ export const updateLeaseWarehouse = async (req: Request, res: Response) => {
         );
     
        
-        const existingDoc = await CommercialLeaseWarehouse.findById(documentId);
+        const existingDoc = await CommercialLeaseWarehouse.findOne({propertyId});
         if (!existingDoc) {
           return res.status(404).json({
             success: false,
@@ -172,8 +172,8 @@ export const updateLeaseWarehouse = async (req: Request, res: Response) => {
     
         const mergedData = _.merge(existingDoc.toObject(), cleanedData);
     
-        const updatedDoc = await CommercialLeaseWarehouse.findByIdAndUpdate(
-          documentId,
+        const updatedDoc = await CommercialLeaseWarehouse.findOneAndUpdate(
+          {propertyId},
           { $set: mergedData },
           { new: true, runValidators: true }
         );

@@ -18,10 +18,11 @@ import CommercialMediaUpload from '../CommercialComponents/CommercialMediaUpload
 import { DollarSign, Calendar, User, Image, ImageIcon, UserCircle, ChevronLeft, ChevronRight, Store, Building2, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import MapLocation from '../CommercialComponents/MapLocation';
 
 interface IFormData {
+  propertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -225,7 +226,7 @@ const RentCoveredSpace = () => {
         },
       },
     },
-    
+
     brokerage: {
       required: 'no',
       amount: 0,
@@ -303,6 +304,7 @@ const RentCoveredSpace = () => {
   const navigate = useNavigate();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const formRef = useRef<HTMLDivElement>(null);
+  const { propertyId } = useParams();
 
   // Check login status on component mount
   useEffect(() => {
@@ -312,7 +314,53 @@ const RentCoveredSpace = () => {
     } else {
       setIsLoggedIn(true);
     }
-  }, [navigate]);
+
+    const fetchRentShed = async () => {
+      try {
+        await axios.get(`/api/commercial/rent/covered-space/${propertyId}`).then((res) => {
+          if (res.data && res.data.data) {
+            const rentShed = res.data.data;
+            setFormData(prev => ({
+              ...prev,
+              propertyId: rentShed.propertyId,
+              basicInformation: {
+                ...rentShed.basicInformation,
+              },
+              spaceDetails: {
+                ...rentShed.spaceDetails,
+              },
+              propertyDetails: {
+                ...rentShed.propertyDetails,
+              },
+              rentalTerms: {
+                ...rentShed.rentalterms,
+              },
+              brokerage: {
+                ...rentShed.brokerage,
+              },
+              availability: {
+                ...rentShed.availability,
+              },
+              contactInformation: {
+                ...rentShed.contactInformation,
+              },
+              media: {
+                ...rentShed.media
+              }
+            }))
+          } else {
+            toast.error("unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if (propertyId) {
+      fetchRentShed();
+    }
+  }, [navigate, propertyId]);
 
   // Enhanced validation for current step
   const validateCurrentStep = () => {
@@ -627,7 +675,7 @@ const RentCoveredSpace = () => {
     });
   };
 
-  
+
 
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -712,18 +760,18 @@ const RentCoveredSpace = () => {
       content: renderFormSection(
         <>
           <div className="space-y-6">
-            <Rent rentDetails={formData.rentalTerms.rentDetails} 
-             onRentChange={(rent) => setFormData(prev => ({
-              ...prev,
-              rentalTerms: {
-                ...prev.rentalTerms,
-                rentDetails: {
-                  expectedRent: rent.expectedRent,
-                  isNegotiable: rent.isNegotiable,
-                  rentType: rent.rentType,
+            <Rent rentDetails={formData.rentalTerms.rentDetails}
+              onRentChange={(rent) => setFormData(prev => ({
+                ...prev,
+                rentalTerms: {
+                  ...prev.rentalTerms,
+                  rentDetails: {
+                    expectedRent: rent.expectedRent,
+                    isNegotiable: rent.isNegotiable,
+                    rentType: rent.rentType,
+                  },
                 },
-              },
-            }))}
+              }))}
             />
             {formData.rentalTerms.rentDetails.rentType === 'exclusive' && (
               <MaintenanceAmount
@@ -914,6 +962,29 @@ const RentCoveredSpace = () => {
     //   return;
     // }
     console.log(formData);
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.propertyDetails.area) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const user = sessionStorage.getItem('user');
@@ -986,10 +1057,34 @@ const RentCoveredSpace = () => {
           }
         };
 
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            location: safelocation,
+          }
+        };
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
+
+
         // Send the data to the backend
         const token = JSON.parse(user).token;
-        const response = await axios.post(
-          `/api/commercial/rent/covered-space`,
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/lease/shops/${formData.propertyId}`
+          : '/api/commercial/lease/shops'
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(
+          endpoint,
           transformedData,
           {
             headers: {
@@ -1001,10 +1096,14 @@ const RentCoveredSpace = () => {
 
         if (response.data.success) {
           toast.success('Commercial covered space listing created successfully!');
+          navigate('/updatepropertyform');
         } else {
+          console.error("Server returned success:false", response.data);
           toast.error(response.data.error || 'Failed to create listing. Please try again.');
         }
       } else {
+        console.log("User not authenticated, redirecting to login");
+        toast.error('User not logged in');
         navigate('/login');
       }
     } catch (error: any) {

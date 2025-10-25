@@ -357,6 +357,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
 };
 
 app.use(errorHandler);
+app.disable('etag');
 
 // Start server
 const PORT: number = process.env.PORT ? parseInt(process.env.PORT) : 8000;

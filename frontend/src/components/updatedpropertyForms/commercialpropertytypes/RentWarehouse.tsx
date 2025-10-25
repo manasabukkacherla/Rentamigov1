@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import PropertyName from '../PropertyName';
 import WarehouseType from '../CommercialComponents/WarehouseType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -23,6 +23,7 @@ import MapLocation from '../CommercialComponents/MapLocation';
 
 // Define the FormData interface to match the backend structure
 interface FormData {
+  propertyId?: string,
   basicInformation: {
     title: string;
     Type: string[];
@@ -155,6 +156,7 @@ const convertFileToBase64 = (file: File): Promise<string> => {
 const RentWarehouse = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+  const { propertyId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -239,7 +241,7 @@ const RentWarehouse = () => {
         },
       },
     },
-    
+
     brokerage: {
       required: 'no',
       amount: 0,
@@ -279,6 +281,48 @@ const RentWarehouse = () => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchRentWareHouseById = async () => {
+      try {
+        await axios.get(`/api/commercial/rent/warehouse/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const wareHouse = res.data.data;
+            console.log(wareHouse);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: wareHouse.propertyId,
+              basicInformation: {
+                ...wareHouse.basicInformation,
+              },
+              warehouseDetails: {
+                ...wareHouse.warehouseDetails,
+              },
+              propertyDetails: {
+                ...wareHouse.propertyDetails,
+              },
+              rentalTerms: {
+                ...wareHouse.rentalTerms,
+              },
+              brokerage: { ...wareHouse.brokerage },
+              availability: { ...wareHouse.availability },
+              contactInformation: { ...wareHouse.contactInformation },
+              media: { ...wareHouse.media },
+              metadata: { ...wareHouse.metadata },
+            }))
+          } else {
+            toast.error("Unable to lead property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    };
+    if (propertyId) {
+      fetchRentWareHouseById();
+    }
+  }, [navigate, propertyId]);
 
   const handlePropertyNameChange = (name: string) => {
     setFormData({
@@ -747,8 +791,31 @@ const RentWarehouse = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setIsSubmitting(true);
+
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.propertyDetails.area.totalArea) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -766,7 +833,24 @@ const RentWarehouse = () => {
           videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
-        console.log(formData)
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation:{
+            ...formData.basicInformation,
+            location:safelocation,
+          }
+        }
+
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
 
         const transformedData = {
           ...formData,
@@ -784,7 +868,12 @@ const RentWarehouse = () => {
 
 
         console.log(transformedData);
-        const response = await axios.post('/api/commercial/rent/warehouses', transformedData, {
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/rent/warehouses/${formData.propertyId}`
+          : `/api/commercial/rent/warehouses`;
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -793,6 +882,10 @@ const RentWarehouse = () => {
 
         if (response.data.success) {
           toast.success('Commercial warehouse listing created successfully!');
+          navigate('/updatepropertyform');
+        } else {
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
         navigate('/login');

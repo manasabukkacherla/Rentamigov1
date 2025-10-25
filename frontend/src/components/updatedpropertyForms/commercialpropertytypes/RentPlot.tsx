@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
 import PlotType from '../CommercialComponents/PlotType';
@@ -73,6 +73,7 @@ const ErrorDisplay = ({ errors }: { errors: Record<string, string> }) => {
 };
 
 interface FormData {
+  propertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -150,6 +151,7 @@ interface FormData {
 const RentPlot = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+  const { propertyId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -237,7 +239,44 @@ const RentPlot = () => {
     } else {
       setIsLoggedIn(true);
     }
-  }, [navigate]);
+
+    const fetchRentPlotById = async () => {
+      try {
+        await axios.get(`/api/commercial/rent/others/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const rentOthers = res.data.data;
+            console.log(rentOthers);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: rentOthers.propertyId,
+              basicInformation: {
+                ...rentOthers.basicInformation,
+              },
+              propertyDetails: {
+                ...rentOthers.propertyDetails,
+              },
+              rentalTerms: {
+                ...rentOthers.rentalTerms,
+              },
+              availability: { ...rentOthers.availability },
+              contactInformation: { ...rentOthers.contactInformation },
+              media: { ...rentOthers.media },
+              metadata: { ...rentOthers.metaData }
+            }))
+          } else {
+            toast.error("Unable to lead property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+
+    if (propertyId) {
+      fetchRentPlotById();
+    }
+  }, [navigate, propertyId]);
 
   const validateCurrentStep = () => {
     const errors: Record<string, string> = {};
@@ -537,6 +576,30 @@ const RentPlot = () => {
     setIsSubmitting(true);
     // Add API submission logic here
     console.log('Form Data:', formData);
+
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.propertyDetails.totalArea) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -565,6 +628,24 @@ const RentPlot = () => {
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            location: safelocation,
+          }
+        };
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
+
         const transformedData = {
           ...formData,
           media: convertedMedia,
@@ -574,7 +655,13 @@ const RentPlot = () => {
           }
         };
 
-        const response = await axios.post('/api/commercial/rent/plots', transformedData, {
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/rent/plots/${formData.propertyId}`
+          : '/api/commercial/rent/plots'
+        const method = isEditMode ? axios.put : axios.post;
+
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -582,8 +669,14 @@ const RentPlot = () => {
 
         if (response.data.success) {
           toast.success('Commercial rent plot listing created successfully!');
+          navigate('/updatepropertyform');
+        } else {
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
+        console.log("User not authenticated, redirecting to login");
+        toast.error('User not logged in');
         navigate('/login');
       }
     } catch (error) {
@@ -654,7 +747,7 @@ const RentPlot = () => {
 
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-8">
+        <div className="mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-black">Rent Commercial Plot</h1>
         </div>
         <div className="mb-8">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import PropertyName from '../PropertyName';
 import OfficeSpaceType from '../CommercialComponents/OfficeSpaceType';
@@ -177,6 +177,7 @@ interface IFloor {
 }
 
 interface FormData {
+  propertyId?: string,
   basicInformation: IBasicInformation;
   officeDetails: IOfficeDetails;
   propertyDetails: {
@@ -211,6 +212,7 @@ interface FormData {
 const RentOfficeSpace = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+  const { propertyId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: '',
@@ -342,7 +344,46 @@ const RentOfficeSpace = () => {
     } else {
       setIsLoggedIn(true);
     }
-  }, [navigate]);
+    const fetchRentOfficeSpaceById = async () => {
+      try {
+        await axios.get(`/api/commercial/rent/office-space/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const officeSpace = res.data.data;
+            console.log(officeSpace);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: officeSpace.propertyId,
+              basicInformation: {
+                ...officeSpace.basicInformation,
+              },
+              officeDetails: {
+                ...officeSpace.officeDetails,
+              },
+              propertyDetails: {
+                ...officeSpace.propertyDetails,
+              },
+              rentalTerms: {
+                ...officeSpace.rentalTerms,
+              },
+              brokerage: { ...officeSpace.brokerage },
+              availability: { ...officeSpace.availability },
+              contactInformation: { ...officeSpace.contactInformation },
+              media: { ...officeSpace.media },
+              metadata: { ...officeSpace.metadata },
+            }))
+          } else {
+            toast.error("Unable to lead property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    };
+    if (propertyId) {
+      fetchRentOfficeSpaceById();
+    }
+  }, [navigate, propertyId]);
 
   const validateCurrentStep = () => {
     const errors: Record<string, string> = {};
@@ -716,6 +757,30 @@ const RentOfficeSpace = () => {
     e.preventDefault();
     setIsSubmitting(true);
     console.log(formData);
+    if (!formData.basicInformation.title) {
+      toast.error('Property Name is reuired');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
+      toast.error('Address details are required');
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.propertyDetails.area.totalArea) {
+      toast.error("Area information needed");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
+      toast.error('Contact information is required');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const user = sessionStorage.getItem('user');
       if (user) {
@@ -744,6 +809,48 @@ const RentOfficeSpace = () => {
           documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
         };
 
+        const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          basicInformation: {
+            ...formData.basicInformation,
+            location:safelocation,
+          },
+          officeDetails: {
+            ...formData.officeDetails,
+          },
+          propertyDetails: {
+            ...formData.propertyDetails,
+          },
+          rentalTerms: {
+            ...formData.rentalTerms,
+          },
+          brokerage: {
+            ...formData.brokerage,
+          },
+          availability: {
+            ...formData.availability,
+          },
+          contactInformation: {
+            ...formData.contactInformation,
+          },
+          media: {
+            ...formData.media,
+          },
+          metadata: {
+            ...formData.metadata,
+          }
+        };
+
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
+
         const transformedData = {
           ...formData,
           media: convertedMedia,
@@ -760,7 +867,12 @@ const RentOfficeSpace = () => {
 
         console.log("transformedData", transformedData);
 
-        const response = await axios.post('/api/commercial/rent/office-space', transformedData, {
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/rent/office-space/${formData.propertyId}`
+          : '/api/commercial/rent/office-space'
+        const method = isEditMode ? axios.put : axios.post;
+        const response = await method(endpoint, transformedData, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -768,8 +880,14 @@ const RentOfficeSpace = () => {
 
         if (response.data.success) {
           toast.success('Commercial rent office space listing created successfully!');
+          navigate('/updatepropertyform');
+        } else {
+          console.error("Server returned success:false", response.data);
+          toast.error(response.data.message || 'Failed to create listing. Please try again.');
         }
       } else {
+        console.log("User not authenticated, redirecting to login");
+        toast.error("You must be logged in to update a property.");
         navigate('/login');
       }
     } catch (error) {
