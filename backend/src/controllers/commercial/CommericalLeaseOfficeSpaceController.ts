@@ -199,7 +199,8 @@ export const createLeaseOfficeSpace = async (req: Request, res: Response) => {
                 documents: formData.media?.documents || []
             },
             metadata: {
-                createdBy: req.user?._id || null,
+                ...formData.metadata,
+                createdBy: formData.metadata?.createdBy || null,
                 createdAt: new Date(),
                 // status: 'active',
                 // views: 0,
@@ -282,10 +283,10 @@ export const getLeaseOfficeSpaceById = async (req: Request, res: Response) => {
 
 export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
   try {
-    const documentId = req.params.id; // This is the _id of the document
+    const propertyId = req.params.id; // This is the _id of the document
 
     // Validate request body
-    const incomingData = req.body?.data;
+    const incomingData = req.body;
     if (!incomingData) {
       return res.status(400).json({
         success: false,
@@ -302,7 +303,7 @@ export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
     );
 
     // Step 2: Fetch existing document using _id
-    const existingDoc = await CommercialLeaseOfficeSpace.findById(documentId);
+    const existingDoc = await CommercialLeaseOfficeSpace.findOne({propertyId});
     if (!existingDoc) {
       return res.status(404).json({
         success: false,
@@ -314,8 +315,8 @@ export const updateLeaseOfficeSpace = async (req: Request, res: Response) => {
     const mergedData = _.merge(existingDoc.toObject(), cleanedData);
 
     // Step 4: Perform the update
-    const updatedDoc = await CommercialLeaseOfficeSpace.findByIdAndUpdate(
-      documentId,
+    const updatedDoc = await CommercialLeaseOfficeSpace.findOneAndUpdate(
+      {propertyId},
       { $set: mergedData },
       { new: true, runValidators: true }
     );

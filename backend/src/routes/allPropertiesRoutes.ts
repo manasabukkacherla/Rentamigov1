@@ -50,7 +50,7 @@ import SalePlot from '../models/residential/salePlot';
 
 // Residential Lease Models
 import ResidentialLeaseApartment from '../models/residential/residentialLeaseAppartment';
-import ResidentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
+import residentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
 import ResidentialLeaseIndependentHouse from '../models/residential/residentialLeaseIndependentHouse';
 
 // Normalizer helper to pick only needed fields
@@ -138,7 +138,7 @@ router.get('/all', async (req: any, res: any) => {
       SalePlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
 
       ResidentialLeaseApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft leaseTerms.leaseDetails.leaseAmount.amount media.photos.exterior propertyDetails.furnishingStatus'),
-      ResidentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      residentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),,
       ResidentialLeaseIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus')
     ]);
 
@@ -155,7 +155,7 @@ router.get('/all', async (req: any, res: any) => {
 
     // Destructure and normalize results
     const [
-      // rentAgriculture,
+      rentAgriculture,
       rentCoveredSpace,
       rentOfficeSpace,
       rentOthers,
@@ -166,7 +166,7 @@ router.get('/all', async (req: any, res: any) => {
       rentShop,
       rentShowroom,
 
-      // sellAgriculture,
+      sellAgriculture,
       sellCoveredSpace,
       sellOfficeSpace,
       sellOthers,
@@ -200,7 +200,7 @@ router.get('/all', async (req: any, res: any) => {
       resLeaseApartment,
       resLeaseBuilderFloor,
       resLeaseIndependentHouse
-    ] = results.map(r => (r.status === 'fulfilled' ? r.value.map(normalizeProperty) : []));
+    ] = results.map(r => (r.status === 'fulfilled' && r.value ? r.value.map(normalizeProperty) : []));
 
     return res.status(200).json({
       success: true,
@@ -347,7 +347,7 @@ router.put('/:category/:listing/:type/:propertyId', async (req: any, res: any) =
         case 'lease':
           switch (type) {
             case 'apartment': model = ResidentialLeaseApartment; break;
-            case 'builderfloor': model = ResidentialLeaseBuilderFloor; break;
+            case 'builderfloor': model = residentialLeaseBuilderFloor; break;
             case 'independenthouse': model = ResidentialLeaseIndependentHouse; break;
             default: return res.status(400).json({ success: false, message: 'Invalid type' });
           }
@@ -462,7 +462,7 @@ router.delete('/:category/:listing/:type/:propertyId', async (req: any, res: any
         case 'lease':
           switch (type) {
             case 'apartment': model = ResidentialLeaseApartment; break;
-            case 'builderfloor': model = ResidentialLeaseBuilderFloor; break;
+            case 'builderfloor': model = residentialLeaseBuilderFloor; break;
             case 'independenthouse': model = ResidentialLeaseIndependentHouse; break;
             default: return res.status(400).json({ success: false, message: 'Invalid type' });
           }

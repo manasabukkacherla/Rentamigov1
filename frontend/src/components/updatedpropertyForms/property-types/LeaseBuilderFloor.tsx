@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef ,useCallback} from "react"
+import React, { useState, useRef ,useCallback, useEffect} from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -19,7 +19,7 @@ import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 import { uploadResidentialMediaToS3 } from '../../../utils/residentialMediaUploader'
 
@@ -217,6 +217,7 @@ interface ApiError {
 }
 
 interface FormData {
+  propertyId?:string;
   basicInformation: {
     title: string;
     floorNumber: number;
@@ -555,12 +556,14 @@ interface LeaseDuration {
   durationUnit: DurationUnit;  // More strict typing
 }
 
-const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initialPropertyId, onSubmit }) => {
+const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
+  const {propertyId} = useParams();
+  const navigate = useNavigate()
+  const [isLoggedIn , setIsLoggedIn] = useState(false);
   const formRef = useRef<HTMLDivElement>(null)
   const initialData = {
     basicInformation: {
@@ -850,6 +853,55 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       status: "Available"
     }
   })
+
+  useEffect(()=>{
+    const user = sessionStorage.getItem('user');
+    if(!user){
+      navigate('/login');
+    }else{
+      setIsLoggedIn(true);
+    };
+    const fetchLeaseBuilderById = async ()=>{
+      try {
+        await axios.get(`/api/residential/lease/builderfloor/${propertyId}`).then((res)=>{
+          if(res.data && res.data.success){
+            const leaseBuilder = res.data.data;
+            console.log("lease Builder",leaseBuilder);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: leaseBuilder.propertyId,
+              basicInformation:{
+                ...leaseBuilder.basicInformation,
+              },
+              propertyDetails:{
+                ...leaseBuilder.propertyDetails,
+              },
+              availableitems:{
+                ...leaseBuilder.availableitems,
+              },
+              floorAmenities:{
+                ...leaseBuilder.floorAmenities,
+              },
+              leaseDetails:{
+                ...leaseBuilder.leaseDetails,
+              },
+              availability:{
+                ...leaseBuilder.availability,
+              }
+            }))
+          }else{
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if(propertyId){
+      fetchLeaseBuilderById();
+    }
+  },[propertyId , navigate]);
 
   const handleAddressChange = useCallback((newAddress: Address) => {
       setFormData(prev => ({
@@ -1260,7 +1312,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
@@ -1382,9 +1433,14 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
                 }))
               }
             };
+            const isEditMode = !!formData.propertyId;
+            const endpoint = isEditMode
+            ? `/api/residential/lease/builderfloor/${formData.propertyId}`
+            : '/api/residential/lease/builderfloor'
+            const method = isEditMode ? axios.put : axios.post;
 
             // Send the updated form data to the backend
-            const response = await axios.post('/api/residential/lease/builderfloor', {
+            const response = await method(endpoint, {
               ...updatedFormData,
               metadata: {
                 createdBy: author,
@@ -1398,9 +1454,16 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
 
             if (response.data.success) {
               // Set the propertyId from the response
-              setPropertyId(response.data.data.propertyId);
               toast.success('Property listed successfully!');
-              // navigate('/dashboard');
+              navigate('/Userdashboard/properties');
+            }else if(!!formData.propertyId){
+              toast.dismiss();
+              toast.error(response.data.error || "Failed to create property listing");
+              console.error('Failed to create property listing:', response.data.error);
+            }else{
+              toast.dismiss();
+              toast.error(response.data.error || "Failed to update property listing");
+              console.error('Failed to update property listing:', response.data.error);
             }
           }
         } catch (error) {
@@ -1408,8 +1471,14 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
           toast.error('Failed to upload media files');
         }
       } else {
+
+        const isEditMode = !!formData.propertyId;
+            const endpoint = isEditMode
+            ? `/api/residential/lease/builderfloor/${formData.propertyId}`
+            : '/api/residential/lease/builderfloor'
+            const method = isEditMode ? axios.put : axios.post;
         // If no media to upload, just send the form data
-        const response = await axios.post('/api/residential/lease/builderfloor', {
+        const response = await method(endpoint, {
           ...formData,
           metadata: {
             createdBy: author,
@@ -1423,9 +1492,12 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
 
         if (response.data.success) {
           // Set the propertyId from the response
-          setPropertyId(response.data.data.propertyId);
           toast.success('Property listed successfully!');
-          navigate('/dashboard');
+          navigate('/Userdashboard/properties');
+        }else{
+          toast.dismiss();
+          toast.error(response.data.error || "Failed to update property listing");
+          console.error('Failed to update property listing:', response.data.error);
         }
       }
     } catch (error) {

@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import PropertyName from '../PropertyName';
@@ -38,6 +38,7 @@ interface OfficeDetails {
 }
 
 interface FormData {
+  propertyId?: string;
   title: string;
   officeType: string[];
   address: {
@@ -101,6 +102,7 @@ interface FormData {
 const LeaseOfficeSpaceMain = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { propertyId } = useParams();
   const [formData, setFormData] = useState<FormData>({
     title: '',
     officeType: [] as string[],
@@ -172,8 +174,93 @@ const LeaseOfficeSpaceMain = () => {
   });
 
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    }
+    const fetchLeaseOfficeSpaceById = async () => {
+      try {
+        await axios.get(`/api/commercial/lease/office-space/${propertyId}`).then((res) => {
+          if (res.data && res.data.success) {
+            const leaseOffice = res.data.data;
+            console.log("lease office props:", leaseOffice);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: leaseOffice.propertyId,
+              title: leaseOffice.basicInformation.title,
+              officeType: Array.isArray(leaseOffice.basicInformation.type)
+                ? leaseOffice.officeType
+                : leaseOffice.officeType
+                  ? [leaseOffice.officeType]
+                  : [],
+              address: {
+                ...leaseOffice.basicInformation.address,
+              },
+              landmark: leaseOffice.basicInformation.landmark,
+              coordinates: {
+                ...leaseOffice.coordinates,
+              },
+              isCornerProperty: leaseOffice.isCornerProperty,
+              officeDetails: {
+                seatingCapacity: leaseOffice.officeDetails?.seatingCapacity || '',
+                cabins: {
+                  available: leaseOffice.officeDetails?.cabins?.available ?? false,
+                  count: leaseOffice.officeDetails?.cabins?.count ?? 0
+                },
+                conferenceRoom: leaseOffice.officeDetails?.conferenceRoom ?? false,
+                meetingRoom: leaseOffice.officeDetails?.meetingRoom ?? false,
+                receptionArea: leaseOffice.officeDetails?.receptionArea ?? false,
+                wifiSetup: leaseOffice.officeDetails?.wifiSetup ?? false,
+                serverRoom: leaseOffice.officeDetails?.serverRoom ?? false,
+                coworkingFriendly: leaseOffice.officeDetails?.coworkingFriendly ?? false
+              },
+              propertyDetails: {
+                ...leaseOffice.propertyDetails,
+              },
+              leaseAmount: {
+                ...leaseOffice.leaseAmount,
+              },
+              leaseTenure: {
+                ...leaseOffice.leaseTenure,
+              },
+              maintenanceAmount: {
+                ...leaseOffice.maintenanceAmount
+              },
+              otherCharges: {
+                ...leaseOffice.otherCharges
+              },
+              brokerage: {
+                ...leaseOffice.brokerage,
+              },
+              availability: {
+                ...leaseOffice.availability,
+              },
+              contactDetails: {
+                ...leaseOffice.contactInformation,
+              },
+              media: {
+                ...leaseOffice.media,
+              }
+            }))
+          } else {
+            toast.error("Unable to lead property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if (propertyId) {
+      fetchLeaseOfficeSpaceById();
+    }
+  }, [propertyId, navigate])
   // Form prevention utility function
   const preventDefault = (e: React.MouseEvent | React.FormEvent) => {
     if (e) {
@@ -182,6 +269,18 @@ const LeaseOfficeSpaceMain = () => {
     }
     return false;
   };
+
+  function normalizeFiles(files: (File | string)[]) {
+    return files.map(file => {
+      if (typeof file === "string" && file.startsWith("data:image")) {
+        return { url: file, file: null as any };
+      }
+      if (file instanceof File) {
+        return { url: URL.createObjectURL(file), file };
+      }
+      return { url: "", file: null as any };
+    });
+  }
 
   const steps = [
     {
@@ -200,7 +299,7 @@ const LeaseOfficeSpaceMain = () => {
           <div className="space-y-6">
             <CommercialPropertyAddress address={formData.address} onAddressChange={(address) => setFormData(prev => ({ ...prev, address }))} />
 
-            <MapLocation  
+            <MapLocation
               latitude={formData.coordinates.latitude}
               longitude={formData.coordinates.longitude}
               landmark={formData.landmark}
@@ -265,7 +364,7 @@ const LeaseOfficeSpaceMain = () => {
             ...prev,
             availability: {
               date: availability.date || new Date(),
-              type: availability.type|| 'immediate',
+              type: availability.type || 'immediate',
               leaseDuration: availability.preferredSaleDuration || '',
               noticePeriod: availability.noticePeriod || '',
               petsAllowed: availability.petsAllowed || false
@@ -292,44 +391,44 @@ const LeaseOfficeSpaceMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+                files: normalizeFiles(files)
               })),
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
             }}
-              onMediaChange={(media) => {
-                const photosByCategory: Record<string, File[]> = {
-                  exterior: [],
-                  interior: [],
-                  floorPlan: [],
-                  washrooms: [],
-                  lifts: [],
-                  emergencyExits: []
-                };
+            onMediaChange={(media) => {
+              const photosByCategory: Record<string, File[]> = {
+                exterior: [],
+                interior: [],
+                floorPlan: [],
+                washrooms: [],
+                lifts: [],
+                emergencyExits: []
+              };
 
-                media.photos.forEach(({ category, files }) => {
-                  if (category in photosByCategory) {
-                    photosByCategory[category] = files.map(f => f.file);
-                  }
-                });
+              media.photos.forEach(({ category, files }) => {
+                if (category in photosByCategory) {
+                  photosByCategory[category] = files.map(f => f.file);
+                }
+              });
 
-                setFormData(prev => ({
-                  ...prev,
-                  media: {
-                    photos: {
-                      exterior: photosByCategory.exterior,
-                      interior: photosByCategory.interior,
-                      floorPlan: photosByCategory.floorPlan,
-                      washrooms: photosByCategory.washrooms,
-                      lifts: photosByCategory.lifts,
-                      emergencyExits: photosByCategory.emergencyExits
-                    },
-                    videoTour: media.videoTour || null,
-                    documents: media.documents
-                  }
-                }));
-              }}
-            />
+              setFormData(prev => ({
+                ...prev,
+                media: {
+                  photos: {
+                    exterior: photosByCategory.exterior,
+                    interior: photosByCategory.interior,
+                    floorPlan: photosByCategory.floorPlan,
+                    washrooms: photosByCategory.washrooms,
+                    lifts: photosByCategory.lifts,
+                    emergencyExits: photosByCategory.emergencyExits
+                  },
+                  videoTour: media.videoTour || null,
+                  documents: media.documents
+                }
+              }));
+            }}
+          />
         </div>
       ),
     },
@@ -405,28 +504,37 @@ const LeaseOfficeSpaceMain = () => {
 
       try {
         // Make API call to create commercial lease office space
-        const response = await axios.post(
-          `/api/commercial/lease/office-space`, // Fixed endpoint path to match backend route
+
+        const isEditMode = !!formData.propertyId;
+        const endpoint = isEditMode
+          ? `/api/commercial/lease/office-space/${formData.propertyId}`
+          : '/api/commercial/lease/office-space'
+        const method = isEditMode ? axios.put : axios.post;
+
+        const response = await method(
+          endpoint, // Fixed endpoint path to match backend route
           backendData,
           {
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              // 'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
           }
         );
 
         if (response.data.success) {
           // Clear the stored property ID after successful submission
-          localStorage.removeItem('officeSpacePropertyId');
-
           toast.dismiss();
           toast.success("Property listed successfully!");
-          navigate('/updatePropertyForm');
-        } else {
+          navigate('/Userdashboard/properties');
+        } else if (!!formData.propertyId) {
           toast.dismiss();
           toast.error(response.data.error || "Failed to create property listing");
           console.error('Failed to create property listing:', response.data.error);
+        } else {
+          toast.dismiss();
+          toast.error(response.data.error || "Failed to update property listing");
+          console.error('Failed to update property listing:', response.data.error);
         }
       } catch (apiError: any) {
         toast.dismiss();
@@ -524,10 +632,30 @@ const LeaseOfficeSpaceMain = () => {
     return uploadedMedia;
   };
 
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   // Map frontend form data to backend model structure
   const mapFormDataToBackendModel = async () => {
     // Handle media upload first (this would involve actual file uploads in production)
-    const uploadedMedia = await uploadMediaFiles();
+    const uploadedMedia = {
+      photos: {
+        exterior: await Promise.all((formData.media?.photos?.exterior ?? []).filter(f => f instanceof File).map(convertFileToBase64)),
+        interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+        floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+        washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+        lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+        emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+      },
+      videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+      documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+    };
 
     // Function to ensure correct casing for enum values
     const formatEnumValue = (value: string | undefined, enumType: 'leaseType' | 'frequency'): string => {
@@ -582,29 +710,29 @@ const LeaseOfficeSpaceMain = () => {
     const formatOfficeFeature = (value: boolean) => value ? 'Available' : 'Not Available';
 
     // Check if propertyId already exists in localStorage, otherwise generate a new one
-    let propertyId = localStorage.getItem('officeSpacePropertyId');
-    console.log('Existing propertyId from localStorage:', propertyId);
+    // let propertyId = localStorage.getItem('officeSpacePropertyId');
+    // console.log('Existing propertyId from localStorage:', propertyId);
 
-    if (!propertyId) {
-      const timestamp = new Date().getTime();
-      const randomStr = Math.random().toString(36).substring(2, 8);
-      propertyId = `OFFICE-${timestamp}-${randomStr}`;
-      localStorage.setItem('officeSpacePropertyId', propertyId);
-      console.log('Generated new propertyId:', propertyId);
-    } else {
-      console.log('Using existing propertyId:', propertyId);
-    }
+    // if (!formData.propertyId) {
+    //   const timestamp = new Date().getTime();
+    //   const randomStr = Math.random().toString(36).substring(2, 8);
+    //   propertyId = `OFFICE-${timestamp}-${randomStr}`;
+    //   localStorage.setItem('officeSpacePropertyId', propertyId);
+    //   console.log('Generated new propertyId:', propertyId);
+    // } else {
+    //   console.log('Using existing propertyId:', propertyId);
+    // }
 
     // Log the office details before mapping
     console.log('Office Details before mapping:', {
       seatingCapacity: formData.officeDetails?.seatingCapacity,
-      cabins: formatOfficeFeature(formData.officeDetails?.cabins.available),
+      cabins: formatOfficeFeature(formData.officeDetails?.cabins?.available),
       cabinCount: formData.officeDetails?.cabins.count
     });
 
     // Create the backend data object with proper mapping
     const backendData = {
-      propertyId: propertyId,
+      propertyId: formData.propertyId,
       basicInformation: {
         title: formData.title || '',
         officeType: formData.officeType || [],
@@ -704,7 +832,7 @@ const LeaseOfficeSpaceMain = () => {
       },
       media: uploadedMedia,
       metadata: {
-        createdBy: localStorage.getItem('_Id') || null,
+        createdBy: sessionStorage.getItem('userId') || null,
         createdAt: new Date(),
         propertyType: 'Commercial',
         propertyName: 'Office Space',

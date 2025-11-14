@@ -58,7 +58,7 @@ export const createCommercialRentShed = async (req: Request, res: Response) => {
 
         // Robustly set metadata.createdBy and createdAt
         formData.metadata = formData.metadata || {};
-        formData.metadata.createdBy = req.user?._id || formData.metadata.createdBy || null;
+        formData.metadata.createdBy = formData.metadata.createdBy || null;
         formData.metadata.createdAt = formData.metadata.createdAt || new Date();
 
         if (!formData.metadata.createdBy) {

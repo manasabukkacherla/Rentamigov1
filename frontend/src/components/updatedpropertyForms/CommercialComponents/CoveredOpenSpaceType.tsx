@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { ArrowRight, Warehouse } from 'lucide-react';
 
 interface CoveredOpenSpaceTypeProps {
@@ -10,13 +10,17 @@ const CoveredOpenSpaceType = ({ onSpaceTypeChange }: CoveredOpenSpaceTypeProps) 
 
   const handleTypeChange = (type: string) => {
     setSelectedTypes((prev) => {
-      const updatedTypes = prev.includes(type) 
+      return prev.includes(type) 
         ? prev.filter((t) => t !== type) 
         : [...prev, type];
-      onSpaceTypeChange?.(updatedTypes);
-      return updatedTypes;
     });
   };
+
+  useEffect(() => {
+    if (onSpaceTypeChange) {
+      onSpaceTypeChange?.(selectedTypes);
+    }
+  }, [selectedTypes]);
 
   const spaceTypes = [
     { value: 'open-yard', label: 'Open Yard' },

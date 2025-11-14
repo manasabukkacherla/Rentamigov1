@@ -2,33 +2,24 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, Ruler, Building2, Compass, Sofa, Zap, Droplets, Shield, Clock } from 'lucide-react';
 
 interface CommercialPropertyDetailsProps {
-  onDetailsChange: (details: {
-    area: {
-      totalArea: number;
-      carpetArea: number;
-      builtUpArea: number;
-    };
-    floor: {
-      floorNumber: number;
-      totalFloors: number;
-    };
+  initialDetails?: {
+    area: { totalArea: number; carpetArea: number; builtUpArea: number };
+    floor: { floorNumber: number; totalFloors: number };
     facingDirection: string;
     furnishingStatus: string;
     propertyAmenities: string[];
     wholeSpaceAmenities: string[];
-    electricitySupply: {
-      powerLoad: number | null;
-      backup: boolean;
-    };
+    electricitySupply: { powerLoad: number | null; backup: boolean };
     waterAvailability: string;
     propertyAge: string;
     propertyCondition: string;
-  }) => void;
+  };
+  onDetailsChange: (details: any) => void;
 }
 
-const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetailsProps) => {
-  const [propertyDetails, setPropertyDetails] = useState({
-    area: {
+const CommercialPropertyDetails = ({ onDetailsChange,initialDetails }: CommercialPropertyDetailsProps) => {
+  const [propertyDetails, setPropertyDetails] = useState(
+    initialDetails || {area: {
       totalArea: 0,
       carpetArea: 0,
       builtUpArea: 0
@@ -65,7 +56,6 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
         const key = field as keyof typeof newState;
         (newState[key] as any) = value;
       }
-      onDetailsChange(newState);
       return newState;
     });
   };
@@ -86,17 +76,10 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
   };
 
   useEffect(() => {
-    onDetailsChange({
-      ...propertyDetails,
-      electricitySupply: {
-        powerLoad: null,
-        backup: false
-      },
-      waterAvailability: '',
-      propertyAge: '',
-      propertyCondition: 'new'
-    });
-  }, []);
+    if(initialDetails) {
+      setPropertyDetails(initialDetails);
+    }
+  }, [initialDetails]);
 
   const handleAmenityChange = (category: 'propertyAmenities' | 'wholeSpaceAmenities', amenity: string, isChecked: boolean) => {
     const currentAmenities = propertyDetails[category];
@@ -114,7 +97,6 @@ const CommercialPropertyDetails = ({ onDetailsChange }: CommercialPropertyDetail
     };
 
     setPropertyDetails(updatedDetails);
-    onDetailsChange?.(updatedDetails);
   };
 
   const allPropertyAmenities = [

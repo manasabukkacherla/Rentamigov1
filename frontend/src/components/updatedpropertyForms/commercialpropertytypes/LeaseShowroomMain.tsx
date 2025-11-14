@@ -299,7 +299,7 @@ const LeaseShowroomMain = () => {
   const navigate = useNavigate()
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const formRef = useRef<HTMLDivElement>(null)
-  const propertyId = useParams();
+  const {propertyId} = useParams();
 
   useEffect(() => {
     const user = sessionStorage.getItem('user');
@@ -308,7 +308,6 @@ const LeaseShowroomMain = () => {
     } else {
       setIsLoggedIn(true);
     }
-    console.log(propertyId);
     const fetchLeaseShowroom = async () => {
       try {
         await axios.get(`/api/commercial/lease/showrooms/${propertyId}`).then((res) => {
@@ -349,8 +348,8 @@ const LeaseShowroomMain = () => {
       }
     }
     if (propertyId) {
-      fetchLeaseShowroom();
-    }
+    fetchLeaseShowroom();
+  }
   }, [navigate, propertyId]);
 
   const steps = [

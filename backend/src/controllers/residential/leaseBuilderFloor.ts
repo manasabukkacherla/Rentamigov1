@@ -57,7 +57,11 @@ export const createLeaseBuilderFloor = async (req: Request, res: Response) => {
       ...req.body,
       propertyId,
       metadata: {
-        ...req.body.metadata,
+        propertyType: req.body.metadata.propertyType,
+        propertyName: req.body.metadata.propertyName,
+        intent: req.body.metadata.intent,
+        status: req.body.metadata.status,
+        createdBy: req.body.metadata.createdBy,
         createdAt: new Date()
       }
     };

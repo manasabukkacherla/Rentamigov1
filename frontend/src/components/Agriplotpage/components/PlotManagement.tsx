@@ -34,7 +34,7 @@ const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
         propertyId: property?.propertyId,
         propertyTitle: property?.metadata?.propertyName || property?.basicInformation?.title
       });
-      
+
       alert('Thank you for your enquiry! We will get back to you soon.');
       onClose();
     } catch (error) {
@@ -130,8 +130,8 @@ const EnquiryForm: React.FC<EnquiryFormProps> = ({ onClose, property }) => {
           </button>
         </form>
       </div>
-      
-      
+
+
     </div>
   );
 };
@@ -157,7 +157,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
                 <span className="text-gray-600">Property Price</span>
                 <span className="font-medium">₹{property?.pricingDetails?.propertyPrice || 'N/A'}</span>
               </div>
-             
+
               <div className="flex justify-between">
                 <span className="text-gray-600">Price per Sqft</span>
                 <span className="font-medium">₹{property?.pricingDetails?.pricePerSqFt || 'N/A'}</span>
@@ -166,7 +166,7 @@ const PricingCard: React.FC<PricingCardProps> = ({ property, listing, type, onEn
                 <span className="text-gray-600">Total Price</span>
                 <span className="font-medium">₹{property?.pricingDetails?.totalPrice || 'N/A'}</span>
               </div>
-             
+
             </div>
           </div>
         </div>
@@ -297,6 +297,7 @@ export interface AgricultureProperty {
     cropSuitability: string;
     waterSource?: string;
     legalClearances: boolean;
+    powersupply: boolean;
   };
   price?: {
     expectedPrice?: number;
@@ -449,6 +450,7 @@ interface leaseagriculture {
     cropSuitability: string;
     waterSource: string;
     legalClearances: boolean;
+    powersupply: boolean;
   };
 
 
@@ -673,7 +675,7 @@ const PlotManagement: React.FC = () => {
   const [showPriceCard, setShowPriceCard] = useState(false);
   const [showAllFeatures, setShowAllFeatures] = useState(false);
   const [propertyRentPlot, setPropertyRentPlot] = useState<any>(null);
-  
+
   const categoryCodes: Record<string, string> = {
     residential: "RES",
     commercial: "COM",
@@ -818,7 +820,7 @@ const PlotManagement: React.FC = () => {
             <div><strong>sell Price:</strong> ₹{price}</div>
           </>
         )}
-       
+
       </div>
     );
   };
@@ -932,12 +934,12 @@ const PlotManagement: React.FC = () => {
                       } else if (listing === 'rent') {
                         const address = rentplotproperty?.basicInformation?.address;
                         return address ? `${address.street || ''}, ${address.city || ''}, ${address.state || ''} ${address.zipCode || ''}`.replace(/^, | ,| , | $/g, '') : '';
-                      } else if(listing === 'sell'){
+                      } else if (listing === 'sell') {
                         const address = sellplotproperty?.basicInformation;
 
                         return `${address?.address || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '') || '';
 
-                      }else if(listing === 'lease') {
+                      } else if (listing === 'lease') {
                         const address = leaseplotproperty?.basicInformation?.address;
 
                         return `${address?.street || ''}, ${address?.city || ''}, ${address?.state || ''} ${address?.zipCode || ''}`.replace(/^, | ,| , | $/g, '');
@@ -1096,12 +1098,12 @@ const PlotManagement: React.FC = () => {
                   <MapPin className="h-6 w-6 text-gray-400 mt-1" />
                   <div>
                     <h2 className="text-2xl font-bold text-black mb-2">Property Address</h2>
-                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street : 
-                    listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing === 'sell' ? 
-                    sellplotproperty?.basicInformation?.state : listing === 'lease' ? 
-                    leaseplotproperty?.basicInformation?.address?.street : ''}, 
-                    {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing === 'sell' ? sellplotproperty?.basicInformation.city : listing === 'lease' ? 
-                    leaseplotproperty?.basicInformation?.address?.city : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing === 'sell' ? sellplotproperty?.basicInformation?.state : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.state : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing === 'sell' ? sellplotproperty?.basicInformation?.zipCode : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.zipCode : ''}</p>
+                    <p className="text-gray-600">{type === 'agriculture' ? property?.basicInformation?.address?.street :
+                      listing === 'rent' ? rentplotproperty?.basicInformation?.address?.street : listing === 'sell' ?
+                        sellplotproperty?.basicInformation?.state : listing === 'lease' ?
+                          leaseplotproperty?.basicInformation?.address?.street : ''},
+                      {type === 'agriculture' ? property?.basicInformation?.address?.city : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.city : listing === 'sell' ? sellplotproperty?.basicInformation.city : listing === 'lease' ?
+                        leaseplotproperty?.basicInformation?.address?.city : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.state : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.state : listing === 'sell' ? sellplotproperty?.basicInformation?.state : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.state : ''}, {type === 'agriculture' ? property?.basicInformation?.address?.zipCode : listing === 'rent' ? rentplotproperty?.basicInformation?.address?.zipCode : listing === 'sell' ? sellplotproperty?.basicInformation?.zipCode : listing === 'lease' ? leaseplotproperty?.basicInformation?.address?.zipCode : ''}</p>
                   </div>
                 </div>
               </div>
@@ -1220,6 +1222,22 @@ const PlotManagement: React.FC = () => {
                   <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 transition-all duration-300 ${showAllFeatures ? '' : 'max-h-[120px] overflow-hidden'}`}>
                     {property && (() => {
                       const features: string[] = [];
+                      const agri = property.Agriculturelanddetails;
+                      if (agri) {
+                        if (agri.irrigation) features.push("Irrigation available");
+                        if (agri.fencing) features.push("Fencing present");
+                        if (agri.legalClearances) features.push("Legal clearances obtained");
+                        if (agri.powersupply) features.push("Power supply available");
+                        if (agri.cropSuitability && agri.cropSuitability.trim() !== "")
+                          features.push(`Crop suitability: ${agri.cropSuitability.trim()}`);
+                        if (agri.waterSource && agri.waterSource.trim() !== "")
+                          features.push(`Water source: ${agri.waterSource.trim()}`);
+                        if (agri.totalArea) features.push(`Total area: ${agri.totalArea}`);
+                        if (agri.soilType && agri.soilType.trim() !== "")
+                          features.push(`Soil type: ${agri.soilType.trim()}`);
+                      }
+                      console.log("Property:",property);
+                      console.log("Features to show:", features);
 
                       return type == 'agriculture' && features.length > 0 ? features.map((feature, index) => (
                         <div key={index} className="flex items-center bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -1239,81 +1257,81 @@ const PlotManagement: React.FC = () => {
 
           {/* Pricing Card - Sticky on Desktop, Modal on Mobile */}
           <div className="lg:col-span-1">
-            <PricingCard 
-              property={listing === 'sell' ? sellplotproperty : 
-                        listing === 'rent' ? rentplotproperty : 
-                        listing === 'lease' && type === 'AG' ? leaseagricultureproperty : 
-                        leaseplotproperty}
+            <PricingCard
+              property={listing === 'sell' ? sellplotproperty :
+                listing === 'rent' ? rentplotproperty :
+                  listing === 'lease' && type === 'AG' ? leaseagricultureproperty :
+                    leaseplotproperty}
               listing={listing}
               type={type}
               onEnquireClick={() => {
-                setSelectedProperty(listing === 'sell' ? sellplotproperty : 
-                                 listing === 'rent' ? rentplotproperty : 
-                                 listing === 'lease' && type === 'AG' ? leaseagricultureproperty : 
-                                 leaseplotproperty);
+                setSelectedProperty(listing === 'sell' ? sellplotproperty :
+                  listing === 'rent' ? rentplotproperty :
+                    listing === 'lease' && type === 'AG' ? leaseagricultureproperty :
+                      leaseplotproperty);
                 setShowEnquiryForm(true);
               }}
             />
-                    {listing == "rent" && type == "plots" && (
-                      <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                          <div className="text-gray-600 font-semibold">Excepted rent</div>
-                          <div className="text-black font-bold">₹{rentplotproperty?.rentalTerms?.rentDetails?.expectedRent}</div>
+            {listing == "rent" && type == "plots" && (
+              <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                  <div className="text-gray-600 font-semibold">Excepted rent</div>
+                  <div className="text-black font-bold">₹{rentplotproperty?.rentalTerms?.rentDetails?.expectedRent}</div>
 
-                          <div className="text-gray-600 font-semibold">Rent Type</div>
-                          <div className="text-black font-bold">{rentplotproperty?.rentalTerms?.rentDetails?.rentType}</div>
-                        </div>
-                      </div>
-                    )}
-                    {type == "agriculture" && listing != "lease" && (
-                      <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                          <div className="text-gray-600 font-semibold">Property Price</div>
-                          <div className="text-black font-bold">₹{property?.price?.expectedPrice || property?.rent?.expectedRent}</div>
-
-                          <div className="text-gray-600 font-semibold">Price Type</div>
-                          <div className="text-black font-bold">{property?.price?.isNegotiable ? "Not Negotiable" : "Negotiable"}</div>
-                        </div>
-                      </div>
-                    )}
-                    {type == "agriculture" && listing == "lease" && (
-                      <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
-                        <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
-                          <div className="text-gray-600 font-semibold">Lease Amount</div>
-                          <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
-
-                          
-                        </div>
-                      </div>
-                    )}
-
-                    {listing === 'lease' && type !== "agriculture" && (
-                      <div className="space-y-2 w-full">
-                        <div className="flex justify-between">
-                          <span className="text-black font-bold">Lease Amount:</span>
-                          <span className="text-black font-bold">{leaseplotproperty?.leaseTerms?.leaseAmount?.amount}</span>
-                        </div>
-                        
-                        
-
-                      </div>
-                    )}
-{/* Enquiry Form Modal */}
-{showEnquiryForm && (
-        <EnquiryForm
-          onClose={() => setShowEnquiryForm(false)}
-        />
-      )}
-    </div>  {/* ← closes the outermost <div className="min-h-screen …"> */}
-
-
-
-                  </div>
+                  <div className="text-gray-600 font-semibold">Rent Type</div>
+                  <div className="text-black font-bold">{rentplotproperty?.rentalTerms?.rentDetails?.rentType}</div>
                 </div>
               </div>
+            )}
+            {type == "agriculture" && listing != "lease" && (
+              <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                  <div className="text-gray-600 font-semibold">Property Price</div>
+                  <div className="text-black font-bold">₹{property?.price?.expectedPrice || property?.rent?.expectedRent}</div>
+
+                  <div className="text-gray-600 font-semibold">Price Type</div>
+                  <div className="text-black font-bold">{property?.price?.isNegotiable ? "Not Negotiable" : "Negotiable"}</div>
+                </div>
+              </div>
+            )}
+            {type == "agriculture" && listing == "lease" && (
+              <div className="p-4 bg-white rounded-xl shadow-md w-full max-w-md">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4">Pricing Details</h2>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
+                  <div className="text-gray-600 font-semibold">Lease Amount</div>
+                  <div className="text-black font-bold">₹{leaseagricultureproperty?.leaseTerms?.leaseAmount?.amount}</div>
+
+
+                </div>
+              </div>
+            )}
+
+            {listing === 'lease' && type !== "agriculture" && (
+              <div className="space-y-2 w-full">
+                <div className="flex justify-between">
+                  <span className="text-black font-bold">Lease Amount:</span>
+                  <span className="text-black font-bold">{leaseplotproperty?.leaseTerms?.leaseAmount?.amount}</span>
+                </div>
+
+
+
+              </div>
+            )}
+            {/* Enquiry Form Modal */}
+            {showEnquiryForm && (
+              <EnquiryForm
+                onClose={() => setShowEnquiryForm(false)}
+              />
+            )}
+          </div>  {/* ← closes the outermost <div className="min-h-screen …"> */}
+
+
+
+        </div>
+      </div>
+    </div>
   )
 };
 

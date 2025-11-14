@@ -50,9 +50,9 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
     const formData = req.body;
 
     // Prefer authenticated user if available
-   
 
-  
+
+    
     // Generate property ID
     const propertyId = await generatePropertyId();
     if (!propertyId) {
@@ -148,7 +148,7 @@ export const createCommercialLeaseAgriculture = async (req: Request, res: Respon
     // Create new agriculture lease listing
     const agriculture = new CommercialLeaseAgriculture(agricultureData);
     await agriculture.save();
-
+    
     res.status(201).json({
       success: true,
       message: 'Agricultural land lease listing created successfully!',
@@ -214,10 +214,10 @@ export const getCommercialLeaseAgricultureById = async (req: Request, res: Respo
 export const updateCommercialLeaseAgriculture = async (req: Request, res: Response) => {
  
   try {
-    const documentId = req.params.id; // This is the _id of the document
+    const propertyId = req.params.id; // This is the _id of the document
 
     // Validate request body
-    const incomingData = req.body?.data;
+    const incomingData = req.body;
     if (!incomingData) {
       return res.status(400).json({
         success: false,
@@ -234,7 +234,7 @@ export const updateCommercialLeaseAgriculture = async (req: Request, res: Respon
     );
 
     // Step 2: Fetch existing document using _id
-    const existingDoc = await CommercialLeaseAgriculture.findById(documentId);
+    const existingDoc = await CommercialLeaseAgriculture.findOne({propertyId});
     if (!existingDoc) {
       return res.status(404).json({
         success: false,
@@ -243,8 +243,8 @@ export const updateCommercialLeaseAgriculture = async (req: Request, res: Respon
     }
 
     const mergedData = _.merge(existingDoc.toObject(), cleanedData);
-    const updatedDoc = await CommercialLeaseAgriculture.findByIdAndUpdate(
-      documentId,
+    const updatedDoc = await CommercialLeaseAgriculture.findOneAndUpdate(
+      {propertyId},
       { $set: mergedData },
       { new: true, runValidators: true }
     );

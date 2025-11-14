@@ -410,15 +410,17 @@ const SellOthersMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+                files: files.map(file => ({ file }))
               })),
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
             }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
-                photos[category] = files.map(f => f.file);
+              media.photos.forEach(({ category, files }) => {
+                if(category in photos){
+                  photos[category] = files.map(f => f.file);
+                }
               });
 
               setFormData(prev => ({

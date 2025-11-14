@@ -38,14 +38,18 @@ export const createCommercialLeaseCoveredSpace = async (req: AuthenticatedReques
     const coveredSpace = new CommercialLeaseCoveredSpace({
       ...req.body,
       propertyId,
+      media:{
+        photos: req.body.media.photos,
+        videoTour: req.body.media.videoTour,
+        documents: req.body.media.documents,
+      },
       metadata: {
         ...req.body.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: req.body.metadata?.userId || null,
         createdAt: new Date()
       }
     });
-
-    // await coveredSpace.save();
+    await coveredSpace.save();
 
     res.status(201).json({ success: true, message: "Created successfully", data: coveredSpace });
   } catch (error) {
@@ -113,7 +117,7 @@ export const createCommercialLeaseCoveredSpace = async (req: AuthenticatedReques
 export const getAllCommercialLeaseCoveredSpaces = async (req: Request, res: Response) => {
   try {
     const leaseProperties = await CommercialLeaseCoveredSpace.find({}).sort({ 'metaData.createdAt': -1 });
-    
+    console.log("lease properties :", leaseProperties);
     res.status(200).json({
       success: true,
       count: leaseProperties.length,
@@ -146,8 +150,8 @@ export const getCommercialLeaseCoveredSpaceById = async (req: Request, res: Resp
 
 export const updateCommercialLeaseCoveredSpace = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const documentId = req.params.id; 
-      const incomingData = req.body?.data;
+      const propertyId = req.params.id; 
+      const incomingData = req.body;
       if (!incomingData) {
         return res.status(400).json({
           success: false,
@@ -163,7 +167,7 @@ export const updateCommercialLeaseCoveredSpace = async (req: AuthenticatedReques
       );
   
      
-      const existingDoc = await CommercialLeaseCoveredSpace.findById(documentId);
+      const existingDoc = await CommercialLeaseCoveredSpace.findOne({propertyId});
       if (!existingDoc) {
         return res.status(404).json({
           success: false,
@@ -173,8 +177,8 @@ export const updateCommercialLeaseCoveredSpace = async (req: AuthenticatedReques
   
       const mergedData = _.merge(existingDoc.toObject(), cleanedData);
   
-      const updatedDoc = await CommercialLeaseCoveredSpace.findByIdAndUpdate(
-        documentId,
+      const updatedDoc = await CommercialLeaseCoveredSpace.findOneAndUpdate(
+        {propertyId},
         { $set: mergedData },
         { new: true, runValidators: true }
       );

@@ -134,7 +134,7 @@ export interface ICommercialLeaseOthers extends Document {
     documents: string[];
   };
 
-  metaData?: {
+  metadata?: {
     createdBy: Schema.Types.ObjectId | null;
     createdAt: Date;
     propertyType: string;
@@ -276,7 +276,7 @@ const CommercialLeaseOthersSchema: Schema = new Schema({
     documents: { type: [String], default: [] }
   },
 
-  metaData: {
+  metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },

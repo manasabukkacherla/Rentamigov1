@@ -69,9 +69,9 @@ export const createCommercialLeaseOthers = async (req: Request, res: Response) =
     const leasePropertyData = {
       propertyId,
       ...formData,
-      metaData: {
-        ...formData.metaData,
-        createdBy: req.user?._id || null,
+      metadata: {
+        ...formData.metadata,
+        createdBy: formData.metadata?.createdBy || null,
         createdAt: new Date()
       }
     };
@@ -98,8 +98,7 @@ export const createCommercialLeaseOthers = async (req: Request, res: Response) =
 // Get all commercial lease others properties
 export const getAllCommercialLeaseOthers = async (req: Request, res: Response) => {
   try {
-    const leaseProperties = await CommercialLeaseOthers.find({}).sort({ 'metaData.createdAt': -1 });
-    
+    const leaseProperties = await CommercialLeaseOthers.find({}).sort({ 'metadata.createdAt': -1 });
     res.status(200).json({
       success: true,
       count: leaseProperties.length,
@@ -146,8 +145,8 @@ export const getCommercialLeaseOthersById = async (req: Request, res: Response) 
 // Update a commercial lease others property
 export const updateCommercialLeaseOthers = async (req: Request, res: Response) => {
     try {
-      const documentId = req.params.id; 
-      const incomingData = req.body?.data;
+      const propertyId = req.params.id; 
+      const incomingData = req.body;
       if (!incomingData) {
         return res.status(400).json({
           success: false,
@@ -163,7 +162,7 @@ export const updateCommercialLeaseOthers = async (req: Request, res: Response) =
       );
   
      
-      const existingDoc = await CommercialLeaseOthers.findById(documentId);
+      const existingDoc = await CommercialLeaseOthers.findOne({propertyId});
       if (!existingDoc) {
         return res.status(404).json({
           success: false,
@@ -173,8 +172,8 @@ export const updateCommercialLeaseOthers = async (req: Request, res: Response) =
   
       const mergedData = _.merge(existingDoc.toObject(), cleanedData);
   
-      const updatedDoc = await CommercialLeaseOthers.findByIdAndUpdate(
-        documentId,
+      const updatedDoc = await CommercialLeaseOthers.findOneAndUpdate(
+        {propertyId},
         { $set: mergedData },
         { new: true, runValidators: true }
       );

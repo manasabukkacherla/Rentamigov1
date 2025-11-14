@@ -309,7 +309,11 @@ const LeaseBuilderFloorSchema = new Schema<ILeaseBuilderFloor>({
   },
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: false },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now },
+    popertyType: {type: String , default: 'Residential'},
+    propertyName: {type: String},
+    intent: {type: String, default: 'Lease'},
+    status: {type: String, default:'Available'}
   }
 });
 

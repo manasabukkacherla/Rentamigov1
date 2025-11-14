@@ -70,7 +70,7 @@ export const createCommercialLeaseShowroom = async (req: Request, res: Response)
       ...formData,
       metadata: {
         ...formData.metadata,
-        createdBy: req.user?._id || null,
+        createdBy: formData.metadata.createdBy || null,
         createdAt: new Date()
       }
     };
