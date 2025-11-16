@@ -1,5 +1,5 @@
 import express from 'express';
-import { createShowroom, deleteShowroom, getAllShowrooms, getShowroom, updateShowroom } from '../../controllers/commercial/commercialSellShowroomController';
+import {   createShowroom, deleteShowroom, getAllShowrooms, getShowroom, updateShowroom } from '../../controllers/commercial/commercialSellShowroomController';
 
 const commercialSellShowroomRoutes = express.Router();
 
@@ -7,7 +7,7 @@ const commercialSellShowroomRoutes = express.Router();
 commercialSellShowroomRoutes.post('/',  createShowroom);
 commercialSellShowroomRoutes.get('/', getAllShowrooms);
 commercialSellShowroomRoutes.get('/:propertyId', getShowroom);
-commercialSellShowroomRoutes.put('/:id', updateShowroom);
-commercialSellShowroomRoutes.delete('/:id', deleteShowroom);
+commercialSellShowroomRoutes.put('/:propertyId', updateShowroom);
+commercialSellShowroomRoutes.delete('/:propertyId', deleteShowroom);
 
 export default commercialSellShowroomRoutes; 

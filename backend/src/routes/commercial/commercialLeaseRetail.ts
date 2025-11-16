@@ -19,7 +19,7 @@ router.get('/', getAllCommercialLeaseRetail);
 router.get('/:propertyId', getCommercialLeaseRetailById);
 
 // Update a commercial lease retail property
-router.put('/:id', updateCommercialLeaseRetail);
+router.put('/:propertyId', updateCommercialLeaseRetail);
 
 // Delete a commercial lease retail property
 router.delete('/:id', deleteCommercialLeaseRetail);

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import LeaseBuilderFloor from '../../models/residential/residentialLeaseBuilderFloor';
 import _ from 'lodash';
+import { createRentBuilderFloor } from './rentBuilderFloor';
 
 // Generate Property ID for Lease Builder Floor
 const generatePropertyId = async (): Promise<string> => {
@@ -50,7 +51,7 @@ const generatePropertyId = async (): Promise<string> => {
 // Create a new lease builder floor listing
 export const createLeaseBuilderFloor = async (req: Request, res: Response) => {
   try {
-    console.log('Incoming request body:', req.body);
+   // console.log('Incoming request body:', req.body);
     const propertyId = await generatePropertyId();
     console.log('Property ID:', propertyId);
     const builderFloorData = {
@@ -61,10 +62,12 @@ export const createLeaseBuilderFloor = async (req: Request, res: Response) => {
         createdAt: new Date()
       }
     };
+    //console.log(builderFloorData)
 
     const builderFloor = new LeaseBuilderFloor(builderFloorData);
-    await builderFloor.save();
-
+     const builder =  await builderFloor.save();
+   
+  console.log("builder floor data", builderFloor, builder)
     res.status(201).json({
       success: true,
       message: 'Builder Floor listing created successfully',
@@ -120,7 +123,7 @@ export const getAllLeaseBuilderFloors = async (req: Request, res: Response) => {
 export const getLeaseBuilderFloorById = async (req: Request, res: Response) => {
   try {
     const property = await LeaseBuilderFloor.findOne({ propertyId: req.params.propertyId });
-
+  console.log(property)
     if (!property) {
       return res.status(404).json({
         success: false,
@@ -145,10 +148,10 @@ export const getLeaseBuilderFloorById = async (req: Request, res: Response) => {
 // Update a lease builder floor listing
 export const updateLeaseBuilderFloor = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const {propertyId } = req.params;
     const updates = req.body;
 
-    const property = await LeaseBuilderFloor.findOne({ propertyId: id });
+    const property = await LeaseBuilderFloor.findOne({ propertyId: propertyId });
 
     if (!property) {
       return res.status(404).json({
@@ -162,7 +165,7 @@ export const updateLeaseBuilderFloor = async (req: Request, res: Response) => {
 
     // Update the document
     const updatedProperty = await LeaseBuilderFloor.findOneAndUpdate(
-      { propertyId: id },
+      { propertyId: propertyId},
       { $set: updatedData },
       { new: true, runValidators: true }
     );

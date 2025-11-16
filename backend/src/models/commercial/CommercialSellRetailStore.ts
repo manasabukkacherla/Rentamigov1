@@ -194,18 +194,18 @@ const CommercialSellRetailStoreSchema = new Schema<ICommercialSellRetailStore>({
     alternatePhone: { type: String },
     bestTimeToContact: { type: String }
   },
-  media: {
-    photos: {
-      exterior: [{ type: String }], 
-      interior: [{ type: String }], 
-      floorPlan: [{ type: String }], 
-      washrooms: [{ type: String }],
-      lifts: [{ type: String }],
-      emergencyExits: [{ type: String }] 
-    },
-    videoTour: { type: String }, 
-    documents: [{ type: String }] 
+ media: {
+  photos: {
+    exterior: { type: [String], default: [] }, 
+    interior: { type: [String], default: [] }, 
+    floorPlan: { type: [String], default: [] }, 
+    washrooms: { type: [String], default: [] },
+    lifts: { type: [String], default: [] },
+    emergencyExits: { type: [String], default: [] }
   },
+  videoTour: { type: String, default: "" }, 
+  documents: { type: [String], default: [] }
+},
   metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },

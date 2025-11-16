@@ -10,11 +10,20 @@ import {
 
 const residentialRentIndependentHouseRoutes = express.Router();
 
+
 residentialRentIndependentHouseRoutes.post('/', createRentIndependentHouse);
+
 residentialRentIndependentHouseRoutes.get('/', getAllRentIndependentHouses);
+
+
+residentialRentIndependentHouseRoutes.get('/user/:userId', getUserIndependentHouses);
+
+
 residentialRentIndependentHouseRoutes.get('/:propertyId', getRentIndependentHouseById);
-residentialRentIndependentHouseRoutes.put('/:id', updateRentIndependentHouse);
+
+
+residentialRentIndependentHouseRoutes.put('/:propertyId', updateRentIndependentHouse);
+
 residentialRentIndependentHouseRoutes.delete('/:id', deleteRentIndependentHouse);
-residentialRentIndependentHouseRoutes.get('/:userId', getUserIndependentHouses);
 
 export default residentialRentIndependentHouseRoutes;

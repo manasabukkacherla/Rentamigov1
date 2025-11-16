@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronRight, ChevronLeft } from "lucide-react"
 import PropertyName from "../PropertyName"
 import WarehouseType from "../CommercialComponents/WarehouseType"
@@ -18,7 +18,7 @@ import CommercialContactDetails from "../CommercialComponents/CommercialContactD
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 import { toast } from "react-hot-toast"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import MapLocation from "../CommercialComponents/MapLocation"
 
 
@@ -93,6 +93,7 @@ interface IFloor {
 }
 
 interface FormData {
+ propertyId?:string;
   basicInformation: IBasicInformation;
   warehouseDetails: {
     ceilingHeight: number;
@@ -237,13 +238,159 @@ const SellWarehouseMain = () => {
       documents: []
     }
   })
+  
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [, setSubmitError] = useState<string | null>(null)
-
+const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+    const [loading, setLoading] = useState(false)
+    const [isEditMode, setIsEditMode] = useState(false)
+    const { propertyId } = useParams();
   const formRef = useRef<HTMLDivElement>(null)
+   
+useEffect(() => {
+  const fetchSellWarehouse = async () => {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
 
+    if (!propertyId) return;
+
+    console.log("propertyId:", propertyId);
+    setLoading(true);
+    try {
+      const res = await axios.get(`/api/commercial/sale/warehouses/${propertyId}`);
+      if (res.data && res.data.success) {
+        const warehouse = res.data.data;
+
+        //  Map backend data to your formData structure
+        setFormData({
+          basicInformation: {
+            title: warehouse.basicInformation?.title || "",
+            Type: warehouse.basicInformation?.Type || [],
+            address: warehouse.basicInformation?.address || {
+              street: "",
+              city: "",
+              state: "",
+              zipCode: "",
+            },
+            landmark: warehouse.basicInformation?.landmark || "",
+            location: warehouse.basicInformation?.location || {
+              latitude: "",
+              longitude: "",
+            },
+            isCornerProperty: warehouse.basicInformation?.isCornerProperty || false,
+          },
+
+          warehouseDetails: warehouse.warehouseDetails || {
+            ceilingHeight: 0,
+            totalArea: 0,
+            docks: { count: 0, height: 0 },
+            floorLoadCapacity: 0,
+            fireSafety: false,
+            securityPersonnel: false,
+            access24x7: false,
+            truckParking: false,
+          },
+
+          propertyDetails: warehouse.propertyDetails || {
+            area: { totalArea: 0, carpetArea: 0, builtUpArea: 0 },
+            floor: { floorNumber: 0, totalFloors: 0 },
+            facingDirection: "",
+            furnishingStatus: "",
+            propertyAmenities: [],
+            wholeSpaceAmenities: [],
+            electricitySupply: { powerLoad: 0, backup: false },
+            waterAvailability: [],
+            propertyAge: "",
+            propertyCondition: "",
+          },
+
+          pricingDetails: warehouse.pricingDetails || {
+            propertyPrice: 0,
+            pricetype: "fixed",
+            area: 0,
+            totalprice: 0,
+            pricePerSqft: 0,
+          },
+
+          registration: warehouse.registration || {
+            chargestype: "inclusive",
+            registrationAmount: 0,
+            stampDutyAmount: 0,
+          },
+
+          brokerage: warehouse.brokerage || {
+            required: "no",
+            amount: 0,
+          },
+
+          availability: warehouse.availability || {
+            availableFrom: new Date().toISOString(),
+            availableImmediately: false,
+            leaseDuration: "",
+            noticePeriod: "",
+            petsAllowed: false,
+            operatingHours: {
+              restricted: false,
+              restrictions: "",
+            },
+          },
+
+          contactInformation: warehouse.contactInformation || {
+            name: "",
+            email: "",
+            phone: "",
+            alternatePhone: "",
+            bestTimeToContact: "",
+          },
+
+          media: warehouse.media
+            ? {
+                photos: {
+                  exterior: warehouse.media.photos?.exterior || [],
+                  interior: warehouse.media.photos?.interior || [],
+                  floorPlan: warehouse.media.photos?.floorPlan || [],
+                  washrooms: warehouse.media.photos?.washrooms || [],
+                  lifts: warehouse.media.photos?.lifts || [],
+                  emergencyExits: warehouse.media.photos?.emergencyExits || [],
+                },
+                videoTour: warehouse.media.videoTour || null,
+                documents: warehouse.media.documents || [],
+              }
+            : {
+                photos: {
+                  exterior: [],
+                  interior: [],
+                  floorPlan: [],
+                  washrooms: [],
+                  lifts: [],
+                  emergencyExits: [],
+                },
+                videoTour: null,
+                documents: [],
+              },
+        });
+      } else {
+        toast.error("Failed to fetch warehouse details.");
+      }
+    } catch (error) {
+      console.error("Error fetching warehouse:", error);
+      toast.error("Something went wrong while loading warehouse details.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchSellWarehouse();
+}, [propertyId]);
+
+  
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
       const keys = key.split('.');
@@ -272,7 +419,7 @@ const SellWarehouseMain = () => {
               ...prev,
               basicInformation: { ...prev.basicInformation, title: name }
             }))}
-          />
+          />   
           <WarehouseType
             onWarehouseTypeChange={(types: string[]) => setFormData(prev => ({
               ...prev,
@@ -444,26 +591,39 @@ const SellWarehouseMain = () => {
               documents: formData.media.documents
             }}
             onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
-                photos[category] = files.map(f => f.file);
-              });
+    const photosByCategory: Record<string, File[]> = {
+      exterior: [],
+      interior: [],
+      floorPlan: [],
+      washrooms: [],
+      lifts: [],
+      emergencyExits: [],
+    };
 
-              setFormData(prev => ({
-                ...prev,
-                media: {
-                  ...prev.media,
-                  photos: {
-                    ...prev.media.photos,
-                    ...photos
-                  },
-                  videoTour: media.videoTour || null,
-                  documents: media.documents
-                }
-              }));
-            }}
-          />
-        </div>
+    media.photos.forEach(({ category, files }) => {
+      if (category in photosByCategory) {
+        photosByCategory[category] = files.map((f) => f.file);
+      }
+    });
+
+    setFormData((prev) => ({
+      ...prev,
+      media: {
+        photos: {
+          exterior: photosByCategory.exterior,
+          interior: photosByCategory.interior,
+          floorPlan: photosByCategory.floorPlan,
+          washrooms: photosByCategory.washrooms,
+          lifts: photosByCategory.lifts,
+          emergencyExits: photosByCategory.emergencyExits,
+        },
+        videoTour: media.videoTour || null,
+        documents: media.documents,
+      },
+    }));
+  }}
+      />
+      </div>
       ),
     },
   ]
@@ -522,99 +682,168 @@ const SellWarehouseMain = () => {
       reader.onerror = error => reject(error);
     });
   };
+const handleSubmit = async (e: { preventDefault: () => void }) => {
+  e.preventDefault();
+  console.log("Form data before submission:", formData);
+  
+  setIsSubmitting(true);
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    setSubmitError(null)
-    console.log(formData)
-
-    try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
-
-        const convertedMedia = {
-          photos: {
-            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-          },
-          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-        };
-        console.log(formData)
-
-        const transformedData = {
-          basicInformation: {
-            ...formData.basicInformation
-          },
-          warehouseDetails: {
-            ...formData.warehouseDetails
-          },
-          propertyDetails: {
-            ...formData.propertyDetails,
-            waterAvailability: Array.isArray(formData.propertyDetails.waterAvailability)
-              ? formData.propertyDetails.waterAvailability[0] || 'scheduled'
-              : formData.propertyDetails.waterAvailability,
-            propertyAge: typeof formData.propertyDetails.propertyAge === 'string'
-              ? formData.propertyDetails.propertyAge
-              : formData.propertyDetails.propertyAge
-          },
-          pricingDetails: {
-            ...formData.pricingDetails
-          },
-          registration: {
-            ...formData.registration
-          },
-          brokerage: {
-            ...formData.brokerage
-          },
-          availability: {
-            ...formData.availability,
-            leaseDuration: formData.availability.leaseDuration || 'Not Specified',
-            noticePeriod: formData.availability.noticePeriod || 'Not Specified',
-            petsAllowed: formData.availability.petsAllowed === true
-          },
-          contactInformation: {
-            ...formData.contactInformation
-          },
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date(),
-            propertyType: 'Commercial',
-            propertyName: 'Warehouse',
-            intent: 'Sell',
-            status: 'Available',
-          }
-        };
-
-
-        console.log(transformedData);
-        const response = await axios.post('/api/commercial/sell/warehouses', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        console.log(response.data)
-
-        if (response.data.success) {
-          toast.success('Commercial warehouses listing created successfully!');
-        }
-      } else {
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create commercial wareshouses listing. Please try again.');
-    } finally {
-      // setIsSubmitting(false)
-    }
+  if (!formData.basicInformation.title) {
+    toast.error('Property Name is required');
+    setIsSubmitting(false);
+    return;
   }
+
+  try {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const author = JSON.parse(user).id;
+
+    // Convert media files to base64
+    const convertMediaToBase64 = async (media: IMedia) => {
+      const convertedMedia: any = {
+        photos: {
+          exterior: [],
+          interior: [],
+          floorPlan: [],
+          washrooms: [],
+          lifts: [],
+          emergencyExits: []
+        },
+        videoTour: null,
+        documents: []
+      };
+
+      // Convert photos
+      for (const [category, files] of Object.entries(media.photos)) {
+        if (Array.isArray(files) && files.length > 0) {
+          convertedMedia.photos[category] = await Promise.all(
+            files.map(async (file) => {
+              try {
+                return await convertFileToBase64(file);
+              } catch (error) {
+                console.error(`Error converting ${category} photo:`, error);
+                return null;
+              }
+            })
+          );
+          convertedMedia.photos[category] = convertedMedia.photos[category].filter((item: any) => item !== null);
+        }
+      }
+
+      // Convert video tour
+      if (media.videoTour) {
+        try {
+          convertedMedia.videoTour = await convertFileToBase64(media.videoTour);
+        } catch (error) {
+          console.error('Error converting video tour:', error);
+        }
+      }
+
+      // Convert documents
+      if (media.documents && media.documents.length > 0) {
+        convertedMedia.documents = await Promise.all(
+          media.documents.map(async (file) => {
+            try {
+              return await convertFileToBase64(file);
+            } catch (error) {
+              console.error('Error converting document:', error);
+              return null;
+            }
+          })
+        );
+        convertedMedia.documents = convertedMedia.documents.filter((item: any) => item !== null);
+      }
+
+      return convertedMedia;
+    };
+
+    // Convert all media to base64
+    const convertedMedia = await convertMediaToBase64(formData.media);
+
+    // Prepare the final data for submission - FIXED STRUCTURE
+    const submissionData = {
+      propertyId: formData.propertyId,
+      basicInformation: {
+        ...formData.basicInformation,
+        location: {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        }
+      },
+      // FIX: Changed from showroomDetails to warehouseDetails
+      warehouseDetails: formData.warehouseDetails,
+      propertyDetails: {
+        ...formData.propertyDetails,
+        // Ensure waterAvailability is string (not array) to match model
+        waterAvailability: Array.isArray(formData.propertyDetails.waterAvailability) 
+          ? formData.propertyDetails.waterAvailability[0] || ''
+          : formData.propertyDetails.waterAvailability || ''
+      },
+      pricingDetails: formData.pricingDetails,
+      registration: formData.registration,
+      brokerage: formData.brokerage,
+      availability: formData.availability,
+      contactInformation: formData.contactInformation,
+      media: convertedMedia,
+      metadata: {
+        createdBy: author,
+        createdAt: new Date().toISOString(),
+        propertyType: "Commercial",
+        propertyName: "Warehouse", // FIX: Changed from Showroom to Warehouse
+        intent: "Sale",
+        status: "Available"
+      }
+    };
+
+    console.log("Submitting data:", JSON.stringify(submissionData, null, 2));
+
+    // FIX: Changed endpoint from showrooms to warehouses
+    let response;
+    const url = isEditMode && formData.propertyId 
+      ? `/api/commercial/sale/warehouses/${formData.propertyId}`
+      : '/api/commercial/sale/warehouses';
+
+    if (isEditMode && formData.propertyId) {
+      response = await axios.put(url, submissionData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } else {
+      response = await axios.post(url, submissionData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
+    if (response.data.success) {
+      toast.success(`Commercial warehouse ${isEditMode ? 'updated' : 'created'} successfully!`);
+      navigate('/updatePropertyform');
+    } else {
+      toast.error(`Failed to ${isEditMode ? 'update' : 'create'} commercial warehouse.`);
+    }
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    if (error.response) {
+      console.error('Error response:', error.response.data);
+      toast.error(error.response.data.message || `Failed to ${isEditMode ? 'update' : 'create'} commercial warehouse.`);
+    } else {
+      toast.error(`Failed to ${isEditMode ? 'update' : 'create'} commercial warehouse. Please try again.`);
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">

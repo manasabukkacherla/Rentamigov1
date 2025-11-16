@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import ResidentialRentBuilderFloor from '../../models/residential/residentialRentBuilderFloor';
-
+import _ from 'lodash'; 
 const generatePropertyId = async (): Promise<string> => {
     try {
         const prefix = "RA-RESREBF";
@@ -58,7 +58,8 @@ export const createRentBuilderFloor = async (req: Request, res: Response) => {
       }
     };
 
-    // Initialize media structure if not present
+    console.log("builder data: ", builderFloorData)
+   
     if (!builderFloorData.media) {
       builderFloorData.media = {
         photos: {
@@ -178,7 +179,7 @@ export const getAllRentBuilderFloors = async (req: Request, res: Response) => {
 export const getRentBuilderFloorById = async (req: Request, res: Response) => {
   try {
     const builderFloor = await ResidentialRentBuilderFloor.findOne({propertyId: req.params.propertyId});
-    
+    console.log('fetched builder floor', builderFloor)
     if (!builderFloor) {
       return res.status(404).json({
         success: false,
@@ -199,53 +200,51 @@ export const getRentBuilderFloorById = async (req: Request, res: Response) => {
     });
   }
 };
-
 export const updateRentBuilderFloor = async (req: Request, res: Response) => {
   try {
-    const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);
-    const userId = req.body.userId;
+    // Fix this line - don't destructure, use req.params.propertyId directly
+    const { propertyId } = req.params; // This should work
+     const incomingData = req.body;
     
-    if (!builderFloor) {
+    console.log("Updating property:", propertyId);
+    console.log("User ID:", incomingData);
+
+    const existingDoc = await ResidentialRentBuilderFloor.findOne({ propertyId });
+
+    if (!existingDoc) {
       return res.status(404).json({
         success: false,
-        message: 'Builder Floor not found'
+        message: 'Commercial showroom listing not found',
       });
     }
+  const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === '_id' || key === '__v') return undefined;
+        return value;
+      })
+    );
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
 
-    if (builderFloor.metadata?.createdBy.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this listing'
-      });
-    }
-
-    const updatedBuilderFloor = await ResidentialRentBuilderFloor.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...req.body,
-        metadata: {
-          ...builderFloor.metadata,
-          updatedAt: new Date()
-        }
-      },
+    const updatedDoc = await ResidentialRentBuilderFloor.findOneAndUpdate(
+      { propertyId },
+      { $set: mergedData },
       { new: true, runValidators: true }
     );
 
     res.status(200).json({
       success: true,
-      message: 'Builder Floor listing updated successfully',
-      data: updatedBuilderFloor
+      message: 'Commercial showroom listing updated successfully',
+      data: updatedDoc,
     });
   } catch (error) {
     console.error('Error updating builder floor:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to update builder floor',
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 };
-
 export const deleteRentBuilderFloor = async (req: Request, res: Response) => {
   try {
     const builderFloor = await ResidentialRentBuilderFloor.findById(req.params.id);

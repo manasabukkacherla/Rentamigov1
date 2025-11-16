@@ -12,8 +12,8 @@ const residentialRentApartmentRoutes = express.Router();
 
 residentialRentApartmentRoutes.post('/', createRentApartment);
 residentialRentApartmentRoutes.get('/', getAllRentApartments);
-residentialRentApartmentRoutes.put('/:id', updateRentApartment);
-residentialRentApartmentRoutes.delete('/:id', deleteRentApartment);
+residentialRentApartmentRoutes.put('/:propertyId', updateRentApartment);
+residentialRentApartmentRoutes.delete('/:propertyId', deleteRentApartment);
 residentialRentApartmentRoutes.get('/:propertyId', getRentApartmentById);
 
 export default residentialRentApartmentRoutes;

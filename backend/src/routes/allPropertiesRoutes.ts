@@ -50,7 +50,7 @@ import SalePlot from '../models/residential/salePlot';
 
 // Residential Lease Models
 import ResidentialLeaseApartment from '../models/residential/residentialLeaseAppartment';
-import ResidentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
+import residentialLeaseBuilderFloor from '../models/residential/residentialLeaseBuilderFloor';
 import ResidentialLeaseIndependentHouse from '../models/residential/residentialLeaseIndependentHouse';
 
 // Normalizer helper to pick only needed fields
@@ -77,18 +77,13 @@ const normalizeProperty = (item: any) => ({
   status: (item.metadata?.status || item.metaData?.status || 'Available'),
   intent: item.metadata?.intent || item.metaData?.intent || '',
   furnishing: item.propertyDetails?.furnishingStatus || 'Unfurnished',
-  // userId: item.metadata?.createdBy || item.metaData?.createdBy || '',
   createdBy: item.metadata?.createdBy || item.metaData?.createdBy || '',
 });
 
 const router = express.Router();
 
 router.get('/all', async (req: any, res: any) => {
-  // const { page = 1, limit = 10 } = req.query; // Pagination params
-  // const skip = (page - 1) * limit;
-
   try {
-    // const filter='_id basicInformation.title metadata.propertyType metadata.propertyName propertyDetails.area.totalArea propertyDetails.bathrooms propertyDetails.bedrooms media.photos.exterior'
     const results = await Promise.allSettled([
       // Commercial Rent
       CommercialRentAgriculture.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType rent.expectedRent Agriculturelanddetails.totalArea media.photos.exterior metaData.createdAt availability.type metaData.intent propertyDetails.furnishingStatus'),
@@ -114,7 +109,7 @@ router.get('/all', async (req: any, res: any) => {
       CommercialSellShop.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
       CommercialSellShowroom.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType pricingDetails.propertyPrice propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.propertyType metadata.intent propertyDetails.furnishingStatus'),
 
-      // // Commercial Lease
+      // Commercial Lease
       CommercialLeaseAgriculture.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseAmount.amount Agriculturelanddetails.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialLeaseOthers.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialLeaseRetailStore.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
@@ -126,19 +121,20 @@ router.get('/all', async (req: any, res: any) => {
       CommercialLeaseShed.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialLeaseWarehouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
 
-
       // Residential Rent
       ResidentialRentApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialRentBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialRentIndependent.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
 
+      // Residential Sale
       ResidentialSaleApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft priceDetails.propertyPrice media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialSaleBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       SaleIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft priceDetails.propertyPrice media.photos.exterior propertyDetails.furnishingStatus'),
       SalePlot.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
 
+      // Residential Lease
       ResidentialLeaseApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.superBuiltUpAreaSqft leaseTerms.leaseDetails.leaseAmount.amount media.photos.exterior propertyDetails.furnishingStatus'),
-      ResidentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
+      residentialLeaseBuilderFloor.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
       ResidentialLeaseIndependentHouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus')
     ]);
 
@@ -155,7 +151,7 @@ router.get('/all', async (req: any, res: any) => {
 
     // Destructure and normalize results
     const [
-      // rentAgriculture,
+      rentAgriculture,
       rentCoveredSpace,
       rentOfficeSpace,
       rentOthers,
@@ -166,7 +162,7 @@ router.get('/all', async (req: any, res: any) => {
       rentShop,
       rentShowroom,
 
-      // sellAgriculture,
+      sellAgriculture,
       sellCoveredSpace,
       sellOfficeSpace,
       sellOthers,
@@ -200,14 +196,13 @@ router.get('/all', async (req: any, res: any) => {
       resLeaseApartment,
       resLeaseBuilderFloor,
       resLeaseIndependentHouse
-    ] = results.map(r => (r.status === 'fulfilled' ? r.value.map(normalizeProperty) : []));
+    ] = results.map(r => (r.status === 'fulfilled' && r.value ? r.value.map(normalizeProperty) : []));
 
     return res.status(200).json({
       success: true,
       message: 'All properties fetched successfully',
       data: {
         commercialRent: {
-          // agriculture: rentAgriculture,
           coveredSpace: rentCoveredSpace,
           officeSpace: rentOfficeSpace,
           others: rentOthers,
@@ -219,7 +214,6 @@ router.get('/all', async (req: any, res: any) => {
           showroom: rentShowroom
         },
         commercialSale: {
-          // agriculture: sellAgriculture,
           coveredSpace: sellCoveredSpace,
           officeSpace: sellOfficeSpace,
           others: sellOthers,
@@ -347,7 +341,7 @@ router.put('/:category/:listing/:type/:propertyId', async (req: any, res: any) =
         case 'lease':
           switch (type) {
             case 'apartment': model = ResidentialLeaseApartment; break;
-            case 'builderfloor': model = ResidentialLeaseBuilderFloor; break;
+            case 'builderfloor': model = residentialLeaseBuilderFloor; break;
             case 'independenthouse': model = ResidentialLeaseIndependentHouse; break;
             default: return res.status(400).json({ success: false, message: 'Invalid type' });
           }
@@ -462,7 +456,7 @@ router.delete('/:category/:listing/:type/:propertyId', async (req: any, res: any
         case 'lease':
           switch (type) {
             case 'apartment': model = ResidentialLeaseApartment; break;
-            case 'builderfloor': model = ResidentialLeaseBuilderFloor; break;
+            case 'builderfloor': model = residentialLeaseBuilderFloor; break;
             case 'independenthouse': model = ResidentialLeaseIndependentHouse; break;
             default: return res.status(400).json({ success: false, message: 'Invalid type' });
           }

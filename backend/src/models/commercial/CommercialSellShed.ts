@@ -48,7 +48,7 @@ interface IContactInformation {
   bestTimeToContact?: string;
 }
 
-interface IMetadata {
+interface IMetadata {  // Keep interface name as IMetadata
   createdBy: Schema.Types.ObjectId | null;
   createdAt: Date;
   propertyType: string;
@@ -84,7 +84,7 @@ interface IMedia {
   documents: string[];
 }
 
- interface ICommercialSellShed extends Document {
+interface ICommercialSellShed extends Document {
   propertyId?: string;
   basicInformation: IBasicInformation;
   shedDetails: {
@@ -127,7 +127,8 @@ interface IMedia {
     videoTour?: string;
     documents: string[];
   };
-  metaData: IMetadata;
+  // CHANGE: metaData to metadata (lowercase d)
+  metadata: IMetadata;
 }
 
 // Schema
@@ -230,7 +231,8 @@ const CommercialSellShedSchema: Schema = new Schema({
     videoTour: { type: String },
     documents: { type: [String], default: [] }
   },
-  metaData: {
+  // CHANGE: metaData to metadata (lowercase d)
+  metadata: {
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Commercial' },
@@ -240,12 +242,12 @@ const CommercialSellShedSchema: Schema = new Schema({
   }
 });
 
-// Indexes
+// Indexes - UPDATE: Change metaData to metadata
 CommercialSellShedSchema.index({ propertyId: 1 }, { unique: true });
-CommercialSellShedSchema.index({ 'address.city': 1 });
-CommercialSellShedSchema.index({ 'address.state': 1 });
+CommercialSellShedSchema.index({ 'basicInformation.address.city': 1 });
+CommercialSellShedSchema.index({ 'basicInformation.address.state': 1 });
 CommercialSellShedSchema.index({ 'propertyDetails.area.superBuiltUpAreaSqft': 1 });
-CommercialSellShedSchema.index({ 'metaData.createdAt': -1 });
+CommercialSellShedSchema.index({ 'metadata.createdAt': -1 });
 
 // Export model and interfaces
 export type { ICommercialSellShed, IBasicInformation, IArea, IPricingDetails, IAvailability, IContactInformation, IMedia, IMetadata };

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react"
+import { useState,useEffect, useRef, AwaitedReactNode, JSXElementConstructor, Key, ReactElement, ReactNode, ReactPortal } from "react"
 import PropertyName from "../PropertyName"
 import CoveredOpenSpaceType from "../CommercialComponents/CoveredOpenSpaceType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -31,7 +31,7 @@ import {
 import axios from "axios"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Navigate, useParams } from "react-router-dom"
 
 
 // --- Types for strong typing and error-free state updates ---
@@ -55,6 +55,7 @@ type SpaceDetails = {
 };
 
 type FormDataType = {
+   propertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -234,7 +235,11 @@ const SellCoveredSpaceMain = () => {
     });
   };
 
-  const [currentStep, setCurrentStep] = useState(0)
+   const params = useParams()
+   const propertyId = params.propertyId;
+    const [currentStep, setCurrentStep] = useState(0);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
   const formRef = useRef<HTMLDivElement>(null)
 
   // Helper to convert File[] to string[] (simulate upload, or use URLs if already uploaded)
@@ -245,6 +250,146 @@ const SellCoveredSpaceMain = () => {
       .filter(f => !!f)
       .map(f => (typeof f === 'string' ? f : URL.createObjectURL(f)));
   };
+useEffect(() => {
+  const fetchById = async () => {
+    const user = sessionStorage.getItem("user");
+
+    if (!user) {
+      navigate("/login");
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    if (!propertyId) return;
+
+    console.log("Fetching Commercial Covered Space details for:", propertyId);
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/commercial/sale/coveredspace/${propertyId}`);
+      
+      if (response.data && response.data.data) {
+        const sellcoveredData = response.data.data;
+        
+        // Transform the backend data to match frontend form structure
+        setFormData((prev) => ({
+          ...prev,
+          propertyId: sellcoveredData.propertyId || '',
+          basicInformation: {
+            title: sellcoveredData.basicInformation?.title || '',
+            Type: sellcoveredData.basicInformation?.Type || [],
+            address: {
+              street: sellcoveredData.basicInformation?.address?.street || '',
+              city: sellcoveredData.basicInformation?.address?.city || '',
+              state: sellcoveredData.basicInformation?.address?.state || '',
+              zipCode: sellcoveredData.basicInformation?.address?.zipCode || ''
+            },
+            landmark: sellcoveredData.basicInformation?.landmark || '',
+            location: {
+              latitude: sellcoveredData.basicInformation?.location?.latitude?.toString() || '',
+              longitude: sellcoveredData.basicInformation?.location?.longitude?.toString() || ''
+            },
+            isCornerProperty: sellcoveredData.basicInformation?.isCornerProperty || false
+          },
+          spaceDetails: {
+            totalArea: sellcoveredData.spaceDetails?.totalArea?.toString() || '',
+            areaUnit: sellcoveredData.spaceDetails?.areaUnit || '',
+            coveredArea: sellcoveredData.spaceDetails?.coveredArea?.toString() || '',
+            openArea: sellcoveredData.spaceDetails?.openArea?.toString() || '',
+            roadWidth: sellcoveredData.spaceDetails?.roadWidth?.value?.toString() || 
+                      sellcoveredData.spaceDetails?.roadWidth?.toString() || '',
+            ceilingHeight: sellcoveredData.spaceDetails?.ceilingHeight?.value?.toString() || 
+                          sellcoveredData.spaceDetails?.ceilingHeight?.toString() || '',
+            openSides: sellcoveredData.spaceDetails?.noOfOpenSides?.toString() || 
+                      sellcoveredData.spaceDetails?.openSides?.toString() || ''
+          },
+          propertyDetails: {
+            area: {
+              totalArea: sellcoveredData.propertyDetails?.area?.totalArea || 0,
+              builtUpArea: sellcoveredData.propertyDetails?.area?.builtUpArea || 0,
+              carpetArea: sellcoveredData.propertyDetails?.area?.carpetArea || 0
+            },
+            floor: {
+              floorNumber: sellcoveredData.propertyDetails?.floor?.floorNumber || 0,
+              totalFloors: sellcoveredData.propertyDetails?.floor?.totalFloors || 0
+            },
+            facingDirection: sellcoveredData.propertyDetails?.facingDirection || '',
+            furnishingStatus: sellcoveredData.propertyDetails?.furnishingStatus || '',
+            propertyAmenities: sellcoveredData.propertyDetails?.propertyAmenities || [],
+            wholeSpaceAmenities: sellcoveredData.propertyDetails?.wholeSpaceAmenities || [],
+            electricitySupply: {
+              powerLoad: sellcoveredData.propertyDetails?.electricitySupply?.powerLoad || 0,
+              backup: sellcoveredData.propertyDetails?.electricitySupply?.backup || false
+            },
+            waterAvailability: Array.isArray(sellcoveredData.propertyDetails?.waterAvailability) 
+              ? sellcoveredData.propertyDetails.waterAvailability[0] || ''
+              : sellcoveredData.propertyDetails?.waterAvailability || '',
+            propertyAge: sellcoveredData.propertyDetails?.propertyAge || '',
+            propertyCondition: sellcoveredData.propertyDetails?.propertyCondition || ''
+          },
+          pricingDetails: {
+            propertyPrice: sellcoveredData.pricingDetails?.propertyPrice || 0,
+            pricetype: sellcoveredData.pricingDetails?.pricetype || ''
+          },
+          registration: {
+            chargestype: sellcoveredData.registration?.chargestype || '',
+            registrationAmount: sellcoveredData.registration?.registrationAmount || 0,
+            stampDutyAmount: sellcoveredData.registration?.stampDutyAmount || 0
+          },
+          brokerage: {
+            required: sellcoveredData.brokerage?.required || '',
+            amount: sellcoveredData.brokerage?.amount || 0
+          },
+          availability: {
+            type: sellcoveredData.availability?.type || 'immediate',
+            isPetsAllowed: sellcoveredData.availability?.isPetsAllowed || false,
+            operatingHours: sellcoveredData.availability?.operatingHours || false,
+            noticePeriod: sellcoveredData.availability?.noticePeriod || '',
+            date: sellcoveredData.availability?.date ? 
+                  new Date(sellcoveredData.availability.date).toISOString().split('T')[0] : '',
+            preferredSaleDuration: sellcoveredData.availability?.preferredSaleDuration || ''
+          },
+          contactInformation: {
+            name: sellcoveredData.contactInformation?.name || '',
+            email: sellcoveredData.contactInformation?.email || '',
+            phone: sellcoveredData.contactInformation?.phone || '',
+            alternatePhone: sellcoveredData.contactInformation?.alternatePhone || '',
+            bestTimeToContact: sellcoveredData.contactInformation?.bestTimeToContact || ''
+          },
+          // Note: Media files need special handling - you might need to fetch them separately
+          // or convert URLs to File objects if needed for editing
+          media: {
+            photos: {
+              exterior: sellcoveredData.media?.photos?.exterior || [],
+              interior: sellcoveredData.media?.photos?.interior || [],
+              floorPlan: sellcoveredData.media?.photos?.floorPlan || [],
+              washrooms: sellcoveredData.media?.photos?.washrooms || [],
+              lifts: sellcoveredData.media?.photos?.lifts || [],
+              emergencyExits: sellcoveredData.media?.photos?.emergencyExits || []
+            },
+            videoTour: sellcoveredData.media?.videoTour || null,
+            documents: sellcoveredData.media?.documents || []
+          }
+        }));
+
+        console.log('Form data set successfully:', sellcoveredData);
+      } else {
+        toast.error('No data found for this property');
+        navigate('/properties');
+      }
+    } catch (error: any) {
+      console.error('Error fetching property details:', error);
+      toast.error('Failed to load property details');
+      navigate('/Userdashboard/properties');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (propertyId) {
+    fetchById();
+  }
+}, [propertyId, navigate]);
 
   const steps = [
     {
@@ -421,94 +566,122 @@ const SellCoveredSpaceMain = () => {
     });
   };
 
-  const handleSubmit = async (e?: { preventDefault: () => void }) => {
-    if (e) e.preventDefault();
-    console.log(formData);
-    try {
-      // Convert media files to base64 strings if they exist
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      };
+const handleSubmit = async (e?: { preventDefault: () => void }) => {
+  if (e) e.preventDefault();
+  
+  setLoading(true);
+  console.log('Form Data:', formData);
 
-      // Get userId robustly from localStorage
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        toast.error('Please log in to continue');
-        navigate('/login');
-        return;
-      }
-
-      const userData = JSON.parse(user);
-      const author = userData.id;
-
-      // Transform data for backend
-      const transformedData = {
-        ...formData,
-        basicInformation: {
-          ...formData.basicInformation,
-          location: {
-            latitude: formData.basicInformation.location.latitude,
-            longitude: formData.basicInformation.location.longitude
-          }
-        },
-        media: convertedMedia,
-        // Ensure availability data matches the schema
-        price: formData.pricingDetails.propertyPrice,
-        registration: {
-          chargestype: formData.registration.chargestype,
-          registrationAmount: formData.registration.registrationAmount,
-          stampDutyAmount: formData.registration.stampDutyAmount
-        },
-        brokerage: {
-          required: typeof formData.brokerage?.required === 'boolean'
-            ? (formData.brokerage.required ? 'yes' : 'no')
-            : formData.brokerage?.required || 'no',
-          amount: formData.brokerage?.amount || 0
-        },
-        availability: {
-          type: formData.availability.type || 'immediate',
-          date: formData.availability.date,
-          noticePeriod: formData.availability.noticePeriod,
-          isPetsAllowed: formData.availability.isPetsAllowed || false,
-          operatingHours: formData.availability.operatingHours || false
-        },
-        // Add metadata
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: 'Commercial',
-          propertyName: 'Covered Space',
-          intent: 'Sell',
-          status: 'Available',
-        }
-      };
-
-
-      console.log('Submitting data:', transformedData);
-
-      // Submit to backend API
-      const response = await axios.post('/api/commercial/sell/covered-space', transformedData);
-
-      if (response.status === 201) {
-        toast.success("Property listed successfully!");
-        // Redirect to some success page or dashboard
-
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error("Failed to list property. Please try again.");
+  try {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      toast.error('Please log in to continue');
+      navigate('/login');
+      return;
     }
-  }
 
+    const userData = JSON.parse(user);
+    const author = userData.id;
+
+    const submitData = {
+      ...formData,
+      basicInformation: {
+        ...formData.basicInformation,
+        location: {
+          latitude: String(formData.basicInformation.location.latitude),
+          longitude: String(formData.basicInformation.location.longitude)
+        }
+      },
+      availability: {
+        type: formData.availability.type || 'immediate',
+        date: formData.availability.date,
+        preferredSaleDuration: formData.availability.preferredSaleDuration,
+        noticePeriod: formData.availability.noticePeriod,
+        isPetsAllowed: formData.availability.isPetsAllowed || false,
+        operatingHours: formData.availability.operatingHours || false
+      },
+      brokerage: {
+        required: formData.brokerage.required || 'no',
+        amount: Number(formData.brokerage.amount) || 0
+      },
+      metadata: {
+        createdBy: author,
+        createdAt: new Date().toISOString(),
+        propertyType: 'Commercial',
+        propertyName: 'Covered Space',
+        intent: 'Sell',
+        status: 'Available'
+      }
+    };
+
+    let response;
+    if (propertyId) {
+      // Update existing property
+      console.log('Updating property:', propertyId);
+      response = await axios.put(`/api/commercial/sale/coveredspace/${propertyId}`, {
+        data: submitData
+      });
+    } else {
+      // Create new property
+      console.log('Creating new property');
+      response = await axios.post('/api/commercial/sale/coveredspace', submitData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+    }
+ const safelocation = {
+          latitude: typeof formData.basicInformation.location.latitude === 'string'
+            ? parseFloat(formData.basicInformation.location.latitude) || 0
+            : formData.basicInformation.location.latitude || 0,
+          longitude: typeof formData.basicInformation.location.longitude === 'string'
+            ? parseFloat(formData.basicInformation.location.longitude) || 0
+            : formData.basicInformation.location.longitude || 0
+        };
+
+        const updatedFormData = {
+          ...formData,
+          basicInformation: {
+            ...formData.basicInformation,
+            location: safelocation,
+          }
+        };
+        console.log("Updated form data:", JSON.stringify(updatedFormData));
+
+    if (response.data.success) {
+      toast.success(propertyId ? "Property updated successfully!" : "Property listed successfully!");
+      navigate('/Userdashboard/properties');
+    } else {
+      throw new Error(response.data.error || (propertyId ? 'Failed to update property' : 'Failed to list property'));
+    }
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    
+    if (error.response) {
+      console.error('Server response error:', error.response.data);
+      toast.error(error.response.data.details?.[0] || error.response.data.error || 
+                 (propertyId ? 'Failed to update property' : 'Failed to list property'));
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      toast.error('No response from server. Please check your connection.');
+    } else {
+      toast.error(error.message || (propertyId ? 'Failed to update property' : 'Failed to list property'));
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+// Add this inside your return statement, before the progress indicator
+if (loading && propertyId) {
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+        <p className="text-gray-600">Loading property details...</p>
+      </div>
+    </div>
+  );
+}
   const handlePrevious = () => {
     setCurrentStep(currentStep - 1);
   };

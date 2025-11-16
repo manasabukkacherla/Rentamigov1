@@ -122,75 +122,76 @@ interface ICommercialSellCoveredSpace extends Document {
 }
 
 // Schema
+// Make some fields not required initially for testing
 const CommercialSellCoveredSpaceSchema = new Schema<ICommercialSellCoveredSpace>({
-  propertyId: { type: String, unique: true },
+  propertyId: { type: String, unique: true, sparse: true },
   basicInformation: {
-    title: { type: String, default: "Unnamed Property", required: true },
-    Type: [{ type: String, required: true }],
+    title: { type: String, default: "Unnamed Property" },
+    Type: [{ type: String }],
     address: {
-      street: { type: String, required: true },
-      city: { type: String, required: true },
-      state: { type: String, required: true },
-      zipCode: { type: String, required: true },
+      street: { type: String },
+      city: { type: String },
+      state: { type: String },
+      zipCode: { type: String },
     },
-    landmark: { type: String, required: true },
+    landmark: { type: String },
     location: {
-      latitude: { type: String, required: true },
-      longitude: { type: String, required: true },
+      latitude: { type: String },
+      longitude: { type: String },
     },
     isCornerProperty: { type: Boolean, default: false },
   },
   spaceDetails: {
-    totalArea: { type: Number, required: true },
-    areaUnit: { type: String, required: true },
-    coveredArea: { type: Number, required: true },
-    openArea: { type: Number, required: true },
+    totalArea: { type: Number},
+    areaUnit: { type: String },
+    coveredArea: { type: Number },
+    openArea: { type: Number },
     roadWidth: {
       type: Schema.Types.Mixed,
-      required: true,
+      
     },
     ceilingHeight: {
       type: Schema.Types.Mixed,
-      required: true,
+    
     },
     openSides: {
       type: Schema.Types.Mixed,
-      required: true,
+     
     },
   },
   propertyDetails: {
     area: {
-      totalArea: { type: Number, required: true },
-      builtUpArea: { type: Number, required: true },
-      carpetArea: { type: Number, required: true },
+      totalArea: { type: Number},
+      builtUpArea: { type: Number },
+      carpetArea: { type: Number },
     },
     floor: {
-      floorNumber: { type: Number, required: true },
-      totalFloors: { type: Number, required: true },
+      floorNumber: { type: Number },
+      totalFloors: { type: Number },
     },
-    facingDirection: { type: String, required: true },
-    furnishingStatus: { type: String, required: true },
+    facingDirection: { type: String },
+    furnishingStatus: { type: String },
     propertyAmenities: [{ type: String }],
     wholeSpaceAmenities: [{ type: String }],
     electricitySupply: {
-      powerLoad: { type: Number, required: true },
-      backup: { type: Boolean, default: false },
+      powerLoad: { type: Number },
+      backup: { type: Boolean },
     },
     waterAvailability: [{ type: String }],
-    propertyAge: { type: String, required: true },
-    propertyCondition: { type: String, required: true },
+    propertyAge: { type: String },
+    propertyCondition: { type: String },
   },
   pricingDetails: {
-    propertyPrice: { type: Number, required: true },
-    pricetype: { type: String, required: true },
+    propertyPrice: { type: Number },
+    pricetype: { type: String },
   },
   registration: {
-    chargestype: { type: String, required: true },
+    chargestype: { type: String },
     registrationAmount: { type: Number },
     stampDutyAmount: { type: Number },
   },
   brokerage: {
-    required: { type: String, required: true },
+    required: { type: String },
     amount: { type: Number },
   },
   availability: {

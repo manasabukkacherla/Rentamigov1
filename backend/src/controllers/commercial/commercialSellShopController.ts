@@ -119,17 +119,26 @@ export const getCommercialSellShopById = async (req: Request, res: Response) => 
     res.status(500).json({ error: 'Failed to fetch commercial sell shop property' });
   }
 }; 
-
 export const updateCommercialSellShop = async (req: Request, res: Response) => {
     try {
-      const documentId = req.params.id; 
-      const incomingData = req.body?.data;
-    const userId = req.body.userId;
+      const propertyId = req.params.propertyId; 
+      const incomingData = req.body;
+      
+      // Get userId from token (you'll need authentication middleware)
+      // If you don't have auth middleware, get from headers
+      const userId = req.headers['user-id'] || req.body.userId;
     
-      if (!incomingData) {
+      if (!incomingData) { 
         return res.status(400).json({
           success: false,
           message: "No data provided for update.",
+        });
+      }
+
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: "User ID not provided",
         });
       }
   
@@ -140,8 +149,8 @@ export const updateCommercialSellShop = async (req: Request, res: Response) => {
         })
       );
   
-     
-      const existingDoc = await CommercialSellShop.findById(documentId);
+      // Find by _id (MongoDB default) or your custom propertyId field
+      const existingDoc = await CommercialSellShop.findOne({propertyId});
       if (!existingDoc) {
         return res.status(404).json({
           success: false,
@@ -149,7 +158,9 @@ export const updateCommercialSellShop = async (req: Request, res: Response) => {
         });
       }
 
-      if (existingDoc.metadata?.createdBy?.toString() !== userId) {
+      // Check authorization - handle both ObjectId and string comparison
+      const createdBy = existingDoc.metadata?.createdBy;
+      if (!createdBy || createdBy.toString() !== userId.toString()) {
         return res.status(403).json({
           success: false,
           message: 'Not authorized to update this listing'
@@ -158,8 +169,8 @@ export const updateCommercialSellShop = async (req: Request, res: Response) => {
   
       const mergedData = _.merge(existingDoc.toObject(), cleanedData);
   
-      const updatedDoc = await CommercialSellShop.findByIdAndUpdate(
-        documentId,
+      const updatedDoc = await CommercialSellShop.findOneAndUpdate(
+       { propertyId},
         { $set: mergedData },
         { new: true, runValidators: true }
       );
@@ -177,6 +188,64 @@ export const updateCommercialSellShop = async (req: Request, res: Response) => {
       });
     }
   };
+
+// export const updateCommercialSellShop = async (req: Request, res: Response) => {
+//     try {
+//       const propertyId = req.params.propertyId; 
+//       const incomingData = req.body;
+//       const userId = req.body.userId;
+    
+//       if (!incomingData) { 
+//         return res.status(400).json({
+//           success: false,
+//           message: "No data provided for update.",
+//         });
+//       }
+  
+//       const cleanedData = JSON.parse(
+//         JSON.stringify(incomingData, (key, value) => {
+//           if (key === "_id" || key === "__v") return undefined;
+//           return value;
+//         })
+//       );
+  
+     
+//       const existingDoc = await CommercialSellShop.findOne({propertyId});
+//       if (!existingDoc) {
+//         return res.status(404).json({
+//           success: false,
+//           message: "Property not found",
+//         });
+//       }
+
+//       if (existingDoc.metadata?.createdBy?.toString() !== userId) {
+//         return res.status(403).json({
+//           success: false,
+//           message: 'Not authorized to update this listing'
+//         });
+//       }
+  
+//       const mergedData = _.merge(existingDoc.toObject(), cleanedData);
+  
+//       const updatedDoc = await CommercialSellShop.findOneAndUpdate(
+//         {propertyId},
+//         { $set: mergedData },
+//         { new: true, runValidators: true }
+//       );
+  
+//       res.status(200).json({
+//         success: true,
+//         message: "Sell shop updated successfully.",
+//         data: updatedDoc,
+//       });
+//     } catch (error: any) {
+//       console.error("Update error:", error);
+//       res.status(500).json({
+//         success: false,
+//         message: error instanceof Error ? error.message : "Unknown update error",
+//       });
+//     }
+//   };
   
 export const deleteCommercialSellShop = async (req: Request, res: Response) => {
         try {

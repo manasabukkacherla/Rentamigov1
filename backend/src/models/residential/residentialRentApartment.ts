@@ -220,7 +220,7 @@ interface IResidentialRentApartment extends Document {
 }
 
 const ResidentailRentApartmentSchema = new Schema<IResidentialRentApartment>({
-  propertyId: { type: String, required: false, unique: false },
+  propertyId: { type: String, required: false, unique: true },
   basicInformation: {
     title: { type: String, required: false },
     address: {

@@ -17,7 +17,7 @@ router.get('/:propertyId', getLeaseBuilderFloorById);
 
 // Protected routes - require authentication
 router.post('/', createLeaseBuilderFloor);
-router.put('/:id', updateLeaseBuilderFloor);
+router.put('/:propertyId', updateLeaseBuilderFloor);
 router.delete('/:id', deleteLeaseBuilderFloor);
 
 export default router;

@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useRef ,useCallback} from "react"
+import React, { useState, useRef ,useCallback, useEffect} from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -19,7 +20,7 @@ import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate , useParams} from "react-router-dom"
 import { v4 as uuidv4 } from 'uuid'
 import { uploadResidentialMediaToS3 } from '../../../utils/residentialMediaUploader'
 
@@ -45,7 +46,6 @@ interface Address {
 
 interface IBasicInformation {
   title: string;
-
   floorNumber: number;
   totalFloors: number;
   propertyId?: string;
@@ -217,6 +217,7 @@ interface ApiError {
 }
 
 interface FormData {
+  propertyId?: string;
   basicInformation: {
     title: string;
     floorNumber: number;
@@ -555,13 +556,16 @@ interface LeaseDuration {
   durationUnit: DurationUnit;  // More strict typing
 }
 
-const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initialPropertyId, onSubmit }) => {
+const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
+  const {propertyId} = useParams()
   const formRef = useRef<HTMLDivElement>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [isLoadingProperty, setIsLoadingProperty] = useState(false)
+
   const initialData = {
     basicInformation: {
       title: "",
@@ -706,7 +710,8 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       status: "Available"
     }
   }
-  const [formData, setFormData] = useState<FormData>({
+
+const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
       floorNumber: 0,
@@ -850,6 +855,197 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       status: "Available"
     }
   })
+
+
+  // Fetch existing property data when propertyId is provided (edit mode)
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      if (!propertyId) {
+        setIsEditing(false)
+        return
+      }
+
+      setIsEditing(true)
+      setIsLoadingProperty(true)
+      
+      try {
+        const user = sessionStorage.getItem('user')
+        if (!user) {
+          navigate('/login')
+          return
+        }
+
+        const token = JSON.parse(user).token
+        const response = await axios.get(`/api/residential/lease/builderfloor/${propertyId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        console.log(response)
+        if (response.data.success) {
+          const propertyData = response.data.data
+          
+          // Transform the API response to match our form structure
+          const transformedData: FormData = {
+            propertyId: propertyData._id || propertyData.propertyId,
+            basicInformation: {
+              title: propertyData.basicInformation?.title || "",
+              floorNumber: propertyData.basicInformation?.floorNumber || 0,
+              totalFloors: propertyData.basicInformation?.totalFloors || 0,
+              address: {
+                flatNo: propertyData.basicInformation?.address?.flatNo || 0,
+                showFlatNo: propertyData.basicInformation?.address?.showFlatNo || false,
+                floor: propertyData.basicInformation?.address?.floor || 0,
+                apartmentName: propertyData.basicInformation?.address?.apartmentName || "",
+                street: propertyData.basicInformation?.address?.street || "",
+                city: propertyData.basicInformation?.address?.city || "",
+                state: propertyData.basicInformation?.address?.state || "",
+                zipCode: propertyData.basicInformation?.address?.zipCode || "",
+                location: {
+                  latitude: propertyData.basicInformation?.address?.location?.latitude || "",
+                  longitude: propertyData.basicInformation?.address?.location?.longitude || "",
+                }
+              }
+            },
+            propertyDetails: {
+              propertysize: propertyData.propertyDetails?.propertysize || 0,
+              bedrooms: propertyData.propertyDetails?.bedrooms || 0,
+              washrooms: propertyData.propertyDetails?.washrooms || 0,
+              bathrooms: propertyData.propertyDetails?.bathrooms || 0,
+              balconies: propertyData.propertyDetails?.balconies || 0,
+              parkingdetails: propertyData.propertyDetails?.parkingdetails || "",
+              ExtraRooms: propertyData.propertyDetails?.ExtraRooms || [],
+              utility: propertyData.propertyDetails?.utility || "",
+              Furnishingstatus: propertyData.propertyDetails?.Furnishingstatus || "",
+              totalfloors: propertyData.propertyDetails?.totalfloors || 0,
+              floorNumber: propertyData.propertyDetails?.floorNumber || 0,
+              propertyfacing: propertyData.propertyDetails?.propertyfacing || "",
+              propertyage: propertyData.propertyDetails?.propertyage || "",
+              superareasqft: propertyData.propertyDetails?.superareasqft || 0,
+              superareasqmt: propertyData.propertyDetails?.superareasqmt || 0,
+              builtupareasqft: propertyData.propertyDetails?.builtupareasqft || 0,
+              builtupareasqmt: propertyData.propertyDetails?.builtupareasqmt || 0,
+              carpetareasqft: propertyData.propertyDetails?.carpetareasqft || 0,
+              carpetareasqmt: propertyData.propertyDetails?.carpetareasqmt || 0,
+              electricityavailability: propertyData.propertyDetails?.electricityavailability || "",
+              wateravailability: propertyData.propertyDetails?.wateravailability || [],
+              servantRoom: propertyData.propertyDetails?.servantRoom || false,
+              studyRoom: propertyData.propertyDetails?.studyRoom || false,
+              pooja: propertyData.propertyDetails?.pooja || false
+            },
+            availableitems: {
+              availableitems: propertyData.availableitems?.availableitems || [],
+              securityandsafety: propertyData.availableitems?.securityandsafety || [],
+              powerutility: propertyData.availableitems?.powerutility || [],
+              parkingtranspotation: propertyData.availableitems?.parkingtranspotation || [],
+              recreationalsportsfacilities: propertyData.availableitems?.recreationalsportsfacilities || [],
+              childrenfamilyamenities: propertyData.availableitems?.childrenfamilyamenities || [],
+              healthwellnessfacilities: propertyData.availableitems?.healthwellnessfacilities || [],
+              shoppingconviencestores: propertyData.availableitems?.shoppingconviencestores || [],
+              ecofriendlysustainable: propertyData.availableitems?.ecofriendlysustainable || [],
+              communityculturalspaces: propertyData.availableitems?.communityculturalspaces || [],
+              smarthometechnology: propertyData.availableitems?.smarthometechnology || [],
+              otheritems: propertyData.availableitems?.otheritems || []
+            },
+            floorAmenities: {
+              lights: propertyData.floorAmenities?.lights || 0,
+              geysers: propertyData.floorAmenities?.geysers || 0,
+              lofts: propertyData.floorAmenities?.lofts || 0,
+              clothHanger: propertyData.floorAmenities?.clothHanger || 0,
+              cotWithMattress: propertyData.floorAmenities?.cotWithMattress || 0,
+              airConditioner: propertyData.floorAmenities?.airConditioner || 0,
+              exhaustFan: propertyData.floorAmenities?.exhaustFan || 0,
+              ceilingFan: propertyData.floorAmenities?.ceilingFan || 0,
+              wardrobes: propertyData.floorAmenities?.wardrobes || 0,
+              kitchenCabinets: propertyData.floorAmenities?.kitchenCabinets || 0,
+              diningTableWithChairs: propertyData.floorAmenities?.diningTableWithChairs || 0,
+              sideTable: propertyData.floorAmenities?.sideTable || 0,
+              desertCooler: propertyData.floorAmenities?.desertCooler || 0
+            },
+            leaseDetails: {
+              monthlyRent: propertyData.leaseDetails?.monthlyRent || 0,
+              securityDeposit: propertyData.leaseDetails?.securityDeposit || 0,
+              maintenanceCharges: {
+                amount: propertyData.leaseDetails?.maintenanceCharges?.amount || 0,
+                type: propertyData.leaseDetails?.maintenanceCharges?.type || "monthly"
+              },
+              leaseDuration: {
+                minimumDuration: propertyData.leaseDetails?.leaseDuration?.minimumDuration || 0,
+                maximumDuration: propertyData.leaseDetails?.leaseDuration?.maximumDuration || 0,
+                durationUnit: propertyData.leaseDetails?.leaseDuration?.durationUnit || "years"
+              },
+              rentNegotiable: propertyData.leaseDetails?.rentNegotiable || false,
+              additionalCharges: {
+                waterCharges: {
+                  type: propertyData.leaseDetails?.additionalCharges?.waterCharges?.type || "inclusive",
+                  amount: propertyData.leaseDetails?.additionalCharges?.waterCharges?.amount || 0
+                },
+                electricityCharges: {
+                  type: propertyData.leaseDetails?.additionalCharges?.electricityCharges?.type || "inclusive",
+                  amount: propertyData.leaseDetails?.additionalCharges?.electricityCharges?.amount || 0
+                },
+                gasCharges: {
+                  type: propertyData.leaseDetails?.additionalCharges?.gasCharges?.type || "inclusive",
+                  amount: propertyData.leaseDetails?.additionalCharges?.gasCharges?.amount || 0
+                },
+                otherCharges: {
+                  type: propertyData.leaseDetails?.additionalCharges?.otherCharges?.type || "inclusive",
+                  amount: propertyData.leaseDetails?.additionalCharges?.otherCharges?.amount || 0
+                }
+              },
+              brokerage: {
+                type: propertyData.leaseDetails?.brokerage?.type || "no",
+                amount: propertyData.leaseDetails?.brokerage?.amount || 0
+              }
+            },
+            availability: {
+              type: propertyData.availability?.type || "immediate",
+              date: propertyData.availability?.date || ""
+            },
+            media: {
+              photos: {
+                exterior: propertyData.media?.photos?.exterior || [],
+                interior: propertyData.media?.photos?.interior || [],
+                floorPlan: propertyData.media?.photos?.floorPlan || [],
+                washrooms: propertyData.media?.photos?.washrooms || [],
+                bedrooms: propertyData.media?.photos?.bedrooms || [],
+                halls: propertyData.media?.photos?.halls || [],
+                storerooms: propertyData.media?.photos?.storerooms || [],
+                kitchen: propertyData.media?.photos?.kitchen || [],
+                servantRoom: propertyData.media?.photos?.servantRoom || [],
+                studyRoom: propertyData.media?.photos?.studyRoom || [],
+                pooja: propertyData.media?.photos?.pooja || [],
+                lifts: propertyData.media?.photos?.lifts || [],
+                emergencyExits: propertyData.media?.photos?.emergencyExits || []
+              },
+              mediaItems: propertyData.media?.mediaItems || [],
+              videoTour: propertyData.media?.videoTour || "",
+              documents: propertyData.media?.documents || []
+            },
+            metadata: {
+              createdBy: propertyData.metadata?.createdBy || "",
+              createdAt: propertyData.metadata?.createdAt ? new Date(propertyData.metadata.createdAt) : new Date(),
+              propertyType: "Residential",
+              propertyName: "Builder Floor",
+              intent: "Lease",
+              status: propertyData.metadata?.status || "Available"
+            }
+          }
+
+          setFormData(transformedData)
+          toast.success('Property data loaded successfully!')
+        }
+      } catch (error) {
+        console.error('Error fetching property data:', error)
+        toast.error('Failed to load property data')
+        setError('Failed to load property data. Please try again.')
+      } finally {
+        setIsLoadingProperty(false)
+      }
+    }
+
+    fetchPropertyData()
+  }, [propertyId])
 
   const handleAddressChange = useCallback((newAddress: Address) => {
       setFormData(prev => ({
@@ -1006,7 +1202,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
       icon: <Home className="w-6 h-6" />,
       component: (
         <div className="space-y-8">
-           
            <PropertyName
             propertyName={formData.basicInformation.title}
             onPropertyNameChange={(name: string) => setFormData(prev => ({
@@ -1018,7 +1213,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             }))}
           />
              
-
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <div className="space-y-8">
               <div className="flex items-center mb-8">
@@ -1027,8 +1221,6 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <PropertyAddress
-                // latitude={formData.basicInformation.address.location.latitude}
-                // longitude={formData.basicInformation.address.location.longitude}
                 address={{
                   ...formData.basicInformation.address,
                   location: {
@@ -1383,8 +1575,14 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
               }
             };
 
-            // Send the updated form data to the backend
-            const response = await axios.post('/api/residential/lease/builderfloor', {
+            // Use PUT for editing, POST for creating new
+            const url = isEditing && propertyId 
+              ? `/api/residential/lease/builderfloor/${propertyId}`
+              : '/api/residential/lease/builderfloor';
+            
+            const method = isEditing && propertyId ? 'put' : 'post';
+
+            const response = await axios[method](url, {
               ...updatedFormData,
               metadata: {
                 createdBy: author,
@@ -1397,10 +1595,8 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             });
 
             if (response.data.success) {
-              // Set the propertyId from the response
-              setPropertyId(response.data.data.propertyId);
-              toast.success('Property listed successfully!');
-              // navigate('/dashboard');
+              toast.success(isEditing ? 'Property updated successfully!' : 'Property listed successfully!');
+              navigate('/UserDashboard');
             }
           }
         } catch (error) {
@@ -1409,7 +1605,13 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
         }
       } else {
         // If no media to upload, just send the form data
-        const response = await axios.post('/api/residential/lease/builderfloor', {
+        const url = isEditing && propertyId 
+          ? `/api/residential/lease/builderfloor/${propertyId}`
+          : '/api/residential/lease/builderfloor';
+        
+        const method = isEditing && propertyId ? 'put' : 'post';
+
+        const response = await axios[method](url, {
           ...formData,
           metadata: {
             createdBy: author,
@@ -1420,21 +1622,31 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             status: "Available"
           }
         });
-
+  
         if (response.data.success) {
-          // Set the propertyId from the response
-          setPropertyId(response.data.data.propertyId);
-          toast.success('Property listed successfully!');
-          navigate('/dashboard');
+          toast.success(isEditing ? 'Property updated successfully!' : 'Property listed successfully!');
+          navigate('/UserDashboard');
         }
       }
     } catch (error) {
       console.error('Error creating builder floor listing:', error);
-      toast.error('Failed to create builder floor listing');
+      toast.error(isEditing ? 'Failed to update builder floor listing' : 'Failed to create builder floor listing');
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state while fetching property data
+  if (isLoadingProperty) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-12 w-12 mx-auto text-black mb-4" />
+          <p className="text-lg text-black">Loading property data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">
@@ -1488,7 +1700,12 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
   
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Apartment</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            {isEditing ? 'Edit Builder Floor' : 'List Your Builder Floor'}
+          </h1>
+          {isEditing && (
+            <p className="text-gray-600 mt-2">Editing property ID: {propertyId}</p>
+          )}
         </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep - 1].title}</h2>
@@ -1502,8 +1719,8 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
             onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+            disabled={currentStep === 1}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 1
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
@@ -1519,11 +1736,11 @@ const LeaseBuilderFloor: React.FC<LeaseBuilderFloorProps> = ({ propertyId: initi
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                Submitting...
+                {isEditing ? 'Updating...' : 'Submitting...'}
               </>
             ) : (
               <>
-                {currentStep === formSections.length ? 'Submit' : 'Next'}
+                {currentStep === formSections.length ? (isEditing ? 'Update Property' : 'Submit') : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />
               </>
             )}

@@ -106,7 +106,7 @@ interface ICommercialShowroom extends Document {
       powerLoad: number;
       backup: boolean;
     };
-    waterAvailability: string[];
+   waterAvailability: { type: [String]},
     propertyAge: string;
     propertyCondition: string;
   };

@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/', createCommercialSellAgriculture);
 router.get('/', getAllCommercialSellAgriculture);
 router.get('/:propertyId', getCommercialSellAgricultureById);
-router.put('/:id', updateCommercialSellAgriculture);
+router.put('/:propertyId', updateCommercialSellAgriculture);
 router.delete('/:id', deleteCommercialSellAgriculture);
 
 export default router; 

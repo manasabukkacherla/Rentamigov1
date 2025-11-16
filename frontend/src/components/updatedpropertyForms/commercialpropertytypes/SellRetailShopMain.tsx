@@ -1,5 +1,5 @@
 "use client"
-
+import { useParams } from "react-router-dom";
 import type React from "react"
 import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
@@ -21,6 +21,7 @@ import axios from "axios"
 import { toast } from "react-hot-toast"
 import MapLocation from "../CommercialComponents/MapLocation"
 import PriceDetails from "../CommercialComponents/PriceDetails"
+
 // interface MediaFile {
 //   url: string;
 //   file: File;
@@ -37,6 +38,7 @@ import PriceDetails from "../CommercialComponents/PriceDetails"
 // }
 
 interface FormDataState {
+  propertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -124,16 +126,16 @@ interface FormDataState {
   metadata?: {
     createdBy?: string;
     createdAt?: Date;
-    isVerified?: boolean;
-    propertyType?: string;
-    propertyName?: string;
-    intent?: string;
-    status?: string;
+    propertyType?: 'Commercial';
+    propertyName?: 'Retail store';
+    intent?: 'Sale';
+    status?: 'Available';
   };
 }
 
 const SellRetailShopMain = () => {
   const navigate = useNavigate();
+  const { propertyId} = useParams();
   const [formData, setFormData] = useState<FormDataState>({
     basicInformation: {
       title: '',
@@ -227,7 +229,61 @@ const SellRetailShopMain = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const formRef = useRef<HTMLDivElement>(null);
+useEffect(() => {
+  if (!propertyId) return; 
 
+  const fetchPropertyData = async () => {
+    try {
+      const token = sessionStorage.getItem("token");
+      const response = await axios.get(`/api/commercial/sale/retailstore/${propertyId}`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : ""
+        }
+      });
+
+      const data = response.data.data;
+
+      // FIX: Handle waterAvailability array -> string conversion
+      setFormData(prev => ({
+        ...prev,
+        propertyId: propertyId,
+        basicInformation: data.basicInformation || prev.basicInformation,
+        retailStoreDetails: data.retailStoreDetails || prev.retailStoreDetails,
+        propertyDetails: {
+          ...(data.propertyDetails || prev.propertyDetails),
+          // Convert waterAvailability array to string
+          waterAvailability: Array.isArray(data.propertyDetails?.waterAvailability) 
+            ? data.propertyDetails.waterAvailability[0] || ''
+            : data.propertyDetails?.waterAvailability || ''
+        },
+        priceDetails: data.priceDetails || prev.priceDetails,
+        registration: data.registration || prev.registration,
+        brokerage: data.brokerage || prev.brokerage,
+        availability: data.availability || prev.availability,
+        contactInformation: data.contactInformation || prev.contactInformation,
+        media: {
+          photos: {
+            exterior: data.media?.photos?.exterior || prev.media.photos.exterior,
+            interior: data.media?.photos?.interior || prev.media.photos.interior,
+            floorPlan: data.media?.photos?.floorPlan || prev.media.photos.floorPlan,
+            washrooms: data.media?.photos?.washrooms || prev.media.photos.washrooms,
+            lifts: data.media?.photos?.lifts || prev.media.photos.lifts,
+            emergencyExits: data.media?.photos?.emergencyExits || prev.media.photos.emergencyExits,
+          },
+          videoTour: data.media?.videoTour || prev.media.videoTour,
+          documents: data.media?.documents || prev.media.documents
+        },
+        metadata: data.metadata || prev.metadata
+      }));
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast.error("Failed to load property data.");
+    }
+  };
+
+  fetchPropertyData();
+}, [propertyId]);
   // Check login status on component mount
   useEffect(() => {
     const user = sessionStorage.getItem('user')
@@ -428,14 +484,14 @@ const SellRetailShopMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+                files: files.map(file => ({  file }))
               })),
               videoTour: formData.media.videoTour || null,
               documents: formData.media.documents
             }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -527,209 +583,184 @@ const SellRetailShopMain = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    // Debug: log price before validation
-    console.log('DEBUG price before validation:', formData.priceDetails.propertyPrice);
-    e.preventDefault();
-    console.log('Form Data:', formData);
-
-    // Validate price and author before submission
-    const user = sessionStorage.getItem('user');
-    if (!user) {
-      toast.error('You need to be logged in to create a listing');
-      navigate('/login');
-      return;
-    }
-    const userData = JSON.parse(user);
-    const author = userData.id;
-    if (!author) {
-      toast.error('User information missing. Please log in again.');
-      navigate('/login');
-      return;
-    }
-    // Removed price > 0 validation as requested
-    setIsSubmitting(true);
-
-    try {
-      const token = sessionStorage.getItem('token');
-      // Convert media files to base64
-      const convertFileToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        });
-      };
-
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      };
-
-      console.log('Sending data to backend with author ID:', author);
-
-      const transformedData = {
-        basicInformation: {
-          ...formData.basicInformation,
-          Type: Array.isArray(formData.basicInformation.Type)
-          ? formData.basicInformation.Type
-  : (formData.basicInformation.Type ? [formData.basicInformation.Type] : []),
-
-          location: {
-            latitude: formData.basicInformation.location.latitude,
-            longitude: formData.basicInformation.location.longitude
-          },
-          address: {
-            street: formData.basicInformation.address.street,
-            city: formData.basicInformation.address.city,
-            state: formData.basicInformation.address.state,
-            zipCode: formData.basicInformation.address.zipCode
-          },
-          landmark: formData.basicInformation.landmark,
-          isCornerProperty: formData.basicInformation.isCornerProperty,
-          possessionStatus: formData.propertyDetails.possessionStatus,
-          ownershipType: formData.propertyDetails.ownershipType,
-          propertyAge: formData.propertyDetails.propertyAge,
-          propertyCondition: formData.propertyDetails.propertyCondition,
-          facingDirection: formData.propertyDetails.facingDirection,
-          furnishingStatus: formData.propertyDetails.furnishingStatus,
-          propertyAmenities: formData.propertyDetails.propertyAmenities,
-          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
-          electricitySupply: {
-            powerLoad: formData.propertyDetails.electricitySupply.powerLoad,
-            backup: formData.propertyDetails.electricitySupply.backup
-          },
-          waterAvailability: formData.propertyDetails.waterAvailability,
-          area: {
-            totalArea: formData.propertyDetails.area.totalArea,
-            carpetArea: formData.propertyDetails.area.carpetArea,
-            builtUpArea: formData.propertyDetails.area.builtUpArea
-          },
-          floor: {
-            floorNumber: formData.propertyDetails.floor.floorNumber,
-            totalFloors: formData.propertyDetails.floor.totalFloors
-          }
-        },
-        retailStoreDetails: {
-          location: formData.retailStoreDetails.location,
-          anchorStores: formData.retailStoreDetails.anchorStores,
-          footfallData: formData.retailStoreDetails.footfallData,
-          signageAllowed: formData.retailStoreDetails.signageAllowed,
-          sharedWashrooms: formData.retailStoreDetails.sharedWashrooms,
-          fireExit: formData.retailStoreDetails.fireExit
-        },
-        propertyDetails: {
-          ...formData.propertyDetails,
-          area: {
-            totalArea: parseFloat(formData.propertyDetails.area.totalArea.toString()),
-            carpetArea: parseFloat(formData.propertyDetails.area.carpetArea.toString()),
-            builtUpArea: parseFloat(formData.propertyDetails.area.builtUpArea.toString())
-          },
-          floor: {
-            floorNumber: parseInt(formData.propertyDetails.floor.floorNumber.toString()),
-            totalFloors: parseInt(formData.propertyDetails.floor.totalFloors.toString())
-          },
-          facingDirection: formData.propertyDetails.facingDirection,
-          furnishingStatus: formData.propertyDetails.furnishingStatus,
-          propertyAmenities: formData.propertyDetails.propertyAmenities,
-          wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
-          electricitySupply: {
-            powerLoad: parseFloat(formData.propertyDetails.electricitySupply.powerLoad.toString()),
-            backup: formData.propertyDetails.electricitySupply.backup
-          },
-          waterAvailability: formData.propertyDetails.waterAvailability,
-        },
-          priceDetails: {
-            propertyPrice: parseFloat(formData.priceDetails.propertyPrice.toString()),
-            pricetype: formData.priceDetails.pricetype=='fixed'?'fixed':'negotiable'
-          },
-          registration: {
-            chargestype: formData.registration.chargestype=='inclusive'?'inclusive':'exclusive',
-            registrationAmount: formData.registration.registrationAmount ? parseFloat(formData.registration.registrationAmount.toString()) : 0,
-            stampDutyAmount: formData.registration.stampDutyAmount ? parseFloat(formData.registration.stampDutyAmount.toString()) : 0,
-          },
-        
-          brokerage: {
-            required: formData.brokerage.required === "Yes" ? "Yes" : "No",
-            amount: formData.brokerage.amount ? parseFloat(formData.brokerage.amount.toString()) : undefined
-          },
-          availability: {
-            type: formData.availability.type,
-            date: formData.availability.date
-        },
-        contactInformation: {
-          ...formData.contactInformation,
-          name: formData.contactInformation.name,
-          email: formData.contactInformation.email,
-          phone: formData.contactInformation.phone,
-          alternatePhone: formData.contactInformation.alternatePhone,
-          bestTimeToContact: formData.contactInformation.bestTimeToContact
-        },
-        media: convertedMedia,
-        metadata: {
-  createdAt: new Date(),
-  isVerified: false,
-  propertyType: 'Commercial',
-  propertyName: 'Retail Store',
-  intent: 'Sell',
-  status: 'Available',
-  createdBy: author // ensure createdBy is set from logged-in user
-},
-      };
-
-      // Use the same format as in the backend routes configuration
-      const API_ENDPOINT = '/api/commercial/sell/retail-store';
-      console.log(`About to send API request to ${API_ENDPOINT}`);
-      console.log('Request headers:', {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-      });
-
-      console.log('Sending transformedData:', JSON.stringify(transformedData, null, 2));
-       const response = await axios.post(API_ENDPOINT, transformedData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ''
+  // ... your existing validation code ...
+ let author = null;
+   const user = sessionStorage.getItem('user');
+   if (user) {
+     author = JSON.parse(user).id;
+   } else {
+     toast.error('User not logged in');
+     return;
+   }
+  try {
+    const token = sessionStorage.getItem('token');
+    
+    // FIX: Better file conversion that handles existing base64 strings
+    const convertFileToBase64 = (file: File | string): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        if (typeof file === 'string' && file.startsWith('data:')) {
+          resolve(file);
+          return;
         }
+        const reader = new FileReader();
+        reader.readAsDataURL(file as File);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
       });
+    };
 
-      console.log('API response:', response.data);
+    const convertedMedia = {
+      photos: {
+        exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+        interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+        floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+        washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+        lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+        emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+      },
+      videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+      documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+    };
 
-      if (response.data.success) {
-        toast.success('Commercial sell retail shop listing created successfully!');
-        setTimeout(() => {
-          navigate('/updatePropertyform');
-        }, 1500);
-      } else {
-        toast.error(response.data.error || 'Failed to create listing');
+    // FIX: Transform waterAvailability from string to string[]
+    const transformedData = {
+      basicInformation: {
+        title: formData.basicInformation.title,
+        Type: Array.isArray(formData.basicInformation.Type)
+          ? formData.basicInformation.Type
+          : [formData.basicInformation.Type],
+        address: {
+          street: formData.basicInformation.address.street,
+          city: formData.basicInformation.address.city,
+          state: formData.basicInformation.address.state,
+          zipCode: formData.basicInformation.address.zipCode,
+        },
+        landmark: formData.basicInformation.landmark,
+        location: {
+          latitude: formData.basicInformation.location.latitude,
+          longitude: formData.basicInformation.location.longitude,
+        },
+        isCornerProperty: formData.basicInformation.isCornerProperty,
+      },
+      retailStoreDetails: {
+        location: formData.retailStoreDetails.location,
+        anchorStores: formData.retailStoreDetails.anchorStores,
+        footfallData: formData.retailStoreDetails.footfallData,
+        signageAllowed: formData.retailStoreDetails.signageAllowed,
+        sharedWashrooms: formData.retailStoreDetails.sharedWashrooms,
+        fireExit: formData.retailStoreDetails.fireExit
+      },
+      propertyDetails: {
+        ...formData.propertyDetails,
+        area: {
+          totalArea: parseFloat(formData.propertyDetails.area.totalArea.toString()),
+          carpetArea: parseFloat(formData.propertyDetails.area.carpetArea.toString()),
+          builtUpArea: parseFloat(formData.propertyDetails.area.builtUpArea.toString())
+        },
+        floor: {
+          floorNumber: parseInt(formData.propertyDetails.floor.floorNumber.toString()),
+          totalFloors: parseInt(formData.propertyDetails.floor.totalFloors.toString())
+        },
+        facingDirection: formData.propertyDetails.facingDirection,
+        furnishingStatus: formData.propertyDetails.furnishingStatus,
+        propertyAmenities: formData.propertyDetails.propertyAmenities,
+        wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities,
+        electricitySupply: {
+          powerLoad: parseFloat(formData.propertyDetails.electricitySupply.powerLoad.toString()),
+          backup: formData.propertyDetails.electricitySupply.backup
+        },
+        // FIX: Convert string to string[] for waterAvailability
+        waterAvailability: formData.propertyDetails.waterAvailability 
+          ? [formData.propertyDetails.waterAvailability] 
+          : [],
+        propertyAge: formData.propertyDetails.propertyAge,
+        propertyCondition: formData.propertyDetails.propertyCondition,
+        ownershipType: formData.propertyDetails.ownershipType,
+        possessionStatus: formData.propertyDetails.possessionStatus
+      },
+      priceDetails: {
+        propertyPrice: parseFloat(formData.priceDetails.propertyPrice.toString()),
+        pricetype: formData.priceDetails.pricetype == 'fixed' ? 'fixed' : 'negotiable'
+      },
+      registration: {
+        chargestype: formData.registration.chargestype == 'inclusive' ? 'inclusive' : 'exclusive',
+        registrationAmount: formData.registration.registrationAmount ? parseFloat(formData.registration.registrationAmount.toString()) : 0,
+        stampDutyAmount: formData.registration.stampDutyAmount ? parseFloat(formData.registration.stampDutyAmount.toString()) : 0,
+      },
+      brokerage: {
+        required: formData.brokerage.required === "Yes" ? "Yes" : "No",
+        amount: formData.brokerage.amount ? parseFloat(formData.brokerage.amount.toString()) : undefined
+      },
+      availability: {
+        type: formData.availability.type,
+        date: formData.availability.date
+      },
+      contactInformation: {
+        ...formData.contactInformation
+      },
+      media: convertedMedia,
+      metadata: {
+        createdAt: new Date(),
+        isVerified: false,
+        propertyType: 'Commercial',
+        propertyName: 'Retail Store',
+        intent: 'Sell',
+        status: 'Available',
+        createdBy: author
+      },
+    };
+
+    // FIX: Add authorization headers
+    const config = {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : "",
+        'Content-Type': 'application/json'
       }
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
+    };
 
-      // Improved error handling with better user feedback
-      if (error.response) {
-        // Server responded with an error
-        const errorMessage = error.response.data.error || error.response.data.message || 'Failed to create listing';
-        toast.error(errorMessage);
-      } else if (error.request) {
-        // Request was made but no response
-        toast.error('No response from server. Please check your internet connection and try again.');
-      } else {
-        // Error in setting up the request
-        toast.error('Failed to create commercial sell retail shop listing. Please try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
+    let response;
+
+    if (formData.propertyId) {
+      response = await axios.put(
+        `/api/commercial/sale/retailstore/${formData.propertyId}`,
+        transformedData,
+        config // ADD AUTHORIZATION HEADERS
+      );
+    } else {
+      response = await axios.post(
+        "/api/commercial/sale/retailstore",
+        transformedData,
+        config // ADD AUTHORIZATION HEADERS
+      );
     }
-  };
+
+    if (response.data.success) {
+      toast.success(
+        propertyId
+          ? "Retail store updated successfully!"
+          : "Retail store created successfully!"
+      );
+      navigate("/UserDashboard/properties");
+    } else {
+      toast.error(response.data.error || 'Failed to create listing');
+    }
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    
+    // Better error logging
+    if (error.response) {
+      console.error('Server response:', error.response.data);
+      const errorMessage = error.response.data.error || error.response.data.message || 'Failed to create listing';
+      toast.error(errorMessage);
+    } else if (error.request) {
+      toast.error('No response from server. Please check your internet connection and try again.');
+    } else {
+      toast.error('Failed to create commercial sell retail shop listing. Please try again.');
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   // Show login prompt if not logged in
   if (!isLoggedIn) {
     return (

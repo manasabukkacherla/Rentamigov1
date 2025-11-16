@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import PropertyName from "../PropertyName"
 import AgriculturalLandType from "../CommercialComponents/AgriculturalLandType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -16,7 +16,7 @@ import Brokerage from "../residentialrent/Brokerage"
 import CommercialAvailability from "../CommercialComponents/CommercialAvailability"
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import MediaUploadforagriplot from "../Mediauploadforagriplot"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Navigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
 import {
@@ -33,6 +33,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 import MapLocation from "../CommercialComponents/MapLocation"
+import { BasicInfo } from "@/components/propertiesdetails/components/BasicInfo"
 
 // Interface that matches the backend model structure
 interface FormData {
@@ -138,7 +139,6 @@ interface FormData {
 }
 
 const SellAgricultureMain = () => {
-  const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
   const [formData, setFormData] = useState<FormData>({
     basicInformation:{
@@ -233,7 +233,67 @@ const SellAgricultureMain = () => {
     }
   })
 
-  const [currentStep, setCurrentStep] = useState(0)
+
+
+   
+
+   const params = useParams()
+   const propertyId = params.propertyId;
+   const [Loading, setLoading] = useState(false);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const navigate = useNavigate()
+
+useEffect(() => {
+  const fetchById = async () => {
+    const user = sessionStorage.getItem("user");
+
+    if (!user) {
+      navigate("/login");
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    if (!propertyId) return;
+
+    console.log("Fetching Agricultural Land details for:", propertyId);
+    setLoading(true);
+
+    try {
+      const response = await axios.get(`/api/commercial/sell/agriculture/${propertyId}`);
+if (response.data && response.data.data) {
+  const agricultreData = response.data.data;
+        setFormData((prev) => ({
+          ...prev,
+          basicInformation: agricultreData.basicInformation || prev.basicInformation,
+          Agriculturelanddetails: agricultreData.Agriculturelanddetails || prev.Agriculturelanddetails,
+          propertyDetails: agricultreData.propertyDetails || prev.propertyDetails,
+          price: agricultreData.price || prev.price,
+          registrationCharges: agricultreData.registrationCharges || prev.registrationCharges,
+          brokerage: agricultreData.brokerage || prev.brokerage,
+          availability: agricultreData.availability || prev.availability,
+          petsAllowed: agricultreData.petsAllowed ?? prev.petsAllowed,
+          operatingHoursRestrictions: agricultreData.operatingHoursRestrictions ?? prev.operatingHoursRestrictions,
+          contactDetails: agricultreData.contactDetails || prev.contactDetails,
+          media: agricultreData.media || prev.media,
+          metadata: agricultreData.metadata || prev.metadata
+        }));
+
+        toast.success("Agricultural land details loaded successfully!");
+      } else {
+        toast.error("Failed to load property details.");
+      }
+    } catch (err) {
+      console.error("Error fetching agricultural land details:", err);
+      toast.error("Failed to fetch property details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchById();
+}, [navigate, propertyId]);
 
   const steps = [
     {
@@ -381,37 +441,74 @@ const SellAgricultureMain = () => {
       ),
     },
     {
-      title: "Property Media",
-      icon: <ImageIcon className="w-5 h-5" />,
-      component: (
-        <div className="space-y-6">
-          <MediaUploadforagriplot
-            onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.images.forEach(({ category, files }) => {
-                photos[category] = files.map(f => f.file);
-              });
+  title: "Property Media",
+  icon: <ImageIcon className="w-5 h-5" />,
+  component: (
+    <div className="space-y-6">
+      <MediaUploadforagriplot
+        Media={{
+          photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+            category,
+            files: files.map(file => {
+              if (file instanceof File) {
+                // New uploads
+                return { url: URL.createObjectURL(file), file };
+              } else if (typeof file === "string") {
+                // Existing URLs from backend
+                return { url: file, file: null };
+              }
+              return { url: "", file: null };
+            })
+          })),
+          videoTour:
+            formData.media.videoTour instanceof File
+              ? URL.createObjectURL(formData.media.videoTour)
+              : formData.media.videoTour || null,
+          documents:
+            formData.media.documents.map(file =>
+              file instanceof File ? URL.createObjectURL(file) : file
+            )
+        }}
+        onMediaChange={(media) => {
+          const photosByCategory: Record<string, (File | string)[]> = {
+            exterior: [],
+            interior: [],
+            floorPlan: [],
+            washrooms: [],
+            lifts: [],
+            emergencyExits: []
+          };
 
-              setFormData(prev => ({
-                ...prev,
-                media: {
-                  photos: {
-                    exterior: photos.exterior || [],
-                    interior: photos.interior || [],
-                    floorPlan: photos.floorPlan || [],
-                    washrooms: photos.washrooms || [],
-                    lifts: photos.lifts || [],
-                    emergencyExits: photos.emergencyExits || []
-                  },
-                  videoTour: media.video?.file || null,
-                  documents: media.documents.map(d => d.file)
-                }
-              }));
-            }}
-          />
-        </div>
-      ),
-    },
+          media.photos.forEach(({ category, files }) => {
+            if (category in photosByCategory) {
+              photosByCategory[category] = files.map(f => f.file || f.url);
+            }
+          });
+
+          setFormData(prev => ({
+            ...prev,
+            media: {
+              photos: {
+                exterior: photosByCategory.exterior,
+                interior: photosByCategory.interior,
+                floorPlan: photosByCategory.floorPlan,
+                washrooms: photosByCategory.washrooms,
+                lifts: photosByCategory.lifts,
+                emergencyExits: photosByCategory.emergencyExits
+              },
+              videoTour:
+                media.videoTour && typeof media.videoTour !== "string"
+                  ? media.videoTour
+                  : prev.media.videoTour,
+              documents: media.documents
+            }
+          }));
+        }}
+      />
+    </div>
+  ),
+}
+,
   ]
 
   const convertFileToBase64 = (file: File): Promise<string> => {
@@ -462,70 +559,74 @@ const SellAgricultureMain = () => {
   }
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault()
-    console.log(formData)
-    try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
+  e.preventDefault();
 
-        const convertedMedia = {
-          photos: {
-            exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-            interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-            floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-            washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-            lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-            emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-          },
-          videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-          documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-        };
-
-        // Create the payload matching the backend model structure
-        const transformedData = {
-          basicInformation: formData.basicInformation,
-          Agriculturelanddetails: formData.Agriculturelanddetails,
-          powerSupply: formData.Agriculturelanddetails.powersupply,
-          propertyDetails: formData.propertyDetails,
-          price: formData.price,
-          registrationCharges: formData.registrationCharges,
-          brokerage: formData.brokerage,
-          availability: formData.availability,
-          petsAllowed: formData.petsAllowed,
-          operatingHoursRestrictions: formData.operatingHoursRestrictions,
-          contactDetails: formData.contactDetails,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date(),
-            propertyType: 'Commercial',
-            propertyName: 'Agricultural Land',
-            intent: 'Sell',
-            status: 'Available',
-          }
-        };
-
-        const response = await axios.post('/api/commercial/sell/agriculture', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data) {
-          toast.success('Agricultural land listing created successfully!');
-          // Navigate to dashboard or listing page
-          // navigate('/dashboard');
-        }
-      } else {
-        toast.error('You must be logged in to create a listing');
-        navigate('/login');
-      }
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
-      toast.error(error.response?.data?.message || 'Failed to create agricultural land listing. Please try again.');
+  try {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      toast.error("You must be logged in to create or edit a listing");
+      navigate("/login");
+      return;
     }
+
+    const author = JSON.parse(user).id;
+    setLoading(true);
+
+    // Convert only new File objects to base64 (not URLs)
+    const convertFileIfNeeded = async (item: File | string) => {
+      if (item instanceof File) {
+        return await convertFileToBase64(item);
+      }
+      return item;
+    };
+
+    const convertedMedia = {
+      photos: {
+        exterior: await Promise.all(formData.media.photos.exterior.map(convertFileIfNeeded)),
+        interior: await Promise.all(formData.media.photos.interior.map(convertFileIfNeeded)),
+        floorPlan: await Promise.all(formData.media.photos.floorPlan.map(convertFileIfNeeded)),
+        washrooms: await Promise.all(formData.media.photos.washrooms.map(convertFileIfNeeded)),
+        lifts: await Promise.all(formData.media.photos.lifts.map(convertFileIfNeeded)),
+        emergencyExits: await Promise.all(formData.media.photos.emergencyExits.map(convertFileIfNeeded)),
+      },
+      videoTour: formData.media.videoTour
+        ? await convertFileIfNeeded(formData.media.videoTour)
+        : null,
+      documents: await Promise.all(formData.media.documents.map(convertFileIfNeeded)),
+    };
+
+    const payload = {
+      ...formData,
+      media: convertedMedia,
+      metadata: {
+        createdBy: author,
+        createdAt: new Date(),
+        propertyType: "Commercial",
+        propertyName: "Agricultural Land",
+        intent: "Sell",
+        status: "Available",
+      },
+    };
+
+    let response;
+    if (propertyId) {
+      response = await axios.put(`/api/commercial/sell/agriculture/${propertyId}`, payload);
+      toast.success("Agricultural land updated successfully!");
+    } else {
+      response = await axios.post(`/api/commercial/sell/agriculture`, payload);
+      toast.success("Agricultural land created successfully!");
+    }
+
+    if (response.data) {
+      // navigate("/dashboard"); // optional
+    }
+  } catch (error: any) {
+    console.error("Error submitting form:", error);
+    toast.error(error.response?.data?.message || "Failed to save property. Please try again.");
+  } finally {
+    setLoading(false);
   }
+};
 
   return (
     <div className="min-h-screen bg-white">

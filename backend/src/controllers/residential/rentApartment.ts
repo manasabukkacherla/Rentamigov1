@@ -229,33 +229,65 @@ export const getRentApartmentById = async (req: Request, res: Response) => {
 
 export const updateRentApartment = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialRentApartment.findById(req.params.id);
-    const userId = req.body.userId;
-    
-    if (!apartment) {
-      return res.status(404).json({
-        success: false,
-        message: 'Apartment not found'
+    const { propertyId } = req.params; // Use destructuring for consistency
+    const incomingData = req.body;
+
+    if (!incomingData) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'No data provided for update' 
       });
     }
 
-    if (apartment.metadata.createdBy.toString() !== userId) {
+    // Find the apartment by propertyId
+    const existingApartment = await ResidentialRentApartment.findOne({ propertyId });
+    if (!existingApartment) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Apartment not found' 
+      });
+    }
+
+    // Check authorization - make sure userId is sent from frontend
+    if (existingApartment.metadata.createdBy.toString() !== incomingData.userId) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
       });
     }
 
-    const updatedApartment = await ResidentialRentApartment.findByIdAndUpdate(
-      req.params.id,
+    // Clean the data - remove fields that shouldn't be updated
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => 
+        (['_id', '__v', 'propertyId', 'metadata'].includes(key) ? undefined : value)
+      )
+    );
+
+    // Add updatedAt timestamp to metadata
+    cleanedData.metadata = {
+      ...existingApartment.metadata, // Convert mongoose document to plain object
+      updatedAt: new Date()
+    };
+   
+if (
+  existingApartment.metadata?.createdBy &&
+  existingApartment.metadata.createdBy.toString() !== incomingData.userId
+) {
+  return res.status(403).json({
+    success: false,
+    message: "Not authorized to update this listing",
+  });
+}
+
+
+    // Update the document
+    const updatedApartment = await ResidentialRentApartment.findOneAndUpdate(
+      { propertyId },
+      { $set: cleanedData }, // Use $set operator
       {
-        ...req.body,
-        metadata: {
-          ...apartment.metadata,
-          updatedAt: new Date()
-        }
-      },
-      { new: true, runValidators: true }
+        new: true,
+        runValidators: true,
+      }
     );
 
     res.status(200).json({

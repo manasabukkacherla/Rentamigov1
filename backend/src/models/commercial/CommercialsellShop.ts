@@ -126,7 +126,7 @@ interface ICommercialShop extends Document {
 
 // Schema
 const CommercialShopSchema = new Schema<ICommercialShop>({
-  propertyId: { type: String, required: true, unique: true },
+  propertyId: String,
   basicInformation: {
     title: { type: String, required: true },
     Type: [{ type: String, required: true }],

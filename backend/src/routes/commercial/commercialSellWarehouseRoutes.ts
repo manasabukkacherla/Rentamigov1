@@ -7,7 +7,7 @@ const commercialSellWarehouseRoutes = express.Router();
 commercialSellWarehouseRoutes.post('/', createCommercialWarehouse);
 commercialSellWarehouseRoutes.get('/', getAllSellWarehouses);
 commercialSellWarehouseRoutes.get('/:propertyId', getSellWarehouseById);
-commercialSellWarehouseRoutes.put('/:id', updateSellWarehouse);
-commercialSellWarehouseRoutes.delete('/:id', deleteSellWarehouse);
+commercialSellWarehouseRoutes.put('/:propertyId', updateSellWarehouse);
+commercialSellWarehouseRoutes.delete('/:propertyId', deleteSellWarehouse);
 
 export default commercialSellWarehouseRoutes; 

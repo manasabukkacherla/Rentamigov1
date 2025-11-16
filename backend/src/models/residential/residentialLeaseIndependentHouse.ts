@@ -13,7 +13,7 @@ interface IBasicInformation {
       latitude: string;
       longitude: string;
     };
-  };
+  }; 
 }
 
 interface ExtraRooms {
@@ -172,15 +172,15 @@ interface IResidentialLeaseIndependentHouse extends Document {
   media: Media;
   metadata?: IMetadata;
 }
-
+// In your model, make sure all fields match
 const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndependentHouse>({
-  propertyId: { type: String },
+  propertyId: { type: String, unique: true },
   basicInformation: {
-    title: { type: String },
+    title: { type: String, required: true },
     propertyAddress: {
       houseName: { type: String },
       street: { type: String },
-      city: { type: String },
+      city: { type: String, required: true },
       state: { type: String },
       zipCode: { type: String },
       pinCode: { type: String },
@@ -209,8 +209,6 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
     utilityArea: String,
     furnishingStatus: String,
     flooring: String,
-    totalFloors: Number,
-    propertyOnFloor: Number,
     facing: String,
     propertyAge: String,
     superBuiltUpAreaSqft: Number,
@@ -289,10 +287,7 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
       required: { type: String },
       amount: { type: Number }
     }
-  }
-  
-  
-  ,
+  },
   availability: {
     type: { type: String },
     date: { type: String }
@@ -303,13 +298,12 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
       interior: [String],
       floorPlan: [String],
       washrooms: [String],
-      garden: [String],
-      basement: [String],
+      lifts: [String],
+      emergencyExits: [String],
       bedrooms: [String],
       halls: [String],
       storerooms: [String],
-      kitchen: [String],
-      servantQuarters: [String]
+      kitchen: [String]
     },
     videoTour: { type: String },
     documents: [String]
@@ -318,7 +312,7 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
     createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     createdAt: { type: Date, default: Date.now },
     propertyType: { type: String, default: 'Residential' },
-    propertyName: { type: String, default:'Independent House' },
+    propertyName: { type: String, default: 'Independent House' },
     intent: { type: String, default: 'Lease' },
     status: { 
       type: String, 
@@ -327,7 +321,7 @@ const ResidentialLeaseIndependentHouseSchema = new Schema<IResidentialLeaseIndep
     }
   }
 }, {
-  timestamps: false
+  timestamps: true 
 });
 
 export default mongoose.models.ResidentialLeaseIndependentHouse ||

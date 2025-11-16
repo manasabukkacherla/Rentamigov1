@@ -56,11 +56,11 @@ export const createCommercialWarehouse = async (req: Request, res: Response) => 
     // Generate property ID
     const propertyId = await generatePropertyId();
     
-    // Add metadata and property ID
     warehouseData.metadata = {
-      createdBy: warehouseData.metadata?.createdBy,
-      createdAt: new Date(),
-    };
+  ...warehouseData.metadata,
+  createdAt: new Date()
+};
+
     
     // Add property ID to the warehouse data
     warehouseData.propertyId = propertyId;
@@ -157,12 +157,11 @@ export const getSellWarehouseById = async (req: Request, res: Response) => {
   }
 };
 
-
 export const updateSellWarehouse = async (req: Request, res: Response) => {
   try {
-    const documentId = req.params.id; 
-    const incomingData = req.body?.data;
-    const userId = req.body.userId;
+    const propertyId = req.params;
+    const incomingData = req.body;
+
     if (!incomingData) {
       return res.status(400).json({
         success: false,
@@ -177,25 +176,20 @@ export const updateSellWarehouse = async (req: Request, res: Response) => {
       })
     );
 
-   
-    const existingDoc = await CommercialWarehouse.findById(documentId);
-    if (existingDoc?.metadata?.createdBy?.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: "Not authorized to update this listing",
-      });
-    }
+    const existingDoc = await CommercialWarehouse.findOne({ propertyId });
+
     if (!existingDoc) {
       return res.status(404).json({
         success: false,
-        message: "Property not found",
+        message: "Property not found.",
       });
     }
 
+    // Merge new data with existing document
     const mergedData = _.merge(existingDoc.toObject(), cleanedData);
 
-    const updatedDoc = await CommercialWarehouse.findByIdAndUpdate(
-      documentId,
+    const updatedDoc = await CommercialWarehouse.findOneAndUpdate(
+      { propertyId },
       { $set: mergedData },
       { new: true, runValidators: true }
     );

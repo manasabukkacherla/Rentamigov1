@@ -61,106 +61,91 @@ const generatePropertyId = async (): Promise<string> => {
 // Create a new commercial sell covered space listing
 export const createCommercialSellCoveredSpace = async (req: Request, res: Response) => {
   try {
-    // Log the incoming request body
-    console.log('Received form data:', req.body);
+    console.log('Received form data:', JSON.stringify(req.body, null, 2));
 
     // Generate a unique property ID
     const propertyId = await generatePropertyId();
 
-    // // Map frontend fields to backend schema
-    // const mapPayload = (body: any) => {
-    //   // Map registrationCharges.included -> includedInPrice
-    //   if (body.propertyDetails && body.propertyDetails.registrationCharges) {
-    //     body.propertyDetails.registrationCharges.includedInPrice = body.propertyDetails.registrationCharges.included;
-    //     delete body.propertyDetails.registrationCharges.included;
-    //   }
-    //   // Ensure waterAvailability is an array
-    //   if (body.propertyDetails && body.propertyDetails.waterAvailability && !Array.isArray(body.propertyDetails.waterAvailability)) {
-    //     body.propertyDetails.waterAvailability = [body.propertyDetails.waterAvailability];
-    //   }
-    //   // Map area fields in propertyDetails.area
-    //   if (body.propertyDetails && body.propertyDetails.area) {
-    //     if (body.propertyDetails.area.superBuiltUpAreaSqft !== undefined) {
-    //       body.propertyDetails.area.totalArea = Number(body.propertyDetails.area.superBuiltUpAreaSqft) || 0;
-    //     }
-    //     if (body.propertyDetails.area.builtUpAreaSqft !== undefined) {
-    //       body.propertyDetails.area.builtUpArea = Number(body.propertyDetails.area.builtUpAreaSqft) || 0;
-    //     }
-    //     if (body.propertyDetails.area.carpetAreaSqft !== undefined) {
-    //       body.propertyDetails.area.carpetArea = Number(body.propertyDetails.area.carpetAreaSqft) || 0;
-    //     }
-    //   }
-    //   // Map area fields in spaceDetails
-    //   if (body.spaceDetails) {
-    //     if (body.spaceDetails.totalArea !== undefined) {
-    //       body.spaceDetails.totalArea = Number(body.spaceDetails.totalArea) || 0;
-    //     }
-    //     if (body.spaceDetails.coveredArea !== undefined) {
-    //       body.spaceDetails.coveredArea = Number(body.spaceDetails.coveredArea) || 0;
-    //     }
-    //     if (body.spaceDetails.openArea !== undefined) {
-    //       body.spaceDetails.openArea = Number(body.spaceDetails.openArea) || 0;
-    //     }
-    //     if (body.spaceDetails.roadWidth !== undefined && typeof body.spaceDetails.roadWidth !== 'object') {
-    //       body.spaceDetails.roadWidth = Number(body.spaceDetails.roadWidth) || 0;
-    //     }
-    //     if (body.spaceDetails.ceilingHeight !== undefined && typeof body.spaceDetails.ceilingHeight !== 'object') {
-    //       body.spaceDetails.ceilingHeight = Number(body.spaceDetails.ceilingHeight) || 0;
-    //     }
-    //     if (body.spaceDetails.noOfOpenSides !== undefined && typeof body.spaceDetails.noOfOpenSides !== 'string') {
-    //       body.spaceDetails.noOfOpenSides = String(body.spaceDetails.noOfOpenSides);
-    //     }
-    //   }
-    //   // Ensure numbers for floor fields
-    //   if (body.propertyDetails && body.propertyDetails.floor) {
-    //     if (body.propertyDetails.floor.floorNumber !== undefined) {
-    //       body.propertyDetails.floor.floorNumber = Number(body.propertyDetails.floor.floorNumber) || 0;
-    //     }
-    //     if (body.propertyDetails.floor.totalFloors !== undefined) {
-    //       body.propertyDetails.floor.totalFloors = Number(body.propertyDetails.floor.totalFloors) || 0;
-    //     }
-    //   }
-    //   // Ensure numbers for priceDetails
-    //   if (body.propertyDetails && body.propertyDetails.priceDetails) {
-    //     if (body.propertyDetails.priceDetails.Price !== undefined) {
-    //       body.propertyDetails.priceDetails.Price = Number(body.propertyDetails.priceDetails.Price) || 0;
-    //     }
-    //   }
-    //   // Ensure numbers for brokerage amount
-    //   if (body.propertyDetails && body.propertyDetails.brokerage) {
-    //     if (body.propertyDetails.brokerage.amount !== undefined) {
-    //       body.propertyDetails.brokerage.amount = Number(body.propertyDetails.brokerage.amount) || 0;
-    //     }
-    //   }
-    //   // Ensure numbers for registrationCharges
-    //   if (body.propertyDetails && body.propertyDetails.registrationCharges) {
-    //     if (body.propertyDetails.registrationCharges.amount !== undefined) {
-    //       body.propertyDetails.registrationCharges.amount = Number(body.propertyDetails.registrationCharges.amount) || 0;
-    //     }
-    //     if (body.propertyDetails.registrationCharges.stampDuty !== undefined) {
-    //       body.propertyDetails.registrationCharges.stampDuty = Number(body.propertyDetails.registrationCharges.stampDuty) || 0;
-    //     }
-    //   }
-    //   return body;
-    // };
+    // Transform the incoming data to match schema
+    const transformData = (body: any) => {
+      const transformed = { ...body };
+      
+      // Ensure waterAvailability is an array
+      if (transformed.propertyDetails?.waterAvailability && !Array.isArray(transformed.propertyDetails.waterAvailability)) {
+        transformed.propertyDetails.waterAvailability = [transformed.propertyDetails.waterAvailability];
+      }
 
-    // const mappedBody = mapPayload({ ...req.body });
+      // Convert string numbers to actual numbers
+      if (transformed.spaceDetails) {
+        transformed.spaceDetails.totalArea = Number(transformed.spaceDetails.totalArea) || 0;
+        transformed.spaceDetails.coveredArea = Number(transformed.spaceDetails.coveredArea) || 0;
+        transformed.spaceDetails.openArea = Number(transformed.spaceDetails.openArea) || 0;
+        
+        // Handle roadWidth conversion
+        if (transformed.spaceDetails.roadWidth && typeof transformed.spaceDetails.roadWidth !== 'object') {
+          transformed.spaceDetails.roadWidth = {
+            value: Number(transformed.spaceDetails.roadWidth) || 0,
+            unit: 'feet'
+          };
+        }
+        
+        // Handle ceilingHeight conversion
+        if (transformed.spaceDetails.ceilingHeight && typeof transformed.spaceDetails.ceilingHeight !== 'object') {
+          transformed.spaceDetails.ceilingHeight = {
+            value: Number(transformed.spaceDetails.ceilingHeight) || 0,
+            unit: 'feet'
+          };
+        }
+        
+        // Handle openSides
+        if (transformed.spaceDetails.openSides !== undefined) {
+          transformed.spaceDetails.noOfOpenSides = String(transformed.spaceDetails.openSides);
+          delete transformed.spaceDetails.openSides;
+        }
+      }
 
-    // Create a new commercial sell covered space document
+      // Convert area fields to numbers
+      if (transformed.propertyDetails?.area) {
+        transformed.propertyDetails.area.totalArea = Number(transformed.propertyDetails.area.totalArea) || 0;
+        transformed.propertyDetails.area.builtUpArea = Number(transformed.propertyDetails.area.builtUpArea) || 0;
+        transformed.propertyDetails.area.carpetArea = Number(transformed.propertyDetails.area.carpetArea) || 0;
+      }
+
+      // Convert floor numbers
+      if (transformed.propertyDetails?.floor) {
+        transformed.propertyDetails.floor.floorNumber = Number(transformed.propertyDetails.floor.floorNumber) || 0;
+        transformed.propertyDetails.floor.totalFloors = Number(transformed.propertyDetails.floor.totalFloors) || 0;
+      }
+
+      // Convert electricity supply
+      if (transformed.propertyDetails?.electricitySupply) {
+        transformed.propertyDetails.electricitySupply.powerLoad = Number(transformed.propertyDetails.electricitySupply.powerLoad) || 0;
+      }
+
+      return transformed;
+    };
+
+    const transformedData = transformData(req.body);
+
+    // Create new document
     const newCoveredSpace = new CommercialSellCoveredSpace({
       propertyId,
-      ...req.body,
+      ...transformedData,
       metadata: {
-        ...req.body.metadata,
-        createdBy: req.body.metadata.createdBy,
-        createdAt: new Date()
+        createdBy: req.body.metadata?.createdBy || null,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        intent: 'Sell',
+        propertyName: 'Covered Space',
+        status: 'Available'
       }
     });
 
-    // Save the document to the database
+    console.log('Saving document:', JSON.stringify(newCoveredSpace, null, 2));
+
+    // Save to database
     const savedCoveredSpace = await newCoveredSpace.save();
 
-    // Send success response
     res.status(201).json({
       success: true,
       message: 'Commercial covered space sale listing created successfully',
@@ -168,23 +153,24 @@ export const createCommercialSellCoveredSpace = async (req: Request, res: Respon
     });
 
   } catch (error: any) {
-    // Log the error and request body for debugging
     console.error('Error creating commercial covered space sale listing:', error);
-    console.error('Request body that caused the error:', req.body);
-
-    // Send error response
+    console.error('Error details:', error.stack);
+    
+    // More detailed error information
     let details: string[] = [];
     if (error.errors) {
-      details = Object.values(error.errors).map((err: any) => err.message);
-    } else if (Array.isArray(error?.details)) {
-      details = error.details;
-    } else if (typeof error === 'string') {
-      details = [error];
+      details = Object.values(error.errors).map((err: any) => `${err.path}: ${err.message}`);
+    } else if (error.code === 11000) {
+      details = ['Duplicate property ID'];
+    } else if (error.message) {
+      details = [error.message];
     }
+    
     res.status(400).json({
       success: false,
-      error: error.message || 'Failed to create commercial covered space sale listing',
-      details
+      error: 'Failed to create commercial covered space sale listing',
+      details,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
@@ -211,95 +197,37 @@ export const getAllCommercialSellCoveredSpaces = async (req: Request, res: Respo
 export const getCommercialSellCoveredSpaceById = async (req: Request, res: Response) => {
   try {
     const propertyId = req.params.propertyId;
+    console.log('Fetching property with ID:', propertyId);
+    
     const property = await CommercialSellCoveredSpace.findOne({ propertyId });
     
     if (!property) {
-      return res.status(404).json({ error: 'Commercial sell covered space property not found' });
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial sell covered space property not found' 
+      });
     }
     
-    res.status(200).json({
+    console.log('Property found:', property.propertyId);
+    return res.status(200).json({
+      success: true,
       message: 'Commercial sell covered space property retrieved successfully',
       data: property
     });
-  } catch (error) {
+    
+  } catch (error: any) {
     console.error('Error fetching commercial sell covered space property:', error);
-    res.status(500).json({ error: 'Failed to fetch commercial sell covered space property' });
+    return res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch commercial sell covered space property',
+      details: error.message 
+    });
   }
-}; 
-
+};
 export const updateCommercialSellCoveredSpace = async (req: Request, res: Response) => {
-  // Map frontend fields to backend schema for update as well
-  const mapPayload = (body: any) => {
-    if (body.propertyDetails && body.propertyDetails.registrationCharges) {
-      body.propertyDetails.registrationCharges.includedInPrice = body.propertyDetails.registrationCharges.included;
-      delete body.propertyDetails.registrationCharges.included;
-    }
-    if (body.propertyDetails && body.propertyDetails.waterAvailability && !Array.isArray(body.propertyDetails.waterAvailability)) {
-      body.propertyDetails.waterAvailability = [body.propertyDetails.waterAvailability];
-    }
-    if (body.propertyDetails && body.propertyDetails.area) {
-      if (body.propertyDetails.area.superBuiltUpAreaSqft !== undefined) {
-        body.propertyDetails.area.totalArea = Number(body.propertyDetails.area.superBuiltUpAreaSqft) || 0;
-      }
-      if (body.propertyDetails.area.builtUpAreaSqft !== undefined) {
-        body.propertyDetails.area.builtUpArea = Number(body.propertyDetails.area.builtUpAreaSqft) || 0;
-      }
-      if (body.propertyDetails.area.carpetAreaSqft !== undefined) {
-        body.propertyDetails.area.carpetArea = Number(body.propertyDetails.area.carpetAreaSqft) || 0;
-      }
-    }
-    if (body.spaceDetails) {
-      if (body.spaceDetails.totalArea !== undefined) {
-        body.spaceDetails.totalArea = Number(body.spaceDetails.totalArea) || 0;
-      }
-      if (body.spaceDetails.coveredArea !== undefined) {
-        body.spaceDetails.coveredArea = Number(body.spaceDetails.coveredArea) || 0;
-      }
-      if (body.spaceDetails.openArea !== undefined) {
-        body.spaceDetails.openArea = Number(body.spaceDetails.openArea) || 0;
-      }
-      if (body.spaceDetails.roadWidth !== undefined && typeof body.spaceDetails.roadWidth !== 'object') {
-        body.spaceDetails.roadWidth = Number(body.spaceDetails.roadWidth) || 0;
-      }
-      if (body.spaceDetails.ceilingHeight !== undefined && typeof body.spaceDetails.ceilingHeight !== 'object') {
-        body.spaceDetails.ceilingHeight = Number(body.spaceDetails.ceilingHeight) || 0;
-      }
-      if (body.spaceDetails.noOfOpenSides !== undefined && typeof body.spaceDetails.noOfOpenSides !== 'string') {
-        body.spaceDetails.noOfOpenSides = String(body.spaceDetails.noOfOpenSides);
-      }
-    }
-    if (body.propertyDetails && body.propertyDetails.floor) {
-      if (body.propertyDetails.floor.floorNumber !== undefined) {
-        body.propertyDetails.floor.floorNumber = Number(body.propertyDetails.floor.floorNumber) || 0;
-      }
-      if (body.propertyDetails.floor.totalFloors !== undefined) {
-        body.propertyDetails.floor.totalFloors = Number(body.propertyDetails.floor.totalFloors) || 0;
-      }
-    }
-    if (body.propertyDetails && body.propertyDetails.priceDetails) {
-      if (body.propertyDetails.priceDetails.Price !== undefined) {
-        body.propertyDetails.priceDetails.Price = Number(body.propertyDetails.priceDetails.Price) || 0;
-      }
-    }
-    if (body.propertyDetails && body.propertyDetails.brokerage) {
-      if (body.propertyDetails.brokerage.amount !== undefined) {
-        body.propertyDetails.brokerage.amount = Number(body.propertyDetails.brokerage.amount) || 0;
-      }
-    }
-    if (body.propertyDetails && body.propertyDetails.registrationCharges) {
-      if (body.propertyDetails.registrationCharges.amount !== undefined) {
-        body.propertyDetails.registrationCharges.amount = Number(body.propertyDetails.registrationCharges.amount) || 0;
-      }
-      if (body.propertyDetails.registrationCharges.stampDuty !== undefined) {
-        body.propertyDetails.registrationCharges.stampDuty = Number(body.propertyDetails.registrationCharges.stampDuty) || 0;
-      }
-    }
-    return body;
-  };
-  req.body = mapPayload({ ...req.body });
     try {
-      const documentId = req.params.id; 
-      const incomingData = req.body?.data;
+      const propertyId = req.params.propertyId; 
+      const incomingData = req.body;
       if (!incomingData) {
         return res.status(400).json({
           success: false,
@@ -315,7 +243,7 @@ export const updateCommercialSellCoveredSpace = async (req: Request, res: Respon
       );
   
      
-      const existingDoc = await CommercialSellCoveredSpace.findById(documentId);
+      const existingDoc = await CommercialSellCoveredSpace.findOne({propertyId});
       if (!existingDoc) {
         return res.status(404).json({
           success: false,
@@ -325,8 +253,8 @@ export const updateCommercialSellCoveredSpace = async (req: Request, res: Respon
   
       const mergedData = _.merge(existingDoc.toObject(), cleanedData);
   
-      const updatedDoc = await CommercialSellCoveredSpace.findByIdAndUpdate(
-        documentId,
+      const updatedDoc = await CommercialSellCoveredSpace.findOneAndUpdate(
+        {propertyId},
         { $set: mergedData },
         { new: true, runValidators: true }
       );

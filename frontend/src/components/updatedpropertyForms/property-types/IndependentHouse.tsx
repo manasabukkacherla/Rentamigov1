@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useRef } from "react"
+import React, { useState, useCallback, useRef , useEffect} from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2, Lock as LockIcon } from "lucide-react"
 import PropertyName from "../PropertyName"
 import IndependentPropertyAddress from "../IndependentPropertyAddress"
@@ -17,7 +17,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams, Navigate } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
 
@@ -31,6 +31,7 @@ const customStyles = `
 `;
 
 interface FormData {
+  propertyId?: string;
   basicInformation: {
     title: string
     address: {
@@ -203,14 +204,15 @@ interface IndependentHouseProps {
   onSubmit?: (formData: FormData) => void;
 }
 
-const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initialPropertyId, onSubmit }) => {
+const IndependentHouse: React.FC<IndependentHouseProps> = ({  onSubmit }) => {
   const [currentStep, setCurrentStep] = useState(0)
+  const { propertyId } = useParams();
+ 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
+ 
   const formRef = useRef<HTMLDivElement>(null)
-
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
@@ -620,7 +622,6 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
           <ResidentialPropertyMediaUpload
                 propertyType="independenthouse"
-                propertyId={propertyId}
                 value={formData.media}
                 onChange={(media) => setFormData(prev => ({ ...prev, media }))}
               />
@@ -629,6 +630,162 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
       ),
     },
   ]
+useEffect(() => {
+  const fetchIndependentHouseById = async () => {
+    console.log("🔄 Starting fetch with ID:", propertyId);
+    
+    if (!propertyId) {
+      console.log(" No ID provided");
+      return;
+    }
+
+    try {
+      const res = await axios.get(`/api/residential/rent/independenthouse/${propertyId}`);
+      console.log(" Full API Response:", res);
+      
+      if (res.data && res.data.success) {
+        const property = res.data.data;
+        console.log(" Property data received:", property);
+        
+        // Check if basic data exists
+        if (!property.basicInformation) {
+          console.log(" No basicInformation in response");
+        } else {
+          console.log("🏠 Basic info:", property.basicInformation.title);
+        }
+
+        setFormData(prev => ({
+          ...prev,
+          ...property,
+          basicInformation: property.basicInformation || prev.basicInformation,
+          propertyDetails: property.propertyDetails || prev.propertyDetails,
+          restrictions: property.restrictions || prev.restrictions,
+          flatAmenities: property.flatAmenities || prev.flatAmenities,
+          societyAmenities: property.societyAmenities || prev.societyAmenities,
+          rentalTerms: property.rentalTerms || prev.rentalTerms,
+          availability: property.availability || prev.availability,
+          media: property.media || prev.media,
+          metadata: property.metadata || prev.metadata
+        }));
+
+      } else {
+        console.log("❌ API success false:", res.data);
+        toast.error(res.data.message || "Failed to load property");
+      }
+    } catch (error: any) {
+      console.error("💥 Fetch error:", error);
+      console.error("📡 Error details:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message
+      });
+      toast.error(error.response?.data?.message || "Failed to fetch property");
+    }
+  };
+
+  if (propertyId) {
+    fetchIndependentHouseById();
+  }
+}, [propertyId]);
+
+const handleSubmit = async () => {
+  setIsSubmitting(true);
+
+  try {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const author = JSON.parse(user).id;
+
+    // Convert files to Base64 (only for new uploads)
+    const convertFileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = (error) => reject(error);
+      });
+    };
+
+    const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+      const results: string[] = [];
+      for (const file of files) {
+        if (file instanceof File) {
+          const base64 = await convertFileToBase64(file);
+          results.push(base64);
+        } else {
+          results.push(file); // already an existing URL
+        }
+      }
+      return results;
+    };
+
+    // Convert media fields
+    const convertedMedia = {
+      photos: {
+        exterior: await convertFilesToBase64(formData.media.photos.exterior),
+        interior: await convertFilesToBase64(formData.media.photos.interior),
+        floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+        washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+        lifts: await convertFilesToBase64(formData.media.photos.lifts),
+        emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+        bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+        halls: await convertFilesToBase64(formData.media.photos.halls),
+        storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+        kitchen: await convertFilesToBase64(formData.media.photos.kitchen),
+      },
+      videoTour: formData.media.videoTour || undefined,
+      documents: await convertFilesToBase64(formData.media.documents),
+    };
+
+    const finalData = {
+      ...formData,
+      media: convertedMedia,
+      metadata: {
+        ...formData.metadata,
+        createdBy: author,
+        createdAt: formData.metadata?.createdAt || new Date(),
+      },
+    };
+
+    // --- ADD or UPDATE Independent House ---
+    let res;
+    if (propertyId) {
+     
+      res = await axios.put(
+        `/api/residential/rent/independenthouse/${propertyId}`,
+        finalData
+      );
+    } else {
+      
+      res = await axios.post(
+        `/api/residential/rent/independenthouse`,
+        finalData
+      );
+    }
+
+    if (res.data.success) {
+      toast.success(
+        propertyId
+          ? "Independent house updated successfully!"
+          : "Independent house created successfully!"
+      );
+      navigate("/UserDashboard/properties");
+    } else {
+      toast.error(res.data.message || "Something went wrong");
+    }
+  } catch (error: any) {
+    console.error("Error during submission:", error);
+    toast.error(error.response?.data?.message || "Failed to save property");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
@@ -676,99 +833,105 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    console.log(formData);
+//  const handleSubmit = async () => {
+//   setIsSubmitting(true);
 
-    try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        navigate('/updatepropertyform');
-        return;
-      }
+//   try {
+//     const user = sessionStorage.getItem('user');
+//     if (!user) {
+//       navigate('/login');
+//       return;
+//     }
 
-      const author = JSON.parse(user).id;
+//     const author = JSON.parse(user).id;
 
-      // Convert media files to base64
-      const convertFileToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        });
-      };
+//     // Convert files to Base64 (only for new uploads)
+//     const convertFileToBase64 = (file: File): Promise<string> => {
+//       return new Promise((resolve, reject) => {
+//         const reader = new FileReader();
+//         reader.readAsDataURL(file);
+//         reader.onload = () => resolve(reader.result as string);
+//         reader.onerror = (error) => reject(error);
+//       });
+//     };
 
-      // Helper function to convert array of files to base64
-      const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-        const results: string[] = [];
-        for (const file of files) {
-          if (file instanceof File) {
-            const base64 = await convertFileToBase64(file);
-            results.push(base64);
-          } else {
-            results.push(file); // Already a string (URL)
-          }
-        }
-        return results;
-      };
+//     const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+//       const results: string[] = [];
+//       for (const file of files) {
+//         if (file instanceof File) {
+//           const base64 = await convertFileToBase64(file);
+//           results.push(base64);
+//         } else {
+//           results.push(file); // already URL
+//         }
+//       }
+//       return results;
+//     };
 
-      const convertedMedia = {
-        photos: {
-          exterior: await convertFilesToBase64(formData.media.photos.exterior),
-          interior: await convertFilesToBase64(formData.media.photos.interior),
-          floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-          washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-          lifts: await convertFilesToBase64(formData.media.photos.lifts),
-          emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-          bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-          halls: await convertFilesToBase64(formData.media.photos.halls),
-          storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-          kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-        },
-        videoTour: formData.media.videoTour
-          ? formData.media.videoTour instanceof File
-            ? await convertFileToBase64(formData.media.videoTour)
-            : formData.media.videoTour
-          : undefined,
-        documents: await convertFilesToBase64(formData.media.documents)
-      };
+//     // Convert media
+//     const convertedMedia = {
+//       photos: {
+//         exterior: await convertFilesToBase64(formData.media.photos.exterior),
+//         interior: await convertFilesToBase64(formData.media.photos.interior),
+//         floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+//         washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+//         lifts: await convertFilesToBase64(formData.media.photos.lifts),
+//         emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+//         bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+//         halls: await convertFilesToBase64(formData.media.photos.halls),
+//         storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+//         kitchen: await convertFilesToBase64(formData.media.photos.kitchen),
+//       },
+//       videoTour: formData.media.videoTour || undefined,
+//       documents: await convertFilesToBase64(formData.media.documents),
+//     };
 
-      const transformedData = {
-        ...formData,
-        media: convertedMedia,
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: "Residential",
-          propertyName: "Independent House",
-          intent: "Rent",
-          status: "Available"
-        }
-      };
+//     const finalData = {
+//       ...formData,
+//       media: convertedMedia,
+//       metadata: {
+//         ...formData.metadata,
+//         createdBy: author,
+//         createdAt: formData.metadata?.createdAt || new Date(),
+//       },
+//     };
 
-      const response = await axios.post('/api/residential/rent/independenthouse', transformedData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+//     // --- ADD or UPDATE ---
+//     if (Id) {
+//       // ✅ Update Property
+//       const res = await axios.put(
+//         `/api/residential/rent/independenthouse/${Id}`,
+//         finalData
+//       );
 
-      if (response.data.success) {
-        setPropertyId(response.data.propertyId);
-        toast.success('Property listing created successfully!');
-        setFormData(initialFormData);
-        if (onSubmit) {
-          onSubmit(formData);
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create independent house listing. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-  
+//       if (res.data.success) {
+//         toast.success("Property updated successfully!");
+//         navigate("/allproperties");
+//       } else {
+//         toast.error(res.data.message || "Failed to update property.");
+//       }
+//     } else {
+//       // ✅ Add New Property
+//       const res = await axios.post(
+//         "/api/residential/rent/independenthouse",
+//         finalData
+//       );
+
+//       if (res.data.success) {
+//         toast.success("Property added successfully!");
+//         navigate("/allproperties");
+//       } else {
+//         toast.error(res.data.message || "Failed to add property.");
+//       }
+//     }
+//   } catch (error) {
+//     console.error("Error submitting property:", error);
+//     toast.error("Something went wrong during submission.");
+//   } finally {
+//     setIsSubmitting(false);
+//   }
+// };
+
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">
@@ -872,4 +1035,4 @@ const IndependentHouse: React.FC<IndependentHouseProps> = ({ propertyId: initial
   )
 }
 
-export default IndependentHouse
+export default IndependentHouse;

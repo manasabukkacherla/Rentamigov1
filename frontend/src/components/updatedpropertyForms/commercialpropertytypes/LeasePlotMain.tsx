@@ -24,7 +24,7 @@ import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import MapLocation from "../CommercialComponents/MapLocation"
 import { useParams } from 'react-router-dom';
 interface FormData {
-  propertyId?: string;
+  propertyId?: string;       /////////
   basicInformation: {
     title: string;
     plotType: string[];
@@ -223,6 +223,16 @@ const LeasePlotMain = () => {
       documents: []
     }
   });
+  // Add this helper function to check if a string is base64
+const isBase64 = (str: string): boolean => {
+  if (typeof str !== 'string') return false;
+  try {
+    return btoa(atob(str)) === str;
+  } catch (err) {
+    return false;
+  }
+};
+// Update the fetch function in useEffect:
 useEffect(() => {
   const fetchLeasePlotById = async () => {
     try {
@@ -252,10 +262,10 @@ useEffect(() => {
           },
           media: {
             photos: {
-              exterior: [], // Optionally preload image URLs here
+              exterior: plot.media?.photos?.exterior || [], 
             },
-            documents: [],
-            videoTour: null,
+            videoTour: plot.media?.videoTour || null,
+            documents: plot.media?.documents || [],
           },
         }));
       } else {
@@ -274,7 +284,7 @@ useEffect(() => {
 
   const [currentStep, setCurrentStep] = useState(0);
   const formRef = useRef<HTMLDivElement>(null);
-  
+
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -498,7 +508,27 @@ useEffect(() => {
       }, 100);
     }
   };
-
+// Update the file conversion function:
+const convertFileToBase64 = async (file: File | string): Promise<string> => {
+  // If it's already a string (base64 or URL), return as is
+  if (typeof file === 'string') {
+    // Check if it's a base64 string or a URL
+    if (file.startsWith('data:') || isBase64(file)) {
+      return file;
+    }
+    // If it's a URL, you might want to handle it differently
+    // For now, return as is - you may need to fetch and convert URLs to base64
+    return file;
+  }
+  
+  // If it's a File object, convert to base64
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+};
   const validateFormData = () => {
     const errors = [];  
 
@@ -552,267 +582,161 @@ useEffect(() => {
   // };
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+// Update the handleSubmit function media conversion part:
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    console.log("Form submission started...");
+  // ... validation code ...
 
-    // Basic validation
-    if (!formData.basicInformation.title) {
-      toast.error('Property name is required');
+  try {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      toast.error('You must be logged in to list a property.');
       setIsSubmitting(false);
       return;
     }
 
-    if (!formData.basicInformation.address.street || !formData.basicInformation.address.city) {
-      toast.error('Address details are required');
-      setIsSubmitting(false);
-      return;
-    }
+    const author = JSON.parse(user).id;
 
-    if (!formData.plotDetails.totalPlotArea || formData.plotDetails.totalPlotArea <= 0) {
-      toast.error('Total plot area is required and must be greater than 0');
-      setIsSubmitting(false);
-      return;
-    }
-
-    // if (!formData.leaseTerms.leaseAmount || formData.leaseTerms.leaseAmount <= 0) {
-    //   toast.error('Lease amount is required and must be greater than 0');
-    //   setIsSubmitting(false);
-    //   return;
-    // }
-
-    if (!formData.contactInformation.name || !formData.contactInformation.phone) {
-      toast.error('Contact information is required');
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        console.log("User not authenticated, redirecting to login");
-        toast.error('You must be logged in to list a property.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      const author = JSON.parse(user).id;
-      console.log("User authenticated, ID:", author);
-
-      // Ensure coordinates are valid numbers for the backend
-      const safelocation = {
-        latitude: typeof formData.basicInformation.location.latitude === 'string'
-          ? parseFloat(formData.basicInformation.location.latitude) || 0
-          : formData.basicInformation.location.latitude || 0,
-        longitude: typeof formData.basicInformation.location.longitude === 'string'
-          ? parseFloat(formData.basicInformation.location.longitude) || 0
-          : formData.basicInformation.location.longitude || 0
+    // Convert media files to base64
+    const convertMediaFiles = async () => {
+      const convertedPhotos = {
+        exterior: await Promise.all(
+          (formData.media?.photos?.exterior || []).map(async (file) => {
+            // Handle both File objects and existing base64 strings
+            if (file instanceof File) {
+              return await convertFileToBase64(file);
+            }
+            return file; // Already base64 string
+          })
+        ),
       };
 
-      // Generate a unique propertyId if not already set
+      const convertedVideoTour = formData.media?.videoTour 
+        ? await convertFileToBase64(formData.media.videoTour)
+        : null;
 
-      // Update form data with safe coordinates and ensure required fields
-      const updatedFormData = {
-        basicInformation: {
-          title: formData.basicInformation.title,
-          plotType: formData.basicInformation.plotType,
-          address: formData.basicInformation.address,
-          landmark: formData.basicInformation.landmark,
-          location:safelocation,
-          isCornerProperty: formData.basicInformation.isCornerProperty
-        },
-        plotDetails: {
-          totalPlotArea: formData.plotDetails.totalPlotArea || 0,
-          zoningType: formData.plotDetails.zoningType || "commercial",
-          boundaryWall: formData.plotDetails.boundaryWall || false,
-          waterSewer: formData.plotDetails.waterSewer || false,
-          electricity: formData.plotDetails.electricity || false,
-          roadAccess: formData.plotDetails.roadAccess || "",
-          securityRoom: formData.plotDetails.securityRoom || false,
-          previousConstruction: formData.plotDetails.previousConstruction || ""
-        },
-        
-        leaseTerms: {
-          leaseAmount: {
-            amount: formData.leaseTerms.leaseAmount.amount || 0,
-            duration: formData.leaseTerms.leaseAmount.duration || 0,
-            durationType: formData.leaseTerms.leaseAmount.durationType || "month",
-            amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
-          },
-          leaseTenure: {
-            minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure ||"",
-            minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
-            maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
-            maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
-            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
-            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
-            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
-            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
-          },
-          
-        },
-        
-        availability: {
-          availableFrom: formData.availability.availableFrom,
-          availableImmediately: formData.availability.availableImmediately || false,
-          availabilityStatus: formData.availability.availabilityStatus || (formData.availability.availableImmediately ? 'immediate' : 'later'),
-          leaseDuration: formData.availability.leaseDuration || "",
-          noticePeriod: formData.availability.noticePeriod || "",
-          isPetsAllowed: formData.availability.isPetsAllowed || false,
-          operatingHours: formData.availability.operatingHours || false,
-        },
-        contactInformation: {
-          name: formData.contactInformation.name || "",
-          email: formData.contactInformation.email || "",
-          phone: formData.contactInformation.phone || "",
-          alternatePhone: formData.contactInformation.alternatePhone || "",
-          bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
-        }
-      };
-
-      console.log("Property Name being submitted:", updatedFormData.basicInformation.title);
-      console.log("Full structure of updatedFormData:", JSON.stringify(updatedFormData, null, 2));
-
-      // Convert all media files to base64
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      };
-
-      const transformedData = {
-        propertyId: formData.propertyId || `CLPLOT-${Date.now().toString().slice(-8)}`,
-        basicInformation: {
-          title: formData.basicInformation.title || "",
-          plotType: formData.basicInformation.plotType || [],
-          address: {
-            street: formData.basicInformation.address.street || "",
-            city: formData.basicInformation.address.city || "",
-            state: formData.basicInformation.address.state || "",
-            zipCode: formData.basicInformation.address.zipCode || ""
-          },
-          landmark: formData.basicInformation.landmark || "",
-          location: {
-            latitude: formData.basicInformation.location.latitude || "",
-            longitude: formData.basicInformation.location.longitude || ""
-          },
-          isCornerProperty: formData.basicInformation.isCornerProperty || false
-        },
-        plotDetails: {
-          totalPlotArea: formData.plotDetails.totalPlotArea || 0,
-          zoningType: formData.plotDetails.zoningType || "commercial",
-          boundaryWall: formData.plotDetails.boundaryWall || false,
-          waterSewer: formData.plotDetails.waterSewer || false,
-          electricity: formData.plotDetails.electricity || false,
-          roadAccess: formData.plotDetails.roadAccess || "",
-          securityRoom: formData.plotDetails.securityRoom || false,
-          previousConstruction: formData.plotDetails.previousConstruction || ""
-        },
-        leaseTerms: {
-          leaseAmount: {
-            amount: formData.leaseTerms.leaseAmount.amount || 0,
-            duration: formData.leaseTerms.leaseAmount.duration || 0,
-            durationType: formData.leaseTerms.leaseAmount.durationType || "month",
-            amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
-          },
-          leaseTenure: {
-            minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure || "",
-            minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
-            maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
-            maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
-            lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
-            lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
-            noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
-            noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
+      const convertedDocuments = await Promise.all(
+        (formData.media?.documents || []).map(async (file) => {
+          if (file instanceof File) {
+            return await convertFileToBase64(file);
           }
-        },
-        availability: {
-          availableFrom: formData.availability.availableFrom,
-          availableImmediately: formData.availability.availableImmediately || false,
-          availabilityStatus: formData.availability.availabilityStatus || (formData.availability.availableImmediately ? 'immediate' : 'later'),
-          leaseDuration: formData.availability.leaseDuration || "",
-          noticePeriod: formData.availability.noticePeriod || "",
-          isPetsAllowed: formData.availability.isPetsAllowed || false,
-          operatingHours: formData.availability.operatingHours || false
-        },
-        contactInformation: {
-          name: formData.contactInformation.name || "",
-          email: formData.contactInformation.email || "",
-          phone: formData.contactInformation.phone || "",
-          alternatePhone: formData.contactInformation.alternatePhone || "",
-          bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
-        },
-        media: convertedMedia,
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: 'Commercial',
-          propertyName: 'Plot',
-          intent: 'Lease',
-          status: 'Available'
-        }
-      };
+          return file; // Already base64 string
+        })
+      );
 
-      console.log("Submitting data:", transformedData);
+      return {
+        photos: convertedPhotos,
+        videoTour: convertedVideoTour,
+        documents: convertedDocuments,
+      };
+    };
+
+    const convertedMedia = await convertMediaFiles();
+
+    const transformedData = {
+      propertyId: formData.propertyId,
+      basicInformation: {
+        title: formData.basicInformation.title || "",
+        plotType: formData.basicInformation.plotType || [],
+        address: {
+          street: formData.basicInformation.address.street || "",
+          city: formData.basicInformation.address.city || "",
+          state: formData.basicInformation.address.state || "",
+          zipCode: formData.basicInformation.address.zipCode || ""
+        },
+        landmark: formData.basicInformation.landmark || "",
+        location: {
+          latitude: formData.basicInformation.location.latitude || "",
+          longitude: formData.basicInformation.location.longitude || ""
+        },
+        isCornerProperty: formData.basicInformation.isCornerProperty || false
+      },
+      plotDetails: {
+        totalPlotArea: formData.plotDetails.totalPlotArea || 0,
+        zoningType: formData.plotDetails.zoningType || "commercial",
+        boundaryWall: formData.plotDetails.boundaryWall || false,
+        waterSewer: formData.plotDetails.waterSewer || false,
+        electricity: formData.plotDetails.electricity || false,
+        roadAccess: formData.plotDetails.roadAccess || "",
+        securityRoom: formData.plotDetails.securityRoom || false,
+        previousConstruction: formData.plotDetails.previousConstruction || ""
+      },
+      leaseTerms: {
+        leaseAmount: {
+          amount: formData.leaseTerms.leaseAmount.amount || 0,
+          duration: formData.leaseTerms.leaseAmount.duration || 0,
+          durationType: formData.leaseTerms.leaseAmount.durationType || "month",
+          amountType: formData.leaseTerms.leaseAmount.amountType || "fixed"
+        },
+        leaseTenure: {
+          minimumTenure: formData.leaseTerms.leaseTenure.minimumTenure || "",
+          minimumUnit: formData.leaseTerms.leaseTenure.minimumUnit || "",
+          maximumTenure: formData.leaseTerms.leaseTenure.maximumTenure || "",
+          maximumUnit: formData.leaseTerms.leaseTenure.maximumUnit || "",
+          lockInPeriod: formData.leaseTerms.leaseTenure.lockInPeriod || "",
+          lockInUnit: formData.leaseTerms.leaseTenure.lockInUnit || "",
+          noticePeriod: formData.leaseTerms.leaseTenure.noticePeriod || "",
+          noticePeriodUnit: formData.leaseTerms.leaseTenure.noticePeriodUnit || ""
+        }
+      },
+      availability: {
+        availableFrom: formData.availability.availableFrom,
+        availableImmediately: formData.availability.availableImmediately || false,
+        availabilityStatus: formData.availability.availabilityStatus || (formData.availability.availableImmediately ? 'immediate' : 'later'),
+        leaseDuration: formData.availability.leaseDuration || "",
+        noticePeriod: formData.availability.noticePeriod || "",
+        isPetsAllowed: formData.availability.isPetsAllowed || false,
+        operatingHours: formData.availability.operatingHours || false
+      },
+      contactInformation: {
+        name: formData.contactInformation.name || "",
+        email: formData.contactInformation.email || "",
+        phone: formData.contactInformation.phone || "",
+        alternatePhone: formData.contactInformation.alternatePhone || "",
+        bestTimeToContact: formData.contactInformation.bestTimeToContact || ""
+      },
+      media: convertedMedia,
+      metadata: {
+        createdBy: author,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: 'Plot',
+        intent: 'Lease',
+        status: 'Available'
+      }
+    };
+
+    console.log("Submitting data:", transformedData);
 
     const isEditMode = !!formData.propertyId;
+    const endpoint = isEditMode
+      ? `/api/commercial/lease/plots/${formData.propertyId}`
+      : '/api/commercial/lease/plots';
 
-const endpoint = isEditMode
-  ? `/api/commercial/lease/plots/${formData.propertyId}`
-  : '/api/commercial/lease/plots';
+    const method = isEditMode ? axios.put : axios.post;
 
-const method = isEditMode ? axios.put : axios.post;
-
-const response = await method(endpoint, transformedData, {
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-
-      console.log("Response from server:", response.data);
-
-      if (response.data.success) {
-        toast.success('Commercial plot lease listing created successfully!');
-        navigate('/updatepropertyform');
-      } else {
-        console.error("Server returned success:false", response.data);
-        toast.error(response.data.message || 'Failed to create listing. Please try again.');
+    const response = await method(endpoint, transformedData, {
+      headers: {
+        'Content-Type': 'application/json'
       }
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
+    });
 
-      if (error.response) {
-        console.error('Server response error:', error.response.data);
-        console.error('Status code:', error.response.status);
-        console.error('Headers:', error.response.headers);
-
-        // Try to provide a more helpful error message
-        let errorMessage = 'Failed to create plot lease listing. Please try again.';
-        if (error.response.data && error.response.data.message) {
-          errorMessage = error.response.data.message;
-        } else if (error.response.data && error.response.data.error) {
-          errorMessage = error.response.data.error;
-        } else if (typeof error.response.data === 'string') {
-          errorMessage = error.response.data;
-        }
-
-        toast.error(errorMessage);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-        toast.error('No response from server. Please check your connection.');
-      } else {
-        console.error('Error details:', error.message);
-        toast.error('Failed to create commercial plot lease listing. Please try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (response.data.success) {
+      toast.success(isEditMode ? 'Commercial plot updated successfully!' : 'Commercial plot lease listing created successfully!');
+      navigate('/updatepropertyform');
+    } else {
+      console.error("Server returned success:false", response.data);
+      toast.error(response.data.message || 'Failed to create listing. Please try again.');
     }
-  };
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    // ... error handling code ...
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">

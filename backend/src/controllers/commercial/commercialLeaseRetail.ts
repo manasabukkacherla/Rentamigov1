@@ -122,7 +122,7 @@ export const getCommercialLeaseRetailById = async (req: Request, res: Response) 
   try {
     const propertyId = req.params.propertyId;
     const property = await CommercialLeaseRetail.findOne({ propertyId });
-    
+   
     if (!property) {
       return res.status(404).json({ 
         success: false,
@@ -146,8 +146,9 @@ export const getCommercialLeaseRetailById = async (req: Request, res: Response) 
 
 export const updateCommercialLeaseRetail = async (req: Request, res: Response) => {
   try {
-    const documentId = req.params.id; 
-    const incomingData = req.body?.data;
+    const propertyId = req.params.propertyId;
+    const incomingData = req.body;
+
     if (!incomingData) {
       return res.status(400).json({
         success: false,
@@ -162,28 +163,25 @@ export const updateCommercialLeaseRetail = async (req: Request, res: Response) =
       })
     );
 
-   
-    const existingDoc = await CommercialLeaseRetail.findById(documentId);
-    if (!existingDoc) {
+    const updatedDoc = await CommercialLeaseRetail.findOneAndUpdate(
+      { propertyId },
+      { $set: cleanedData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedDoc) {
       return res.status(404).json({
         success: false,
         message: "Property not found",
       });
     }
 
-    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
-
-    const updatedDoc = await CommercialLeaseRetail.findByIdAndUpdate(
-      documentId,
-      { $set: mergedData },
-      { new: true, runValidators: true }
-    );
-
     res.status(200).json({
       success: true,
       message: "Lease retail updated successfully.",
       data: updatedDoc,
     });
+
   } catch (error: any) {
     console.error("Update error:", error);
     res.status(500).json({
@@ -195,7 +193,8 @@ export const updateCommercialLeaseRetail = async (req: Request, res: Response) =
 
 export const deleteCommercialLeaseRetail = async (req: Request, res: Response) => {
   try {
-    const data = await CommercialLeaseRetail.findByIdAndDelete(req.params.id);
+    const propertyId = req.params.propertyId;
+    const data = await CommercialLeaseRetail.findOneAndDelete({ propertyId });
 
     if (!data) {
         return res.status(404).json({
@@ -208,12 +207,12 @@ export const deleteCommercialLeaseRetail = async (req: Request, res: Response) =
         success: true,
         message: 'Lease retail listing deleted successfully'
     });
-} catch (error) {
+  } catch (error) {
     console.error('Error deleting lease retail:', error);
     res.status(500).json({
         success: false,
-        error: 'Failed to delete lease  retail listing',
+        error: 'Failed to delete lease retail listing',
         message: error instanceof Error ? error.message : 'Unknown error'
     });
-}
+  }
 };

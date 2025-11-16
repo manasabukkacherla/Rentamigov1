@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, Navigate} from 'react-router-dom';
 import PropertyName from '../PropertyName';
 import ShopType from '../CommercialComponents/ShopType';
 import CommercialPropertyAddress from '../CommercialComponents/CommercialPropertyAddress';
@@ -52,6 +52,7 @@ const globalStyles = `
 `;
 
 interface FormData {
+  propertyId?: String;
   basicInformation: {
     title: string;
     Type: string[];
@@ -146,6 +147,14 @@ interface FormData {
     };
     videoTour: File | null;
     documents: File[];
+  },
+  metadata: {
+    createdBy: string;
+    createdAt: Date;
+    propertyType: string;
+    intent: string;
+    propertyName: string;
+    status: string;
   };
 }
 
@@ -246,7 +255,15 @@ const SellShopMain = () => {
       },
       videoTour: null,
       documents: []
-    }
+    },// ADD THIS METADATA SECTION
+  metadata: {
+    createdBy: '',
+    createdAt: new Date(),
+    propertyType: 'Commercial',
+    intent: 'Sell',
+    propertyName: 'Shop',
+    status: 'Available'
+  } 
   });
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -255,7 +272,11 @@ const SellShopMain = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isDebugMode, setIsDebugMode] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
-
+  const params = useParams()
+  const [Loading, setLoading] = useState(false)
+   const propertyId = params.propertyId;
+    
+  
   // Function to get auth token
 
   // Check login status on component mount
@@ -386,6 +407,148 @@ const SellShopMain = () => {
   //   toast.info("After selecting a location in Google Maps, please manually input the coordinates here.");
   // };
 
+useEffect(() => {
+  const fetchById = async () => {
+    const user = sessionStorage.getItem("user");
+
+    if (!user) {
+      navigate("/login");
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    if (!propertyId) return;
+    console.log("Fetching Commercial Shop details for:", propertyId);
+    setLoading(true);
+    try {
+      const response = await axios.get(`/api/commercial/sale/shops/${propertyId}`);
+      
+      if (response.data && response.data.data) {
+        const sellshopData = response.data.data;
+        
+        // Transform the backend data to match frontend form structure
+        setFormData((prev) => ({
+          ...prev,
+          propertyId: sellshopData.propertyId || '',
+          basicInformation: {
+            title: sellshopData.basicInformation?.title || '',
+            Type: sellshopData.basicInformation?.Type || [],
+            address: {
+              street: sellshopData.basicInformation?.address?.street || '',
+              city: sellshopData.basicInformation?.address?.city || '',
+              state: sellshopData.basicInformation?.address?.state || '',
+              zipCode: sellshopData.basicInformation?.address?.zipCode || ''
+            },
+            landmark: sellshopData.basicInformation?.landmark || '',
+            location: {
+              latitude: sellshopData.basicInformation?.location?.latitude?.toString() || '',
+              longitude: sellshopData.basicInformation?.location?.longitude?.toString() || ''
+            },
+            isCornerProperty: sellshopData.basicInformation?.isCornerProperty || false
+          },
+          propertyDetails: {
+            area: {
+              totalArea: sellshopData.propertyDetails?.area?.totalArea || 0,
+              builtUpArea: sellshopData.propertyDetails?.area?.builtUpArea || 0,
+              carpetArea: sellshopData.propertyDetails?.area?.carpetArea || 0
+            },
+            floor: {
+              floorNumber: sellshopData.propertyDetails?.floor?.floorNumber || 0,
+              totalFloors: sellshopData.propertyDetails?.floor?.totalFloors || 0
+            },
+            facingDirection: sellshopData.propertyDetails?.facingDirection || '',
+            furnishingStatus: sellshopData.propertyDetails?.furnishingStatus || '',
+            propertyAmenities: sellshopData.propertyDetails?.propertyAmenities || [],
+            wholeSpaceAmenities: sellshopData.propertyDetails?.wholeSpaceAmenities || [],
+            electricitySupply: {
+              powerLoad: sellshopData.propertyDetails?.electricitySupply?.powerLoad || 0,
+              backup: sellshopData.propertyDetails?.electricitySupply?.backup || false
+            },
+            waterAvailability: Array.isArray(sellshopData.propertyDetails?.waterAvailability) 
+              ? sellshopData.propertyDetails.waterAvailability[0] || ''
+              : sellshopData.propertyDetails?.waterAvailability || '',
+            propertyAge: sellshopData.propertyDetails?.propertyAge || '',
+            propertyCondition: sellshopData.propertyDetails?.propertyCondition || ''
+          },
+          shopDetails: {
+            frontageWidth: sellshopData.shopDetails?.frontageWidth || 0,
+            heightOfShop: sellshopData.shopDetails?.heightOfShop || 0,
+            displayWindow: sellshopData.shopDetails?.displayWindow || false,
+            attachedStorageRoom: sellshopData.shopDetails?.attachedStorageRoom || false,
+            averageFootTraffic: sellshopData.shopDetails?.averageFootTraffic || '',
+            customerParking: sellshopData.shopDetails?.customerParking || false,
+            previousBusiness: sellshopData.shopDetails?.previousBusiness || ''
+          },
+          pricingDetails: {
+            propertyPrice: sellshopData.pricingDetails?.propertyPrice || 0,
+            pricetype: sellshopData.pricingDetails?.pricetype || 'fixed',
+            area: sellshopData.pricingDetails?.area || 0,
+            totalprice: sellshopData.pricingDetails?.totalprice || 0,
+            pricePerSqft: sellshopData.pricingDetails?.pricePerSqft || 0
+          },
+          registration: {
+            chargestype: sellshopData.registration?.chargestype || '',
+            registrationAmount: sellshopData.registration?.registrationAmount || 0,
+            stampDutyAmount: sellshopData.registration?.stampDutyAmount || 0,
+            brokeragedetails: sellshopData.registration?.brokeragedetails || false,
+            brokerageAmount: sellshopData.registration?.brokerageAmount || 0
+          },
+          brokerage: {
+            required: sellshopData.brokerage?.required || 'no',
+            amount: sellshopData.brokerage?.amount || 0
+          },
+          availability: {
+            availableFrom: sellshopData.availability?.availableFrom ? 
+                  new Date(sellshopData.availability.availableFrom).toISOString().split('T')[0] : '',
+            availableImmediately: sellshopData.availability?.availableImmediately || false,
+            leaseDuration: sellshopData.availability?.leaseDuration || '',
+            noticePeriod: sellshopData.availability?.noticePeriod || '',
+            petsAllowed: sellshopData.availability?.petsAllowed || false,
+            operatingHours: {
+              restricted: sellshopData.availability?.operatingHours?.restricted || false,
+              restrictions: sellshopData.availability?.operatingHours?.restrictions || ''
+            }
+          },
+          contactInformation: {
+            name: sellshopData.contactInformation?.name || '',
+            email: sellshopData.contactInformation?.email || '',
+            phone: sellshopData.contactInformation?.phone || '',
+            alternatePhone: sellshopData.contactInformation?.alternatePhone || '',
+            bestTimeToContact: sellshopData.contactInformation?.bestTimeToContact || ''
+          },
+          media: {
+            photos: {
+              exterior: sellshopData.media?.photos?.exterior || [],
+              interior: sellshopData.media?.photos?.interior || [],
+              floorPlan: sellshopData.media?.photos?.floorPlan || [],
+              washrooms: sellshopData.media?.photos?.washrooms || [],
+              lifts: sellshopData.media?.photos?.lifts || [],
+              emergencyExits: sellshopData.media?.photos?.emergencyExits || []
+            },
+            videoTour: sellshopData.media?.videoTour || null,
+            documents: sellshopData.media?.documents || []
+          }
+        }));
+
+        console.log('Shop form data set successfully:', sellshopData);
+      } else {
+        toast.error('No data found for this shop property');
+        navigate('/Userdashboard/properties');
+      }
+    } catch (error: any) {
+      console.error('Error fetching shop property details:', error);
+      toast.error('Failed to load shop property details');
+      navigate('/Userdashboard/properties');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (propertyId) {
+    fetchById();
+  }
+}, [propertyId, navigate]);
   const formSections = [
     {
       title: 'Basic Information',
@@ -521,42 +684,58 @@ const SellShopMain = () => {
       )
     },
     {
-      title: 'Property Media',
-      icon: <ImageIcon className="w-5 h-5" />,
-      content: renderFormSection(
-        <div className="space-y-6">
-          <CommercialMediaUpload
-            Media={{
-              photos: Object.entries(formData.media.photos).map(([category, files]) => ({
-                category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
-              })),
-              videoTour: formData.media.videoTour || null,
-              documents: formData.media.documents
-            }}
-            onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
-                photos[category] = files.map(f => f.file);
-              });
+  title: 'Property Media',
+  icon: <ImageIcon className="w-5 h-5" />,
+  content: renderFormSection(
+    <div className="space-y-6">
+      <CommercialMediaUpload
+        Media={{
+          photos: Object.entries(formData.media.photos).map(([category, files]) => ({
+            category,
+            files: files.map(file => {
+              if (file instanceof File) {
+                return { url: URL.createObjectURL(file), file, isNew: true };
+              } else {
+                return { url: file, file: null, isNew: false };
+              }
+            })
+          })),
+          videoTour: formData.media.videoTour ? 
+            (formData.media.videoTour instanceof File ? 
+              { url: URL.createObjectURL(formData.media.videoTour), file: formData.media.videoTour, isNew: true } 
+              : { url: formData.media.videoTour, file: null, isNew: false }) 
+            : null,
+          documents: formData.media.documents.map(doc => {
+            if (doc instanceof File) {
+              return { url: URL.createObjectURL(doc), file: doc, isNew: true };
+            } else {
+              return { url: doc, file: null, isNew: false };
+            }
+          })
+        }}
+        onMediaChange={(media) => {
+          const photos: Record<string, (File | string)[]> = {};
+          media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File | null }[] }) => {
+            photos[category] = files.map(f => f.file || f.url);
+          });
 
-              setFormData(prev => ({
-                ...prev,
-                media: {
-                  ...prev.media,
-                  photos: {
-                    ...prev.media.photos,
-                    ...photos
-                  },
-                  videoTour: media.videoTour || null,
-                  documents: media.documents
-                }
-              }));
-            }}
-          />
-        </div>
-      )
-    }
+          setFormData(prev => ({
+            ...prev,
+            media: {
+              ...prev.media,
+              photos: {
+                ...prev.media.photos,
+                ...photos
+              },
+              videoTour: media.videoTour?.file || media.videoTour?.url || null,
+              documents: media.documents.map((doc: any) => doc.file || doc.url)
+            }
+          }));
+        }}
+      />
+    </div>
+  )
+}
   ];
 
   const handleChange = (key: string, value: any) => {
@@ -584,162 +763,6 @@ const SellShopMain = () => {
     });
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
-    console.log(formData);
-
-    setIsSubmitting(true);
-
-    try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        toast.error('Please log in to continue');
-        navigate('/login');
-        return;
-      }
-
-      const userData = JSON.parse(user);
-      const author = userData.id;
-      const token = userData.token;
-
-      console.log("User authenticated:", { userId: author });
-      console.log("Converting media files...");
-
-      // Convert all image files to base64
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      };
-
-      console.log("Media conversion complete");
-
-      // Create a payload with all the necessary data
-      const transformedData = {
-        basicInformation: {
-          ...formData.basicInformation,
-          // Ensure shopType is an array
-          Type: Array.isArray(formData.basicInformation.Type)
-            ? formData.basicInformation.Type
-            : [formData.basicInformation.Type].filter(Boolean),
-          // Convert location coordinates to numbers
-          location: {
-            latitude: parseFloat(formData.basicInformation.location.latitude) || 0,
-            longitude: parseFloat(formData.basicInformation.location.longitude) || 0
-          }
-        },
-        propertyDetails: {
-          ...formData.propertyDetails,
-          // Fix propertyAge to ensure it's a number
-          propertyAge: formData.propertyDetails.propertyAge || ''
-        },
-        shopDetails: formData.shopDetails,
-        pricingDetails:{
-          propertyPrice: formData.pricingDetails.propertyPrice,
-          pricetype: formData.pricingDetails.pricetype,
-          area: formData.pricingDetails.area,
-          totalprice: formData.pricingDetails.totalprice,
-          pricePerSqft: formData.pricingDetails.pricePerSqft
-        },
-        registration: {
-          ...formData.registration,
-          // Convert chargestype to expected enum values
-          chargestype: formData.registration.chargestype || 'inclusive'
-        },
-        brokerage: {
-          // Convert required from string to boolean if needed
-          required: typeof formData.brokerage.required === 'string'
-            ? formData.brokerage.required === 'yes'
-            : Boolean(formData.brokerage.required),
-          amount: formData.brokerage.amount
-        },
-        availability: {
-          // Ensure all required fields are present
-          availableImmediately: formData.availability.availableImmediately === true,
-          availableFrom: formData.availability.availableFrom
-            ? new Date(formData.availability.availableFrom)
-            : new Date(),
-          leaseDuration: formData.availability.leaseDuration || 'Not Specified',
-          noticePeriod: formData.availability.noticePeriod || 'Not Specified',
-          petsAllowed: formData.availability.petsAllowed === true,
-          operatingHours: {
-            restricted: formData.availability.operatingHours?.restricted === true,
-            restrictions: formData.availability.operatingHours?.restrictions || 'No restrictions'
-          }
-        },
-        contactInformation: formData.contactInformation,
-        media: convertedMedia,
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: 'Commercial',
-          propertyName: 'Shop',
-          intent: 'Sell',
-          status: 'Available',
-         
-        }
-      };
-
-      console.log("Sending request to backend...");
-      console.log("Request endpoint:", '/api/commercial/sell/shops');
-
-      // Send the data to the backend
-      ///api/commercial/sell/shops
-      const response = await axios.post('http://localhost:8000/api/commercial/sell/shops', transformedData, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      console.log("Response received:", response.data);
-
-      if (response.data.success) {
-        setFormSubmitted(true);
-        toast.success('Commercial shop listing created successfully!');
-
-        // Show the property ID to the user
-        if (response.data.data && response.data.data.propertyId) {
-          toast.info(`Your property ID is: ${response.data.data.propertyId}`);
-        }
-      } else {
-        console.error("API returned success: false", response.data);
-        throw new Error(response.data.message || 'Failed to create listing');
-      }
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
-
-      // Handle different types of errors
-      if (error.response) {
-        // Server responded with an error status code
-        const errorMessage = error.response.data.message || error.response.data.error || 'Server error occurred';
-        toast.error(`Submission failed: ${errorMessage}`);
-
-        // Display validation errors if any
-        if (error.response.data.validationErrors) {
-          console.error('Validation errors:', error.response.data.validationErrors);
-          Object.values(error.response.data.validationErrors).forEach((message: any) => {
-            toast.error(`Validation error: ${message}`);
-          });
-        }
-      } else if (error.request) {
-        // Request was made but no response received
-        toast.error('Network error: Please check your internet connection');
-      } else {
-        // Something else happened while setting up the request
-        toast.error(`Error: ${error.message || 'An unknown error occurred'}`);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const handleNext = () => {
     if (currentStep < formSections.length - 1) {
@@ -760,7 +783,230 @@ const SellShopMain = () => {
       }, 100);
     }
   };
+const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  e.preventDefault();
+  console.log('Starting form submission...', formData);
 
+  setIsSubmitting(true);
+
+  try {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      toast.error('Please log in to continue');
+      navigate('/login');
+      return;
+    }
+
+    const userData = JSON.parse(user);
+    const author = userData.id;
+    const token = userData.token;
+
+    console.log("User authenticated:", { userId: author });
+
+    // Enhanced file conversion with better error handling
+    const convertIfFile = async (item: File | string): Promise<string> => {
+      if (item instanceof File) {
+        console.log('Converting file to base64:', item.name, item.type, item.size);
+        try {
+          const base64 = await convertFileToBase64(item);
+          console.log('File converted successfully, length:', base64.length);
+          return base64;
+        } catch (error) {
+          console.error('Error converting file to base64:', error);
+          throw new Error(`Failed to convert file ${item.name}: ${error}`);
+        }
+      }
+      console.log('Keeping existing string (URL/base64):', item?.substring(0, 100) + '...');
+      return item;
+    };
+
+    console.log("Converting media files...");
+
+    // Convert media files to base64
+    const convertedMedia = {
+      photos: {
+        exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertIfFile)),
+        interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertIfFile)),
+        floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertIfFile)),
+        washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertIfFile)),
+        lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertIfFile)),
+        emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertIfFile))
+      },
+      videoTour: formData.media?.videoTour ? await convertIfFile(formData.media.videoTour) : undefined,
+      documents: await Promise.all((formData.media?.documents ?? []).map(convertIfFile))
+    };
+
+    console.log("Media conversion complete");
+
+    // Safe location conversion
+    const safeLocation = {
+      latitude: formData.basicInformation.location.latitude || '0',
+      longitude: formData.basicInformation.location.longitude || '0'
+    };
+
+    // Prepare the complete data for backend
+    const transformedData = {
+      basicInformation: {
+        title: formData.basicInformation.title || '',
+        Type: Array.isArray(formData.basicInformation.Type) 
+          ? formData.basicInformation.Type 
+          : [formData.basicInformation.Type].filter(Boolean),
+        address: {
+          street: formData.basicInformation.address.street || '',
+          city: formData.basicInformation.address.city || '',
+          state: formData.basicInformation.address.state || '',
+          zipCode: formData.basicInformation.address.zipCode || ''
+        },
+        landmark: formData.basicInformation.landmark || '',
+        location: safeLocation,
+        isCornerProperty: Boolean(formData.basicInformation.isCornerProperty)
+      },
+      propertyDetails: {
+        area: {
+          totalArea: Number(formData.propertyDetails.area.totalArea) || 0,
+          carpetArea: Number(formData.propertyDetails.area.carpetArea) || 0,
+          builtUpArea: Number(formData.propertyDetails.area.builtUpArea) || 0
+        },
+        floor: {
+          floorNumber: Number(formData.propertyDetails.floor.floorNumber) || 0,
+          totalFloors: Number(formData.propertyDetails.floor.totalFloors) || 0
+        },
+        facingDirection: formData.propertyDetails.facingDirection || '',
+        furnishingStatus: formData.propertyDetails.furnishingStatus || '',
+        propertyAmenities: Array.isArray(formData.propertyDetails.propertyAmenities) 
+          ? formData.propertyDetails.propertyAmenities 
+          : [],
+        wholeSpaceAmenities: Array.isArray(formData.propertyDetails.wholeSpaceAmenities) 
+          ? formData.propertyDetails.wholeSpaceAmenities 
+          : [],
+        electricitySupply: {
+          powerLoad: Number(formData.propertyDetails.electricitySupply.powerLoad) || 0,
+          backup: Boolean(formData.propertyDetails.electricitySupply.backup)
+        },
+        waterAvailability: formData.propertyDetails.waterAvailability || '',
+        propertyAge: formData.propertyDetails.propertyAge || '',
+        propertyCondition: formData.propertyDetails.propertyCondition || ''
+      },
+      shopDetails: {
+        frontageWidth: Number(formData.shopDetails.frontageWidth) || 0,
+        heightOfShop: Number(formData.shopDetails.heightOfShop) || 0,
+        displayWindow: Boolean(formData.shopDetails.displayWindow),
+        attachedStorageRoom: Boolean(formData.shopDetails.attachedStorageRoom),
+        averageFootTraffic: formData.shopDetails.averageFootTraffic || '',
+        customerParking: Boolean(formData.shopDetails.customerParking),
+        previousBusiness: formData.shopDetails.previousBusiness || ''
+      },
+      pricingDetails: {
+        propertyPrice: Number(formData.pricingDetails.propertyPrice) || 0,
+        pricetype: formData.pricingDetails.pricetype || 'fixed',
+        area: Number(formData.pricingDetails.area) || 0,
+        totalprice: Number(formData.pricingDetails.totalprice) || 0,
+        pricePerSqft: Number(formData.pricingDetails.pricePerSqft) || 0
+      },
+      registration: {
+        chargestype: formData.registration.chargestype || 'inclusive',
+        registrationAmount: Number(formData.registration.registrationAmount) || 0,
+        stampDutyAmount: Number(formData.registration.stampDutyAmount) || 0
+      },
+      brokerage: {
+        required: formData.brokerage.required === 'yes',
+        amount: Number(formData.brokerage.amount) || 0
+      },
+      availability: {
+        availableImmediately: Boolean(formData.availability.availableImmediately),
+        availableFrom: formData.availability.availableFrom && !formData.availability.availableImmediately
+          ? new Date(formData.availability.availableFrom)
+          : undefined,
+        leaseDuration: formData.availability.leaseDuration || '',
+        noticePeriod: formData.availability.noticePeriod || '',
+        petsAllowed: Boolean(formData.availability.petsAllowed),
+        operatingHours: {
+          restricted: Boolean(formData.availability.operatingHours?.restricted),
+          restrictions: formData.availability.operatingHours?.restrictions || ''
+        }
+      },
+      contactInformation: {
+        name: formData.contactInformation.name || '',
+        email: formData.contactInformation.email || '',
+        phone: formData.contactInformation.phone || '',
+        alternatePhone: formData.contactInformation.alternatePhone || '',
+        bestTimeToContact: formData.contactInformation.bestTimeToContact || ''
+      },
+      media: convertedMedia,
+      metadata: {
+        createdBy: author,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        intent: 'Sell',
+        propertyName: 'Shop',
+        status: 'Available'
+      }
+    };
+
+    console.log("Final transformed data:", transformedData);
+
+    let response;
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+      'user-id': author
+    };
+
+    if (propertyId) {
+      console.log('Updating property:', propertyId);
+      response = await axios.put(`/api/commercial/sale/shops/${propertyId}`, transformedData, {
+        headers: headers
+      });
+    } else {
+      console.log('Creating new property');
+      response = await axios.post('/api/commercial/sale/shops', transformedData, {
+        headers: headers
+      });
+    }
+
+    console.log("Response received:", response.data);
+
+    if (response.data.success) {
+      setFormSubmitted(true);
+      const successMessage = propertyId 
+        ? 'Commercial shop listing updated successfully!' 
+        : 'Commercial shop listing created successfully!';
+      
+      toast.success(successMessage);
+
+      if (response.data.data && response.data.data.propertyId) {
+        toast.info(`Your property ID is: ${response.data.data.propertyId}`);
+      }
+      
+      navigate('/Userdashboard/properties');
+    } else {
+      throw new Error(response.data.message || (propertyId ? 'Failed to update property' : 'Failed to create listing'));
+    }
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    
+    if (error.response) {
+      console.error('Error response:', error.response);
+      const errorMessage = error.response.data?.message || error.response.data?.error || 'Server error occurred';
+      toast.error(`Submission failed: ${errorMessage}`);
+
+      if (error.response.data?.validationErrors) {
+        console.error('Validation errors:', error.response.data.validationErrors);
+        Object.values(error.response.data.validationErrors).forEach((message: any) => {
+          toast.error(`Validation error: ${message}`);
+        });
+      }
+    } else if (error.request) {
+      console.error('Error request:', error.request);
+      toast.error('Network error: Please check your internet connection');
+    } else {
+      console.error('Error message:', error.message);
+      toast.error(`Error: ${error.message || 'An unknown error occurred'}`);
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -814,6 +1060,7 @@ const SellShopMain = () => {
       }
     }
   };
+  
 
   // Toggle debug mode with Ctrl+Shift+D
   useEffect(() => {

@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef , useEffect} from "react";
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2 } from "lucide-react";
 import PropertyName from "../PropertyName";
 import IndependentPropertyAddress from "../IndependentPropertyAddress";
@@ -19,7 +19,7 @@ import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate, useParams } from "react-router-dom";
 // Add custom styles for inclusive/exclusive buttons
 const customStyles = `
   /* Target inclusive buttons when selected */
@@ -208,6 +208,7 @@ interface Availability {
 }
 
 interface FormData {
+  property?: string;
   basicInformation: BasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
@@ -292,8 +293,8 @@ const LeaseIndependentHouse: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [propertyId, setPropertyId] = useState<string | undefined>(undefined);
-
+  const {propertyId} = useParams();
+  const [Loading, setLoading] = useState(false)
   const initialFormData: FormData = {
     basicInformation: {
       title: "",
@@ -473,22 +474,28 @@ const LeaseIndependentHouse: React.FC = () => {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
-  const handleAddressChange = useCallback((newAddress: Address) => {
-    setFormData(prev => ({
-      ...prev,
-      basicInformation: {
-        ...prev.basicInformation,
-        address: {
-          ...prev.basicInformation.propertyAddress,
-          ...newAddress,
-          location: {
-            ...prev.basicInformation.propertyAddress.location,
-            ...newAddress.location // <-- This line ensures updated lat/lng are applied
-          }
+useEffect(() => {
+  console.log("Current step:", currentStep);
+  console.log("Is submitting:", isSubmitting);
+  console.log("Total steps:", formSections.length);
+}, [currentStep, isSubmitting]);
+const handleAddressChange = useCallback((newAddress: Address) => {
+  setFormData(prev => ({
+    ...prev,
+    basicInformation: {
+      ...prev.basicInformation,
+      propertyAddress: {
+        ...prev.basicInformation.propertyAddress,
+        ...newAddress,
+        location: {
+          ...prev.basicInformation.propertyAddress.location,
+          ...newAddress.location
         }
       }
-    }));
-  }, []);
+    }
+  }));
+}, []);
+
 
   const handleAvailabilityChange = useCallback((newAvailability: { type: "immediate" | "specific", date?: string }) => {
     setFormData(prev => ({
@@ -518,10 +525,10 @@ const LeaseIndependentHouse: React.FC = () => {
               </div>
               <IndependentPropertyAddress
                 propertyAddress={formData.basicInformation.propertyAddress}
-                onAddressChange={(address) =>
-                  setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, propertyAddress: address } }))
-                }
-              />
+               onAddressChange={handleAddressChange}
+                 />
+                
+              
             </div>
           </div>
         </div>
@@ -748,7 +755,7 @@ const LeaseIndependentHouse: React.FC = () => {
             <div className="[&_input]:text-black [&_input]:placeholder:text-black/60 [&_input]:border-black/20 [&_input]:bg-white [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black">
               <ResidentialPropertyMediaUpload
                 propertyType="independenthouse"
-                propertyId={propertyId}
+              
                 value={formData.media}
                 onChange={(media) => setFormData(prev => ({ ...prev, media }))}
               />
@@ -758,6 +765,56 @@ const LeaseIndependentHouse: React.FC = () => {
       ),
     },
   ];
+  useEffect(() => {
+  const fetchIndependentHouseById = async () => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+      return;
+    } else {
+      setIsSubmitting(true);
+    }
+
+    if (!propertyId) return;
+
+    console.log("Fetching Independent House details for:", propertyId);
+    setLoading(true);
+
+    try {
+      const response = await axios.get(`/api/residential/lease/independenthouse/${propertyId}`);
+      console.log("Backend data:", response);
+
+      if (response.data?.success) {
+        const independentHouse = response.data.data;
+        console.log("Fetched independent house data:", independentHouse);
+
+        setFormData(prev => ({
+          ...prev,
+          basicInformation: independentHouse.basicInformation || prev.basicInformation,
+          propertySize: independentHouse.propertySize || prev.propertySize,
+          propertyDetails: independentHouse.propertyDetails || prev.propertyDetails,
+          restrictions: independentHouse.restrictions || prev.restrictions,
+          flatAmenities: independentHouse.flatAmenities || prev.flatAmenities,
+          societyAmenities: independentHouse.societyAmenities || prev.societyAmenities,
+          leaseTerms: independentHouse.leaseTerms || prev.leaseTerms,
+          availability: independentHouse.availability || prev.availability,
+          media: independentHouse.media || prev.media,
+          metadata: independentHouse.metadata || prev.metadata,
+        }));
+      } else {
+        toast.error("Failed to fetch independent house details.");
+      }
+    } catch (error) {
+      console.error("Error fetching independent house data:", error);
+      toast.error("Something went wrong while fetching the property details.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  fetchIndependentHouseById();
+}, [propertyId, navigate]);
+
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
@@ -798,96 +855,86 @@ const LeaseIndependentHouse: React.FC = () => {
       }, 100);
     }
   };
+const handleSubmit = async () => {
+  setIsSubmitting(true);
+  console.log("Final formData before submit", formData);
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    console.log(formData)
-
-    try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
-
-        // Convert media files to base64
-        const convertFileToBase64 = (file: File): Promise<string> => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = error => reject(error);
-          });
-        };
-
-        // Helper function to convert array of files to base64
-        const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-          const results: string[] = [];
-          for (const file of files) {
-            if (file instanceof File) {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } else {
-              results.push(file); // Already a string (URL)
-            }
-          }
-          return results;
-        };
-
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour
-            ? (formData.media.videoTour instanceof File
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
-        };
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date(),
-            propertyType: "Residential",
-            propertyName: "Independent House",
-            intent: "Lease",
-            status: "Available"
-          }
-        };
-
-        const response = await axios.post('/api/residential/lease/independenthouse', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          // Set the propertyId from the response
-          setPropertyId(response.data.propertyId);
-          toast.success('Property listing created successfully!');
-          setFormData({...initialFormData} as FormData);
-        } else {
-          navigate('/login');
-        }
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create Independent house listing. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+  try {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
     }
-  };
+    const author = JSON.parse(user).id;
+
+    // Convert File objects to empty strings or handle them properly
+    const sanitizedMedia = {
+      photos: {
+        exterior: formData.media.photos.exterior.map(item => typeof item === 'string' ? item : ''),
+        interior: formData.media.photos.interior.map(item => typeof item === 'string' ? item : ''),
+        floorPlan: formData.media.photos.floorPlan.map(item => typeof item === 'string' ? item : ''),
+        washrooms: formData.media.photos.washrooms.map(item => typeof item === 'string' ? item : ''),
+        lifts: formData.media.photos.lifts.map(item => typeof item === 'string' ? item : ''),
+        emergencyExits: formData.media.photos.emergencyExits.map(item => typeof item === 'string' ? item : ''),
+        bedrooms: formData.media.photos.bedrooms.map(item => typeof item === 'string' ? item : ''),
+        halls: formData.media.photos.halls.map(item => typeof item === 'string' ? item : ''),
+        storerooms: formData.media.photos.storerooms.map(item => typeof item === 'string' ? item : ''),
+        kitchen: formData.media.photos.kitchen.map(item => typeof item === 'string' ? item : ''),
+      },
+      videoTour: typeof formData.media.videoTour === 'string' ? formData.media.videoTour : '',
+      documents: formData.media.documents.map(item => typeof item === 'string' ? item : ''),
+    };
+
+    // Prepare the final data
+    const submissionData = {
+      ...formData,
+      media: sanitizedMedia,
+      metadata: {
+        ...formData.metadata,
+        createdBy: author,
+        createdAt: new Date().toISOString(),
+        propertyType: "Residential",
+        propertyName: "Independent House",
+        intent: "Lease",
+        status: "Available",
+      },
+    };
+
+    console.log("Submitting data:", submissionData);
+
+    let response;
+    if (propertyId) {
+      response = await axios.put(
+        `/api/residential/lease/independenthouse/${propertyId}`,
+        submissionData
+      );
+    } else {
+      response = await axios.post(
+        `/api/residential/lease/independenthouse`,
+        submissionData
+      );
+    }
+
+    console.log("API response:", response);
+    if (response.data.success) {
+      toast.success(propertyId ? "Property updated successfully!" : "Property listing created successfully!");
+      navigate("/UserDashboard/properties");
+    } else {
+      toast.error("Failed to save property.");
+    }
+  } catch (error: any) {
+    console.error("Error submitting form:", error);
+    if (error.response) {
+      console.error("Error response:", error.response.data);
+      toast.error(`Submission failed: ${error.response.data.message || error.response.data.error || "Unknown error"}`);
+    } else {
+      toast.error("Something went wrong while saving the property.");
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};  
+
 
   return (
     <div ref={formRef} className="max-w-5xl mx-auto px-4 py-8 space-y-12">
@@ -976,23 +1023,28 @@ const LeaseIndependentHouse: React.FC = () => {
               <ChevronRight className="w-5 h-5 ml-2" />
             </button>
           ) : (
-            <button
-              onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
-              disabled={isSubmitting}
-              className="flex items-center px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition-all duration-200"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
-                  <ChevronRight className="w-5 h-5 ml-2" />
-                </>
-              )}
-            </button>
+           <button
+  type="button" // Add type="button" to prevent form submission issues
+  onClick={currentStep === formSections.length - 1 ? handleSubmit : handleNext}
+  disabled={isSubmitting}
+  className={`flex items-center px-6 py-2 rounded-lg transition-all duration-200 ${
+    isSubmitting 
+      ? 'bg-gray-400 cursor-not-allowed text-white' 
+      : 'bg-black text-white hover:bg-gray-800'
+  }`}
+>
+  {isSubmitting ? (
+    <>
+      <Loader2 className="animate-spin mr-2 h-5 w-5" />
+      Submitting...
+    </>
+  ) : (
+    <>
+      {currentStep === formSections.length - 1 ? 'Submit' : 'Next'}
+      {currentStep < formSections.length - 1 && <ChevronRight className="w-5 h-5 ml-2" />}
+    </>
+  )}
+</button>
           )}
         </div>
       </div>

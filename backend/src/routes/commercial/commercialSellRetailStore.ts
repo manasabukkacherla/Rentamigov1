@@ -24,9 +24,9 @@ commercialSellRetailStore.get('/', getAllCommercialSellRetailStores);
 commercialSellRetailStore.get('/:propertyId', getCommercialSellRetailStoreById);
 
 // Update a commercial sell retail store listing
-commercialSellRetailStore.put('/:id', protect, updateCommercialSellRetailStore);
+commercialSellRetailStore.put('/:propertyId', updateCommercialSellRetailStore);
 
 // Delete a commercial sell retail store listing
-commercialSellRetailStore.delete('/:id', protect, deleteCommercialSellRetailStore);
+commercialSellRetailStore.delete('/:propertyId', protect, deleteCommercialSellRetailStore);
 
 export default commercialSellRetailStore; 

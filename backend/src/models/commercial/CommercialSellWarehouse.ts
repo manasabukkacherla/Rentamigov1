@@ -109,7 +109,7 @@ interface ICommercialWarehouse extends Document {
       backup: boolean;
     };
     waterAvailability: string;
-    propertyAge: number;
+    propertyAge: String;
     propertyCondition: string;
   };
   pricingDetails: IPricingDetails;
@@ -178,7 +178,7 @@ const CommercialWarehouseSchema = new Schema<ICommercialWarehouse>({
       powerLoad: { type: Number },
       backup: { type: Boolean, default: false }
     },
-    waterAvailability: { type: String },
+   waterAvailability: [{ type: String }],
     propertyAge: { type: String },
     propertyCondition: { type: String }
   },

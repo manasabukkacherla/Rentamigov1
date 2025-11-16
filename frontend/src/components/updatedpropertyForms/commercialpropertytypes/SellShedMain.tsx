@@ -1,4 +1,4 @@
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, Store } from "lucide-react"
 import PropertyName from "../PropertyName"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -14,7 +14,7 @@ import CommercialAvailability from "../CommercialComponents/CommercialAvailabili
 import CommercialContactDetails from "../CommercialComponents/CommercialContactDetails"
 import CommercialMediaUpload from "../CommercialComponents/CommercialMediaUpload"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 
 import ShedType from "../CommercialComponents/ShedType"
@@ -88,6 +88,7 @@ interface ContactDetailsType {
 }
 
 interface FormDataType {
+  PropertyId?: string;
   basicInformation: {
     title: string;
     Type: string[];
@@ -128,6 +129,7 @@ interface FormDataType {
 
 const SellShedMain = () => {
   const navigate = useNavigate();
+   const {propertyId} = useParams();
   const formRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState<FormDataType>({
     basicInformation: {
@@ -183,8 +185,11 @@ const SellShedMain = () => {
       documents: []
     }
   })
-
-  const [currentStep, setCurrentStep] = useState(0)
+  const [isEditMode, setIsEditMode] = useState(false);
+    const [currentStep, setCurrentStep] = useState(0)
+    const [isLoggedIn, setIsLoggedIn] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [Loading , setLoading ] = useState(false)
   const steps = [
     {
       title: "Basic Information",
@@ -296,7 +301,7 @@ const SellShedMain = () => {
             }}
             onMediaChange={(media) => {
               const photos: Record<string, File[]> = {};
-              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
+              media.photos.forEach(({ category, files }: { category: string, files: { file: File }[] }) => {
                 photos[category] = files.map(f => f.file);
               });
 
@@ -318,6 +323,127 @@ const SellShedMain = () => {
       ),
     },
   ]
+ 
+useEffect(() => {
+  const fetchShedById = async () => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
+
+    if (!propertyId) return;
+
+    console.log("Fetching sell Shed details for:", propertyId);
+    setLoading(true);
+
+    try {
+      const response = await axios.get(`/api/commercial/sale/sheds/${propertyId}`);
+      
+      if (response.data?.success) {
+        const shed = response.data.data;
+        setIsEditMode(true);
+        
+        console.log("Fetched shed data:", shed);
+
+        // Transform the API data to match our form structure
+        setFormData(prev => ({
+          ...prev,
+          PropertyId: shed.propertyId,
+          basicInformation: {
+            title: shed.basicInformation?.title || "",
+            Type: shed.basicInformation?.Type || [],
+            address: shed.basicInformation?.address || {
+              street: "",
+              city: "",
+              state: "",
+              zipCode: ""
+            },
+            landmark: shed.basicInformation?.landmark || "",
+            location: {
+              latitude: shed.basicInformation?.location?.latitude?.toString() || "",
+              longitude: shed.basicInformation?.location?.longitude?.toString() || ""
+            },
+            isCornerProperty: shed.basicInformation?.isCornerProperty || false,
+          },
+          shedDetails: {
+            totalArea: shed.shedDetails?.totalArea || 0,
+            carpetArea: shed.shedDetails?.carpetArea || 0,
+            Height: shed.shedDetails?.ceilingHeight || 0, // Map ceilingHeight to Height
+            entranceWidth: shed.shedDetails?.entranceWidth || 0,
+            additionalDetails: shed.shedDetails?.additionalDetails || ""
+          },
+          propertyDetails: {
+            area: {
+              totalArea: shed.propertyDetails?.area?.superBuiltUpAreaSqft || 0,
+              builtUpArea: shed.propertyDetails?.area?.builtUpAreaSqft || 0,
+              carpetArea: shed.propertyDetails?.area?.carpetAreaSqft || 0
+            },
+            floorDetails: {
+              floorNumber: shed.propertyDetails?.facingDetails?.floorNumber || 0,
+              totalFloors: shed.propertyDetails?.facingDetails?.totalFloors || 0
+            },
+            facingDirection: shed.propertyDetails?.facingDirection || "",
+            furnishingStatus: shed.propertyDetails?.furnishingStatus || "",
+            propertyAmenities: shed.propertyDetails?.propertyAmenities || [],
+            wholeSpaceAmenities: shed.propertyDetails?.wholeSpaceAmenities || [],
+            propertyAge: shed.propertyDetails?.propertyAge || "",
+            propertyCondition: shed.propertyDetails?.propertyCondition || "",
+            waterAvailability: shed.propertyDetails?.waterAvailability || [],
+            electricitySupply: {
+              powerLoad: shed.propertyDetails?.electricitySupply?.powerLoad || 0,
+              backup: shed.propertyDetails?.electricitySupply?.backup || false
+            }
+          },
+          pricingDetails: {
+            propertyPrice: shed.pricingDetails?.propertyPrice || 0,
+            pricetype: shed.pricingDetails?.pricetype || "fixed"
+          },
+          registration: {
+            chargestype: shed.registration?.chargestype || 'inclusive',
+            registrationAmount: shed.registration?.registrationAmount || 0,
+            stampDutyAmount: shed.registration?.stampDutyAmount || 0
+          },
+          brokerage: {
+            required: shed.brokerage?.required || "no",
+            amount: shed.brokerage?.amount || 0
+          },
+          availability: {
+            type: shed.availability?.type || "immediate",
+            date: shed.availability?.date,
+            preferredSaleDuration: shed.availability?.preferredSaleDuration,
+            noticePeriod: shed.availability?.noticePeriod,
+            isPetsAllowed: shed.availability?.isPetsAllowed || false,
+            operatingHours: shed.availability?.operatingHours?.restricted || false
+          },
+          contactDetails: {
+            name: shed.contactDetails?.name || "",
+            email: shed.contactDetails?.email || "",
+            phone: shed.contactDetails?.phone || "",
+            alternatePhone: shed.contactDetails?.alternatePhone || "",
+            bestTimeToContact: shed.contactDetails?.bestTimeToContact || ""
+          }
+       
+        }));
+
+        toast.success("Shed data loaded successfully!");
+      } else {
+        toast.error("Failed to load shed data");
+      }
+    } catch (err: any) {
+      console.error("Error fetching shed:", err);
+      toast.error(err.response?.data?.error || "Error fetching shed details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (propertyId) {
+    fetchShedById();
+  }
+}, [propertyId, navigate]);
 
   const nextStep = () => {
     setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
@@ -381,101 +507,200 @@ const SellShedMain = () => {
       reader.onerror = error => reject(error);
     });
   };
-
-  const handleSubmit = async (e?: { preventDefault: () => void }) => {
-    if (e) e.preventDefault();
-    let author=null
-    const user = sessionStorage.getItem('user');
-    if (user) {
-      author = JSON.parse(user).id;
-    }
-    console.log(formData);
-    try {
-      // Convert media files to base64 strings if they exist
-      
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
-          lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
-          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      };
-
-      // Get userId robustly from localStorage
-      
-      
-      // Transform data for backend
-      const transformedData = {
-        ...formData,
-        basicInformation: {
-          ...formData.basicInformation,
-          location: {
-            latitude: formData.basicInformation.location.latitude,
-            longitude: formData.basicInformation.location.longitude
-          }
-        },
-        media: convertedMedia,
-        // Ensure availability data matches the schema
-        pricingDetails:{
-          propertyPrice: formData.pricingDetails.propertyPrice,
-          pricetype: formData.pricingDetails.pricetype
-        },
-        registration: {
-          chargestype: formData.registration?.chargestype || 'inclusive',
-          registrationAmount: formData.registration?.registrationAmount || 0,
-          stampDutyAmount: formData.registration?.stampDutyAmount || 0
-        },
-        brokerage: {
-          required: typeof formData.brokerage?.required === 'boolean'
-            ? (formData.brokerage.required ? 'yes' : 'no')
-            : formData.brokerage?.required || 'no',
-          amount: formData.brokerage?.amount || 0
-        },
-        availability: {
-          type: formData.availability.type || 'immediate',
-          date: formData.availability.date,
-          preferredSaleDuration: formData.availability.preferredSaleDuration,
-          noticePeriod: formData.availability.noticePeriod,
-          isPetsAllowed: formData.availability.isPetsAllowed || false,
-          operatingHours: formData.availability.operatingHours || false
-        },
-        // Add metadata
-        //const user = sessionStorage.getItem('user');
-      // if (user) {
-      //   const author = JSON.parse(user).id;
-        metaData: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: 'Commercial',
-          propertyName: 'Shed',
-          intent: 'Sell',
-          status: 'Available',
-        }
-      };
-
-
-      console.log('Submitting data:', transformedData);
-
-      // Submit to backend API
-      const response = await axios.post('/api/commercial/sell/sheds', transformedData);
-
-      if (response.status === 201) {
-        toast.success("Property listed successfully!");
-        // Redirect to some success page or dashboard
-
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error("Failed to list property. Please try again.");
-    }
+const handleSubmit = async (e?: { preventDefault: () => void }) => {
+  if (e) e.preventDefault();
+  
+  // Add validation for required fields
+  if (!formData.basicInformation.title) {
+    toast.error('Property title is required');
+    return;
   }
 
+  let author = null;
+  const user = sessionStorage.getItem('user');
+  if (user) {
+    author = JSON.parse(user).id;
+  } else {
+    toast.error('User not logged in');
+    return;
+  }
+
+  console.log('Form Data before transformation:', formData);
+  setIsSubmitting(true);
+  
+  try {
+    // Convert media files to base64 strings if they exist
+    const convertedMedia = {
+      photos: {
+        exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
+        interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
+        floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
+        washrooms: await Promise.all((formData.media?.photos?.washrooms ?? []).map(convertFileToBase64)),
+        lifts: await Promise.all((formData.media?.photos?.lifts ?? []).map(convertFileToBase64)),
+        emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits ?? []).map(convertFileToBase64))
+      },
+      videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
+      documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
+    };
+
+    // Transform data for backend
+    const transformedData = {
+      // Basic Information
+      basicInformation: {
+        title: formData.basicInformation.title,
+        Type: formData.basicInformation.Type || [],
+        address: formData.basicInformation.address || {
+          street: '',
+          city: '',
+          state: '',
+          zipCode: ''
+        },
+        landmark: formData.basicInformation.landmark || '',
+        location: {
+          latitude: formData.basicInformation.location?.latitude || '',
+          longitude: formData.basicInformation.location?.longitude || ''
+        },
+        isCornerProperty: formData.basicInformation.isCornerProperty || false
+      },
+
+      // Shed Details
+      shedDetails: {
+        totalArea: Number(formData.shedDetails?.totalArea) || 0,
+        builtUpArea: Number(formData.shedDetails?.totalArea) || 0,
+        carpetArea: Number(formData.shedDetails?.carpetArea) || 0,
+        entranceWidth: Number(formData.shedDetails?.entranceWidth) || 0,
+        ceilingHeight: Number(formData.shedDetails?.Height) || 0, // Map Height to ceilingHeight
+        additionalDetails: formData.shedDetails?.additionalDetails || ''
+      },
+
+      // Property Details
+      propertyDetails: {
+        area: {
+          superBuiltUpAreaSqft: Number(formData.propertyDetails?.area?.totalArea) || 0,
+          builtUpAreaSqft: Number(formData.propertyDetails?.area?.builtUpArea) || 0,
+          carpetAreaSqft: Number(formData.propertyDetails?.area?.carpetArea) || 0
+        },
+        facingDetails: {
+          floorNumber: Number(formData.propertyDetails?.floorDetails?.floorNumber) || 0,
+          totalFloors: Number(formData.propertyDetails?.floorDetails?.totalFloors) || 0
+        },
+        facingDirection: formData.propertyDetails?.facingDirection || '',
+        furnishingStatus: formData.propertyDetails?.furnishingStatus || '',
+        propertyAge: formData.propertyDetails?.propertyAge || '',
+        propertyCondition: formData.propertyDetails?.propertyCondition || '',
+        propertyAmenities: formData.propertyDetails?.propertyAmenities || [],
+        wholeSpaceAmenities: formData.propertyDetails?.wholeSpaceAmenities || [],
+        waterAvailability: formData.propertyDetails?.waterAvailability || [],
+        electricitySupply: {
+          powerLoad: Number(formData.propertyDetails?.electricitySupply?.powerLoad) || 0,
+          backup: formData.propertyDetails?.electricitySupply?.backup || false
+        }
+      },
+
+      // Pricing
+      pricingDetails: {
+        propertyPrice: Number(formData.pricingDetails.propertyPrice) || 0,
+        pricetype: formData.pricingDetails.pricetype || 'fixed'
+      },
+
+      // Registration
+      registration: {
+        chargestype: formData.registration?.chargestype || 'inclusive',
+        registrationAmount: Number(formData.registration?.registrationAmount) || 0,
+        stampDutyAmount: Number(formData.registration?.stampDutyAmount) || 0
+      },
+
+      // Brokerage
+      brokerage: {
+        required: formData.brokerage?.required || 'no',
+        amount: Number(formData.brokerage?.amount) || 0
+      },
+
+      // Availability
+      availability: {
+        type: formData.availability.type || 'immediate',
+        date: formData.availability.date,
+        preferredSaleDuration: formData.availability.preferredSaleDuration,
+        noticePeriod: formData.availability.noticePeriod,
+        isPetsAllowed: formData.availability.isPetsAllowed || false,
+        operatingHours: {
+          restricted: formData.availability.operatingHours || false,
+          restrictions: ''
+        }
+      },
+
+      // Contact
+      contactDetails: {
+        name: formData.contactDetails.name || '',
+        email: formData.contactDetails.email || '',
+        phone: formData.contactDetails.phone || '',
+        alternatePhone: formData.contactDetails.alternatePhone || '',
+        bestTimeToContact: formData.contactDetails.bestTimeToContact || ''
+      },
+
+      // Media
+      media: convertedMedia,
+
+      // Metadata
+      metadata: {
+        createdBy: author,
+        createdAt: new Date(),
+        propertyType: 'Commercial',
+        intent: 'Sell',
+        propertyName: 'Shed',
+        status: 'Available'
+      }
+    };
+
+    console.log('Transformed Data being sent:', JSON.stringify(transformedData, null, 2));
+
+    let response;
+    if (isEditMode && propertyId) {
+      // Update existing shed
+      response = await axios.put(`/api/commercial/sale/sheds/${propertyId}`, transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } else {
+      // Create new shed
+      response = await axios.post('/api/commercial/sale/sheds', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
+
+    if (response.status === 201 || response.status === 200 || response.data.success) {
+      toast.success(`Property ${isEditMode ? 'updated' : 'listed'} successfully!`);
+      navigate('/updatepropertyform');
+    }
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    if (error.response) {
+      console.log('Error response:', error.response.data);
+      toast.error(error.response.data.error || `Failed to ${isEditMode ? 'update' : 'list'} property. Please try again.`);
+    } else {
+      toast.error(`Failed to ${isEditMode ? 'update' : 'list'} property. Please try again.`);
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+}
+// Add this at the beginning of your return statement
+if (Loading) {
   return (
+    <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
+        <p className="mt-4 text-gray-600">Loading property data...</p>
+      </div>
+    </div>
+  );
+}
+
+  return (
+    
     <div ref={formRef} className="min-h-screen bg-white">
       {/* Progress indicator */}
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">

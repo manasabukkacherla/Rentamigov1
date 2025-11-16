@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useRef } from "react"
+import React, { useState, useCallback, useRef, useEffect } from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2, Lock as LockIcon } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -17,9 +17,10 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
+import { property } from "lodash"
 
 // Add custom styles for inclusive/exclusive buttons
 const customStyles = `
@@ -179,6 +180,7 @@ interface IMetadata {
 }
 
 interface FormData {
+   propertyId?: string;
   basicInformation: IBasicInformation
   propertySize: number
   propertyDetails: PropertyDetails;
@@ -233,13 +235,14 @@ interface FormData {
   metadata?: IMetadata
 }
 
-const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
+const BuilderFloor = ({ onSubmit }: BuilderFloorProps) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [isloggedIn, setIsLoggedIn] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
-
+  const {propertyId} = useParams();
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
@@ -463,7 +466,196 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
       }
     }));
   }, []);
+ useEffect(() => {
+  const fetchBuilderFloorById = async () => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+      return;
+    } else {
+      setIsLoggedIn(true);
+    }
 
+    if (!propertyId) return;
+
+    console.log("Fetching builder floor details for:", propertyId);
+    setLoading(true);
+
+    try {
+      const response = await axios.get(`/api/residential/rent/builderfloor/${propertyId}`);
+      console.log("backend data ",response)
+      
+      if (response.data?.success) {
+        const builderFloor = response.data.data;
+        console.log("Fetched builder floor data:", builderFloor);
+
+        // Transform the API data to match our form structure
+        setFormData(prev => ({
+          ...prev,
+          Id: builderFloor.propertyId || builderFloor._id,
+          basicInformation: {
+            title: builderFloor.basicInformation?.title || "",
+            address: {
+              flatNo: builderFloor.basicInformation?.address?.flatNo || 0,
+              showFlatNo: builderFloor.basicInformation?.address?.showFlatNo || false,
+              floor: builderFloor.basicInformation?.address?.floor || 0,
+              apartmentName: builderFloor.basicInformation?.address?.apartmentName || "",
+              street: builderFloor.basicInformation?.address?.street || "",
+              city: builderFloor.basicInformation?.address?.city || "",
+              state: builderFloor.basicInformation?.address?.state || "",
+              zipCode: builderFloor.basicInformation?.address?.zipCode || "",
+              location: {
+                latitude: builderFloor.basicInformation?.address?.location?.latitude?.toString() || "",
+                longitude: builderFloor.basicInformation?.address?.location?.longitude?.toString() || ""
+              }
+            }
+          },
+          propertySize: builderFloor.propertySize || 0,
+          propertyDetails: {
+            bedrooms: builderFloor.propertyDetails?.bedrooms || 0,
+            washrooms: builderFloor.propertyDetails?.washrooms || 0,
+            balconies: builderFloor.propertyDetails?.balconies || 0,
+            hasParking: builderFloor.propertyDetails?.hasParking || false,
+            parkingDetails: {
+              twoWheeler: builderFloor.propertyDetails?.parkingDetails?.twoWheeler || 0,
+              fourWheeler: builderFloor.propertyDetails?.parkingDetails?.fourWheeler || 0
+            },
+            extraRooms: {
+              servant: builderFloor.propertyDetails?.extraRooms?.servant || false,
+              puja: builderFloor.propertyDetails?.extraRooms?.puja || false,
+              store: builderFloor.propertyDetails?.extraRooms?.store || false,
+              others: builderFloor.propertyDetails?.extraRooms?.others || false
+            },
+            utilityArea: builderFloor.propertyDetails?.utilityArea || "",
+            furnishingStatus: builderFloor.propertyDetails?.furnishingStatus || "",
+            totalFloors: builderFloor.propertyDetails?.totalFloors || 0,
+            propertyOnFloor: builderFloor.propertyDetails?.propertyOnFloor || 0,
+            facing: builderFloor.propertyDetails?.facing || "",
+            propertyAge: builderFloor.propertyDetails?.propertyAge || "",
+            superBuiltUpAreaSqft: builderFloor.propertyDetails?.superBuiltUpAreaSqft || 0,
+            superBuiltUpAreaSqmt: builderFloor.propertyDetails?.superBuiltUpAreaSqmt || 0,
+            builtUpAreaSqft: builderFloor.propertyDetails?.builtUpAreaSqft || 0,
+            builtUpAreaSqmt: builderFloor.propertyDetails?.builtUpAreaSqmt || 0,
+            carpetAreaSqft: builderFloor.propertyDetails?.carpetAreaSqft || 0,
+            carpetAreaSqmt: builderFloor.propertyDetails?.carpetAreaSqmt || 0,
+            electricityAvailability: builderFloor.propertyDetails?.electricityAvailability || "",
+            waterAvailability: {
+              borewell: builderFloor.propertyDetails?.waterAvailability?.borewell || false,
+              governmentSupply: builderFloor.propertyDetails?.waterAvailability?.governmentSupply || false,
+              tankerSupply: builderFloor.propertyDetails?.waterAvailability?.tankerSupply || false
+            }
+          },
+          restrictions: {
+            foodPreference: builderFloor.restrictions?.foodPreference || "",
+            petsAllowed: builderFloor.restrictions?.petsAllowed || "",
+            tenantType: builderFloor.restrictions?.tenantType || ""
+          },
+          flatAmenities: {
+            lights: builderFloor.flatAmenities?.lights || 0,
+            ceilingFan: builderFloor.flatAmenities?.ceilingFan || 0,
+            geysers: builderFloor.flatAmenities?.geysers || 0,
+            chimney: builderFloor.flatAmenities?.chimney || false,
+            callingBell: builderFloor.flatAmenities?.callingBell || false,
+            wardrobes: builderFloor.flatAmenities?.wardrobes || 0,
+            lofts: builderFloor.flatAmenities?.lofts || 0,
+            kitchenCabinets: builderFloor.flatAmenities?.kitchenCabinets || 0,
+            clothHanger: builderFloor.flatAmenities?.clothHanger || 0,
+            pipedGasConnection: builderFloor.flatAmenities?.pipedGasConnection || false,
+            gasStoveWithCylinder: builderFloor.flatAmenities?.gasStoveWithCylinder || false,
+            ironingStand: builderFloor.flatAmenities?.ironingStand || false,
+            bathtub: builderFloor.flatAmenities?.bathtub || false,
+            shower: builderFloor.flatAmenities?.shower || false,
+            sofa: builderFloor.flatAmenities?.sofa || false,
+            coffeeTable: builderFloor.flatAmenities?.coffeeTable || false,
+            tvUnit: builderFloor.flatAmenities?.tvUnit || false,
+            diningTableWithChairs: builderFloor.flatAmenities?.diningTableWithChairs || 0,
+            cotWithMattress: builderFloor.flatAmenities?.cotWithMattress || 0,
+            sideTable: builderFloor.flatAmenities?.sideTable || 0,
+            studyTableWithChair: builderFloor.flatAmenities?.studyTableWithChair || 0,
+            television: builderFloor.flatAmenities?.television || false,
+            refrigerator: builderFloor.flatAmenities?.refrigerator || false,
+            washingMachine: builderFloor.flatAmenities?.washingMachine || false,
+            dishwasher: builderFloor.flatAmenities?.dishwasher || false,
+            waterPurifier: builderFloor.flatAmenities?.waterPurifier || false,
+            microwaveOven: builderFloor.flatAmenities?.microwaveOven || false,
+            inductionCooktop: builderFloor.flatAmenities?.inductionCooktop || false,
+            gasStove: builderFloor.flatAmenities?.gasStove || false,
+            airConditioner: builderFloor.flatAmenities?.airConditioner || 0,
+            desertCooler: builderFloor.flatAmenities?.desertCooler || 0,
+            ironBox: builderFloor.flatAmenities?.ironBox || false,
+            exhaustFan: builderFloor.flatAmenities?.exhaustFan || 0
+          },
+          societyAmenities: {
+            powerutility: builderFloor.societyAmenities?.powerutility || [],
+            parkingtranspotation: builderFloor.societyAmenities?.parkingtranspotation || [],
+            recreationalsportsfacilities: builderFloor.societyAmenities?.recreationalsportsfacilities || [],
+            childrenfamilyamenities: builderFloor.societyAmenities?.childrenfamilyamenities || [],
+            healthwellnessfacilities: builderFloor.societyAmenities?.healthwellnessfacilities || [],
+            shoppingconviencestores: builderFloor.societyAmenities?.shoppingconviencestores || [],
+            ecofriendlysustainable: builderFloor.societyAmenities?.ecofriendlysustainable || [],
+            communityculturalspaces: builderFloor.societyAmenities?.communityculturalspaces || [],
+            smarthometechnology: builderFloor.societyAmenities?.smarthometechnology || [],
+            otheritems: builderFloor.societyAmenities?.otheritems || []
+          },
+          rentalTerms: {
+            rentDetails: {
+              expectedRent: builderFloor.rentalTerms?.rentDetails?.expectedRent || 0,
+              isNegotiable: builderFloor.rentalTerms?.rentDetails?.isNegotiable || false,
+              rentType: builderFloor.rentalTerms?.rentDetails?.rentType || "inclusive"
+            },
+            securityDeposit: {
+              amount: builderFloor.rentalTerms?.securityDeposit?.amount || 0
+            },
+            maintenanceAmount: {
+              amount: builderFloor.rentalTerms?.maintenanceAmount?.amount || 0,
+              frequency: builderFloor.rentalTerms?.maintenanceAmount?.frequency || "monthly"
+            },
+            otherCharges: {
+              water: {
+                amount: builderFloor.rentalTerms?.otherCharges?.water?.amount || 0,
+                type: builderFloor.rentalTerms?.otherCharges?.water?.type || "inclusive"
+              },
+              electricity: {
+                amount: builderFloor.rentalTerms?.otherCharges?.electricity?.amount || 0,
+                type: builderFloor.rentalTerms?.otherCharges?.electricity?.type || "inclusive"
+              },
+              gas: {
+                amount: builderFloor.rentalTerms?.otherCharges?.gas?.amount || 0,
+                type: builderFloor.rentalTerms?.otherCharges?.gas?.type || "inclusive"
+              },
+              others: {
+                amount: builderFloor.rentalTerms?.otherCharges?.others?.amount || 0,
+                type: builderFloor.rentalTerms?.otherCharges?.others?.type || "inclusive"
+              }
+            },
+            brokerage: {
+              required: builderFloor.rentalTerms?.brokerage?.required || "no",
+              amount: builderFloor.rentalTerms?.brokerage?.amount || 0
+            }
+          },
+          availability: {
+            type: builderFloor.availability?.type || "immediate",
+            date: builderFloor.availability?.date || ""
+          }
+          // Note: Media files are handled separately as they need special processing
+        }));
+
+        toast.success("Builder floor data loaded successfully!");
+      } else {
+        toast.error("Failed to load builder floor data");
+      }
+    } catch (err: any) {
+      console.error("Error fetching builder floor:", err);
+      toast.error(err.response?.data?.error || "Error fetching builder floor details");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (propertyId) {
+    fetchBuilderFloorById();
+  }
+}, [propertyId]);
   const formSections = [
     {
       title: "Basic Information",
@@ -762,98 +954,274 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
       }, 100)
     }
   }
-
+ console.log(formData)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    console.log(formData)
+//   const handleSubmit = async () => {
+//   setIsSubmitting(true);
 
-    try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        navigate('/login');
-        return;
-      }
+//   try {
+//     const user = sessionStorage.getItem('user');
+//     if (!user) {
+//       navigate('/login');
+//       return;
+//     }
 
-      const author = JSON.parse(user).id;
+//     const author = JSON.parse(user).id;
 
-      // Convert media files to base64
-      const convertFileToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        });
-      };
+//     const convertFileToBase64 = (file: File): Promise<string> => {
+//       return new Promise((resolve, reject) => {
+//         const reader = new FileReader();
+//         reader.readAsDataURL(file);
+//         reader.onload = () => resolve(reader.result as string);
+//         reader.onerror = error => reject(error);
+//       });
+//     };
 
-      // Helper function to convert array of files to base64
-      const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-        const results: string[] = [];
-        for (const file of files) {
-          if (file instanceof File) {
-            const base64 = await convertFileToBase64(file);
-            results.push(base64);
-          } else {
-            results.push(file); // Already a string (URL)
+//     const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+//       const results: string[] = [];
+//       for (const file of files) {
+//         if (file instanceof File) {
+//           const base64 = await convertFileToBase64(file);
+//           results.push(base64);
+//         } else {
+//           results.push(file);
+//         }
+//       }
+//       return results;
+//     };
+
+//     const convertedMedia = {
+//       photos: {
+//         exterior: await convertFilesToBase64(formData.media.photos.exterior),
+//         interior: await convertFilesToBase64(formData.media.photos.interior),
+//         floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
+//         washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
+//         lifts: await convertFilesToBase64(formData.media.photos.lifts),
+//         emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
+//         bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
+//         halls: await convertFilesToBase64(formData.media.photos.halls),
+//         storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
+//         kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
+//       },
+//       videoTour: formData.media.videoTour 
+//         ? (formData.media.videoTour instanceof File 
+//           ? await convertFileToBase64(formData.media.videoTour)
+//           : formData.media.videoTour)
+//         : undefined,
+//       documents: await convertFilesToBase64(formData.media.documents)
+//     };
+
+//     const submissionData = {
+//       ...formData,
+//       media: convertedMedia,
+//       metadata: {
+//         ...formData.metadata,
+//         createdBy: propertyId ? formData.metadata?.createdBy || author : author,
+//         createdAt: propertyId ? formData.metadata?.createdAt : new Date(),
+//         updatedAt: new Date(),
+//         updatedBy: author,
+//         propertyType: "Residential",
+//         propertyName: "Builder Floor",
+//         intent: "Rent",
+//         status: formData.metadata?.status || "Available"
+//       }
+//     };
+
+//     let response;
+    
+//     if (propertyId) {
+//       response = await axios.put(`/api/residential/rent/builderfloor/${propertyId}`, submissionData, {
+//         headers: {
+//           'Content-Type': 'application/json'
+//         }
+//       });
+      
+//       if (response.data.success) {
+//         toast.success('Builder floor updated successfully!');
+//       } else {
+//         toast.error('Failed to update builder floor');
+//       }
+//     } else {
+//       response = await axios.post('/api/residential/rent/builderfloor', submissionData, {
+//         headers: {
+//           'Content-Type': 'application/json'
+//         }
+//       });
+
+//       if (response.data.success) {
+//         toast.success('Builder floor created successfully!');
+//         setFormData(initialFormData);
+//       } else {
+//         toast.error('Failed to create builder floor');
+//       }
+//     }
+//   } catch (error: any) {
+//     console.error('Error submitting form:', error);
+//     const errorMessage = error.response?.data?.error || 
+//       (propertyId 
+//         ? 'Failed to update builder floor. Please try again.' 
+//         : 'Failed to create builder floor. Please try again.'
+//       );
+//     toast.error(errorMessage);
+//   } finally {
+//     setIsSubmitting(false);
+//   }
+// };
+const handleSubmit = async () => {
+  setIsSubmitting(true);
+  console.log('Form data being submitted:', formData);
+
+  try {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const author = JSON.parse(user).id;
+
+    // OPTIMIZED: Faster file conversion with parallel processing
+    const convertFileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        // Skip if file is too large (e.g., > 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          reject(new Error(`File ${file.name} is too large (max 5MB)`));
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+      });
+    };
+
+    // OPTIMIZED: Process files in parallel with progress
+    const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
+      const fileConversionPromises = files.map(async (file) => {
+        if (file instanceof File) {
+          try {
+            return await convertFileToBase64(file);
+          } catch (error) {
+            console.warn(`Failed to convert file ${file.name}:`, error);
+            return ''; // Return empty string for failed conversions
           }
-        }
-        return results;
-      };
-
-      const convertedMedia = {
-        photos: {
-          exterior: await convertFilesToBase64(formData.media.photos.exterior),
-          interior: await convertFilesToBase64(formData.media.photos.interior),
-          floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-          washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-          lifts: await convertFilesToBase64(formData.media.photos.lifts),
-          emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-          bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-          halls: await convertFilesToBase64(formData.media.photos.halls),
-          storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-          kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-        },
-        videoTour: formData.media.videoTour 
-          ? (formData.media.videoTour instanceof File 
-            ? await convertFileToBase64(formData.media.videoTour)
-            : formData.media.videoTour)
-          : undefined,
-        documents: await convertFilesToBase64(formData.media.documents)
-      };
-
-      const transformedData = {
-        ...formData,
-        media: convertedMedia,
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: "Residential",
-          propertyName: "Builder Floor",
-          intent: "Rent",
-          status: "Available"
-        }
-      };
-
-      const response = await axios.post('/api/residential/rent/builderfloor', transformedData, {
-        headers: {
-          'Content-Type': 'application/json'
+        } else {
+          return file; // Already base64 string
         }
       });
 
-      if (response.data.success) {
-        toast.success('Property listing created successfully!');
-        setFormData(initialFormData);
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create builder floor listing. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+      // Process all files in parallel instead of sequentially
+      return Promise.all(fileConversionPromises);
+    };
 
+    console.log('Starting media conversion...');
+    
+    // OPTIMIZED: Convert all media categories in parallel
+    const mediaConversionPromises = {
+      photos: Promise.all(Object.entries(formData.media.photos).map(async ([category, files]) => ({
+        category,
+        convertedFiles: await convertFilesToBase64(files)
+      }))),
+      videoTour: formData.media.videoTour 
+        ? (formData.media.videoTour instanceof File 
+            ? convertFileToBase64(formData.media.videoTour).catch(() => '')
+            : Promise.resolve(formData.media.videoTour))
+        : Promise.resolve(''),
+      documents: convertFilesToBase64(formData.media.documents)
+    };
+
+    // Wait for all media conversions to complete
+    const [convertedPhotos, convertedVideoTour, convertedDocuments] = await Promise.all([
+      mediaConversionPromises.photos,
+      mediaConversionPromises.videoTour,
+      mediaConversionPromises.documents
+    ]);
+
+    console.log('Media conversion completed');
+
+    // Reconstruct photos object
+    const photos: any = {};
+    convertedPhotos.forEach(({ category, convertedFiles }) => {
+      photos[category] = convertedFiles;
+    });
+
+    const convertedMedia = {
+      photos,
+      videoTour: convertedVideoTour,
+      documents: convertedDocuments
+    };
+
+    const submissionData = {
+      ...formData,
+      media: convertedMedia,
+      userId: author,
+      metadata: {
+        createdBy: author,
+        createdAt: new Date(),
+        propertyType: "Residential",
+        propertyName: "Builder Floor", 
+        intent: "Rent",
+        status: "Available"
+      }
+    };
+
+    console.log('Final submission data prepared');
+
+    let response;
+    
+    if (propertyId) {
+      response = await axios.put(`/api/residential/rent/builderfloor/${propertyId}`, submissionData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 second timeout
+      });
+      
+      if (response.data.success) {
+        toast.success('Builder floor updated successfully!');
+        navigate('/UserDashboard/properties'); 
+      } else {
+        toast.error('Failed to update builder floor: ' + (response.data.message || 'Unknown error'));
+      }
+    } else {
+      response = await axios.post('/api/residential/rent/builderfloor', submissionData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000 // 30 second timeout
+      });
+
+      console.log("response", response.data);
+
+      if (response.data.success) {
+        toast.success('Builder floor created successfully!');
+        setFormData(initialFormData);
+        navigate('/Userdashboard/properties'); 
+      } else {
+        toast.error('Failed to create builder floor: ' + (response.data.message || 'Unknown error'));
+      }
+    }
+  } catch (error: any) {
+    console.error('Error submitting form:', error);
+    
+    if (error.response) {
+      console.error('Server response error:', error.response.data);
+      toast.error(error.response.data?.message || error.response.data?.error || 'Server error occurred');
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      toast.error('No response from server. Please check your connection.');
+    } else if (error.message?.includes('timeout')) {
+      toast.error('Request timeout. Please try again with smaller files.');
+    } else {
+      console.error('Error setting up request:', error.message);
+      toast.error('Failed to submit form: ' + error.message);
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   return (
     <div ref={formRef} className="min-h-screen bg-white">
       <div className="sticky top-0 z-50 bg-white border-b border-gray-200">

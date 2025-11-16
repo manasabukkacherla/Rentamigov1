@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import CommercialShowroom from '../../models/commercial/CommercialsellShowroom';
 import PropertySelection from '../../models/PropertySelection';
+import _ from 'lodash';
 
 // Generate property ID with format RA-COMSESR-XXXX
 const generatePropertyId = async (): Promise<string> => {
@@ -9,33 +10,33 @@ const generatePropertyId = async (): Promise<string> => {
     const highestShowroom = await CommercialShowroom.findOne({
       propertyId: { $regex: `^${prefix}\\d+$` }
     }).sort({ propertyId: -1 });
-    
+
     let nextNumber = 1;
-    
+
     if (highestShowroom) {
       const match = highestShowroom.propertyId.match(/(\d+)$/);
       if (match && match[1]) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
     }
-    
+
     const propertyId = `${prefix}${nextNumber.toString().padStart(4, '0')}`;
-    
+
     const existingWithExactId = await CommercialShowroom.findOne({ propertyId });
-    
+
     if (existingWithExactId) {
       const forcedNextNumber = nextNumber + 1;
       const forcedPropertyId = `${prefix}${forcedNextNumber.toString().padStart(4, '0')}`;
-      
+
       const forcedExisting = await CommercialShowroom.findOne({ propertyId: forcedPropertyId });
-      
+
       if (forcedExisting) {
         return generatePropertyId();
       }
-      
+
       return forcedPropertyId;
     }
-    
+
     return propertyId;
   } catch (error) {
     console.error('Error generating property ID:', error);
@@ -48,21 +49,21 @@ const generatePropertyId = async (): Promise<string> => {
 export const createShowroom = async (req: Request, res: Response) => {
   try {
     const showroomData = req.body;
-    console.log(showroomData)
-    
+    console.log(showroomData);
+
     // Generate property ID
     const propertyId = await generatePropertyId();
 
-    // // Add metadata
+    // Add metadata
     showroomData.metadata = {
       createdBy: showroomData.metadata.createdBy,
       createdAt: new Date(),
     };
-    
-    // // Add property ID
+
+    // Add property ID
     showroomData.propertyId = propertyId;
 
-    // // Create new showroom listing
+    // Create new showroom listing
     const showroom = new CommercialShowroom(showroomData);
     await showroom.save();
 
@@ -126,42 +127,44 @@ export const getShowroom = async (req: Request, res: Response) => {
 // Update commercial showroom listing
 export const updateShowroom = async (req: Request, res: Response) => {
   try {
-    const showroom = await CommercialShowroom.findById(req.params.id);
-    const userId = req.body.userId; 
+    const propertyId = req.params.id;
+    const incomingData = req.body;
 
-    if (showroom?.metadata?.createdBy?.toString() !== userId) {
+    if (!incomingData) {
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
       });
     }
 
-    if (!showroom) {
+    const cleanedData = JSON.parse(
+      JSON.stringify(incomingData, (key, value) => {
+        if (key === "_id" || key === "__v") return undefined;
+        return value;
+      })
+    );
+
+    const existingDoc = await CommercialShowroom.findOne({ propertyId });
+
+    if (!existingDoc) {
       return res.status(404).json({
         success: false,
         message: 'Commercial showroom listing not found'
       });
     }
 
-    // Update metadata
-    req.body.metadata = {
-      ...showroom.metadata,
-      updatedAt: new Date()
-    };
+    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
 
-    const updatedShowroom = await CommercialShowroom.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true
-      }
+    const updatedDoc = await CommercialShowroom.findOneAndUpdate(
+      { propertyId },
+      { $set: mergedData },
+      { new: true, runValidators: true }
     );
 
     res.status(200).json({
       success: true,
       message: 'Commercial showroom listing updated successfully',
-      data: updatedShowroom
+      data: updatedDoc
     });
   } catch (error: any) {
     res.status(500).json({
@@ -191,6 +194,7 @@ export const deleteShowroom = async (req: Request, res: Response) => {
         message: 'Not authorized to delete this listing'
       });
     }
+
     await showroom.deleteOne();
 
     res.status(200).json({
@@ -252,4 +256,4 @@ export const searchShowrooms = async (req: Request, res: Response) => {
       error: error.message
     });
   }
-}; 
+};

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -23,6 +23,7 @@ import SecurityDeposit from "../residentialrent/SecurityDeposit"
 import MaintenanceAmount from "../residentialrent/MaintenanceAmount"
 import OtherCharges from "../residentialrent/OtherCharges"
 import RentDetails from "@/components/fullpages/Rent_monthly"
+import { useParams } from "react-router"
 
 interface Address {
   flatNo: number;
@@ -220,6 +221,7 @@ interface Restrictions {
 }
 
 interface FormData {
+  propertyId?: string;
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
@@ -275,7 +277,7 @@ const Apartment = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>(undefined)
+ const {propertyId} = useParams()
   const formRef = useRef<HTMLDivElement>(null)
 
   const initialFormData = {
@@ -620,6 +622,141 @@ const Apartment = () => {
       status: 'Available'
     }
   })
+  useEffect(() => {
+  const fetchById = async () => {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
+    } else {
+      setIsSubmitting(true);
+    }
+
+    if (!propertyId) return;
+
+    console.log("Fetching apartment details for:", propertyId);
+    setLoading(true);
+
+    try {
+      const response = await axios.get(`/api/residential/rent/apartment/${propertyId}`);
+      console.log("Backend data:", response);
+
+      if (response.data?.success) {
+        const apartment = response.data.data;
+        console.log("Fetched apartment data:", apartment);
+
+        // Map backend data → form structure
+        setFormData((prev) => ({
+          ...prev,
+          basicInformation: {
+            title: apartment.basicInformation?.title || "",
+            address: {
+              flatNo: apartment.basicInformation?.address?.flatNo || 0,
+              showFlatNo: apartment.basicInformation?.address?.showFlatNo || false,
+              floor: apartment.basicInformation?.address?.floor || 0,
+              apartmentName: apartment.basicInformation?.address?.apartmentName || "",
+              street: apartment.basicInformation?.address?.street || "",
+              city: apartment.basicInformation?.address?.city || "",
+              state: apartment.basicInformation?.address?.state || "",
+              zipCode: apartment.basicInformation?.address?.zipCode || "",
+              location: {
+                latitude: apartment.basicInformation?.address?.location?.latitude || "",
+                longitude: apartment.basicInformation?.address?.location?.longitude || "",
+              },
+            },
+          },
+
+          propertySize: apartment.propertySize || 0,
+
+          propertyDetails: {
+            ...prev.propertyDetails,
+            ...apartment.propertyDetails,
+            parkingDetails: apartment.propertyDetails?.parkingDetails || { twoWheeler: 0, fourWheeler: 0 },
+            extraRooms: apartment.propertyDetails?.extraRooms || { servant: false, puja: false, store: false, others: false },
+            waterAvailability: apartment.propertyDetails?.waterAvailability || {
+              borewell: false,
+              governmentSupply: false,
+              tankerSupply: false,
+            },
+          },
+
+          restrictions: apartment.restrictions || {
+            foodPreference: "",
+            petsAllowed: "",
+            tenantType: "",
+          },
+
+          flatAmenities: apartment.flatAmenities || prev.flatAmenities,
+          societyAmenities: apartment.societyAmenities || prev.societyAmenities,
+
+          rentalTerms: {
+            rentDetails: {
+              expectedRent: apartment.rentalTerms?.rentDetails?.expectedRent || 0,
+              isNegotiable: apartment.rentalTerms?.rentDetails?.isNegotiable || false,
+              rentType: apartment.rentalTerms?.rentDetails?.rentType || "inclusive",
+            },
+            securityDeposit: {
+              amount: apartment.rentalTerms?.securityDeposit?.amount || 0,
+            },
+            maintenanceAmount: {
+              amount: apartment.rentalTerms?.maintenanceAmount?.amount || 0,
+              frequency: apartment.rentalTerms?.maintenanceAmount?.frequency || "monthly",
+            },
+            otherCharges: {
+              water: apartment.rentalTerms?.otherCharges?.water || { amount: 0, type: "inclusive" },
+              electricity: apartment.rentalTerms?.otherCharges?.electricity || { amount: 0, type: "inclusive" },
+              gas: apartment.rentalTerms?.otherCharges?.gas || { amount: 0, type: "inclusive" },
+              others: apartment.rentalTerms?.otherCharges?.others || { amount: 0, type: "inclusive" },
+            },
+            brokerage: apartment.rentalTerms?.brokerage || { required: "no", amount: 0 },
+          },
+
+          availability: {
+            type: apartment.availability?.type || "immediate",
+            date: apartment.availability?.date || "",
+          },
+
+          media: {
+            photos: {
+              exterior: apartment.media?.photos?.exterior || [],
+              interior: apartment.media?.photos?.interior || [],
+              floorPlan: apartment.media?.photos?.floorPlan || [],
+              washrooms: apartment.media?.photos?.washrooms || [],
+              lifts: apartment.media?.photos?.lifts || [],
+              emergencyExits: apartment.media?.photos?.emergencyExits || [],
+              bedrooms: apartment.media?.photos?.bedrooms || [],
+              halls: apartment.media?.photos?.halls || [],
+              storerooms: apartment.media?.photos?.storerooms || [],
+              kitchen: apartment.media?.photos?.kitchen || [],
+            },
+            videoTour: apartment.media?.videoTour || undefined,
+            documents: apartment.media?.documents || [],
+          },
+
+          metadata: {
+            createdBy: apartment.metadata?.createdBy || "",
+            createdAt: apartment.metadata?.createdAt || new Date(),
+            propertyType: "Residential",
+            propertyName: "Apartment",
+            intent: "Rent",
+            status: apartment.metadata?.status || "Available",
+          },
+        }));
+      } else {
+        toast.error("Failed to fetch apartment data");
+      }
+    } catch (err: any) {
+      console.error("Error fetching apartment details:", err);
+      toast.error("Something went wrong while fetching property data");
+    } finally {
+      setLoading(false);
+      setIsSubmitting(false);
+    }
+  };
+
+  fetchById();
+}, [propertyId]);
+
 
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
@@ -806,7 +943,7 @@ const Apartment = () => {
         <div className="space-y-8">
           <div className="space-y-8">
 
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <div className="[&input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <Rent
                 rentDetails={formData.rentalTerms.rentDetails}
                 onRentChange={(rent) => setFormData(prev => ({
@@ -826,7 +963,7 @@ const Apartment = () => {
 
           <div className="space-y-8">
 
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <div className="[&input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
             <SecurityDeposit
                 deposit={formData.rentalTerms.securityDeposit}
                 onSecurityDepositChange={(deposit) => setFormData(prev => ({
@@ -842,7 +979,7 @@ const Apartment = () => {
 
           <div className="space-y-8">
 
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <div className="[&input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <MaintenanceAmount
                 maintenanceAmount={formData.rentalTerms.maintenanceAmount}
                 onMaintenanceAmountChange={(maintenance) => setFormData({ ...formData, rentalTerms: { ...formData.rentalTerms, maintenanceAmount: maintenance } })} />
@@ -851,7 +988,7 @@ const Apartment = () => {
 
           <div className="space-y-8">
 
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <div className="[&input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
               <OtherCharges
                 otherCharges={formData.rentalTerms.otherCharges}
                 onOtherChargesChange={(charges) => setFormData(prev => ({
@@ -865,7 +1002,7 @@ const Apartment = () => {
 
           <div className="space-y-8">
 
-            <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
+            <div className="[&input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
             <Brokerage
                 bro={formData.rentalTerms.brokerage}
                 onBrokerageChange={(brokerage) => setFormData(prev => ({
@@ -906,7 +1043,7 @@ const Apartment = () => {
           <div className="space-y-8">
             <ResidentialPropertyMediaUpload
               propertyType="apartment"
-              propertyId={propertyId}
+          
               value={formData.media}
               onChange={(media) => setFormData(prev => ({ ...prev, media }))}
             />
@@ -960,93 +1097,87 @@ const Apartment = () => {
   };
 
   const navigate = useNavigate()
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    console.log("Final formData before submit", formData);
+  
+const handleSubmit = async () => {
+  setIsSubmitting(true);
+  console.log("Final formData before submit", formData);
 
-    try {
-      const user = sessionStorage.getItem('user');
-      if (user) {
-        const author = JSON.parse(user).id;
-
-        // Process media items to ensure we only send URLs to the backend
-        const processMediaForSubmission = (media: IMedia) => {
-          // Debug the incoming media object
-          console.log('Processing media for submission:', {
-            hasVideoTour: !!media.videoTour,
-            videoTourType: media.videoTour ? typeof media.videoTour : 'undefined',
-            videoTourValue: media.videoTour
-          });
-          
-          // Ensure videoTour is properly extracted from media object
-          const videoTourUrl = media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined;
-          
-          // Log the videoTour URL for debugging
-          console.log('VideoTour URL for submission:', videoTourUrl);
-          
-          const processedMedia = {
-            photos: {
-              exterior: media.photos.exterior.filter(item => typeof item === 'string') as string[],
-              interior: media.photos.interior.filter(item => typeof item === 'string') as string[],
-              floorPlan: media.photos.floorPlan.filter(item => typeof item === 'string') as string[],
-              washrooms: media.photos.washrooms.filter(item => typeof item === 'string') as string[],
-              lifts: media.photos.lifts.filter(item => typeof item === 'string') as string[],
-              emergencyExits: media.photos.emergencyExits.filter(item => typeof item === 'string') as string[],
-              bedrooms: media.photos.bedrooms.filter(item => typeof item === 'string') as string[],
-              halls: media.photos.halls.filter(item => typeof item === 'string') as string[],
-              storerooms: media.photos.storerooms.filter(item => typeof item === 'string') as string[],
-              kitchen: media.photos.kitchen.filter(item => typeof item === 'string') as string[]
-            },
-            videoTour: videoTourUrl,
-            documents: media.documents.filter(doc => typeof doc === 'string') as string[]
-          };
-          
-          // Final check of processed media
-          console.log('Final processed media for backend:', {
-            hasVideoTour: !!processedMedia.videoTour,
-            videoTourValue: processedMedia.videoTour,
-            photoCategories: Object.keys(processedMedia.photos),
-            documentCount: processedMedia.documents.length
-          });
-          
-          return processedMedia;
-        };
-
-        const transformedData = {
-          ...formData,
-          media: processMediaForSubmission(formData.media),
-          metadata: {
-            createdBy: author,
-            createdAt: new Date(),
-            propertyType: 'Residential',
-            propertyName: 'Appartment',
-            intent: 'Rent',
-            status: 'Available'
-          }
-        };
-
-        const response = await axios.post('/api/residential/rent/apartment', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          // Set the propertyId from the response
-          setPropertyId(response.data.propertyId);
-          toast.success('Property listing created successfully!');
-          setFormData({...initialFormData as FormData});
-        }
-      } else {
-        navigate('/login');
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      toast.error('Failed to create apartment listing. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+  try {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
     }
-  };
+
+    const author = JSON.parse(user).id;
+
+    // 🔧 Process media safely before submission
+    const processMediaForSubmission = (media: IMedia) => {
+      console.log("Processing media for submission:", media);
+
+      const videoTourUrl =
+        media.videoTour && typeof media.videoTour === "string"
+          ? media.videoTour
+          : undefined;
+
+      return {
+        photos: {
+          exterior: media.photos.exterior.filter((item) => typeof item === "string"),
+          interior: media.photos.interior.filter((item) => typeof item === "string"),
+          floorPlan: media.photos.floorPlan.filter((item) => typeof item === "string"),
+          washrooms: media.photos.washrooms.filter((item) => typeof item === "string"),
+          lifts: media.photos.lifts.filter((item) => typeof item === "string"),
+          emergencyExits: media.photos.emergencyExits.filter((item) => typeof item === "string"),
+          bedrooms: media.photos.bedrooms.filter((item) => typeof item === "string"),
+          halls: media.photos.halls.filter((item) => typeof item === "string"),
+          storerooms: media.photos.storerooms.filter((item) => typeof item === "string"),
+          kitchen: media.photos.kitchen.filter((item) => typeof item === "string"),
+        },
+        videoTour: videoTourUrl,
+        documents: media.documents.filter((doc) => typeof doc === "string"),
+      };
+    };
+
+    // 🧠 Transform data before sending to backend
+    const transformedData = {
+      ...formData,
+      userId: author, // ✅ Add this line
+      media: processMediaForSubmission(formData.media),
+      metadata: {
+        ...formData.metadata,
+        createdBy: formData.metadata?.createdBy || author,
+        updatedAt: new Date(),
+        propertyType: "Residential",
+        propertyName: "Apartment",
+        intent: "Rent",
+        status: formData.metadata?.status || "Available",
+      },
+    };
+
+    console.log("Final transformed data sent to backend:", transformedData);
+
+    // 🚀 Update API call
+    const response = await axios.put(
+      `/api/residential/rent/apartment/${propertyId}`,
+      transformedData,
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    if (response.data?.success) {
+      toast.success("Property updated successfully 🎉");
+      console.log("Updated property:", response.data);
+      navigate("/UserDashboard/properties");
+    } else {
+      toast.error(response.data?.message || "Failed to update property");
+    }
+  } catch (error: any) {
+    console.error("Error submitting form:", error);
+    toast.error(error.response?.data?.message || "Failed to update property. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">

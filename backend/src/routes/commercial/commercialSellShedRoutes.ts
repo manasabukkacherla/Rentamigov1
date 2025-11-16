@@ -1,13 +1,19 @@
 import express from 'express';
-import { createCommercialShed, updateCommercialShed, deleteCommercialShed, getAllCommercialSheds, getCommercialShedById } from '../../controllers/commercial/commercialSellShedController';
+import { 
+  createCommercialShed, 
+  updateCommercialShed, 
+  deleteCommercialShed, 
+  getAllCommercialSheds, 
+  getCommercialShedById 
+} from '../../controllers/commercial/commercialSellShedController';
 
 const commercialSellShedRoutes = express.Router();
 
 // Routes
-commercialSellShedRoutes.post('/', createCommercialShed);
-commercialSellShedRoutes.get('/', getAllCommercialSheds);
-commercialSellShedRoutes.get('/:propertyId', getCommercialShedById);
-commercialSellShedRoutes.put('/:id', updateCommercialShed);
-commercialSellShedRoutes.delete('/:id', deleteCommercialShed);
+commercialSellShedRoutes.post('/', createCommercialShed as express.RequestHandler);
+commercialSellShedRoutes.get('/', getAllCommercialSheds as express.RequestHandler);
+commercialSellShedRoutes.get('/:propertyId', getCommercialShedById as express.RequestHandler);
+commercialSellShedRoutes.put('/:propertyId', updateCommercialShed as express.RequestHandler);
+commercialSellShedRoutes.delete('/:id', deleteCommercialShed as express.RequestHandler);
 
-export default commercialSellShedRoutes; 
+export default commercialSellShedRoutes;

@@ -20,7 +20,7 @@ const uploadFields = [
 commercialSellShopRoutes.post('/', createCommercialShop);
 commercialSellShopRoutes.get('/', getAllCommercialSellShop);
 commercialSellShopRoutes.get('/:propertyId', getCommercialSellShopById);
-commercialSellShopRoutes.put('/:id', updateCommercialSellShop);
+commercialSellShopRoutes.put('/:propertyId', updateCommercialSellShop);
 commercialSellShopRoutes.delete('/:id', deleteCommercialSellShop);
 
 export default commercialSellShopRoutes; 
