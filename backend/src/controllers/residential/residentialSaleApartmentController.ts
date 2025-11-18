@@ -145,7 +145,7 @@ export const getSaleApartmentById = async (req: Request, res: Response) => {
 
 export const updateSaleApartment = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleApartment.findById(req.params.id);
+    const apartment = await ResidentialSaleApartment.findOne({propertyId:req.params.id});
     const userId = req.body.userId;
     
     if (!apartment) {
@@ -155,15 +155,15 @@ export const updateSaleApartment = async (req: Request, res: Response) => {
       });
     }
 
-    if (apartment.metadata.createdBy.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this listing'
-      });
-    }
+    // if (apartment.metadata.createdBy.toString() !== userId) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Not authorized to update this listing'
+    //   });
+    // }
 
-    const updatedApartment = await ResidentialSaleApartment.findByIdAndUpdate(
-      req.params.id,
+    const updatedApartment = await ResidentialSaleApartment.findOneAndUpdate(
+      {propertyId:req.params.id},
       {
         ...req.body,
         metadata: {

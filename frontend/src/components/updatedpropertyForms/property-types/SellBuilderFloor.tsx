@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useRef } from "react"
+import React, { useState, useCallback, useRef, useEffect } from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2, Lock as LockIcon } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -17,7 +17,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
 
@@ -179,6 +179,7 @@ interface IMetadata {
 }
 
 interface FormData {
+  propertyId?: string;
   basicInformation: IBasicInformation
   propertySize: number
   propertyDetails: PropertyDetails;
@@ -233,13 +234,15 @@ interface FormData {
   metadata: IMetadata
 }
 
-const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFloorProps) => {
+const SellBuilderFloor = ({ onSubmit }: BuilderFloorProps) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId)
   const formRef = useRef<HTMLDivElement>(null)
+  const { propertyId } = useParams();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -414,6 +417,60 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
 
   const initialFormData = formData
 
+  useEffect(() => {
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      navigate('/login');
+    } else {
+      setIsLoggedIn(true);
+    };
+
+    const fetchSellBuilderFloor = async () => {
+      try {
+        await axios.get(`/api/residential/sale/builderfloor`).then((res) => {
+          if (res.data && res.data.success) {
+            const builderfloor = res.data.data[0];
+            console.log("sell builder floor:", builderfloor);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: builderfloor.propertyId,
+              basicInformation: {
+                ...builderfloor.basicInformation,
+              },
+              propertySize: builderfloor.propertySize,
+              propertyDetails: {
+                ...builderfloor.propertyDetails,
+              },
+              restrictions: {
+                ...builderfloor.restrictions,
+              },
+              flatAmenities: {
+                ...builderfloor.flatAmenities,
+              },
+              societyAmenities: {
+                ...builderfloor.societyAmenities,
+              },
+              rentalTerms: {
+                ...builderfloor.rentalTerms,
+              },
+              availability: {
+                ...builderfloor.availability,
+              }
+            }))
+          } else {
+            toast.error("unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if (propertyId) {
+      fetchSellBuilderFloor();
+    };
+  }, [navigate, propertyId]);
+
   // Function to update map location based on latitude and longitude
   const updateMapLocation = (lat: string, lng: string) => {
     const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
@@ -513,7 +570,7 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
                 <h3 className="text-2xl font-semibold text-black">Property Size</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertySize
+                <PropertySize
                   propertySize={formData.propertySize}
                   onPropertySizeChange={(size: number) => {
                     setFormData(prev => ({
@@ -533,17 +590,17 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
                 <h3 className="text-2xl font-semibold text-black">Property Features</h3>
               </div>
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-              <PropertyFeatures
-                onFeaturesChange={(features: Record<string, any>) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    propertyDetails: {
-                      ...prev.propertyDetails,
-                      ...features
-                    }
-                  }))
-                }}
-              />
+                <PropertyFeatures
+                  onFeaturesChange={(features: Record<string, any>) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      propertyDetails: {
+                        ...prev.propertyDetails,
+                        ...features
+                      }
+                    }))
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -710,12 +767,12 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
       component: (
         <div className="space-y-8">
           <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
-          <ResidentialPropertyMediaUpload
-                propertyType="builderfloor"
-                propertyId={propertyId}
-                value={formData.media}
-                onChange={(media) => setFormData(prev => ({ ...prev, media }))}
-              />
+            <ResidentialPropertyMediaUpload
+              propertyType="builderfloor"
+              propertyId={propertyId}
+              value={formData.media}
+              onChange={(media) => setFormData(prev => ({ ...prev, media }))}
+            />
           </div>
         </div>
       ),
@@ -765,7 +822,6 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
   }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
     console.log(formData);
@@ -816,11 +872,11 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
           storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
           kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
         },
-        videoTour: formData.media.videoTour 
-          ? (formData.media.videoTour instanceof File 
+        videoTour: formData.media.videoTour
+          ? (formData.media.videoTour instanceof File
             ? await convertFileToBase64(formData.media.videoTour)
             : formData.media.videoTour)
-            : undefined,
+          : undefined,
         documents: await convertFilesToBase64(formData.media.documents)
       };
 
@@ -836,17 +892,24 @@ const SellBuilderFloor = ({ propertyId: initialPropertyId, onSubmit }: BuilderFl
           status: "Available"
         }
       };
-
-      const response = await axios.post('/api/residential/sale/builderfloor', transformedData, {
+      const isEditMode = !!formData.propertyId;
+      const endpoint = isEditMode
+        ? `/api/residential/sale/builderfloor/${formData.propertyId}`
+        : '/api/residential/sale/builderfloor'
+      const method = isEditMode ? axios.put : axios.post;
+      const response = await method(endpoint, transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
       if (response.data.success) {
-        setPropertyId(response.data.propertyId);
         toast.success('Property listing created successfully!');
         setFormData(initialFormData);
+      } else {
+        toast.dismiss();
+        toast.error(response.data.error || "Failed to create property listing");
+        console.error('Failed to create property listing:', response.data.error);
       }
     } catch (error) {
       console.error('Error submitting form:', error);

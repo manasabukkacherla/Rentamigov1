@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, useEffect } from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2, DollarSign } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -18,7 +18,7 @@ import Restrictions from "../Restrictions"
 import FinalSteps from "../FinalSteps"
 import axios from "axios"
 import { toast } from "react-toastify"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import PriceDetails from "../CommercialComponents/PriceDetails"
 import PricePerSqft from "../sell/PricePerSqft"
 
@@ -252,6 +252,7 @@ interface Restrictions {
 }
 
 interface FormData {
+  propertyId?:string;
   basicInformation: IBasicInformation;
   propertyDetails: propertyDetails;
   availableitems: availableitems;
@@ -432,8 +433,11 @@ const SellApartment = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>(undefined)
+  // const [propertyId, setPropertyId] = useState<string | undefined>(undefined)
   const formRef = useRef<HTMLDivElement>(null)
+  const {propertyId} = useParams();
+  const [isLoggedIn , setIsLoggedIn] = useState(false);
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -586,6 +590,59 @@ const SellApartment = () => {
       tenantType: ""
     }
   })
+
+  useEffect(()=>{
+    const user = sessionStorage.getItem('user');
+    if(!user) {
+      navigate('/login');
+    }else{
+      setIsLoggedIn(true);
+    }
+
+    const fetchSellApartmentById = async()=>{
+      try {
+        await axios.get(`/api/residential/sale/apartment/${propertyId}`).then((res)=>{
+          if(res.data && res.data.success){
+            const sellApartment = res.data.data;
+            console.log("sell apt data :",sellApartment);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: sellApartment.propertyId,
+              basicInformation: {
+                ...sellApartment.basicInformation,
+              },
+              propertyDetails:{
+                ...sellApartment.propertyDetails,
+              },
+              availableitems:{
+                ...sellApartment.availableitems,
+              },
+              flatAmenities:{
+                ...sellApartment.flatAmenities,
+              },
+              societyAmenities:{
+                ...sellApartment.societyAmenities,
+              },
+              priceDetails:{
+                ...sellApartment.priceDetails,
+              },
+              registration:{
+                ...sellApartment.registration,
+              }
+            }))
+          } else {
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:",error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if(propertyId){
+      fetchSellApartmentById();
+    }
+  },[navigate,propertyId]);
 
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
@@ -852,7 +909,6 @@ const SellApartment = () => {
   ];
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
 
   const handleNext = () => {
     if (currentStep < formSections.length) {
@@ -978,16 +1034,25 @@ const SellApartment = () => {
         }
       };
 
-      const response = await axios.post('/api/residential/sale/apartment', transformedData, {
+      const isEditMode = !!formData.propertyId;
+      const endpoint = isEditMode
+      ? `/api/residential/sale/apartment/${formData.propertyId}`
+      : '/api/residential/sale/apartment'
+      const method = isEditMode ? axios.put : axios.post;
+      const response = await method(endpoint, transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
       if (response.data.success) {
-        setPropertyId(response.data.propertyId);
-        toast.success('Property listing created successfully!');
+        // setPropertyId(response.data.propertyId);
+        toast.success('Property listed successfully!');
         setFormData({ ...initialFormData});
+      }else {
+        toast.dismiss();
+        toast.error(response.data.error || "Failed to create property listing");
+        console.error('Failed to create property listing:', response.data.error);
       }
     } catch (error) {
       console.error('Error submitting form:', error);

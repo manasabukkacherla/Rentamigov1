@@ -159,7 +159,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
         <label className="flex items-center gap-2.5 text-sm text-black/70 bg-black/5 px-4 py-3 rounded-lg w-fit">
           <input
             type="checkbox"
-            checked={address.showFlatNo ?? false}
+            checked={address?.showFlatNo ?? false}
             onChange={(e) => handleChange("showFlatNo", e.target.checked)}
             className="rounded border-black/10 text-black focus:ring-black/5"
           />
@@ -169,7 +169,7 @@ const PropertyAddress: React.FC<PropertyAddressProps> = ({
         <div className="grid grid-cols-3 gap-6">
           <input
             type="text"
-            value={address.apartmentName}
+            value={address?.apartmentName}
             onChange={(e) => handleChange("apartmentName", e.target.value)}
             placeholder="Apartment Name"
             className={inputClasses}

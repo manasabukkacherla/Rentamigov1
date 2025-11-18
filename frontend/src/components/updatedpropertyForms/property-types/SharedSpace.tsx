@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import { Building2, MapPin, IndianRupee, Calendar, Image, Home, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName";
 import PropertyAddress from "../PropertyAddress";
@@ -18,7 +18,7 @@ import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload";
 import FlatAmenities from "../FlatAmenities";
 import SocietyAmenities from "../SocietyAmenities";
 import SharingMembers from "../Sharingmembers";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 
@@ -187,6 +187,7 @@ interface IMetadata {
 }
 
 interface FormData {
+  propertyId?:string;
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
@@ -243,14 +244,16 @@ interface SharedSpaceProps {
   onSubmit?: (formData: FormData) => void;
 }
 
-const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpaceProps) => {
+const SharedSpace = ({ onSubmit }: SharedSpaceProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId);
+  // const [propertyId, setPropertyId] = useState<string | undefined>(initialPropertyId);
   const formRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const {propertyId} = useParams();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const initialFormData: FormData = {
     basicInformation: {
@@ -430,6 +433,63 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
+
+  useEffect(()=>{
+    const user = sessionStorage.getItem('user');
+    if(!user){
+      navigate('/login');
+    }else{
+      setIsLoggedIn(true);
+    }
+
+    const fetchSharedSpaceById = async()=>{
+      try {
+        await axios.get(`/api/residential/rent/shared-space/${propertyId}`).then((res)=>{
+          if(res.data && res.data.success){
+            const sharedSpace = res.data.data;
+            console.log("shared space data:",sharedSpace);
+            setFormData(prev =>({
+              ...prev,
+              propertyId: sharedSpace.propertyId,
+              basicInformation:{
+                ...sharedSpace.basicInformation,
+              },
+              propertySize: sharedSpace.propertySize,
+              propertyDetails:{
+                ...sharedSpace.propertyDetails,
+              },
+              sharingDetails:{
+                ...sharedSpace.sharingDetails,
+              },
+              restrictions:{
+                ...sharedSpace.restrictions,
+              },
+              flatAmenities:{
+                ...sharedSpace.flatAmenities,
+              },
+              societyAmenities:{
+                ...sharedSpace.societyAmenities,
+              },
+              rentalTerms:{
+                ...sharedSpace.rentalTerms,
+              },
+              availability:{
+                ...sharedSpace.availability,
+              },
+            }))
+          }else{
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if(propertyId){
+      fetchSharedSpaceById();
+    }
+  },[navigate, propertyId]);
 
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
@@ -788,9 +848,13 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
           status: "active"
         }
       };
-
-      const response = await axios.post(
-        "/api/residential/rent/shared-space",
+      const isEditMode = !!formData.propertyId;
+      const endpoint = isEditMode
+      ? `/api/residential/rent/shared-space/${formData.propertyId}`
+      : '/api/residential/rent/shared-space'
+      const method = isEditMode ? axios.put : axios.post;
+      const response = await method(
+        endpoint,
         transformedData,
         {
           headers: {
@@ -800,9 +864,12 @@ const SharedSpace = ({ propertyId: initialPropertyId, onSubmit }: SharedSpacePro
       );
 
       if (response.data.success) {
-        setPropertyId(response.data.propertyId);
-        toast.success("Property listing created successfully!");
+        toast.success("Property listing successfully!");
         setFormData(initialFormData);
+      } else {
+        toast.dismiss();
+        toast.error(response.data.error || "Failed to create property listing");
+        console.error('Failed to create property listing:', response.data.error);
       }
     } catch (error) {
       console.error("Error submitting form:", error);

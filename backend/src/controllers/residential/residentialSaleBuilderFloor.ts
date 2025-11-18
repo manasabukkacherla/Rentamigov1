@@ -146,9 +146,9 @@ export const getSaleBuilderFloorById = async (req: Request, res: Response) => {
 
 export const updateSaleBuilderFloor = async (req: Request, res: Response) => {
   try {
-    const builderFloor = await ResidentialSaleBuilderFloor.findById(req.params.id);
+    const builderFloor = await ResidentialSaleBuilderFloor.findOne({propertyId:req.params.id});
     const userId = req.body.userId;
-    
+    console.log("user id:",userId);
     if (!builderFloor) {
       return res.status(404).json({
         success: false,
@@ -156,15 +156,15 @@ export const updateSaleBuilderFloor = async (req: Request, res: Response) => {
       });
     }
 
-    if (builderFloor.metadata?.createdBy.toString() !== userId) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this listing'
-      });
-    }
+    // if (builderFloor.metadata?.createdBy.toString() !== userId) {
+    //   return res.status(403).json({
+    //     success: false,
+    //     message: 'Not authorized to update this listing'
+    //   });
+    // }
 
-    const updatedBuilderFloor = await ResidentialSaleBuilderFloor.findByIdAndUpdate(
-      req.params.id,
+    const updatedBuilderFloor = await ResidentialSaleBuilderFloor.findOneAndUpdate(
+      {propertyId:req.params.id},
       {
         ...req.body,
         metadata: {

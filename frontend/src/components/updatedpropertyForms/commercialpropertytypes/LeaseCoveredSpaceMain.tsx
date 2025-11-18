@@ -330,7 +330,7 @@ const LeaseCoveredSpaceMain = () => {
               }
             }))
           } else {
-            toast.error("Unable to lead property data");
+            toast.error("Unable to load property data");
           }
         })
       } catch (error) {

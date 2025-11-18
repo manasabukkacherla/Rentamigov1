@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useCallback, useRef } from "react"
+import React, { useState, useCallback, useRef, useEffect } from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, ChevronLeft, ChevronRight, Locate, Navigation, Loader2, Lock as LockIcon } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -17,7 +17,7 @@ import OtherCharges from "../residentialrent/OtherCharges"
 import ResidentialPropertyMediaUpload from "../ResidentialPropertyMediaUpload"
 import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
 
@@ -179,6 +179,7 @@ interface IMetadata {
 }
 
 interface FormData {
+  propertyId?:string;
   basicInformation: IBasicInformation
   propertySize: number
   propertyDetails: PropertyDetails;
@@ -233,12 +234,15 @@ interface FormData {
   metadata?: IMetadata
 }
 
-const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
+const BuilderFloor = ({ onSubmit }: BuilderFloorProps) => {
   const [currentStep, setCurrentStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const formRef = useRef<HTMLDivElement>(null)
+  const {propertyId} = useParams();
+  const [isLoggedIn , setIsLoggedIn] = useState(false);
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -412,6 +416,60 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
   })
 
   const initialFormData = formData
+
+  useEffect(()=>{
+    const user = sessionStorage.getItem('user');
+    if(!user) {
+      navigate('/login');
+    }else{
+      setIsLoggedIn(true);
+    };
+
+    const fetchBuilderFloorById = async()=>{
+      try {
+        axios.get(`/api/residential/rent/builderfloor/${propertyId}`).then((res)=>{
+          if(res.data && res.data.success){
+            const builderFloor = res.data.data;
+            console.log("Builder floor data :",builderFloor);
+            setFormData(prev => ({
+              ...prev,
+              propertyId: builderFloor.propertyId,
+              basicInformation:{
+                ...builderFloor.basicInformation,
+              },
+              propertySize:builderFloor.propertySize,
+              propertyDetails:{
+                ...builderFloor.propertyDetails,
+              },
+              restrictions:{
+                ...builderFloor.restrictions,
+              },
+              flatAmenities:{
+                ...builderFloor.flatAmenities,
+              },
+              societyAmenities:{
+                ...builderFloor.societyAmenities,
+              },
+              rentalTerms:{
+                ...builderFloor.rentalTerms,
+              },
+              availability:{
+                ...builderFloor.availability,
+              }
+            }))
+          } else {
+            toast.error("Unable to load property data");
+          }
+        })
+      } catch (error) {
+        console.error("Fetch error:", error);
+        toast.error("Error fetching property.");
+      }
+    }
+    if(propertyId){
+      fetchBuilderFloorById();
+    }
+  },[navigate,propertyId]);
 
   // Function to update map location based on latitude and longitude
   const updateMapLocation = (lat: string, lng: string) => {
@@ -764,7 +822,6 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
   }
 
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
   const handleSubmit = async () => {
     setIsSubmitting(true);
     console.log(formData)
@@ -835,8 +892,13 @@ const BuilderFloor = ({ propertyId, onSubmit }: BuilderFloorProps) => {
           status: "Available"
         }
       };
+      const isEditMode = !!formData.propertyId;
+      const endpoint = isEditMode
+      ? `/api/residential/rent/builderfloor/${formData.propertyId}`
+      : '/api/residential/rent/builderfloor'
+      const method = isEditMode ? axios.put : axios.post;
 
-      const response = await axios.post('/api/residential/rent/builderfloor', transformedData, {
+      const response = await method(endpoint, transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }
