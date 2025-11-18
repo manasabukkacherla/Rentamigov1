@@ -12,7 +12,7 @@ const router = express.Router();
 router.post('/', createSellOfficeSpace);
 router.get('/', getAllSellOfficeSpace);
 router.get('/:propertyId', getSellOfficeSpaceById);
-router.put('/:id', updateSellOfficeSpace);
+router.put('/:propertyId', updateSellOfficeSpace);
 router.delete('/:id', deleteSellOfficeSpace);
 
 export default router; 

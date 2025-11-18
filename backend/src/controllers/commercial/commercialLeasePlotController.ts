@@ -286,7 +286,7 @@ export const getLeasePlotById = async (req: Request, res: Response) => {
 
   export const updatePlotById = async (req: Request, res: Response) => {
     try {
-      const propertyId = req.params.id;
+      const {propertyId} = req.params;
       const updateData = req.body;
       
       const leasePlots= await LeasePlot.findOneAndUpdate(

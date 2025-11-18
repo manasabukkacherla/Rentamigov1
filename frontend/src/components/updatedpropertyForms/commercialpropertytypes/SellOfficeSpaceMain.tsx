@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
 import PropertyName from "../PropertyName"
@@ -32,6 +32,7 @@ import MapLocation from "../CommercialComponents/MapLocation"
 
 // Define proper interface for form data
 interface FormData {
+  property?: string,
   basicInformation: {
     title: string;
     Type: string[];
@@ -109,7 +110,8 @@ const SellOfficeSpaceMain = () => {
   const formRef = useRef<HTMLDivElement>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+    const params = useParams()
+   const propertyId = params.propertyId;
   // Initialize form data with proper structure
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
@@ -172,12 +174,7 @@ const SellOfficeSpaceMain = () => {
   const [currentStep, setCurrentStep] = useState(0);
 
   // Check login status on component mount
-  useEffect(() => {
-    const user = sessionStorage.getItem('user');
-    if (user) {
-      setIsLoggedIn(true);
-    }
-  }, []);
+  
 
   const handleChange = (key: string, value: any) => {
     setFormData(prev => {
@@ -194,6 +191,56 @@ const SellOfficeSpaceMain = () => {
       return { ...prev, [key]: value };
     });
   };
+ 
+useEffect(() => {
+  // Check Login Status
+  const user = sessionStorage.getItem("user");
+  if (user) {
+    setIsLoggedIn(true);
+  }
+
+  // Fetch Property Data if editing existing listing
+  const fetchData = async () => {
+    try {
+      if (!propertyId) return;
+
+      const response = await axios.get(`/api/commercial/sale/officyspace/${propertyId}`);
+
+      const data = response.data.data;
+
+      setFormData(prev => ({
+         data : propertyId,
+        ...prev,
+        basicInformation: {
+          ...prev.basicInformation,
+          title: data.basicInformation?.title || "",
+          Type: data.basicInformation?.Type || [],
+          address: data.basicInformation?.address || prev.basicInformation.address,
+          landmark: data.basicInformation?.landmark || "",
+          location: data.basicInformation?.location || prev.basicInformation.location,
+          isCornerProperty: data.basicInformation?.isCornerProperty || false
+        },
+        officeDetails: data.officeDetails || {},
+        propertyDetails: data.propertyDetails || {},
+        pricingDetails: {
+          propertyPrice: data.pricingDetails?.propertyPrice || 0,
+          pricetype: data.pricingDetails?.pricetype || "fixed"
+        },
+        area: data.area || prev.area,
+        registration: data.registration || prev.registration,
+        brokerage: data.brokerage || prev.brokerage,
+        availability: data.availability || prev.availability,
+        contactDetails: data.contactInformation || prev.contactDetails,
+        media: prev.media // keep empty because images cannot preload as File[]
+      }));
+    } catch (err) {
+      console.error("Error fetching property:", err);
+      toast.error("Failed to load property data");
+    }
+  };
+
+  fetchData();
+}, [propertyId]);
 
   const steps = [
     {
@@ -445,96 +492,129 @@ const SellOfficeSpaceMain = () => {
     }
   };
 
-  const handleSubmit = async (e: { preventDefault: () => void }) => {
-    e.preventDefault();
-    console.log("Form Data:", formData);
+ const handleSubmit = async (e: { preventDefault: () => void }) => {
+  e.preventDefault();
+  setIsSubmitting(true);
 
-    try {
-      setIsSubmitting(true);
+  try {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      toast.error("You must be logged in to submit the form.");
+      return;
+    }
 
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        toast.error('You must be logged in to create a property listing');
-        return;
+    const userData = JSON.parse(user);
+    const author = userData.id;
+
+    // Convert only NEW uploaded files to base64
+    const convertNewFiles = async (files: (File | string)[]) => {
+      const converted: string[] = [];
+
+      for (const f of files) {
+        if (typeof f === "string") {
+          // Existing image URL (from DB)
+          converted.push(f);
+        } else {
+          // New uploaded image
+          const base64 = await convertFileToBase64(f);
+          converted.push(base64);
+        }
       }
+      return converted;
+    };
 
-      const userData = JSON.parse(user);
-      const author = userData.id;
+    // Convert media (photos & documents)
+    const convertedMedia = {
+      photos: {
+        exterior: await convertNewFiles(formData.media.photos.exterior),
+        interior: await convertNewFiles(formData.media.photos.interior),
+        floorPlan: await convertNewFiles(formData.media.photos.floorPlan),
+        washrooms: await convertNewFiles(formData.media.photos.washrooms),
+        lifts: await convertNewFiles(formData.media.photos.lifts),
+        emergencyExits: await convertNewFiles(formData.media.photos.emergencyExits),
+        others: await convertNewFiles(formData.media.photos.others),
+      },
+      videoTour:
+        typeof formData.media.videoTour === "string"
+          ? formData.media.videoTour // existing URL
+          : formData.media.videoTour
+          ? await convertFileToBase64(formData.media.videoTour)
+          : null,
 
+      documents: await convertNewFiles(formData.media.documents),
+    };
 
+    // Final data payload
+    const payload = {
+      basicInformation: {
+        title: formData.basicInformation.title,
+        Type: formData.basicInformation.Type,
+        address: formData.basicInformation.address,
+        landmark: formData.basicInformation.landmark,
+        location: formData.basicInformation.location,
+        isCornerProperty: formData.basicInformation.isCornerProperty,
+      },
 
-      // Convert uploaded files to base64 strings
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior || []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior || []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan || []).map(convertFileToBase64)),
-          washrooms: await Promise.all((formData.media?.photos?.washrooms || []).map(convertFileToBase64)),
-          lifts: await Promise.all((formData.media?.photos?.lifts || []).map(convertFileToBase64)),
-          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits || []).map(convertFileToBase64)),
-          others: await Promise.all((formData.media?.photos?.others || []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents || []).map(convertFileToBase64))
-      };
+      officeDetails: formData.officeDetails,
+      propertyDetails: formData.propertyDetails,
 
-      // Create payload for API
-      const transformedData = {
-        basicInformation: {
-          title: formData.basicInformation.title,
-          Type: formData.basicInformation.Type,
-          address: formData.basicInformation.address,
-          landmark: formData.basicInformation.landmark,
-          location: {
-            latitude: formData.basicInformation.location.latitude,
-            longitude: formData.basicInformation.location.longitude
-          },
-          isCornerProperty: formData.basicInformation.isCornerProperty
-        },
-        officeDetails: formData.officeDetails,
-        propertyDetails: formData.propertyDetails,
-        pricingDetails:{
-            propertyPrice: formData.pricingDetails.propertyPrice,
-            pricetype: formData.pricingDetails.pricetype
-        },
-        registration: {
-           chargestype: formData.registration.chargestype,
-           registrationAmount: formData.registration.registrationAmount,
-           stampDutyAmount: formData.registration.stampDutyAmount
-        },
-        brokerage: formData.brokerage,
-        availability: formData.availability,
-        contactInformation: formData.contactDetails,
-        media: convertedMedia,
-        metadata: {
-          createdBy: author,
-          createdAt: new Date(),
-          propertyType: 'Commercial',
-          propertyName: 'Office Space',
-          intent: 'Sell',
-          status: 'Available',
-        }
-      };
+      pricingDetails: {
+        propertyPrice: formData.pricingDetails.propertyPrice,
+        pricetype: formData.pricingDetails.pricetype,
+      },
 
-      // Send data to API
-      const response = await axios.post('/api/commercial/sell/office-space', transformedData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      area: formData.area,
+      registration: formData.registration,
+      brokerage: formData.brokerage,
+      availability: formData.availability,
+      contactInformation: formData.contactDetails,
+
+      media: convertedMedia,
+
+      metadata: {
+        createdBy: author,
+        lastUpdatedAt: new Date(),
+        propertyType: "Commercial",
+        propertyName: "Office Space",
+        intent: "Sell",
+      },
+    };
+
+    let response;
+
+ 
+    if (propertyId) {
+      response = await axios.put(
+        `/api/commercial/sale/officyspace/${propertyId}`,
+        payload,
+        { headers: { "Content-Type": "application/json" } }
+      );
 
       if (response.data.success) {
-        toast.success('Sell office space listing created successfully!');
-      } else {
-        toast.error(response.data.message || 'Failed to create listing');
+        toast.success("Listing updated successfully!");
+        navigate(`Userdashboard/properties`);
       }
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
-      toast.error(error.response?.data?.message || 'Failed to create property listing. Please try again.');
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
-  };
+
+   
+    response = await axios.post(
+      `/api/commercial/sale/office-space`,
+      payload,
+      { headers: { "Content-Type": "application/json" } }
+    );
+
+    if (response.data.success) {
+      toast.success("Office space listing created successfully!");
+      navigate(`/dashboard/my-listings`);
+    }
+  } catch (error: any) {
+    console.error("Submit Error:", error);
+    toast.error(error.response?.data?.message || "Failed to submit");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (!isLoggedIn) {
     return (

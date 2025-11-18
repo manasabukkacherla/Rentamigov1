@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
-import { Building2, MapPin, IndianRupee, Calendar, Image, Ruler, Home, Store, ChevronLeft, ChevronRight, Loader2, DollarSign } from "lucide-react"
+import { useState, useCallback, useRef, useEffect } from "react"
+import { Building2, MapPin, Calendar, Image, Store, ChevronLeft, ChevronRight, Loader2, DollarSign } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../IndependentPropertyAddress"
 import PropertySize from "../PropertySize"
@@ -13,7 +13,7 @@ import AvailabilityDate from "../AvailabilityDate"
 import Restrictions from "../Restrictions"
 import axios from "axios"
 import { toast } from "react-toastify"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import RegistrationCharges from "../sell/RegistrationCharges"
 import Price from "../sell/Price"
 import Brokerage from "../residentialrent/Brokerage"
@@ -82,7 +82,7 @@ interface PropertyDetails {
   };
 }
 
-interface FlatAmenities {
+interface FlatAmenitiesType {
   lights: number;
   ceilingFan: number;
   geysers: number;
@@ -118,7 +118,7 @@ interface FlatAmenities {
   exhaustFan: number;
 }
 
-interface SocietyAmenities {
+interface SocietyAmenitiesType {
   powerutility: string[];
   parkingtranspotation: string[];
   recreationalsportsfacilities: string[];
@@ -131,6 +131,7 @@ interface SocietyAmenities {
   otheritems: string[];
 }
 
+// UPDATED: Match the ResidentialPropertyMediaUpload component interface
 interface IMedia {
   photos: {
     exterior: (File | string)[];
@@ -148,30 +149,24 @@ interface IMedia {
   documents: (File | string)[];
 }
 
-interface PropertySize {
-  superBuiltUpAreaSqft: number;
-  superBuiltUpAreaSqmt: number;
-  builtUpAreaSqft: number;
-  builtUpAreaSqmt: number;
-  carpetAreaSqft: number;
-  carpetAreaSqmt: number;
-}
-
-interface Restrictions {
+interface RestrictionsType {
   foodPreference: string;
   petsAllowed: string;
   tenantType: string;
 }
-interface priceDetails {
+
+interface PriceDetails {
   propertyPrice: number;
   pricetype: string;
 }
-interface registration {
+
+interface Registration {
   chargestype: string;
   registrationAmount?: number;
   stampDutyAmount?: number;
 }
-interface brokerage {
+
+interface BrokerageType {
   required: string;
   amount?: number;
 }
@@ -186,15 +181,16 @@ interface IMetadata {
 }
 
 interface FormData {
+  propertyId?: string;
   basicInformation: IBasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
-  restrictions: Restrictions;
-  priceDetails: priceDetails;
-  registration: registration;
-  brokerage: brokerage;
-  flatAmenities: FlatAmenities;
-  societyAmenities: SocietyAmenities;
+  restrictions: RestrictionsType;
+  priceDetails: PriceDetails;
+  registration: Registration;
+  brokerage: BrokerageType;
+  flatAmenities: FlatAmenitiesType;
+  societyAmenities: SocietyAmenitiesType;
   availability: {
     type: "immediate" | "specific";
     date: string;
@@ -203,80 +199,16 @@ interface FormData {
   metadata: IMetadata;
 }
 
-interface PropertyNameProps {
-  title: string
-  onPropertyNameChange: (name: string) => void
-}
-
-interface MapSelectorProps {
-  latitude: string
-  longitude: string
-  onLocationSelect: (lat: string, lng: string, address?: any) => void
-  initialShowMap?: boolean
-}
-
-interface PropertySizeProps {
-  onPropertySizeChange: (size: string) => void
-}
-
-interface PropertyFeaturesProps {
-  onFeaturesChange?: (features: Record<string, any>) => void
-}
-
-interface FlatAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
-}
-
-interface SocietyAmenitiesProps {
-  amenities: string[]
-  onChange: (amenities: string[]) => void
-}
-
-interface RestrictionsProps {
-  restrictions: string[]
-  onChange: (restrictions: string[]) => void
-}
-
-interface AvailabilityDateProps {
-  date: Date
-  onChange: (date: Date) => void
-}
-
-interface PropertyAddressType {
- houseNo?: string
-  street?: string
-  city?: string
-  state?: string
-  zipCode?: string
-  pincode?: string
-  coordinates?: {
-    lat: number
-    lng: number
-  }
-  locationLabel?: string
-}
-
-interface MediaUploadProps {
-  onMediaChange?: (media: {
-    exteriorViews: File[];
-    interiorViews: File[];
-    floorPlan: File[];
-    washrooms: File[];
-    lifts: File[];
-    emergencyExits: File[];
-    videoTour?: File;
-    legalDocuments: File[];
-  }) => void;
-}
-
 const SellIndependentHouse = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [propertyId, setPropertyId] = useState<string | undefined>()
+  const param = useParams()
+  const propertyId = param.propertyId
+  const [isEditMode, setIsEditMode] = useState(false)
   const formRef = useRef<HTMLDivElement>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate()
 
   const initialFormData: FormData = {
     basicInformation: {
@@ -381,18 +313,18 @@ const SellIndependentHouse = () => {
       smarthometechnology: [],
       otheritems: []
     },
-    priceDetails:{
-      propertyPrice:0,
-      pricetype:""
+    priceDetails: {
+      propertyPrice: 0,
+      pricetype: ""
     },
-    registration:{
-      chargestype:"",
-      registrationAmount:0,
-      stampDutyAmount:0
+    registration: {
+      chargestype: "",
+      registrationAmount: 0,
+      stampDutyAmount: 0
     },
-    brokerage:{
-      required:"",
-      amount:0
+    brokerage: {
+      required: "",
+      amount: 0
     },
     availability: {
       type: "immediate",
@@ -426,6 +358,90 @@ const SellIndependentHouse = () => {
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
 
+  // Fetch property data for editing
+  useEffect(() => {
+    const fetchIndependentHouseById = async () => {
+      console.log("🔄 Fetching property data for ID:", propertyId);
+      
+      if (!propertyId) {
+        setIsEditMode(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const res = await axios.get(`/api/residential/sale/independenthouse/${propertyId}`);
+        console.log("📦 API Response:", res.data);
+        
+        if (res.data && res.data.success) {
+          const property = res.data.data;
+          console.log("🏠 Property data loaded:", property);
+
+          // Convert media data to match component's expected format
+          const convertMediaToComponentFormat = (mediaData: any): IMedia => {
+            if (!mediaData) {
+              console.log("📸 No media data found, using initial state");
+              return initialFormData.media;
+            }
+
+            const convertedMedia = {
+              photos: {
+                exterior: mediaData.photos?.exterior || [],
+                interior: mediaData.photos?.interior || [],
+                floorPlan: mediaData.photos?.floorPlan || [],
+                washrooms: mediaData.photos?.washrooms || [],
+                lifts: mediaData.photos?.lifts || [],
+                emergencyExits: mediaData.photos?.emergencyExits || [],
+                bedrooms: mediaData.photos?.bedrooms || [],
+                halls: mediaData.photos?.halls || [],
+                storerooms: mediaData.photos?.storerooms || [],
+                kitchen: mediaData.photos?.kitchen || []
+              },
+              videoTour: mediaData.videoTour || undefined,
+              documents: mediaData.documents || []
+            };
+
+            console.log("🔄 Converted media data:", convertedMedia);
+            return convertedMedia;
+          };
+
+          const updatedFormData = {
+            ...initialFormData,
+            propertyId: property.propertyId,
+            basicInformation: property.basicInformation || initialFormData.basicInformation,
+            propertySize: property.propertySize || initialFormData.propertySize,
+            propertyDetails: property.propertyDetails || initialFormData.propertyDetails,
+            restrictions: property.restrictions || initialFormData.restrictions,
+            priceDetails: property.priceDetails || initialFormData.priceDetails,
+            registration: property.registration || initialFormData.registration,
+            brokerage: property.brokerage || initialFormData.brokerage,
+            flatAmenities: property.flatAmenities || initialFormData.flatAmenities,
+            societyAmenities: property.societyAmenities || initialFormData.societyAmenities,
+            availability: property.availability || initialFormData.availability,
+            media: convertMediaToComponentFormat(property.media),
+            metadata: property.metadata || initialFormData.metadata
+          };
+
+          setFormData(updatedFormData);
+          setIsEditMode(true);
+          console.log("✅ Form data populated for editing");
+          
+        } else {
+          console.log("❌ No success in response");
+          setIsEditMode(false);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching property:", error);
+        toast.error("Failed to load property data");
+        setIsEditMode(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIndependentHouseById();
+  }, [propertyId]);
+
   const handleAddressChange = useCallback((newAddress: Address) => {
     setFormData(prev => ({
       ...prev,
@@ -436,13 +452,12 @@ const SellIndependentHouse = () => {
           ...newAddress,
           location: {
             ...prev.basicInformation.address.location,
-            ...newAddress.location // <-- This line ensures updated lat/lng are applied
+            ...newAddress.location
           }
         }
       }
     }));
   }, []);
-
 
   const handleLocationSelect = useCallback((lat: string, lng: string, address?: any) => {
     setFormData(prev => ({
@@ -473,6 +488,342 @@ const SellIndependentHouse = () => {
       }
     }))
   }, []);
+
+  const handleMediaChange = useCallback((newMedia: IMedia) => {
+    console.log("🔄 Media changed in form:", newMedia);
+    setFormData(prev => ({ 
+      ...prev, 
+      media: newMedia 
+    }));
+    setError(null);
+  }, []);
+
+  // Convert File to Base64
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  // Prepare media for submission
+  const prepareMediaForSubmission = async (media: IMedia) => {
+    console.log("🔄 Preparing media for submission:", media);
+
+    // Helper function to convert files to base64
+    const convertFilesToBase64 = async (items: (File | string)[]): Promise<string[]> => {
+      const results: string[] = [];
+      
+      for (const item of items) {
+        if (item instanceof File) {
+          try {
+            console.log("📤 Converting file to base64:", item.name);
+            const base64 = await convertFileToBase64(item);
+            results.push(base64);
+          } catch (error) {
+            console.error('❌ Error converting file to base64:', error);
+            throw new Error(`Failed to process file: ${item.name}`);
+          }
+        } else if (typeof item === 'string') {
+          // Already a URL string, keep as is
+          console.log("📋 Keeping existing URL:", item);
+          results.push(item);
+        }
+      }
+      
+      return results;
+    };
+
+    try {
+      const preparedMedia = {
+        photos: {
+          exterior: await convertFilesToBase64(media.photos.exterior),
+          interior: await convertFilesToBase64(media.photos.interior),
+          floorPlan: await convertFilesToBase64(media.photos.floorPlan),
+          washrooms: await convertFilesToBase64(media.photos.washrooms),
+          lifts: await convertFilesToBase64(media.photos.lifts),
+          emergencyExits: await convertFilesToBase64(media.photos.emergencyExits),
+          bedrooms: await convertFilesToBase64(media.photos.bedrooms),
+          halls: await convertFilesToBase64(media.photos.halls),
+          storerooms: await convertFilesToBase64(media.photos.storerooms),
+          kitchen: await convertFilesToBase64(media.photos.kitchen)
+        },
+        videoTour: media.videoTour 
+          ? (media.videoTour instanceof File 
+            ? await convertFileToBase64(media.videoTour)
+            : media.videoTour)
+          : null,
+        documents: await convertFilesToBase64(media.documents)
+      };
+
+      console.log("✅ Media prepared successfully:", preparedMedia);
+      return preparedMedia;
+    } catch (error) {
+      console.error("❌ Error preparing media:", error);
+      throw error;
+    }
+  };
+
+  // Create new property
+  const handleCreate = async () => {
+    try {
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('Please login to continue');
+        navigate('/login');
+        return;
+      }
+
+      const author = JSON.parse(user).id;
+
+      // Validate required fields
+      if (!formData.basicInformation.title) {
+        toast.error('Please enter a property title');
+        return;
+      }
+
+      if (!formData.basicInformation.address.street) {
+        toast.error('Please enter property address');
+        return;
+      }
+
+      console.log("🔄 Starting property creation...");
+      
+      // Convert media files
+      const convertedMedia = await prepareMediaForSubmission(formData.media);
+
+      const transformedData = {
+        ...formData,
+        media: convertedMedia,
+        metadata: {
+          createdBy: author,
+          createdAt: new Date(),
+          propertyType: "Residential",
+          propertyName: "Independent House",
+          intent: "Sale",
+          status: "Active"
+        }
+      };
+
+      console.log("📤 Submitting data to API...");
+      const response = await axios.post('/api/residential/sale/independenthouse', transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 30000
+      });
+
+      console.log("✅ API Response:", response.data);
+
+      if (response.data.success) {
+        toast.success('Property listing created successfully!');
+        setFormData(initialFormData);
+        navigate('/updatepropertyform');
+      } else {
+        throw new Error(response.data.message || 'Failed to create property');
+      }
+    } catch (error: any) {
+      console.error('❌ Error creating property:', error);
+      throw error;
+    }
+  };
+
+ const handleUpdate = async () => {
+  try {
+    if (!propertyId) {
+      toast.error('Property ID is missing');
+      return;
+    }
+
+    const user = sessionStorage.getItem('user');
+    if (!user) {
+      toast.error('Please login to continue');
+      navigate('/login');
+      return;
+    }
+
+    const author = JSON.parse(user).id; // Get the user ID
+
+    if (!formData.basicInformation.title) {
+      toast.error('Please enter a property title');
+      return;
+    }
+
+    console.log("🔄 Starting property update...");
+    
+    const convertedMedia = await prepareMediaForSubmission(formData.media);
+
+    const transformedData = {
+      ...formData,
+      userId: author, // ✅ Add userId to the request body for authorization
+      media: convertedMedia,
+      metadata: {
+        ...formData.metadata,
+        updatedAt: new Date(),
+      }
+    };
+
+    // Remove propertyId from body since it's in the URL
+    delete transformedData.propertyId;
+
+    console.log("📤 Updating property via API...");
+    const response = await axios.put(`/api/residential/sale/independenthouse/${propertyId}`, transformedData, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      timeout: 30000
+    });
+
+    console.log("✅ Update API Response:", response.data);
+
+    if (response.data.success) {
+      toast.success('Property updated successfully!');
+      navigate('/updatepropertyform');
+    } else {
+      throw new Error(response.data.message || 'Failed to update property');
+    }
+  } catch (error: any) {
+    console.error('❌ Error updating property:', error);
+    throw error;
+  }
+};
+  // Handle submission errors
+  const handleSubmissionError = (error: any) => {
+    console.error("❌ Submission error details:", error);
+    
+    if (error.response) {
+      console.error('Server response error:', error.response.data);
+      const errorData = error.response.data;
+
+      if (errorData.errors) {
+        console.error('Validation errors:', errorData.errors);
+        const errorMessages: string[] = [];
+
+        if (typeof errorData.errors === 'object') {
+          Object.entries(errorData.errors).forEach(([field, details]: [string, any]) => {
+            console.error(`Field ${field} error:`, details);
+            const message = details.message || details.properties?.message || `${field} is invalid`;
+            errorMessages.push(`${field}: ${message}`);
+          });
+        } else if (typeof errorData.message === 'string') {
+          errorMessages.push(errorData.message);
+        }
+
+        const errorMessage = errorMessages.join('\n');
+        toast.error(`Validation errors: ${errorMessage}`);
+      } else if (errorData.message) {
+        toast.error(errorData.message);
+      } else {
+        toast.error('Server error. Please try again.');
+      }
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      toast.error('No response from server. Please check your connection.');
+    } else if (error.message) {
+      console.error('Error message:', error.message);
+      toast.error(error.message);
+    } else {
+      console.error('Unknown error:', error);
+      toast.error('Failed to process your request. Please try again.');
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setError(null);
+    console.log('🔄 Starting form submission...');
+    console.log('🎯 Edit mode:', isEditMode);
+    console.log('📝 Form data overview:', {
+      title: formData.basicInformation.title,
+      address: formData.basicInformation.address.street,
+      mediaCounts: {
+        exterior: formData.media.photos.exterior.length,
+        interior: formData.media.photos.interior.length,
+        videoTour: formData.media.videoTour ? 'exists' : 'none',
+        documents: formData.media.documents.length
+      }
+    });
+
+    try {
+      if (isEditMode && propertyId) {
+        await handleUpdate();
+      } else {
+        await handleCreate();
+      }
+    } catch (error: any) {
+      console.error('❌ Error in form submission:', error);
+      handleSubmissionError(error);
+      setError(error.message || `Failed to ${isEditMode ? 'update' : 'create'} independent house listing`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleNext = () => {
+    if (currentStep < formSections.length) {
+      setCurrentStep(currentStep + 1);
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      setTimeout(() => {
+        if (formRef.current) {
+          window.scrollTo({
+            top: formRef.current.offsetTop - 100,
+            behavior: 'smooth'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
+    }
+  };
+
+  // Debug component to see media state
+  const MediaDebugInfo = () => (
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+      <h3 className="font-bold text-blue-800 mb-2">Media Debug Info:</h3>
+      <div className="text-sm text-blue-700">
+        <p><strong>Edit Mode:</strong> {isEditMode ? 'Yes' : 'No'}</p>
+        <p><strong>Property ID:</strong> {propertyId || 'None'}</p>
+        <p><strong>Media Counts:</strong></p>
+        <ul className="ml-4">
+          <li>Exterior Photos: {formData.media.photos.exterior.length}</li>
+          <li>Interior Photos: {formData.media.photos.interior.length}</li>
+          <li>Floor Plans: {formData.media.photos.floorPlan.length}</li>
+          <li>Washrooms: {formData.media.photos.washrooms.length}</li>
+          <li>Video Tour: {formData.media.videoTour ? 'Exists' : 'None'}</li>
+          <li>Documents: {formData.media.documents.length}</li>
+        </ul>
+        <details className="mt-2">
+          <summary className="cursor-pointer font-medium">View Full Media Data</summary>
+          <pre className="text-xs overflow-auto mt-2 bg-white p-2 rounded border">
+            {JSON.stringify(formData.media, null, 2)}
+          </pre>
+        </details>
+      </div>
+    </div>
+  );
 
   const formSections = [
     {
@@ -551,9 +902,8 @@ const SellIndependentHouse = () => {
                 }}
               />
             </div>
-
-
           </div>
+
           <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
             <Restrictions
               res={formData.restrictions}
@@ -612,44 +962,43 @@ const SellIndependentHouse = () => {
       icon: <DollarSign className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
-            <Price onPriceChange={(price) => setFormData(prev => ({
-              ...prev,
-              priceDetails: {
-                ...prev.priceDetails,
-                propertyPrice: price.propertyPrice,
-                pricetype: price.pricetype || 'fixed',
-              }
-            }))} />
-            <div className="space-y-4 text-black">
-              <div className="text-black">
-                <RegistrationCharges
-                  onRegistrationChargesChange={(charges) => setFormData(prev => ({
-                    ...prev,
-                    registration: {
-                      ...prev.registration,
-                      chargestype: charges.chargestype,
-                      registrationAmount: charges.registrationAmount,
-                      stampDutyAmount: charges.stampDutyAmount,
-                    }
-                  }))} />  
-              </div>
-              <div className="text-black">
-                <Brokerage 
+          <Price onPriceChange={(price) => setFormData(prev => ({
+            ...prev,
+            priceDetails: {
+              ...prev.priceDetails,
+              propertyPrice: price.propertyPrice,
+              pricetype: price.pricetype || 'fixed',
+            }
+          }))} />
+          <div className="space-y-4 text-black">
+            <div className="text-black">
+              <RegistrationCharges
+                onRegistrationChargesChange={(charges) => setFormData(prev => ({
+                  ...prev,
+                  registration: {
+                    ...prev.registration,
+                    chargestype: charges.chargestype,
+                    registrationAmount: charges.registrationAmount,
+                    stampDutyAmount: charges.stampDutyAmount,
+                  }
+                }))} />  
+            </div>
+            <div className="text-black">
+              <Brokerage 
                 bro={formData.brokerage}
                 onBrokerageChange={(brokerage) => setFormData({
                   ...formData,
                   brokerage: {
-                      required: brokerage.required || 'No',
-                      amount: parseFloat(brokerage.amount?.toString() || '0')
-                    }
-                  })}
-                />
-              </div>
+                    required: brokerage.required || 'No',
+                    amount: parseFloat(brokerage.amount?.toString() || '0')
+                  }
+                })}
+              />
             </div>
           </div>
-        ),
-      },
-    
+        </div>
+      ),
+    },
     {
       title: "Availability",
       icon: <Calendar className="w-5 h-5" />,
@@ -664,7 +1013,6 @@ const SellIndependentHouse = () => {
                 }}
                 onAvailabilityChange={handleAvailabilityChange}
               />
-
             </div>
           </div>
         </div>
@@ -675,193 +1023,32 @@ const SellIndependentHouse = () => {
       icon: <Image className="w-5 h-5" />,
       content: (
         <div className="space-y-6">
+          {/* Debug info - you can remove this after confirming media works */}
+          <MediaDebugInfo />
+          
           <div className="space-y-8">
             <ResidentialPropertyMediaUpload
-                propertyType="independenthouse"
-                propertyId={propertyId}
-                value={formData.media}
-                onChange={(media) => {
-                  setFormData(prev => ({ ...prev, media }));
-                  setError(null); // Clear any previous errors
-                }}
-              />
-
+              propertyType="independenthouse"
+              propertyId={propertyId}
+              value={formData.media}
+              onChange={handleMediaChange}
+            />
           </div>
         </div>
       ),
     },
   ];
 
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
-
-  const handleNext = () => {
-    if (currentStep < formSections.length) {
-      setCurrentStep(currentStep + 1);
-      // Scroll to top of the form
-      setTimeout(() => {
-        if (formRef.current) {
-          window.scrollTo({
-            top: formRef.current.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-      // Scroll to top of the form
-      setTimeout(() => {
-        if (formRef.current) {
-          window.scrollTo({
-            top: formRef.current.offsetTop - 100,
-            behavior: 'smooth'
-          });
-        } else {
-          window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-          });
-        }
-      }, 100);
-    }
-  };
-
-  // Add a function to handle media upload errors
-  const handleMediaError = (error: any) => {
-    console.error('Media upload error:', error);
-    setError(error.message || 'Failed to upload media files');
-    toast.error(error.message || 'Failed to upload media files');
-  };
-
-  // Add a function to handle media upload success
-  const handleMediaSuccess = (mediaItems: any[]) => {
-    console.log('Media upload success:', mediaItems);
-    toast.success(`Successfully uploaded ${mediaItems.length} files`);
-  };
-
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    setError(null);
-    console.log('Submitting form data:', formData);
-
-    try {
-      const user = sessionStorage.getItem('user');
-      if (!user) {
-        toast.error('Please login to continue');
-        navigate('/login');
-        return;
-      }
-
-      const author = JSON.parse(user).id;
-
-      // Convert media files to base64
-      const convertFileToBase64 = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        });
-      };
-
-      // Helper function to convert array of files to base64
-      const convertFilesToBase64 = async (files: (File | string)[]): Promise<string[]> => {
-        const results: string[] = [];
-        for (const file of files) {
-          if (file instanceof File) {
-            try {
-              const base64 = await convertFileToBase64(file);
-              results.push(base64);
-            } catch (error) {
-              console.error('Error converting file to base64:', error);
-              throw new Error('Failed to process media files');
-            }
-          } else {
-            results.push(file); // Already a string (URL)
-          }
-        }
-        return results;
-      };
-
-      
-
-      try {
-        const convertedMedia = {
-          photos: {
-            exterior: await convertFilesToBase64(formData.media.photos.exterior),
-            interior: await convertFilesToBase64(formData.media.photos.interior),
-            floorPlan: await convertFilesToBase64(formData.media.photos.floorPlan),
-            washrooms: await convertFilesToBase64(formData.media.photos.washrooms),
-            lifts: await convertFilesToBase64(formData.media.photos.lifts),
-            emergencyExits: await convertFilesToBase64(formData.media.photos.emergencyExits),
-            bedrooms: await convertFilesToBase64(formData.media.photos.bedrooms),
-            halls: await convertFilesToBase64(formData.media.photos.halls),
-            storerooms: await convertFilesToBase64(formData.media.photos.storerooms),
-            kitchen: await convertFilesToBase64(formData.media.photos.kitchen)
-          },
-          videoTour: formData.media.videoTour 
-            ? (formData.media.videoTour instanceof File 
-              ? await convertFileToBase64(formData.media.videoTour)
-              : formData.media.videoTour)
-            : undefined,
-          documents: await convertFilesToBase64(formData.media.documents)
-        };
-
-        // Update loading toast
-        toast.success('Media files processed successfully');
-
-        const transformedData = {
-          ...formData,
-          media: convertedMedia,
-          metadata: {
-            createdBy: author,
-            createdAt: new Date(),
-            propertyType: "Residential",
-            propertyName: "Independent House",
-            intent: "Sale",
-            status: "Active"
-
-          }
-        };
-
-
-        const response = await axios.post('/api/residential/sale/independenthouse', transformedData, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-
-        if (response.data.success) {
-          // Set the propertyId from the response
-          setPropertyId(response.data.propertyId);
-          toast.success('Property listing created successfully!');
-          setFormData(initialFormData);
-          
-          // Scroll to top
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      } catch (error: any) {
-        console.error('Error processing media:', error);
-        toast.error('Failed to process media files');
-        throw error;
-      }
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
-      toast.error(error.message || 'Failed to create independent house listing. Please try again.');
-      setError(error.message || 'Failed to create independent house listing');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-12 w-12 mx-auto text-black" />
+          <p className="mt-4 text-black">Loading property data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">
@@ -915,7 +1102,12 @@ const SellIndependentHouse = () => {
 
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">List Your Independent House</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            {isEditMode ? 'Edit Independent House' : 'List Your Independent House'}
+          </h1>
+          {isEditMode && (
+            <p className="text-green-600 mt-2">You are editing an existing property. Changes will be updated.</p>
+          )}
         </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{formSections[currentStep - 1].title}</h2>
@@ -929,8 +1121,8 @@ const SellIndependentHouse = () => {
         <div className="max-w-5xl mx-auto px-4 py-4 flex justify-between">
           <button
             onClick={handlePrevious}
-            disabled={currentStep === 0}
-            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 0
+            disabled={currentStep === 1}
+            className={`flex items-center px-6 py-2 rounded-lg border border-black/20 transition-all duration-200 ${currentStep === 1
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-white text-black hover:bg-black hover:text-white'
               }`}
@@ -946,11 +1138,11 @@ const SellIndependentHouse = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                Submitting...
+                {isEditMode ? 'Updating...' : 'Submitting...'}
               </>
             ) : (
               <>
-                {currentStep === formSections.length ? 'Submit' : 'Next'}
+                {currentStep === formSections.length ? (isEditMode ? 'Update' : 'Submit') : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />
               </>
             )}
@@ -961,11 +1153,6 @@ const SellIndependentHouse = () => {
       {error && (
         <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
           {error}
-        </div>
-      )}
-      {success && (
-        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600">
-          {success}
         </div>
       )}
     </div>

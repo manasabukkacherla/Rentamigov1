@@ -1,9 +1,9 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef , useEffect} from "react"
 import { Store, Building2, DollarSign, Calendar, UserCircle, Image as ImageIcon, ChevronLeft, ChevronRight, MapPin, Locate, Navigation, Loader2 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
 import PropertyName from "../PropertyName"
@@ -13,7 +13,6 @@ import Landmark from "../CommercialComponents/Landmark"
 import MapCoordinates from "../MapCoordinates"
 import CornerProperty from "../CommercialComponents/CornerProperty"
 import PlotDetails from "../CommercialComponents/PlotDetails"
-//import CommercialPropertyDetails from "../CommercialComponents/CommercialPropertyDetails"
 import Price from "../sell/Price"
 import PricePerSqft from "../sell/PricePerSqft"
 import RegistrationCharges from "../sell/RegistrationCharges"
@@ -23,7 +22,13 @@ import CommercialContactDetails from "../CommercialComponents/CommercialContactD
 import MediaUploadforagriplot from "../Mediauploadforagriplot"
 import MapLocation from "../CommercialComponents/MapLocation"
 
+interface MediaFile {
+  file: File | null;
+  url?: string;
+}
+
 interface FormData {
+  propertyId?: string;
   basicInformation: {
     title: string;
     type: string[];
@@ -81,7 +86,7 @@ interface FormData {
     chargesType: string;
     registrationAmount: number;
     stampDutyAmount: number;
-    type: string; // Required by backend validation - must be set to avoid 400 errors
+    type: string;
   };
   brokerage: {
     required: string;
@@ -95,7 +100,6 @@ interface FormData {
     petsAllowed: boolean;
     operatingHours: boolean;
     bookingAmount: number;
-     
   };
   contactInformation: {
     name: string;
@@ -106,15 +110,15 @@ interface FormData {
   };
   media: {
     photos: {
-      exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      landscape: File[];
-      adjacent: File[];
-      aerialView: File[];
+      exterior: MediaFile[];
+      interior: MediaFile[];
+      floorPlan: MediaFile[];
+      landscape: MediaFile[];
+      adjacent: MediaFile[];
+      aerialView: MediaFile[];
     };
-    videoTour: File | null;
-    documents: File[];
+    videoTour: MediaFile | null;
+    documents: MediaFile[];
   };
 }
 
@@ -133,23 +137,19 @@ const globalStyles = `
     color: rgba(0, 0, 0, 0.6);
   }
   
-  /* Make radio button and checkbox text black */
   input[type="radio"] + label,
   input[type="checkbox"] + label {
     color: black;
   }
   
-  /* Make select placeholder text black */
   select {
     color: black;
   }
   
-  /* Make all form labels black */
   label {
     color: black;
   }
   
-  /* Make all input text black */
   input,
   textarea,
   select {
@@ -160,6 +160,12 @@ const globalStyles = `
 const SellPlotMain = () => {
   const navigate = useNavigate();
   const formRef = useRef<HTMLDivElement>(null);
+  const param = useParams()
+  const propertyId = param.propertyId
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
     basicInformation: {
       title: "",
@@ -260,7 +266,6 @@ const SellPlotMain = () => {
   const updateMapLocation = (lat: string, lng: string) => {
     const iframe = document.getElementById('map-iframe') as HTMLIFrameElement;
     if (iframe && lat && lng) {
-      // Use higher zoom level (18) and more precise marker for better accuracy
       iframe.src = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${lat},${lng}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`;
     }
   };
@@ -273,16 +278,12 @@ const SellPlotMain = () => {
           const lat = position.coords.latitude.toString();
           const lng = position.coords.longitude.toString();
 
-          // Update form data
           handleChange('basicInformation.location', {
             latitude: lat,
             longitude: lng
           });
 
-          // Update map
           updateMapLocation(lat, lng);
-
-          // Attempt to reverse geocode for address
           reverseGeocode(lat, lng);
         },
         (error) => {
@@ -305,7 +306,6 @@ const SellPlotMain = () => {
         if (data.status === "OK" && data.results && data.results.length > 0) {
           const address = data.results[0];
 
-          // Extract address components
           const addressComponents = {
             street: '',
             city: '',
@@ -313,7 +313,6 @@ const SellPlotMain = () => {
             zipCode: ''
           };
 
-          // Map address components to our format
           address.address_components.forEach((component: any) => {
             const types = component.types;
 
@@ -328,7 +327,6 @@ const SellPlotMain = () => {
             }
           });
 
-          // Check if we have a street address, if not use formatted address
           if (!addressComponents.street && address.formatted_address) {
             const formattedParts = address.formatted_address.split(',');
             if (formattedParts.length > 0) {
@@ -336,10 +334,8 @@ const SellPlotMain = () => {
             }
           }
 
-          // Update address in form data
           handleChange('basicInformation.address', addressComponents);
 
-          // Update landmark with nearby point of interest if available
           const landmark = data.results.find((result: any) =>
             result.types.some((type: string) =>
               ['point_of_interest', 'establishment', 'premise'].includes(type)
@@ -359,6 +355,119 @@ const SellPlotMain = () => {
         console.error("Error during reverse geocoding:", error);
       });
   };
+
+  useEffect(() => {
+    // 1. Check Login Status
+    const user = sessionStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+
+    // 2. Fetch Property Data (Edit Mode)
+    const fetchPropertyData = async () => {
+      if (!propertyId) {
+        setIsEditMode(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setIsEditMode(true);
+
+        const response = await axios.get(`/api/commercial/sell/plots/${propertyId}`);
+        const data = response.data.data;
+
+        const prepareExistingImages = (imageUrls: string[]): MediaFile[] => {
+          return imageUrls.map((url) => ({
+            file: null,
+            url: url,
+          }));
+        };
+
+        setFormData((prev) => ({
+          ...prev,
+          propertyId: data.propertyId,
+
+          basicInformation: {
+            title: data.basicInformation?.title || "",
+            type: data.basicInformation?.type || [],
+            address: data.basicInformation?.address || {
+              street: "",
+              city: "",
+              state: "",
+              zipCode: "",
+            },
+            landmark: data.basicInformation?.landmark || "",
+            location: data.basicInformation?.location || {
+              latitude: "",
+              longitude: "",
+            },
+            isCornerProperty: data.basicInformation?.isCornerProperty || false,
+          },
+
+          plotDetails: {
+            plotArea: data.plotDetails?.plotArea || 0,
+            totalArea: data.plotDetails?.totalArea || 0,
+            lengthOfPlot: data.plotDetails?.lengthOfPlot || 0,
+            widthOfPlot: data.plotDetails?.widthOfPlot || 0,
+            plotFacing: data.plotDetails?.plotFacing || "",
+            roadWidth: data.plotDetails?.roadWidth || 0,
+            boundaryWall: data.plotDetails?.boundaryWall || false,
+            approvals: data.plotDetails?.approvals || [],
+            landUseZoning: data.plotDetails?.landUseZoning || "",
+            floorAreaRatio: data.plotDetails?.floorAreaRatio || 0,
+            landmarkProximity: data.plotDetails?.landmarkProximity || [],
+            infrastructure: data.plotDetails?.infrastructure || [],
+            security: data.plotDetails?.security || [],
+            previousConstruction: data.plotDetails?.previousConstruction || "",
+            roadAccess: data.plotDetails?.roadAccess || "",
+            zoninginformation: data.plotDetails?.zoninginformation || "",
+            zoningType: data.plotDetails?.zoningType || "commercial",
+          },
+
+          propertyDetails: data.propertyDetails || prev.propertyDetails,
+
+          pricingDetails: {
+            propertyPrice: data.pricingDetails?.propertyPrice || 0,
+            priceType: data.pricingDetails?.priceType || "fixed",
+            area: data.pricingDetails?.area || 0,
+            totalPrice: data.pricingDetails?.totalPrice || 0,
+            pricePerSqft: data.pricingDetails?.pricePerSqft || 0,
+          },
+
+          registration: data.registration || prev.registration,
+          brokerage: data.brokerage || prev.brokerage,
+          availability: data.availability || prev.availability,
+          contactInformation: data.contactInformation || prev.contactInformation,
+
+          media: {
+            photos: {
+              exterior: prepareExistingImages(data.media?.photos?.exterior || []),
+              interior: prepareExistingImages(data.media?.photos?.interior || []),
+              floorPlan: prepareExistingImages(data.media?.photos?.floorPlan || []),
+              landscape: prepareExistingImages(data.media?.photos?.landscape || []),
+              adjacent: prepareExistingImages(data.media?.photos?.adjacent || []),
+              aerialView: prepareExistingImages(data.media?.photos?.aerialView || []),
+            },
+            videoTour: data.media?.videoTour
+              ? { file: null, url: data.media.videoTour }
+              : null,
+            documents: prepareExistingImages(data.media?.documents || []),
+          },
+        }));
+
+      } catch (error) {
+        console.error("Error fetching property:", error);
+        toast.error("Failed to load property data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPropertyData();
+  }, [propertyId]);
 
   // Function to open location picker in Google Maps
   const openLocationPicker = () => {
@@ -398,130 +507,6 @@ const SellPlotMain = () => {
           <PlotType onPlotTypeChange={(type) => handleChange('basicInformation.plotType', type)} />
           <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => handleChange('basicInformation.address', address)} />
 
-          {/* <div className="bg-gray-100 rounded-xl p-8 shadow-md border border-black/20 transition-all duration-300 hover:shadow-lg">
-            <div className="flex items-center mb-8">
-              <MapPin className="text-black mr-3" size={28} />
-              <h3 className="text-2xl font-semibold text-black">Map Location</h3>
-            </div>
-            <div className="bg-white p-6 rounded-lg space-y-6">
-              <div>
-                <h4 className="text-lg font-medium mb-4 text-black">Select Location on Map</h4>
-                <p className="text-sm text-gray-500 mb-4">
-                  Use the map below to set your property's location. Click on the map or search for an address.
-                </p>
-                <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden relative mb-6">
-                  <iframe
-                    id="map-iframe"
-                    src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d500!2d${formData.basicInformation.coordinates.longitude || '78.9629'}!3d${formData.basicInformation.coordinates.latitude || '20.5937'}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2s${formData.basicInformation.coordinates.latitude || '20.5937'},${formData.basicInformation.coordinates.longitude || '78.9629'}!5e0!3m2!1sen!2sin!4v1709667547372!5m2!1sen!2sin`}
-                    width="100%"
-                    height="100%"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    className="rounded-xl"
-                    title="Property Location Map"
-                  ></iframe>
-
-                  <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
-                    <button
-                      onClick={() => getCurrentLocation()}
-                      className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                      aria-label="Get current location"
-                      type="button"
-                    >
-                      <Locate className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium">My Location</span>
-                    </button>
-
-                    <button
-                      onClick={() => openLocationPicker()}
-                      className="bg-white p-2 rounded-lg shadow-md hover:bg-gray-100 transition-colors flex items-center gap-2"
-                      aria-label="Select location"
-                      type="button"
-                    >
-                      <Navigation className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium">Select Location</span>
-                    </button>
-                  </div>
-
-                  <div className="absolute bottom-2 left-2 bg-white bg-opacity-75 px-2 py-1 rounded text-xs text-gray-600">
-                    Powered by Google Maps
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="text-lg font-medium mb-4 text-black">Coordinates</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="latitude" className="block text-gray-800 font-medium mb-2">
-                      Latitude
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="latitude"
-                        value={formData.basicInformation.coordinates.latitude}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (!isNaN(Number(value)) || value === '-' || value === '') {
-                            handleChange('basicInformation.coordinates', {
-                              ...formData.basicInformation.coordinates,
-                              latitude: value
-                            });
-
-                            // Update map when latitude changes
-                            updateMapLocation(
-                              value,
-                              formData.basicInformation.coordinates.longitude || '78.9629'
-                            );
-                          }
-                        }}
-                        placeholder="Enter latitude (e.g., 17.683301)"
-                        className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                      />
-                      <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="longitude" className="block text-gray-800 font-medium mb-2">
-                      Longitude
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="longitude"
-                        value={formData.basicInformation.coordinates.longitude}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (!isNaN(Number(value)) || value === '-' || value === '') {
-                            handleChange('basicInformation.coordinates', {
-                              ...formData.basicInformation.coordinates,
-                              longitude: value
-                            });
-
-                            // Update map when longitude changes
-                            updateMapLocation(
-                              formData.basicInformation.coordinates.latitude || '20.5937',
-                              value
-                            );
-                          }
-                        }}
-                        placeholder="Enter longitude (e.g., 83.019301)"
-                        className="w-full px-4 py-3 rounded-lg bg-white border-2 border-gray-300 focus:border-black outline-none transition-colors duration-200 text-black placeholder:text-black/40"
-                      />
-                      <Navigation className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs text-gray-500">
-                  Enter coordinates manually or use the map above to set the location.
-                </p>
-              </div>
-            </div>
-          </div> */}
-
           <MapLocation
             latitude={formData.basicInformation.location.latitude}
             longitude={formData.basicInformation.location.longitude}
@@ -531,16 +516,6 @@ const SellPlotMain = () => {
             onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
           />
 
-          {/* <Landmark
-            onLandmarkChange={(landmark) => handleChange('basicInformation.landmark', landmark)}
-            onLocationSelect={(location) => {
-              handleChange('basicInformation.coordinates', location);
-              // Update map when location changes from Landmark component
-              updateMapLocation(location.latitude, location.longitude);
-            }}
-            latitude={formData.basicInformation.coordinates.latitude}
-            longitude={formData.basicInformation.coordinates.longitude}
-          /> */}
           <CornerProperty
             isCornerProperty={formData.basicInformation.isCornerProperty}
             onCornerPropertyChange={(isCorner) => handleChange('basicInformation.isCornerProperty', isCorner)}
@@ -554,7 +529,6 @@ const SellPlotMain = () => {
       content: (
         <div className="space-y-6">
           <PlotDetails onDetailsChange={(details) => {
-            // Make sure totalArea is properly set
             const updatedDetails = {
               ...details,
               totalArea: details.totalArea || details.plotArea || 0
@@ -586,10 +560,6 @@ const SellPlotMain = () => {
               </div>
             </div>
           </div>
-
-          {/* <CommercialPropertyDetails
-            onDetailsChange={(details) => handleChange('propertyDetails', details)}
-          /> */}
         </div>
       ),
     },
@@ -648,11 +618,12 @@ const SellPlotMain = () => {
       icon: <ImageIcon className="w-5 h-5" />,
       content: (
         <MediaUploadforagriplot
+          existingMedia={formData.media}
           onMediaChange={(mediaUpdate) => {
             const convertedPhotos: any = {};
 
             mediaUpdate.images.forEach(({ category, files }) => {
-              convertedPhotos[category] = files.map(f => f.file);
+              convertedPhotos[category] = files;
             });
 
             handleChange('media', {
@@ -660,8 +631,8 @@ const SellPlotMain = () => {
                 ...formData.media.photos,
                 ...convertedPhotos
               },
-              videoTour: mediaUpdate.video?.file || null,
-              documents: mediaUpdate.documents.map(d => d.file)
+              videoTour: mediaUpdate.video || null,
+              documents: mediaUpdate.documents
             });
           }}
         />
@@ -673,7 +644,6 @@ const SellPlotMain = () => {
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -693,7 +663,6 @@ const SellPlotMain = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -712,27 +681,59 @@ const SellPlotMain = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true);
-    console.log("Form submission started...")
+  // Handle media conversion for submission
+  const prepareMediaForSubmission = async (media: FormData['media']) => {
+    const convertMediaFiles = async (mediaFiles: MediaFile[]): Promise<string[]> => {
+      const results: string[] = [];
+      
+      for (const mediaFile of mediaFiles) {
+        if (mediaFile.file) {
+          // New file - convert to base64
+          const base64 = await convertFileToBase64(mediaFile.file);
+          results.push(base64);
+        } else if (mediaFile.url) {
+          // Existing file - keep URL as is
+          results.push(mediaFile.url);
+        }
+      }
+      
+      return results;
+    };
 
+    return {
+      photos: {
+        exterior: await convertMediaFiles(media.photos.exterior),
+        interior: await convertMediaFiles(media.photos.interior),
+        floorPlan: await convertMediaFiles(media.photos.floorPlan),
+        landscape: await convertMediaFiles(media.photos.landscape),
+        adjacent: await convertMediaFiles(media.photos.adjacent),
+        aerialView: await convertMediaFiles(media.photos.aerialView),
+      },
+      videoTour: media.videoTour?.file 
+        ? await convertFileToBase64(media.videoTour.file)
+        : media.videoTour?.url || null,
+      documents: await convertMediaFiles(media.documents),
+    };
+  };
+
+  // Create new property
+  const handleCreate = async () => {
     try {
-      // Debug the location data to identify the IntersectionObserver issue
-      console.log("Location data being submitted:", formData.basicInformation)
-
       const user = sessionStorage.getItem('user');
       if (!user) {
-        console.log("User not authenticated, redirecting to login")
         toast.error('You must be logged in to list a property.');
         navigate('/login');
         return;
       }
 
       const author = JSON.parse(user).id;
-      console.log("User authenticated, ID:", author);
 
-      // Ensure coordinates are valid strings to prevent Google Maps errors
+      // Ensure required fields
+      if (!formData.plotDetails.zoningType) {
+        toast.error('Please select a zoning type for the plot');
+        return;
+      }
+
       const safeCoordinates = {
         latitude: typeof formData.basicInformation.location.latitude === 'string'
           ? formData.basicInformation.location.latitude
@@ -742,53 +743,30 @@ const SellPlotMain = () => {
           : String(formData.basicInformation.location.longitude || "")
       };
 
-      // Also ensure that coordinates fallback to empty string if undefined
       if (!safeCoordinates.latitude) safeCoordinates.latitude = "";
       if (!safeCoordinates.longitude) safeCoordinates.longitude = "";
 
-      // Defensive: Ensure location object always exists
-      // if (!formData.basicInformation) {
-      //   formData.basicInformation.latitude= "",
-      //   formData.basicInformation.longitude= "",
-  
-      // }
-
-      // Ensure required fields are present
-      if (!formData.plotDetails.zoningType) {
-        console.error("Missing required field: plotDetails.zoningType");
-        toast.error('Please select a zoning type for the plot');
-        return;
-      }
-
-      // Check for both possible registration type fields
       const hasRegistrationType = formData.registration.type || formData.registration.chargesType;
       if (!hasRegistrationType) {
-        console.error("Missing required field: registration.type/chargesType");
         toast.error('Please select a registration type');
         return;
       }
 
-      // Ensure plotDetails.totalArea is set (required by backend)
       if (!formData.plotDetails.totalArea && formData.plotDetails.plotArea) {
-        console.log("Setting totalArea from plotArea");
         formData.plotDetails.totalArea = formData.plotDetails.plotArea;
       } else if (!formData.plotDetails.totalArea && !formData.plotDetails.plotArea) {
-        console.error("Missing required field: plotDetails.totalArea/plotArea");
         toast.error('Please enter the total area of the plot');
         return;
       }
 
-      // Map registration types correctly
       let registrationType = formData.registration.type || formData.registration.chargesType;
-      // Ensure it's one of the accepted types for the backend
       if (registrationType === 'sale' || registrationType === 'rent' || registrationType === 'lease') {
-        registrationType = 'inclusive'; // Map sale/rent/lease to inclusive
+        registrationType = 'inclusive';
       }
       if (registrationType !== 'inclusive' && registrationType !== 'exclusive') {
-        registrationType = 'inclusive'; // Default to inclusive if value is not recognized
+        registrationType = 'inclusive';
       }
 
-      // Update form data with safe coordinates and ensure required fields
       const updatedFormData = {
         ...formData,
         basicInformation: {
@@ -797,38 +775,24 @@ const SellPlotMain = () => {
         },
         plotDetails: {
           ...formData.plotDetails,
-          zoningType: formData.plotDetails.zoningType || "commercial", // Ensure zoningType is set
-          totalArea: formData.plotDetails.totalArea || formData.plotDetails.plotArea || 0 // Ensure totalArea is set
+          zoningType: formData.plotDetails.zoningType || "commercial",
+          totalArea: formData.plotDetails.totalArea || formData.plotDetails.plotArea || 0
         },
         registration: {
           ...formData.registration,
-          type: registrationType, // Use mapped registration type
-          chargesType: registrationType // Set both fields to be safe
+          type: registrationType,
+          chargesType: registrationType
         }
       };
 
       console.log("Converting media files to base64...");
-      console.log("Final form data to be submitted:", updatedFormData);
-
-      // Convert all media files to base64
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior ?? []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior ?? []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan ?? []).map(convertFileToBase64)),
-          landscape: await Promise.all((formData.media?.photos?.landscape ?? []).map(convertFileToBase64)),
-          adjacent: await Promise.all((formData.media?.photos?.adjacent ?? []).map(convertFileToBase64)),
-          aerialView: await Promise.all((formData.media?.photos?.aerialView ?? []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents ?? []).map(convertFileToBase64))
-      };
+      const convertedMedia = await prepareMediaForSubmission(formData.media);
 
       const transformedData = {
         ...updatedFormData,
         media: convertedMedia,
         metadata: {
-          userId: author, // Ensure userId is included for backend validation
+          userId: author,
           createdBy: author,
           createdAt: new Date(),
           propertyType: 'Commercial',
@@ -857,50 +821,153 @@ const SellPlotMain = () => {
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
+      handleSubmissionError(error);
+    }
+  };
 
-      if (error.response) {
-        console.error('Server response error:', error.response.data);
-        const errorData = error.response.data;
-
-        // Check for validation errors
-        if (errorData.errors) {
-          console.error('Validation errors:', errorData.errors);
-
-          // Extract detailed validation error messages
-          const errorMessages: string[] = [];
-
-          // MongoDB validation errors come in different formats
-          if (typeof errorData.errors === 'object') {
-            // Log each field error in detail
-            Object.entries(errorData.errors).forEach(([field, details]: [string, any]) => {
-              console.error(`Field ${field} error:`, details);
-              const message = details.message || details.properties?.message || `${field} is invalid`;
-              errorMessages.push(`${field}: ${message}`);
-            });
-          } else if (typeof errorData.message === 'string') {
-            // Generic error message
-            errorMessages.push(errorData.message);
-          }
-
-          // Display the error messages to the user
-          const errorMessage = errorMessages.join('\n');
-          toast.error(`Validation errors: ${errorMessage}`);
-
-          // Log what we sent versus what was expected
-          console.error("Validation failed. Check these fields in your request:", errorMessages);
-        } else {
-          toast.error(errorData.message || 'Server error. Please try again.');
-        }
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-        toast.error('No response from server. Please check your connection.');
-      } else {
-        console.error('Error details:', error.message);
-        toast.error('Failed to create commercial plot listing. Please try again.');
+  // Update existing property
+  const handleUpdate = async () => {
+    try {
+      if (!propertyId) {
+        toast.error('Property ID is missing');
+        return;
       }
+
+      const user = sessionStorage.getItem('user');
+      if (!user) {
+        toast.error('You must be logged in to update a property.');
+        navigate('/login');
+        return;
+      }
+
+      // Ensure required fields
+      if (!formData.plotDetails.zoningType) {
+        toast.error('Please select a zoning type for the plot');
+        return;
+      }
+
+      const safeCoordinates = {
+        latitude: typeof formData.basicInformation.location.latitude === 'string'
+          ? formData.basicInformation.location.latitude
+          : String(formData.basicInformation.location.latitude || ""),
+        longitude: typeof formData.basicInformation.location.longitude === 'string'
+          ? formData.basicInformation.location.longitude
+          : String(formData.basicInformation.location.longitude || "")
+      };
+
+      if (!safeCoordinates.latitude) safeCoordinates.latitude = "";
+      if (!safeCoordinates.longitude) safeCoordinates.longitude = "";
+
+      const updatedFormData = {
+        ...formData,
+        basicInformation: {
+          ...formData.basicInformation,
+          location: safeCoordinates
+        },
+        plotDetails: {
+          ...formData.plotDetails,
+          zoningType: formData.plotDetails.zoningType || "commercial",
+          totalArea: formData.plotDetails.totalArea || formData.plotDetails.plotArea || 0
+        }
+      };
+
+      console.log("Converting media files for update...");
+      const convertedMedia = await prepareMediaForSubmission(formData.media);
+
+      const transformedData = {
+        ...updatedFormData,
+        media: convertedMedia,
+        metadata: {
+          updatedAt: new Date(),
+        }
+      };
+
+      console.log("Updating data:", transformedData);
+
+      const response = await axios.put(`/api/commercial/sell/plots/${propertyId}`, transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      console.log("Update response from server:", response.data);
+
+      if (response.data.success) {
+        toast.success('Commercial plot updated successfully!');
+        navigate('/updatepropertyform');
+      } else {
+        console.error("Server returned success:false", response.data);
+        toast.error(response.data.message || 'Failed to update listing. Please try again.');
+      }
+    } catch (error: any) {
+      console.error('Error updating form:', error);
+      handleSubmissionError(error);
+    }
+  };
+
+  // Handle submission errors
+  const handleSubmissionError = (error: any) => {
+    if (error.response) {
+      console.error('Server response error:', error.response.data);
+      const errorData = error.response.data;
+
+      if (errorData.errors) {
+        console.error('Validation errors:', errorData.errors);
+        const errorMessages: string[] = [];
+
+        if (typeof errorData.errors === 'object') {
+          Object.entries(errorData.errors).forEach(([field, details]: [string, any]) => {
+            console.error(`Field ${field} error:`, details);
+            const message = details.message || details.properties?.message || `${field} is invalid`;
+            errorMessages.push(`${field}: ${message}`);
+          });
+        } else if (typeof errorData.message === 'string') {
+          errorMessages.push(errorData.message);
+        }
+
+        const errorMessage = errorMessages.join('\n');
+        toast.error(`Validation errors: ${errorMessage}`);
+      } else {
+        toast.error(errorData.message || 'Server error. Please try again.');
+      }
+    } else if (error.request) {
+      console.error('No response received:', error.request);
+      toast.error('No response from server. Please check your connection.');
+    } else {
+      console.error('Error details:', error.message);
+      toast.error('Failed to process your request. Please try again.');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true);
+    console.log("Form submission started...")
+
+    try {
+      if (isEditMode && propertyId) {
+        await handleUpdate();
+      } else {
+        await handleCreate();
+      }
+    } catch (error) {
+      console.error('Unexpected error during submission:', error);
+      toast.error('An unexpected error occurred. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-12 w-12 mx-auto text-black" />
+          <p className="mt-4 text-black">Loading property data...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -946,8 +1013,10 @@ const SellPlotMain = () => {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sell Commercial Plot</h1>
+        <div className="mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            {isEditMode ? 'Edit Commercial Plot' : 'Sell Commercial Plot'}
+          </h1>
         </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
@@ -979,11 +1048,11 @@ const SellPlotMain = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                Submitting...
+                {isEditMode ? 'Updating...' : 'Submitting...'}
               </>
             ) : (
               <>
-                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                {currentStep === steps.length - 1 ? (isEditMode ? 'Update' : 'Submit') : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />
               </>
             )}

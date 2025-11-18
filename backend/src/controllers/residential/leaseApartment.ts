@@ -144,8 +144,8 @@ export const getLeaseApartmentById = async (req: Request, res: Response) => {
 // Update Lease Apartment
 export const updateLeaseApartment = async (req: Request, res: Response) => {
   try {
-    const id = req.params._id;
-    const incomingData = req.body?.data;
+    const {propertyId} = req.params;
+    const incomingData = req.body;
 
     if (!incomingData) {
       return res.status(400).json({ success: false, message: 'No data provided for update' });
@@ -155,14 +155,14 @@ export const updateLeaseApartment = async (req: Request, res: Response) => {
       JSON.stringify(incomingData, (key, value) => (['_id', '__v'].includes(key) ? undefined : value))
     );
 
-    const existing = await LeaseApartment.findById(id);
+    const existing = await LeaseApartment.findOne({propertyId});
     if (!existing) {
       return res.status(404).json({ success: false, message: 'Property not found' });
     }
 
     const merged = _.merge(existing.toObject(), cleanedData);
 
-    const updated = await LeaseApartment.findByIdAndUpdate(id, { $set: merged }, {
+    const updated = await LeaseApartment.findOneAndUpdate({propertyId}, { $set: merged }, {
       new: true,
       runValidators: true,
       lean: true // Use lean() for better performance

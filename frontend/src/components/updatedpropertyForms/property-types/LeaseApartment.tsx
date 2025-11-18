@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useCallback } from "react"
+import React, { useState, useRef, useCallback, useEffect } from "react"
 import { Building2, MapPin, IndianRupee, Calendar, Image, Home, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
 import PropertyName from "../PropertyName"
 import PropertyAddress from "../PropertyAddress"
@@ -18,7 +18,7 @@ import FlatAmenities from "../FlatAmenities"
 import SocietyAmenities from "../SocietyAmenities"
 import { toast } from "react-toastify"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { uploadResidentialMediaToS3 } from "../../../utils/residentialMediaUploader"
 
 interface Location {
@@ -223,6 +223,7 @@ interface MediaUploadResult {
 }
 
 interface FormData {
+  propertyId?: string,
   basicInformation: BasicInformation;
   propertySize: number;
   propertyDetails: PropertyDetails;
@@ -242,9 +243,11 @@ const LeaseApartment: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error] = useState<string | null>(null);
   const [success] = useState<string | null>(null);
-  const [propertyId, setPropertyId] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState(false);
+const [isEditMode, setIsEditMode] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
-
+ const param = useParams()
+ const propertyId= param.propertyId
   const convertFileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -723,7 +726,7 @@ const LeaseApartment: React.FC = () => {
               <div className="[&_input]:text-black [&_input]:placeholder:text-black [&_input]:bg-white [&_input]:border-black/20 [&_input]:focus:border-black [&_input]:focus:ring-black [&_label]:text-black [&_svg]:text-black [&_select]:text-black [&_select]:bg-white [&_select_option]:text-black [&_select_option]:bg-white [&_select]:border-black/20 [&_select]:focus:border-black [&_select]:focus:ring-black [&_*]:text-black [&_span]:text-black [&_button]:text-black [&_button]:bg-white [&_button]:border-black/20 [&_p]:text-black [&_h4]:text-black [&_option]:text-black [&_option]:bg-white [&_select]:placeholder:text-black [&_select]:placeholder:bg-white">
                 <ResidentialPropertyMediaUpload
                   propertyType="apartment"
-                  propertyId={propertyId}
+               
                   value={formData.media}
                   onChange={(media) => setFormData(prev => ({ ...prev, media }))}
                 />
@@ -775,113 +778,216 @@ const LeaseApartment: React.FC = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    console.log("Final formData before submit", formData);
+  useEffect(() => {
+  const fetchApartmentData = async () => {
+    console.log("🔄 Starting fetch with ID:", propertyId);
+    
+    if (!propertyId) {
+      console.log("❌ No ID provided");
+      setIsEditMode(false);
+      return;
+    }
 
     try {
-      const user = sessionStorage.getItem("user");
-      if (!user) {
-        navigate("/login");
-        return;
-      }
-
-      const author = JSON.parse(user).id;
-      const processMediaForSubmission = (media: Media) => {
-        // Debug the incoming media object
-        console.log('Processing media for submission:', {
-          hasVideoTour: !!media.videoTour,
-          videoTourType: media.videoTour ? typeof media.videoTour : 'undefined',
-          videoTourValue: media.videoTour
-        });
+      setLoading(true);
+      const res = await axios.get(`/api/residential/lease/apartment/${propertyId}`);
+      console.log("📦 Full API Response:", res);
+      
+      if (res.data && res.data.success) {
+        const property = res.data.data;
+        console.log("🏠 Property data received:", property);
         
-        // Ensure videoTour is properly extracted from media object
-        const videoTourUrl = media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined;
-        
-        // Log the videoTour URL for debugging
-        console.log('VideoTour URL for submission:', videoTourUrl);
-        
-        const processedMedia = {
-          photos: {
-            exterior: media.photos.exterior.filter((item: any) => typeof item === 'string') as string[],
-            interior: media.photos.interior.filter((item: any) => typeof item === 'string') as string[],
-            floorPlan: media.photos.floorPlan.filter((item: any) => typeof item === 'string') as string[],
-            washrooms: media.photos.washrooms.filter((item: any) => typeof item === 'string') as string[],
-            lifts: media.photos.lifts.filter((item: any) => typeof item === 'string') as string[],
-            emergencyExits: media.photos.emergencyExits.filter((item: any) => typeof item === 'string') as string[],
-            bedrooms: media.photos.bedrooms.filter((item: any) => typeof item === 'string') as string[],
-            halls: media.photos.halls.filter((item: any) => typeof item === 'string') as string[],
-            storerooms: media.photos.storerooms.filter((item: any) => typeof item === 'string') as string[],
-            kitchen: media.photos.kitchen.filter((item: any) => typeof item === 'string') as string[]
-          },
-          videoTour: videoTourUrl,
-          documents: media.documents.filter(doc => typeof doc === 'string') as string[]
-        };
-        
-        // Final check of processed media
-        console.log('Final processed media for backend:', {
-          hasVideoTour: !!processedMedia.videoTour,
-          videoTourValue: processedMedia.videoTour,
-          photoCategories: Object.keys(processedMedia.photos),
-          documentCount: processedMedia.documents.length
-        });
-        
-        return processedMedia;
-      };
-
-      console.log("Final formData before submit", formData);
-
-      const transformedData = {
-        ...formData,
-        media: processMediaForSubmission(formData.media),
-        metadata: {
-          createdBy: author,
-          createdAt: new Date().toISOString(),
-          propertyType: "Residential",
-          propertyName: "Apartment",
-          intent: "Lease",
-          status: "Available"
+        // Check if basic data exists
+        if (!property.basicInformation) {
+          console.log("⚠️ No basicInformation in response");
+        } else {
+          console.log("✅ Basic info:", property.basicInformation.title);
         }
-      };
 
-      const response = await axios.post('/api/residential/lease/apartment', transformedData, {
+        // Transform backend data to match frontend form structure
+        const transformedData: FormData = {
+          propertyId: property.propertyId,
+          basicInformation: property.basicInformation || initialFormData.basicInformation,
+          propertySize: property.propertySize || 0,
+          propertyDetails: property.propertyDetails || initialFormData.propertyDetails,
+          restrictions: property.restrictions || initialFormData.restrictions,
+          flatAmenities: property.flatAmenities || initialFormData.flatAmenities,
+          societyAmenities: property.societyAmenities || initialFormData.societyAmenities,
+          leaseTerms: property.leaseTerms || initialFormData.leaseTerms,
+          availability: property.availability || initialFormData.availability,
+          media: property.media || initialFormData.media,
+          metadata: property.metadata || initialFormData.metadata
+        };
+
+        console.log("🔄 Transformed form data:", transformedData);
+        
+        setFormData(transformedData);
+        setIsEditMode(true);
+        console.log("✅ Form data populated for editing");
+        
+      } else {
+        console.log("❌ No success in response");
+        setIsEditMode(false);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching property:", error);
+      toast.error("Failed to load property data");
+      setIsEditMode(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchApartmentData();
+}, [propertyId]);
+
+// UPDATED handleSubmit function with edit functionality using correct API
+const handleSubmit = async () => {
+  setIsSubmitting(true);
+  console.log("Final formData before submit", formData);
+
+  try {
+    const user = sessionStorage.getItem("user");
+    if (!user) {
+      navigate("/login");
+      return;
+    }
+
+    const author = JSON.parse(user).id;
+    
+    const processMediaForSubmission = (media: Media) => {
+      // Debug the incoming media object
+      console.log('Processing media for submission:', {
+        hasVideoTour: !!media.videoTour,
+        videoTourType: media.videoTour ? typeof media.videoTour : 'undefined',
+        videoTourValue: media.videoTour
+      });
+      
+      // Ensure videoTour is properly extracted from media object
+      const videoTourUrl = media.videoTour && typeof media.videoTour === 'string' ? media.videoTour : undefined;
+      
+      // Log the videoTour URL for debugging
+      console.log('VideoTour URL for submission:', videoTourUrl);
+      
+      const processedMedia = {
+        photos: {
+          exterior: media.photos.exterior.filter((item: any) => typeof item === 'string') as string[],
+          interior: media.photos.interior.filter((item: any) => typeof item === 'string') as string[],
+          floorPlan: media.photos.floorPlan.filter((item: any) => typeof item === 'string') as string[],
+          washrooms: media.photos.washrooms.filter((item: any) => typeof item === 'string') as string[],
+          lifts: media.photos.lifts.filter((item: any) => typeof item === 'string') as string[],
+          emergencyExits: media.photos.emergencyExits.filter((item: any) => typeof item === 'string') as string[],
+          bedrooms: media.photos.bedrooms.filter((item: any) => typeof item === 'string') as string[],
+          halls: media.photos.halls.filter((item: any) => typeof item === 'string') as string[],
+          storerooms: media.photos.storerooms.filter((item: any) => typeof item === 'string') as string[],
+          kitchen: media.photos.kitchen.filter((item: any) => typeof item === 'string') as string[]
+        },
+        videoTour: videoTourUrl,
+        documents: media.documents.filter(doc => typeof doc === 'string') as string[]
+      };
+      
+      // Final check of processed media
+      console.log('Final processed media for backend:', {
+        hasVideoTour: !!processedMedia.videoTour,
+        videoTourValue: processedMedia.videoTour,
+        photoCategories: Object.keys(processedMedia.photos),
+        documentCount: processedMedia.documents.length
+      });
+      
+      return processedMedia;
+    };
+
+    console.log("Final formData before submit", formData);
+
+    const transformedData = {
+      ...formData,
+      media: processMediaForSubmission(formData.media),
+      metadata: {
+        createdBy: author,
+        createdAt: isEditMode ? formData.metadata?.createdAt : new Date().toISOString(),
+        updatedAt: isEditMode ? new Date().toISOString() : undefined,
+        propertyType: "Residential",
+        propertyName: "Apartment",
+        intent: "Lease",
+        status: "Available"
+      }
+    };
+
+    let response;
+    let apiUrl;
+    
+    if (isEditMode && propertyId) {
+      // UPDATE request - use PUT method
+      apiUrl = `/api/residential/lease/apartment/${propertyId}`;
+      console.log("📤 Making UPDATE request to:", apiUrl);
+      response = await axios.put(apiUrl, transformedData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
+    } else {
+      // CREATE request - use POST method
+      apiUrl = '/api/residential/lease/apartment';
+      console.log("📤 Making CREATE request to:", apiUrl);
+      response = await axios.post(apiUrl, transformedData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    }
 
-      if (response.data.success) {
-        // Set the propertyId from the response
-        setPropertyId(response.data.propertyId);
-        toast.success('Property listing created successfully!');
+    console.log("✅ Response from server:", response.data);
+
+    if (response.data.success) {
+      const successMessage = isEditMode 
+        ? 'Apartment listing updated successfully!' 
+        : 'Apartment listing created successfully!';
+      
+      toast.success(successMessage);
+      
+      if (!isEditMode) {
+        // Reset form only for new creations
         setFormData({...initialFormData} as FormData);
       }
       
-    } catch (error: any) {
-      console.error("Error submitting form:", error);
-      toast.dismiss('formSubmit');
-
-      // Handle different types of errors
-      if (error.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        const errorMessage = error.response.data?.message ||
-          error.response.data?.error ||
-          error.response.data?.details ||
-          "Server error. Please try again.";
-        toast.error(errorMessage);
-      } else if (error.request) {
-        // The request was made but no response was received
-        toast.error("No response from server. Please check if the backend server is running at http://localhost:8000");
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        toast.error(error.message || "Failed to create apartment listing. Please try again.");
-      }
-    } finally {
-      setIsSubmitting(false);
-      setUploadingMedia(false);
+      // Navigate to property list after successful submission
+      navigate('/updatepropertyform');
+    } else {
+      console.error("Server returned success:false", response.data);
+      toast.error(response.data.message || `Failed to ${isEditMode ? 'update' : 'create'} listing. Please try again.`);
     }
-  };
+    
+  } catch (error: any) {
+    console.error("Error submitting form:", error);
+
+    // Handle different types of errors
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Server response error:', error.response.data);
+      
+      let errorMessage = `Failed to ${isEditMode ? 'update' : 'create'} apartment listing. Please try again.`;
+      if (error.response.data && error.response.data.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      }
+
+      toast.error(errorMessage);
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received:', error.request);
+      toast.error('No response from server. Please check your connection.');
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Error details:', error.message);
+      toast.error(`Failed to ${isEditMode ? 'update' : 'create'} apartment listing. Please try again.`);
+    }
+  } finally {
+    setIsSubmitting(false);
+    setUploadingMedia(false);
+  }
+};
 
   return (
     <div ref={formRef} className="min-h-screen bg-white">

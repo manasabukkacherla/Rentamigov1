@@ -71,8 +71,8 @@ const transformPlotData = (formData: any) => {
             },
             landmark: formData.basicInformation.landmark || '',
             coordinates: {
-                latitude: parseFloat(formData.basicInformation.coordinates?.latitude) || 0,
-                longitude: parseFloat(formData.basicInformation.coordinates?.longitude) || 0
+                latitude: formData.basicInformation.coordinates?.latitude?.toString() || '0',
+                longitude: formData.basicInformation.coordinates?.longitude?.toString() || '0'
             },
             isCornerProperty: Boolean(formData.basicInformation.isCornerProperty)
         };
@@ -95,21 +95,24 @@ const transformPlotData = (formData: any) => {
             propertyAmenities: Array.isArray(formData.propertyDetails.propertyAmenities) 
                 ? formData.propertyDetails.propertyAmenities 
                 : [],
-            wholeSpaceAmenities: formData.propertyDetails.wholeSpaceAmenities || ''
+            wholeSpaceAmenities: Array.isArray(formData.propertyDetails.wholeSpaceAmenities)
+                ? formData.propertyDetails.wholeSpaceAmenities
+                : (formData.propertyDetails.wholeSpaceAmenities ? [formData.propertyDetails.wholeSpaceAmenities] : [])
         };
     }
 
-    // Plot Details
+    // Plot Details - Add zoningInformation field
     if (formData.plotDetails) {
         transformedData.plotDetails = {
             totalPlotArea: parseFloat(formData.plotDetails.totalPlotArea) || 0,
-            zoningType: formData.plotDetails.zoningType || "commercial",
+            zoningType: formData.plotDetails.zoningType || "residential",
             infrastructure: Array.isArray(formData.plotDetails.infrastructure) 
                 ? formData.plotDetails.infrastructure 
                 : [],
             roadAccess: formData.plotDetails.roadAccess || "",
             securityRoom: Boolean(formData.plotDetails.securityRoom),
-            previousConstruction: formData.plotDetails.previousConstruction || ""
+            previousConstruction: formData.plotDetails.previousConstruction || "",
+            zoningInformation: formData.plotDetails.zoningInformation || "" // Add this field
         };
     }
 
@@ -180,8 +183,7 @@ const transformPlotData = (formData: any) => {
             leaseDuration: formData.availability.leaseDuration || '',
             noticePeriod: formData.availability.noticePeriod || '',
             isPetsAllowed: Boolean(formData.availability.isPetsAllowed),
-            operatingHours: formData.availability.operatingHours || false
-            
+            operatingHours: Boolean(formData.availability.operatingHours)
         };
     }
 
@@ -224,14 +226,6 @@ const transformPlotData = (formData: any) => {
             documents: Array.isArray(formData.media.documents) 
                 ? formData.media.documents 
                 : []
-        };
-    }
-
-    // Metadata
-    if (formData.metadata) {
-        transformedData.metadata = {
-            createdBy: formData.metadata.createdBy,
-            createdAt: formData.metadata.createdAt || new Date()
         };
     }
 
@@ -339,56 +333,89 @@ export const getPlotById = async (req: Request, res: Response) => {
         });
     }
 }; 
-
 export const updatePlotById = async (req: Request, res: Response) => {
     try {
-        const documentId = req.params.id; 
-        const incomingData = req.body?.data;
-        if (!incomingData) {
-          return res.status(400).json({
-            success: false,
-            message: "No data provided for update.",
-          });
+        const { propertyId } = req.params; 
+        const incomingData = req.body; 
+        
+        console.log("=== UPDATE DEBUG ===");
+        console.log("Property ID:", propertyId);
+        console.log("Request body exists:", !!req.body);
+        console.log("Request body keys:", Object.keys(req.body));
+        console.log("Incoming data:", incomingData);
+        console.log("====================");
+
+        if (!incomingData || Object.keys(incomingData).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No data provided for update.",
+                debug: {
+                    bodyExists: !!req.body,
+                    bodyKeys: req.body ? Object.keys(req.body) : [],
+                    bodyContent: req.body
+                }
+            });
         }
-    
-        const cleanedData = JSON.parse(
-          JSON.stringify(incomingData, (key, value) => {
-            if (key === "_id" || key === "__v") return undefined;
-            return value;
-          })
-        );
-    
-       
-        const existingDoc = await SalePlot.findById(documentId);
+
+        // Find existing document first
+        const existingDoc = await SalePlot.findOne({ propertyId });
         if (!existingDoc) {
-          return res.status(404).json({
-            success: false,
-            message: "Property not found",
-          });
+            return res.status(404).json({
+                success: false,
+                message: "Property not found",
+            });
         }
-    
-        const mergedData = _.merge(existingDoc.toObject(), cleanedData);
-    
-        const updatedDoc = await SalePlot.findByIdAndUpdate(
-          documentId,
-          { $set: mergedData },
-          { new: true, runValidators: true }
+
+        // Clean the data - remove internal fields
+        const cleanedData = JSON.parse(
+            JSON.stringify(incomingData, (key, value) => {
+                if (key === '_id' || key === '__v' || key === 'createdAt' || key === 'updatedAt') return undefined;
+                return value;
+            })
         );
-    
+
+        console.log("Cleaned data for update:", cleanedData);
+
+        // Use transformPlotData to ensure data matches schema
+        const transformedData = transformPlotData(cleanedData);
+
+        // Update metadata
+        transformedData.metadata = {
+            ...existingDoc.metadata,
+            updatedAt: new Date(),
+            updatedBy: cleanedData.metadata?.createdBy // Use the user ID from frontend
+        };
+
+        console.log("Final transformed data for update:", transformedData);
+
+        // Update the document
+        const updatedDoc = await SalePlot.findOneAndUpdate(
+            { propertyId },
+            { $set: transformedData },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedDoc) {
+            return res.status(404).json({
+                success: false,
+                message: "Property not found after update attempt",
+            });
+        }
+
         res.status(200).json({
-          success: true,
-          message: "Lease plot updated successfully.",
-          data: updatedDoc,
+            success: true,
+            message: "Residential plot updated successfully.",
+            data: updatedDoc,
         });
-      } catch (error: any) {
+    } catch (error: any) {
         console.error("Update error:", error);
         res.status(500).json({
-          success: false,
-          message: error instanceof Error ? error.message : "Unknown update error",
+            success: false,
+            message: error instanceof Error ? error.message : "Unknown update error",
+            error: error.message
         });
-      }
-    };
-  
+    }
+};
   export const deletePlotById = async (req: Request, res: Response) => {
     try {
         const data = await SalePlot.findByIdAndDelete(req.params.id);

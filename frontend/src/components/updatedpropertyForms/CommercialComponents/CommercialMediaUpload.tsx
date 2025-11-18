@@ -4,7 +4,7 @@ import CameraCaptureModal from '../CameraCaptureModal';
 import { toast } from 'react-toastify';
 
 interface IMedia {
-  photos: { category: string; files: { url: string; file: File }[] }[]; // Array of objects with category and files
+  photos: { category: string; files: { url?: string; file: File }[] }[]; // Array of objects with category and files
   videoTour?: File | null; // Video file
   documents: File[]; // Array of documents
 }
@@ -70,7 +70,7 @@ const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadPr
 
   const handleImageFiles = (files: File[], category: string) => {
     const newFiles = files.map(file => ({
-      url: URL.createObjectURL(file),
+
       file
     }));
 
@@ -181,7 +181,7 @@ const CommercialMediaUpload = ({ Media, onMediaChange }: CommercialMediaUploadPr
         if (img.category === currentCategory) {
           return {
             ...img,
-            files: [...img.files, { url: URL.createObjectURL(image), file: image }].slice(0, 5)
+            files: [...img.files, {  file: image }].slice(0, 5)
           };
         }
         return img;

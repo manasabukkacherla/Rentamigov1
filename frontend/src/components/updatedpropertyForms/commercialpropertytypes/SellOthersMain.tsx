@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import PropertyName from "../PropertyName"
 import OtherCommercialType from "../CommercialComponents/OtherCommercialType"
 import CommercialPropertyAddress from "../CommercialComponents/CommercialPropertyAddress"
@@ -30,7 +30,7 @@ import {
   ChevronRight,
   Loader2
 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useNavigation , useParams} from "react-router-dom"
 import { toast } from "react-toastify"
 import axios from "axios"
 import MapLocation from "../CommercialComponents/MapLocation"
@@ -112,16 +112,16 @@ interface FormData {
   };
   media: {
     photos: {
-      exterior: File[];
-      interior: File[];
-      floorPlan: File[];
-      washrooms: File[];
-      lifts: File[];
-      emergencyExits: File[];
-      others: File[];
+      exterior: (File | { file: File | null; url: string })[];
+      interior: (File | { file: File | null; url: string })[];
+      floorPlan: (File | { file: File | null; url: string })[];
+      washrooms: (File | { file: File | null; url: string })[];
+      lifts: (File | { file: File | null; url: string })[];
+      emergencyExits: (File | { file: File | null; url: string })[];
+      others: (File | { file: File | null; url: string })[];
     };
     videoTour: File | null;
-    documents: File[];
+    documents: (File | { file: File | null; url: string })[];
   };
   metaData?: {
     createdBy: string;
@@ -136,6 +136,11 @@ interface FormData {
 const SellOthersMain = () => {
   const navigate = useNavigate()
   const formRef = useRef<HTMLDivElement>(null)
+  const params = useParams()
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const propertyId = params.propertyId;
+  const [isEditMode, setIsEditMode] = useState(false)
+  
   const [formData, setFormData] = useState<FormData>({
     basicInformation:{
     title: "",
@@ -174,7 +179,6 @@ const SellOthersMain = () => {
       propertyAge: "",
       propertyCondition: "",
       electricitySupply: {
-        
         powerLoad: 0,
         backup: false
       }
@@ -219,6 +223,137 @@ const SellOthersMain = () => {
     }
   })
 
+  // Corrected useEffect with proper data fetching for edit mode
+  useEffect(() => {
+    // Check login status
+    const user = sessionStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+    }
+
+    // Fetch existing property data for Edit mode
+    const fetchPropertyData = async () => {
+      try {
+        if (!propertyId) {
+          setIsEditMode(false);
+          return;
+        }
+
+        setIsEditMode(true);
+        const response = await axios.get(`/api/commercial/sale/others/${propertyId}`);
+        const data = response.data.data;
+
+        // Helper function to handle existing images
+        const prepareExistingImages = (imageUrls: string[]) => {
+          return imageUrls.map((url) => ({
+            file: null, // null indicates existing server image
+            url: url
+          }));
+        };
+
+        setFormData(prev => ({
+          ...prev,
+          propertyId: data.propertyId,
+
+          basicInformation: {
+            title: data.basicInformation?.title || "",
+            type: data.basicInformation?.type || [],
+            address: data.basicInformation?.address || {
+              street: "",
+              city: "",
+              state: "",
+              zipCode: ""
+            },
+            landmark: data.basicInformation?.landmark || "",
+            location: data.basicInformation?.location || { latitude: "", longitude: "" },
+            isCornerProperty: data.basicInformation?.isCornerProperty || false,
+          },
+
+          propertyDetails: {
+            area: data.propertyDetails?.area || {
+              totalArea: 0,
+              carpetArea: 0,
+              builtUpArea: 0
+            },
+            floor: data.propertyDetails?.floor || {
+              floorNumber: 0,
+              totalFloors: 0
+            },
+            otherDetails: data.propertyDetails?.otherDetails || {
+              propertyTypeDescription: "",
+              specialFeatures: "",
+              usageRecommendation: "",
+              additionalRequirements: ""
+            },
+            facingDirection: data.propertyDetails?.facingDirection || "",
+            furnishingStatus: data.propertyDetails?.furnishingStatus || "",
+            propertyAmenities: data.propertyDetails?.propertyAmenities || [],
+            wholeSpaceAmenities: data.propertyDetails?.wholeSpaceAmenities || [],
+            waterAvailability: data.propertyDetails?.waterAvailability || "",
+            propertyAge: data.propertyDetails?.propertyAge || "",
+            propertyCondition: data.propertyDetails?.propertyCondition || "",
+            electricitySupply: data.propertyDetails?.electricitySupply || {
+              powerLoad: 0,
+              backup: false
+            }
+          },
+
+          pricingDetails: {
+            propertyPrice: data.pricingDetails?.propertyPrice || 0,
+            pricetype: data.pricingDetails?.pricetype || "fixed"
+          },
+
+          registration: {
+            chargestype: data.registration?.chargestype || 'inclusive',
+            registrationAmount: data.registration?.registrationAmount || 0,
+            stampDutyAmount: data.registration?.stampDutyAmount || 0
+          },
+
+          brokerage: data.brokerage || {
+            required: "No",
+            amount: 0
+          },
+
+          availability: data.availability || {
+            type: "immediate"
+          },
+
+          petsAllowed: data.petsAllowed || false,
+          operatingHoursRestrictions: data.operatingHoursRestrictions || false,
+
+          contactDetails: data.contactDetails || {
+            name: "",
+            email: "",
+            phone: "",
+            alternatePhone: "",
+            bestTimeToContact: ""
+          },
+
+          media: {
+            photos: {
+              exterior: data.media?.photos?.exterior ? prepareExistingImages(data.media.photos.exterior) : [],
+              interior: data.media?.photos?.interior ? prepareExistingImages(data.media.photos.interior) : [],
+              floorPlan: data.media?.photos?.floorPlan ? prepareExistingImages(data.media.photos.floorPlan) : [],
+              washrooms: data.media?.photos?.washrooms ? prepareExistingImages(data.media.photos.washrooms) : [],
+              lifts: data.media?.photos?.lifts ? prepareExistingImages(data.media.photos.lifts) : [],
+              emergencyExits: data.media?.photos?.emergencyExits ? prepareExistingImages(data.media.photos.emergencyExits) : [],
+              others: data.media?.photos?.others ? prepareExistingImages(data.media.photos.others) : [],
+            },
+            videoTour: data.media?.videoTour || null,
+            documents: data.media?.documents ? prepareExistingImages(data.media.documents) : []
+          }
+        }));
+
+      } catch (err) {
+        console.error("Error loading property:", err);
+        toast.error("Failed to load property data.");
+        setIsEditMode(false);
+      }
+    };
+
+    fetchPropertyData();
+  }, [propertyId]);
+
   const [currentStep, setCurrentStep] = useState(0)
 
   const steps = [
@@ -240,16 +375,7 @@ const SellOthersMain = () => {
 
           <div className="space-y-6">
             <CommercialPropertyAddress address={formData.basicInformation.address} onAddressChange={(address) => setFormData((prev) => ({ ...prev, basicInformation: { ...prev.basicInformation, address } }))} />
-            {/* <Landmark
-                onLandmarkChange={(landmark) => setFormData((prev) => ({ ...prev, landmark }))}
-                onLocationSelect={(location) => setFormData((prev) => ({
-                  ...prev,
-                  coordinates: {
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                  }
-                }))}
-              /> */}
+            
             <MapLocation
               latitude={formData.basicInformation.location.latitude.toString()}
               longitude={formData.basicInformation.location.longitude.toString()}
@@ -280,7 +406,13 @@ const SellOthersMain = () => {
             <CornerProperty
               isCornerProperty={formData.basicInformation.isCornerProperty}
               onCornerPropertyChange={(isCorner) =>
-                setFormData((prev) => ({ ...prev, isCornerProperty: isCorner }))
+                setFormData((prev) => ({ 
+                  ...prev, 
+                  basicInformation: { 
+                    ...prev.basicInformation, 
+                    isCornerProperty: isCorner 
+                  } 
+                }))
               }
             />
           </div>
@@ -306,8 +438,6 @@ const SellOthersMain = () => {
           <CommercialPropertyDetails
             onDetailsChange={(details) => {
               const updatedDetails = { ...formData.propertyDetails };
-              // Merge the returned details with our existing propertyDetails
-              // This preserves the otherDetails structure
               Object.assign(updatedDetails, details);
               setFormData((prev) => ({
                 ...prev,
@@ -410,15 +540,54 @@ const SellOthersMain = () => {
             Media={{
               photos: Object.entries(formData.media.photos).map(([category, files]) => ({
                 category,
-                files: files.map(file => ({ url: URL.createObjectURL(file), file }))
+                files: files.map(fileItem => {
+                  if (fileItem instanceof File) {
+                    return { 
+                      url: URL.createObjectURL(fileItem), 
+                      file: fileItem,
+                      isExisting: false 
+                    };
+                  }
+                  return { 
+                    url: fileItem.url, 
+                    file: fileItem.file,
+                    isExisting: true 
+                  };
+                })
               })),
               videoTour: formData.media.videoTour || null,
-              documents: formData.media.documents
+              documents: formData.media.documents.map(doc => {
+                if (doc instanceof File) {
+                  return { 
+                    url: URL.createObjectURL(doc), 
+                    file: doc,
+                    isExisting: false 
+                  };
+                }
+                return { 
+                  url: doc.url, 
+                  file: doc.file,
+                  isExisting: true 
+                };
+              })
             }}
             onMediaChange={(media) => {
-              const photos: Record<string, File[]> = {};
-              media.photos.forEach(({ category, files }: { category: string, files: { url: string, file: File }[] }) => {
-                photos[category] = files.map(f => f.file);
+              console.log('Media changed:', media);
+              
+              const photos: Record<string, (File | { file: File | null; url: string })[]> = {};
+              
+              // Process all photo categories including floorPlan, washrooms, lifts, emergencyExits, others
+              media.photos.forEach(({ category, files }: { 
+                category: string, 
+                files: { url: string, file: File, isExisting?: boolean }[] 
+              }) => {
+                photos[category] = files.map(f => {
+                  if (f.isExisting) {
+                    // Keep existing images as objects with url
+                    return { file: f.file, url: f.url };
+                  }
+                  return f.file; // New uploads as File objects
+                });
               });
 
               setFormData(prev => ({
@@ -430,7 +599,12 @@ const SellOthersMain = () => {
                     ...photos
                   },
                   videoTour: media.videoTour || null,
-                  documents: media.documents
+                  documents: media.documents.map(doc => {
+                    if (doc.isExisting) {
+                      return { file: doc.file, url: doc.url };
+                    }
+                    return doc.file;
+                  })
                 }
               }));
             }}
@@ -449,10 +623,60 @@ const SellOthersMain = () => {
     });
   };
 
+  // Helper function to process media files for submission
+  const processMediaForSubmission = async (media: FormData['media']) => {
+    const processFileArray = async (files: (File | { file: File | null; url: string })[]) => {
+      const results: string[] = [];
+      
+      for (const fileItem of files) {
+        if (fileItem instanceof File) {
+          // New file - convert to base64
+          const base64 = await convertFileToBase64(fileItem);
+          results.push(base64);
+        } else if (fileItem.file instanceof File) {
+          // New file in object format - convert to base64
+          const base64 = await convertFileToBase64(fileItem.file);
+          results.push(base64);
+        } else if (fileItem.url) {
+          // Existing server image - keep URL as is
+          results.push(fileItem.url);
+        }
+      }
+      
+      return results;
+    };
+
+    const processPhotos = async (photos: FormData['media']['photos']) => {
+      const processedPhotos: Record<string, string[]> = {};
+      
+      // Process ALL photo categories
+      const photoCategories = [
+        'exterior', 
+        'interior', 
+        'floorPlan', 
+        'washrooms', 
+        'lifts', 
+        'emergencyExits', 
+        'others'
+      ];
+      
+      for (const category of photoCategories) {
+        processedPhotos[category] = await processFileArray(photos[category as keyof typeof photos] || []);
+      }
+      
+      return processedPhotos;
+    };
+
+    return {
+      photos: await processPhotos(media.photos),
+      videoTour: media.videoTour instanceof File ? await convertFileToBase64(media.videoTour) : media.videoTour,
+      documents: await processFileArray(media.documents)
+    };
+  };
+
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -472,7 +696,6 @@ const SellOthersMain = () => {
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
-      // Scroll to top of the form
       setTimeout(() => {
         if (formRef.current) {
           window.scrollTo({
@@ -488,6 +711,7 @@ const SellOthersMain = () => {
       }, 100);
     }
   };
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Validate location before submitting
@@ -502,6 +726,7 @@ const SellOthersMain = () => {
       toast.error('Please select a valid location on the map (latitude and longitude are required).');
       return;
     }
+    
     console.log('Submitting payload:', formData);
     setIsSubmitting(true);
 
@@ -513,51 +738,57 @@ const SellOthersMain = () => {
         return;
       }
 
-      const author = JSON.parse(user).id;
+      const userData = JSON.parse(user);
+      const author = userData.id || userData._id;
+      
+      if (!author) {
+        toast.error('User ID not found in session');
+        setIsSubmitting(false);
+        return;
+      }
 
-      // Convert uploaded files to base64 strings
-      const convertedMedia = {
-        photos: {
-          exterior: await Promise.all((formData.media?.photos?.exterior || []).map(convertFileToBase64)),
-          interior: await Promise.all((formData.media?.photos?.interior || []).map(convertFileToBase64)),
-          floorPlan: await Promise.all((formData.media?.photos?.floorPlan || []).map(convertFileToBase64)),
-          washrooms: await Promise.all((formData.media?.photos?.washrooms || []).map(convertFileToBase64)),
-          lifts: await Promise.all((formData.media?.photos?.lifts || []).map(convertFileToBase64)),
-          emergencyExits: await Promise.all((formData.media?.photos?.emergencyExits || []).map(convertFileToBase64)),
-          others: await Promise.all((formData.media?.photos?.others || []).map(convertFileToBase64))
-        },
-        videoTour: formData.media?.videoTour ? await convertFileToBase64(formData.media.videoTour) : null,
-        documents: await Promise.all((formData.media?.documents || []).map(convertFileToBase64))
-      };
+      // Process media files for submission
+      const processedMedia = await processMediaForSubmission(formData.media);
 
       // Create payload matching the backend model structure
       const transformedData = {
         ...formData,
-        media: convertedMedia,
+        media: processedMedia,
         metadata: {
           createdBy: author,
           propertyType: 'Commercial',
-          propertyName: 'Other',
+          propertyName: 'Other', 
           intent: 'Sell',
           status: 'Available',
         }
       };
 
-      // Send data to API
-      const response = await axios.post('/api/commercial/sell/others', transformedData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      let response;
+      
+      if (isEditMode && propertyId) {
+        // UPDATE existing property
+        response = await axios.put(`/api/commercial/sell/others/${propertyId}`, transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        toast.success('Commercial property successfully updated!');
+      } else {
+        // CREATE new property
+        response = await axios.post('/api/commercial/sale/others', transformedData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        toast.success('Commercial property successfully listed!');
+      }
 
       if (response.data) {
-        toast.success('Commercial property successfully listed!');
-        // Navigate to dashboard
         navigate('/updatePropertyform');
       }
     } catch (error: any) {
       console.error("Error submitting form:", error);
-      toast.error(error.response?.data?.message || 'Failed to create property listing. Please try again.');
+      toast.error(error.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} property listing. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -608,7 +839,9 @@ const SellOthersMain = () => {
       {/* Form Content */}
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-black">Sale Commercial Others</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-black">
+            {isEditMode ? 'Edit Commercial Property' : 'Sale Commercial Others'}
+          </h1>
         </div>
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-black mb-2">{steps[currentStep].title}</h2>
@@ -640,11 +873,11 @@ const SellOthersMain = () => {
             {isSubmitting ? (
               <>
                 <Loader2 className="animate-spin mr-2 h-5 w-5" />
-                Submitting...
+                {isEditMode ? 'Updating...' : 'Submitting...'}
               </>
             ) : (
               <>
-                {currentStep === steps.length - 1 ? 'Submit' : 'Next'}
+                {currentStep === steps.length - 1 ? (isEditMode ? 'Update' : 'Submit') : 'Next'}
                 <ChevronRight className="w-5 h-5 ml-2" />
               </>
             )}
@@ -656,4 +889,3 @@ const SellOthersMain = () => {
 }
 
 export default SellOthersMain
-

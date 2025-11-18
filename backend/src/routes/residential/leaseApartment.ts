@@ -6,7 +6,7 @@ const Router= express.Router();
 Router.post('/', createLeaseApartment);
 Router.get('/', getAllLeaseApartments);
 Router.get('/:propertyId', getLeaseApartmentById);
-Router.put('/:id', updateLeaseApartment);
+Router.put('/:propertyId', updateLeaseApartment);
 Router.delete('/:id', deleteLeaseApartment);
 
 export default Router;

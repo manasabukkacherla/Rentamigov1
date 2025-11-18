@@ -227,8 +227,8 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
   
   export const updateSellOfficeSpace = async (req: Request, res: Response) => {
       try {
-        const documentId = req.params.id; 
-        const incomingData = req.body?.data;
+        const { propertyId }= req.params; 
+        const incomingData = req.body;
         if (!incomingData) {
           return res.status(400).json({
             success: false,
@@ -244,7 +244,7 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
         );
     
        
-        const existingDoc = await CommercialSellOfficeSpace.findById(documentId);
+        const existingDoc = await CommercialSellOfficeSpace.findOne({propertyId});
         if (!existingDoc) {
           return res.status(404).json({
             success: false,
@@ -254,8 +254,8 @@ export const getAllSellOfficeSpace = async (req: Request, res: Response) => {
     
         const mergedData = _.merge(existingDoc.toObject(), cleanedData);
     
-        const updatedDoc = await CommercialSellOfficeSpace.findByIdAndUpdate(
-          documentId,
+        const updatedDoc = await CommercialSellOfficeSpace.findOneAndUpdate(
+          {propertyId},
           { $set: mergedData },
           { new: true, runValidators: true }
         );

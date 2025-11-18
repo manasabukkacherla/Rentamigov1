@@ -262,6 +262,7 @@ export const createPlot = async (req: Request, res: Response) => {
     }
 };
 
+
 // Get all commercial plots
 export const getAllPlots = async (req: Request, res: Response) => {
     try {
@@ -313,6 +314,50 @@ export const getPlotById = async (req: Request, res: Response) => {
         });
     }
 };
+// update 
+// Update a commercial plot by ID
+export const updatePlotById = async (req: Request, res: Response) => {
+    try {
+        const propertyId = req.params.propertyId;
+        const formData = req.body;
+
+        // Check if plot exists
+        const existingPlot = await SellPlot.findOne({ propertyId });
+        if (!existingPlot) {
+            return res.status(404).json({
+                success: false,
+                error: 'Plot not found'
+            });
+        }
+
+        // Transform incoming frontend data
+        const transformedData = transformPlotData(formData);
+
+        // Update the plot
+        const updatedPlot = await SellPlot.findOneAndUpdate(
+            { propertyId },
+            { $set: transformedData },
+            { new: true }
+        )
+            .populate('metadata.createdBy', 'name email')
+            .select('-__v');
+
+        res.status(200).json({
+            success: true,
+            message: 'Commercial plot updated successfully',
+            data: updatedPlot
+        });
+
+    } catch (error) {
+        console.error('Error updating plot:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update commercial plot',
+            message: (error as Error).message
+        });
+    }
+};
+
 
 export const deleteSellPlotById = async (req: Request, res: Response) => {
     try {

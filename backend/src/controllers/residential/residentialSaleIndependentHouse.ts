@@ -142,11 +142,17 @@ export const getSaleIndependentHouseById = async (req: Request, res: Response) =
     });
   }
 };
-
 export const updateSaleIndependentHouse = async (req: Request, res: Response) => {
   try {
-    const apartment = await ResidentialSaleIndependentHouse.findById(req.params.id);
-    const userId = req.body.userId;
+    const { propertyId } = req.params;
+    const apartment = await ResidentialSaleIndependentHouse.findOne({ propertyId });
+    
+    // FIX: Extract userId properly from req.body
+    const { userId } = req.body; // ✅ Correct: Destructure userId from req.body
+    
+    console.log("🔄 Update request - Property ID:", propertyId);
+    console.log("👤 User ID from request:", userId);
+    console.log("🏠 Property created by:", apartment?.metadata?.createdBy?.toString());
     
     if (!apartment) {
       return res.status(404).json({
@@ -155,15 +161,17 @@ export const updateSaleIndependentHouse = async (req: Request, res: Response) =>
       });
     }
 
-    if (apartment?.metadata?.createdBy?.toString() !== userId) {
+    // FIX: Compare string to string
+    if (apartment.metadata?.createdBy?.toString() !== userId) {
+      console.log("❌ Authorization failed: User ID mismatch");
       return res.status(403).json({
         success: false,
         message: 'Not authorized to update this listing'
       });
     }
 
-    const updatedsaleIndependentHouse = await ResidentialSaleIndependentHouse.findByIdAndUpdate(
-      req.params.id,
+    const updatedsaleIndependentHouse = await ResidentialSaleIndependentHouse.findOneAndUpdate(
+      { propertyId },
       {
         ...req.body,
         metadata: {
@@ -188,7 +196,6 @@ export const updateSaleIndependentHouse = async (req: Request, res: Response) =>
     });
   }
 };
-
 export const deleteSaleIndependentHouse = async (req: Request, res: Response) => {
   try {
     const residentialSaleIndependentHouse = await ResidentialSaleIndependentHouse.findById(req.params.id);

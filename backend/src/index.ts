@@ -248,16 +248,16 @@ app.use("/api/stats", BlogStats);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/bug", bugRouter);
 
-app.use("/api/commercial/sell/shops", commercialSellShopRoutes);
-app.use("/api/commercial/sell/showrooms", commercialSellShowroomRoutes);
-app.use("/api/commercial/sell/warehouses", commercialSellWarehouseRoutes);
+app.use("/api/commercial/sale/shops", commercialSellShopRoutes);
+app.use("/api/commercial/sale/showrooms", commercialSellShowroomRoutes);
+app.use("/api/commercial/sale/warehouses", commercialSellWarehouseRoutes);
 app.use("/api/commercial/sell/plots", commercialPlotRoutes);
 app.use("/api/commercial/sell/agriculture", commercialSellAgricultureRoutes);
 app.use("/api/commercial/sell/others", commercialSellOthersRoutes);
 app.use("/api/commercial/sell/office-space", commercialSellOfficeSpaceRoutes);
-app.use("/api/commercial/sell/retail-store", commercialSellRetailStore);
-app.use("/api/commercial/sell/sheds", commercialSellShedRoutes);
-app.use("/api/commercial/sell/covered-space", commercialSellCoveredSpaceRoutes);
+app.use("/api/commercial/sale/retailstore", commercialSellRetailStore);
+app.use("/api/commercial/sale/sheds", commercialSellShedRoutes);
+app.use("/api/commercial/sale/coveredspace", commercialSellCoveredSpaceRoutes);
 //openspace
 
 //lease routes
@@ -266,7 +266,7 @@ app.use("/api/commercial/lease/agriculture", commercialLeaseAgricultureRoutes);
 app.use("/api/commercial/lease/shops", commercialLeaseShopRoutes);
 app.use("/api/commercial/lease/others", commercialLeaseOthersRoutes);
 app.use("/api/commercial/lease/covered-space", commercialLeaseCoveredSpaceRoutes);
-app.use("/api/commercial/lease/retail-store", commercialLeaseRetailRoutes);
+app.use("/api/commercial/lease/retailstore", commercialLeaseRetailRoutes);
 app.use("/api/commercial/lease/showrooms", commercialLeaseShowroomRoutes);
 app.use("/api/commercial/lease/warehouses",commercialLeaseWarehouseRoutes);
 app.use("/api/commercial/lease/office-space",CommercialLeaseOfficeSpace);

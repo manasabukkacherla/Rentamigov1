@@ -3,10 +3,9 @@ import {
     createPlot,
     getAllPlots,
     getPlotById,
-    // updatePlotById,
-    // deletePlotById
+    updatePlotById,
+    deleteSellPlotById
 } from '../../controllers/commercial/commericalSellPlotController';
-import { authenticateUser } from '../../middleware/auth';
 
 const router = express.Router();
 
@@ -19,7 +18,10 @@ router.get('/', getAllPlots as express.RequestHandler);
 // Get a specific commercial plot by ID
 router.get('/:propertyId', getPlotById as express.RequestHandler);
 
-// Update a plot listing
+// Update a plot listing by propertyId
+router.put('/:propertyId', updatePlotById as express.RequestHandler);
 
+// Delete plot listing by MongoDB ID
+router.delete('/:id', deleteSellPlotById as express.RequestHandler);
 
 export default router;

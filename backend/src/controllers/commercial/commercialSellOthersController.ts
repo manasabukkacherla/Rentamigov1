@@ -7,13 +7,13 @@ const generatePropertyId = async (): Promise<string> => {
   const prefix = "RA-COMSEOT";
   try {
     const highestProperty = await CommercialSellOthers.findOne({
-      'basicInformation.propertyId': { $regex: `^${prefix}\\d+$` }
-    }).sort({ 'basicInformation.propertyId': -1 });
+      'propertyId': { $regex: `^${prefix}\\d+$` }
+    }).sort({ 'propertyId': -1 });
     
     let nextNumber = 1;
     
-    if (highestProperty) {
-      const match = highestProperty.propertyId?.match(/(\d+)$/);
+    if (highestProperty && highestProperty.propertyId) {
+      const match = highestProperty.propertyId.match(/(\d+)$/);
       if (match && match[1]) {
         nextNumber = parseInt(match[1], 10) + 1;
       }
@@ -50,19 +50,22 @@ export const createCommercialSellOthers = async (req: Request, res: Response) =>
     const formData = req.body;
     const propertyId = await generatePropertyId();
 
-    // Correctly map frontend 'metadata' to backend 'metaData'
+    // Use the createdBy from metadata (sent by frontend) for new properties
     const otherPropertyData = {
       ...formData,
       propertyId,
       metaData: {
-        ...formData.metadata,
-        createdBy: formData.metadata.createdBy,
+        createdBy: formData.metadata?.createdBy, // Use the ID sent from frontend
         createdAt: new Date(),
+        propertyType: 'Commercial',
+        propertyName: 'Other',
+        intent: 'Sell',
+        status: 'Available',
       },
     };
 
-    // Remove the original metadata field to avoid confusion
-   
+    // Remove the original metadata field to avoid duplication
+    delete otherPropertyData.metadata;
 
     const otherProperty = new CommercialSellOthers(otherPropertyData);
     await otherProperty.save();
@@ -107,7 +110,10 @@ export const getCommercialSellOthersById = async (req: Request, res: Response) =
     const property = await CommercialSellOthers.findOne({ propertyId });
     
     if (!property) {
-      return res.status(404).json({ error: 'Commercial sell others property not found' });
+      return res.status(404).json({ 
+        success: false,
+        error: 'Commercial sell others property not found' 
+      });
     }
     
     res.status(200).json({
@@ -117,30 +123,29 @@ export const getCommercialSellOthersById = async (req: Request, res: Response) =
     });
   } catch (error) {
     console.error('Error fetching commercial sell others property:', error);
-    res.status(500).json({ error: 'Failed to fetch commercial sell others property' });
+    res.status(500).json({ 
+      success: false,
+      error: 'Failed to fetch commercial sell others property' 
+    });
   }
 };
-
-// Update commercial sell others property
+// Update commercial sell others property - FIXED
 export const updateCommercialSellOthers = async (req: Request, res: Response) => {
   try {
-    const documentId = req.params.id;
-    // @ts-ignore
-    const userId = req.user?._id; // Get user ID from authenticated session
-    const incomingData = req.body?.data;
+    const { propertyId } = req.params;
+    const incomingData = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthorized: User not logged in.' });
-    }
+    console.log("📥 Incoming update data:", JSON.stringify(incomingData, null, 2));
 
-    if (!incomingData) {
+    if (!incomingData || Object.keys(incomingData).length === 0) {
       return res.status(400).json({
         success: false,
         message: 'No data provided for update.',
       });
     }
 
-    const existingDoc = await CommercialSellOthers.findById(documentId);
+    // Find existing document
+    const existingDoc = await CommercialSellOthers.findOne({ propertyId });
     if (!existingDoc) {
       return res.status(404).json({
         success: false,
@@ -148,32 +153,48 @@ export const updateCommercialSellOthers = async (req: Request, res: Response) =>
       });
     }
 
-    // Authorization check
-    if (existingDoc.metaData?.createdBy?.toString() !== userId.toString()) {
+    // AUTHORIZATION: Compare with the createdBy from the document
+    const frontendUserId = incomingData.metadata?.createdBy;
+    
+    if (!frontendUserId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User ID not provided in request.' 
+      });
+    }
+
+    const existingCreatedBy = existingDoc.metaData?.createdBy?.toString();
+    
+    if (existingCreatedBy !== frontendUserId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'You are not authorized to update this property.',
       });
     }
 
+    // TRANSFORM DATA: Convert frontend structure to backend schema
+    const transformedData = transformFrontendToBackend(incomingData);
+    
+    console.log("🔄 Transformed data:", JSON.stringify(transformedData, null, 2));
+
+    // Clean the data - remove internal fields
     const cleanedData = JSON.parse(
-      JSON.stringify(incomingData, (key, value) => {
-        if (key === '_id' || key === '__v') return undefined;
+      JSON.stringify(transformedData, (key, value) => {
+        if (key === '_id' || key === '__v' || key === 'metadata') return undefined;
         return value;
       })
     );
 
-    const mergedData = _.merge(existingDoc.toObject(), cleanedData);
-
-    const updatedDoc = await CommercialSellOthers.findByIdAndUpdate(
-      documentId,
-      { $set: mergedData },
+    // Update the document
+    const updatedDoc = await CommercialSellOthers.findOneAndUpdate(
+      { propertyId },
+      { $set: cleanedData },
       { new: true, runValidators: true }
     );
 
     res.status(200).json({
       success: true,
-      message: 'Sell others updated successfully.',
+      message: 'Commercial sell others property updated successfully.',
       data: updatedDoc,
     });
   } catch (error: any) {
@@ -185,45 +206,147 @@ export const updateCommercialSellOthers = async (req: Request, res: Response) =>
   }
 };
 
+// Helper function to transform frontend data to backend schema
+const transformFrontendToBackend = (frontendData: any) => {
+  return {
+    basicInformation: {
+      title: frontendData.basicInformation?.title || '',
+      type: frontendData.basicInformation?.plotType || [], // Map plotType to type
+      address: frontendData.basicInformation?.address || {},
+      landmark: frontendData.basicInformation?.landmark || '',
+      location: { // Map coordinates to location
+        latitude: frontendData.basicInformation?.coordinates?.latitude || '',
+        longitude: frontendData.basicInformation?.coordinates?.longitude || ''
+      },
+      isCornerProperty: frontendData.basicInformation?.isCornerProperty || false
+    },
+    propertyDetails: {
+      area: frontendData.propertyDetails?.area || {},
+      floor: frontendData.propertyDetails?.floor || {},
+      otherDetails: { // Provide default values for required fields
+        propertyTypeDescription: frontendData.propertyDetails?.propertyTypeDescription || '',
+        specialFeatures: frontendData.propertyDetails?.specialFeatures || '',
+        usageRecommendation: frontendData.propertyDetails?.usageRecommendation || '',
+        additionalRequirements: frontendData.propertyDetails?.additionalRequirements || ''
+      },
+      facingDirection: frontendData.propertyDetails?.facingDirection || '',
+      furnishingStatus: frontendData.propertyDetails?.furnishingStatus || '',
+      propertyAmenities: frontendData.propertyDetails?.propertyAmenities || [],
+      wholeSpaceAmenities: Array.isArray(frontendData.propertyDetails?.wholeSpaceAmenities) 
+        ? frontendData.propertyDetails.wholeSpaceAmenities 
+        : [frontendData.propertyDetails?.wholeSpaceAmenities || ''],
+      waterAvailability: frontendData.propertyDetails?.waterAvailability || '',
+      propertyAge: frontendData.propertyDetails?.propertyAge || '',
+      propertyCondition: frontendData.propertyDetails?.propertyCondition || '',
+      electricitySupply: frontendData.propertyDetails?.electricitySupply || {
+        powerLoad: 0,
+        backup: false
+      }
+    },
+    pricingDetails: { // Map leaseDetails to pricingDetails
+      propertyPrice: frontendData.leaseDetails?.leaseAmount || 0,
+      pricetype: frontendData.leaseDetails?.leaseduration?.amountType || 'fixed'
+    },
+    registration: {
+      chargestype: 'inclusive', // Default value
+      registrationAmount: 0,
+      stampDutyAmount: 0
+    },
+    brokerage: { // Transform brokerage data
+      required: frontendData.brokerage?.required ? 'yes' : 'no',
+      amount: frontendData.brokerage?.amount || 0
+    },
+    availability: { // Transform availability data
+      type: frontendData.availability?.availableImmediately ? 'immediate' : 'specific',
+      date: frontendData.availability?.availableFrom,
+      preferredLeaseDuration: frontendData.availability?.leaseDuration || '',
+      noticePeriod: frontendData.availability?.noticePeriod || ''
+    },
+    petsAllowed: frontendData.availability?.isPetsAllowed || false,
+    operatingHoursRestrictions: frontendData.availability?.operatingHours || false,
+    contactDetails: { // Map contactInformation to contactDetails
+      name: frontendData.contactInformation?.name || '',
+      email: frontendData.contactInformation?.email || '',
+      phone: frontendData.contactInformation?.phone || '',
+      alternatePhone: frontendData.contactInformation?.alternatePhone || '',
+      bestTimeToContact: frontendData.contactInformation?.bestTimeToContact || ''
+    },
+    media: { // Transform media data
+      photos: {
+        exterior: frontendData.media?.photos?.exterior || [],
+        interior: frontendData.media?.photos?.interior || [],
+        floorPlan: frontendData.media?.photos?.floorPlan || [],
+        washrooms: frontendData.media?.photos?.washroom || [], // Map washroom to washrooms
+        lifts: frontendData.media?.photos?.lift || [], // Map lift to lifts
+        emergencyExits: frontendData.media?.photos?.emergencyExit || [], // Map emergencyExit to emergencyExits
+        others: [] // Default empty array
+      },
+      videoTour: frontendData.media?.videoTour || '',
+      documents: frontendData.media?.documents || []
+    },
+    metaData: {
+      createdBy: frontendData.metadata?.createdBy,
+      createdAt: frontendData.metadata?.createdAt || new Date(),
+      propertyType: 'Commercial',
+      intent: 'Sell',
+      propertyName: 'Other',
+      status: 'active'
+    }
+  };
+};
+
 // Delete commercial sell others property
 export const deleteCommercialSellOthers = async (req: Request, res: Response) => {
   try {
-    const documentId = req.params.id;
-    // @ts-ignore
-    const userId = req.user?._id; // Get user ID from authenticated session
+    const { propertyId } = req.params;
+    const incomingData = req.body;
 
-    if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthorized: User not logged in.' });
+    if (!incomingData) {
+      return res.status(400).json({
+        success: false,
+        message: 'No data provided for authorization.',
+      });
     }
 
-    const docToDelete = await CommercialSellOthers.findById(documentId);
+    const docToDelete = await CommercialSellOthers.findOne({ propertyId });
 
     if (!docToDelete) {
       return res.status(404).json({
         success: false,
-        message: 'Sell others listing not found',
+        message: 'Commercial sell others listing not found',
       });
     }
 
-    // Authorization check
-    if (docToDelete.metaData?.createdBy?.toString() !== userId.toString()) {
+    // FIXED AUTHORIZATION: Use the same logic as update
+    const frontendUserId = incomingData.metadata?.createdBy;
+    
+    if (!frontendUserId) {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'User ID not provided in request.' 
+      });
+    }
+
+    const existingCreatedBy = docToDelete.metaData?.createdBy?.toString();
+    
+    if (existingCreatedBy !== frontendUserId.toString()) {
       return res.status(403).json({
         success: false,
         message: 'You are not authorized to delete this property.',
       });
     }
 
-    await CommercialSellOthers.findByIdAndDelete(documentId);
+    await CommercialSellOthers.findOneAndDelete({ propertyId });
 
     res.status(200).json({
       success: true,
-      message: 'Sell others listing deleted successfully',
+      message: 'Commercial sell others listing deleted successfully',
     });
-  } catch (error) {
-    console.error('Error deleting Sell others:', error);
+  } catch (error: any) {
+    console.error('Error deleting commercial sell others:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to delete Sell others listing',
+      error: 'Failed to delete commercial sell others listing',
       message: error instanceof Error ? error.message : 'Unknown error',
     });
   }

@@ -14,7 +14,7 @@ import CommercialRentShop from '../models/commercial/commercialrentshop';
 import { CommercialRentShowroom } from '../models/commercial/commercialRentShowroom';
 
 // Commercial Sell Models
-import CommercialSellAgriculture from '../models/commercial/CommercialSellAgriculture';
+import CommercialSellAgriculture from '../models/commercial/CommercialSellAgriculture'; // This is imported correctly
 import CommercialSellCoveredSpace from '../models/commercial/CommercialSellCoveredSpace';
 import CommercialSellOfficeSpace from '../models/commercial/CommercialSellOfficeSpace';
 import CommercialSellOthers from '../models/commercial/CommercialSellOthers';
@@ -118,8 +118,8 @@ router.get('/all', async (req: any, res: any) => {
       CommercialLeaseShowroom.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialLeaseCoveredSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialLeaseOfficeSpace.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
-      CommercialLeaseShed.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
       CommercialLeaseWarehouse.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
+      CommercialLeaseShed.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyName metadata.propertyType leaseTerms.leaseDetails.leaseAmount.amount propertyDetails.area.totalArea media.photos.exterior metadata.createdAt metadata.status metadata.intent propertyDetails.furnishingStatus'),
 
       // Residential Rent
       ResidentialRentApartment.find().select('_id propertyId basicInformation.title basicInformation.address metadata.createdBy metadata.propertyType metadata.propertyName metadata.createdAt propertyDetails.builtUpAreaSqft rentalTerms.rentDetails.expectedRent media.photos.exterior propertyDetails.furnishingStatus'),
@@ -149,7 +149,7 @@ router.get('/all', async (req: any, res: any) => {
       });
     }
 
-    // Destructure and normalize results
+    // Destructure and normalize results - FIXED THE VARIABLE NAMES
     const [
       rentAgriculture,
       rentCoveredSpace,
@@ -162,7 +162,7 @@ router.get('/all', async (req: any, res: any) => {
       rentShop,
       rentShowroom,
 
-      sellAgriculture,
+      sellAgriculture, // This is the correct variable name
       sellCoveredSpace,
       sellOfficeSpace,
       sellOthers,
@@ -203,6 +203,7 @@ router.get('/all', async (req: any, res: any) => {
       message: 'All properties fetched successfully',
       data: {
         commercialRent: {
+          agriculture: rentAgriculture, // Fixed variable name
           coveredSpace: rentCoveredSpace,
           officeSpace: rentOfficeSpace,
           others: rentOthers,
@@ -214,6 +215,7 @@ router.get('/all', async (req: any, res: any) => {
           showroom: rentShowroom
         },
         commercialSale: {
+          agriculture: sellAgriculture, // Fixed: Using correct variable name
           coveredSpace: sellCoveredSpace,
           officeSpace: sellOfficeSpace,
           others: sellOthers,
@@ -262,6 +264,7 @@ router.get('/all', async (req: any, res: any) => {
   }
 });
 
+// ... rest of your routes (PUT and DELETE) remain the same
 router.put('/:category/:listing/:type/:propertyId', async (req: any, res: any) => {
   try {
     const { category, listing, type, propertyId } = req.params;
