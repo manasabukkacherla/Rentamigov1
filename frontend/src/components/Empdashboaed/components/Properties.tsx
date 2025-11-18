@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Property, PropertyStatus } from '../../../components/allpropertiespage/types';
+import { Property } from '../../../components/allpropertiespage/types';
 import axios from 'axios';
 import { Check, AlertCircle, Wrench, Trash, Edit2, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -25,62 +25,31 @@ export const Properties: React.FC = () => {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const navigate = useNavigate();
 
+  // Function to flatten all categories dynamically
+  const flattenProperties = (data: any): Property[] => {
+    const categories = ['residentialSale', 'residentialRent', 'residentialLease', 'commercialSale', 'commercialRent', 'commercialLease'];
+    let all: Property[] = [];
+    categories.forEach(cat => {
+      const catData = data?.[cat];
+      if (!catData) return;
+      Object.values(catData).forEach((arr: any) => {
+        if (Array.isArray(arr)) all = all.concat(arr);
+      });
+    });
+    return all;
+  };
+
   const fetchProperties = async () => {
     try {
+      setLoading(true);
       const response = await axios.get('/api/allproperties/all');
       const data = response.data;
-      
-      const allProperties = [
-        ...(data?.data?.commercialRent?.apartment || []),
-        ...(data?.data?.commercialRent?.coveredSpace || []),
-        ...(data?.data?.commercialRent?.officeSpace || []),
-        ...(data?.data?.commercialRent?.others || []),
-        ...(data?.data?.commercialRent?.retailStore || []),
-        ...(data?.data?.commercialRent?.shed || []),
-        ...(data?.data?.commercialRent?.warehouse || []),
-        ...(data?.data?.commercialRent?.plot || []),
-        ...(data?.data?.commercialRent?.shop || []),
-        ...(data?.data?.commercialRent?.showroom || []),
-
-        ...(data?.data?.commercialSale?.apartment || []),
-        ...(data?.data?.commercialSale?.coveredSpace || []),
-        ...(data?.data?.commercialSale?.officeSpace || []),
-        ...(data?.data?.commercialSale?.others || []),
-        ...(data?.data?.commercialSale?.retailStore || []),
-        ...(data?.data?.commercialSale?.shed || []),
-        ...(data?.data?.commercialSale?.warehouse || []),
-        ...(data?.data?.commercialSale?.plot || []),
-        ...(data?.data?.commercialSale?.shop || []),
-        ...(data?.data?.commercialSale?.showroom || []),
-
-        ...(data?.data?.commercialLease?.apartment || []),
-        ...(data?.data?.commercialLease?.coveredSpace || []),
-        ...(data?.data?.commercialLease?.officeSpace || []),
-        ...(data?.data?.commercialLease?.others || []),
-        ...(data?.data?.commercialLease?.retailStore || []),
-        ...(data?.data?.commercialLease?.shed || []),
-        ...(data?.data?.commercialLease?.warehouse || []),
-        ...(data?.data?.commercialLease?.plot || []),
-        ...(data?.data?.commercialLease?.shop || []),
-        ...(data?.data?.commercialLease?.showroom || []),
-
-        ...(data?.data?.residentialRent?.apartment || []),
-        ...(data?.data?.residentialRent?.house || []),
-        ...(data?.data?.residentialRent?.villa || []),
-
-        ...(data?.data?.residentialSale?.apartment || []),
-        ...(data?.data?.residentialSale?.house || []),
-        ...(data?.data?.residentialSale?.villa || []),
-
-        ...(data?.data?.residentialLease?.apartment || []),
-        ...(data?.data?.residentialLease?.house || []),
-        ...(data?.data?.residentialLease?.villa || [])
-      ];
-
+      const allProperties = flattenProperties(data.data);
       setProperties(allProperties);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching properties:', error);
+      toast.error('Failed to fetch properties');
+    } finally {
       setLoading(false);
     }
   };
@@ -89,67 +58,79 @@ export const Properties: React.FC = () => {
     fetchProperties();
   }, []);
 
-  // ✅ Updated handleDelete: calls backend and refreshes
-  const handleDelete = useCallback(async (id: string) => {
-    if (!window.confirm('Delete this property?')) return;
+  const handleDelete = useCallback(
+    async (id: string) => {
+      if (!window.confirm('Delete this property?')) return;
 
-    const property = properties.find(p => p.propertyId === id);
-    if (!property) {
-      toast.error('Property not found');
-      return;
-    }
-
-    const [_, typeCode] = id.split('-');
-    const category = typeCode.substring(0, 3); // COM or RES
-    const listingType = typeCode.substring(3, 5); // RE, SA or LE
-    const propertyType = typeCode.substring(5, 7); // PL, AG, etc.
-
-    const typeMap: Record<string, string> = {
-      'PL': 'plots',
-      'AG': 'agriculture',
-      'CS': 'covered-space',
-      'OS': 'office-space',
-      'RS': 'retail-store',
-      'SH': 'shops',
-      'SR': 'showrooms',
-      'SD': 'sheds',
-      'WH': 'warehouses',
-      'OT': 'others',
-      'AP': 'apartments',
-      'IH': 'independent-houses',
-      'BF': 'builder-floors',
-      'SS': 'shared-spaces'
-    };
-
-    const ptSlug = typeMap[propertyType] || 'others';
-    const categorySlug = category === 'COM' ? 'commercial' : 'residential';
-    const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
-
-    try {
-      const response = await axios.delete(`/api/${categorySlug}/${listingSlug}/${ptSlug}/${property.id}`);
-      console.log('Delete response:', response.data);
-
-      if (response.data.success) {
-        toast.success('Property deleted successfully');
-        fetchProperties();
-      } else {
-        toast.error(response.data.message || 'Failed to delete property');
+      const property = properties.find(p => p.propertyId === id);
+      if (!property) {
+        toast.error('Property not found');
+        return;
       }
-    } catch (err: any) {
-      console.error('Delete error:', err);
-      const errMsg = err.response?.data?.message || (err.response?.status === 404 ? 'Property not found' : 'Failed to delete property');
-      toast.error(errMsg);
-    }
-  }, [properties]);
 
-const handleEdit = (propertyId: string) => {
-  navigate(`/updatepropertyform/${propertyId}`);
-};
+      const [_, typeCode] = id.split('-');
+      const category = typeCode.substring(0, 3); // COM or RES
+      const listingType = typeCode.substring(3, 5); // RE, SA, LE
+      const propertyType = typeCode.substring(5, 7); // PL, AG, etc.
 
+      const typeMap: Record<string, string> = {
+        PL: 'plots',
+        AG: 'agriculture',
+        CS: 'covered-space',
+        OS: 'office-space',
+        RS: 'retail-store',
+        SH: 'shops',
+        SR: 'showrooms',
+        SD: 'sheds',
+        WH: 'warehouses',
+        OT: 'others',
+        AP: 'apartments',
+        IH: 'independent-houses',
+        BF: 'builder-floors',
+        SS: 'shared-spaces',
+      };
+
+      const ptSlug = typeMap[propertyType] || 'others';
+      const categorySlug = category === 'COM' ? 'commercial' : 'residential';
+      const listingSlug = listingType === 'RE' ? 'rent' : listingType === 'SA' ? 'sell' : 'lease';
+
+      try {
+        const response = await axios.delete(`/api/${categorySlug}/${listingSlug}/${ptSlug}/${property.id}`);
+        if (response.data.success) {
+          toast.success('Property deleted successfully');
+          fetchProperties();
+        } else {
+          toast.error(response.data.message || 'Failed to delete property');
+        }
+      } catch (err: any) {
+        console.error('Delete error:', err);
+        const errMsg =
+          err.response?.data?.message || (err.response?.status === 404 ? 'Property not found' : 'Failed to delete property');
+        toast.error(errMsg);
+      }
+    },
+    [properties]
+  );
+
+  const handleEdit = (propertyId: string) => {
+    navigate(`/updatepropertyform/${propertyId}`);
+  };
 
   const handleUpdateProperty = async (propertyId: string, updatedData: any) => {
-    // ✅ Keep your existing update logic exactly as is here
-    /** ... */
+    try {
+      const response = await axios.put(`/api/properties/${propertyId}`, updatedData);
+      if (response.data.success) {
+        toast.success('Property updated successfully');
+        setEditModalOpen(false);
+        setSelectedProperty(null);
+        fetchProperties();
+      } else {
+        toast.error(response.data.message || 'Update failed');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Update failed');
+    }
   };
 
   const filteredProperties = filter === 'all' ? properties : properties.filter(p => p.status === filter);
@@ -164,8 +145,6 @@ const handleEdit = (propertyId: string) => {
 
   if (loading) return <div className="flex justify-center items-center h-64">Loading...</div>;
 
-
-
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between mb-6">
@@ -173,7 +152,7 @@ const handleEdit = (propertyId: string) => {
         <div className="flex items-center space-x-6">
           <select
             value={filter}
-            onChange={(e) => setFilter(e.target.value as typeof filter)}
+            onChange={e => setFilter(e.target.value as typeof filter)}
             className="select select-bordered w-48"
           >
             <option value="all">All Properties</option>
@@ -198,18 +177,20 @@ const handleEdit = (propertyId: string) => {
             </tr>
           </thead>
           <tbody>
-            {filteredProperties.map((property) => (
+            {filteredProperties.map(property => (
               <tr key={property.propertyId} className="hover">
                 <td className="font-mono text-sm">
-                  <span className="bg-gray-100 px-2 py-1 rounded">
-                    {property.propertyId}
-                  </span>
+                  <span className="bg-gray-100 px-2 py-1 rounded">{property.propertyId}</span>
                 </td>
                 <td className="font-medium">{property.title}</td>
                 <td className="font-medium">{property.type}</td>
                 <td>{property.location}</td>
                 <td>
-                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${statusClasses[property.status]}`}>
+                  <span
+                    className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium ${
+                      statusClasses[property.status]
+                    }`}
+                  >
                     {statusIcons[property.status]}
                     <span className="ml-2">{property.status}</span>
                   </span>
@@ -217,19 +198,19 @@ const handleEdit = (propertyId: string) => {
                 <td>{property.price || 'N/A'}</td>
                 <td className="px-3 py-2">
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       className="btn btn-secondary btn-sm hover:scale-105 transition-transform"
-                      onClick={() => handlePropertyClick(property.propertyId.slice(8,10),property.propertyId)}
+                      onClick={() => handlePropertyClick(property.propertyId.slice(8, 10), property.propertyId)}
                     >
                       View Details
                     </button>
-                    <button 
+                    <button
                       className="btn btn-outline btn-sm hover:scale-105 transition-transform"
                       onClick={() => handleEdit(property.propertyId)}
                     >
                       <Edit2 className="text-blue-600" />
                     </button>
-                    <button 
+                    <button
                       className="btn btn-error btn-sm hover:scale-105 transition-transform"
                       onClick={() => handleDelete(property.propertyId)}
                     >
@@ -249,17 +230,24 @@ const handleEdit = (propertyId: string) => {
           <div className="bg-white p-6 rounded-lg w-96 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Edit Property</h2>
-              <button onClick={() => { setEditModalOpen(false); setSelectedProperty(null); }}>
+              <button
+                onClick={() => {
+                  setEditModalOpen(false);
+                  setSelectedProperty(null);
+                }}
+              >
                 <X className="text-gray-500 hover:text-gray-700" />
               </button>
             </div>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target as HTMLFormElement);
-              const updatedData = Object.fromEntries(formData.entries());
-              handleUpdateProperty(selectedProperty.propertyId, updatedData);
-            }}>
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const updatedData = Object.fromEntries(formData.entries());
+                handleUpdateProperty(selectedProperty.propertyId, updatedData);
+              }}
+            >
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Title</label>
@@ -303,7 +291,10 @@ const handleEdit = (propertyId: string) => {
                 <div className="flex justify-end space-x-2">
                   <button
                     type="button"
-                    onClick={() => { setEditModalOpen(false); setSelectedProperty(null); }}
+                    onClick={() => {
+                      setEditModalOpen(false);
+                      setSelectedProperty(null);
+                    }}
                     className="btn btn-outline"
                   >
                     Cancel
